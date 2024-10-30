@@ -560,74 +560,119 @@ export class MistHUD extends Application {
     console.log(`Exporting roll data with Total Power: ${totalPower}`);
   }
 
+  // getSelectedRollData() {
+  //   // Collect selected power tags
+  //   const powerTags = this.element.find('.mh-power-tag.selected').map((i, el) => ({
+  //     tagName: $(el).text().trim(),
+  //     id: $(el).data('id'),
+  //     stateClass: $(el).find('.mh-burn-toggle').hasClass('toBurn')
+  //                ? "to-burn" 
+  //                : $(el).find('.mh-burn-toggle').hasClass('burned') ? "burned" : ""
+  //   })).get();
+  //   console.log("Selected Power Tags:", powerTags);
+  
+  //   // Collect selected weakness tags
+  //   const weaknessTags = this.element.find('.mh-weakness-tag.selected').map((i, el) => ({
+  //     tagName: $(el).text().trim(),
+  //     id: $(el).data('id'),
+  //     stateClass: $(el).hasClass('inverted') ? "inverted" : "normal"
+  //   })).get();
+  //   console.log("Selected Weakness Tags:", weaknessTags);
+  
+  //   // Collect only unique character statuses by name and tier
+  //   const statusMap = new Map();
+  //   this.element.find('.mh-status.selected').each((i, el) => {
+  //     const name = $(el).attr('data-status-name') || $(el).data('statusName');
+  //     const tier = parseInt($(el).data('tier'));
+  //     const key = `${name}-${tier}`;  // Unique key for each status by name and tier
+  
+  //     // Log each status as it’s processed
+  //     console.log(`Processing Status: ${name}, Tier: ${tier}, Key: ${key}`);
+      
+  //     if (!statusMap.has(key)) {
+  //       statusMap.set(key, {
+  //         name,
+  //         tier,
+  //         typeClass: $(el).hasClass('positive') ? "positive" : "negative",
+  //         temporary: $(el).data('temporary') || false,
+  //         permanent: $(el).data('permanent') || false
+  //       });
+  //     } else {
+  //       console.warn(`Duplicate status detected for key: ${key}`);
+  //     }
+  //   });
+  //   const statuses = Array.from(statusMap.values());
+  //   console.log("Unique Character Statuses:", statuses);
+  
+  //   // Collect only selected scene tags
+  //   const sceneTags = getSceneStatus().filter(sceneTag => sceneTag.isSelected).map(sceneTag => ({
+  //     name: sceneTag.name,
+  //     tier: sceneTag.tier,
+  //     typeClass: sceneTag.type === "positive" ? "scene-positive" : "scene-negative"
+  //   }));
+  //   console.log("Selected Scene Tags:", sceneTags);
+  
+  //   // Final log before returning data
+  //   console.log("Final Selected Roll Data:", {
+  //     powerTags,
+  //     weaknessTags,
+  //     statuses,   // Only unique character statuses
+  //     sceneTags   // Only scene tags
+  //   });
+  
+  //   return {
+  //     powerTags,
+  //     weaknessTags,
+  //     statuses,    // Only unique character statuses
+  //     sceneTags,   // Only selected scene tags
+  //     modifier: this.modifier
+  //   };
+  // }
+
   getSelectedRollData() {
-    // Collect selected power tags
     const powerTags = this.element.find('.mh-power-tag.selected').map((i, el) => ({
       tagName: $(el).text().trim(),
       id: $(el).data('id'),
-      stateClass: $(el).find('.mh-burn-toggle').hasClass('toBurn')
-                 ? "to-burn" 
-                 : $(el).find('.mh-burn-toggle').hasClass('burned') ? "burned" : ""
+      stateClass: $(el).find('.mh-burn-toggle').hasClass('toBurn') ? "to-burn" :
+                  $(el).find('.mh-burn-toggle').hasClass('burned') ? "burned" : ""
     })).get();
-    console.log("Selected Power Tags:", powerTags);
   
-    // Collect selected weakness tags
     const weaknessTags = this.element.find('.mh-weakness-tag.selected').map((i, el) => ({
       tagName: $(el).text().trim(),
       id: $(el).data('id'),
       stateClass: $(el).hasClass('inverted') ? "inverted" : "normal"
     })).get();
-    console.log("Selected Weakness Tags:", weaknessTags);
   
-    // Collect only unique character statuses by name and tier
-    const statusMap = new Map();
+    // Collect only selected statuses
+    const selectedStatuses = [];
     this.element.find('.mh-status.selected').each((i, el) => {
-      const name = $(el).attr('data-status-name') || $(el).data('statusName');
-      const tier = parseInt($(el).data('tier'));
-      const key = `${name}-${tier}`;  // Unique key for each status by name and tier
-  
-      // Log each status as it’s processed
-      console.log(`Processing Status: ${name}, Tier: ${tier}, Key: ${key}`);
-      
-      if (!statusMap.has(key)) {
-        statusMap.set(key, {
-          name,
-          tier,
-          typeClass: $(el).hasClass('positive') ? "positive" : "negative",
-          temporary: $(el).data('temporary') || false,
-          permanent: $(el).data('permanent') || false
-        });
-      } else {
-        console.warn(`Duplicate status detected for key: ${key}`);
-      }
+      selectedStatuses.push({
+        name: $(el).attr('data-status-name') || $(el).data('statusName'),
+        tier: parseInt($(el).data('tier')),
+        typeClass: $(el).hasClass('positive') ? "positive" : "negative",
+        temporary: $(el).data('temporary') || false,
+        permanent: $(el).data('permanent') || false
+      });
     });
-    const statuses = Array.from(statusMap.values());
-    console.log("Unique Character Statuses:", statuses);
   
-    // Collect only selected scene tags
+    // Include modifier only if non-zero
+    const modifier = this.modifier || 0;
+  
     const sceneTags = getSceneStatus().filter(sceneTag => sceneTag.isSelected).map(sceneTag => ({
       name: sceneTag.name,
       tier: sceneTag.tier,
       typeClass: sceneTag.type === "positive" ? "scene-positive" : "scene-negative"
     }));
-    console.log("Selected Scene Tags:", sceneTags);
-  
-    // Final log before returning data
-    console.log("Final Selected Roll Data:", {
-      powerTags,
-      weaknessTags,
-      statuses,   // Only unique character statuses
-      sceneTags   // Only scene tags
-    });
   
     return {
       powerTags,
       weaknessTags,
-      statuses,    // Only unique character statuses
-      sceneTags,   // Only selected scene tags
-      modifier: this.modifier
+      statuses: selectedStatuses,  // Only selected statuses
+      sceneTags,
+      modifier: modifier ? modifier : null  // Include modifier if not zero
     };
   }
+  
   
   async postRollCleanup(tagsData) {
     const actor = this.actor;

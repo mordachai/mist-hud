@@ -85,7 +85,7 @@
 
 .mh-char-name {
   flex-grow: 1;
-  font-size: 1.2em;
+  font-size: 1.4em;
   font-family: 'Rift', sans-serif;
   filter: drop-shadow(1px 2px 3px var(--mythos-dark-color));
 }
@@ -202,13 +202,14 @@ hr {
   font-weight: bold;
   text-shadow: var(--mythos-dark-color) 1px 1px 3px;
   padding: 5px 10px;
+  font-size: large;
 }
 
 .mh-theme-name {
   font-family: 'Rift', sans-serif;
-  font-size: 1.1em;
+  font-size: 1.2em;
   display: block;
-  margin: 3px 10px;
+  margin: 3px 6px;
   font-style: italic;
 }
 
@@ -234,13 +235,20 @@ hr {
 /* Tags */
 .mh-tags {
   font-family: 'Roboto Condensed', sans-serif;
+  font-size: 1rem;
   padding-left: 3px;
   padding-right: 3px;
 }
 
 .mh-tags li {
-  height: 22px;
+  height: 1.4rem;
+  padding-right: 3px;
 }
+
+.mh-tags li:hover {
+  opacity: 0.85;
+}
+
 
 .mh-power-tag,
 .mh-weakness-tag,
@@ -302,7 +310,7 @@ hr {
   color: white;
   border-left: 3px solid fuchsia;
   margin-left: -3px;
-  background: linear-gradient(0.25turn, darkorchid, rgba(153, 50, 204, 0));
+  /* background: linear-gradient(0.25turn, darkorchid, rgba(153, 50, 204, 0)); */
 }
 
 .mh-power-tag.burned {
@@ -320,7 +328,7 @@ hr {
   color: white;
   border-left: 3px solid red;
   margin-left: -3px;
-  background: linear-gradient(0.25turn, darkred, rgba(139, 0, 0, 0));
+  /* background: linear-gradient(0.25turn, darkred, rgba(139, 0, 0, 0)); */
 }
 
 .mh-weakness-tag.inverted {
@@ -329,7 +337,7 @@ hr {
   color: white;
   border-left: 3px solid lime;
   margin-left: -3px;
-  background: linear-gradient(0.25turn, green, rgba(0, 128, 0, 0));
+  /* background: linear-gradient(0.25turn, green, rgba(0, 128, 0, 0)); */
 }
 
 .mh-subtag{
@@ -371,6 +379,8 @@ hr {
 .mh-statuses-title {
   font-weight: bold;
   font-family: 'Rift', sans-serif;
+  font-size: 1.2em;
+  text-shadow: 1px 1px 1px var(--mythos-dark-color);
 }
 
 .mh-statuses-list {
@@ -382,13 +392,15 @@ hr {
 
 .mh-status {
   margin: 2px;
-  padding: 1px 3px;
+  padding: 2px 4px;
   border-radius: 2px;
-  font-size: 0.9em;
+  font-size: 1.1em;
   cursor: pointer;
-  font-family: 'Averia Serif Libre', cursive;
+  font-family: 'Roboto Condensed', sans-serif;
   align-content: center;
   line-height: 15px;
+  text-transform: lowercase;
+  font-style: italic;
 }
 
 /* Status Types */

@@ -11,35 +11,32 @@
   {{/if}}
 
   {{!-- We need to capture the selected tags and statuses and show in the next section below  --}}
-  {{#if (or themeCount calculatedPower totalWeakness totalStatuses modifier)}}
-    <div class="mhr-roll-mdf">
-      {{#if themeCount}}
-        {{#if (eq themeType "mythos")}}
-          <i class="fa-solid fa-bolt"></i> {{themeCount}}
-          {{else if (eq themeType "logos")}}
-          <i class="fa-solid fa-mask"></i> {{themeCount}}
-        {{/if}}
+  <div class="mhr-roll-mdf">
+    {{#if themeCount}}
+      {{#if (eq themeType "mythos")}}
+        <i class="fa-solid fa-bolt"></i> {{themeCount}}
+        {{else if (eq themeType "logos")}}
+        <i class="fa-solid fa-mask"></i> {{themeCount}}
       {{/if}}
-      {{#if calculatedPower}}
-        <i class="fa-light fa-bolt"></i> {{calculatedPower}}
-      {{/if}}
-      {{#if totalWeakness}}
-        <i class="fa-light fa-angles-down mhr-mls"></i> {{totalWeakness}}
-      {{/if}}
-      {{#if totalStatuses}}
-        <i class="fa-light fa-rectangle-list mhr-mls"></i> {{totalStatuses}}
-      {{/if}}
-      {{#if modifier}}
-        <i class="fa-light fa-notes-medical mhr-mls"></i> {{modifier}}
-      {{/if}}
-    </div>
-  {{/if}}
+    {{/if}}
+    {{#if calculatedPower}}
+      <i class="fa-light fa-bolt"></i> {{calculatedPower}}
+    {{/if}}
+    {{#if totalWeakness}}
+      <i class="fa-light fa-angles-down mhr-mls"></i> {{totalWeakness}}
+    {{/if}}
+    {{#if totalStatuses}}
+      <i class="fa-light fa-rectangle-list mhr-mls"></i> {{totalStatuses}}
+    {{/if}}
+    {{#if modifier}}
+      <i class="fa-light fa-notes-medical mhr-mls"></i> {{modifier}}
+    {{/if}}
+  </div>
 
-  {{#if (or tagsData.powerTags tagsData.weaknessTags tagsData.statuses tagsData.modifier)}}
+  {{#if (or tagsData.powerTags tagsData.weaknessTags tagsData.statuses tagsData.sceneTags tagsData.modifier)}}
     <hr>
   {{/if}}
 
-  {{#if (or tagsData.powerTags tagsData.weaknessTags tagsData.statuses tagsData.sceneTags)}}
   <div class="tags-section">
     <span class="tag-row mhr-power-tags">
       {{#each tagsData.powerTags}}
@@ -69,7 +66,6 @@
       {{/each}}
     </span>
   </div>
-  {{/if}}
 
   {{#if rollTotal}}
   <hr>
