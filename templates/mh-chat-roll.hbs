@@ -1,0 +1,92 @@
+<div class="roll-container">
+  <div class="mhr-roll-title">{{localize moveName}}</div>
+  {{!-- <div class="mhr-roll-subtitle">{{actorName}}</div> --}}
+  
+  {{#if rollResults}}
+  <div class="mh-dice-rolls">
+    {{#each rollResults}}
+      <div class="mh-die-d6">{{this}}</div>
+    {{/each}}
+  </div>
+  {{/if}}
+
+  {{!-- We need to capture the selected tags and statuses and show in the next section below  --}}
+  {{#if (or themeCount calculatedPower totalWeakness totalStatuses modifier)}}
+    <div class="mhr-roll-mdf">
+      {{#if themeCount}}
+        {{#if (eq themeType "mythos")}}
+          <i class="fa-solid fa-bolt"></i> {{themeCount}}
+          {{else if (eq themeType "logos")}}
+          <i class="fa-solid fa-mask"></i> {{themeCount}}
+        {{/if}}
+      {{/if}}
+      {{#if calculatedPower}}
+        <i class="fa-light fa-bolt"></i> {{calculatedPower}}
+      {{/if}}
+      {{#if totalWeakness}}
+        <i class="fa-light fa-angles-down mhr-mls"></i> {{totalWeakness}}
+      {{/if}}
+      {{#if totalStatuses}}
+        <i class="fa-light fa-rectangle-list mhr-mls"></i> {{totalStatuses}}
+      {{/if}}
+      {{#if modifier}}
+        <i class="fa-light fa-notes-medical mhr-mls"></i> {{modifier}}
+      {{/if}}
+    </div>
+  {{/if}}
+
+  {{#if (or tagsData.powerTags tagsData.weaknessTags tagsData.statuses tagsData.modifier)}}
+    <hr>
+  {{/if}}
+
+  {{#if (or tagsData.powerTags tagsData.weaknessTags tagsData.statuses tagsData.sceneTags)}}
+  <div class="tags-section">
+    <span class="tag-row mhr-power-tags">
+      {{#each tagsData.powerTags}}
+        <span class="mhr-power-tag {{stateClass}}">{{tagName}}</span>
+      {{/each}}
+    </span>
+
+    <span class="tag-row mhr-weakness-tags">
+      {{#each tagsData.weaknessTags}}
+        <span class="mhr-weakness-tag {{stateClass}}">{{tagName}}</span>
+      {{/each}}
+    </span>
+
+    <span class="tag-row mhr-character-statuses">
+      {{#each tagsData.statuses}}
+        <span class="mhr-status-tag {{typeClass}} {{#if temporary}}mhr-temporary-status{{/if}} {{#if permanent}}mhr-permanent-status{{/if}}">
+          {{#if temporary}}⏱️ {{/if}}
+          {{#if permanent}}💎 {{/if}}
+          {{name}}-{{tier}}
+        </span>
+      {{/each}}
+    </span>
+    
+    <span class="tag-row mhr-scene-statuses">
+      {{#each tagsData.sceneTags}}
+        <span class="mhr-status-tag {{typeClass}}">{{name}}-{{tier}}</span>
+      {{/each}}
+    </span>
+  </div>
+  {{/if}}
+
+  {{#if rollTotal}}
+  <hr>
+  {{/if}}
+
+  <div class="mhr-roll-result">{{rollTotal}}</div>
+
+  <hr>
+
+  <div class="mhr-outcome">{{localize outcomeMessage}}</div>
+
+  <!-- Move Effects List -->
+  {{#if localizedMoveEffects.length}}
+    <ul class="ch-move-list">
+      {{#each localizedMoveEffects}}
+        <li>{{this}}</li>
+      {{/each}}
+    </ul>
+  {{/if}}
+</div>

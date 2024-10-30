@@ -1,0 +1,58 @@
+{
+  "id": "mist-hud",
+  "title": "Mist Engine HUD",
+  "description": "A simple always-open, never-in-the-way HUD that allows players to select tags and statuses to be used in rolls. No questions, no menus, just select and roll using the moves in the hotbar.",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Gus",
+      "flags": {}
+    },
+    {
+      "name": "Snagov",
+      "flags": {}
+    }
+  ],
+  "compatibility": {
+    "minimum": "12",
+    "verified": "12"
+  },
+  "packs": [
+    {
+      "name": "mist-hud-macros",
+      "label": "Mist HUD Macros",
+      "path": "packs/mist-hud-macros",
+      "type": "Macro",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      },
+      "system": "city-of-mist"
+    }
+  ],
+  "esmodules": [
+    "scripts/mh-settings.js",
+    "scripts/mist-hud.js",
+    "scripts/mh-drag-pos.js",
+    "scripts/mh-com-roll.js",
+    "scripts/mh-theme-config.js",
+    "scripts/dynamite-panel.js"
+  ],
+  "styles": [
+    "styles/mh-com.css",
+    "styles/mh-roll.css"
+  ],
+  "url": "https://github.com/mordachai/mist-hud",
+  "manifest": "https://github.com/mordachai/mist-hud/raw/main/module.json",
+  "download": "https://github.com/mordachai/mist-hud/raw/refs/heads/main/mist-hud.zip",
+  "license": "https://raw.githubusercontent.mist/mordachai/mist-hud/refs/heads/main/LICENSE",
+  "relationships": {
+    "systems": [
+      {
+        "id": "city-of-mist",
+        "type": "system",
+        "compatibility": {}
+      }
+    ]
+  }
+}

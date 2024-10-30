@@ -1,0 +1,100 @@
+<div class="mh-hud">
+    <div class="mh-token-image">
+      <img src="{{tokenImage}}" alt="Character Token">
+    </div>
+  <!-- HUD Header -->
+  <div class="mh-hud-header">
+
+    <div class="mh-char-name">{{charName}}</div>
+    <div class="mh-header-controls">
+      <!-- Collapse Button -->
+      <div class="mh-collapse-button clickable">
+        {{#if isCollapsed}}
+          <i class="fas fa-angle-down"></i>
+        {{else}}
+          <i class="fas fa-angle-up"></i>
+        {{/if}}
+      </div>
+      <!-- Close div -->
+      <div class="mh-close-button clickable"><i class="fas fa-times"></i></div>
+    </div>
+  </div>
+
+  {{#unless isCollapsed}}
+  <!-- HUD Content -->
+    <div class="mh-content">
+    {{#each themes}}
+        <div class="mh-theme">
+          <div class="mh-theme-header">
+            <span class="{{iconClass}} mh-theme-icon" data-themebook-name="{{themebookName}}"></span>
+            <span class="mh-theme-name mh-theme-name-com-{{category}}">{{themeName}}</span>
+          </div>
+
+          <!-- Power Tags -->
+          <ul class="mh-tags">
+            {{#each powerTags}}
+              <li class="mh-power-tag {{this.cssClass}}" data-id="{{this.id}}">
+                <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
+                <span class="mh-tag-text">{{this.tagName}}</span>
+              </li>
+            {{/each}}
+          </ul>
+
+          <!-- Weakness Tags -->
+          <ul class="mh-tags">
+            {{#each weaknessTags}}
+              <span class="mh-weakness-tag" data-id="{{this.id}}">
+              <i class="mh-weakness-toggle {{#if isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">{{{weaknessIcon}}}</i>
+                <span class="mh-tag-text">{{this.tagName}}</span>
+              </span>
+            {{/each}}
+          </ul>
+
+          <hr>
+
+          {{#each loadoutTags}}
+          <li class="mh-loadout-tag" data-id="{{this.id}}" data-burn-state="{{this.burnState}}">
+            <div class="mh-burn-toggle clickable">{{{this.burnIcon}}}</div>
+                      <!-- Checkbox or Toggle for Activated Loadout -->
+            <input type="checkbox" class="mh-loadout-toggle" {{#if this.activatedLoadout}}checked{{/if}} data-id="{{this.id}}" />
+            {{this.tagName}}
+
+            {{#if this.subtags}}
+              <ul>
+                {{#each this.subtags}}
+                  <li class="mh-loadout-tag mh-subtag" data-id="{{this.id}}" data-burn-state="{{this.burnState}}">
+                    <div class="mh-burn-toggle mh-subtag clickable">{{{this.burnIcon}}}</div>
+                    {{this.tagName}}
+                  </li>
+                {{/each}}
+              </ul>
+            {{/if}}
+          </li>
+          {{/each}}
+       </div>
+    {{/each}}
+    </div>
+
+  <div class="mh-statuses">
+    <div class="mh-statuses-title">Statuses</div>
+    <div class="mh-statuses-list">
+      {{#each statuses}}
+        <div class="mh-status {{#if selected}}selected{{/if}} {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
+          {{#if temporary}}⏱️ {{/if}}
+          {{#if permanent}}💎 {{/if}}
+          {{statusName}}-{{statusTier}}
+        </div>
+      {{/each}}
+    </div>
+  </div>
+
+
+  <!-- Modifier bar -->
+  <div class="mh-modifier-bar">
+    <div id="mh-mod-decrease" class="mh-mod-button">-</div>
+    <input type="text" id="mh-mod-value" value="0" />
+    <div id="mh-mod-increase" class="mh-mod-button">+</div>
+  </div>
+  {{/unless}}
+
+</div>

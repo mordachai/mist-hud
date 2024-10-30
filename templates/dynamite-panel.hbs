@@ -1,0 +1,23 @@
+<table class="dynamite-table">
+  <thead>
+    <tr>
+      <th>Move</th>
+      {{#each players}}
+      <th>{{name}} {{owner}}</th>
+      {{/each}}
+    </tr>
+  </thead>
+  <tbody>
+    {{#each moves}}
+    <tr>
+      <td>{{name}}</td>
+      {{#each ../players}}
+      <td>
+        <input type="checkbox" class="dynamite-toggle" data-player-id="{{id}}" data-move-id="{{../id}}"
+               {{#if (includes dynamiteMoves ../id)}}checked{{/if}}>
+      </td>
+      {{/each}}
+    </tr>
+    {{/each}}
+  </tbody>
+</table>

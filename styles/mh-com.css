@@ -1,0 +1,494 @@
+/* Import Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400&display=swap');
+@import url('https://fonts.cdnfonts.com/css/rift');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400&display=swap');
+
+
+:root {
+   --mythos-dark-color:#a62dcb;
+   --mythos-light-color:#dbafe9;
+   --mythos-verylight-color:#f8eefb;
+   --filter-mythos: invert(92%) sepia(5%) saturate(1197%) hue-rotate(247deg) brightness(107%) contrast(97%);
+   --logos-dark-color: #b05d33;
+   --logos-light-color: #d7d4c1;
+   --logos-verylight-color: #faf8eb;
+   --filter-logos: invert(99%) sepia(1%) saturate(6005%) hue-rotate(318deg) brightness(105%) contrast(68%);
+   --mist-dark-color: #374e5c;
+   --mist-light-color: #93a5b9;
+   --mist-verylight-color: #d7e5f5;
+   --filter-mist: invert(97%) sepia(3%) saturate(3929%) hue-rotate(175deg) brightness(96%) contrast(102%);
+   --positive-tag-color: rgba(255, 246, 76, 0.825);
+   --negative-tag-color: rgba(255, 180, 40, 0.825);
+}
+
+
+/* HUD Container */
+.mh-hud {
+    position: absolute;
+    max-height: calc(100vh - 40px);  /* Prevent overflowing from screen */
+    max-width: 310px;
+    min-width: 150px;
+    /* overflow: hidden; */
+    z-index: 100; /* Ensure it appears above core elements */
+    display: flex;
+    flex-direction: column;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 1px solid #444;
+    border-radius: 5px;
+    left: 80px;
+    top: 150px;
+}
+
+/* Collapsed state content */
+.mh-hud-container.collapsed .mh-content,
+.mh-hud-container.collapsed hr {
+  display: none;
+}
+
+/* HUD Header */
+.mh-hud-header {
+    position: relative;
+    padding-left: 40px;
+    padding-right: 10px;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    cursor: move;
+}
+
+.mh-token-image {
+  position: absolute;
+  top: -20px;
+  left: -30px;
+  width: 65px;
+  height: 65px;
+  z-index: 10000;
+  overflow: visible;
+  cursor: move;
+}
+
+.mh-token-image img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover; /* Ensure the image fits properly within the circle */
+}
+
+.mh-header-controls {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    overflow: visible; /* Ensure that elements can overflow the container */
+}
+
+.mh-char-name {
+  flex-grow: 1;
+  font-size: 1.2em;
+  font-family: 'Rift', sans-serif;
+  filter: drop-shadow(1px 2px 3px var(--mythos-dark-color));
+}
+
+/* Collapse and Close Buttons as clickable divs */
+.mh-collapse-button,
+.mh-close-button {
+  display: inline-block;
+  padding: 5px;
+  cursor: pointer;
+  margin-left: 5px;
+  color: white;
+  font-size: 1.2em;
+}
+
+.mh-collapse-button:hover,
+.mh-close-button:hover {
+  color: #ccc;
+}
+
+/* Horizontal Rule */
+hr {
+  border: none;
+  border-top: 1px solid #444;
+  margin: 5px 10px;
+
+}
+
+/* Ensure no horizontal overflow */
+.mh-content {
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 100%;
+}
+
+/* General umbrella class for all theme icons */
+.mh-theme-icon {
+  display: inline-block;
+  margin-right: 3px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: middle;
+  align-self: center;
+}
+
+/* Specific icons for Mythos, Logos, and Mist themes */
+.mh-theme-icon.mythos {
+  width: 11px;
+  height: 18px;
+  background-image: url('../ui/icons/mythos_icn.svg');
+  filter: drop-shadow(1px 0 6px var(--mythos-dark-color));
+}
+
+.mh-theme-icon.logos {
+  width: 18px;
+  height: 12px;
+  background-image: url('../ui/icons/logos_icn.svg');
+  filter: drop-shadow(1px 0 6px var(--logos-dark-color));
+}
+
+.mh-theme-icon.mist {
+  width: 18px;
+  height: 18px;
+  background-image: url('../ui/icons/mist_icn.svg');
+  filter: drop-shadow(1px 0 6px var(--mist-dark-color));
+}
+
+
+/* Theme Section */
+.mh-theme {
+  font-family: 'Averia Serif Libre', cursive;
+}
+
+.mh-theme-header {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  margin: 0px 3px 0px 10px;
+  height: 20px;
+}
+
+.mh-themebook-name {
+  font-family: 'Averia Serif Libre', cursive;
+  font-style: italic;
+  white-space: nowrap;
+  font-size: 1.0em;
+}
+
+/* Mythos Themebook Name Styling */
+.mh-themebook-name-com-mythos {
+  color: var(--mythos-verylight-color);
+  text-shadow: var(--mythos-dark-color) 1px 0 6px;
+  font-weight: bold;
+}
+
+/* Logos Themebook Name Styling */
+.mh-themebook-name-com-logos {
+  color: var(--logos-verylight-color-color);
+  text-shadow: var(--logos-dark-color) 1px 0 6px;
+  font-weight: bold;
+}
+
+/* Mist Themebook Name Styling */
+.mh-themebook-name-com-mist {
+  color: var(--mist-verylight-color);
+  text-shadow: var(--mist-dark-color) 1px 0 6px;
+  font-weight: bold;
+}
+
+.mh-tooltip{
+  background-color: #181818de;
+  border-radius: 5px;
+  font-family: 'Averia Serif Libre', cursive;
+  font-weight: bold;
+  text-shadow: var(--mythos-dark-color) 1px 1px 3px;
+  padding: 5px 10px;
+}
+
+.mh-theme-name {
+  font-family: 'Rift', sans-serif;
+  font-size: 1.1em;
+  display: block;
+  margin: 3px 10px;
+  font-style: italic;
+}
+
+/* Mythos Theme Name Styling */
+.mh-theme-name-com-mythos {
+  color: var(--mythos-verylight-color);
+  text-shadow: var(--mythos-dark-color) 1px 1px;
+}
+
+/* Logos Theme Name Styling */
+.mh-theme-name-com-logos {
+  color: var(--logos-verylight-color-color);
+  text-shadow: var(--logos-dark-color) 1px 1px;
+}
+
+/* Mist Theme Name Styling */
+.mh-theme-name-com-mist {
+  color: var(--mist-verylight-color);
+  text-shadow: var(--mist-dark-color) 1px 1px;
+}
+
+
+/* Tags */
+.mh-tags {
+  font-family: 'Roboto Condensed', sans-serif;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.mh-tags li {
+  height: 22px;
+}
+
+.mh-power-tag,
+.mh-weakness-tag,
+.mh-loadout-tag {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.mh-power-subtag,
+.mh-loadout-subtag {
+  display: flex;
+  align-items: center;
+  margin: 2px 0;
+  padding-left: 15px;
+}
+
+/* Burn Toggle Icon */
+.mh-burn-toggle,
+.mh-weakness-toggle {
+  display: inline-block;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.mh-burn-toggle.unburned i, 
+.mh-weakness-toggle.default i {
+  color: #e2e2e2eb;
+}
+
+.mh-burn-toggle.toBurn i {
+  color: rgb(255, 208, 122);
+  text-shadow: rgb(255, 111, 75) 0px 0px 3px;
+}
+
+.mh-burn-toggle.burned i {
+  color: orange;
+}
+
+.mh-weakness-toggle.inverted i {
+  color: lightgreen;
+}
+
+/* Add hover effect */
+.mh-burn-toggle:hover,
+.mh-weakness-toggle:hover,
+.mh-collapse-button:hover,
+.mh-close-button:hover {
+  opacity: 0.8;  /* Visual feedback when hovering */
+}
+
+/* Power Tags */
+/* .mh-power-tag {
+} */
+
+.mh-power-tag.selected {
+  font-weight: 600;
+  text-shadow: darkorchid 0px 1px;
+  color: white;
+  border-left: 3px solid fuchsia;
+  margin-left: -3px;
+  background: linear-gradient(0.25turn, darkorchid, rgba(153, 50, 204, 0));
+}
+
+.mh-power-tag.burned {
+  text-decoration: line-through;
+  color: #ef9023;
+}
+
+/* Weakness Tags */
+/* .mh-weakness-tag {
+} */
+
+.mh-weakness-tag.selected {
+  font-weight: 600;
+  text-shadow: darkred 0px 1px;
+  color: white;
+  border-left: 3px solid red;
+  margin-left: -3px;
+  background: linear-gradient(0.25turn, darkred, rgba(139, 0, 0, 0));
+}
+
+.mh-weakness-tag.inverted {
+  font-weight: 600;
+  text-shadow: darkgreen 0px 1px;
+  color: white;
+  border-left: 3px solid lime;
+  margin-left: -3px;
+  background: linear-gradient(0.25turn, green, rgba(0, 128, 0, 0));
+}
+
+.mh-subtag{
+  margin-left: 5px;
+}
+
+/* Loadout Theme */
+.mh-loadout-theme {
+  padding: 5px;
+}
+
+.mh-loadout-name {
+  font-weight: bold;
+  font-family: 'Rift', sans-serif;
+}
+
+/* Loadout Tags */
+/* .mh-loadout-tag {
+} */
+
+.mh-loadout-tag.selected {
+  font-weight: 600;
+  text-shadow: var(--mist-dark-color) 1px 1px;
+  color: white;
+  border-left: 2px solid var(--mythos-dark-color);
+}
+
+.mh-loadout-tag.burned {
+  text-decoration: line-through;
+  color: #ef9023;
+  cursor: none;
+}
+
+/* Statuses */
+.mh-statuses {
+  padding: 5px;
+}
+
+.mh-statuses-title {
+  font-weight: bold;
+  font-family: 'Rift', sans-serif;
+}
+
+.mh-statuses-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  align-items: center;
+}
+
+.mh-status {
+  margin: 2px;
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-size: 0.9em;
+  cursor: pointer;
+  font-family: 'Averia Serif Libre', cursive;
+  align-content: center;
+  line-height: 15px;
+}
+
+/* Status Types */
+.mh-status.neutral {
+  background: none;
+  border: 1px solid rgb(200, 200, 200);
+  color: rgb(200, 200, 200);
+}
+
+.mh-status.negative {
+  background: var(--negative-tag-color);
+  border: 1px solid var(--negative-tag-color);
+  color: black;
+}
+
+.mh-status.positive {
+  background: var(--positive-tag-color);
+  border: 1px solid var(--positive-tag-color);
+  color: black;
+}
+
+/* Modifiers */
+.mh-modifiers {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+}
+
+.mh-modifier-bar {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  gap: 5px; /* Adds space between elements */
+  border-top: 1px solid #ccc;
+  height: 25px;
+  width: 100%; /* Full width of the container */
+}
+
+.mh-mod-button,
+#mh-mod-value {
+  height: 25px;
+  flex: 1; /* Makes all elements take equal space */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 16px;
+}
+
+.mh-mod-button {
+  padding: 0;
+  cursor: pointer;
+}
+
+.mh-mod-button:hover {
+  background-color: #e0e0e038;
+}
+
+.mh-mod-button:active {
+  background-color: #d0d0d052;
+}
+
+#mh-mod-value {
+  border: none;
+  color: white;
+  filter: drop-shadow(1px 2px 3px var(--mythos-dark-color));
+}
+
+
+/* Scrollbar Styling */
+.mh-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.mh-content::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 4px;
+}
+
+.mh-content::-webkit-scrollbar-track {
+  background-color: #222;
+}
+
+/* No Horizontal Scrollbar */
+.mh-content {
+  overflow-x: hidden;
+}
+
+/* Text Wrapping */
+.mh-power-tag,
+.mh-weakness-tag,
+.mh-loadout-tag,
+.mh-status {
+  word-wrap: break-word;
+}
+
+/* Icons */
+.mh-burn-toggle i,
+.mh-weakness-toggle i {
+  font-family: FontAwesome;
+}
