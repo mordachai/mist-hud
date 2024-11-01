@@ -357,8 +357,8 @@ export class MistHUD extends Application {
     totalPower += this.modifier || 0;  // Modifier can be positive or negative
   
     // Correctly process scene statuses
-    const sceneTags = getSceneStatus();
-    const scenePower = sceneTags.reduce((acc, tag) => acc + (tag.type === 'positive' ? tag.tier : -tag.tier), 0);
+    const sceneStatuses = getSceneStatuses();
+    const scenePower = sceneStatuses.reduce((acc, status) => acc + (status.type === 'positive' ? status.tier : -status.tier), 0);
     totalPower += scenePower;
      
     return totalPower;
@@ -656,93 +656,74 @@ export class MistHUD extends Application {
 
   getSelectedRollData() {
     const powerTags = this.element.find('.mh-power-tag.selected').map((i, el) => ({
-      tagName: $(el).text().trim(),
-      id: $(el).data('id'),
-      stateClass: $(el).find('.mh-burn-toggle').hasClass('toBurn') ? "to-burn" :
-                  $(el).find('.mh-burn-toggle').hasClass('burned') ? "burned" : ""
+        tagName: $(el).text().trim(),
+        id: $(el).data('id'),
+        stateClass: $(el).find('.mh-burn-toggle').hasClass('toBurn') ? "to-burn" :
+                    $(el).find('.mh-burn-toggle').hasClass('burned') ? "burned" : ""
     })).get();
-  
+
     const weaknessTags = this.element.find('.mh-weakness-tag.selected').map((i, el) => ({
-      tagName: $(el).text().trim(),
-      id: $(el).data('id'),
-      stateClass: $(el).hasClass('inverted') ? "inverted" : "normal"
+        tagName: $(el).text().trim(),
+        id: $(el).data('id'),
+        stateClass: $(el).hasClass('inverted') ? "inverted" : "normal"
     })).get();
-  
+
     const storyTags = this.element.find('.mh-story-tag.selected').map((i, el) => {
-      const tagElement = $(el);
-      const isInverted = tagElement.hasClass('inverted');
-      const burnElement = tagElement.find('.mh-burn-toggle');
-  
-      // Determine the state class based on conditions
-      let stateClass;
-      if (burnElement.hasClass('burned')) {
-        stateClass = "burned";  // Story tag already burned
-      } else if (burnElement.hasClass('toBurn')) {
-        stateClass = "to-burn";  // Story tag marked for burning
-      } else {
-        stateClass = isInverted ? "inverted" : "selected";  // Either inverted or simply selected
-      }
-  
-      return {
-        tagName: tagElement.text().trim(),
-        id: tagElement.data('id'),
-        stateClass
-      };
+        const tagElement = $(el);
+        const isInverted = tagElement.hasClass('inverted');
+        const burnElement = tagElement.find('.mh-burn-toggle');
+
+        let stateClass;
+        if (burnElement.hasClass('burned')) {
+            stateClass = "burned";
+        } else if (burnElement.hasClass('toBurn')) {
+            stateClass = "to-burn";
+        } else {
+            stateClass = isInverted ? "inverted" : "selected";
+        }
+
+        return {
+            tagName: tagElement.text().trim(),
+            id: tagElement.data('id'),
+            stateClass
+        };
     }).get();
-  
-    // Collect only selected statuses
-    const selectedStatuses = [];
-    this.element.find('.mh-status.selected').each((i, el) => {
-      selectedStatuses.push({
+
+    const selectedStatuses = this.element.find('.mh-status.selected').map((i, el) => ({
         name: $(el).attr('data-status-name') || $(el).data('statusName'),
         tier: parseInt($(el).data('tier')),
         typeClass: $(el).hasClass('positive') ? "positive" : "negative",
         temporary: $(el).data('temporary') || false,
         permanent: $(el).data('permanent') || false
-      });
-    });
-  
-    // Include modifier only if non-zero
+    })).get();
+
     const modifier = this.modifier || 0;
-  
-    const sceneTags = getSceneStatus().filter(sceneTag => sceneTag.isSelected).map(sceneTag => ({
-      name: sceneTag.name,
-      tier: sceneTag.tier,
-      typeClass: sceneTag.type === "positive" ? "scene-positive" : "scene-negative"
+
+    // Retrieve scene tags from getScnTags
+    const scnTags = getScnTags();
+
+    const sceneStatuses = getSceneStatuses().filter(sceneStatus => sceneStatus.isSelected).map(sceneStatus => ({
+      name: sceneStatus.name,
+      tier: sceneStatus.tier,
+      typeClass: sceneStatus.type === "positive" ? "scene-positive" : "scene-negative",
+      temporary: sceneStatus.temporary,
+      permanent: sceneStatus.permanent
     }));
-  
+
     return {
-      powerTags,
-      weaknessTags,
-      storyTags,
-      statuses: selectedStatuses,  // Only selected statuses
-      sceneTags,
-      modifier: modifier ? modifier : null  // Include modifier if not zero
+        powerTags,
+        weaknessTags,
+        storyTags,
+        statuses: selectedStatuses,
+        sceneStatuses,
+        scnTags,  // Add scene tags to the roll data
+        modifier: modifier ? modifier : null
     };
+
+    console.log('getSelectedRollData - Roll Data:', rollData);  // Log full roll data
+    return rollData;
   }
-    
-  // async postRollCleanup(tagsData) {
-  //   const actor = this.actor;
-  //   if (!actor) return;
-
-  //   // Update "toBurn" tags to "burned" on the actor's data
-  //   for (const tag of [...tagsData.powerTags, ...tagsData.storyTags]) {
-  //       if (tag.stateClass === "to-burn") {
-  //           const tagItem = actor.items.get(tag.id);
-  //           if (tagItem) {
-  //               await tagItem.update({
-  //                   "system.burned": true,
-  //                   "system.burn_state": 0  // Set burn state to burned
-  //               });
-  //               console.log(`Updated tag "${tagItem.name}" to burned state.`);
-  //           }
-  //       }
-  //   }
-
-  //   // Reset UI elements
-  //   this.resetHUD();
-  // }
-
+   
   async postRollCleanup(tagsData) {
     const actor = this.actor;
     if (!actor) return;
@@ -813,53 +794,94 @@ export class MistHUD extends Application {
   
 }
 
-// Function to attach listeners for scene tags globally
+// Function to attach click listeners to each scene tag for dynamic updates
 function attachSceneTagListeners() {
-  // Add listeners for scene status toggle inside .scene-tag-window
-  $('.scene-tag-window').on('click', '.status-name', (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-    const statusNameElement = $(event.currentTarget);
+  $('.scene-tag-window').on('click', '.tag-or-status .flex-row.tag', (event) => {
+      event.stopPropagation();
+      event.preventDefault();
 
-    // Alert for testing purposes to verify click event is triggered
-    alert('Status clicked: ' + statusNameElement.text().trim());
+      // Toggle the selection state based on positive/negative classes
+      const tagElement = $(event.currentTarget).find('.flex-tag-name');
+      if (tagElement.hasClass('positive-selected')) {
+          tagElement.removeClass('positive-selected').addClass('negative-selected');
+      } else if (tagElement.hasClass('negative-selected')) {
+          tagElement.removeClass('negative-selected').addClass('positive-selected');
+      } else {
+          tagElement.addClass('positive-selected');
+      }
 
-    // Toggle between positive-selected, negative-selected, and none
-    if (statusNameElement.hasClass('positive-selected')) {
-      statusNameElement.removeClass('positive-selected').addClass('negative-selected');
-    } else if (statusNameElement.hasClass('negative-selected')) {
-      statusNameElement.removeClass('negative-selected');
-    } else {
-      statusNameElement.addClass('positive-selected');
-    }
-
-    // Recalculate the total power after scene status changes
-    calculateTotalPower();
+      // Retrieve and log the updated scene tags
+      console.log("Updated Scene Tags:");
+      getScnTags();
   });
 }
 
 // Function to get scene status information and calculate its contribution to total power
-function getSceneStatus() {
+function getSceneStatuses() {
   const selectedStatuses = [];
 
-  // Assuming each scene status has the classes `.status-line.status`
+  // Select each status line in the scene tag window
   $('.scene-tag-window .tag-or-status-list .status-line.status').each((index, element) => {
     const statusElement = $(element);
     const statusName = statusElement.data('status-name');
     const statusTier = parseInt(statusElement.data('tier')) || 0;
+    const isTemporary = !!statusElement.data('temporary'); // Get temporary status as a boolean
+    const isPermanent = !!statusElement.data('permanent'); // Get permanent status as a boolean
 
-    // Check if the element has a positive or negative selection class
+    // Check if the status is selected as positive or negative and add to selectedStatuses
     if (statusElement.find('.status-name').hasClass('positive-selected')) {
-      selectedStatuses.push({ name: statusName, tier: statusTier, type: 'positive', isSelected: true });
+      selectedStatuses.push({
+        name: statusName,
+        tier: statusTier,
+        type: 'positive',
+        isSelected: true,
+        temporary: isTemporary,
+        permanent: isPermanent
+      });
     } else if (statusElement.find('.status-name').hasClass('negative-selected')) {
-      selectedStatuses.push({ name: statusName, tier: statusTier, type: 'negative', isSelected: true });
+      selectedStatuses.push({
+        name: statusName,
+        tier: statusTier,
+        type: 'negative',
+        isSelected: true,
+        temporary: isTemporary,
+        permanent: isPermanent
+      });
     }
   });
 
-  return selectedStatuses; // Return only selected scene statuses
+  return selectedStatuses; // Return selected scene statuses with temporary and permanent information
 }
 
-export { getSceneStatus };
+// Ensure exports and references use the new name
+export { getSceneStatuses };
+
+function getScnTags() {
+  const tags = [];
+  const tagElements = document.querySelectorAll('.scene-tag-window .tag-or-status .flex-row.tag');
+
+  tagElements.forEach(tagEl => {
+      const name = tagEl.querySelector('.flex-tag-name').textContent.trim();
+      const isTemporary = !!tagEl.querySelector('.tag-symbols [title="Temporary"]');
+      const isPermanent = !!tagEl.querySelector('.tag-symbols [title="Permanent"]');
+      const isPositive = tagEl.querySelector('.flex-tag-name').classList.contains('positive-selected');
+      const isNegative = tagEl.querySelector('.flex-tag-name').classList.contains('negative-selected');
+
+      if (isPositive || isNegative) {
+          tags.push({
+              name,
+              temporary: isTemporary,
+              permanent: isPermanent,
+              type: isPositive ? 'positive' : 'negative'
+          });
+      }
+  });
+
+  console.log('getScnTags - Scene Tags:', tags);  // Log collected scene tags
+  return tags;
+}
+
+export { getScnTags };
 
 // Hook to attach listeners after the Foundry VTT application is ready
 Hooks.on('ready', () => {

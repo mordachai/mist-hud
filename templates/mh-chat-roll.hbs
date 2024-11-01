@@ -28,6 +28,9 @@
     {{#if totalStoryTags}}
       <i class="fa-light fa-tag mhr-mls"></i> {{totalStoryTags}}
     {{/if}}
+    {{#if totalScnTags}}
+      <i class="fa-solid fa-tag mhr-mls"></i> {{totalScnTags}}
+    {{/if}}
     {{#if totalStatuses}}
       <i class="fa-light fa-rectangle-list mhr-mls"></i> {{totalStatuses}}
     {{/if}}
@@ -36,7 +39,7 @@
     {{/if}}
   </div>
 
-  {{#if (or tagsData.powerTags tagsData.weaknessTags tagsData.statuses tagsData.sceneTags tagsData.modifier)}}
+  {{#if (or tagsData.powerTags tagsData.weaknessTags tagsData.storyTags tagsData.statuses tagsData.sceneStatuses tagsData.scnTags tagsData.modifier)}}
     <hr>
   {{/if}}
 
@@ -58,6 +61,16 @@
         <span class="mhr-story-tag {{stateClass}}">{{tagName}}</span>
       {{/each}}
     </span>
+    
+    {{#if tagsData.scnTags}}
+        {{#each tagsData.scnTags}}            
+          <span class="scene-tag-item {{#if (eq this.type "positive")}}scene-positive{{else}}scene-negative{{/if}}">
+            {{#if this.temporary}}⏱️ {{/if}}
+            {{#if this.permanent}}💎 {{/if}}
+            {{this.name}}
+          </span>
+        {{/each}}
+    {{/if}}
 
     <span class="tag-row mhr-character-statuses">
       {{#each tagsData.statuses}}
@@ -70,9 +83,13 @@
     </span>
     
     <span class="tag-row mhr-scene-statuses">
-      {{#each tagsData.sceneTags}}
-        <span class="mhr-status-tag {{typeClass}}">{{name}}-{{tier}}</span>
-      {{/each}}
+        {{#each tagsData.sceneStatuses}}
+          <span class="mhr-scene-status-tag {{typeClass}}">
+              {{#if temporary}}⏳{{/if}}
+              {{#if permanent}}💎{{/if}}
+              {{name}}-{{tier}}
+          </span>
+        {{/each}}
     </span>
   </div>
 

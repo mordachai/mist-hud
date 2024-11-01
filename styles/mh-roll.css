@@ -125,7 +125,8 @@ background: #02120c !important;
   .mhr-story-tag,
   .mhr-status-tag,
   .mhr-modifier .mhr-modifier-value,
-  .mhr-permanent-status {
+  .mhr-permanent-status, .scene-tag-item,
+  .mhr-scene-status-tag {
     display: inline-block;
     padding: 2px 3px;
     font-family: 'Roboto Condensed', sans-serif;
@@ -137,12 +138,14 @@ background: #02120c !important;
   }
    
   .mhr-power-tag, .mhr-story-tag, .mhr-status-tag, .mhr-weakness-tag.inverted,
-  .mhr-status-tag.positive, .mhr-status-tag.scene-positive {
+  .mhr-status-tag.positive, .mhr-status-tag.scene-positive, .scene-tag-item.scene-positive,
+  .mhr-scene-status-tag.scene-positive {
     background-color: var(--positive-tag-color);
   }
 
   .mhr-status-tag.negative, .mhr-weakness-tag,  .mhr-story-tag.inverted,
-  .mhr-status-tag.scene-negative {
+  .mhr-status-tag.scene-negative, .scene-tag-item.scene-negative,
+  .mhr-scene-status-tag.scene-negative {
     background-color: var(--negative-tag-color);
   }
 

@@ -2,7 +2,8 @@
 
 import { moveConfig } from './mh-theme-config.js';
 import { MistHUD } from './mist-hud.js';
-import { getSceneStatus } from './mist-hud.js';
+import { getSceneStatuses } from './mist-hud.js';
+import { getScnTags } from './mist-hud.js';
 import { COM_mythosThemes, COM_logosThemes, COM_mistThemes } from './mh-theme-config.js';
 
 // Ensure global object initialization
@@ -32,16 +33,17 @@ function debugLog(...args) {
 // Roll dice with Dice So Nice support
 async function rollDice() {
   const roll = new Roll("2d6");
-  await roll.evaluate({ async: true });
+  await roll.evaluate();
 
   // Show Dice So Nice animation if available
   if (game.modules.get("dice-so-nice")?.active) {
-    await game.dice3d.showForRoll(roll);
+      await game.dice3d.showForRoll(roll);
   }
 
   // Return the individual dice results
   return roll.dice[0].results.map(die => die.result);
 }
+
 
 function calculatePowerTags() {
   const hud = MistHUD.getInstance();
@@ -87,18 +89,25 @@ function calculateStatuses() {
   const hud = MistHUD.getInstance();
   const rollData = hud.getSelectedRollData();
 
-  // Sum tiers for character statuses (positive adds, negative subtracts)
   const characterStatusTotal = rollData.statuses.reduce((total, status) => {
     return total + (status.typeClass === "positive" ? status.tier : -status.tier);
   }, 0);
 
-  // Sum tiers for scene statuses (positive adds, negative subtracts)
-  const sceneStatusTotal = rollData.sceneTags.reduce((total, sceneStatus) => {
+  // Use sceneStatuses to calculate scene status contributions
+  const sceneStatusTotal = rollData.sceneStatuses.reduce((total, sceneStatus) => {
     return total + (sceneStatus.typeClass === "scene-positive" ? sceneStatus.tier : -sceneStatus.tier);
   }, 0);
 
-  // Return the combined total of character and scene statuses
   return characterStatusTotal + sceneStatusTotal;
+}
+
+function calculateScnTags() {
+  const hud = MistHUD.getInstance();
+  const scnTags = hud.getSelectedRollData().scnTags;
+
+  return scnTags.reduce((total, tag) => {
+      return total + (tag.type === "positive" ? 1 : -1);  // +1 for positive, -1 for negative
+  }, 0);
 }
 
 function getRollModifier() {
@@ -110,26 +119,29 @@ function getRollModifier() {
 async function rollMove(moveName, hasDynamite) {
   const move = moveConfig[moveName];
   if (!move) {
-    console.error(`Move not found: ${moveName}`);
-    return;
+      console.error(`Move not found: ${moveName}`);
+      return;
   }
 
   const hud = MistHUD.getInstance();
   const actor = hud.actor;
   if (!actor) {
-    ui.notifications.warn("Please select an actor before attempting this roll.");
-    return;
+      ui.notifications.warn("Please select an actor before attempting this roll.");
+      return;
   }
 
   // Calculate individual values
   const calculatedPower = calculatePowerTags();
   const totalWeakness = calculateWeaknessTags();
-  const totalStoryTags = calculateStoryTags(); // Include story tags in the roll
+  const totalStoryTags = calculateStoryTags();
   const totalStatuses = calculateStatuses();
+  const totalScnTags = calculateScnTags();  // Calculate scnTags contribution
   const modifier = getRollModifier() || 0;
 
   // Aggregate total power for the roll calculation
-  const totalPower = calculatedPower + totalWeakness + + totalStoryTags + totalStatuses + modifier;
+  const totalPower = calculatedPower + totalWeakness + totalStoryTags + totalStatuses + totalScnTags + modifier;
+  console.log("rollMove - Total Power Calculation:", { calculatedPower, totalWeakness, totalStoryTags, totalStatuses, totalScnTags, modifier, totalPower });
+
   const rollResults = await rollDice();
   const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower;
 
@@ -139,17 +151,17 @@ async function rollMove(moveName, hasDynamite) {
   let moveEffects = [];
 
   if (dynamiteEnabled && rollTotal >= 12) {
-    outcome = "dynamite";
-    moveEffects = move.dynamiteEffects || [];
+      outcome = "dynamite";
+      moveEffects = move.dynamiteEffects || [];
   } else if (rollTotal >= 10) {
-    outcome = "success";
-    moveEffects = move.successEffects || [];
+      outcome = "success";
+      moveEffects = move.successEffects || [];
   } else if (rollTotal >= 7) {
-    outcome = "partial";
-    moveEffects = move.partialEffects || [];
+      outcome = "partial";
+      moveEffects = move.partialEffects || [];
   } else {
-    outcome = "fail";
-    moveEffects = move.failEffects || [];
+      outcome = "fail";
+      moveEffects = move.failEffects || [];
   }
 
   // Generate and localize chat output
@@ -168,8 +180,9 @@ async function rollMove(moveName, hasDynamite) {
     outcomeMessage,
     calculatedPower,
     totalWeakness,
-    totalStoryTags, 
+    totalStoryTags,
     totalStatuses,
+    totalScnTags,
     modifier,
     rollTotal: displayRollTotal,
     localizedMoveEffects,
@@ -179,8 +192,8 @@ async function rollMove(moveName, hasDynamite) {
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
 
   ChatMessage.create({
-    content: chatContent,
-    speaker: { alias: actor.name }
+      content: chatContent,
+      speaker: { alias: actor.name }
   });
 
   hud.postRollCleanup(chatData.tagsData);
