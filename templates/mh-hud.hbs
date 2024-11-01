@@ -43,10 +43,12 @@
           <!-- Weakness Tags -->
           <ul class="mh-tags">
             {{#each weaknessTags}}
-              <span class="mh-weakness-tag" data-id="{{this.id}}">
-              <i class="mh-weakness-toggle {{#if isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">{{{weaknessIcon}}}</i>
+              <li class="mh-weakness-tag {{this.cssClass}}" data-id="{{this.id}}">
+                <span class="mh-weakness-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
+                  {{{this.inversionIcon}}}
+                </span>
                 <span class="mh-tag-text">{{this.tagName}}</span>
-              </span>
+              </li>
             {{/each}}
           </ul>
 
@@ -75,26 +77,47 @@
     {{/each}}
     </div>
 
-  <div class="mh-statuses">
-    <div class="mh-statuses-title">Statuses</div>
-    <div class="mh-statuses-list">
-      {{#each statuses}}
-        <div class="mh-status {{#if selected}}selected{{/if}} {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
-          {{#if temporary}}⏱️ {{/if}}
-          {{#if permanent}}💎 {{/if}}
-          {{statusName}}-{{statusTier}}
-        </div>
-      {{/each}}
+    <!-- Story Tags Section -->
+    {{#if hasStoryTags}}
+      <div class="mh-story-tags-container">
+        <div class="mh-story-tags-title">Story Tags</div>
+        <ul class="mh-tags">
+          {{#each storyTags}}
+            <li class="mh-story-tag {{this.cssClass}}" data-id="{{this.id}}" data-temporary="{{this.temporary}}" data-permanent="{{this.permanent}}">
+              <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
+              <span class="mh-tag-text">
+                {{#if temporary}}⏱️ {{/if}}
+                {{#if permanent}}💎 {{/if}}
+                {{this.tagName}}</span>
+              <span class="mhr-mls mh-story-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
+                {{{this.inversionIcon}}}
+              </span>
+            </li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/if}}
+
+
+    <div class="mh-statuses">
+      <div class="mh-statuses-title">Statuses</div>
+      <div class="mh-statuses-list">
+        {{#each statuses}}
+          <div class="mh-status {{#if selected}}selected{{/if}} {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
+            {{#if temporary}}⏱️ {{/if}}
+            {{#if permanent}}💎 {{/if}}
+            {{statusName}}-{{statusTier}}
+          </div>
+        {{/each}}
+      </div>
     </div>
-  </div>
 
-
-  <!-- Modifier bar -->
-  <div class="mh-modifier-bar">
-    <div id="mh-mod-decrease" class="mh-mod-button">-</div>
-    <input type="text" id="mh-mod-value" value="0" />
-    <div id="mh-mod-increase" class="mh-mod-button">+</div>
-  </div>
+    <!-- Modifier bar -->
+    <div class="mh-modifier-bar">
+      <div id="mh-mod-decrease" class="mh-mod-button">-</div>
+      <input type="text" id="mh-mod-value" value="0" />
+      <div id="mh-mod-increase" class="mh-mod-button">+</div>
+    </div>
   {{/unless}}
 
 </div>

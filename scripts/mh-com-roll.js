@@ -68,6 +68,21 @@ function calculateWeaknessTags() {
   }, 0);
 }
 
+function calculateStoryTags() {
+  const hud = MistHUD.getInstance();
+  const storyTags = hud.getSelectedRollData().storyTags;
+
+  return storyTags.reduce((total, tag) => {
+    if (tag.stateClass === "to-burn") {
+      return total + 3; // +3 if toBurn is active and not inverted
+    } else if (tag.stateClass === "inverted") {
+      return total - 1; // -1 if inverted
+    } else {
+      return total + 1; // +1 if simply selected
+    }
+  }, 0);
+}
+
 function calculateStatuses() {
   const hud = MistHUD.getInstance();
   const rollData = hud.getSelectedRollData();
@@ -109,11 +124,12 @@ async function rollMove(moveName, hasDynamite) {
   // Calculate individual values
   const calculatedPower = calculatePowerTags();
   const totalWeakness = calculateWeaknessTags();
+  const totalStoryTags = calculateStoryTags(); // Include story tags in the roll
   const totalStatuses = calculateStatuses();
   const modifier = getRollModifier() || 0;
 
   // Aggregate total power for the roll calculation
-  const totalPower = calculatedPower + totalWeakness + totalStatuses + modifier;
+  const totalPower = calculatedPower + totalWeakness + + totalStoryTags + totalStatuses + modifier;
   const rollResults = await rollDice();
   const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower;
 
@@ -152,6 +168,7 @@ async function rollMove(moveName, hasDynamite) {
     outcomeMessage,
     calculatedPower,
     totalWeakness,
+    totalStoryTags, 
     totalStatuses,
     modifier,
     rollTotal: displayRollTotal,

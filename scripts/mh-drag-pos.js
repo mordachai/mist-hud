@@ -45,9 +45,8 @@ export function makeDraggable(element, dragHandle, actorId) {
 export function getHUDPosition(actorId) {
   let position = {
     top: savedPosition.top > 0 ? `${savedPosition.top}px` : '100px',
-    left: savedPosition.left > 0 ? `${savedPosition.left}px` : '100px'
+    left: savedPosition.left > 0 ? `${savedPosition.left}px` : '150px'
   };
-  console.log("HUD Position:", position);
 
   const container = document.querySelector('.mh-hud');
   if (container) {

@@ -25,6 +25,9 @@
     {{#if totalWeakness}}
       <i class="fa-light fa-angles-down mhr-mls"></i> {{totalWeakness}}
     {{/if}}
+    {{#if totalStoryTags}}
+      <i class="fa-light fa-tag mhr-mls"></i> {{totalStoryTags}}
+    {{/if}}
     {{#if totalStatuses}}
       <i class="fa-light fa-rectangle-list mhr-mls"></i> {{totalStatuses}}
     {{/if}}
@@ -47,6 +50,12 @@
     <span class="tag-row mhr-weakness-tags">
       {{#each tagsData.weaknessTags}}
         <span class="mhr-weakness-tag {{stateClass}}">{{tagName}}</span>
+      {{/each}}
+    </span>
+
+    <span class="tag-row mhr-story-tags">
+      {{#each tagsData.storyTags}}
+        <span class="mhr-story-tag {{stateClass}}">{{tagName}}</span>
       {{/each}}
     </span>
 

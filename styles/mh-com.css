@@ -235,9 +235,9 @@ hr {
 /* Tags */
 .mh-tags {
   font-family: 'Roboto Condensed', sans-serif;
-  font-size: 1rem;
   padding-left: 3px;
   padding-right: 3px;
+  margin-right: 10px;
 }
 
 .mh-tags li {
@@ -249,12 +249,21 @@ hr {
   opacity: 0.85;
 }
 
+.mh-story-tags-title{
+  font-weight: bold;
+  font-family: 'Rift', sans-serif;
+  font-size: 1.2em;
+  text-shadow: 1px 1px 1px var(--mythos-dark-color);
+  padding-left: 5px;
+}
 
 .mh-power-tag,
 .mh-weakness-tag,
-.mh-loadout-tag {
+.mh-loadout-tag,
+.mh-story-tag {
   display: flex;
   align-items: center;
+  margin: auto;
   cursor: pointer;
 }
 
@@ -272,6 +281,26 @@ hr {
   display: inline-block;
   padding: 5px;
   cursor: pointer;
+}
+
+.mh-story-invert-toggle {
+  padding-left: 5px;
+  padding-bottom: 2px;
+  cursor: pointer;
+}
+
+.mh-story-tag .mh-story-invert-toggle i {
+  font-size: 0.75em;
+}
+
+.mh-story-tag .mh-story-invert-toggle:hover {
+  opacity: 0.8;
+}
+
+.mh-story-tag.inverted .mh-story-invert-toggle {
+  color: red;
+  font-weight: bold;
+  text-shadow: rgb(255, 208, 204) 1px 1px;
 }
 
 .mh-burn-toggle.unburned i, 
@@ -304,8 +333,9 @@ hr {
 /* .mh-power-tag {
 } */
 
-.mh-power-tag.selected {
-  font-weight: 600;
+.mh-power-tag.selected,
+.mh-story-tag.selected {
+  font-weight: 700;
   text-shadow: darkorchid 0px 1px;
   color: white;
   border-left: 3px solid fuchsia;
@@ -313,7 +343,8 @@ hr {
   /* background: linear-gradient(0.25turn, darkorchid, rgba(153, 50, 204, 0)); */
 }
 
-.mh-power-tag.burned {
+.mh-power-tag.burned,
+.mh-story-tag.burned  {
   text-decoration: line-through;
   color: #ef9023;
 }
@@ -323,8 +354,8 @@ hr {
 } */
 
 .mh-weakness-tag.selected {
-  font-weight: 600;
-  text-shadow: darkred 0px 1px;
+  font-weight: 700;
+  text-shadow: red 1px 1px;
   color: white;
   border-left: 3px solid red;
   margin-left: -3px;
@@ -332,12 +363,17 @@ hr {
 }
 
 .mh-weakness-tag.inverted {
-  font-weight: 600;
   text-shadow: darkgreen 0px 1px;
-  color: white;
   border-left: 3px solid lime;
   margin-left: -3px;
   /* background: linear-gradient(0.25turn, green, rgba(0, 128, 0, 0)); */
+}
+
+.mh-story-tag.inverted {
+  text-shadow: red 0px 1px;
+  border-left: 3px groove red;
+  margin-left: -3px;
+  /* background: linear-gradient(0.25turn, red, rgba(0, 128, 0, 0)); */
 }
 
 .mh-subtag{
@@ -495,6 +531,7 @@ hr {
 .mh-power-tag,
 .mh-weakness-tag,
 .mh-loadout-tag,
+.mh-story-tag,
 .mh-status {
   word-wrap: break-word;
 }
