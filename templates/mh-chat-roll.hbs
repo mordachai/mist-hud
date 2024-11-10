@@ -6,7 +6,7 @@
   <div class="mhr-roll-subtitle">{{subtitle}}</div>
   {{/if}}
   {{#if subtitleImg}}
-    <div class="mhr-subtitleImg mh-dropshadow-{{themeCategory}}"><img src="{{subtitleImg}}"></div>
+    <div class="mhr-subtitleImg mh-dropshadow-{{themeCategory}}" style="display: block;"><img src="{{subtitleImg}}"></div>
   {{/if}}
   {{#if rollResults}}
   <div class="mh-dice-rolls">
@@ -23,6 +23,12 @@
         <i class="fa-solid fa-bolt"></i> {{themeCount}}
         {{else if (eq themeType "logos")}}
         <i class="fa-solid fa-mask"></i> {{themeCount}}
+        {{else if (eq themeType "noise")}}
+        {{themeCount}}
+        {{else if (eq themeType "self")}}
+        {{themeCount}}
+        {{else if (eq themeType "mythosOS")}}
+        {{themeCount}}
       {{/if}}
     {{/if}}
     {{#if calculatedPower}}
@@ -58,6 +64,12 @@
   <div class="tags-section">
     <span class="tag-row mhr-power-tags">
       {{#each tagsData.powerTags}}
+        <span class="mhr-power-tag {{stateClass}}">{{tagName}}</span>
+      {{/each}}
+    </span>
+
+        <span class="tag-row mhr-loadout-tags">
+      {{#each tagsData.loadoutTags}}
         <span class="mhr-power-tag {{stateClass}}">{{tagName}}</span>
       {{/each}}
     </span>

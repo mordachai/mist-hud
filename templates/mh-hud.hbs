@@ -73,7 +73,7 @@
           <div class="mh-story-tags-title">Loadout</div>
           <ul class="mh-tags">
             {{#each loadoutTags}}
-              <li class="mh-loadout-tag" data-id="{{this.id}}">
+              <li class="mh-loadout-tag {{this.cssClass}}" data-id="{{this.id}}">
                 <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
                 <span class="mh-tag-text">{{this.tagName}}</span>
                 {{#if subtags}}

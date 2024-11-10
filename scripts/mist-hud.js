@@ -892,7 +892,7 @@ export class MistHUD extends Application {
  
   
     // 1. Update "toBurn" power tags and story tags to "burned" on the actor's data
-    for (const tag of [...tagsData.powerTags, ...tagsData.storyTags]) {
+    for (const tag of [...tagsData.powerTags, ...tagsData.storyTags, ...tagsData.loadoutTags]) {
       if (tag.stateClass === "to-burn") {
         const tagItem = actor.items.get(tag.id);
         if (tagItem) {
