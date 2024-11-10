@@ -3,24 +3,49 @@
 @import url('https://fonts.cdnfonts.com/css/rift');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400&display=swap');
 
-
-:root {
-   --mythos-dark-color:#a62dcb;
-   --mythos-light-color:#dbafe9;
-   --mythos-verylight-color:#f8eefb;
-   --filter-mythos: invert(92%) sepia(5%) saturate(1197%) hue-rotate(247deg) brightness(107%) contrast(97%);
-   --logos-dark-color: #b05d33;
-   --logos-light-color: #d7d4c1;
-   --logos-verylight-color: #faf8eb;
-   --filter-logos: invert(99%) sepia(1%) saturate(6005%) hue-rotate(318deg) brightness(105%) contrast(68%);
-   --mist-dark-color: #374e5c;
-   --mist-light-color: #93a5b9;
-   --mist-verylight-color: #d7e5f5;
-   --filter-mist: invert(97%) sepia(3%) saturate(3929%) hue-rotate(175deg) brightness(96%) contrast(102%);
-   --positive-tag-color: rgba(255, 246, 76, 0.825);
-   --negative-tag-color: rgba(255, 180, 40, 0.825);
+@font-face {
+  font-family: 'SDGlitch';
+  src: url('../ui/fonts/sdglitch.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
 }
 
+@font-face {
+  font-family: 'Recbold';
+  src: url('../ui/fonts/recbold.ttf') format('truetype'),
+  url('../ui/fonts/recbold.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  /* Global Colors */
+  --mythos-dark-color:#b90ded;
+  --mythos-light-color:#dbafe9;
+  --mythos-verylight-color:#fdf7ff;
+  --filter-mythos: invert(92%) sepia(5%) saturate(1197%) hue-rotate(247deg) brightness(107%) contrast(97%);
+  --logos-dark-color: #b05d33;
+  --logos-light-color: #d7d4c1;
+  --logos-verylight-color: #faf8eb;
+  --filter-logos: invert(99%) sepia(1%) saturate(6005%) hue-rotate(318deg) brightness(105%) contrast(68%);
+  --mist-dark-color: #374e5c;
+  --mist-light-color: #93a5b9;
+  --mist-verylight-color: #d7e5f5;
+  --filter-mist: invert(97%) sepia(3%) saturate(3929%) hue-rotate(175deg) brightness(96%) contrast(102%);
+  --self-dark-color: #f7106e;
+  --self-light-color: #9d2a5d;
+  --self-verylight-color: #fff0f9;
+  --mythosOS-dark-color:#9833f2;
+  --mythosOS-light-color:#c160e8;
+  --mythosOS-verylight-color:#f8f0ff;
+  --noise-dark-color: #00def6;
+  --noise-light-color: #0079a6;
+  --noise-verylight-color: #f4feff;
+}
+
+#hotbar .macro .macro-key{
+  background: none;
+}
 
 /* HUD Container */
 .mh-hud {
@@ -28,7 +53,6 @@
     max-height: calc(100vh - 40px);  /* Prevent overflowing from screen */
     max-width: 310px;
     min-width: 150px;
-    /* overflow: hidden; */
     z-index: 100; /* Ensure it appears above core elements */
     display: flex;
     flex-direction: column;
@@ -59,7 +83,7 @@
 
 .mh-token-image {
   position: absolute;
-  top: -20px;
+  top: -35px;
   left: -30px;
   width: 65px;
   height: 65px;
@@ -85,9 +109,14 @@
 
 .mh-char-name {
   flex-grow: 1;
-  font-size: 1.4em;
-  font-family: 'Rift', sans-serif;
+  font-size: 1.2rem;
+  font-family: var(--font-family-move), sans-serif;
   filter: drop-shadow(1px 2px 3px var(--mythos-dark-color));
+}
+
+.mh-token-name{
+  font-family: var(--font-family-main1), sans-serif;
+  filter: drop-shadow(1px 2px 3px var(--logos-dark-color));
 }
 
 /* Collapse and Close Buttons as clickable divs */
@@ -136,7 +165,7 @@ hr {
   width: 11px;
   height: 18px;
   background-image: url('../ui/icons/mythos_icn.svg');
-  filter: drop-shadow(1px 0 6px var(--mythos-dark-color));
+  filter: drop-shadow(1px 0 6px var(--mythosOS-dark-color));
 }
 
 .mh-theme-icon.logos {
@@ -153,22 +182,43 @@ hr {
   filter: drop-shadow(1px 0 6px var(--mist-dark-color));
 }
 
+.mh-theme-icon.self {
+  width: 20px;
+  height: 18px;
+  background-image: url('../ui/icons/self_os_icn.svg');
+  filter: drop-shadow(1px 0 4px var(--self-dark-color));
+}
+
+.mh-theme-icon.mythosOS {
+  width: 19px;
+  height: 20px;
+  background-image: url('../ui/icons/mythos_os_icn.svg');
+  filter: drop-shadow(1px 0 4px var(--mythosOS-light-color));
+}
+
+.mh-theme-icon.noise {
+  width: 18px;
+  height: 18px;
+  background-image: url('../ui/icons/noise_os_icn.svg');
+  filter: drop-shadow(1px 0 4px var(--noise-dark-color));
+}
+
 
 /* Theme Section */
 .mh-theme {
-  font-family: 'Averia Serif Libre', cursive;
+  font-family: var(--font-family-main2), cursive;
 }
 
 .mh-theme-header {
   display: flex;
   align-items: center;
   flex-direction: row;
-  margin: 0px 3px 0px 10px;
-  height: 20px;
+  margin: 0px 3px 0px 5px;
+  height: 18px;
 }
 
 .mh-themebook-name {
-  font-family: 'Averia Serif Libre', cursive;
+  font-family: var(--font-family-main2), cursive;
   font-style: italic;
   white-space: nowrap;
   font-size: 1.0em;
@@ -176,47 +226,49 @@ hr {
 
 /* Mythos Themebook Name Styling */
 .mh-themebook-name-com-mythos {
-  color: var(--mythos-verylight-color);
-  text-shadow: var(--mythos-dark-color) 1px 0 6px;
-  font-weight: bold;
+  color: var(--mythosOS-verylight-color);
+  text-shadow: var(--mythosOS-dark-color) 1px 0 6px;
 }
 
 /* Logos Themebook Name Styling */
 .mh-themebook-name-com-logos {
   color: var(--logos-verylight-color-color);
   text-shadow: var(--logos-dark-color) 1px 0 6px;
-  font-weight: bold;
 }
 
 /* Mist Themebook Name Styling */
 .mh-themebook-name-com-mist {
   color: var(--mist-verylight-color);
   text-shadow: var(--mist-dark-color) 1px 0 6px;
-  font-weight: bold;
 }
 
-.mh-tooltip{
-  background-color: #181818de;
-  border-radius: 5px;
-  font-family: 'Averia Serif Libre', cursive;
-  font-weight: bold;
-  text-shadow: var(--mythos-dark-color) 1px 1px 3px;
-  padding: 5px 10px;
-  font-size: large;
+.mh-theme-name-com-self {
+  color: var(--self-verylight-color);
+  text-shadow: var(--self-dark-color) 1px 1px 3px;
+}
+
+.mh-theme-name-com-mythosOS {
+  color: var(--mythosOS-verylight-color);
+  text-shadow: var(--mythosOS-dark-color) 1px 1px 3px;
+}
+
+.mh-theme-name-com-noise {
+  color: var(--noise-verylight-color);
+  text-shadow: var(--noise-dark-color) 1px 1px 3px;
 }
 
 .mh-theme-name {
-  font-family: 'Rift', sans-serif;
+  font-family: var(--font-family-move), sans-serif;
   font-size: 1.2em;
   display: block;
-  margin: 3px 6px;
+  margin: 4px 2px;
   font-style: italic;
 }
 
 /* Mythos Theme Name Styling */
 .mh-theme-name-com-mythos {
-  color: var(--mythos-verylight-color);
-  text-shadow: var(--mythos-dark-color) 1px 1px;
+  color: var(--mythosOS-verylight-color);
+  text-shadow: var(--mythosOS-dark-color) 1px 1px;
 }
 
 /* Logos Theme Name Styling */
@@ -231,13 +283,17 @@ hr {
   text-shadow: var(--mist-dark-color) 1px 1px;
 }
 
-
 /* Tags */
 .mh-tags {
-  font-family: 'Roboto Condensed', sans-serif;
-  padding-left: 3px;
-  padding-right: 3px;
+  font-family: var(--font-family-tags), sans-serif;
+  padding-left: 2px;
+  padding-right: 2px;
   margin-right: 10px;
+}
+
+.mh-tags ul {
+  padding: 3px;
+  margin: 10px;
 }
 
 .mh-tags li {
@@ -250,8 +306,7 @@ hr {
 }
 
 .mh-story-tags-title{
-  font-weight: bold;
-  font-family: 'Rift', sans-serif;
+  font-family: var(--font-family-move), sans-serif;
   font-size: 1.2em;
   text-shadow: 1px 1px 1px var(--mythos-dark-color);
   padding-left: 5px;
@@ -263,8 +318,10 @@ hr {
 .mh-story-tag {
   display: flex;
   align-items: center;
-  margin: auto;
+  margin: 0;
+  padding: 0;
   cursor: pointer;
+  text-align: left;
 }
 
 .mh-power-subtag,
@@ -303,6 +360,24 @@ hr {
   text-shadow: rgb(255, 208, 204) 1px 1px;
 }
 
+.mh-burn-icon img {
+  width: 26px;  /* Adjust as needed */
+  height: 16px; /* Ensure consistent icon size */
+  vertical-align: middle; /* Align with text */
+}
+
+.mh-burn-icon img[alt="burned"] {
+  filter: none; /* Add specific styles for burned state if needed */
+}
+
+.mh-burn-icon img[alt="to burn"] {
+  filter: hue-rotate(30deg); /* Optional styling */
+}
+
+.mh-burn-icon img[alt="unburned"] {
+  opacity: 0.6; /* Make the unburned icon less prominent */
+}
+
 .mh-burn-toggle.unburned i, 
 .mh-weakness-toggle.default i {
   color: #e2e2e2eb;
@@ -334,17 +409,22 @@ hr {
 } */
 
 .mh-power-tag.selected,
-.mh-story-tag.selected {
+.mh-story-tag.selected,
+.mh-loadout-tag.selected {
   font-weight: 700;
-  text-shadow: darkorchid 0px 1px;
+  text-shadow: rgb(16, 66, 229) 0px 1px;
   color: white;
-  border-left: 3px solid fuchsia;
-  margin-left: -3px;
-  /* background: linear-gradient(0.25turn, darkorchid, rgba(153, 50, 204, 0)); */
+  border-left: 6px solid rgb(0, 255, 251);
+  margin-left: -6px;
+  background: linear-gradient(0.25turn, #0079a6, rgba(6, 95, 150, 0));
+  background-size: 80% 92%;
+  background-repeat: no-repeat;
+  background-position: left center;
 }
 
 .mh-power-tag.burned,
-.mh-story-tag.burned  {
+.mh-story-tag.burned,
+.mh-loadout-tag.burned  {
   text-decoration: line-through;
   color: #ef9023;
 }
@@ -355,56 +435,44 @@ hr {
 
 .mh-weakness-tag.selected {
   font-weight: 700;
-  text-shadow: red 1px 1px;
-  color: white;
-  border-left: 3px solid red;
+  text-shadow: rgb(255, 81, 0) 1px 1px;
+  color: rgb(255, 252, 242);
+  border-left: 3px solid rgb(255, 208, 0);
   margin-left: -3px;
-  /* background: linear-gradient(0.25turn, darkred, rgba(139, 0, 0, 0)); */
+  background: linear-gradient(0.25turn, #a0310cd4, rgba(212, 109, 35, 0));
+  background-size: 80% 92%;
+  background-repeat: no-repeat;
+  background-position: left center;
 }
 
 .mh-weakness-tag.inverted {
-  text-shadow: darkgreen 0px 1px;
+  font-weight: 700;
+  text-shadow: rgb(0, 207, 124) 1px 1px;
+  color: rgb(246, 255, 242);
   border-left: 3px solid lime;
   margin-left: -3px;
-  /* background: linear-gradient(0.25turn, green, rgba(0, 128, 0, 0)); */
+  background: linear-gradient(0.25turn, green, rgba(0, 128, 0, 0));
+  background-size: 80% 92%;
+  background-repeat: no-repeat;
+  background-position: left center;
 }
 
 .mh-story-tag.inverted {
   text-shadow: red 0px 1px;
   border-left: 3px groove red;
   margin-left: -3px;
-  /* background: linear-gradient(0.25turn, red, rgba(0, 128, 0, 0)); */
+  background: linear-gradient(0.25turn, #ca6b1dd4, rgba(212, 109, 35, 0));
+  background-size: 80% 92%;
+  background-repeat: no-repeat;
+  background-position: left center;
 }
 
 .mh-subtag{
   margin-left: 5px;
 }
 
-/* Loadout Theme */
-.mh-loadout-theme {
-  padding: 5px;
-}
-
-.mh-loadout-name {
-  font-weight: bold;
-  font-family: 'Rift', sans-serif;
-}
-
-/* Loadout Tags */
-/* .mh-loadout-tag {
-} */
-
-.mh-loadout-tag.selected {
-  font-weight: 600;
-  text-shadow: var(--mist-dark-color) 1px 1px;
-  color: white;
-  border-left: 2px solid var(--mythos-dark-color);
-}
-
-.mh-loadout-tag.burned {
-  text-decoration: line-through;
-  color: #ef9023;
-  cursor: none;
+.subtag-item{
+  color: #00def6;
 }
 
 /* Statuses */
@@ -413,17 +481,25 @@ hr {
 }
 
 .mh-statuses-title {
-  font-weight: bold;
-  font-family: 'Rift', sans-serif;
+  font-family: var(--font-family-move), sans-serif;
   font-size: 1.2em;
   text-shadow: 1px 1px 1px var(--mythos-dark-color);
+  padding-left: 5px;
 }
 
 .mh-statuses-list {
+  list-style: none;
   display: flex;
   flex-wrap: wrap;
   margin-top: 5px;
   align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.mh-statuses-list ul {
+  list-style: none;
+  padding: 0;
 }
 
 .mh-status {
@@ -432,7 +508,7 @@ hr {
   border-radius: 2px;
   font-size: 1.1em;
   cursor: pointer;
-  font-family: 'Roboto Condensed', sans-serif;
+  font-family: var(--font-family-tags), sans-serif;
   align-content: center;
   line-height: 15px;
   text-transform: lowercase;
@@ -449,13 +525,13 @@ hr {
 .mh-status.negative {
   background: var(--negative-tag-color);
   border: 1px solid var(--negative-tag-color);
-  color: black;
+  color: white;
 }
 
 .mh-status.positive {
   background: var(--positive-tag-color);
   border: 1px solid var(--positive-tag-color);
-  color: black;
+  color: white;
 }
 
 /* Modifiers */
@@ -504,7 +580,7 @@ hr {
 #mh-mod-value {
   border: none;
   color: white;
-  filter: drop-shadow(1px 2px 3px var(--mythos-dark-color));
+  filter: drop-shadow(1px 2px 3px var(--mythosOS-dark-color));
 }
 
 
@@ -536,8 +612,61 @@ hr {
   word-wrap: break-word;
 }
 
-/* Icons */
-.mh-burn-toggle i,
-.mh-weakness-toggle i {
-  font-family: FontAwesome;
+/* MYSTERY /  TOOLTIP */
+
+.mh-tooltip{
+  background-color: #121212;
+  padding: 5px 10px;
+  font-family: var(--font-family-main1), sans-serif;
+  border-left: 3px solid white;
+}
+
+.mystery-type {
+  font-weight: bolder;
+  font-size: 0.9em;
+}
+
+.mystery-type.mythos {
+  color: var(--mythos-verylight-color);
+  text-shadow: var(--mythos-dark-color) 1px 1px 1px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin: auto;
+}
+
+.mystery-type.logos {
+  color: var(--logos-verylight-color);
+  text-shadow: var(--logos-dark-color) 1px 1px 1px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin: auto;
+}
+
+.mystery-type.self {
+  color: var(--self-verylight-color);
+  text-shadow: var(--self-dark-color) 1px 1px 1px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin: auto;
+}
+
+.mystery-type.mythosOS {
+  color: var(--mythosOS-verylight-color);
+  text-shadow: var(--mythosOS-dark-color) 1px 1px 1px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin: auto;
+}
+
+.mystery-type.noise {
+  color: var(--noise-verylight-color);
+  text-shadow: var(--noise-dark-color) 1px 1px 1px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin: auto;
+}
+
+.mystery-text {
+  font-size: 0.85em;  
+  font-style: italic;
 }

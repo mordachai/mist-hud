@@ -1,69 +1,94 @@
-/* Import Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400&display=swap');
-@import url('https://fonts.cdnfonts.com/css/rift');
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400&display=swap');
-
-
-:root {
-  --mythos-dark-color:#a62dcb;
-  --mythos-light-color:#dbafe9;
-  --mythos-verylight-color:#f8eefb;
-  --filter-mythos: invert(92%) sepia(5%) saturate(1197%) hue-rotate(247deg) brightness(107%) contrast(97%);
-  --logos-dark-color: #b05d33;
-  --logos-light-color: #d7d4c1;
-  --logos-verylight-color: #faf8eb;
-  --filter-logos: invert(99%) sepia(1%) saturate(6005%) hue-rotate(318deg) brightness(105%) contrast(68%);
-  --mist-dark-color: #374e5c;
-  --mist-light-color: #93a5b9;
-  --mist-verylight-color: #d7e5f5;
-  --filter-mist: invert(97%) sepia(3%) saturate(3929%) hue-rotate(175deg) brightness(96%) contrast(102%);
-  --positive-tag-color: rgba(255, 246, 76, 0.825);
-  --negative-tag-color: rgba(255, 180, 40, 0.825);
-  --destroyed-tag-color: rgba(255, 40, 40, 0.825);
-}
-
 #chat-log .message-sender {
   font-size: 1.1em;
-  font-family: 'Rift', sans-serif;
+  font-family: var(--font-family-main1), sans-serif;
   font-weight: bolder;
-  text-shadow: 1px 1px 1px var(--mythos-light-color);
+  text-shadow: 1px 1px 1px var(--self-light-color);
+  color: var(--text-main-color);
 }
 
-/* #chat-log .chat-message {
-background: #02120c !important;
-} */
+#chat-log .chat-message {
+  background: var(--dark-bg-color) !important;
+  border: var(--noise-verylight-color) 1px solid;
+  width: 100%;
+  border-radius: 10px;
+}
 
   /* General Styles */
   .roll-container {
     max-width: 400px;
+    color: var(--text-main-color);
   }
-  
+ 
   .mhr-roll-title {
-    font-size: 1.8em;
-    font-weight: bold;
+    font-size: 2em;
     text-align: center;
-    font-family: 'Rift';
-    text-shadow: 2px 2px 1px var(--mythos-light-color);
-    color: var(--logos-dark-color);
+    font-weight: bold;
+    font-family: var(--font-family-move);
+    text-shadow: 1px 1px 2px var(--roll-shadow-color);
+    color: var(--outcome-text-color);
     justify-content: center;
     margin-top: 12px;
     line-height: 1em;
+    text-transform: uppercase;
+    font-style: italic;
   }
   
   .mhr-roll-subtitle {
-    font-size: 1.2em;
+    font-size: 1.8em;
     font-weight: normal;
     margin-bottom: 5px;
     text-align: center;
+    font-family: var(--font-family-move);
+    text-shadow: 1px 1px 1px var(--noise-dark-color);
+    color: var(--noise-verylight-color);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  .mhr-subtitleImg{
+    width: 35px;
+    height: 35px;
+    text-align: center;
+    margin: auto;
+    padding-top: 5px;
+  }
+
+  .mh-dropshadow-mythos{
+    filter: drop-shadow(1px 1px 5px var(--mythos-dark-color));
+  }
+
+  .mh-dropshadow-logos{
+    filter: drop-shadow(2px 2px 5px var(--logos-dark-color));
+  }
+
+  .mh-dropshadow-self{
+    filter: drop-shadow(2px 2px  var(--self-dark-color));
+  }
+
+  .mh-dropshadow-noise{
+    filter: drop-shadow(1px 1px var(--noise-dark-color));
+  }
+
+  .mh-dropshadow-mythosOS{
+    filter: drop-shadow(2px 2px var(--mythosOS-dark-color));
+  }
+
+  .mhr-subtitleImg img{
+    border: none;
   }
 
   .mhr-roll-mdf {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     justify-content: center;
     margin-bottom: 5px;
   }
+
+  .mhr-roll-mdf span {
+    text-wrap: nowrap;
+  }  
 
   .mhr-mrs{
     margin-right: 5px;
@@ -74,20 +99,50 @@ background: #02120c !important;
   }
 
   .mhr-outcome{
-    font-size: 1.0em;
-    color: var(--logos-dark-color);
+    font-family: var(--font-family-outcome), sans-serif;
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--outcome-text-color);
+    text-shadow: 1px 1px 4px var(--blur-shadow-color);
     text-align: center;
-    font-weight: bold;
+    justify-content: baseline;
+  }
+
+  .mhr-move-list{
+    font-family: var(--font-family-effects), Courier, monospace;
+    color: var(--effects-color2);
+    font-size: 1.1em;
+    list-style: none;
+    padding: 0 ;
+    
+  }
+
+  .mhr-move-list li{
+    color: var(--effects-color1);
+    padding: 2px 6px;
+  }
+
+  .mhr-divider {
+    margin: 5px auto;
+    width: 98%;
+    border: 1px solid var(--divider-roll-color);
+  }
+
+  .mhr-roll-divider {
+    width: 100%;
+    border: 1px solid var(--divider-roll-color);
+    margin: 10px 0px;
   }
 
   .mhr-roll-result {
     font-size: 2.5em;
-    font-weight: bolder;
-    margin: 15px 0px;
     text-align: center;
-    font-family: 'Rift Bold', sans-serif;
-    text-shadow: 2px 2px 1px var(--mythos-light-color);
-    color: var(--logos-dark-color);
+    font-family: var(--font-family-roll), sans-serif;
+    text-shadow: 2px 2px 1px var(--roll-shadow-color);
+    color: var(--outcome-text-color);
+    font-stretch: extra-condensed;
+    font-style: oblique;
+    padding-top: 10px;
   }
 
   .mh-header-rollCard{
@@ -128,29 +183,35 @@ background: #02120c !important;
   .mhr-permanent-status, .scene-tag-item,
   .mhr-scene-status-tag {
     display: inline-block;
-    padding: 2px 3px;
-    font-family: 'Roboto Condensed', sans-serif;
-    /* font-family: 'Rift', sans-serif; */
+    padding: 1px 2px;
+    font-family: var(--font-family-tags), sans-serif;
+    /* font-family: var(--font-family-main1), sans-serif; */
     font-size: 0.9rem;
     line-height: 1rem;
-    border: 1px solid;
-    border-radius: 4px;
+    border-radius: 3px;
   }
    
-  .mhr-power-tag, .mhr-story-tag, .mhr-status-tag, .mhr-weakness-tag.inverted,
+  .mhr-power-tag, .mhr-story-tag, .mhr-weakness-tag.inverted,
   .mhr-status-tag.positive, .mhr-status-tag.scene-positive, .scene-tag-item.scene-positive,
   .mhr-scene-status-tag.scene-positive {
+    color: var(--text-main-color);
     background-color: var(--positive-tag-color);
   }
 
   .mhr-status-tag.negative, .mhr-weakness-tag,  .mhr-story-tag.inverted,
   .mhr-status-tag.scene-negative, .scene-tag-item.scene-negative,
   .mhr-scene-status-tag.scene-negative {
+    color: var(--text-main-color);
     background-color: var(--negative-tag-color);
   }
 
+  .mhr-status-tag, .mhr-scene-status-tag{
+    font-style: italic;
+    text-transform: lowercase;
+  }
+
   .mhr-temporary-status {
-    border-color: var(--destroyed-tag-color) !important;
+    background-color: var(--destroyed-tag-color) !important;
   }
 
   /* .mhr-permanent-status {
@@ -162,7 +223,7 @@ background: #02120c !important;
   } */
   
   .to-burn {
-    color: #7c5103;
+    color: var(--toBurn-text-color);
     text-shadow: 0 0 3px #ff4500;
   }
   
@@ -192,7 +253,7 @@ background: #02120c !important;
     font-size: 1.2em;
     font-weight: bold;
     margin: 0 10px;
-    color: chartreuse;
+    color: var(--effects-color1);
   }
   
   .modifier-button:hover {
@@ -209,25 +270,7 @@ background: #02120c !important;
     vertical-align: middle;
     padding-top: 3px;
   }
-/*   
- 
-  .burn-toggle {
-    display: inline-block;
-    cursor: pointer;
-    margin-left: 5px;
-  }
-  
-  .burn-toggle.unburned i {
-    color: #f0f0f0;
-  }
-  
-  .burn-toggle.toBurn i {
-    color: #f39c12;
-  }
-  
-  .burn-toggle.burned i {
-    color: #e74c3c;
-  } */
+
   
   /* Dice roll display */
   .mh-dice-rolls {
@@ -246,7 +289,7 @@ background: #02120c !important;
   
   /* Adjust the dice appearance */
   .mh-die-d6 {
-    background-color: #391536;
+    background-color: #1e1354;
     color: white;
     border-radius: 6px;
     border: 2px solid #fff;
@@ -257,7 +300,7 @@ background: #02120c !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Rift Bold', sans-serif;
+    font-family: var(--font-family-main1), sans-serif;
     font-size: 25px;
     text-shadow: 0px 1px 2px rgb(243, 26, 113);
     margin-top: 10px;
@@ -308,5 +351,80 @@ background: #02120c !important;
   padding: 8px;
   text-align: center;
   border-bottom: 1px solid #ddd;
+}
+
+/* Tracked Effects */
+
+.mh-os-trackedfx-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  font-family: var(--font-family-tags), sans-serif;
+  color: var(--noise-verylight-color);
+  text-align: center;
+}
+
+.mh-os-trackedfx-item {
+  border: 2px solid #afafaf;
+  padding: 5px;
+  border-radius: 6px;
+  background-color: #0a314b;
+}
+
+.mh-os-trackedfx-name {
+  font-weight: 900;
+  font-style: oblique;
+  text-shadow: var(--effects-color1) 0px 0px 5px;
+  font-size: 1.1em;
+  text-transform: uppercase;
+  color: var(--effects-color1)
+}
+
+.mh-os-trackedfx-description {
+  font-weight: 400;
+  color: var(--noise-verylight-color);
+  font-style: oblique;
+  text-shadow: var(--effects-color1) 0px 0px 5px;
+  font-size: 1.0em;
+  text-transform: uppercase;
+}
+
+.mh-os-trackedfx-tags {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--effects-color3);
+  width: 100%;
+  background-color: #7e98b3a9;
+  border-top: 1px solid var(--outcome-text-color);
+  border-bottom: 1px solid var(--outcome-text-color);
+  height: 40px;
+  gap: 0px 2px;
+  margin: 5px 0;
+  font-family: var(--font-family-effects), Courier, monospace;
+}
+
+.mh-os-trackedfx-cost {
+  text-align: center;
+  font-family: var(--font-family-tags), sans-serif;
+  font-size: 0.9em;
+  padding-top: 3px;
+}
+
+.mh-os-trackedfx-row-break {
+  display: none;
+}
+
+.mh-os-trackedfx-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.mh-os-trackedfx-item {
+  width: 100%;
+  box-sizing: border-box;
 }
   

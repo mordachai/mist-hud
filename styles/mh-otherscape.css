@@ -1,0 +1,32 @@
+/* otherscape.css */
+
+:root {
+  --dark-bg-color: #030d21;
+  --text-main-color: rgb(245,245,245);
+  --text-main-color: #f7f2d3;
+  --text-hud-main-color: #d7e5f5; 
+  --text-hud-subtitles-color: #abff00;
+  --outcome-text-color: rgb(245,245,245) ;
+  --effects-color1:#abff00;
+  --effects-color2:rgb(245,245,245);
+  --effects-color3: #d3f265;
+  --toBurn-text-color: #ffefd1;
+  --positive-tag-color: #0079a6;
+  --negative-tag-color: rgba(255, 151, 47, 0.56);
+  --destroyed-tag-color: rgba(255, 40, 40, 0.825);
+  --spectrum-color:#abff00;
+  --status-color: rgb(0, 93, 93);
+  --divider-roll-color: rgba(255, 255, 255, 0.3);
+  --divider-color1: rgba(255, 255, 255, 0.3);
+  --roll-shadow-color:#00def6;
+  --blur-shadow-color: #00def6;
+  --divider-roll-color: #00def6;
+  --font-family-main1: Rift;
+  --font-family-main2: Averia Serif Libre;
+  --font-family-move: SDGlitch;
+  --font-family-roll: Recbold;
+  --font-family-tags: Roboto Condensed;
+  --font-family-outcome: Roboto Condensed;
+  --font-family-hud: Roboto Condensed;
+  --font-family-effects: Courier New;
+}

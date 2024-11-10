@@ -32,15 +32,17 @@
   ],
   "esmodules": [
     "scripts/mh-settings.js",
+    "scripts/mh-theme-config.js",
     "scripts/mist-hud.js",
     "scripts/mh-drag-pos.js",
-    "scripts/mh-com-roll.js",
-    "scripts/mh-theme-config.js",
-    "scripts/dynamite-panel.js"
+    "scripts/mh-roll.js",
+    "scripts/dynamite-panel.js",
+    "scripts/npc-hud.js"
   ],
   "styles": [
-    "styles/mh-com.css",
-    "styles/mh-roll.css"
+    "styles/mist-hud.css",
+    "styles/mh-roll.css",
+    "styles/mh-npc-hud.css"
   ],
   "url": "https://github.com/mordachai/mist-hud",
   "manifest": "https://github.com/mordachai/mist-hud/raw/main/module.json",

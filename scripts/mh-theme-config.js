@@ -3,6 +3,10 @@
 export const COM_mythosThemes = ["adaptation", "adaption", "bastion", "conjuration", "divination", "enclave", "esoterica", "expression", "familiar", "mobility", "relic"];
 export const COM_logosThemes = ["definingevent", "definingrelationship", "destiny", "mission", "personality", "possessions", "routine", "struggle", "subversion", "training", "tradition", "turf"];
 export const COM_mistThemes = ["shrouding", "advancedart", "unit"];
+export const OS_selfThemes = ["affiliation", "assets", "expertise", "horizon", "personality", "troubledPast"];
+export const OS_mythosThemes = ["artifact", "companion", "esoterica", "exposure"];
+export const OS_noiseThemes = ["augmentation", "cuttingEdge", "cyberspace", "drones"];
+
 
 // Function to get theme category by name
 export function getThemeCategory(themeName) {
@@ -12,6 +16,9 @@ export function getThemeCategory(themeName) {
     if (COM_mythosThemes.includes(normalizedThemeName)) return "mythos";
     if (COM_logosThemes.includes(normalizedThemeName)) return "logos";
     if (COM_mistThemes.includes(normalizedThemeName)) return "mist";
+    if (OS_selfThemes.includes(normalizedThemeName)) return "self";
+    if (OS_mythosThemes.includes(normalizedThemeName)) return "mythosOS";
+    if (OS_noiseThemes.includes(normalizedThemeName)) return "noise";
     return null;  // Return null if theme is not recognized
 }
 
@@ -313,5 +320,259 @@ export const moveConfig = {
         ],
         moveType: "cinematic",
     },
-    
+
+    "Quick Outcome": {
+        name: "Otherscape.moves.quickOutcome.name",
+        fail: "Otherscape.moves.quickOutcome.fail",
+        partial: "Otherscape.moves.quickOutcome.partial",
+        success: "Otherscape.moves.quickOutcome.success",
+    },
+
+    "Tracked Outcome": {
+        name: "Otherscape.moves.trackedOutcome.name",
+        fail: "Otherscape.moves.generic.fail",
+        partial: "Otherscape.moves.trackedOutcome.partial",
+        success: "Otherscape.moves.trackedOutcome.success",
+    },
+
+    "Mitigate Consequences": {
+        name: "Otherscape.moves.mitigate.name",
+        fail: "Otherscape.moves.mitigate.fail",
+        partial: "Otherscape.moves.mitigate.partial",
+        success: "Otherscape.moves.mitigate.success",
+        rollMythosOS: true
+    },
+
+    "Blaze of Glory (Significant)": {
+        name: "Otherscape.moves.blazeOfGlory.significant.name",
+        fail: "Otherscape.moves.blazeOfGlory.significant.fail",
+        partial: "Otherscape.moves.blazeOfGlory.significant.partial",
+        success: "Otherscape.moves.blazeOfGlory.significant.success",
+        moveType: "cinematic",
+    },
+
+    "Blaze of Glory (No Return)": {
+        name: "Otherscape.moves.blazeOfGlory.noReturn.name",
+        fail: "Otherscape.moves.blazeOfGlory.noReturn.fail",
+        partial: "Otherscape.moves.blazeOfGlory.noReturn.partial",
+        success: "Otherscape.moves.blazeOfGlory.noReturn.success",
+        moveType: "cinematic",
+    },
+
+    "Blaze of Glory (Ultimate)": {
+        name: "Otherscape.moves.blazeOfGlory.ultimate.name",
+        fail: "Otherscape.moves.blazeOfGlory.ultimate.fail",
+        partial: "Otherscape.moves.blazeOfGlory.ultimate.partial",
+        success: "Otherscape.moves.blazeOfGlory.ultimate.success",
+        moveType: "cinematic",
+    },
+
+    "OS: Downtime": {
+        name: "Otherscape.moves.downtime.name",
+        fail: "Otherscape.moves.downtime.always",
+        partial: "Otherscape.moves.downtime.always",
+        success: "Otherscape.moves.downtime.always",
+        failEffects: [
+            "Otherscape.moves.downtime.0",
+            "Otherscape.moves.downtime.1",
+            "Otherscape.moves.downtime.2",
+            "Otherscape.moves.downtime.3",
+            "Otherscape.moves.downtime.4"
+        ],
+        partialEffects: [
+            "Otherscape.moves.downtime.0",
+            "Otherscape.moves.downtime.1",
+            "Otherscape.moves.downtime.2",
+            "Otherscape.moves.downtime.3",
+            "Otherscape.moves.downtime.4"
+        ],
+        successEffects: [
+            "Otherscape.moves.downtime.0",
+            "Otherscape.moves.downtime.1",
+            "Otherscape.moves.downtime.2",
+            "Otherscape.moves.downtime.3",
+            "Otherscape.moves.downtime.4"
+        ],
+        moveType: "cinematic",
+    },
+
+    "OS: Session End": {
+        name: "Otherscape.moves.creditRoll.name",
+        fail: "Otherscape.moves.creditRoll.always",
+        partial: "Otherscape.moves.creditRoll.always",
+        success: "Otherscape.moves.creditRoll.always",
+        failEffects: [
+            "Otherscape.moves.creditRoll.0",
+            "Otherscape.moves.creditRoll.1",
+            "Otherscape.moves.creditRoll.2",
+            "Otherscape.moves.creditRoll.3",
+            "Otherscape.moves.creditRoll.4",
+            "Otherscape.moves.creditRoll.5",
+            "Otherscape.moves.creditRoll.6",
+            "Otherscape.moves.creditRoll.7"
+        ],
+        partialEffects: [
+            "Otherscape.moves.creditRoll.0",
+            "Otherscape.moves.creditRoll.1",
+            "Otherscape.moves.creditRoll.2",
+            "Otherscape.moves.creditRoll.3",
+            "Otherscape.moves.creditRoll.4",
+            "Otherscape.moves.creditRoll.5",
+            "Otherscape.moves.creditRoll.6",
+            "Otherscape.moves.creditRoll.7"
+        ],
+        successEffects: [
+            "Otherscape.moves.creditRoll.0",
+            "Otherscape.moves.creditRoll.1",
+            "Otherscape.moves.creditRoll.2",
+            "Otherscape.moves.creditRoll.3",
+            "Otherscape.moves.creditRoll.4",
+            "Otherscape.moves.creditRoll.5",
+            "Otherscape.moves.creditRoll.6",
+            "Otherscape.moves.creditRoll.7"
+        ],
+        moveType: "cinematic",
+    },
+
+    "Tracked Outcome - Attack": {
+        name: "Otherscape.moves.trackedOutcome.name",
+        subtitle: "Attack",
+        fail: "Otherscape.moves.generic.fail",
+        partial: "Otherscape.moves.trackedOutcome.partial",
+        success: "Otherscape.moves.trackedOutcome.success",
+        trackedEffects: [
+        {
+            key: "effect.attack",
+            name: "Attack",
+            tags: ["slash", "punch", "shoot", "zap"],
+            description: "Give your target a harmful status.",
+            cost: "1 Power per Tier"
+        },
+        {
+            key: "effect.disrupt",
+            name: "Disrupt",
+            tags: ["blind", "confuse", "shock", "trip", "jam", "interrupt"],
+            description: "Give your target a hindering tag or status.",
+            cost: "1 Power per Tier / 2 Power per Tag"
+        },
+        {
+            key: "effect.influence",
+            name: "Influence",
+            tags: ["convince", "threaten", "provoke", "hack", "mind-control"],
+            description: "Give your target a compelling status.",
+            cost: "1 Power per Tier"
+        },
+        {
+            key: "effect.weaken",
+            name: "Weaken",
+            tags: ["break", "sunder", "defuse", "neutralize", "nullify", "silence"],
+            description: "Remove a target's useful tag or status.",
+            cost: "1 Power per Tier / 2 Power per Tag"
+        }]
+    },
+
+    "Tracked Outcome - Empower": {
+    name: "Otherscape.moves.trackedOutcome.name",
+    subtitle: "Empower",
+    fail: "Otherscape.moves.generic.fail",
+    partial: "Otherscape.moves.trackedOutcome.partial",
+    success: "Otherscape.moves.trackedOutcome.success",
+    trackedEffects: [
+        {
+            key: "effect.bestow",
+            name: "Bestow",
+            tags: ["teach", "learn", "impart", "empower", "enchant", "equip"],
+            description: "Give yourself or an ally new abilities using tags.",
+            cost: "2 Power per Tag"
+        },
+        {
+            key: "effect.create",
+            name: "Create",
+            tags: ["craft", "find", "purchase", "loot", "summon", "build", "rally"],
+            description: "Create a new object or being using tags.",
+            cost: "2 Power per Tag"
+        },
+        {
+            key: "effect.enhance",
+            name: "Enhance",
+            tags: ["assist", "aim", "boost", "energize", "take cover", "gain advantage"],
+            description: "Give yourself or an ally a helpful status.",
+            cost: "1 Power per Tier"
+        },
+        {
+            key: "effect.restore",
+            name: "Restore",
+            tags: ["heal", "repair", "rejuvenate", "regain", "alleviate", "undo"],
+            description: "Reduce a harmful status or recover a burnt power tag.",
+            cost: "1 Power per Tier / 2 Power per Tag"
+        }]
+    },
+
+    "Tracked Outcome - Extras": {
+    name: "Otherscape.moves.trackedOutcome.name",
+    subtitle: "Extras",
+    fail: "Otherscape.moves.generic.fail",
+    partial: "Otherscape.moves.trackedOutcome.partial",
+    success: "Otherscape.moves.trackedOutcome.success",
+    trackedEffects: [
+        {
+            key: "effect.advance",
+            name: "Advance",
+            tags: ["make progress", "get closer", "push forward"],
+            description: "Increase a progress status.",
+            cost: "1 Power per Tier"
+        },
+        {
+            key: "effect.setBack",
+            name: "Set Back",
+            tags: ["delay", "ruin", "sabotage", "reverse"],
+            description: "Decrease a progress status.",
+            cost: "1 Power per Tier"
+        },
+        {
+            key: "effect.discover",
+            name: "Discover",
+            tags: ["sense", "recall information", "research", "converse", "reveal"],
+            description: "Discover a valuable detail.",
+            cost: "1 Power per Detail"
+        },
+        {
+            key: "effect.extraFeat",
+            name: "Extra Feat",
+            tags: ["additional feature", "minor achievement"],
+            description: "1 Power per additional feature or minor achievement included in the action.",
+            cost: "1 Power per Extra"
+        }]
+    },
+
+    "OS: Roll with Mythos": {
+        name: "CityOfMist.terms.mythos",
+        themeCategory: "mythosOS",
+        subtitleImg: "modules/mist-hud/ui/icons/mythos_os_icn.svg",
+        fail: "Something doesn't work as intended and there are adverse Consequences.",
+        partial: "The action succeeds or benefits you, but there are still some Consequences",
+        success: "Strong hit! The action succeeds as intended, or better. There are no Consequences. You may choose to take Consequences for an even greater degree of success.",
+        rollMythosOS: true,
+    },
+
+    "OS: Roll with Self": {
+        name: "Otherscape.terms.self",
+        themeCategory: "self",
+        subtitleImg: "modules/mist-hud/ui/icons/self_os_icn.svg",   
+        fail: "Something doesn't work as intended and there are adverse Consequences.",
+        partial: "The action succeeds or benefits you, but there are still some Consequences",
+        success: "Strong hit! The action succeeds as intended, or better. There are no Consequences. You may choose to take Consequences for an even greater degree of success",
+        rollSelf: true,
+    },
+
+    "OS: Roll with Noise": {
+        name: "Otherscape.terms.noise",
+        themeCategory: "noise",
+        subtitleImg: "modules/mist-hud/ui/icons/noise_os_icn.svg",   
+        fail: "Something doesn't work as intended and there are adverse Consequences.",
+        partial: "The action succeeds or benefits you, but there are still some Consequences",
+        success: "Strong hit! The action succeeds as intended, or better. There are no Consequences. You may choose to take Consequences for an even greater degree of success",
+        rollNoise: true,
+    }    
+
 };

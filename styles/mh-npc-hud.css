@@ -1,0 +1,231 @@
+.npc-hud {
+    position: absolute;
+    max-height: calc(100vh - 40px);
+    max-width: 330px;
+    min-width: 150px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    color: var(--text-hud-main-color);
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 1px solid #444;
+    border-radius: 5px;
+    left: 80px;
+    top: 150px;
+}
+
+.npc-hud-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+}
+
+.npc-header-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.npc-collapse-button,
+.npc-close-button {
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.npc-collapse-button:hover,
+.npc-close-button:hover {
+    opacity: 0.8;
+}
+
+.npc-name{
+    color: var(--text-hud-main-color);
+    font-family: var(--font-family-main1);
+    font-style: italic;
+    text-shadow: var(--text-hud-main-color) 1px 1px 6px;
+    font-size: 1.3rem;
+    padding-left: 40px;
+}
+
+.npc-content {
+    list-style: none;
+    font-family: var(--font-family-hud);
+    padding: 10px;
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Take full height */
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.accordion-content.active {
+    max-height: 500px; /* Adjust based on your content */
+}
+
+.fa-chevron-left {
+    color: var(--text-hud-subtitles-color);
+    transition: transform 0.2s ease;
+    font-size: small;
+    padding-right: 5px;
+}
+
+.fa-chevron-left.rotated {
+    transform: rotate(-90deg);
+    padding-right: 5px;
+}
+
+.npc-subtitle-text:hover {
+    opacity: 0.8;
+}
+
+/* Make moves section scrollable */
+.npc-moves-container {
+    flex: 1; /* Takes remaining space */
+    overflow-y: auto;
+    overflow-x: hidden; /* Enables vertical scrolling */
+    min-height: 0; /* Important for Firefox */
+    max-height: calc(100vh - 480px); /* Adjust this value as needed */
+    margin: 0 5px;
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* For Firefox */
+}
+
+/* Webkit scrollbar styling (Chrome, Safari, Edge) */
+.npc-moves-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.npc-moves-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.npc-moves-container::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+ .npc-subtitle-container-r {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px; 
+    margin: 5px 0; 
+    opacity: 0.75;
+    color:  var(--text-hud-subtitles-color);
+}
+
+.npc-subtitle-container-r::before {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: var(--text-hud-subtitles-color);
+}
+
+.npc-subtitle-container-l {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px; 
+    margin: 5px 0; 
+    opacity: 0.75;
+    color: var(--text-hud-subtitles-color);
+}
+
+.npc-subtitle-container-l::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color:  var(--text-hud-subtitles-color);
+}
+
+.npc-subtitle-text {
+    text-transform: uppercase;
+    font-family: var(--font-family-main1);
+    font-weight: bold;
+    color: var(--text-hud-subtitles-color);
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+
+.centered {
+    text-align: center;
+}
+
+.npc-list{
+    list-style: none;
+    padding: 0;
+}
+
+.mh-storytags-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+    list-style: none;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.no-wrap{
+    white-space: nowrap; /* Prevents line breaks inside the list item */
+    overflow: hidden; /* Hides overflowing content */
+    text-overflow: ellipsis; /* Adds ellipsis (...) to overflowing text */
+}
+
+.npc-spectrum-list{
+    list-style: none;
+    padding: 0;
+    display: flex ;
+    justify-content: space-around;
+}
+
+.npc-move-name {
+    font-weight: bold;
+}
+
+.npc-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.npc-list li {
+    padding: 3px 0;
+}
+
+.npc-list li:not(:last-child) {
+    border-bottom: 1px solid var(--divider-color1); /* Semi-transparent white line */
+}
+
+.npc-spectrum {
+    padding: 4px 6px;
+    background-color: var(--spectrum-color);
+    color: black;
+    font-family: var(--font-family-main1);
+    font-weight: bold;
+    font-size: 1rem;
+    clip-path: polygon(
+        0 0,         /* Top-left corner */
+        100% 0,        /* Top-right corner */
+        100% 100%,     /* Bottom-right corner */
+        10px 100%,      /* Bottom chamfered section */
+        0 20px          /* Bottom-left corner (chamfered) */
+    );
+}
+
+.npc-spectrum-tier{
+    font-size: 1.5rem;
+    padding: 4px 0px;
+}
+
+.npc-status {
+    background-color: var(--status-color);
+    text-transform: lowercase;
+    font-style: oblique;
+    padding: 0px 2px ;
+}
+

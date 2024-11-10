@@ -1,0 +1,31 @@
+/* legends-in-the-mist.css */
+
+:root {
+  --dark-bg-color: #c6bdb6;
+  --text-main-color: #1b190e;
+  --text-hud-main-color: #d7e5f5; 
+  --text-hud-subtitles-color: #d7e5f5;
+  --outcome-text-color: #1b190e;
+  --effects-color1:#1b190e;
+  --effects-color2:rgb(245,245,245);
+  --effects-color3: #d3f265;
+  --toBurn-text-color: #85662b;
+  --positive-tag-color: #e0d674;
+  --negative-tag-color: #9eb06b;
+  --destroyed-tag-color: rgba(255, 40, 40, 0.825);
+  --spectrum-color:#dc9c67;
+  --status-color: rgb(0, 93, 93);
+  --divider-roll-color: rgba(255, 255, 255, 0.3);
+  --divider-color1: rgba(255, 255, 255, 0.3);
+  --roll-shadow-color:#d542b7;
+  --blur-shadow-color: #d542b7;
+  --divider-roll-color: #1b190e;
+  --font-family-main1: Rift;
+  --font-family-main2: Averia Serif Libre;
+  --font-family-move: Rift Bold;
+  --font-family-roll: Averia Serif Libre;
+  --font-family-tags: Roboto Condensed;
+  --font-family-outcome: Averia Serif Libre;
+  --font-family-hud: Roboto Condensed;
+  --font-family-effects: Times New Roman;
+}

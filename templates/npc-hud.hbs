@@ -1,0 +1,116 @@
+<div class="npc-hud">
+    <div class="mh-token-image">
+        <img src="{{tokenImage}}" alt="NPC Token">
+    </div>
+
+    <div class="npc-hud-header">
+        <div class="npc-name">{{name}} / <span class="mh-token-name"> {{tokenName}}</span></div>
+        <div class="npc-header-controls">
+            <div class="npc-collapse-button clickable">
+                {{#if isCollapsed}}
+                    <i class="fas fa-angle-down"></i>
+                {{else}}
+                    <i class="fas fa-angle-up"></i>
+                {{/if}}
+            </div>
+            <div class="npc-close-button clickable"><i class="fas fa-times"></i></div>
+        </div>
+    </div>
+
+    {{#unless isCollapsed}}
+    <div class="npc-content">
+
+        <div class="npc-description-section accordion-container">
+            <div class="npc-subtitle-container-r accordion-header clickable">
+                <span class="npc-subtitle-text">Description</span>
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="accordion-content">
+                {{{description}}}
+            </div>
+        </div>
+
+        <div class="npc-biography-section accordion-container">
+            <div class="npc-subtitle-container-r accordion-header clickable">
+                <span class="npc-subtitle-text">Biography</span>
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="accordion-content">
+                {{{biography}}}
+            </div>
+        </div>
+
+        <!-- Spectrums Section -->
+        <ul class="npc-spectrum-list">
+            {{#each spectrums}}
+            <li><span class="npc-spectrum">{{name}}: <span class="npc-spectrum-tier">{{system.maxTier}}</span></span></li>
+            {{/each}}
+        </ul>
+
+        <!-- Moves Section -->
+        {{#each moveGroups as |moves subtype|}}
+        <div class="npc-moves-accordion">
+            <div class="npc-moves-container">
+                <div class="npc-subtitle-container-r accordion-header start-expanded clickable">
+                    <div class="npc-subtitle-text">{{subtype}} MOVES</div>
+                    <div class="accordion-icon">
+                        <i class="fas fa-chevron-left"></i>
+                    </div>
+                </div>
+                <div class="accordion-content">
+                    <ul class="npc-list">
+                        {{#each moves}}
+                        <li>
+                            {{#unless system.hideName}}
+                                <span class="npc-move-name">{{name}}</span> -
+                            {{/unless}}
+                            <span class="npc-move-description">{{parseStatus system.description}}</span>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+
+        <!-- Story Tags Section -->
+        {{#if hasStoryTags}}
+        <div class="mh-story-tags-container">
+            <div class="npc-subtitle-container-l">
+                <div class="npc-subtitle-text">Story Tags</div>
+            </div>
+            <ul class="mh-storytags-list">
+            {{#each storyTags}}
+                <li class="mh-story-tag {{this.cssClass}} no-wrap" data-id="{{this.id}}" data-temporary="{{this.temporary}}" data-permanent="{{this.permanent}}">
+                <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
+                <span class="mh-tags">
+                    {{this.tagName}}</span>
+                    {{#if temporary}}⏱️{{/if}}
+                    {{#if permanent}}💎{{/if}}
+                </li>
+            {{/each}}
+            </ul>
+        </div>
+        {{/if}}
+
+        <!-- Statuses Section -->
+        {{#if statuses.length}}
+            <div class="npc-subtitle-container-l">
+                <div class="npc-subtitle-text">Statuses</div>
+            </div>
+        <ul class="mh-statuses-list">
+            {{#each statuses}}
+            <li>
+                <div class="mh-status {{#if selected}}selected{{/if}} {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
+                {{#if temporary}}⏱️ {{/if}}
+                {{#if permanent}}💎 {{/if}}
+                {{statusName}}-{{statusTier}}
+                </div>
+            </li>
+            {{/each}}
+        </ul>
+        {{/if}}
+
+    </div>
+    {{/unless}}
+</div>

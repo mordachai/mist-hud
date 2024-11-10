@@ -1,13 +1,10 @@
-// mh-com-roll.js
+// mh-roll.js
 
 import { moveConfig } from './mh-theme-config.js';
 import { MistHUD } from './mist-hud.js';
 import { getSceneStatuses } from './mist-hud.js';
 import { getScnTags } from './mist-hud.js';
-import { COM_mythosThemes, COM_logosThemes, COM_mistThemes } from './mh-theme-config.js';
-
-// Ensure global object initialization
-globalThis.CityOfMistRolls = globalThis.CityOfMistRolls || {};
+import { COM_mythosThemes, COM_logosThemes, COM_mistThemes, OS_selfThemes, OS_mythosThemes, OS_noiseThemes } from './mh-theme-config.js';
 
 // Debug mode setting
 let debug = false;
@@ -70,6 +67,16 @@ function calculateWeaknessTags() {
   }, 0);
 }
 
+function calculateLoadoutTags() {
+  const hud = MistHUD.getInstance();
+  const loadoutTags = hud.getSelectedRollData().loadoutTags;
+
+  return loadoutTags.reduce((total, tag) => {
+    return total + (tag.stateClass === "to-burn" ? 3 : 1); // +3 if toBurn, +1 if selected
+  }, 0);
+}
+
+
 function calculateStoryTags() {
   const hud = MistHUD.getInstance();
   const storyTags = hud.getSelectedRollData().storyTags;
@@ -85,7 +92,7 @@ function calculateStoryTags() {
   }, 0);
 }
 
-function calculateStatuses() {
+function calculateCharacterStatuses() {
   const hud = MistHUD.getInstance();
   const rollData = hud.getSelectedRollData();
 
@@ -93,13 +100,21 @@ function calculateStatuses() {
     return total + (status.typeClass === "positive" ? status.tier : -status.tier);
   }, 0);
 
+  return characterStatusTotal;
+}
+
+function calculateSceneStatuses() {
+  const hud = MistHUD.getInstance();
+  const rollData = hud.getSelectedRollData();
+
   // Use sceneStatuses to calculate scene status contributions
   const sceneStatusTotal = rollData.sceneStatuses.reduce((total, sceneStatus) => {
     return total + (sceneStatus.typeClass === "scene-positive" ? sceneStatus.tier : -sceneStatus.tier);
   }, 0);
 
-  return characterStatusTotal + sceneStatusTotal;
+  return sceneStatusTotal;
 }
+
 
 function calculateScnTags() {
   const hud = MistHUD.getInstance();
@@ -134,13 +149,14 @@ async function rollMove(moveName, hasDynamite) {
   const calculatedPower = calculatePowerTags();
   const totalWeakness = calculateWeaknessTags();
   const totalStoryTags = calculateStoryTags();
-  const totalStatuses = calculateStatuses();
-  const totalScnTags = calculateScnTags();  // Calculate scnTags contribution
+  const totalLoadoutTags = calculateLoadoutTags();
+  const totalCharStatuses = calculateCharacterStatuses();
+  const totalSceneStatuses = calculateSceneStatuses();
+  const totalScnTags = calculateScnTags();
   const modifier = getRollModifier() || 0;
 
   // Aggregate total power for the roll calculation
-  const totalPower = calculatedPower + totalWeakness + totalStoryTags + totalStatuses + totalScnTags + modifier;
-  console.log("rollMove - Total Power Calculation:", { calculatedPower, totalWeakness, totalStoryTags, totalStatuses, totalScnTags, modifier, totalPower });
+  const totalPower = calculatedPower + totalWeakness + totalStoryTags + totalLoadoutTags + totalCharStatuses + totalSceneStatuses + totalScnTags + modifier;
 
   const rollResults = await rollDice();
   const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower;
@@ -173,20 +189,30 @@ async function rollMove(moveName, hasDynamite) {
   // Add firecracker emoji if the move is dynamite and the rollTotal is 12 or more
   const displayRollTotal = dynamiteEnabled && rollTotal >= 12 ? `${rollTotal} 🧨` : rollTotal;
 
+  // Prepare tracked effects data if applicable
+  let trackedEffects = null;
+  if (Array.isArray(move.trackedEffects) && move.trackedEffects.length > 0) {
+      trackedEffects = move.trackedEffects; // Only include if the move is a tracked outcome move
+  }
+
   const chatData = {
     moveName: move.name,
     actorName: actor.name,
+    subtitle: move.subtitle || "",
     rollResults,
     outcomeMessage,
     calculatedPower,
+    totalLoadoutTags,
     totalWeakness,
     totalStoryTags,
-    totalStatuses,
     totalScnTags,
+    totalCharStatuses,
+    totalSceneStatuses,
     modifier,
     rollTotal: displayRollTotal,
     localizedMoveEffects,
-    tagsData: hud.getSelectedRollData()
+    tagsData: hud.getSelectedRollData(),
+    trackedEffects
   };
 
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
@@ -215,6 +241,9 @@ function substituteText(text, totalPower) {
 
 // Function to count themebook types
 function countThemebookTypes(character) {
+  let mythosOSAmount = 0;
+  let selfAmount = 0;
+  let noiseAmount = 0;
   let logosAmount = 0;
   let mythosAmount = 0;
   let mistAmount = 0;
@@ -224,21 +253,26 @@ function countThemebookTypes(character) {
   themes.forEach(theme => {
     const themeName = theme.system.themebook_name.toLowerCase().replace(/\s+/g, "").trim();
 
-    if (COM_mythosThemes.includes(themeName)) {
-      mythosAmount++;
+    if (OS_mythosThemes.includes(themeName)) {
+      mythosOSAmount++;
+    } else if (OS_selfThemes.includes(themeName)) {
+      selfAmount++;
+    } else if (OS_noiseThemes.includes(themeName)) {
+      noiseAmount++;
     } else if (COM_logosThemes.includes(themeName)) {
       logosAmount++;
+    } else if (COM_mythosThemes.includes(themeName)) {
+      mythosAmount++;
     } else if (COM_mistThemes.includes(themeName)) {
       mistAmount++;
     }
   });
 
-  return { logosAmount, mythosAmount, mistAmount };
+  return { selfAmount, noiseAmount, mythosOSAmount, logosAmount, mythosAmount, mistAmount };
 }
 
 // Adds Mythos or Logos count based on move flags.
-async function rollSpecialMoves(moveName) {
-  console.log("⚙️ Calling rollSpecialMoves");  // Log function call
+export async function rollSpecialMoves(moveName) {
   const move = moveConfig[moveName];
   if (!move) {
     console.error(`Move not found: ${moveName}`);
@@ -252,26 +286,40 @@ async function rollSpecialMoves(moveName) {
     return;
   }
 
-  // Get theme counts and determine which count is relevant
-  const { logosAmount, mythosAmount } = countThemebookTypes(actor);
-  const themeCount = move.rollMythos ? mythosAmount : move.rollLogos ? logosAmount : 0;
-  const themeType = move.rollMythos ? "mythos" : move.rollLogos ? "logos" : null;
+  // Get theme counts for special move rolls
+  const { selfAmount, noiseAmount, mythosOSAmount, logosAmount, mythosAmount, mistAmount } = countThemebookTypes(actor);
 
-  // Calculate statuses and modifier
-  const totalStatuses = calculateStatuses();
+  // Mapping roll flags to theme counts and types
+  const rollMappings = {
+    rollLogos: { amount: logosAmount, type: "logos" },
+    rollMythos: { amount: mythosAmount, type: "mythos" },
+    rollSelf: { amount: selfAmount, type: "self" },
+    rollNoise: { amount: noiseAmount, type: "noise" },
+    rollMythosOS: { amount: mythosOSAmount, type: "mythosOS" }
+  };
+
+  // Determine active roll based on move configuration
+  const activeRoll = Object.entries(rollMappings).find(([flag]) => move[flag]) || [];
+  const { amount: themeCount = 0, type: themeType = null } = activeRoll[1] || {};
+
+  // Calculate additional values
+  const totalWeakness = calculateWeaknessTags();
+  const totalStoryTags = calculateStoryTags();
+  const totalLoadoutTags = calculateLoadoutTags();
+  const totalCharStatuses = calculateCharacterStatuses();
+  const totalSceneStatuses = calculateSceneStatuses();
+  const totalScnTags = calculateScnTags();
   const modifier = getRollModifier() || 0;
 
-  // Total roll calculation using theme count, statuses, and modifier
-  const totalPower = themeCount + totalStatuses + modifier;
+  // Calculate roll results using theme count
+  const totalPower = themeCount + totalWeakness + totalStoryTags + totalLoadoutTags + totalCharStatuses + totalSceneStatuses + totalScnTags + modifier;
   const rollResults = await rollDice();
   const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower;
 
-  // Determine the outcome of the roll
-  const dynamiteEnabled = (await actor.getFlag("mist-hud", "dynamiteMoves") || []).includes(moveName);
+  // Determine roll outcome
   let outcome;
   let moveEffects = [];
-
-  if (dynamiteEnabled && rollTotal >= 12) {
+  if (rollTotal >= 12) {
     outcome = "dynamite";
     moveEffects = move.dynamiteEffects || [];
   } else if (rollTotal >= 10) {
@@ -285,32 +333,31 @@ async function rollSpecialMoves(moveName) {
     moveEffects = move.failEffects || [];
   }
 
-  // Localize and send the message to chat
+  // Generate chat output
   let outcomeMessage = game.i18n.localize(move[outcome]);
   outcomeMessage = substituteText(outcomeMessage, totalPower);
 
   const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
+  const displayRollTotal = rollTotal; // Optionally format for "dynamite" rolls
 
-  // Add firecracker emoji if the move is dynamite and the rollTotal is 12 or more
-  const displayRollTotal = dynamiteEnabled && rollTotal >= 12 ? `${rollTotal} 🧨` : rollTotal;
-
-  // Update chatData to include themeCount and themeType
+  // Prepare chat data for rendering
   const chatData = {
     moveName: move.name,
+    themeCategory: move.themeCategory,
+    subtitle: move.subtitle || "",
+    subtitleImg: move.subtitleImg || "",
     actorName: actor.name,
     rollResults,
     outcomeMessage,
     themeCount,
     themeType,
-    totalStatuses,
-    modifier,
     rollTotal: displayRollTotal,
     localizedMoveEffects,
     tagsData: hud.getSelectedRollData()
   };
 
+  // Render and send chat message
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
-
   ChatMessage.create({
     content: chatContent,
     speaker: { alias: actor.name }
@@ -318,6 +365,7 @@ async function rollSpecialMoves(moveName) {
 
   hud.postRollCleanup(chatData.tagsData);
 }
+
 
 async function rollCinematicMove(moveName) {
   const move = moveConfig[moveName];
@@ -333,7 +381,6 @@ async function rollCinematicMove(moveName) {
     return;
   }
   
-
   // Gather effects if they exist for cinematic moves
   const moveEffects = move.successEffects || move.partialEffects || move.failEffects || [];
   const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
@@ -366,24 +413,38 @@ function executeMove(moveName) {
     return;
   }
 
-  if (move.moveType === "cinematic") {
-    console.log(`🎬 Executing cinematic move for "${moveName}"`);
-    rollCinematicMove(moveName);
-  } else if (move.rollMythos || move.rollLogos) {
+  // Check for special move roll triggers
+  if (move.rollMythos || move.rollLogos || move.rollMythosOS || move.rollSelf || move.rollNoise) {
     rollSpecialMoves(moveName);
+  } else if (move.moveType === "cinematic") {
+    rollCinematicMove(moveName);
   } else {
     rollMove(moveName);
   }
 }
 
-// Export function for potential external usage
-export { rollMove};
-export { countThemebookTypes };
-export { rollSpecialMoves };
-export default CityOfMistRolls;
-export { calculatePowerTags, calculateWeaknessTags, calculateStatuses, getRollModifier };
+// Initialize CityOfMistRolls object
+const CityOfMistRolls = {
+  rollMove,
+  rollSpecialMoves,
+  rollCinematicMove,
+  executeMove,
+  substituteText,
+  countThemebookTypes,
+  calculatePowerTags,
+  calculateWeaknessTags,
+  calculateStoryTags,
+  calculateLoadoutTags,
+  calculateCharacterStatuses,
+  calculateScnTags,
+  calculateSceneStatuses,
+  getRollModifier
+};
 
-// Assign rollMove and substituteText to the global object
-globalThis.CityOfMistRolls.rollMove = rollMove;
-globalThis.CityOfMistRolls.substituteText = substituteText;
-globalThis.CityOfMistRolls.executeMove = executeMove;
+// Export CityOfMistRolls for potential external usage
+export default CityOfMistRolls;
+
+Hooks.once('ready', () => {
+  globalThis.CityOfMistRolls = globalThis.CityOfMistRolls || {};
+  globalThis.CityOfMistRolls = CityOfMistRolls;
+});
