@@ -47,6 +47,10 @@
   background: none;
 }
 
+.clickable{
+  cursor: pointer;
+}
+
 /* HUD Container */
 .mh-hud {
     position: absolute;

@@ -17,19 +17,20 @@
   {{/if}}
 
   {{!-- We need to capture the selected tags and statuses and show in the next section below  --}}
-  <div class="mhr-roll-mdf">
+  <div class="accordion-container">
+  <div class="mhr-roll-mdf accordion-header clickable">
     {{#if themeCount}}
       {{#if (eq themeType "mythos")}}
-        <i class="fa-solid fa-bolt"></i> {{themeCount}}
+        <span class="mh-dropshadow-{{themeCategory}}"><i class="fa-solid fa-bolt"></i> {{themeCount}}</span>
         {{else if (eq themeType "logos")}}
-        <i class="fa-solid fa-mask"></i> {{themeCount}}
+        <span class="mh-dropshadow-{{themeCategory}}"><i class="fa-solid fa-mask"></i> {{themeCount}}</span>
         {{else if (eq themeType "noise")}}
-        {{themeCount}}
+        <span class="mh-dropshadow-{{themeCategory}}">Noise {{themeCount}}</span>
         {{else if (eq themeType "self")}}
-        {{themeCount}}
+        <span class="mh-dropshadow-{{themeCategory}}">Self {{themeCount}}</span>
         {{else if (eq themeType "mythosOS")}}
-        {{themeCount}}
-      {{/if}}
+        <span class="mh-dropshadow-{{themeCategory}}">Mythos {{themeCount}}</span>
+    {{/if}}
     {{/if}}
     {{#if calculatedPower}}
       <span><i class="fa-light fa-bolt"></i> {{calculatedPower}}</span>
@@ -57,11 +58,9 @@
     {{/if}}
   </div>
 
-  {{#if (or tagsData.powerTags tagsData.weaknessTags tagsData.storyTags tagsData.statuses tagsData.sceneStatuses tagsData.scnTags tagsData.modifier)}}
-    <hr>
-  {{/if}}
 
-  <div class="tags-section">
+
+  <div class="tags-section accordion-content">
     <span class="tag-row mhr-power-tags">
       {{#each tagsData.powerTags}}
         <span class="mhr-power-tag {{stateClass}}">{{tagName}}</span>
@@ -116,6 +115,7 @@
         {{/each}}
     </span>
   </div>
+  </div>
 
   {{#if rollTotal}}
   <hr class="mhr-roll-divider">
@@ -141,11 +141,11 @@
 
 
 {{#if trackedEffects.length}}
-<div class="mh-os-trackedfx-container">
+<div class="mh-os-trackedfx-container accordion-container">
     {{#each trackedEffects}}
     <div class="mh-os-trackedfx-item">
-        <div><span class="mh-os-trackedfx-name">{{name}}: </span><span class="mh-os-trackedfx-description">{{description}}</span></div>
-        <div class="mh-os-trackedfx-tags">
+        <div class="accordion-header clickable"><span class="mh-os-trackedfx-name">{{name}}: </span><span class="mh-os-trackedfx-description">{{description}}</span></div>
+        <div class="mh-os-trackedfx-tags accordion-content">
         {{#each tags}}<span class="mh-os-trackedfx-tag">{{this}}</span>{{#unless @last}}, {{/unless}}{{/each}}
         </div>
         <div class="mh-os-trackedfx-cost">{{{cost}}}</div>

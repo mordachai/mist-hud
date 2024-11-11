@@ -5,6 +5,8 @@ import { MistHUD } from './mist-hud.js';
 import { getSceneStatuses } from './mist-hud.js';
 import { getScnTags } from './mist-hud.js';
 import { COM_mythosThemes, COM_logosThemes, COM_mistThemes, OS_selfThemes, OS_mythosThemes, OS_noiseThemes } from './mh-theme-config.js';
+import { initializeAccordions } from './accordion-handler.js';
+
 
 // Debug mode setting
 let debug = false;
@@ -447,4 +449,11 @@ export default CityOfMistRolls;
 Hooks.once('ready', () => {
   globalThis.CityOfMistRolls = globalThis.CityOfMistRolls || {};
   globalThis.CityOfMistRolls = CityOfMistRolls;
+});
+
+Hooks.on('renderChatMessage', (app, html, data) => {
+  // Optional: Introduce a small delay to ensure DOM elements are fully rendered before initialization
+  setTimeout(() => {
+      initializeAccordions();
+  }, 100); // Adjust the delay as needed
 });

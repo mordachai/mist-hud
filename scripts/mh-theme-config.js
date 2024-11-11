@@ -164,6 +164,7 @@ export const moveConfig = {
         partial: "CityOfMist.moves.investigate.partial",
         success: "CityOfMist.moves.investigate.success",
         dynamite: "CityOfMist.moves.investigate.dynamite",
+        themeCategory: "mythos",
         partialEffects: [
             "CityOfMist.moves.investigate.0",
             "CityOfMist.moves.investigate.1",
@@ -222,6 +223,7 @@ export const moveConfig = {
         fail: "CityOfMist.moves.SHB.significant.fail",
         partial: "CityOfMist.moves.SHB.significant.partial",
         success: "CityOfMist.moves.SHB.significant.success",
+        themeCategory: "logos",
         rollLogos: true
     },
 
@@ -230,6 +232,7 @@ export const moveConfig = {
         fail: "CityOfMist.moves.SHB.noReturn.fail",
         partial: "CityOfMist.moves.SHB.noReturn.partial",
         success: "CityOfMist.moves.SHB.noReturn.success",
+        themeCategory: "logos",
         rollLogos: true
     },
 
@@ -238,6 +241,7 @@ export const moveConfig = {
         fail: "CityOfMist.moves.SHB.ultimate.fail",
         partial: "CityOfMist.moves.SHB.ultimate.partial",
         success: "CityOfMist.moves.SHB.ultimate.success",
+        themeCategory: "logos",
         rollLogos: true
     },
 
