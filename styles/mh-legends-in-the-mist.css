@@ -10,11 +10,14 @@
   --effects-color2:rgb(245,245,245);
   --effects-color3: #d3f265;
   --toBurn-text-color: #85662b;
-  --positive-tag-color: #e0d674;
-  --negative-tag-color: #9eb06b;
+  --positive-tag-color: #f6e86a;
+  --positive-tag-borderColor: #faf3ae;
+  --negative-tag-color: #c1806c;
+  --negative-tag-borderColor: #f9af98;
   --destroyed-tag-color: rgba(255, 40, 40, 0.825);
   --spectrum-color:#dc9c67;
   --status-color: rgb(0, 93, 93);
+  --storytag-color: rgb(199, 69, 33);
   --divider-roll-color: rgba(255, 255, 255, 0.3);
   --divider-color1: rgba(255, 255, 255, 0.3);
   --roll-shadow-color:#d542b7;

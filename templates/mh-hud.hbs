@@ -1,4 +1,141 @@
 <div class="mh-hud">
+  <div class="mh-token-image">
+    <img src="{{tokenImage}}" alt="Character Token">
+  </div>
+
+  <!-- HUD Header -->
+  <div class="mh-hud-header">
+    <div class="mh-char-name">{{charName}}</div>
+    <div class="mh-header-controls">
+      <!-- Collapse Button -->
+      <div class="mh-collapse-button clickable">
+        {{#if isCollapsed}}
+          <i class="fas fa-angle-down"></i>
+        {{else}}
+          <i class="fas fa-angle-up"></i>
+        {{/if}}
+      </div>
+      <!-- Close Button -->
+      <div class="mh-close-button clickable"><i class="fas fa-times"></i></div>
+    </div>
+  </div>
+
+  {{#unless isCollapsed}}
+  <!-- HUD Content -->
+  <div class="mh-content">
+    {{#each themes}}
+    <!-- Render each theme-container as a sibling -->
+    <div class="theme-container-{{category}}">
+      <div class="mh-theme-header">
+        <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
+        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{localizedThemebookName}}</span>
+      </div>
+
+      <!-- Power Tags -->
+      <ul class="mh-tags">
+        {{#each powerTags}}
+        <li class="mh-power-tag {{this.cssClass}}" data-id="{{this.id}}">
+          <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
+          <span class="mh-tag-text">{{this.tagName}}</span>
+          {{#if subtags}}
+            <ul class="mh-subtag">
+              {{#each subtags}}
+                <li class="subtag-item {{cssClass}}">
+                  <span class="subtag-burn">{{{burnIcon}}}</span>
+                  <span class="subtag-name">{{this.tagName}}</span>
+                </li>
+              {{/each}}
+            </ul>
+          {{/if}}
+        </li>
+        {{/each}}
+      </ul>
+
+      <!-- Weakness Tags -->
+      <ul class="mh-tags">
+        {{#each weaknessTags}}
+          <li class="mh-weakness-tag {{this.cssClass}}" data-id="{{this.id}}">
+            <span class="mh-weakness-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
+              {{{this.inversionIcon}}}
+            </span>
+            <span class="mh-tag-text">{{this.tagName}}</span>
+          </li>
+        {{/each}}
+      </ul>
+    </div>
+    {{/each}}
+
+    <!-- LOADOUT Section -->
+    {{#if loadoutTags.length}}
+      <div class="mh-story-tags-container">
+        <div class="mh-story-tags-title">Loadout</div>
+        <ul class="mh-tags">
+          {{#each loadoutTags}}
+            <li class="mh-loadout-tag {{this.cssClass}}" data-id="{{this.id}}">
+              <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
+              <span class="mh-tag-text">{{this.tagName}}</span>
+              {{#if subtags}}
+                <ul class="mh-subtag">
+                  {{#each subtags}}
+                    <li class="subtag-item {{cssClass}}">
+                      <span class="subtag-burn">{{{burnIcon}}}</span>
+                      <span class="subtag-name">{{tagName}}</span>
+                    </li>
+                  {{/each}}
+                </ul>
+              {{/if}}
+            </li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/if}}
+
+    <!-- Story Tags Section -->
+    {{#if hasStoryTags}}
+      <div class="mh-story-tags-container">
+        <div class="mh-story-tags-title">Story Tags</div>
+        <ul class="mh-tags">
+          {{#each storyTags}}
+            <li class="mh-story-tag {{this.cssClass}}" data-id="{{this.id}}" data-temporary="{{this.temporary}}" data-permanent="{{this.permanent}}">
+              <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
+              <span class="mh-tag-text">
+                {{#if temporary}}⏱️ {{/if}}
+                {{#if permanent}}💎 {{/if}}
+                {{this.tagName}}</span>
+              <span class="mhr-mls mh-story-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
+                {{{this.inversionIcon}}}
+              </span>
+            </li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/if}}
+
+    <!-- Statuses Section -->
+    <div class="mh-statuses">
+      <div class="mh-statuses-title">Statuses</div>
+      <div class="mh-statuses-list">
+        {{#each statuses}}
+          <div class="mh-status {{#if selected}}selected{{/if}} {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
+            {{#if temporary}}⏱️ {{/if}}
+            {{#if permanent}}💎 {{/if}}
+            {{statusName}}-{{statusTier}}
+          </div>
+        {{/each}}
+      </div>
+    </div>
+
+    <!-- Modifier Bar -->
+    <div class="mh-modifier-bar">
+      <div id="mh-mod-decrease" class="mh-mod-button">-</div>
+      <input type="text" id="mh-mod-value" value="0" />
+      <div id="mh-mod-increase" class="mh-mod-button">+</div>
+    </div>
+  {{/unless}}
+</div>
+
+
+{{!-- <div class="mh-hud">
     <div class="mh-token-image">
       <img src="{{tokenImage}}" alt="Character Token">
     </div>
@@ -22,18 +159,56 @@
 
   {{#unless isCollapsed}}
   <!-- HUD Content -->
-    <div class="mh-content">
+  <div class="mh-content">
     {{#each themes}}
-      <div>
-        <div class="mh-theme-header">
-          <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
-          <span class="mh-theme-name mh-theme-name-com-{{category}}">{{localizedThemebookName}}</span>
-        </div>
+    <div>
+      <div class="mh-theme-header">
+        <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
+        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{localizedThemebookName}}</span>
+      </div>
 
-        <!-- Power Tags -->
+      <!-- Power Tags -->
+      <ul class="mh-tags">
+        {{#each powerTags}}
+        <li class="mh-power-tag {{this.cssClass}}" data-id="{{this.id}}">
+          <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
+          <span class="mh-tag-text">{{this.tagName}}</span>
+          {{#if subtags}}
+            <ul class="mh-subtag">
+              {{#each subtags}}
+                <li class="subtag-item {{cssClass}}">
+                  <span class="subtag-burn">{{{burnIcon}}}</span>
+                  <span class="subtag-name">{{this.tagName}}</span>
+                </li>
+              {{/each}}
+            </ul>
+          {{/if}}
+        </li>
+        {{/each}}
+      </ul>
+
+      <!-- Weakness Tags -->
+      <ul class="mh-tags">
+        {{#each weaknessTags}}
+          <li class="mh-weakness-tag {{this.cssClass}}" data-id="{{this.id}}">
+            <span class="mh-weakness-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
+              {{{this.inversionIcon}}}
+            </span>
+            <span class="mh-tag-text">{{this.tagName}}</span>
+          </li>
+        {{/each}}
+      </ul>
+
+    {{/each}}
+    </div>
+
+    <!-- LOADOUT Section -->
+    {{#if loadoutTags.length}}
+      <div class="mh-story-tags-container">
+        <div class="mh-story-tags-title">Loadout</div>
         <ul class="mh-tags">
-          {{#each powerTags}}
-            <li class="mh-power-tag {{this.cssClass}}" data-id="{{this.id}}">
+          {{#each loadoutTags}}
+            <li class="mh-loadout-tag {{this.cssClass}}" data-id="{{this.id}}">
               <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
               <span class="mh-tag-text">{{this.tagName}}</span>
               {{#if subtags}}
@@ -41,7 +216,7 @@
                   {{#each subtags}}
                     <li class="subtag-item {{cssClass}}">
                       <span class="subtag-burn">{{{burnIcon}}}</span>
-                      <span class="subtag-name">{{this.tagName}}</span>
+                      <span class="subtag-name">{{tagName}}</span>
                     </li>
                   {{/each}}
                 </ul>
@@ -49,48 +224,8 @@
             </li>
           {{/each}}
         </ul>
-
-        <!-- Weakness Tags -->
-        <ul class="mh-tags">
-          {{#each weaknessTags}}
-            <li class="mh-weakness-tag {{this.cssClass}}" data-id="{{this.id}}">
-              <span class="mh-weakness-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
-                {{{this.inversionIcon}}}
-              </span>
-              <span class="mh-tag-text">{{this.tagName}}</span>
-            </li>
-          {{/each}}
-        </ul>
-
-        <hr>
-
-    {{/each}}
-    </div>
-
-      <!-- LOADOUT Section -->
-      {{#if loadoutTags.length}}
-        <div class="mh-story-tags-container">
-          <div class="mh-story-tags-title">Loadout</div>
-          <ul class="mh-tags">
-            {{#each loadoutTags}}
-              <li class="mh-loadout-tag {{this.cssClass}}" data-id="{{this.id}}">
-                <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
-                <span class="mh-tag-text">{{this.tagName}}</span>
-                {{#if subtags}}
-                  <ul class="mh-subtag">
-                    {{#each subtags}}
-                      <li class="subtag-item {{cssClass}}">
-                        <span class="subtag-burn">{{{burnIcon}}}</span>
-                        <span class="subtag-name">{{tagName}}</span>
-                      </li>
-                    {{/each}}
-                  </ul>
-                {{/if}}
-              </li>
-            {{/each}}
-          </ul>
-        </div>
-      {{/if}}
+      </div>
+    {{/if}}
 
 
     <!-- Story Tags Section -->
@@ -136,4 +271,4 @@
     </div>
   {{/unless}}
 
-</div>
+</div> --}}

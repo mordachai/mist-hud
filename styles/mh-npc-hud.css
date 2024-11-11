@@ -89,7 +89,7 @@
     overflow-y: auto;
     overflow-x: hidden; /* Enables vertical scrolling */
     min-height: 0; /* Important for Firefox */
-    max-height: calc(100vh - 480px); /* Adjust this value as needed */
+    max-height: calc(100vh - 600px); /* Adjust this value as needed */
     margin: 0 5px;
     scrollbar-width: thin; /* For Firefox */
     scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* For Firefox */
@@ -97,7 +97,7 @@
 
 /* Webkit scrollbar styling (Chrome, Safari, Edge) */
 .npc-moves-container::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
 }
 
 .npc-moves-container::-webkit-scrollbar-track {
@@ -105,11 +105,11 @@
 }
 
 .npc-moves-container::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(10, 220, 38, 0.3);
     border-radius: 3px;
 }
 
- .npc-subtitle-container-r {
+.npc-subtitle-container-r {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -224,6 +224,13 @@
 
 .npc-status {
     background-color: var(--status-color);
+    text-transform: lowercase;
+    font-style: oblique;
+    padding: 0px 2px ;
+}
+
+.npc-storytag {
+    background-color: var(--storytag-color);
     text-transform: lowercase;
     font-style: oblique;
     padding: 0px 2px ;

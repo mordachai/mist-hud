@@ -344,7 +344,6 @@ export const moveConfig = {
         fail: "Otherscape.moves.mitigate.fail",
         partial: "Otherscape.moves.mitigate.partial",
         success: "Otherscape.moves.mitigate.success",
-        rollMythosOS: true
     },
 
     "Blaze of Glory (Significant)": {
@@ -545,7 +544,7 @@ export const moveConfig = {
             name: "Extra Feat",
             tags: ["additional feature", "minor achievement"],
             description: "1 Power per additional feature or minor achievement included in the action.",
-            cost: "1 Power per Extra"
+            cost: ""
         }]
     },
 

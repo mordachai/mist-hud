@@ -47,6 +47,24 @@
             {{/each}}
         </ul>
 
+                <!-- Statuses Section -->
+        {{#if statuses.length}}
+            <div class="npc-subtitle-container-l">
+                <div class="npc-subtitle-text">Statuses</div>
+            </div>
+        <ul class="mh-statuses-list">
+            {{#each statuses}}
+            <li>
+                <div class="mh-status {{#if selected}}selected{{/if}} {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
+                {{#if temporary}}⏱️ {{/if}}
+                {{#if permanent}}💎 {{/if}}
+                {{statusName}}-{{statusTier}}
+                </div>
+            </li>
+            {{/each}}
+        </ul>
+        {{/if}}
+
         <!-- Moves Section -->
         {{#each moveGroups as |moves subtype|}}
         <div class="npc-moves-accordion">
@@ -93,23 +111,7 @@
         </div>
         {{/if}}
 
-        <!-- Statuses Section -->
-        {{#if statuses.length}}
-            <div class="npc-subtitle-container-l">
-                <div class="npc-subtitle-text">Statuses</div>
-            </div>
-        <ul class="mh-statuses-list">
-            {{#each statuses}}
-            <li>
-                <div class="mh-status {{#if selected}}selected{{/if}} {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
-                {{#if temporary}}⏱️ {{/if}}
-                {{#if permanent}}💎 {{/if}}
-                {{statusName}}-{{statusTier}}
-                </div>
-            </li>
-            {{/each}}
-        </ul>
-        {{/if}}
+
 
     </div>
     {{/unless}}

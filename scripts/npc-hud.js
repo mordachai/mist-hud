@@ -16,7 +16,7 @@ class NpcHUD extends Application {
             template: 'modules/mist-hud/templates/npc-hud.hbs',
             classes: ['npc-hud'],
             popOut: false,
-            width: 300,
+            width: 280,
             height: 'auto',
         });
     }
@@ -350,9 +350,23 @@ class NpcHUD extends Application {
 // Register the parseStatus helper
 Handlebars.registerHelper('parseStatus', function(description) {
     return new Handlebars.SafeString(
-        description.replace(/\[([^\]]+)\]/g, '<span class="npc-status">$1</span>')
+        description
+            .replace(/\[([^\]]+)\]/g, (match, content) => {
+                // Check if content contains ' - ' followed by a number
+                if (/^[a-zA-Z]+-\d+$/.test(content.trim())) {
+                    return `<span class="npc-status">${content}</span>`;
+                }
+                // Check if content contains ':' followed by a number
+                if (/^[a-zA-Z]+:\d+$/.test(content.trim())) {
+                    return `<span class="npc-storytag">${content}</span>`;
+                }
+                // Default case for other content inside brackets
+                return `<span class="npc-storytag">${content}</span>`;
+            })
+            .replace(/\n/g, '</p><p>') // Handle newlines as new paragraphs
     );
 });
+
 
 
 Hooks.on('renderTokenHUD', (app, html, data) => {
