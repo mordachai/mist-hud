@@ -92,7 +92,6 @@ class NpcHUD extends Application {
         return data;
     }
     
-    
     getActorStatuses() {
         if (!this.actor) return [];
     
@@ -171,7 +170,6 @@ class NpcHUD extends Application {
         };
     }
     
-
     getStoryTags() {
         if (!this.actor) return [];
     
@@ -201,7 +199,6 @@ class NpcHUD extends Application {
         return storyTags;
     }
  
-   
     activateListeners(html) {
         super.activateListeners(html);
 
@@ -304,7 +301,6 @@ class NpcHUD extends Application {
                 return '<i class="fa-light fa-fire"></i>';
         }
     }
-    
 
     async toggleCollapse() {
         this.isCollapsed = !this.isCollapsed;
@@ -344,7 +340,6 @@ class NpcHUD extends Application {
         }
     }
     
-    
 }
 
 // Register the parseStatus helper
@@ -352,22 +347,23 @@ Handlebars.registerHelper('parseStatus', function(description) {
     return new Handlebars.SafeString(
         description
             .replace(/\[([^\]]+)\]/g, (match, content) => {
-                // Check if content contains ' - ' followed by a number
-                if (/^[a-zA-Z]+-\d+$/.test(content.trim())) {
-                    return `<span class="npc-status">${content}</span>`;
+                // Trim content to ensure no leading/trailing whitespace
+                const trimmedContent = content.trim();
+
+                // Check if content contains words (with optional spaces/hyphens) followed by ' - ' and a number
+                if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
+                    return `<span class="npc-status">${trimmedContent}</span>`;
                 }
-                // Check if content contains ':' followed by a number
-                if (/^[a-zA-Z]+:\d+$/.test(content.trim())) {
-                    return `<span class="npc-storytag">${content}</span>`;
+                // Check if content contains words (with optional spaces) followed by ':' and a number
+                if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
+                    return `<span class="npc-limit">${trimmedContent}</span>`;
                 }
                 // Default case for other content inside brackets
-                return `<span class="npc-storytag">${content}</span>`;
+                return `<span class="npc-storytag">${trimmedContent}</span>`;
             })
             .replace(/\n/g, '</p><p>') // Handle newlines as new paragraphs
     );
 });
-
-
 
 Hooks.on('renderTokenHUD', (app, html, data) => {
     if (!game.user.isGM) return;

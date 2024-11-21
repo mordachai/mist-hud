@@ -29,7 +29,7 @@ function debugLog(...args) {
   if (debug) console.log("MistHUD |", ...args);
 }
 
-// Roll dice with Dice So Nice support
+
 async function rollDice() {
   const roll = new Roll("2d6");
   await roll.evaluate();
@@ -42,7 +42,6 @@ async function rollDice() {
   // Return the individual dice results
   return roll.dice[0].results.map(die => die.result);
 }
-
 
 function calculatePowerTags() {
   const hud = MistHUD.getInstance();

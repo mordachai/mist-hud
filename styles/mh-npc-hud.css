@@ -229,8 +229,17 @@
     padding: 0px 2px ;
 }
 
-.npc-storytag {
+.npc-limit {
+    background-color: var(--spectrum-color);
+    color: var(--dark-color);
+    text-transform: lowercase;
+    font-style: oblique;
+    padding: 0px 2px ;
+}
+
+.npc-storytag{
     background-color: var(--storytag-color);
+    color: var(--dark-color);
     text-transform: lowercase;
     font-style: oblique;
     padding: 0px 2px ;

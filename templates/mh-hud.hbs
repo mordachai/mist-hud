@@ -28,7 +28,14 @@
     <div class="theme-container-{{category}}">
       <div class="mh-theme-header">
         <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
-        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{localizedThemebookName}}</span>
+
+      {{#if (eq ../activeSystem "city-of-mist")}}
+        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{themeName}}</span> <!-- Render only if system is City of Mist -->
+      {{/if}}
+
+      {{#if (or (eq ../activeSystem "otherscape") (eq ../activeSystem "legend"))}}
+        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{localizedThemebookName}}</span> <!-- Render only if system is Otherscape or Legends in the Mist -->
+      {{/if}}
       </div>
 
       <!-- Power Tags -->

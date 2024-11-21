@@ -1,7 +1,7 @@
 /* city-of-mist.css */
 
 :root {
-  --dark-bg-color: #c6bdb6;
+  --dark-color: #161616;
   --text-main-color: #1b190e;
   --text-hud-main-color: #d7e5f5; 
   --text-hud-subtitles-color: #ffa900;
@@ -30,5 +30,6 @@
   --font-family-tags: Roboto Condensed;
   --font-family-outcome: Averia Serif Libre;
   --font-family-hud: Roboto Condensed;
-  --font-family-effects: Times New Roman;
+  --font-family-effects: Averia Serif Libre;
+  --hud-background1: url('../ui/com_hud_BG.webp');
 }

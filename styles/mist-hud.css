@@ -239,7 +239,7 @@ hr {
   align-items: center;
   flex-direction: row;
   margin: 0px 3px 0px 5px;
-  height: 18px;
+  height: 20px;
 }
 
 .mh-themebook-name {
@@ -437,7 +437,7 @@ hr {
 .mh-story-tag.selected,
 .mh-loadout-tag.selected {
   font-weight: 700;
-  text-shadow: var(--positive-tag-borderColor) 0px 1px;
+  text-shadow: var(--negative-tag-borderColor) 0px 1px; /*inverted to be more visible*/
   color: white;
   border: 4px solid;
   border-image-slice: 1;
@@ -464,7 +464,7 @@ hr {
 
 .mh-weakness-tag.selected {
   font-weight: 700;
-  text-shadow: var(--negative-tag-borderColor) 0px 1px;
+  text-shadow: var(--positive-tag-borderColor) 0px 1px; /*inverted to be more visible*/
   color: white;
   border: 4px solid;
   border-image-slice: 1;
@@ -480,7 +480,7 @@ hr {
 
 .mh-weakness-tag.inverted {
   font-weight: 700;
-  text-shadow: var(--positive-tag-borderColor) 0px 1px;
+  text-shadow: var(--negative-tag-borderColor) 0px 1px; /*inverted to be more visible*/
   color: white;
   border: 4px solid;
   border-image-slice: 1;
@@ -496,7 +496,7 @@ hr {
 
 .mh-story-tag.inverted {
   font-weight: 700;
-  text-shadow: var(--negative-tag-borderColor) 0px 1px;
+  text-shadow: var(--positive-tag-borderColor) 0px 1px; /*inverted to be more visible*/
   color: white;
   border: 4px solid;
   border-image-slice: 1;

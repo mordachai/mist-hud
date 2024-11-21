@@ -7,7 +7,9 @@
 }
 
 #chat-log .chat-message {
-  background: var(--dark-bg-color) !important;
+  background-image: var(--hud-background1) !important;
+  background-repeat: no-repeat;
+  background-size: cover;
   border: var(--noise-verylight-color) 1px solid;
   width: 100%;
   border-radius: 10px;
@@ -111,7 +113,7 @@
   .mhr-move-list{
     font-family: var(--font-family-effects), Courier, monospace;
     color: var(--effects-color2);
-    font-size: 1.1em;
+    font-size: 1.0em;
     list-style: none;
     padding: 0 ;
     
@@ -119,7 +121,7 @@
 
   .mhr-move-list li{
     color: var(--effects-color1);
-    padding: 2px 6px;
+    padding: 0 6px;
   }
 
   .mhr-divider {
@@ -195,14 +197,14 @@
   .mhr-status-tag.positive, .mhr-status-tag.scene-positive, .scene-tag-item.scene-positive,
   .mhr-scene-status-tag.scene-positive {
     color: var(--text-main-color);
-    background-color: var(--positive-tag-color);
+    background-color: var(--positive-tag-borderColor);
   }
 
   .mhr-status-tag.negative, .mhr-weakness-tag,  .mhr-story-tag.inverted,
   .mhr-status-tag.scene-negative, .scene-tag-item.scene-negative,
   .mhr-scene-status-tag.scene-negative {
     color: var(--text-main-color);
-    background-color: var(--negative-tag-color);
+    background-color: var(--negative-tag-borderColor);
   }
 
   .mhr-status-tag, .mhr-scene-status-tag{
@@ -288,7 +290,8 @@
   }
   
   /* Adjust the dice appearance */
-  .mh-die-d6 {
+  
+  /* .mh-die-d6 {
     background-color: #1e1354;
     color: white;
     border-radius: 6px;
@@ -304,7 +307,24 @@
     font-size: 25px;
     text-shadow: 0px 1px 2px rgb(243, 26, 113);
     margin-top: 10px;
-  }
+  } */
+
+.mh-die-d6 {
+  background-image: url('../ui/d12.svg');
+  background-repeat: no-repeat;
+  color: white;
+  font-weight: bold;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-main1), sans-serif;
+  font-size: 22px;
+  text-shadow: 0px 0px 3px rgb(243, 26, 113);
+  margin-top: 5px;
+  filter: drop-shadow(0 0 3px #010108);
+}
 
 /*DYNAMITE PANEL*/
 

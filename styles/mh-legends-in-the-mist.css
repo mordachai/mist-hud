@@ -1,7 +1,7 @@
 /* legends-in-the-mist.css */
 
 :root {
-  --dark-bg-color: #c6bdb6;
+  --dark-color: #c6bdb6;
   --text-main-color: #1b190e;
   --text-hud-main-color: #d7e5f5; 
   --text-hud-subtitles-color: #d7e5f5;
@@ -31,4 +31,5 @@
   --font-family-outcome: Averia Serif Libre;
   --font-family-hud: Roboto Condensed;
   --font-family-effects: Times New Roman;
+  --hud-background1: url('../ui/com_hud_BG.webp');
 }

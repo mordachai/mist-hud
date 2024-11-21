@@ -44,6 +44,13 @@
     "styles/mh-roll.css",
     "styles/mh-npc-hud.css"
   ],
+  "dependencies": [
+  {
+    "name": "dice-so-nice",
+    "manifest": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/raw/master/module.json",
+    "type": "module"
+  }
+  ],
   "url": "https://github.com/mordachai/mist-hud",
   "manifest": "https://github.com/mordachai/mist-hud/raw/main/module.json",
   "download": "https://github.com/mordachai/mist-hud/raw/refs/heads/main/mist-hud.zip",

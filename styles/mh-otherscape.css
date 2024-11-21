@@ -1,7 +1,7 @@
 /* otherscape.css */
 
 :root {
-  --dark-bg-color: #030d21;
+  --dark-color: #030d21;
   --text-main-color: rgb(245,245,245);
   --text-main-color: #f7f2d3;
   --text-hud-main-color: #d7e5f5; 
@@ -32,4 +32,5 @@
   --font-family-outcome: Roboto Condensed;
   --font-family-hud: Roboto Condensed;
   --font-family-effects: Courier New;
+  --hud-background1: url('../ui/os_hud_BG.webp');
 }
