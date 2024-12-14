@@ -1,4 +1,5 @@
 import { initializeAccordions } from './accordion-handler.js';
+import { detectActiveSystem } from './mh-settings.js';
 
 export class NpcHUD extends Application {
     static instance = null;
@@ -39,12 +40,14 @@ export class NpcHUD extends Application {
         this.actor = actor;
         this.isCollapsed = actor.getFlag('mist-hud', 'isCollapsed') || false;
         this.render(true);
-        console.log(`NPCHUD set to actor: ${actor.name}`);
     }
 
-    getData() {
+    async getData() {
         const data = super.getData();
         if (!this.actor) return data;
+        
+        // Pass npcAccordionState to the template
+        data.npcAccordionState = game.settings.get('mist-hud', 'npcAccordionState');
     
         // Retrieve the prototype token name
         data.tokenName = this.actor.prototypeToken?.name || this.actor.name;
@@ -54,11 +57,25 @@ export class NpcHUD extends Application {
         data.mythos = this.actor.system.mythos;
         data.tokenImage = this.actor.prototypeToken.texture.src;
 
-        // Retrieve system description and biography
-        data.description = this.actor.system.description || "<p>No description available.</p>";
-        data.biography = this.actor.system.biography || "<p>No biography available.</p>";
+        // Check if Description and Biography are non-empty
+        const description = this.actor.system.description || "";
+        const biography = this.actor.system.biography || "";
+        const hasContent = description.trim().length > 0 || biography.trim().length > 0;
+
+        data.hasDescriptionBiography = hasContent;
+        data.descriptionBiography = `${description.trim()}${biography.trim() ?"" + biography.trim() : ""}`;
     
-        // Retrieve Spectrums
+        
+        const system = await detectActiveSystem();
+        data.activeSystem = system;
+
+        // Dynamically set the spectrum/limit label
+        if (system === "otherscape" || system === "legend") {
+            data.spectrumLabel = "Limits";
+        } else {
+            data.spectrumLabel = "Spectrums";
+        }
+
         data.spectrums = this.actor.items.filter(i => i.type === 'spectrum');
     
         // Retrieve and group Moves by subtype
@@ -210,10 +227,7 @@ export class NpcHUD extends Application {
 
     async render(force = false, options = {}) {
         try {
-          console.log("NpcHUD render called with force:", force, "options:", options);
-          console.log("Current actor:", this.actor);
           await super.render(true);
-          console.log("NpcHUD rendered successfully.");
         } catch (error) {
           console.error("Deu Error during NpcHUD render:", error);
         }
@@ -230,8 +244,6 @@ export class NpcHUD extends Application {
           return;
         }
     
-        console.log("Starting header injection...");
-      
         // Clear existing header content
         header.empty();
         // we need to keep window title for compatibility to foundry Application render
@@ -239,29 +251,17 @@ export class NpcHUD extends Application {
       
         // Create custom header elements
         const tokenImgSrc = this.actor?.token?.texture.src || this.actor?.img || 'default-token.png';
-        console.log("Token image source:", tokenImgSrc);
     
         const tokenImg = $(`<div class="mh-token-image"><img src="${this.actor?.token?.texture.src || this.actor?.img}" alt="Character Token"></div>`);
         const charName = $(`<div class="mh-char-name">${this.actor?.name || 'Character'}</div>`);
         const closeButton = $(`<i class="mh-close-button fa-solid fa-xmark"></i>`); // Using FontAwesome for the close icon
-    
-        console.log("Created custom header elements.");
-    
       
         // Append custom elements to the header
         header.append(tokenImg, charName, closeButton);
-        console.log("Appended custom elements to the header.");
-    
-        console.log("Header injected successfully:", header);
-    
-      
+
         // Add event listener to the close button
         closeButton.on("click", () => this.close());
-        console.log("Added event listener to the close button.");
-    
-      
-        console.log("Header injected successfully:", header);
-      
+   
         // Add a custom class for additional styling if needed
         header.addClass('mh-custom-header');
       
@@ -270,13 +270,9 @@ export class NpcHUD extends Application {
         if (minimizedState.length) {
           minimizedState.empty(); // Clear default content
           minimizedState.append(tokenImg.clone(), closeButton.clone()); // Add image and close button
-          console.log("Handled minimized state content.");
-    
-      
+
           // Rebind close event for the minimized state button
           minimizedState.find('.mh-close-button').on("click", () => this.close());
-          console.log("Rebound close event for minimized state button.");
-    
         }
     }
 
@@ -284,11 +280,10 @@ export class NpcHUD extends Application {
         super.activateListeners(html);
 
         // Initialize accordions
-        initializeAccordions({ onlyOneOpen: true });
+        initializeAccordions();
 
         // Find the window header within the entire element
         const header = this.element.find('.window-header');
-        console.log("Found header:", header);
         
         if (header.length === 0) {
             console.warn("Header element not found during injection!");
@@ -394,7 +389,6 @@ Handlebars.registerHelper('parseStatus', function(description) {
 
 Hooks.on('renderTokenHUD', (app, html, data) => {
     if (!game.user.isGM) return;
-    console.log("renderTokenHUD triggered");
 
     const actor = game.actors.get(data.actorId);
     if (actor && actor.type === 'threat') {

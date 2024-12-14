@@ -8,9 +8,9 @@ import { COM_mythosThemes, COM_logosThemes, COM_mistThemes, OS_selfThemes, OS_my
 import { initializeAccordions } from './accordion-handler.js';
 import { DiceSystem } from '/modules/dice-so-nice/api.js';
 
-Hooks.once('ready', () => {
-  console.log("Initializing MistHUD:", MistHUD.getInstance());
-});
+// Hooks.once('ready', () => {
+//   console.log("Initializing MistHUD:", MistHUD.getInstance());
+// });
 
 
 // Debug mode setting
@@ -30,9 +30,9 @@ Hooks.once("init", () => {
 });
 
 // Utility function to log messages if debug is enabled
-function debugLog(...args) {
-  if (debug) console.log("MistHUD |", ...args);
-}
+// function debugLog(...args) {
+//   if (debug) console.log("MistHUD |", ...args);
+// }
 
 
 async function rollDice() {
@@ -48,33 +48,20 @@ async function rollDice() {
   return roll.dice[0].results.map(die => die.result);
 }
 
-
-// Main roll function
+//Main Roll function
 async function rollMove(moveName, hasDynamite) {
   const hud = MistHUD.getInstance();
+  const tagsData = hud.getSelectedRollData();
+
   if (!hud || !hud.actor) {
       ui.notifications.warn("MistHUD is not ready. Please select an actor.");
       return;
   }
 
-  const actor = hud.actor; // Add this line to define the actor variable
-  const move = moveConfig[moveName]; // Add this line to get the move configuration
+  const actor = hud.actor; // Define the actor variable
+  const move = moveConfig[moveName]; // Get the move configuration
 
-  // Ensure HUD is rendered
-  if (hud._state === Application.RENDER_STATES.CLOSED) {
-      console.warn("MistHUD is closed. Attempting to reopen.");
-      await hud.render(true);
-  }
-
-  hud.isCollapsed = true; // Set collapsed state
-
-  try {
-      await hud.render(true); // Render with updated state
-  } catch (error) {
-      console.error("Error minimizing HUD before roll:", error);
-  }
-
-  // Calculate individual values
+  // Initialize individual values
   const calculatedPower = calculatePowerTags();
   const totalWeakness = calculateWeaknessTags();
   const totalStoryTags = calculateStoryTags();
@@ -87,26 +74,79 @@ async function rollMove(moveName, hasDynamite) {
   // Aggregate total power for the roll calculation
   const totalPower = calculatedPower + totalWeakness + totalStoryTags + totalLoadoutTags + totalCharStatuses + totalSceneStatuses + totalScnTags + modifier;
 
+// Ensure HUD is rendered
+if (hud._state === Application.RENDER_STATES.CLOSED) {
+  console.warn("MistHUD is closed. Attempting to reopen.");
+  await hud.render(true);
+}
+
+try {
+  await hud.render(true); // Render with updated state
+  // Minimize the HUD after ensuring it's rendered
+  setTimeout(() => {
+      if (hud._element) {
+          hud.minimize().catch(err => console.error("Error minimizing HUD:", err));
+      }
+  }, 100); // Wait for the DOM to fully render
+} catch (error) {
+  console.error("Error minimizing HUD before roll:", error);
+}
+
+
+  
   const rollResults = await rollDice();
   const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower;
 
-  // Determine outcome based on roll total and dynamite setting
-  const dynamiteEnabled = (await actor.getFlag("mist-hud", "dynamiteMoves") || []).includes(moveName);
+  // Import the active system setting
+  const activeSystem = game.settings.get("city-of-mist", "system");
+
+  // Declare `dynamiteEnabled` variable
+  let dynamiteEnabled = false; // Default to false for systems without dynamite moves
+
+  // Apply special rules for Otherscape and LitM
   let outcome;
   let moveEffects = [];
+  const isDoubleOnes = rollResults.every(r => r === 1);
+  const isDoubleSixes = rollResults.every(r => r === 6);
 
-  if (dynamiteEnabled && rollTotal >= 12) {
-      outcome = "dynamite";
-      moveEffects = move.dynamiteEffects || [];
-  } else if (rollTotal >= 10) {
-      outcome = "success";
-      moveEffects = move.successEffects || [];
-  } else if (rollTotal >= 7) {
-      outcome = "partial";
-      moveEffects = move.partialEffects || [];
+  if (activeSystem === "otherscape" || activeSystem === "legend") {
+      if (isDoubleOnes) {
+          outcome = "fail"; // Double ones is always a fail
+          moveEffects = move.failEffects || [];
+      } else if (isDoubleSixes) {
+          outcome = "success"; // Double sixes is always a success (10+)
+          moveEffects = move.successEffects || [];
+      } else if (rollTotal >= 10) {
+          outcome = "success";
+          moveEffects = move.successEffects || [];
+      } else if (rollTotal >= 7) {
+          outcome = "partial";
+          moveEffects = move.partialEffects || [];
+      } else {
+          outcome = "fail";
+          moveEffects = move.failEffects || [];
+      }
+  } else if (activeSystem === "city-of-mist") {
+      // Include dynamite logic for City of Mist
+      dynamiteEnabled = (await actor.getFlag("mist-hud", "dynamiteMoves") || []).includes(moveName);
+
+      if (dynamiteEnabled && rollTotal >= 12) {
+          outcome = "dynamite";
+          moveEffects = move.dynamiteEffects || [];
+      } else if (rollTotal >= 10) {
+          outcome = "success";
+          moveEffects = move.successEffects || [];
+      } else if (rollTotal >= 7) {
+          outcome = "partial";
+          moveEffects = move.partialEffects || [];
+      } else {
+          outcome = "fail";
+          moveEffects = move.failEffects || [];
+      }
   } else {
-      outcome = "fail";
-      moveEffects = move.failEffects || [];
+      // Default behavior for unknown systems
+      console.error(`Unknown system: ${activeSystem}`);
+      return;
   }
 
   // Generate and localize chat output
@@ -116,7 +156,7 @@ async function rollMove(moveName, hasDynamite) {
   const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
 
   // Add firecracker emoji if the move is dynamite and the rollTotal is 12 or more
-  const displayRollTotal = dynamiteEnabled && rollTotal >= 12 ? `${rollTotal} 🧨` : rollTotal;
+  const displayRollTotal = (dynamiteEnabled && rollTotal >= 12) ? `${rollTotal} 🧨` : rollTotal;
 
   // Prepare tracked effects data if applicable
   let trackedEffects = null;
@@ -125,30 +165,29 @@ async function rollMove(moveName, hasDynamite) {
   }
 
   const chatData = {
-    moveName: move.name,
-    actorName: actor.name,
-    subtitle: move.subtitle || "",
-    rollResults,
-    outcomeMessage,
-    calculatedPower,
-    totalLoadoutTags,
-    totalWeakness,
-    totalStoryTags,
-    totalScnTags,
-    totalCharStatuses,
-    totalSceneStatuses,
-    modifier,
-    rollTotal: displayRollTotal,
-    localizedMoveEffects,
-    tagsData: hud.getSelectedRollData(),
-    trackedEffects: trackedEffects ? trackedEffects : []
+      moveName: move.name,
+      actorName: actor.name,
+      subtitle: move.subtitle || "",
+      rollResults,
+      outcomeMessage,
+      calculatedPower,
+      totalLoadoutTags,
+      totalWeakness,
+      totalStoryTags,
+      totalScnTags,
+      totalCharStatuses,
+      totalSceneStatuses,
+      modifier,
+      rollTotal: displayRollTotal,
+      localizedMoveEffects,
+      tagsData,
+      trackedEffects: trackedEffects ? trackedEffects : []
   };
 
   console.log("Tags Data for Roll:", chatData.tagsData);
 
-
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
- 
+
   ChatMessage.create({
       content: chatContent,
       speaker: { alias: actor.name }
@@ -156,8 +195,6 @@ async function rollMove(moveName, hasDynamite) {
 
   hud.cleanHUD(chatData.tagsData);
 }
-
-
 
 function calculatePowerTags() {
   const hud = MistHUD.getInstance();
@@ -358,7 +395,7 @@ export async function rollSpecialMoves(moveName) {
   outcomeMessage = substituteText(outcomeMessage, totalPower);
 
   const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
-  const displayRollTotal = rollTotal; // Optionally format for "dynamite" rolls
+  const displayRollTotal = rollTotal;
 
   // Prepare chat data for rendering
   const chatData = {
@@ -412,6 +449,7 @@ async function rollCinematicMove(moveName) {
     outcomeMessage: game.i18n.localize(move.success), // Text for the cinematic move
     localizedMoveEffects,  // Include localized effects in the chat message
     tagsData: hud.getSelectedRollData()
+    
   };
 
   // Render the chat template with effects included
@@ -494,6 +532,5 @@ Hooks.once("ready", () => {
     calculateSceneStatuses,
     getRollModifier,
   };
-  console.log("CityOfMistRolls initialized globally.");
 });
 

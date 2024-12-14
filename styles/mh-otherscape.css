@@ -3,7 +3,7 @@
 :root {
   --dark-color: #030d21;
   --text-main-color: rgb(245,245,245);
-  --text-main-color: #f7f2d3;
+  --text-tag-color: #0b0643;
   --text-hud-main-color: #d7e5f5; 
   --text-hud-subtitles-color: #abff00;
   --outcome-text-color: rgb(245,245,245) ;
@@ -11,10 +11,10 @@
   --effects-color2:rgb(245,245,245);
   --effects-color3: #d3f265;
   --toBurn-text-color: #ffefd1;
-  --positive-tag-color: #0079a6;
-  --positive-tag-borderColor: #7bdcff;
-  --negative-tag-color: rgba(255, 151, 47, 0.56);
-  --negative-tag-borderColor: rgb(255, 211, 167);
+  --positive-tag-color: #078abade;
+  --positive-tag-borderColor: #89dffff1;
+  --negative-tag-color: rgba(235, 152, 70, 0.777);
+  --negative-tag-borderColor: rgba(250, 193, 137, 0.841);
   --destroyed-tag-color: rgba(255, 40, 40, 0.825);
   --spectrum-color:#abff00;
   --status-color: rgb(0, 93, 93);

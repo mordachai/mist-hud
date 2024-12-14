@@ -60,9 +60,17 @@ export class MistHUD extends Application {
   constructor(options = {}) {
     super(options);
     this.actor = null;
-    this.isCollapsed = false;
+    this.isMinimized = true;
     this.modifier = 0;
   }
+
+  async minimize() {
+    console.log("Before calling super.minimize()"); // Debug
+    const result = await super.minimize();
+    console.log("After calling super.minimize(), HUD state:", this._state); // Debug
+    console.log("HUD minimized class present?", this.element.hasClass("minimized")); // Debug
+    return result;
+}
 
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
@@ -95,39 +103,34 @@ export class MistHUD extends Application {
     this.actor = actor;
     this.isCollapsed = actor.getFlag('mist-hud', 'isCollapsed') || false;
     this.render(true);
-    console.log(`MistHUD set to actor: ${actor.name}`);
   }
 
   async render(force = false, options = {}) {
     try {
-      console.log("MistHUD render called with force:", force, "options:", options);
-      console.log("Current actor:", this.actor);
       await super.render(true);
-      console.log("MistHUD rendered successfully.");
     } catch (error) {
-      console.error("Deu Error during MistHUD render:", error);
     }
   }
-    
-  async _getHeaderButtons() {
-    const buttons = super._getHeaderButtons();
+   
+  // async _getHeaderButtons() {
+  //   const buttons = super._getHeaderButtons();
 
-    // Add a collapse button
-    buttons.unshift({
-      label: '',
-      class: 'mh-collapse-button',
-      icon: this.isCollapsed ? 'fas fa-angle-down' : 'fas fa-angle-up',
-      onclick: () => {
-        this.isCollapsed = !this.isCollapsed;
-        if (this.actor) {
-          this.actor.setFlag('mist-hud', 'isCollapsed', this.isCollapsed);
-        }
-        this.render(true);
-      },
-    });
+  //   // Add a collapse button
+  //   buttons.unshift({
+  //     label: '',
+  //     class: 'mh-collapse-button',
+  //     icon: this.isCollapsed ? 'fas fa-angle-down' : 'fas fa-angle-up',
+  //     onclick: () => {
+  //       this.isCollapsed = !this.isCollapsed;
+  //       if (this.actor) {
+  //         this.actor.setFlag('mist-hud', 'isCollapsed', this.isCollapsed);
+  //       }
+  //       this.render(true);
+  //     },
+  //   });
 
-    return buttons;
-  }
+  //   return buttons;
+  // }
 
   injectCustomHeader() {
     
@@ -140,8 +143,7 @@ export class MistHUD extends Application {
       return;
     }
 
-    console.log("Starting header injection...");
-  
+ 
     // Clear existing header content
     header.empty();
     // we need to keep window title for compatibility to foundry Application render
@@ -149,29 +151,19 @@ export class MistHUD extends Application {
   
     // Create custom header elements
     const tokenImgSrc = this.actor?.token?.texture.src || this.actor?.img || 'default-token.png';
-    console.log("Token image source:", tokenImgSrc);
 
     const tokenImg = $(`<div class="mh-token-image"><img src="${this.actor?.token?.texture.src || this.actor?.img}" alt="Character Token"></div>`);
     const charName = $(`<div class="mh-char-name">${this.actor?.name || 'Character'}</div>`);
-    const closeButton = $(`<i class="mh-close-button fa-solid fa-xmark"></i>`); // Using FontAwesome for the close icon
+    const closeButton = $(`<i class="mh-close-button fa-solid fa-xmark"></i>`);
 
-    console.log("Created custom header elements.");
 
   
     // Append custom elements to the header
     header.append(tokenImg, charName, closeButton);
-    console.log("Appended custom elements to the header.");
-
-    console.log("Header injected successfully:", header);
-
   
     // Add event listener to the close button
     closeButton.on("click", () => this.close());
-    console.log("Added event listener to the close button.");
 
-  
-    console.log("Header injected successfully:", header);
-  
     // Add a custom class for additional styling if needed
     header.addClass('mh-custom-header');
   
@@ -180,13 +172,9 @@ export class MistHUD extends Application {
     if (minimizedState.length) {
       minimizedState.empty(); // Clear default content
       minimizedState.append(tokenImg.clone(), closeButton.clone()); // Add image and close button
-      console.log("Handled minimized state content.");
-
   
       // Rebind close event for the minimized state button
       minimizedState.find('.mh-close-button').on("click", () => this.close());
-      console.log("Rebound close event for minimized state button.");
-
     }
   }
     
@@ -197,14 +185,11 @@ export class MistHUD extends Application {
     this.addTooltipListeners(html);
    
   // Debug: Log the entire HUD HTML
-  console.log("HUD HTML at activateListeners:", this.element.html());
   
   // Find the window header within the entire element
   const header = this.element.find('.window-header');
-  console.log("Found header:", header);
   
   if (header.length === 0) {
-    console.warn("Header element not found during injection!");
     return;
   }
   
@@ -838,7 +823,6 @@ export class MistHUD extends Application {
     const modifierInput = this.element.find('#mh-mod-value');
     if (modifierInput.length) {
       modifierInput.val(this.modifier);
-      console.log("Modifier display updated to:", this.modifier);
     } else {
       console.warn("Modifier input element not found.");
     }
@@ -890,6 +874,8 @@ export class MistHUD extends Application {
   }
 
   getSelectedRollData() {
+    console.log("getSelectedRollData called."); // Debug log
+
     const powerTags = this.element.find('.mh-power-tag.selected').map((i, el) => ({
         tagName: $(el).text().trim(),
         id: $(el).data('id'),
@@ -976,8 +962,70 @@ export class MistHUD extends Application {
         modifier: modifier ? modifier : null
     };
 
-    return rollData;
   }
+
+  // getSelectedRollData() {
+  //   // Power Tags: name, toBurn (true/false), inverted (true/false)
+  //   const powerTags = this.element.find('.mh-power-tag.selected').map((i, el) => ({
+  //       name: $(el).text().trim(),
+  //       toBurn: $(el).find('.mh-burn-toggle').hasClass('toBurn'),
+  //       inverted: $(el).hasClass('inverted'),
+  //   })).get();
+
+  //   // Weakness Tags: name, inverted (true/false)
+  //   const weaknessTags = this.element.find('.mh-weakness-tag.selected').map((i, el) => ({
+  //       name: $(el).text().trim(),
+  //       inverted: $(el).hasClass('inverted'),
+  //   })).get();
+
+  //   // Story Tags: name, toBurn (true/false), inverted (true/false)
+  //   const storyTags = this.element.find('.mh-story-tag.selected').map((i, el) => ({
+  //       name: $(el).text().trim(),
+  //       toBurn: $(el).find('.mh-burn-toggle').hasClass('toBurn'),
+  //       inverted: $(el).hasClass('inverted'),
+  //   })).get();
+
+  //   // Loadout Tags: name, toBurn (true/false), inverted (true/false)
+  //   const loadoutTags = this.element.find('.mh-loadout-tag.selected').map((i, el) => ({
+  //       name: $(el).text().trim(),
+  //       toBurn: $(el).find('.mh-burn-toggle').hasClass('toBurn'),
+  //       inverted: $(el).hasClass('inverted'),
+  //   })).get();
+
+  //   // Statuses: name, tier, positive/negative
+  //   const statuses = this.element.find('.mh-status.selected').map((i, el) => ({
+  //       name: $(el).attr('data-status-name') || $(el).data('statusName'),
+  //       tier: parseInt($(el).data('tier')) || 0,
+  //       type: $(el).hasClass('positive') ? 'positive' : 'negative',
+  //   })).get();
+
+  //   // Scene Tags: from `getScnTags`
+  //   const scnTags = getScnTags();
+
+  //   // Scene Statuses: from `getSceneStatuses`
+  //   const sceneStatuses = getSceneStatuses().filter(status => status.isSelected).map(status => ({
+  //       name: status.name,
+  //       tier: status.tier,
+  //       type: status.type === 'positive' ? 'scene-positive' : 'scene-negative',
+  //       temporary: status.temporary,
+  //       permanent: status.permanent,
+  //   }));
+
+  //   // Current modifier
+  //   const modifier = this.modifier || 0;
+
+  //   // Return all collected data
+  //   return {
+  //       powerTags,
+  //       weaknessTags,
+  //       storyTags,
+  //       loadoutTags,
+  //       statuses,
+  //       scnTags,
+  //       sceneStatuses,
+  //       modifier: modifier ? modifier : null, // Null if no modifier
+  //   };
+  // }  
 
   async cleanHUD() {
     try {
@@ -1008,7 +1056,7 @@ export class MistHUD extends Application {
       }
   
       // Remove `.selected` from all elements
-      this.element.find('.selected').removeClass('selected');
+      //this.element.find('.selected').removeClass('selected');
   
       // Change `.mh-status.positive` and `.mh-status.negative` to `.mh-status.neutral`
       this.element.find('.mh-status.positive, .mh-status.negative').each((index, element) => {
@@ -1020,18 +1068,18 @@ export class MistHUD extends Application {
       this.modifier = 0;
       this.updateModifierDisplay();
   
-      // Delete any elements with the `.crispy` class
-      this.element.find('.crispy').remove();
+      // Delete any elements with the `.temporary` class
+      this.element.find('.temporary').remove();
   
-      console.log("HUD cleaned and actor's tags updated successfully.");
       await this.render(true); // Ensure HUD is re-rendered to reflect changes
     } catch (error) {
       console.error("Error during HUD cleanup:", error);
     }
   }
-  
-    
+     
 }
+
+
 
 // Function to attach click listeners to each scene tag for dynamic updates
 function attachSceneTagListeners() {
@@ -1118,10 +1166,6 @@ function getScnTags() {
 }
 
 export { getScnTags };
-
-Hooks.once('ready', () => {
-  console.log("Initializing MistHUD:", MistHUD.getInstance());
-});
 
 // Hook to attach listeners after the Foundry VTT application is ready
 Hooks.on('ready', () => {

@@ -5,15 +5,16 @@
     border: 1px solid var(--mist-border-color);
     border-radius: 6px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    color: white;
+    color: whitesmoke;
     max-width: fit-content;
+    min-width: 200px;
+    max-height: 80vh;
 }
   
 #npc-hud .window-app {
   padding: 0;
   margin: 0;
   list-style: none;
-  color: #00000000;
   background: none;
   border: none;
 }
@@ -23,6 +24,14 @@
     margin: 0;
     list-style: none;
     color: #00000000;
+    background: none;
+    border: none;
+}
+
+#npc-hud ul {
+    padding: 3px;
+    margin: 0;
+    list-style: none;
     background: none;
     border: none;
 }
@@ -49,6 +58,10 @@
     align-self: flex-start;
     margin-left: 30px;
 }
+
+#npc-hud.minimized .mh-char-name {
+    margin-left: 0px;
+  }
 
 /* Collapse Buttons */
 #npc-hud .mh-collapse-button {
@@ -82,6 +95,8 @@ list-style: none;
 color: #00000000;
 background: var(--hud-bg-color);
 border: none;
+max-height: 80vh;
+overflow-y: hidden;
 }
   
 #npc-hud .mh-content {
@@ -135,7 +150,7 @@ border: none;
 
 .accordion-content.active {
     display: block;
-    max-height: 500px; /* Adjust based on your content */
+    /* max-height: 500px; */
 }
 
 .accordion-header i.fa-chevron-left {
@@ -154,30 +169,90 @@ border: none;
     opacity: 0.8;
 }
 
-/* Make moves section scrollable */
-.npc-moves-container {
-    flex: 1; /* Takes remaining space */
-    overflow-y: auto;
-    overflow-x: hidden; /* Enables vertical scrolling */
-    min-height: 0; /* Important for Firefox */
-    max-height: calc(100vh - 600px); /* Adjust this value as needed */
-    margin: 0 5px;
-    scrollbar-width: thin; /* For Firefox */
-    scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* For Firefox */
+/* Description and Biography Section */
+.npc-description-biography {
+    max-height: calc(80vh * 0.2); /* Maximum 20% of the HUD's total height */
+    overflow-y: auto; /* Enable vertical scrolling if content exceeds max height */
 }
 
-/* Webkit scrollbar styling (Chrome, Safari, Edge) */
-.npc-moves-container::-webkit-scrollbar {
-    width: 4px;
+/* Optional scrollbar styling */
+.npc-description-biography::-webkit-scrollbar {
+    width: 6px;
 }
 
-.npc-moves-container::-webkit-scrollbar-track {
+.npc-description-biography::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent scrollbar */
+    border-radius: 3px;
+}
+
+.npc-description-biography::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.npc-moves-container::-webkit-scrollbar-thumb {
-    background-color: rgba(10, 220, 38, 0.3);
-    border-radius: 3px;
+
+/* Main Moves Section */
+.npc-moves-section {
+    max-height: calc(80vh - 40vh);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Title Styling (Fixed at the top of the section) */
+.npc-moves-title {
+    flex-shrink: 0; /* Prevent shrinking when content overflows */
+    text-align: center;
+    font-size: 1.5rem;
+    color: var(--text-hud-subtitles-color);
+    padding: 10px;
+    border-bottom: 1px solid var(--divider-color1); /* Optional separator line */
+}
+
+.npc-moves-title-text {
+    font-family: var(--font-family-main1), sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Scrollable content */
+.npc-moves-container {
+    flex-grow: 1; /* Allow this container to take up remaining space */
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding: 10px; /* Add padding inside the scrollable area */
+}
+
+/* Each Move Type Container */
+.npc-move-type {
+    margin-bottom: 20px; /* Spacing between move types */
+}
+
+/* Subtitle for Each Move Type */
+.npc-move-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-hud-subtitles-color);
+    text-transform: capitalize;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Move List */
+.npc-move-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Individual Move Styling */
+.npc-move-list li {
+    margin-bottom: 8px; /* Spacing between moves */
+}
+
+.npc-move-name {
+    font-weight: bold;
+}
+
+.npc-move-description {
+    font-style: italic;
+    color: var(--text-hud-description-color);
 }
 
 .npc-subtitle-container-r {
@@ -205,6 +280,7 @@ border: none;
     margin: 5px 0; 
     opacity: 0.75;
     color: var(--text-hud-subtitles-color);
+    font-size: larger;
 }
 
 .npc-subtitle-container-l::after {
@@ -214,12 +290,38 @@ border: none;
     background-color:  var(--text-hud-subtitles-color);
 }
 
+.npc-subtitle-container-c {
+    display: flex;
+    align-items: center;
+    justify-content:center;
+    gap: 8px; 
+    margin: 5px 0; 
+    opacity: 0.75;
+    color: var(--text-hud-subtitles-color);
+    font-weight: bold;
+    font-size: large;
+}
+
+.npc-subtitle-container-c::before {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background-color: var(--text-hud-subtitles-color);
+}
+
+.npc-subtitle-container-c::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background-color:  var(--text-hud-subtitles-color);
+}
+
 .npc-subtitle-text {
     text-transform: uppercase;
     font-family: var(--font-family-main1);
     font-weight: bold;
     color: var(--text-hud-subtitles-color);
-    font-size: 0.9em;
+    font-size: 1.0rem;
     white-space: nowrap;
 }
 
@@ -232,14 +334,14 @@ border: none;
     padding: 0;
 }
 
-.mh-storytags-list {
+/* .mh-storytags-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 5px;
     list-style: none;
     margin: 0 !important;
     padding: 0 !important;
-}
+} */
 
 .no-wrap{
     white-space: nowrap; /* Prevents line breaks inside the list item */
@@ -252,6 +354,7 @@ border: none;
     padding: 0;
     display: flex ;
     justify-content: space-around;
+    gap: 5px;
 }
 
 .npc-move-name {
@@ -315,4 +418,50 @@ border: none;
     font-style: oblique;
     padding: 0px 2px ;
 }
+
+/* Container for Tags & Statuses */
+.npc-tags-statuses-container {
+    display: flex;
+    flex-wrap: wrap; /* Allows items to break to the next line if necessary */
+    justify-content: center; /* Centers the items horizontally */
+    align-items: center; /* Centers items vertically */
+    gap: 5px;
+    padding: 10px; /* Adds some padding around the container */
+    max-width: 100%; /* Ensures the container doesn't exceed its parent's width */
+}
+
+/* Tags & Statuses Items */
+.npc-storytags-list,
+.npc-statuses-list {
+    display: flex;
+    flex-wrap: wrap; /* Items inside lists will also wrap if needed */
+    gap: 4px 8px; /* Adds space between list items */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Responsive Behavior */
+.npc-tags-statuses-container li {
+    flex: 0 1 auto; /* Allow items to grow/shrink as needed */
+    max-width: 150px; /* Optional: Set a maximum width for individual items */
+    text-align: center; /* Center the content inside each item */
+}
+
+/* Scrollbar Styling (Optional for Overflow Cases) */
+.npc-tags-statuses-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.npc-tags-statuses-container::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 3px;
+}
+
+.npc-tags-statuses-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
 

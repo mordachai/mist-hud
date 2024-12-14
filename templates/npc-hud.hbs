@@ -2,60 +2,74 @@
     {{#unless isCollapsed}}
     <div class="npc-content">
 
-        <div class="npc-description-section accordion-container">
-            <div class="npc-subtitle-container-r accordion-header clickable">
-                <span class="npc-subtitle-text">Description</span>
-                <i class="fas fa-chevron-left"></i>
+        {{#if hasDescriptionBiography}}
+        <div class="npc-description-biography accordion-container">
+            <div class="npc-subtitle-container-c accordion-header active">
+                <span class="npc-subtitle-text">Description & Biography</span>
             </div>
-            <div class="accordion-content">
-                {{{description}}}
+            <div class="accordion-content active">
+                {{{descriptionBiography}}}
             </div>
         </div>
+        {{/if}}
 
-        <div class="npc-biography-section accordion-container">
-            <div class="npc-subtitle-container-r accordion-header clickable">
-                <span class="npc-subtitle-text">Biography</span>
-                <i class="fas fa-chevron-left"></i>
-            </div>
-            <div class="accordion-content">
-                {{{biography}}}
-            </div>
-        </div>
 
         <!-- Spectrums Section -->
+        <div class="npc-subtitle-container-c">
+            <div class="npc-subtitle-text">{{spectrumLabel}}</div>
+        </div>
         <ul class="npc-spectrum-list">
             {{#each spectrums}}
             <li><span class="npc-spectrum">{{name}}: <span class="npc-spectrum-tier">{{system.maxTier}}</span></span></li>
             {{/each}}
         </ul>
 
-                <!-- Statuses Section -->
         {{#if statuses.length}}
-            <div class="npc-subtitle-container-l">
-                <div class="npc-subtitle-text">Statuses</div>
+            <div class="npc-subtitle-container-c">
+                <div class="npc-subtitle-text">Tags & Statuses</div>
             </div>
-        <ul class="mh-statuses-list">
-            {{#each statuses}}
-            <li>
-                <div class="mh-status {{#if selected}}selected{{/if}} {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
-                {{#if temporary}}⏱️ {{/if}}
-                {{#if permanent}}💎 {{/if}}
-                {{statusName}}-{{statusTier}}
-                </div>
-            </li>
-            {{/each}}
-        </ul>
+            <div class="npc-tags-statuses-container">
+                <ul class="npc-storytags-list">
+                    {{#each storyTags}}
+                    <li class="mh-story-tag {{this.cssClass}} no-wrap" data-id="{{this.id}}" data-temporary="{{this.temporary}}" data-permanent="{{this.permanent}}">
+                        <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
+                        {{#if temporary}}⏱️{{/if}}
+                        {{#if permanent}}💎{{/if}}
+                        <span class="mh-tags">{{this.tagName}}</span>
+                    </li>
+                    {{/each}}
+                </ul>
+                <ul class="npc-statuses-list">
+                    {{#each statuses}}
+                    <li>
+                        <div class="mh-status {{#if selected}}selected{{/if}} {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
+                            {{#if temporary}}⏱️ {{/if}}
+                            {{#if permanent}}💎 {{/if}}
+                            {{statusName}}-{{statusTier}}
+                        </div>
+                    </li>
+                    {{/each}}
+                </ul>
+            </div>
         {{/if}}
 
-        <!-- Moves Section -->
-        {{#each moveGroups as |moves subtype|}}
-        <div class="npc-moves-accordion">
-            <div class="npc-moves-container accordion-container">
-                <div class="npc-subtitle-container-r accordion-header clickable">
-                <span class="npc-subtitle-text">{{subtype}} Moves</span>
-                <i class="fas fa-chevron-left"></i>
+        <div class="npc-moves-section">
+            <!-- Title stays fixed -->
+            <div class="npc-subtitle-container-c">
+                <div class="npc-subtitle-text">
+                    {{#if (eq activeSystem 'city-of-mist')}}
+                        MC Moves
+                    {{else}}
+                        Threats and Consequences
+                    {{/if}}
                 </div>
-                <div class="accordion-content">
+            </div>
+
+            <!-- Scrollable content -->
+            <div class="npc-moves-container">
+                {{#each moveGroups as |moves subtype|}}
+                <div class="npc-move-type">
+                    <div class="npc-subtitle-container-l npc-subtitle-text">{{subtype}} Moves</div>
                     <ul class="npc-list">
                         {{#each moves}}
                         <li>
@@ -67,32 +81,9 @@
                         {{/each}}
                     </ul>
                 </div>
+                {{/each}}
             </div>
         </div>
-        {{/each}}
-
-        <!-- Story Tags Section -->
-        {{#if hasStoryTags}}
-        <div class="mh-story-tags-container">
-            <div class="npc-subtitle-container-l">
-                <div class="npc-subtitle-text">Story Tags</div>
-            </div>
-            <ul class="mh-storytags-list">
-            {{#each storyTags}}
-                <li class="mh-story-tag {{this.cssClass}} no-wrap" data-id="{{this.id}}" data-temporary="{{this.temporary}}" data-permanent="{{this.permanent}}">
-                <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
-                <span class="mh-tags">
-                    {{this.tagName}}</span>
-                    {{#if temporary}}⏱️{{/if}}
-                    {{#if permanent}}💎{{/if}}
-                </li>
-            {{/each}}
-            </ul>
-        </div>
-        {{/if}}
-
-
-
     </div>
     {{/unless}}
 </div>

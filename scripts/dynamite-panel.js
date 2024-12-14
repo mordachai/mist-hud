@@ -89,9 +89,9 @@ Hooks.on('createActor', () => {
   }
 });
 
-Hooks.once('init', () => {
-  console.log('Dynamite Panel Initialized');
-});
+// Hooks.once('init', () => {
+//   console.log('Dynamite Panel Initialized');
+// });
 
 // Updated Handlebars helper for "mist-hud" flag scope
 Handlebars.registerHelper('getFlag', function(actorId, key) {

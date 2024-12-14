@@ -24,31 +24,32 @@ function applySystemCSS(system) {
 }
 
 export async function detectActiveSystem() {
-    // Retrieve the active system setting
     const systemSetting = game.settings.get("city-of-mist", "system");
 
     switch (systemSetting) {
         case "city-of-mist":
             console.log("Active System: City of Mist");
             applySystemCSS("city-of-mist");
-            break;
+            return "city-of-mist";
         case "otherscape":
             console.log("Active System: Otherscape");
             applySystemCSS("otherscape");
-            break;
+            return "otherscape";
         case "legend":
             console.log("Active System: Legends in the Mist");
             applySystemCSS("legend");
-            break;
+            return "legend";
         case "custom":
             console.log("Active System: Custom");
             applySystemCSS("custom");
-            break;
+            return "custom";
         default:
             console.error(`Unknown System: ${systemSetting}`);
-            applySystemCSS(null); // Optionally remove any custom styles
+            applySystemCSS(null);
+            return null;
     }
 }
+
 
 // Hook to run when the game is ready
 Hooks.once("ready", async () => {
@@ -57,7 +58,25 @@ Hooks.once("ready", async () => {
 
 
 Hooks.once('init', () => {
-    // alert("oi")
+
+    // Detect the active system
+    const activeSystem = game.settings.get("city-of-mist", "system");
+
+      // Register the game setting
+    game.settings.register(MODULE_ID, "preferredDice", {
+        name: "Preferred Dice",
+        hint: "Select your preferred dice set for rolls.",
+        scope: "world",
+        config: true,
+        type: String,
+        choices: getDiceChoices(activeSystem),
+        default: getDefaultDice(activeSystem),
+        onChange: value => {
+            console.log(`Preferred dice set changed to: ${value}`);
+            applyPreferredDice(value); // Apply the selected dice
+        },
+    });  
+    
     game.settings.register(MODULE_ID, 'npcAccordionState', {
         name: 'NPC Accordions Initial State',
         hint: 'Set the initial state for NPC accordions: all expanded, only a specific one expanded, or all closed.',
@@ -127,6 +146,47 @@ Hooks.once('init', () => {
     });
 });
 
+// Function to get dice choices based on the active system
+function getDiceChoices(system) {
+    if (system === "city-of-mist") {
+        return {
+            "city-of-mist": "City of Mist Dice",
+        };
+    } else if (system === "otherscape") {
+        return {
+            "otherscape-noise": "Noise Dice",
+            "otherscape-mythos": "MythosOS Dice",
+            "otherscape-self": "Self Dice",
+        };
+    } else {
+        return {}; // No choices for unsupported systems
+    }
+}
+
+// Function to get the default dice based on the active system
+function getDefaultDice(system) {
+    if (system === "city-of-mist") {
+        return "city-of-mist"; // Default dice for City of Mist
+    } else if (system === "otherscape") {
+        return "otherscape-noise"; // Default dice for Otherscape
+    }
+    return null;
+}
+
+// Function to apply the selected dice to Dice So Nice
+function applyPreferredDice(diceSet) {
+    const dice3d = game.dice3d;
+    if (!dice3d) {
+        console.error("Dice So Nice is not available.");
+        return;
+    }
+
+    // Set the preferred dice system
+    dice3d.setSystem(diceSet);
+
+    console.log(`Applied preferred dice set: ${diceSet}`);
+}
+
 // Registrar as configurações (settings) do módulo
 export function registerSettings() {
 
@@ -166,8 +226,6 @@ async function loadMoves() {
         return;
     }
 
-    console.log(`Sistema ativo detectado: ${activeSystem}`);
-
     const systemMapping = {
         "city-of-mist": {
             core: "COM Core Moves",
@@ -190,7 +248,6 @@ async function loadMoves() {
         return;
     }
 
-    console.log(`Compêndio encontrado:`, pack);
     const macros = await pack.getDocuments();
 
     // Processar "Core Moves"

@@ -59,7 +59,7 @@
       {{/if}}
     </div>
 
-    <div class="tags-section accordion-content">
+    {{!-- <div class="tags-section accordion-content">
       <span class="tag-row mhr-power-tags">
         {{#each tagsData.powerTags}}
           <span class="mhr-power-tag {{stateClass}}">{{tagName}}</span>
@@ -112,6 +112,44 @@
                 {{name}}-{{tier}}
             </span>
           {{/each}}
+      </span>
+    </div> --}}
+
+    <div class="tags-section accordion-content">
+      <span class="tag-row">
+        {{#each tagsData.powerTags}}
+          <span class="mhr-power-tag {{stateClass}}">{{tagName}}</span>
+        {{/each}}
+        {{#each tagsData.loadoutTags}}
+          <span class="mhr-power-tag {{stateClass}}">{{tagName}}</span>
+        {{/each}}
+        {{#each tagsData.weaknessTags}}
+          <span class="mhr-weakness-tag {{stateClass}}">{{tagName}}</span>
+        {{/each}}
+        {{#each tagsData.storyTags}}
+          <span class="mhr-story-tag {{stateClass}}">{{tagName}}</span>
+        {{/each}}
+        {{#each tagsData.scnTags}}   
+        <span class="scene-tag-item {{#if (eq this.type "positive")}}scene-positive{{else}}scene-negative{{/if}}">
+          {{#if this.temporary}}⏱️ {{/if}}
+          {{#if this.permanent}}💎 {{/if}}
+          {{this.name}}
+        </span>
+        {{/each}}
+        {{#each tagsData.statuses}}
+          <span class="mhr-status-tag {{typeClass}} {{#if temporary}}mhr-temporary-status{{/if}} {{#if permanent}}mhr-permanent-status{{/if}}">
+            {{#if temporary}}⏱️ {{/if}}
+            {{#if permanent}}💎 {{/if}}
+            {{name}}-{{tier}}
+          </span>
+        {{/each}}
+        {{#each tagsData.sceneStatuses}}
+          <span class="mhr-scene-status-tag {{typeClass}}">
+                {{#if temporary}}⏳{{/if}}
+                {{#if permanent}}💎{{/if}}
+                {{name}}-{{tier}}
+          </span>
+        {{/each}}
       </span>
     </div>
   </div>

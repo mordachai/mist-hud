@@ -89,9 +89,19 @@ border: none;
   flex-basis: 40px;
   justify-content:center;
   align-content: space-between;
-  padding: 5px 10px;
+  align-items: center; /* Vertically align items */
+  /* padding: 5px 10px; */
   border-bottom: 1px solid white;
   cursor: grab;
+}
+
+#mist-hud ul {
+  padding: 3px;
+  margin: 0;
+  list-style: none;
+  color: #00000000;
+  background: none;
+  border: none;
 }
 
 /* Token image */
@@ -121,6 +131,10 @@ border: none;
   filter: drop-shadow(1px 2px 3px var(--mythos-dark-color));
   align-self: flex-start;
   margin-left: 30px;
+}
+
+#mist-hud.minimized .mh-char-name {
+  margin-left: 0px;
 }
 
 /* Collapse Buttons */
@@ -177,7 +191,7 @@ border: none;
 #mist-hud.minimized .window-header {
   height: 50px;
   overflow: visible; /* Allow overflow */
-  min-width: 180px;
+  min-width: 200px;
 }
 
 
@@ -273,7 +287,7 @@ hr {
   display: flex;
   align-items: center;
   flex-direction: row;
-  margin: 0px 3px 0px 5px;
+  margin: 0px 3px 2px 2px;
   height: 20px;
 }
 
@@ -358,7 +372,7 @@ hr {
 
 .mh-tags li {
   height: 1.4rem;
-  padding-right: 3px;
+  padding: 5px;
   color: whitesmoke;
 }
 
@@ -399,7 +413,8 @@ hr {
 .mh-burn-toggle,
 .mh-weakness-toggle {
   display: inline-block;
-  padding: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
   cursor: pointer;
 }
 
@@ -473,79 +488,45 @@ hr {
 
 .mh-power-tag.selected,
 .mh-story-tag.selected,
-.mh-loadout-tag.selected {
+.mh-loadout-tag.selected,
+.mh-weakness-tag.inverted.selected {
   font-weight: 700;
-  text-shadow: var(--negative-tag-borderColor) 0px 1px; /*inverted to be more visible*/
-  color: white;
-  border: 4px solid;
-  border-image-slice: 1;
-  border-width: 2px;
-  border-image-source: linear-gradient(to right, var(--positive-tag-borderColor), #1af0ff00);
-  border-left: 0;
-  border-right: 0;
+  text-shadow: var(--negative-tag-borderColor) 1px 1px 1px; /*inverted to be more visible*/
+  color: whitesmoke;
   background: linear-gradient(0.25turn, var(--positive-tag-color), rgba(6, 95, 150, 0));
-  background-size: 90% 97%;
+  background-size: 90% 90%;
   background-repeat: no-repeat;
   background-position: center left;
+  border-top-left-radius: 50px 50px;
+  border-bottom-left-radius: 50px 50px;
+  border-left: 3px solid var(--positive-tag-borderColor);
+  margin-left: -3px;
 }
 
 .mh-power-tag.burned,
 .mh-story-tag.burned,
 .mh-loadout-tag.burned  {
   text-decoration: line-through;
-  color: #ef9023;
+  color: #ffa742;
 }
 
 /* Weakness Tags */
 /* .mh-weakness-tag {
 } */
 
-.mh-weakness-tag.selected {
+.mh-weakness-tag.selected,
+.mh-story-tag.inverted.selected {
   font-weight: 700;
-  text-shadow: var(--positive-tag-borderColor) 0px 1px; /*inverted to be more visible*/
-  color: white;
-  border: 4px solid;
-  border-image-slice: 1;
-  border-width: 2px;
-  border-image-source: linear-gradient(to right, var(--negative-tag-borderColor), #1af0ff00);
-  border-left: 0;
-  border-right: 0;
+  text-shadow: var(--positive-tag-borderColor) 0px 1px;
+  color: whitesmoke;
   background: linear-gradient(0.25turn, var(--negative-tag-color), rgba(6, 95, 150, 0));
-  background-size: 90% 97%;
+  background-size: 90% 90%;
   background-repeat: no-repeat;
   background-position: center left;
-}
-
-.mh-weakness-tag.inverted {
-  font-weight: 700;
-  text-shadow: var(--negative-tag-borderColor) 0px 1px; /*inverted to be more visible*/
-  color: white;
-  border: 4px solid;
-  border-image-slice: 1;
-  border-width: 2px;
-  border-image-source: linear-gradient(to right, var(--positive-tag-borderColor), #1af0ff00);
-  border-left: 0;
-  border-right: 0;
-  background: linear-gradient(0.25turn, var(--positive-tag-color), rgba(6, 95, 150, 0));
-  background-size: 90% 97%;
-  background-repeat: no-repeat;
-  background-position: center left;
-}
-
-.mh-story-tag.inverted {
-  font-weight: 700;
-  text-shadow: var(--positive-tag-borderColor) 0px 1px; /*inverted to be more visible*/
-  color: white;
-  border: 4px solid;
-  border-image-slice: 1;
-  border-width: 2px;
-  border-image-source: linear-gradient(to right, var(--negative-tag-borderColor), #1af0ff00);
-  border-left: 0;
-  border-right: 0;
-  background: linear-gradient(0.25turn, var(--negative-tag-color), rgba(6, 95, 150, 0));
-  background-size: 90% 97%;
-  background-repeat: no-repeat;
-  background-position: center left;
+  border-top-left-radius: 50px 50px;
+  border-bottom-left-radius: 50px 50px;
+  border-left: 3px solid var(--negative-tag-borderColor);
+  margin-left: -3px;
 }
 
 .mh-subtag{

@@ -3,6 +3,7 @@
 :root {
   --dark-color: #161616;
   --text-main-color: #1b190e;
+  --text-tag-color: #28211d;
   --text-hud-main-color: #d7e5f5; 
   --text-hud-subtitles-color: #ffa900;
   --outcome-text-color: #3d2911;
@@ -10,8 +11,8 @@
   --effects-color2:rgb(245,245,245);
   --effects-color3: #d3f265;
   --toBurn-text-color: #85662b;
-  --positive-tag-color: #8b7d05;
-  --positive-tag-borderColor: #faf3ae;
+  --positive-tag-color: #8b7e05da;
+  --positive-tag-borderColor: #faf2aedb;
   --negative-tag-color: #8b412a;
   --negative-tag-borderColor: #fb7b6d;
   --destroyed-tag-color: rgba(255, 40, 40, 0.825);
