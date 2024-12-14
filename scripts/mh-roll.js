@@ -190,7 +190,10 @@ try {
 
   ChatMessage.create({
       content: chatContent,
-      speaker: { alias: actor.name }
+      speaker: { alias: actor.name },
+      flags: {
+        "mist-hud": { isCustomRoll: true } // Add this flag
+      }
   });
 
   hud.cleanHUD(chatData.tagsData);
@@ -418,7 +421,10 @@ export async function rollSpecialMoves(moveName) {
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
   ChatMessage.create({
     content: chatContent,
-    speaker: { alias: actor.name }
+    speaker: { alias: actor.name },
+    flags: {
+      "mist-hud": { isCustomRoll: true } // Add this flag
+    }
   });
 
   hud.cleanHUD(chatData.tagsData);
@@ -458,7 +464,10 @@ async function rollCinematicMove(moveName) {
 
   ChatMessage.create({
     content: chatContent,
-    speaker: { alias: actor.name }
+    speaker: { alias: actor.name },
+    flags: {
+      "mist-hud": { isCustomRoll: true } // Add this flag
+    }
   });
 
   hud.cleanHUD(chatData.tagsData);
@@ -508,12 +517,20 @@ Hooks.once('ready', () => {
   globalThis.CityOfMistRolls = CityOfMistRolls;
 });
 
-Hooks.on('renderChatMessage', (app, html, data) => {
-  // Optional: Introduce a small delay to ensure DOM elements are fully rendered before initialization
+Hooks.on('renderChatMessage', (message, html, data) => {
+  const isCustomRoll = message.flags["mist-hud"]?.isCustomRoll;
+
+  if (isCustomRoll) {
+      // Add a custom class to the chat message
+      html.addClass("mist-hud-roll");
+  }  
+
+  // Optional: Initialize accordions after the DOM is fully rendered
   setTimeout(() => {
       initializeAccordions();
   }, 300); // Adjust the delay as needed
 });
+
 
 Hooks.once("ready", () => {
   globalThis.CityOfMistRolls = {

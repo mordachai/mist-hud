@@ -1,4 +1,14 @@
-#chat-log .message-sender {
+/* Style specific to Mist HUD rolls */
+.mist-hud-roll {
+  background-image: var(--hud-background1);
+  background-repeat: no-repeat;
+  background-size: cover;
+  border: var(--noise-verylight-color) 1px solid;
+  width: 100%;
+  border-radius: 10px;
+}
+
+/* .message-sender {
   font-size: 1.1em;
   font-family: var(--font-family-main1), sans-serif;
   font-weight: bolder;
@@ -6,14 +16,15 @@
   color: var(--text-main-color);
 }
 
-#chat-log .chat-message {
+.chat-message {
   background-image: var(--hud-background1) !important;
   background-repeat: no-repeat;
   background-size: cover;
   border: var(--noise-verylight-color) 1px solid;
   width: 100%;
   border-radius: 10px;
-}
+  color: var(--text-main-color);
+} */
 
   /* General Styles */
   .roll-container {
