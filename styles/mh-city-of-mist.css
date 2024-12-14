@@ -32,4 +32,5 @@
   --font-family-hud: Roboto Condensed;
   --font-family-effects: Averia Serif Libre;
   --hud-background1: url('../ui/com_hud_BG.webp');
+  --hud-bg-color: rgba(0, 0, 0, 0.45);
 }

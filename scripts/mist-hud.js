@@ -2,9 +2,6 @@
 
 import { getThemeCategory } from './mh-theme-config.js';
 
-// Import the draggable and position functions from mh-drag-pos.js
-import { makeDraggable, getHUDPosition, setHUDPosition } from './mh-drag-pos.js';
-
 // Helper function to localize themebook names using the system translation file
 // function localizeTheme(themebookName) {
 //   // Normalize themebook name: lowercase, trim, and replace special characters (including spaces) with underscores
@@ -28,6 +25,7 @@ import { makeDraggable, getHUDPosition, setHUDPosition } from './mh-drag-pos.js'
 
 
 // Helper function to localize themebook CORRECTING TYPO ON THEME NAMES KEYS
+
 function localizeTheme(themebookName) {
   // Normalize the themebook name to form the primary key
   const normalizedThemebookName = themebookName.toLowerCase().trim().replace(/\s+/g, "").replace(/[^\w]/g, "");
@@ -71,13 +69,16 @@ export class MistHUD extends Application {
       id: 'mist-hud',
       template: 'modules/mist-hud/templates/mh-hud.hbs',
       classes: ['mh-hud'],
+      header: true,
       resizable: false,
-      popOut: false, // Keep popOut false to embed in main document
-      minimizable: false,
+      popOut: true,
+      minimizable: true,
       width: 310,
       height: 'auto',
+      dragDrop: [{ dragSelector: '.window-header' }],
     });
   }
+
 
   static getInstance() {
     if (!MistHUD.instance) {
@@ -85,110 +86,131 @@ export class MistHUD extends Application {
     }
     return MistHUD.instance;
   }
-  
+
   setActor(actor) {
+    if (!actor || actor.type !== 'character') { // Adjust 'character' to your actual actor type
+      console.warn("Attempted to set an invalid actor.");
+      return;
+    }
     this.actor = actor;
-
-    // Retrieve the collapsed state from actor flags
     this.isCollapsed = actor.getFlag('mist-hud', 'isCollapsed') || false;
-    
     this.render(true);
+    console.log(`MistHUD set to actor: ${actor.name}`);
   }
 
-  getMysteryFromTheme(themeId) {
-    if (!this.actor) {
-        console.warn("No actor set in MistHUD.");
-        return null;
+  async render(force = false, options = {}) {
+    try {
+      console.log("MistHUD render called with force:", force, "options:", options);
+      console.log("Current actor:", this.actor);
+      await super.render(true);
+      console.log("MistHUD rendered successfully.");
+    } catch (error) {
+      console.error("Deu Error during MistHUD render:", error);
     }
-
-    const theme = this.actor.items.find(item => item.type === 'theme' && item.id === themeId);
-
-    if (!theme) {
-        console.warn(`No theme found with ID: ${themeId}`);
-        return "No mystery defined.";
-    }
-
-    // Get the category using getThemeCategory
-    const category = getThemeCategory(theme.system.themebook_name.toLowerCase());
-
-    // Determine the prefix based on the category
-    let prefix = '';
-    switch (category) {
-        case 'mythos':
-          prefix = '<span class="mystery-type mythos">Mystery:</span>';
-            break;
-        case 'logos':
-          prefix = '<span class="mystery-type logos">Identity:</span>';
-            break;
-        case 'self':
-            prefix = '<span class="mystery-type self">Identity:</span>';
-            break;
-        case 'mythosOS':
-            prefix = '<span class="mystery-type mythosOS">Ritual:</span>';
-            break;
-        case 'noise':
-            prefix = '<span class="mystery-type noise">Itch:</span>';
-            break;
-        default:
-            console.warn(`Unknown theme category for theme: ${theme.system.themebook_name}`);
-    }
-
-    const mysteryText = theme.system.mystery || "No mystery defined.";
-    return `${prefix} <span class="mystery-text">${mysteryText}</span>`;
   }
- 
-  addTooltipListeners(html) {
-    html.find('.mh-theme-icon').each((index, element) => {
-        const themeId = $(element).data('theme-id');
+    
+  async _getHeaderButtons() {
+    const buttons = super._getHeaderButtons();
 
-        $(element).hover(
-            (event) => {
-                const mystery = this.getMysteryFromTheme(themeId);
-                this.showTooltip(event, mystery);
-            },
-            () => this.hideTooltip()
-        );
+    // Add a collapse button
+    buttons.unshift({
+      label: '',
+      class: 'mh-collapse-button',
+      icon: this.isCollapsed ? 'fas fa-angle-down' : 'fas fa-angle-up',
+      onclick: () => {
+        this.isCollapsed = !this.isCollapsed;
+        if (this.actor) {
+          this.actor.setFlag('mist-hud', 'isCollapsed', this.isCollapsed);
+        }
+        this.render(true);
+      },
     });
+
+    return buttons;
   }
 
-  showTooltip(event, mystery) {
-    if (!mystery) {
-        console.warn("No mystery found for tooltip.");
-        return;
+  injectCustomHeader() {
+    
+    // Use this.element to access the entire application window
+    const header = this.element.find('.window-header');
+    const window_title = header.find('.window-title')[0];
+    window_title.style.display = "None";
+    if (header.length === 0) {
+      console.warn("Header element not found during injection!");
+      return;
     }
 
-    const tooltip = $(`<div class="mh-tooltip" style="position: absolute;"></div>`);
-    tooltip.html(mystery); // Ensure this renders HTML content
-    this.element.append(tooltip);
-
-    tooltip.css({
-        top: event.pageY - this.element.offset().top + 10,
-        left: event.pageX - this.element.offset().left + 10,
-    });
-  }
-
-  hideTooltip() {
-    this.element.find('.mh-tooltip').remove();
-  }
+    console.log("Starting header injection...");
   
+    // Clear existing header content
+    header.empty();
+    // we need to keep window title for compatibility to foundry Application render
+    header.append(window_title);
+  
+    // Create custom header elements
+    const tokenImgSrc = this.actor?.token?.texture.src || this.actor?.img || 'default-token.png';
+    console.log("Token image source:", tokenImgSrc);
+
+    const tokenImg = $(`<div class="mh-token-image"><img src="${this.actor?.token?.texture.src || this.actor?.img}" alt="Character Token"></div>`);
+    const charName = $(`<div class="mh-char-name">${this.actor?.name || 'Character'}</div>`);
+    const closeButton = $(`<i class="mh-close-button fa-solid fa-xmark"></i>`); // Using FontAwesome for the close icon
+
+    console.log("Created custom header elements.");
+
+  
+    // Append custom elements to the header
+    header.append(tokenImg, charName, closeButton);
+    console.log("Appended custom elements to the header.");
+
+    console.log("Header injected successfully:", header);
+
+  
+    // Add event listener to the close button
+    closeButton.on("click", () => this.close());
+    console.log("Added event listener to the close button.");
+
+  
+    console.log("Header injected successfully:", header);
+  
+    // Add a custom class for additional styling if needed
+    header.addClass('mh-custom-header');
+  
+    // Handle minimized state
+    const minimizedState = this.element.find('.window-title');
+    if (minimizedState.length) {
+      minimizedState.empty(); // Clear default content
+      minimizedState.append(tokenImg.clone(), closeButton.clone()); // Add image and close button
+      console.log("Handled minimized state content.");
+
+  
+      // Rebind close event for the minimized state button
+      minimizedState.find('.mh-close-button').on("click", () => this.close());
+      console.log("Rebound close event for minimized state button.");
+
+    }
+  }
+    
   activateListeners(html) {
     super.activateListeners(html);
     this.addHUDListeners(html);
     this.addModifierListeners(html);
     this.addTooltipListeners(html);
+   
+  // Debug: Log the entire HUD HTML
+  console.log("HUD HTML at activateListeners:", this.element.html());
   
-    const hudElement = html[0];
-    const dragHandles = [
-      hudElement.querySelector('.mh-hud-header'),
-      hudElement.querySelector('.mh-token-image'),
-    ];
+  // Find the window header within the entire element
+  const header = this.element.find('.window-header');
+  console.log("Found header:", header);
   
-    dragHandles.forEach((dragHandle) => {
-      if (dragHandle) {
-        makeDraggable(hudElement, dragHandle, this.actor?.id);
-      }
-    });
+  if (header.length === 0) {
+    console.warn("Header element not found during injection!");
+    return;
+  }
   
+  // Inject the custom header without passing any parameters
+  this.injectCustomHeader();
+    
     // Power tag selection
     html.find('.mh-power-tag').on('click', (event) => {
       event.stopPropagation();
@@ -362,7 +384,88 @@ export class MistHUD extends Application {
       event.stopPropagation();
     });
   }
-     
+
+  getMysteryFromTheme(themeId) {
+    if (!this.actor) {
+        console.warn("No actor set in MistHUD.");
+        return null;
+    }
+
+    const theme = this.actor.items.find(item => item.type === 'theme' && item.id === themeId);
+
+    if (!theme) {
+        console.warn(`No theme found with ID: ${themeId}`);
+        return "No mystery defined.";
+    }
+
+    // Get the category using getThemeCategory
+    const category = getThemeCategory(theme.system.themebook_name.toLowerCase());
+
+    // Determine the prefix based on the category
+    let prefix = '';
+    switch (category) {
+        case 'mythos':
+          prefix = '<span class="mystery-type mythos">Mystery:</span>';
+            break;
+        case 'logos':
+          prefix = '<span class="mystery-type logos">Identity:</span>';
+            break;
+        case 'self':
+            prefix = '<span class="mystery-type self">Identity:</span>';
+            break;
+        case 'mythosOS':
+            prefix = '<span class="mystery-type mythosOS">Ritual:</span>';
+            break;
+        case 'noise':
+            prefix = '<span class="mystery-type noise">Itch:</span>';
+            break;
+        default:
+            console.warn(`Unknown theme category for theme: ${theme.system.themebook_name}`);
+    }
+
+    const mysteryText = theme.system.mystery || "No mystery defined.";
+    return `${prefix} <span class="mystery-text">${mysteryText}</span>`;
+  }
+ 
+  addTooltipListeners(html) {
+    html.find('.mh-theme-icon').each((index, element) => {
+        const themeId = $(element).data('theme-id');
+
+        $(element).hover(
+            (event) => {
+                const mystery = this.getMysteryFromTheme(themeId);
+                this.showTooltip(event, mystery);
+            },
+            () => this.hideTooltip()
+        );
+    });
+  }
+
+  showTooltip(event, mystery) {
+    if (!mystery) {
+        console.warn("No mystery found for tooltip.");
+        return;
+    }
+
+    const tooltip = $(`<div class="mh-tooltip"></div>`);
+    tooltip.html(mystery); // Ensure this renders HTML content
+    $('body').append(tooltip); // Append tooltip to the body for higher z-index context
+
+    tooltip.css({
+        top: event.pageY + 10, // Position near the mouse cursor
+        left: event.pageX + 10
+    });
+
+    this.currentTooltip = tooltip; // Store reference to remove later
+  }
+
+  hideTooltip() {
+    if (this.currentTooltip) {
+        this.currentTooltip.remove();
+        this.currentTooltip = null;
+    }
+  }
+  
   calculateTotalPower() {
     let totalPower = 0;
   
@@ -443,24 +546,6 @@ export class MistHUD extends Application {
     return totalPower;
   }  
   
-  async _render(force = false, options = {}) {
-    if (!this.actor) return;
-
-    await super._render(force, options);
-
-    const position = await getHUDPosition(this.actor.id);
-    this.setPosition({
-      left: parseInt(position.left) || 100,
-      top: parseInt(position.top) || 100,
-    });
-  }
-
-  async close(options = {}) {
-    this.isCollapsed = false;
-    MistHUD.instance = null;
-    await super.close(options);
-  }
-
   getPowerTags(themeId, tagItems, subTagsByParent) {
     // Filter power tags for the given theme
     const powerTags = tagItems.filter(tag => tag.system.theme_id === themeId && tag.system.subtype === 'power');
@@ -750,9 +835,12 @@ export class MistHUD extends Application {
   }
   
   updateModifierDisplay() {
-    const modValueEl = this.element.find('#mh-mod-value');
-    if (modValueEl.length) {
-      modValueEl.val(this.modifier);
+    const modifierInput = this.element.find('#mh-mod-value');
+    if (modifierInput.length) {
+      modifierInput.val(this.modifier);
+      console.log("Modifier display updated to:", this.modifier);
+    } else {
+      console.warn("Modifier input element not found.");
     }
   }
 
@@ -888,72 +976,60 @@ export class MistHUD extends Application {
         modifier: modifier ? modifier : null
     };
 
-    // return rollData;
+    return rollData;
   }
-   
-  async postRollCleanup(tagsData) {
-    const actor = this.actor;
-    if (!actor) return;
- 
+
+  async cleanHUD() {
+    try {
+      // Check if actor exists
+      if (!this.actor) {
+        console.warn("No actor set for MistHUD. Skipping actor updates.");
+        return;
+      }
   
-    // 1. Update "toBurn" power tags and story tags to "burned" on the actor's data
-    for (const tag of [...tagsData.powerTags, ...tagsData.storyTags, ...tagsData.loadoutTags]) {
-      if (tag.stateClass === "to-burn") {
-        const tagItem = actor.items.get(tag.id);
+      // Update `.toBurn` tags to `.burned` in the actor's data and DOM
+      const tagsToUpdate = this.element.find('.mh-power-tag.toBurn, .mh-weakness-tag.toBurn, .mh-story-tag.toBurn, .mh-loadout-tag.toBurn');
+      for (const element of tagsToUpdate) {
+        const $tag = $(element);
+        const tagId = $tag.data('id');
+        const tagItem = this.actor.items.get(tagId);
+  
+        // Update actor's data for burned state
         if (tagItem) {
           await tagItem.update({
             "system.burned": true,
-            "system.burn_state": 0  // Set burn state to burned
+            "system.burn_state": 0 // Ensure the burn state is set to burned
           });
         }
+  
+        // Update the HUD element
+        $tag.removeClass('toBurn').addClass('burned');
+        $tag.find('.mh-burn-toggle').removeClass('toBurn').addClass('burned');
       }
+  
+      // Remove `.selected` from all elements
+      this.element.find('.selected').removeClass('selected');
+  
+      // Change `.mh-status.positive` and `.mh-status.negative` to `.mh-status.neutral`
+      this.element.find('.mh-status.positive, .mh-status.negative').each((index, element) => {
+        const $status = $(element);
+        $status.removeClass('positive negative').addClass('neutral');
+      });
+  
+      // Reset the modifier to 0 and update the display
+      this.modifier = 0;
+      this.updateModifierDisplay();
+  
+      // Delete any elements with the `.crispy` class
+      this.element.find('.crispy').remove();
+  
+      console.log("HUD cleaned and actor's tags updated successfully.");
+      await this.render(true); // Ensure HUD is re-rendered to reflect changes
+    } catch (error) {
+      console.error("Error during HUD cleanup:", error);
     }
-  
-    // 2. Remove temporary statuses used in the roll
-    for (const status of tagsData.statuses) {
-      if (status.temporary) {
-        const statusItem = actor.items.find(i => i.name === status.name && i.type === 'status');
-        if (statusItem) {
-          await statusItem.delete();
-        }
-      }
-    }
-  
-    // 3. Directly filter and delete temporary story tags and power tags from actor's items
-    const temporaryTags = actor.items.filter(item => 
-      item.type === 'tag' && item.system.temporary && 
-      (item.system.subtype === 'story' || item.system.subtype === 'power')
-    );
-  
-    for (const tag of temporaryTags) {
-      await tag.delete();
-    }
-  
-    // 4. Reset HUD to clear selections, reset modifier, and refresh display
-    this.resetHUD();
   }
-     
-  resetHUD() {
-    // Deselect all selected tags: power, story, and weakness tags
-    this.element.find('.mh-power-tag.selected, .mh-story-tag.selected, .mh-weakness-tag.selected').removeClass('selected');
   
-    // Reset status classes (positive and negative) for all statuses back to neutral
-    this.element.find('.mh-status.positive, .mh-status.negative').removeClass('positive negative').addClass('neutral');
-  
-    // Reset any burned or temporary states for story tags, if necessary
-    this.element.find('.mh-story-tag').each((index, element) => {
-      const $tag = $(element);
-      $tag.removeClass('burned toBurn');  // Remove any burn state classes
-      $tag.attr('data-temporary', false);  // Reset temporary attribute to false if used in HUD
-    });
-  
-    // Reset modifier to 0 and update display
-    this.modifier = 0;
-    this.updateModifierDisplay();
-  
-    // Force HUD re-render to apply all changes immediately
-    this.render(true);
-  }
     
 }
 
@@ -1043,12 +1119,16 @@ function getScnTags() {
 
 export { getScnTags };
 
+Hooks.once('ready', () => {
+  console.log("Initializing MistHUD:", MistHUD.getInstance());
+});
+
 // Hook to attach listeners after the Foundry VTT application is ready
 Hooks.on('ready', () => {
   attachSceneTagListeners();
 });
 
-// Hook to control the HUD based on token selection
+//Hook to control the HUD based on token selection
 Hooks.on('controlToken', (token, controlled) => {
   if (controlled && token.actor && token.actor.type === 'character') {
     MistHUD.getInstance().setActor(token.actor);
@@ -1062,151 +1142,4 @@ Hooks.on('updateActor', (actor, data, options, userId) => {
   if (MistHUD.instance && MistHUD.instance.actor?.id === actor.id) {
     MistHUD.getInstance().render(true);
   }
-});
-
-export const DENOMINATION = "6";
-
-export class D6toD12 extends foundry.dice.terms.Die {
-  constructor(termData) {
-    super({ ...termData, faces: 12 });
-  }
-
-  static DENOMINATION = "6";
-}
-
-// Register the custom die term with Foundry VTT
-CONFIG.Dice.terms["6"] = D6toD12;
-
-// Initialization after Dice So Nice is ready
-Hooks.once('diceSoNiceReady', (dice3d) => {
-  // Auxiliary function to create systems
-  const createSystem = (id, name, group) => {
-      dice3d.addSystem({ id, name, group });
-  };
-
-  // Auxiliary function to create dice presets
-  const createDicePreset = (options, type = "d6") => {
-      dice3d.addDicePreset(options, type);
-  };
-
-  // Auxiliary function to create colorsets
-  const createColorset = (colorset) => {
-      dice3d.addColorset(colorset);
-  };
-
-  // Define systems
-  const systems = [
-      { id: "city-of-mist", name: "City of Mist", group: "City of Mist" },
-      { id: "otherscape-mythos", name: "Otherscape Mythos", group: "Otherscape" },
-      { id: "otherscape-noise", name: "Otherscape Noise", group: "Otherscape" },
-      { id: "otherscape-self", name: "Otherscape Self", group: "Otherscape" },
-  ];
-
-  systems.forEach(system => createSystem(system.id, system.name, system.group));
-
-  // Define presets
-  const presets = [
-      {
-          system: "city-of-mist",
-          type: "d6",
-          labels: ['1', '2', '3', '4', '5', '/modules/mist-hud/ui/dice/dice_logos_color.png',
-              '/modules/mist-hud/ui/dice/dice_mythos_color.png', '5', '4', '3', '2', '1'],
-          bumpMaps: [, , , , , '/modules/mist-hud/ui/dice/dice_logos_bump.png',
-              '/modules/mist-hud/ui/dice/dice_mythos_bump.png', , , , , ],
-          emissiveMaps: [, , , , , '/modules/mist-hud/ui/dice/dice_logos_emissive.png',
-              '/modules/mist-hud/ui/dice/dice_mythos_emissive.png', , , , , ],
-          emissive: 0xdc39ff,
-          emissiveIntensity: 0.25,
-          colorset: "city-of-mist",
-      },
-      {
-          system: "otherscape-mythos",
-          type: "d6",
-          labels: ['1', '2', '3', '4', '5', '/modules/mist-hud/ui/dice/dice_otherscape-mythos_color.png',
-              '/modules/mist-hud/ui/dice/dice_otherscape-mythos_color.png', '5', '4', '3', '2', '1'],
-          emissiveMaps: [, , , , , '/modules/mist-hud/ui/dice/dice_otherscape-mythos_emissive.png',
-              '/modules/mist-hud/ui/dice/dice_otherscape-mythos_emissive.png', , , , , ],
-          emissive: 0xffffff,
-          emissiveIntensity: 0.5,
-          colorset: "otherscape-mythos",
-      },
-      {
-          system: "otherscape-noise",
-          type: "d6",
-          labels: ['1', '2', '3', '4', '5', '/modules/mist-hud/ui/dice/dice_otherscape-noise_color.png',
-              '/modules/mist-hud/ui/dice/dice_otherscape-noise_color.png', '5', '4', '3', '2', '1'],
-          emissiveMaps: [, , , , , '/modules/mist-hud/ui/dice/dice_otherscape-noise_emissive.png',
-              '/modules/mist-hud/ui/dice/dice_otherscape-noise_emissive.png', , , , , ],
-          emissive: 0xffffff,
-          emissiveIntensity: 0.5,
-          colorset: "otherscape-noise",
-      },
-      {
-          system: "otherscape-self",
-          type: "d6",
-          labels: ['1', '2', '3', '4', '5', '/modules/mist-hud/ui/dice/dice_otherscape-self_color.png',
-              '/modules/mist-hud/ui/dice/dice_otherscape-self_color.png', '5', '4', '3', '2', '1'],
-          emissiveMaps: [, , , , , '/modules/mist-hud/ui/dice/dice_otherscape-self_emissive.png',
-              '/modules/mist-hud/ui/dice/dice_otherscape-self_emissive.png', , , , , ],
-          emissive: 0xffffff,
-          emissiveIntensity: 0.5,
-          colorset: "otherscape-self",
-      }
-  ];
-
-  presets.forEach(preset => createDicePreset(preset, "d12"));
-
-  // Define colorsets
-  const colorsets = [
-      {
-          name: "city-of-mist",
-          description: "City of Mist Default",
-          category: "City of Mist",
-          foreground: ["#e6e6e6", "#e6e6e6"],
-          background: ["#705e9e", "#8b4939"],
-          outline: ["#433a28", "#433a28"],
-          texture: "stone",
-          material: "plastic",
-          font: "Modesto Condensed",
-          visibility: "visible",
-      },
-      {
-          name: "otherscape-mythos",
-          description: "Otherscape Mythos",
-          category: "Otherscape",
-          foreground: ["#e6e6e6"],
-          background: ["#873fff"],
-          outline: ["#7538ff"],
-          texture: "fire",
-          material: "metal",
-          font: "Bruno Ace",
-          visibility: "visible",
-      },
-      {
-          name: "otherscape-noise",
-          description: "Otherscape Noise",
-          category: "Otherscape",
-          foreground: ["#e6e6e6"],
-          background: ["#195fed"],
-          outline: ["#04c5f5"],
-          texture: "fire",
-          material: "metal",
-          font: "Bruno Ace",
-          visibility: "visible",
-      },
-      {
-          name: "otherscape-self",
-          description: "Otherscape Self",
-          category: "Otherscape",
-          foreground: ["#e6e6e6"],
-          background: ["#e01054"],
-          outline: ["#e0c2d8"],
-          texture: "fire",
-          material: "metal",
-          font: "Bruno Ace",
-          visibility: "visible",
-      }
-  ];
-
-  colorsets.forEach(colorset => createColorset(colorset));
 });

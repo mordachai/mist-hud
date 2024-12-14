@@ -1,45 +1,57 @@
+import { makeDraggable, getHUDPosition } from './mh-drag-pos.js';
 import { initializeAccordions } from './accordion-handler.js';
 
-export class NpcHUD extends Application {
-    static instance = null;
+class NpcHUD extends Application {
+    static hudInstances = {};
 
-    constructor(options = {}) {
+    constructor(actor, options = {}) {
         super(options);
-        this.actor = null;
+        this.actor = actor;
         this.isCollapsed = false;
     }
 
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
-          id: 'npc-hud',
-          template: 'modules/mist-hud/templates/npc-hud.hbs',
-          classes: ['npc-hud'],
-          header: true,
-          resizable: false,
-          popOut: true,
-          minimizable: true,
-          width: 310,
-          height: 'auto',
-          dragDrop: [{ dragSelector: '.window-header' }],
+            id: 'npc-hud',
+            template: 'modules/mist-hud/templates/npc-hud.hbs',
+            classes: ['npc-hud'],
+            popOut: false,
+            width: 280,
+            height: 'auto',
         });
     }
 
-    static getInstance() {
-        if (!NpcHUD.instance) {
-          NpcHUD.instance = new NpcHUD();
+    static getInstance(actor) {
+        if (NpcHUD.hudInstances[actor.id]) {
+            return NpcHUD.hudInstances[actor.id];
+        } else {
+            const hud = new NpcHUD(actor);
+            NpcHUD.hudInstances[actor.id] = hud;
+            return hud;
         }
-        return NpcHUD.instance;
     }
 
-    setActor(actor) {
-        if (!actor || actor.type !== 'threat') { // Adjust 'character' to your actual actor type
-          console.warn("Attempted to set an invalid actor.");
-          return;
-        }
+    async setActor(actor) {
+        if (!actor || actor.type !== 'threat') return;
         this.actor = actor;
+
+        const userId = game.user.id;
+        const savedPosition = actor.getFlag('mist-hud', `hudPosition.${userId}`) || { left: 150, top: 100 };
+        this.position.left = parseInt(savedPosition.left, 10);
+        this.position.top = parseInt(savedPosition.top, 10);
         this.isCollapsed = actor.getFlag('mist-hud', 'isCollapsed') || false;
-        this.render(true);
-        console.log(`NPCHUD set to actor: ${actor.name}`);
+
+        await this.render(true);
+    }
+
+    saveHUDPosition() {
+        const userId = game.user.id;
+        const position = {
+            left: parseInt(this.element.css('left'), 10),
+            top: parseInt(this.element.css('top'), 10)
+        };
+
+        this.actor.setFlag('mist-hud', `hudPosition.${userId}`, position);
     }
 
     getData() {
@@ -186,118 +198,27 @@ export class NpcHUD extends Application {
     
         return storyTags;
     }
-
-    // Helper method for icon retrieval
-    getIcon(state) {
-        switch (state) {
-            case "unburned":
-                return '<i class="fa-light fa-fire"></i>';
-            case "toBurn":
-                return '<i class="fa-regular fa-fire"></i>';
-            case "burned":
-                return '<i class="fa-solid fa-fire"></i>';
-            default:
-                return '<i class="fa-light fa-fire"></i>';
-        }
-    }
-
-    async toggleCollapse() {
-        this.isCollapsed = !this.isCollapsed;
-        await this.actor.setFlag('mist-hud', 'isCollapsed', this.isCollapsed);
-        this.saveHUDPosition();
-        this.render(false);
-    }
-
-    async render(force = false, options = {}) {
-        try {
-          console.log("NpcHUD render called with force:", force, "options:", options);
-          console.log("Current actor:", this.actor);
-          await super.render(true);
-          console.log("NpcHUD rendered successfully.");
-        } catch (error) {
-          console.error("Deu Error during NpcHUD render:", error);
-        }
-    }
-
-    injectCustomHeader() {
-    
-        // Use this.element to access the entire application window
-        const header = this.element.find('.window-header');
-        const window_title = header.find('.window-title')[0];
-        window_title.style.display = "None";
-        if (header.length === 0) {
-          console.warn("Header element not found during injection!");
-          return;
-        }
-    
-        console.log("Starting header injection...");
-      
-        // Clear existing header content
-        header.empty();
-        // we need to keep window title for compatibility to foundry Application render
-        header.append(window_title);
-      
-        // Create custom header elements
-        const tokenImgSrc = this.actor?.token?.texture.src || this.actor?.img || 'default-token.png';
-        console.log("Token image source:", tokenImgSrc);
-    
-        const tokenImg = $(`<div class="mh-token-image"><img src="${this.actor?.token?.texture.src || this.actor?.img}" alt="Character Token"></div>`);
-        const charName = $(`<div class="mh-char-name">${this.actor?.name || 'Character'}</div>`);
-        const closeButton = $(`<i class="mh-close-button fa-solid fa-xmark"></i>`); // Using FontAwesome for the close icon
-    
-        console.log("Created custom header elements.");
-    
-      
-        // Append custom elements to the header
-        header.append(tokenImg, charName, closeButton);
-        console.log("Appended custom elements to the header.");
-    
-        console.log("Header injected successfully:", header);
-    
-      
-        // Add event listener to the close button
-        closeButton.on("click", () => this.close());
-        console.log("Added event listener to the close button.");
-    
-      
-        console.log("Header injected successfully:", header);
-      
-        // Add a custom class for additional styling if needed
-        header.addClass('mh-custom-header');
-      
-        // Handle minimized state
-        const minimizedState = this.element.find('.window-title');
-        if (minimizedState.length) {
-          minimizedState.empty(); // Clear default content
-          minimizedState.append(tokenImg.clone(), closeButton.clone()); // Add image and close button
-          console.log("Handled minimized state content.");
-    
-      
-          // Rebind close event for the minimized state button
-          minimizedState.find('.mh-close-button').on("click", () => this.close());
-          console.log("Rebound close event for minimized state button.");
-    
-        }
-    }
-
+ 
     activateListeners(html) {
         super.activateListeners(html);
 
         // Initialize accordions
         initializeAccordions({ onlyOneOpen: true });
-
-        // Find the window header within the entire element
-        const header = this.element.find('.window-header');
-        console.log("Found header:", header);
-        
-        if (header.length === 0) {
-            console.warn("Header element not found during injection!");
-            return;
-        }
-
-        // Inject the custom header without passing any parameters
-        this.injectCustomHeader();
-
+    
+        const hudElement = html[0];
+        const dragHandles = [
+            hudElement.querySelector('.npc-hud-header'),
+            hudElement.querySelector('.mh-token-image'),
+        ];
+    
+        dragHandles.forEach((dragHandle) => {
+            if (dragHandle) {
+                makeDraggable(hudElement, dragHandle, this.actor?.id, {
+                    stop: () => this.saveHUDPosition()
+                });
+            }
+        });
+    
         // Collapse button toggle
         html.find('.npc-collapse-button').click((event) => {
             event.stopPropagation();
@@ -365,6 +286,58 @@ export class NpcHUD extends Application {
             event.preventDefault();
             event.stopPropagation();
         });
+    }
+    
+    // Helper method for icon retrieval
+    getIcon(state) {
+        switch (state) {
+            case "unburned":
+                return '<i class="fa-light fa-fire"></i>';
+            case "toBurn":
+                return '<i class="fa-regular fa-fire"></i>';
+            case "burned":
+                return '<i class="fa-solid fa-fire"></i>';
+            default:
+                return '<i class="fa-light fa-fire"></i>';
+        }
+    }
+
+    async toggleCollapse() {
+        this.isCollapsed = !this.isCollapsed;
+        await this.actor.setFlag('mist-hud', 'isCollapsed', this.isCollapsed);
+        this.saveHUDPosition();
+        this.render(false);
+    }
+
+    async close(options = {}) {
+        if (NpcHUD.hudInstances[this.actor.id]) {
+            delete NpcHUD.hudInstances[this.actor.id];
+        }
+        await super.close(options);
+    }
+
+    constrainPosition(position) {
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const hudWidth = this.element.width();
+        const hudHeight = this.element.height();
+
+        position.left = Math.max(0, Math.min(position.left, windowWidth - hudWidth));
+        position.top = Math.max(0, Math.min(position.top, windowHeight - hudHeight));
+
+        return position;
+    }
+
+    async _render(force = false, options = {}) {
+        if (!this.actor) return;
+        console.log("Rendering minimal HUD for actor:", this.actor.name);
+    
+        await super._render(force, options);
+    
+        if (!this.element.parent().length) {
+            console.log("Appending minimal HUD to the body");
+            $('body').append(this.element);
+        }
     }
     
 }

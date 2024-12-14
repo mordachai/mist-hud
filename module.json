@@ -23,34 +23,30 @@
       "label": "Mist HUD Macros",
       "path": "packs/mist-hud-macros",
       "type": "Macro",
+      "system": "city-of-mist",
       "ownership": {
         "PLAYER": "OBSERVER",
         "ASSISTANT": "OWNER"
-      },
-      "system": "city-of-mist"
+      }
     }
   ],
   "esmodules": [
-    "scripts/mh-settings.js",
-    "scripts/mh-theme-config.js",
-    "scripts/mist-hud.js",
-    "scripts/mh-drag-pos.js",
-    "scripts/mh-roll.js",
-    "scripts/dynamite-panel.js",
-    "scripts/npc-hud.js"
+      "scripts/mh-settings.js",
+      "scripts/getdata.js",
+      "scripts/mh-theme-config.js",
+      "scripts/mh-dice.js",
+      "scripts/mist-hud.js",
+      "scripts/mh-drag-pos.js",
+      "scripts/mh-roll.js",
+      "scripts/dynamite-panel.js",
+      "scripts/npc-hud.js"
   ],
   "styles": [
     "styles/mist-hud.css",
     "styles/mh-roll.css",
     "styles/mh-npc-hud.css"
   ],
-  "dependencies": [
-  {
-    "name": "dice-so-nice",
-    "manifest": "https://gitlab.com/riccisi/foundryvtt-dice-so-nice/raw/master/module.json",
-    "type": "module"
-  }
-  ],
+  "socket": true,
   "url": "https://github.com/mordachai/mist-hud",
   "manifest": "https://github.com/mordachai/mist-hud/raw/main/module.json",
   "download": "https://github.com/mordachai/mist-hud/raw/refs/heads/main/mist-hud.zip",
@@ -60,6 +56,13 @@
       {
         "id": "city-of-mist",
         "type": "system",
+        "compatibility": {}
+      }
+    ],
+    "recommends": [
+      {
+        "id": "dice-so-nice",
+        "type": "module",
         "compatibility": {}
       }
     ]

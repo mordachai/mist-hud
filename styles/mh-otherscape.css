@@ -33,4 +33,5 @@
   --font-family-hud: Roboto Condensed;
   --font-family-effects: Courier New;
   --hud-background1: url('../ui/os_hud_BG.webp');
+  --hud-bg-color: rgba(0, 0, 0, 0.45);
 }

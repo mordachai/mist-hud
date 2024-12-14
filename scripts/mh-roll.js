@@ -1,11 +1,16 @@
 // mh-roll.js
 
-import { moveConfig } from './mh-theme-config.js';
 import { MistHUD } from './mist-hud.js';
+import { moveConfig } from './mh-theme-config.js';
 import { getSceneStatuses } from './mist-hud.js';
 import { getScnTags } from './mist-hud.js';
 import { COM_mythosThemes, COM_logosThemes, COM_mistThemes, OS_selfThemes, OS_mythosThemes, OS_noiseThemes } from './mh-theme-config.js';
 import { initializeAccordions } from './accordion-handler.js';
+import { DiceSystem } from '/modules/dice-so-nice/api.js';
+
+Hooks.once('ready', () => {
+  console.log("Initializing MistHUD:", MistHUD.getInstance());
+});
 
 
 // Debug mode setting
@@ -43,107 +48,30 @@ async function rollDice() {
   return roll.dice[0].results.map(die => die.result);
 }
 
-function calculatePowerTags() {
-  const hud = MistHUD.getInstance();
-  const rollData = hud.getSelectedRollData();
-
-  const powerTagsTotal = rollData.powerTags.reduce((total, tag) => {
-    return total + (tag.stateClass === "to-burn" ? 3 : 1);
-  }, 0);
-
-  const invertedWeaknessTotal = rollData.weaknessTags.reduce((total, tag) => {
-    return total + (tag.stateClass === "inverted" ? 1 : 0);
-  }, 0);
-
-  return powerTagsTotal + invertedWeaknessTotal;
-}
-
-function calculateWeaknessTags() {
-  const hud = MistHUD.getInstance();
-  const weaknessTags = hud.getSelectedRollData().weaknessTags;
-
-  // Sum only non-inverted weakness tags
-  return weaknessTags.reduce((total, tag) => {
-    return total + (tag.stateClass === "normal" ? -1 : 0);
-  }, 0);
-}
-
-function calculateLoadoutTags() {
-  const hud = MistHUD.getInstance();
-  const loadoutTags = hud.getSelectedRollData().loadoutTags;
-
-  return loadoutTags.reduce((total, tag) => {
-    return total + (tag.stateClass === "to-burn" ? 3 : 1); // +3 if toBurn, +1 if selected
-  }, 0);
-}
-
-
-function calculateStoryTags() {
-  const hud = MistHUD.getInstance();
-  const storyTags = hud.getSelectedRollData().storyTags;
-
-  return storyTags.reduce((total, tag) => {
-    if (tag.stateClass === "to-burn") {
-      return total + 3; // +3 if toBurn is active and not inverted
-    } else if (tag.stateClass === "inverted") {
-      return total - 1; // -1 if inverted
-    } else {
-      return total + 1; // +1 if simply selected
-    }
-  }, 0);
-}
-
-function calculateCharacterStatuses() {
-  const hud = MistHUD.getInstance();
-  const rollData = hud.getSelectedRollData();
-
-  const characterStatusTotal = rollData.statuses.reduce((total, status) => {
-    return total + (status.typeClass === "positive" ? status.tier : -status.tier);
-  }, 0);
-
-  return characterStatusTotal;
-}
-
-function calculateSceneStatuses() {
-  const hud = MistHUD.getInstance();
-  const rollData = hud.getSelectedRollData();
-
-  // Use sceneStatuses to calculate scene status contributions
-  const sceneStatusTotal = rollData.sceneStatuses.reduce((total, sceneStatus) => {
-    return total + (sceneStatus.typeClass === "scene-positive" ? sceneStatus.tier : -sceneStatus.tier);
-  }, 0);
-
-  return sceneStatusTotal;
-}
-
-
-function calculateScnTags() {
-  const hud = MistHUD.getInstance();
-  const scnTags = hud.getSelectedRollData().scnTags;
-
-  return scnTags.reduce((total, tag) => {
-      return total + (tag.type === "positive" ? 1 : -1);  // +1 for positive, -1 for negative
-  }, 0);
-}
-
-function getRollModifier() {
-  const hud = MistHUD.getInstance();
-  return hud.modifier !== 0 ? hud.modifier : null;
-}
 
 // Main roll function
 async function rollMove(moveName, hasDynamite) {
-  const move = moveConfig[moveName];
-  if (!move) {
-      console.error(`Move not found: ${moveName}`);
+  const hud = MistHUD.getInstance();
+  if (!hud || !hud.actor) {
+      ui.notifications.warn("MistHUD is not ready. Please select an actor.");
       return;
   }
 
-  const hud = MistHUD.getInstance();
-  const actor = hud.actor;
-  if (!actor) {
-      ui.notifications.warn("Please select an actor before attempting this roll.");
-      return;
+  const actor = hud.actor; // Add this line to define the actor variable
+  const move = moveConfig[moveName]; // Add this line to get the move configuration
+
+  // Ensure HUD is rendered
+  if (hud._state === Application.RENDER_STATES.CLOSED) {
+      console.warn("MistHUD is closed. Attempting to reopen.");
+      await hud.render(true);
+  }
+
+  hud.isCollapsed = true; // Set collapsed state
+
+  try {
+      await hud.render(true); // Render with updated state
+  } catch (error) {
+      console.error("Error minimizing HUD before roll:", error);
   }
 
   // Calculate individual values
@@ -213,17 +141,108 @@ async function rollMove(moveName, hasDynamite) {
     rollTotal: displayRollTotal,
     localizedMoveEffects,
     tagsData: hud.getSelectedRollData(),
-    trackedEffects
+    trackedEffects: trackedEffects ? trackedEffects : []
   };
 
-  const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
+  console.log("Tags Data for Roll:", chatData.tagsData);
 
+
+  const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
+ 
   ChatMessage.create({
       content: chatContent,
       speaker: { alias: actor.name }
   });
 
-  hud.postRollCleanup(chatData.tagsData);
+  hud.cleanHUD(chatData.tagsData);
+}
+
+
+
+function calculatePowerTags() {
+  const hud = MistHUD.getInstance();
+  const rollData = hud.getSelectedRollData();
+
+  const powerTagsTotal = rollData.powerTags.reduce((total, tag) => {
+    return total + (tag.stateClass === "to-burn" ? 3 : 1);
+  }, 0);
+
+  const invertedWeaknessTotal = rollData.weaknessTags.reduce((total, tag) => {
+    return total + (tag.stateClass === "inverted" ? 1 : 0);
+  }, 0);
+
+  return powerTagsTotal + invertedWeaknessTotal;
+}
+
+function calculateWeaknessTags() {
+  const hud = MistHUD.getInstance();
+  const weaknessTags = hud.getSelectedRollData().weaknessTags;
+
+  // Sum only non-inverted weakness tags
+  return weaknessTags.reduce((total, tag) => {
+    return total + (tag.stateClass === "normal" ? -1 : 0);
+  }, 0);
+}
+
+function calculateLoadoutTags() {
+  const hud = MistHUD.getInstance();
+  const loadoutTags = hud.getSelectedRollData().loadoutTags;
+
+  return loadoutTags.reduce((total, tag) => {
+    return total + (tag.stateClass === "to-burn" ? 3 : 1); // +3 if toBurn, +1 if selected
+  }, 0);
+}
+
+function calculateStoryTags() {
+  const hud = MistHUD.getInstance();
+  const storyTags = hud.getSelectedRollData().storyTags;
+
+  return storyTags.reduce((total, tag) => {
+    if (tag.stateClass === "to-burn") {
+      return total + 3; // +3 if toBurn is active and not inverted
+    } else if (tag.stateClass === "inverted") {
+      return total - 1; // -1 if inverted
+    } else {
+      return total + 1; // +1 if simply selected
+    }
+  }, 0);
+}
+
+function calculateCharacterStatuses() {
+  const hud = MistHUD.getInstance();
+  const rollData = hud.getSelectedRollData();
+
+  const characterStatusTotal = rollData.statuses.reduce((total, status) => {
+    return total + (status.typeClass === "positive" ? status.tier : -status.tier);
+  }, 0);
+
+  return characterStatusTotal;
+}
+
+function calculateSceneStatuses() {
+  const hud = MistHUD.getInstance();
+  const rollData = hud.getSelectedRollData();
+
+  // Use sceneStatuses to calculate scene status contributions
+  const sceneStatusTotal = rollData.sceneStatuses.reduce((total, sceneStatus) => {
+    return total + (sceneStatus.typeClass === "scene-positive" ? sceneStatus.tier : -sceneStatus.tier);
+  }, 0);
+
+  return sceneStatusTotal;
+}
+
+function calculateScnTags() {
+  const hud = MistHUD.getInstance();
+  const scnTags = hud.getSelectedRollData().scnTags;
+
+  return scnTags.reduce((total, tag) => {
+      return total + (tag.type === "positive" ? 1 : -1);  // +1 for positive, -1 for negative
+  }, 0);
+}
+
+function getRollModifier() {
+  const hud = MistHUD.getInstance();
+  return hud.modifier !== 0 ? hud.modifier : null;
 }
 
 function substituteText(text, totalPower) {
@@ -358,15 +377,15 @@ export async function rollSpecialMoves(moveName) {
   };
 
   // Render and send chat message
+  
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
   ChatMessage.create({
     content: chatContent,
     speaker: { alias: actor.name }
   });
 
-  hud.postRollCleanup(chatData.tagsData);
+  hud.cleanHUD(chatData.tagsData);
 }
-
 
 async function rollCinematicMove(moveName) {
   const move = moveConfig[moveName];
@@ -396,6 +415,7 @@ async function rollCinematicMove(moveName) {
   };
 
   // Render the chat template with effects included
+  
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
 
   ChatMessage.create({
@@ -403,7 +423,7 @@ async function rollCinematicMove(moveName) {
     speaker: { alias: actor.name }
   });
 
-  hud.postRollCleanup(chatData.tagsData);
+  hud.cleanHUD(chatData.tagsData);
 }
 
 // Wrapper function to determine which roll function to use
@@ -454,5 +474,26 @@ Hooks.on('renderChatMessage', (app, html, data) => {
   // Optional: Introduce a small delay to ensure DOM elements are fully rendered before initialization
   setTimeout(() => {
       initializeAccordions();
-  }, 100); // Adjust the delay as needed
+  }, 300); // Adjust the delay as needed
 });
+
+Hooks.once("ready", () => {
+  globalThis.CityOfMistRolls = {
+    rollMove,
+    rollSpecialMoves,
+    rollCinematicMove,
+    executeMove,
+    substituteText,
+    countThemebookTypes,
+    calculatePowerTags,
+    calculateWeaknessTags,
+    calculateStoryTags,
+    calculateLoadoutTags,
+    calculateCharacterStatuses,
+    calculateScnTags,
+    calculateSceneStatuses,
+    getRollModifier,
+  };
+  console.log("CityOfMistRolls initialized globally.");
+});
+

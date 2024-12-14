@@ -19,103 +19,101 @@
 
   {{!-- We need to capture the selected tags and statuses and show in the next section below  --}}
   <div class="accordion-container">
-  <div class="mhr-roll-mdf accordion-header clickable">
-    {{#if themeCount}}
-      {{#if (eq themeType "mythos")}}
-        <span class="mh-dropshadow-{{themeCategory}}"><i class="fa-solid fa-bolt"></i> {{themeCount}}</span>
-        {{else if (eq themeType "logos")}}
-        <span class="mh-dropshadow-{{themeCategory}}"><i class="fa-solid fa-mask"></i> {{themeCount}}</span>
-        {{else if (eq themeType "noise")}}
-        <span class="mh-dropshadow-{{themeCategory}}">Noise {{themeCount}}</span>
-        {{else if (eq themeType "self")}}
-        <span class="mh-dropshadow-{{themeCategory}}">Self {{themeCount}}</span>
-        {{else if (eq themeType "mythosOS")}}
-        <span class="mh-dropshadow-{{themeCategory}}">Mythos {{themeCount}}</span>
-    {{/if}}
-    {{/if}}
-    {{#if calculatedPower}}
-      <span><i class="fa-light fa-bolt"></i> {{calculatedPower}}</span>
-    {{/if}}
-    {{#if totalLoadoutTags}}
-      <span><i class="fa-light fa-briefcase"></i> {{totalLoadoutTags}}</span>
-    {{/if}}
-    {{#if totalWeakness}}
-      <span><i class="fa-light fa-angles-down mhr-mls"></i> {{totalWeakness}}</span>
-    {{/if}}
-    {{#if totalStoryTags}}
-      <span><i class="fa-light fa-tag mhr-mls"></i> {{totalStoryTags}}</span>
-    {{/if}}
-    {{#if totalScnTags}}
-      <span><i class="fa-solid fa-tag mhr-mls"></i> {{totalScnTags}}</span>
-    {{/if}}
-    {{#if totalCharStatuses}}
-      <span><i class="fa-light fa-rectangle-list mhr-mls"></i> {{totalCharStatuses}}</span>
-    {{/if}}
-    {{#if totalSceneStatuses}}
-      <span><i class="fa-solid fa-rectangle-list mhr-mls"></i> {{totalSceneStatuses}}</span>
-    {{/if}}
-    {{#if modifier}}
-      <span><i class="fa-light fa-notes-medical mhr-mls"></i> {{modifier}}</span>
-    {{/if}}
-  </div>
+    <div class="mhr-roll-mdf accordion-header clickable">
+      {{#if themeCount}}
+        {{#if (eq themeType "mythos")}}
+          <span class="mh-dropshadow-{{themeCategory}}"><i class="fa-solid fa-bolt"></i> {{themeCount}}</span>
+          {{else if (eq themeType "logos")}}
+          <span class="mh-dropshadow-{{themeCategory}}"><i class="fa-solid fa-mask"></i> {{themeCount}}</span>
+          {{else if (eq themeType "noise")}}
+          <span class="mh-dropshadow-{{themeCategory}}">Noise {{themeCount}}</span>
+          {{else if (eq themeType "self")}}
+          <span class="mh-dropshadow-{{themeCategory}}">Self {{themeCount}}</span>
+          {{else if (eq themeType "mythosOS")}}
+          <span class="mh-dropshadow-{{themeCategory}}">Mythos {{themeCount}}</span>
+      {{/if}}
+      {{/if}}
+      {{#if calculatedPower}}
+        <span><i class="fa-light fa-bolt"></i> {{calculatedPower}}</span>
+      {{/if}}
+      {{#if totalLoadoutTags}}
+        <span><i class="fa-light fa-briefcase"></i> {{totalLoadoutTags}}</span>
+      {{/if}}
+      {{#if totalWeakness}}
+        <span><i class="fa-light fa-angles-down mhr-mls"></i> {{totalWeakness}}</span>
+      {{/if}}
+      {{#if totalStoryTags}}
+        <span><i class="fa-light fa-tag mhr-mls"></i> {{totalStoryTags}}</span>
+      {{/if}}
+      {{#if totalScnTags}}
+        <span><i class="fa-solid fa-tag mhr-mls"></i> {{totalScnTags}}</span>
+      {{/if}}
+      {{#if totalCharStatuses}}
+        <span><i class="fa-light fa-rectangle-list mhr-mls"></i> {{totalCharStatuses}}</span>
+      {{/if}}
+      {{#if totalSceneStatuses}}
+        <span><i class="fa-solid fa-rectangle-list mhr-mls"></i> {{totalSceneStatuses}}</span>
+      {{/if}}
+      {{#if modifier}}
+        <span><i class="fa-light fa-notes-medical mhr-mls"></i> {{modifier}}</span>
+      {{/if}}
+    </div>
 
+    <div class="tags-section accordion-content">
+      <span class="tag-row mhr-power-tags">
+        {{#each tagsData.powerTags}}
+          <span class="mhr-power-tag {{stateClass}}">{{tagName}}</span>
+        {{/each}}
+      </span>
 
+          <span class="tag-row mhr-loadout-tags">
+        {{#each tagsData.loadoutTags}}
+          <span class="mhr-power-tag {{stateClass}}">{{tagName}}</span>
+        {{/each}}
+      </span>
 
-  <div class="tags-section accordion-content">
-    <span class="tag-row mhr-power-tags">
-      {{#each tagsData.powerTags}}
-        <span class="mhr-power-tag {{stateClass}}">{{tagName}}</span>
-      {{/each}}
-    </span>
+      <span class="tag-row mhr-weakness-tags">
+        {{#each tagsData.weaknessTags}}
+          <span class="mhr-weakness-tag {{stateClass}}">{{tagName}}</span>
+        {{/each}}
+      </span>
 
-        <span class="tag-row mhr-loadout-tags">
-      {{#each tagsData.loadoutTags}}
-        <span class="mhr-power-tag {{stateClass}}">{{tagName}}</span>
-      {{/each}}
-    </span>
+      <span class="tag-row mhr-story-tags">
+        {{#each tagsData.storyTags}}
+          <span class="mhr-story-tag {{stateClass}}">{{tagName}}</span>
+        {{/each}}
+      </span>
+      
+      {{#if tagsData.scnTags}}
+          {{#each tagsData.scnTags}}            
+            <span class="scene-tag-item {{#if (eq this.type "positive")}}scene-positive{{else}}scene-negative{{/if}}">
+              {{#if this.temporary}}⏱️ {{/if}}
+              {{#if this.permanent}}💎 {{/if}}
+              {{this.name}}
+            </span>
+          {{/each}}
+      {{/if}}
 
-    <span class="tag-row mhr-weakness-tags">
-      {{#each tagsData.weaknessTags}}
-        <span class="mhr-weakness-tag {{stateClass}}">{{tagName}}</span>
-      {{/each}}
-    </span>
-
-    <span class="tag-row mhr-story-tags">
-      {{#each tagsData.storyTags}}
-        <span class="mhr-story-tag {{stateClass}}">{{tagName}}</span>
-      {{/each}}
-    </span>
-    
-    {{#if tagsData.scnTags}}
-        {{#each tagsData.scnTags}}            
-          <span class="scene-tag-item {{#if (eq this.type "positive")}}scene-positive{{else}}scene-negative{{/if}}">
-            {{#if this.temporary}}⏱️ {{/if}}
-            {{#if this.permanent}}💎 {{/if}}
-            {{this.name}}
+      <span class="tag-row mhr-character-statuses">
+        {{#each tagsData.statuses}}
+          <span class="mhr-status-tag {{typeClass}} {{#if temporary}}mhr-temporary-status{{/if}} {{#if permanent}}mhr-permanent-status{{/if}}">
+            {{#if temporary}}⏱️ {{/if}}
+            {{#if permanent}}💎 {{/if}}
+            {{name}}-{{tier}}
           </span>
         {{/each}}
-    {{/if}}
-
-    <span class="tag-row mhr-character-statuses">
-      {{#each tagsData.statuses}}
-        <span class="mhr-status-tag {{typeClass}} {{#if temporary}}mhr-temporary-status{{/if}} {{#if permanent}}mhr-permanent-status{{/if}}">
-          {{#if temporary}}⏱️ {{/if}}
-          {{#if permanent}}💎 {{/if}}
-          {{name}}-{{tier}}
-        </span>
-      {{/each}}
-    </span>
-    
-    <span class="tag-row mhr-scene-statuses">
-        {{#each tagsData.sceneStatuses}}
-          <span class="mhr-scene-status-tag {{typeClass}}">
-              {{#if temporary}}⏳{{/if}}
-              {{#if permanent}}💎{{/if}}
-              {{name}}-{{tier}}
-          </span>
-        {{/each}}
-    </span>
-  </div>
+      </span>
+      
+      <span class="tag-row mhr-scene-statuses">
+          {{#each tagsData.sceneStatuses}}
+            <span class="mhr-scene-status-tag {{typeClass}}">
+                {{#if temporary}}⏳{{/if}}
+                {{#if permanent}}💎{{/if}}
+                {{name}}-{{tier}}
+            </span>
+          {{/each}}
+      </span>
+    </div>
   </div>
 
   {{#if rollTotal}}

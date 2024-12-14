@@ -1,22 +1,4 @@
 <div class="npc-hud">
-    <div class="mh-token-image">
-        <img src="{{tokenImage}}" alt="NPC Token">
-    </div>
-
-    <div class="npc-hud-header">
-        <div class="npc-name">{{name}} / <span class="mh-token-name"> {{tokenName}}</span></div>
-        <div class="npc-header-controls">
-            <div class="npc-collapse-button clickable">
-                {{#if isCollapsed}}
-                    <i class="fas fa-angle-down"></i>
-                {{else}}
-                    <i class="fas fa-angle-up"></i>
-                {{/if}}
-            </div>
-            <div class="npc-close-button clickable"><i class="fas fa-times"></i></div>
-        </div>
-    </div>
-
     {{#unless isCollapsed}}
     <div class="npc-content">
 
@@ -68,12 +50,10 @@
         <!-- Moves Section -->
         {{#each moveGroups as |moves subtype|}}
         <div class="npc-moves-accordion">
-            <div class="npc-moves-container">
-                <div class="npc-subtitle-container-r accordion-header start-expanded clickable">
-                    <div class="npc-subtitle-text">{{subtype}} MOVES</div>
-                    <div class="accordion-icon">
-                        <i class="fas fa-chevron-left"></i>
-                    </div>
+            <div class="npc-moves-container accordion-container">
+                <div class="npc-subtitle-container-r accordion-header clickable">
+                <span class="npc-subtitle-text">{{subtype}} Moves</span>
+                <i class="fas fa-chevron-left"></i>
                 </div>
                 <div class="accordion-content">
                     <ul class="npc-list">
