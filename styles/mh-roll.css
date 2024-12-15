@@ -3,28 +3,35 @@
   background-image: var(--hud-background1);
   background-repeat: no-repeat;
   background-size: cover;
-  border: var(--noise-verylight-color) 1px solid;
-  width: 100%;
+  border: var(--positive-tag-color) 2px solid;
+  width: 96%;
   border-radius: 10px;
 }
 
-/* .message-sender {
-  font-size: 1.1em;
-  font-family: var(--font-family-main1), sans-serif;
+.mist-hud-roll .message-sender {
+  font-size: 1.0em!important;
+  font-family: var(--font-family-main1), sans-serif !important;
   font-weight: bolder;
- text-shadow: 1px 1px 1px var(--self-light-color);
-  color: var(--text-main-color);
+  text-shadow: 1px 1px 1px var(--self-light-color);
+  color: var(--text-main-color) !important;
 }
 
-.chat-message {
+ .mist-hud-roll .chat-message {
   background-image: var(--hud-background1) !important;
   background-repeat: no-repeat;
   background-size: cover;
   border: var(--noise-verylight-color) 1px solid;
   width: 100%;
   border-radius: 10px;
-  color: var(--text-main-color);
-} */
+  color: var(--text-main-color) !important;
+}
+
+.mist-hud-roll .message-metadata {
+  color: var(--text-main-color) !important;
+  font-size: 0.8em !important;
+}
+
+
 
   /* General Styles */
   .roll-container {

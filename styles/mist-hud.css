@@ -202,7 +202,8 @@ hr {
   margin: 5px 10px;
 
 }
-.theme-container-mythosOS{
+
+/* .theme-container-mythosOS{
   background-image: url(../ui/mythosOS_BG.webp) ;
   background-repeat: no-repeat;
   background-size: 60%;
@@ -221,7 +222,7 @@ hr {
   background-repeat: no-repeat;
   background-size: 60%;
   background-position: center right;
-}
+} */
 
 
 /* General umbrella class for all theme icons */
