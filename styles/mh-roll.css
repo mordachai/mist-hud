@@ -12,7 +12,7 @@
   font-size: 1.1em;
   font-family: var(--font-family-main1), sans-serif;
   font-weight: bolder;
-  text-shadow: 1px 1px 1px var(--self-light-color);
+ text-shadow: 1px 1px 1px var(--self-light-color);
   color: var(--text-main-color);
 }
 
@@ -35,9 +35,8 @@
   .mhr-roll-title {
     font-size: 2em;
     text-align: center;
-    font-weight: bold;
     font-family: var(--font-family-move);
-    text-shadow: 1px 1px 2px var(--roll-shadow-color);
+    /* text-shadow: 1px 1px 2px var(--roll-shadow-color); */
     color: var(--outcome-text-color);
     justify-content: center;
     margin-top: 12px;
@@ -52,7 +51,7 @@
     margin-bottom: 5px;
     text-align: center;
     font-family: var(--font-family-move);
-    text-shadow: 1px 1px 1px var(--noise-dark-color);
+    /* text-shadow: 1px 1px 1px var(--noise-dark-color); */
     color: var(--noise-verylight-color);
     margin-top: 8px;
     font-style: italic;
@@ -116,9 +115,10 @@
     font-size: 1.1em;
     font-weight: 700;
     color: var(--outcome-text-color);
-    text-shadow: 1px 1px 4px var(--blur-shadow-color);
+    /* text-shadow: 1px 1px 4px var(--blur-shadow-color); */
     text-align: center;
     justify-content: baseline;
+    padding: 5px 0px 20px 0px;
   }
 
   .mhr-move-list{
@@ -151,11 +151,12 @@
     font-size: 2.5em;
     text-align: center;
     font-family: var(--font-family-roll), sans-serif;
-    text-shadow: 2px 2px 1px var(--roll-shadow-color);
+    text-shadow: -1px 1px 2px var(--roll-shadow-color);
     color: var(--outcome-text-color);
     font-stretch: extra-condensed;
     font-style: oblique;
-    padding-top: 10px;
+    padding-top: 2px;
+    font-weight: bolder;
   }
 
   .mh-header-rollCard{
@@ -202,6 +203,7 @@
     font-size: 0.9rem;
     line-height: 1rem;
     border-radius: 3px;
+    color: black;
   }
    
   .mhr-power-tag, .mhr-story-tag, .mhr-weakness-tag.inverted,
@@ -405,7 +407,7 @@
 .mh-os-trackedfx-name {
   font-weight: 900;
   font-style: oblique;
-  text-shadow: var(--effects-color1) 0px 0px 5px;
+  /* text-shadow: var(--effects-color1) 0px 0px 5px; */
   font-size: 1.1em;
   text-transform: uppercase;
   color: var(--effects-color1)
@@ -415,7 +417,7 @@
   font-weight: 400;
   color: var(--noise-verylight-color);
   font-style: oblique;
-  text-shadow: var(--effects-color1) 0px 0px 5px;
+  /* text-shadow: var(--effects-color1) 0px 0px 5px; */
   font-size: 1.0em;
   text-transform: uppercase;
 }

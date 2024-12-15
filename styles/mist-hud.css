@@ -435,7 +435,7 @@ hr {
 .mh-story-tag.inverted .mh-story-invert-toggle {
   color: red;
   font-weight: bold;
-  text-shadow: rgb(255, 208, 204) 1px 1px;
+  /* text-shadow: rgb(255, 208, 204) 1px 1px; */
 }
 
 .mh-burn-icon img {
@@ -463,7 +463,7 @@ hr {
 
 .mh-burn-toggle.toBurn i {
   color: rgb(255, 208, 122);
-  text-shadow: rgb(255, 111, 75) 0px 0px 3px;
+  /* text-shadow: rgb(255, 111, 75) 0px 0px 3px; */
 }
 
 .mh-burn-toggle.burned i {
@@ -490,9 +490,9 @@ hr {
 .mh-story-tag.selected,
 .mh-loadout-tag.selected,
 .mh-weakness-tag.inverted.selected {
-  font-weight: 700;
-  text-shadow: var(--negative-tag-borderColor) 1px 1px 1px; /*inverted to be more visible*/
-  color: whitesmoke;
+  /* font-weight: 700; */
+  /* text-shadow: var(--negative-tag-borderColor) 1px 1px 1px; */
+  color: white;
   background: linear-gradient(0.25turn, var(--positive-tag-color), rgba(6, 95, 150, 0));
   background-size: 90% 90%;
   background-repeat: no-repeat;
@@ -516,9 +516,9 @@ hr {
 
 .mh-weakness-tag.selected,
 .mh-story-tag.inverted.selected {
-  font-weight: 700;
-  text-shadow: var(--positive-tag-borderColor) 0px 1px;
-  color: whitesmoke;
+  /* font-weight: 700; */
+  /* text-shadow: var(--positive-tag-borderColor) 0px 1px; */
+  color: white;
   background: linear-gradient(0.25turn, var(--negative-tag-color), rgba(6, 95, 150, 0));
   background-size: 90% 90%;
   background-repeat: no-repeat;
@@ -682,16 +682,16 @@ hr {
 } */
 
 .mh-tooltip {
-  position: fixed; /* Ensures the tooltip is positioned relative to the viewport */
-  z-index: 9999; /* Ensure it appears above other elements */
-  background: rgba(0, 0, 0, 0.9); /* Dark background for visibility */
+  position: fixed; 
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.9); 
   color: white;
   padding: 5px 10px;
   border: 1px solid white;
   border-radius: 5px;
-  box-shadow: 0 4px 6px rgba(80, 52, 97, 0.5); /* Add a subtle shadow */
-  pointer-events: none; /* Prevent tooltip from interfering with mouse events */
-  white-space: nowrap; /* Prevent line breaks in the tooltip */
+  box-shadow: 0 4px 6px rgba(80, 52, 97, 0.5); 
+  pointer-events: none; 
+  white-space: nowrap;
 }
 
 

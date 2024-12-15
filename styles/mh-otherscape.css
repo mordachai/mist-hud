@@ -7,13 +7,13 @@
   --text-hud-main-color: #d7e5f5; 
   --text-hud-subtitles-color: #abff00;
   --outcome-text-color: rgb(245,245,245) ;
-  --effects-color1:#abff00;
+  --effects-color1:#84c600;
   --effects-color2:rgb(245,245,245);
   --effects-color3: #d3f265;
-  --toBurn-text-color: #ffefd1;
-  --positive-tag-color: #078abade;
+  --toBurn-text-color: #03004e;
+  --positive-tag-color: #078ababb;
   --positive-tag-borderColor: #89dffff1;
-  --negative-tag-color: rgba(235, 152, 70, 0.777);
+  --negative-tag-color: rgba(235, 153, 70, 0.676);
   --negative-tag-borderColor: rgba(250, 193, 137, 0.841);
   --destroyed-tag-color: rgba(255, 40, 40, 0.825);
   --spectrum-color:#abff00;
@@ -27,7 +27,7 @@
   --font-family-main1: Rift;
   --font-family-main2: Averia Serif Libre;
   --font-family-move: SDGlitch;
-  --font-family-roll: Recbold;
+  --font-family-roll: Bruno Ace;
   --font-family-tags: Roboto Condensed;
   --font-family-outcome: Roboto Condensed;
   --font-family-hud: Roboto Condensed;
@@ -35,15 +35,6 @@
   --hud-background1: url('../ui/os_hud_BG.webp');
   --hud-bg-color: rgba(0, 0, 0, 0.45);
 }
-
-/* Style for Double Ones */
-/* .double-ones {
-  color: red;
-  font-weight: bold;
-  text-shadow: 2px 2px 5px rgba(255, 0, 0, 0.8),
-  -2px -2px 5px rgba(255, 0, 0, 0.8),
-  0px 0px 10px rgba(255, 0, 0, 1);
-} */
 
 .double-ones::after {
   content: "Snake Eyes!";
@@ -54,25 +45,25 @@
   color: whitesmoke;
   font-weight: bold;
   font-family: var(--font-family-main1);
-  text-shadow: var(--destroyed-tag-color) 1px 1px 3px;
+  text-shadow: var(--destroyed-tag-color) 1px 1px 6px;
 }
 
 .double-sixes::after {
   content: "Boxcars!";
-  display: block; /* Ensures it appears as its own line */
+  display: block;
   font-size: 1.1rem;
   width: 100%;
   text-align: center;
   color: whitesmoke;
   font-weight: bold;
   font-family: var(--font-family-main1);
-  text-shadow: var(--effects-color1) 1px 1px 5px;
+  text-shadow: var(--effects-color1) 1px 1px 6px;
 }
 
 .outcome-fail-double-ones {
-  text-shadow: var(--destroyed-tag-color) -2px 2px 6px;
+  text-shadow: var(--destroyed-tag-color) -3px 3px 15px;
 }
 
 .outcome-success-double-sixes {
-  text-shadow: var(--effects-color1) -2px 2px 6px;
+  text-shadow: var(--effects-color1) -3px 3px 15px;
 }
