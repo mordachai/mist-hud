@@ -349,14 +349,6 @@ overflow-y: hidden;
     text-overflow: ellipsis; /* Adds ellipsis (...) to overflowing text */
 }
 
-.npc-spectrum-list{
-    list-style: none;
-    padding: 0;
-    display: flex ;
-    justify-content: space-around;
-    gap: 5px;
-}
-
 .npc-move-name {
     font-weight: bold;
 }
@@ -375,13 +367,22 @@ overflow-y: hidden;
     border-bottom: 1px solid var(--divider-color1); /* Semi-transparent white line */
 }
 
+.npc-spectrum-list{
+    list-style: none;
+    padding: 0;
+    display: flex ;
+    justify-content: space-around;
+    gap: 10px 5px;
+    flex-wrap: wrap;
+}
+
 .npc-spectrum {
     padding: 4px 6px;
     background-color: var(--spectrum-color);
     color: black;
     font-family: var(--font-family-main1);
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 0.9rem;
     clip-path: polygon(
         0 0,         /* Top-left corner */
         100% 0,        /* Top-right corner */
@@ -392,7 +393,7 @@ overflow-y: hidden;
 }
 
 .npc-spectrum-tier{
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     padding: 4px 0px;
 }
 
@@ -426,7 +427,7 @@ overflow-y: hidden;
     justify-content: center; /* Centers the items horizontally */
     align-items: center; /* Centers items vertically */
     gap: 5px;
-    padding: 10px; /* Adds some padding around the container */
+    padding: 3px; /* Adds some padding around the container */
     max-width: 100%; /* Ensures the container doesn't exceed its parent's width */
 }
 

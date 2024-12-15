@@ -15,6 +15,7 @@
         </div>
       {{/each}}
   </div>
+  <div class="{{diceClass}}"></div>
   {{/if}}
 
   {{!-- We need to capture the selected tags and statuses and show in the next section below  --}}
@@ -59,62 +60,6 @@
       {{/if}}
     </div>
 
-    {{!-- <div class="tags-section accordion-content">
-      <span class="tag-row mhr-power-tags">
-        {{#each tagsData.powerTags}}
-          <span class="mhr-power-tag {{stateClass}}">{{tagName}}</span>
-        {{/each}}
-      </span>
-
-          <span class="tag-row mhr-loadout-tags">
-        {{#each tagsData.loadoutTags}}
-          <span class="mhr-power-tag {{stateClass}}">{{tagName}}</span>
-        {{/each}}
-      </span>
-
-      <span class="tag-row mhr-weakness-tags">
-        {{#each tagsData.weaknessTags}}
-          <span class="mhr-weakness-tag {{stateClass}}">{{tagName}}</span>
-        {{/each}}
-      </span>
-
-      <span class="tag-row mhr-story-tags">
-        {{#each tagsData.storyTags}}
-          <span class="mhr-story-tag {{stateClass}}">{{tagName}}</span>
-        {{/each}}
-      </span>
-      
-      {{#if tagsData.scnTags}}
-          {{#each tagsData.scnTags}}            
-            <span class="scene-tag-item {{#if (eq this.type "positive")}}scene-positive{{else}}scene-negative{{/if}}">
-              {{#if this.temporary}}⏱️ {{/if}}
-              {{#if this.permanent}}💎 {{/if}}
-              {{this.name}}
-            </span>
-          {{/each}}
-      {{/if}}
-
-      <span class="tag-row mhr-character-statuses">
-        {{#each tagsData.statuses}}
-          <span class="mhr-status-tag {{typeClass}} {{#if temporary}}mhr-temporary-status{{/if}} {{#if permanent}}mhr-permanent-status{{/if}}">
-            {{#if temporary}}⏱️ {{/if}}
-            {{#if permanent}}💎 {{/if}}
-            {{name}}-{{tier}}
-          </span>
-        {{/each}}
-      </span>
-      
-      <span class="tag-row mhr-scene-statuses">
-          {{#each tagsData.sceneStatuses}}
-            <span class="mhr-scene-status-tag {{typeClass}}">
-                {{#if temporary}}⏳{{/if}}
-                {{#if permanent}}💎{{/if}}
-                {{name}}-{{tier}}
-            </span>
-          {{/each}}
-      </span>
-    </div> --}}
-
     <div class="tags-section accordion-content">
       <span class="tag-row">
         {{#each tagsData.powerTags}}
@@ -158,11 +103,11 @@
   <hr class="mhr-roll-divider">
   {{/if}}
 
-  <div class="mhr-roll-result">{{rollTotal}}</div>
+  <div class="mhr-roll-result {{outcomeClass}}">{{rollTotal}}</div>
 
   <hr class="mhr-roll-divider">
 
-  <div class="mhr-outcome">{{localize outcomeMessage}}</div>
+  <div class="mhr-outcome {{outcomeClass}}">{{localize outcomeMessage}}</div>
 
   <!-- Move Effects List -->
   {{#if localizedMoveEffects.length}}

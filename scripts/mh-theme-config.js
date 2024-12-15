@@ -196,16 +196,6 @@ export const moveConfig = {
             "CityOfMist.moves.sneak.1",
             "CityOfMist.moves.sneak.2"
         ],
-        successEffects: [
-            "CityOfMist.moves.sneak.0",
-            "CityOfMist.moves.sneak.1",
-            "CityOfMist.moves.sneak.2"
-        ],
-        dynamiteEffects: [
-            "CityOfMist.moves.sneak.0",
-            "CityOfMist.moves.sneak.1",
-            "CityOfMist.moves.sneak.2"
-        ],
         hasDynamite: true
     },
 

@@ -35,3 +35,44 @@
   --hud-background1: url('../ui/os_hud_BG.webp');
   --hud-bg-color: rgba(0, 0, 0, 0.45);
 }
+
+/* Style for Double Ones */
+/* .double-ones {
+  color: red;
+  font-weight: bold;
+  text-shadow: 2px 2px 5px rgba(255, 0, 0, 0.8),
+  -2px -2px 5px rgba(255, 0, 0, 0.8),
+  0px 0px 10px rgba(255, 0, 0, 1);
+} */
+
+.double-ones::after {
+  content: "Snake Eyes!";
+  display: block; /* Ensures it appears as its own line */
+  font-size: 1.1rem;
+  width: 100%;
+  text-align: center;
+  color: whitesmoke;
+  font-weight: bold;
+  font-family: var(--font-family-main1);
+  text-shadow: var(--destroyed-tag-color) 1px 1px 3px;
+}
+
+.double-sixes::after {
+  content: "Boxcars!";
+  display: block; /* Ensures it appears as its own line */
+  font-size: 1.1rem;
+  width: 100%;
+  text-align: center;
+  color: whitesmoke;
+  font-weight: bold;
+  font-family: var(--font-family-main1);
+  text-shadow: var(--effects-color1) 1px 1px 5px;
+}
+
+.outcome-fail-double-ones {
+  text-shadow: var(--destroyed-tag-color) -2px 2px 6px;
+}
+
+.outcome-success-double-sixes {
+  text-shadow: var(--effects-color1) -2px 2px 6px;
+}

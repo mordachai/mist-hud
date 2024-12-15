@@ -48,6 +48,13 @@ async function rollDice() {
   return roll.dice[0].results.map(die => die.result);
 }
 
+// async function rollDice() {
+//   console.warn("rollDice is overridden for testing: always returns [1, 1]");
+  
+//   // Simulate a dice roll result of [1, 1]
+//   return [6, 6];
+// }
+
 //Main Roll function
 async function rollMove(moveName, hasDynamite) {
   const hud = MistHUD.getInstance();
@@ -106,26 +113,36 @@ try {
   // Apply special rules for Otherscape and LitM
   let outcome;
   let moveEffects = [];
+  let diceClass = "default-dice";
+  let outcomeClass = "default-outcome";
   const isDoubleOnes = rollResults.every(r => r === 1);
   const isDoubleSixes = rollResults.every(r => r === 6);
 
+  // Outcome determination logic
   if (activeSystem === "otherscape" || activeSystem === "legend") {
-      if (isDoubleOnes) {
-          outcome = "fail"; // Double ones is always a fail
-          moveEffects = move.failEffects || [];
-      } else if (isDoubleSixes) {
-          outcome = "success"; // Double sixes is always a success (10+)
-          moveEffects = move.successEffects || [];
-      } else if (rollTotal >= 10) {
-          outcome = "success";
-          moveEffects = move.successEffects || [];
-      } else if (rollTotal >= 7) {
-          outcome = "partial";
-          moveEffects = move.partialEffects || [];
-      } else {
-          outcome = "fail";
-          moveEffects = move.failEffects || [];
-      }
+    if (isDoubleOnes) {
+      outcome = "fail";
+      moveEffects = move.failEffects || [];
+      diceClass = "double-ones";
+      outcomeClass = "outcome-fail-double-ones";
+    } else if (isDoubleSixes) {
+      outcome = "success";
+      moveEffects = move.successEffects || [];
+      diceClass = "double-sixes";
+      outcomeClass = "outcome-success-double-sixes";
+    } else if (rollTotal >= 10) {
+      outcome = "success";
+      moveEffects = move.successEffects || [];
+      outcomeClass = "outcome-success";
+    } else if (rollTotal >= 7) {
+      outcome = "partial";
+      moveEffects = move.partialEffects || [];
+      outcomeClass = "outcome-partial";
+    } else {
+      outcome = "fail";
+      moveEffects = move.failEffects || [];
+      outcomeClass = "outcome-fail";
+    }
   } else if (activeSystem === "city-of-mist") {
       // Include dynamite logic for City of Mist
       dynamiteEnabled = (await actor.getFlag("mist-hud", "dynamiteMoves") || []).includes(moveName);
@@ -160,8 +177,8 @@ try {
 
   // Prepare tracked effects data if applicable
   let trackedEffects = null;
-  if (Array.isArray(move.trackedEffects) && move.trackedEffects.length > 0) {
-      trackedEffects = move.trackedEffects; // Only include if the move is a tracked outcome move
+  if (outcome !== "fail" && Array.isArray(move.trackedEffects) && move.trackedEffects.length > 0) {
+      trackedEffects = move.trackedEffects; // Only include tracked effects for non-fail outcomes
   }
 
   const chatData = {
@@ -181,7 +198,9 @@ try {
       rollTotal: displayRollTotal,
       localizedMoveEffects,
       tagsData,
-      trackedEffects: trackedEffects ? trackedEffects : []
+      trackedEffects,
+      diceClass,
+      outcomeClass
   };
 
   console.log("Tags Data for Roll:", chatData.tagsData);
