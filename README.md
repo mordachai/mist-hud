@@ -1,17 +1,21 @@
-# City of Mist: Mist HUD
+# Mist Engine HUD
 
-**City of Mist: Mist HUD** is a simple always-open, never-in-the-way HUD that allows players to select tags and statuses to be used on move rolls. No questions, no menus. Just select and roll using the moves in the hotbar. Fast and streamlined like any _action-packed game_ should be!
+**Mist Engine HUD:** is a simple always-open, never-in-the-way HUD for _City of Mist_ and _Otherscape_ game systems made [by Taragnor for Foundry](https://foundryvtt.com/packages/city-of-mist). It allows players to quickly select tags and statuses and do the Moves rolls, no questions or menus menus to answer. Just select what you need and roll using the Moves in the hotbar. Fast and streamlined like any _action-packed game_ should be!
 
-![image](https://github.com/user-attachments/assets/c49e9371-8eea-43eb-9558-5f7ad958eed9)
+![image](https://github.com/user-attachments/assets/dd7544e7-1eca-43c5-85fb-0c4e6be58942)
 
 ## Features
 
 - **Always-visible HUD**: Provides quick access to theme tags and statuses. You only have to select a PC token
-- **Auto-Localization**: Automatically translates theme and moves names based on the game language
+- **Danger/Threats HUD**: Keep the enemies close and at hand (see image below)
+- **Four Awesome Dice Sets**: the characteristic modified D12 with faces from one to six. One set for _City of Mist_ and three others for _Otherscape_: Noise, Mythos, and Self
 - **Hotbar Integration**: Auto-loads macros for core moves and cinematic moves: core moves on page 1 and cinematic moves on page 2 of the Macro Hotbar
 - **Quick Roll Support**: Allows rolling with selected tags and themes without navigating away from the HUD
 - **Draggable**: Drag it around, see your game while playing it!
 - **Dynamite Moves Control Panel**: an easy way for the MC to determine which move is Dynamite for a character (see image below)
+
+![image](https://github.com/user-attachments/assets/24aca9a7-77a9-49a3-a587-d90963f45593)
+
 
 ## Installation
 
@@ -38,10 +42,10 @@ Once installed and activated, the HUD will automatically appear when a character
 
 1. Select your character token.
 2. Choose tags (Power/Weakness) from the HUD.
-    - You can manually burn tags after they are used on a roll. Burned tags cannot be selected, click on the fire icon again to "unburn" the tag.
+    - You can mark a tag to be burned on the next roll (+3). Burned tags cannot be selected, click on the fire icon again to "unburn" the tag.
 3. Choose statuses. Click over them to toggle if they are positive, negative, or neutral:
-    - Blue (+): will add to the tags calculated in the roll
-    - Yellow (-): will subtract from the tags calculated in the roll
+    - Yellow / Blue (+): will add to the tags calculated in the roll
+    - Orange /  (-): will subtract from the tags calculated in the roll
     - Grey (0): will do nothing to the roll. If a tag has no use in the next roll let it be like this
 4. Click the corresponding move macro in the macro hotbar.
 
