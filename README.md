@@ -8,8 +8,9 @@
 
 - **Always-visible HUD**: Provides quick access to theme tags and statuses. You only have to select a PC token
 - **Danger/Threats HUD**: Keep the enemies close and at hand (see image below)
-- **Four Awesome Dice Sets**: the characteristic modified D12 with faces from one to six. One set for _City of Mist_ and three others for _Otherscape_: Noise, Mythos, and Self
+![image](https://github.com/user-attachments/assets/24aca9a7-77a9-49a3-a587-d90963f45593)
 
+- **Four Awesome Dice Sets**: the characteristic modified D12 with faces from one to six. One set for _City of Mist_ and three others for _Otherscape_: Noise, Mythos, and Self
 ![image](https://github.com/user-attachments/assets/25d11478-1971-4e48-bec6-f4214f13f607)
 
 - **Hotbar Integration**: Auto-loads macros for core moves and cinematic moves: core moves on page 1 and cinematic moves on page 2 of the Macro Hotbar
@@ -17,7 +18,7 @@
 - **Draggable**: Drag it around, see your game while playing it!
 - **Dynamite Moves Control Panel**: an easy way for the MC to determine which move is Dynamite for a character (see image below)
 
-![image](https://github.com/user-attachments/assets/24aca9a7-77a9-49a3-a587-d90963f45593)
+
 
 
 ## Installation
