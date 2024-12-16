@@ -53,16 +53,15 @@ Once installed and activated, the HUD will automatically appear when a character
     - Yellow / Blue (+): will add to the tags calculated in the roll
     - Red / Orange  (-): will subtract from the tags calculated in the roll
     - No Color (0): will do nothing to the roll. If a status has no use in the next roll let it be like this
-![statuses](https://github.com/user-attachments/assets/a765fc7f-f838-4321-9604-5f5fd2cc612a)
 
 4. Click the corresponding move macro in the macro hotbar. There are moves for City of Mist and Otherscape available, depending on the selected system in the City of Mist game settings.
 
 ![image](https://github.com/user-attachments/assets/df4d8706-5794-45bd-ac39-d0c8a7258e47)
 
-The results and move effects will be automatically displayed in the chat. Click the modifiers to open. Tracked Outcomes moves also can be opened.
+The results and move effects will be automatically displayed in the chat. Click the modifiers to open. Tracked Outcomes moves can also be opened.
+
 ![image](https://github.com/user-attachments/assets/6d5bfdec-84f9-4320-b73c-6196ff38c30b)
  
-
 ### Dynamite Move Control Panel
 
 To assign the _Dynamite!_ trait to any Core Move of City of Mist, run the **Dynamite Move Control Panel** macro from the **HUD Macros compendium**. 
