@@ -1,6 +1,6 @@
 # Mist Engine HUD
 
-**Mist Engine HUD:** is a simple always-open, never-in-the-way HUD for _City of Mist_ and _Otherscape_ game systems made [by Taragnor for Foundry](https://foundryvtt.com/packages/city-of-mist). It allows players to quickly select tags and statuses and do the Moves rolls, no questions or menus menus to answer. Just select what you need and roll using the Moves in the hotbar. Fast and streamlined like any _action-packed game_ should be!
+**Mist Engine HUD:** is a simple always-open, never-in-the-way HUD for _City of Mist_ and _Otherscape_ game systems made [by Taragnor for Foundry](https://foundryvtt.com/packages/city-of-mist). It allows players to quickly select tags and statuses and do the Moves rolls, with no questions or menus to answer. Just select what you need and roll using the Moves in the hotbar. Fast and streamlined like any _action-packed game_ should be!
 
 ![image](https://github.com/user-attachments/assets/dd7544e7-1eca-43c5-85fb-0c4e6be58942)
 
@@ -10,7 +10,7 @@
 - **Danger/Threats HUD**: Keep the enemies close and at hand (see image below)
 ![image](https://github.com/user-attachments/assets/24aca9a7-77a9-49a3-a587-d90963f45593)
 
-- **Four Awesome Dice Sets**: the characteristic modified D12 with faces from one to six. One set for _City of Mist_ and three others for _Otherscape_: Noise, Mythos, and Self
+- **Four Awesome Dice Sets**: the caracteristic modified D12 with faces from one to six. One set for _City of Mist_ and three others for _Otherscape_: Noise, Mythos, and Self
 ![image](https://github.com/user-attachments/assets/25d11478-1971-4e48-bec6-f4214f13f607)
 
 - **Hotbar Integration**: Auto-loads macros for core moves and cinematic moves: core moves on page 1 and cinematic moves on page 2 of the Macro Hotbar
@@ -46,7 +46,7 @@ Once installed and activated, the HUD will automatically appear when a character
 ![image](https://github.com/user-attachments/assets/7238d5a3-5cab-45ee-a5be-fddd352aa097)
 
 1. Select your character token. MCs: Click on Dangers/Threats with the right button. NPCs HUD doesn't affect rolls (for now).
-2. Choose tags (Power/Weakness) from the HUD.
+2. Choose tags (Power/Weakness) from the HUD. Scene tags and statuses can be used, select them normally.
     - You can mark a tag to be burned on the next roll (+3). Burned tags cannot be selected, click on the fire icon again to "unburn" the tag.
     - Invert a weakness to be used as a _power tag_ by clicking on the double arrow icon
 3. Choose statuses. Click over them to toggle if they are positive, negative, or neutral:
@@ -73,7 +73,8 @@ When a roll of 12+ is made with a _Dynamite_ move, the roll effects will display
 
 ## Known Issues
 
-- The inputs are not bidirectional. Use the normal character sheet to register anything, the only purpose of the HUD is to make rolls easier and fast. Be especially aware of your burned tags.
+- The inputs are not bidirectional. Use the normal character sheet to register anything, the only purpose of the HUD is to make rolls easier and quick. Be especially aware of your burned tags.
+- NPCs (Dangers/Threats) don't affect rolls. Use the modifier at the HUD bottom to automatically affect players' rolls.
 
 ## Compatibility
 
@@ -81,4 +82,4 @@ This module is designed for Foundry VTT version 12.0 or higher and the City of M
 
 ## License
 
-This project is licensed under the MIT License. See the file for more details.
+This project is licensed under the MIT License. Check the LICENSE file for more details.
