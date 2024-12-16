@@ -37,9 +37,9 @@ OR
 
 Once installed and activated, the HUD will automatically appear when a character token is selected.
 
-### Rolling a Move: Tags and Statuses
+### Rolling a Move: Tags! Statuses! Roll!
 
-![image](https://github.com/user-attachments/assets/b7a3140e-e2d7-4fc7-90be-367f229b9d52)
+![image](https://github.com/user-attachments/assets/7238d5a3-5cab-45ee-a5be-fddd352aa097)
 
 1. Select your character token.
 2. Choose tags (Power/Weakness) from the HUD.
@@ -51,7 +51,7 @@ Once installed and activated, the HUD will automatically appear when a character
     - No Color (0): will do nothing to the roll. If a status has no use in the next roll let it be like this
 ![statuses](https://github.com/user-attachments/assets/a765fc7f-f838-4321-9604-5f5fd2cc612a)
 
-4. Click the corresponding move macro in the macro hotbar. There is moves for City of Mist and Otherscape available, depending on the selected system in the City od Mist settings.
+4. Click the corresponding move macro in the macro hotbar. There are moves for City of Mist and Otherscape available, depending on the selected system in the City of Mist game settings.
 
 ![image](https://github.com/user-attachments/assets/df4d8706-5794-45bd-ac39-d0c8a7258e47)
 
