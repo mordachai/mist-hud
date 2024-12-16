@@ -234,6 +234,7 @@
 
   .mhr-temporary-status {
     background-color: var(--destroyed-tag-color) !important;
+    color: var(--text-tag-color);
   }
 
   /* .mhr-permanent-status {

@@ -1,3 +1,5 @@
+import { initializeAccordions } from "./accordion-handler.js";
+
 export const MODULE_ID = "mist-hud";
 
 const SYSTEM_CSS_MAP = {
@@ -208,136 +210,22 @@ export function registerSettings() {
     });
 }
 
-async function loadMoves() {
-    const compendiumName = "mist-hud.mist-hud-macros"; // Nome interno correto do compêndio
-
-    // UUIDs das pastas para importação
-    const foldersToImport = {
-        "COM Core Moves": "Folder.fGGvwScEsE5w67gZ",
-        "COM Special Moves": "Folder.N8FvP2QD8oeByl7F",
-        "OS Core Moves": "Folder.MNTHYLyBz99gC6G4",
-        "OS Special Moves": "Folder.KEp5B9BW9tBGTw24"
-    };
-
-    // Detectar o sistema ativo
-    const activeSystem = game.settings.get("city-of-mist", "system");
-    if (!["city-of-mist", "otherscape"].includes(activeSystem)) {
-        ui.notifications.error(`Sistema desconhecido: ${activeSystem}`);
-        return;
-    }
-
-    const systemMapping = {
-        "city-of-mist": {
-            core: "COM Core Moves",
-            special: "COM Special Moves"
-        },
-        "otherscape": {
-            core: "OS Core Moves",
-            special: "OS Special Moves"
-        }
-    };
-
-    const systemFolders = systemMapping[activeSystem];
-
-    // Tentar encontrar o compêndio
-    const pack = game.packs.get(compendiumName);
-
-    if (!pack) {
-        ui.notifications.error(`Compêndio "${compendiumName}" não encontrado.`);
-        console.error(`Pacotes disponíveis: `, [...game.packs.keys()]);
-        return;
-    }
-
-    const macros = await pack.getDocuments();
-
-    // Processar "Core Moves"
-    const coreFolderName = systemFolders.core;
-    const coreFolderUUID = foldersToImport[coreFolderName];
-    const coreFolder = await getOrCreateFolder(coreFolderName, "Macro");
-    const coreMacros = macros
-        .filter(macro => macro.folder?.id === coreFolderUUID.split(".").pop())
-        .sort((a, b) => a.name.localeCompare(b.name));
-
-    for (const macro of coreMacros) {
-        const existingMacro = game.macros.find(m => m.name === macro.name);
-        if (!existingMacro) {
-            await Macro.create({
-                ...macro.toObject(),
-                folder: coreFolder.id
-            });
-        }
-    }
-
-    // Processar "Special Moves"
-    const specialFolderName = systemFolders.special;
-    const specialFolderUUID = foldersToImport[specialFolderName];
-    const specialFolder = await getOrCreateFolder(specialFolderName, "Macro");
-    const specialMacros = macros
-        .filter(macro => macro.folder?.id === specialFolderUUID.split(".").pop())
-        .sort((a, b) => a.name.localeCompare(b.name));
-
-    for (const macro of specialMacros) {
-        const existingMacro = game.macros.find(m => m.name === macro.name);
-        if (!existingMacro) {
-            await Macro.create({
-                ...macro.toObject(),
-                folder: specialFolder.id
-            });
-        }
-    }
-
-    // Limpar e atribuir macros para todos os jogadores
-    // for (const user of game.users) {
-    //     if (!user.isGM && user.role >= CONST.USER_ROLES.PLAYER) {
-    //         console.log(`Limpando e atribuindo macros para o usuário: ${user.name}`);
-    //         await clearUserHotbar(user);
-    //         await assignToUserHotbar(user, coreMacros, 1); // Assign core moves to slots 1–10
-    //         await assignToUserHotbar(user, specialMacros, 11); // Assign special moves to slots 11–20
-    //     }
-    // }
-
-    await clearUserHotbar(game.user);
-    await assignToUserHotbar(game.user, coreMacros, 1); // Assign core moves to slots 1–10
-    await assignToUserHotbar(game.user, specialMacros, 11); // Assign special moves to slots 11–20
-
-    ui.notifications.info("Macros importadas, organizadas e atribuídas para os hotbars dos jogadores!");
-}
-
-// Helper para encontrar ou criar uma pasta pelo nome
-async function getOrCreateFolder(name, type) {
-    let folder = game.folders.contents.find(f => f.name === name && f.type === type);
-    if (!folder) {
-        folder = await Folder.create({ name, type });
-    }
-    return folder;
-}
-
-// Helper to assign macros to a user's hotbar
-async function assignToUserHotbar(user, macros, startSlot) {
-    macros.sort((a, b) => a.name.localeCompare(b.name)); // Sort macros alphabetically
-    for (let i = 0; i < macros.length; i++) {
-        const macro = macros[i];
-        const slot = startSlot + i;
-        if (slot > 50) break; // Hotbar limit
-        const existingMacro = game.macros.find(m => m.name === macro.name);
-        if (existingMacro) {
-            await user.assignHotbarMacro(existingMacro, slot);
-        } else {
-            const importedMacro = await Macro.create(macro.toObject());
-            await user.assignHotbarMacro(importedMacro, slot);
-        }
-    }
-}
-
-// Helper para limpar a barra de atalhos de um usuário
-async function clearUserHotbar(user) {
-    for (let i = 1; i <= 50; i++) {
-        await user.assignHotbarMacro(null, i);
-    }
-}
-
-Hooks.once('ready', () => {
-    game.socket.on('module.mist-hud', (data) => {
-        loadMoves();
-    });
+/**
+ * Run initializeAccordions whenever the game initializes.
+ */
+Hooks.once("ready", () => {
+    console.log("Initializing accordions on game start...");
+    initializeAccordions();
 });
+
+/**
+ * Hook into chat messages to initialize accordions in chat rolls.
+ */
+Hooks.on("renderChatMessage", (message, html) => {
+    console.log("Chat message rendered. Checking for accordions...");
+    if (html.find(".accordion-container").length > 0) {
+        console.log("Accordion container found in chat message. Initializing accordions...");
+        initializeAccordions();
+    }
+});
+

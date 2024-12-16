@@ -6,7 +6,6 @@ import { getSceneStatuses } from './mist-hud.js';
 import { getScnTags } from './mist-hud.js';
 import { COM_mythosThemes, COM_logosThemes, COM_mistThemes, OS_selfThemes, OS_mythosThemes, OS_noiseThemes } from './mh-theme-config.js';
 import { initializeAccordions } from './accordion-handler.js';
-import { DiceSystem } from '/modules/dice-so-nice/api.js';
 
 // Hooks.once('ready', () => {
 //   console.log("Initializing MistHUD:", MistHUD.getInstance());
@@ -544,10 +543,10 @@ Hooks.on('renderChatMessage', (message, html, data) => {
       html.addClass("mist-hud-roll");
   }  
 
-  // Optional: Initialize accordions after the DOM is fully rendered
+  //Optional: Initialize accordions after the DOM is fully rendered
   setTimeout(() => {
       initializeAccordions();
-  }, 300); // Adjust the delay as needed
+  }, 300);
 });
 
 

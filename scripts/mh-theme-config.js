@@ -23,6 +23,9 @@ export function getThemeCategory(themeName) {
 }
 
 export const moveConfig = {
+
+    // City of Mist moves
+
     "Change the Game": {
         name: "CityOfMist.moves.CTG.name",
         fail: "CityOfMist.moves.genericFail",
@@ -55,7 +58,9 @@ export const moveConfig = {
             "CityOfMist.moves.CTG.8",
             "CityOfMist.moves.CTG.9"
         ],
-            hasDynamite: true
+        hasDynamite: true,
+        system: "city-of-mist",
+        slot: 1,
     },
 
     "Convince": {
@@ -64,7 +69,9 @@ export const moveConfig = {
         partial: "CityOfMist.moves.convince.partial",
         success: "CityOfMist.moves.convince.success",
         dynamite: "CityOfMist.moves.convince.dynamite",
-        hasDynamite: true
+        hasDynamite: true,
+        system: "city-of-mist",
+        slot: 2,
     },
 
     "Face Danger": {
@@ -77,7 +84,9 @@ export const moveConfig = {
             "CityOfMist.moves.FD.0",
             "CityOfMist.moves.FD.1"
         ],
-        hasDynamite: true
+        hasDynamite: true,
+        system: "city-of-mist",
+        slot: 3,
     },
 
     "Go Toe To Toe": {
@@ -101,7 +110,9 @@ export const moveConfig = {
             "CityOfMist.moves.GTTT.1",
             "CityOfMist.moves.GTTT.2"
         ],
-        hasDynamite: true
+        hasDynamite: true,
+        system: "city-of-mist",
+        slot: 4,
     },
 
     "Hit with All You Got": {
@@ -131,7 +142,9 @@ export const moveConfig = {
             "CityOfMist.moves.HWAYG.8",
             "CityOfMist.moves.HWAYG.9"
         ],
-        hasDynamite: true
+        hasDynamite: true,
+        system: "city-of-mist",
+        slot: 5,
     },
 
     "Investigate": {
@@ -155,7 +168,9 @@ export const moveConfig = {
             "CityOfMist.moves.investigate.1",
             "CityOfMist.moves.investigate.2"
         ],
-        hasDynamite: true
+        hasDynamite: true,
+        system: "city-of-mist",
+        slot: 6,
     },
 
     "Look Beyond the Mist": {
@@ -181,7 +196,9 @@ export const moveConfig = {
             "CityOfMist.moves.investigate.2"
         ],
         hasDynamite: true,
-        rollMythos: true
+        rollMythos: true,
+        system: "city-of-mist",
+        slot: 7,
 
     },
 
@@ -196,7 +213,9 @@ export const moveConfig = {
             "CityOfMist.moves.sneak.1",
             "CityOfMist.moves.sneak.2"
         ],
-        hasDynamite: true
+        hasDynamite: true,
+        system: "city-of-mist",
+        slot: 8,
     },
 
     "Take the Risk": {
@@ -205,7 +224,9 @@ export const moveConfig = {
         partial: "CityOfMist.moves.TTR.partial",
         success: "CityOfMist.moves.TTR.success",
         dynamite: "CityOfMist.moves.TTR.dynamite",
-        hasDynamite: true
+        hasDynamite: true,
+        system: "city-of-mist",
+        slot: 9,
     },
 
     "Stop. Holding. Back. (Significant)": {
@@ -214,7 +235,10 @@ export const moveConfig = {
         partial: "CityOfMist.moves.SHB.significant.partial",
         success: "CityOfMist.moves.SHB.significant.success",
         themeCategory: "logos",
-        rollLogos: true
+        rollLogos: true,
+        system: "city-of-mist",
+        slot: 11,
+        image: "SHB-Significant.webp",
     },
 
     "Stop. Holding. Back. (No Return)": {
@@ -223,7 +247,10 @@ export const moveConfig = {
         partial: "CityOfMist.moves.SHB.noReturn.partial",
         success: "CityOfMist.moves.SHB.noReturn.success",
         themeCategory: "logos",
-        rollLogos: true
+        rollLogos: true,
+        system: "city-of-mist",
+        slot: 12,
+        image: "SHB-NoReturn.webp",
     },
 
     "Stop. Holding. Back. (Ultimate)": {
@@ -232,7 +259,10 @@ export const moveConfig = {
         partial: "CityOfMist.moves.SHB.ultimate.partial",
         success: "CityOfMist.moves.SHB.ultimate.success",
         themeCategory: "logos",
-        rollLogos: true
+        rollLogos: true,
+        system: "city-of-mist",
+        slot: 13,
+        image: "SHB-Ultimate.webp",
     },
 
     "Monologue": {
@@ -240,7 +270,9 @@ export const moveConfig = {
         fail: "CityOfMist.moves.monologue.always",
         partial: "CityOfMist.moves.monologue.always",
         success: "CityOfMist.moves.monologue.always",
+        system: "city-of-mist",
         moveType: "cinematic",
+        slot: 15,
     },
 
     "Flashback": {
@@ -260,7 +292,9 @@ export const moveConfig = {
             "CityOfMist.moves.flashback.0",
             "CityOfMist.moves.flashback.1"
         ],
+        system: "city-of-mist",
         moveType: "cinematic",
+        slot: 16,
     },
 
     "Downtime": {
@@ -289,7 +323,9 @@ export const moveConfig = {
             "CityOfMist.moves.downtime.3",
             "CityOfMist.moves.downtime.4"
         ],
+        system: "city-of-mist",
         moveType: "cinematic",
+        slot: 17,
     },
 
     "Session End": {
@@ -312,119 +348,30 @@ export const moveConfig = {
             "CityOfMist.moves.sessionEnd.1",
             "CityOfMist.moves.sessionEnd.2"
         ],
+        system: "city-of-mist",
         moveType: "cinematic",
+        slot: 18,
     },
 
-    "Quick Outcome": {
-        name: "Otherscape.moves.quickOutcome.name",
-        fail: "Otherscape.moves.quickOutcome.fail",
-        partial: "Otherscape.moves.quickOutcome.partial",
-        success: "Otherscape.moves.quickOutcome.success",
-    },
-
-    "Tracked Outcome": {
-        name: "Otherscape.moves.trackedOutcome.name",
-        fail: "Otherscape.moves.generic.fail",
-        partial: "Otherscape.moves.trackedOutcome.partial",
-        success: "Otherscape.moves.trackedOutcome.success",
-    },
+    // Otherscape moves
 
     "Mitigate Consequences": {
         name: "Otherscape.moves.mitigate.name",
         fail: "Otherscape.moves.mitigate.fail",
         partial: "Otherscape.moves.mitigate.partial",
         success: "Otherscape.moves.mitigate.success",
+        system: "otherscape",
+        slot: 1
     },
 
-    "Blaze of Glory (Significant)": {
-        name: "Otherscape.moves.blazeOfGlory.significant.name",
-        fail: "Otherscape.moves.blazeOfGlory.significant.fail",
-        partial: "Otherscape.moves.blazeOfGlory.significant.partial",
-        success: "Otherscape.moves.blazeOfGlory.significant.success",
-        moveType: "cinematic",
-    },
 
-    "Blaze of Glory (No Return)": {
-        name: "Otherscape.moves.blazeOfGlory.noReturn.name",
-        fail: "Otherscape.moves.blazeOfGlory.noReturn.fail",
-        partial: "Otherscape.moves.blazeOfGlory.noReturn.partial",
-        success: "Otherscape.moves.blazeOfGlory.noReturn.success",
-        moveType: "cinematic",
-    },
-
-    "Blaze of Glory (Ultimate)": {
-        name: "Otherscape.moves.blazeOfGlory.ultimate.name",
-        fail: "Otherscape.moves.blazeOfGlory.ultimate.fail",
-        partial: "Otherscape.moves.blazeOfGlory.ultimate.partial",
-        success: "Otherscape.moves.blazeOfGlory.ultimate.success",
-        moveType: "cinematic",
-    },
-
-    "OS: Downtime": {
-        name: "Otherscape.moves.downtime.name",
-        fail: "Otherscape.moves.downtime.always",
-        partial: "Otherscape.moves.downtime.always",
-        success: "Otherscape.moves.downtime.always",
-        failEffects: [
-            "Otherscape.moves.downtime.0",
-            "Otherscape.moves.downtime.1",
-            "Otherscape.moves.downtime.2",
-            "Otherscape.moves.downtime.3",
-            "Otherscape.moves.downtime.4"
-        ],
-        partialEffects: [
-            "Otherscape.moves.downtime.0",
-            "Otherscape.moves.downtime.1",
-            "Otherscape.moves.downtime.2",
-            "Otherscape.moves.downtime.3",
-            "Otherscape.moves.downtime.4"
-        ],
-        successEffects: [
-            "Otherscape.moves.downtime.0",
-            "Otherscape.moves.downtime.1",
-            "Otherscape.moves.downtime.2",
-            "Otherscape.moves.downtime.3",
-            "Otherscape.moves.downtime.4"
-        ],
-        moveType: "cinematic",
-    },
-
-    "OS: Session End": {
-        name: "Otherscape.moves.creditRoll.name",
-        fail: "Otherscape.moves.creditRoll.always",
-        partial: "Otherscape.moves.creditRoll.always",
-        success: "Otherscape.moves.creditRoll.always",
-        failEffects: [
-            "Otherscape.moves.creditRoll.0",
-            "Otherscape.moves.creditRoll.1",
-            "Otherscape.moves.creditRoll.2",
-            "Otherscape.moves.creditRoll.3",
-            "Otherscape.moves.creditRoll.4",
-            "Otherscape.moves.creditRoll.5",
-            "Otherscape.moves.creditRoll.6",
-            "Otherscape.moves.creditRoll.7"
-        ],
-        partialEffects: [
-            "Otherscape.moves.creditRoll.0",
-            "Otherscape.moves.creditRoll.1",
-            "Otherscape.moves.creditRoll.2",
-            "Otherscape.moves.creditRoll.3",
-            "Otherscape.moves.creditRoll.4",
-            "Otherscape.moves.creditRoll.5",
-            "Otherscape.moves.creditRoll.6",
-            "Otherscape.moves.creditRoll.7"
-        ],
-        successEffects: [
-            "Otherscape.moves.creditRoll.0",
-            "Otherscape.moves.creditRoll.1",
-            "Otherscape.moves.creditRoll.2",
-            "Otherscape.moves.creditRoll.3",
-            "Otherscape.moves.creditRoll.4",
-            "Otherscape.moves.creditRoll.5",
-            "Otherscape.moves.creditRoll.6",
-            "Otherscape.moves.creditRoll.7"
-        ],
-        moveType: "cinematic",
+    "Quick Outcome": {
+        name: "Otherscape.moves.quickOutcome.name",
+        fail: "Otherscape.moves.quickOutcome.fail",
+        partial: "Otherscape.moves.quickOutcome.partial",
+        success: "Otherscape.moves.quickOutcome.success",
+        system: "otherscape",
+        slot: 2
     },
 
     "Tracked Outcome - Attack": {
@@ -433,6 +380,8 @@ export const moveConfig = {
         fail: "Otherscape.moves.generic.fail",
         partial: "Otherscape.moves.trackedOutcome.partial",
         success: "Otherscape.moves.trackedOutcome.success",
+        system: "otherscape",
+        slot: 3,
         trackedEffects: [
         {
             key: "effect.attack",
@@ -470,6 +419,8 @@ export const moveConfig = {
     fail: "Otherscape.moves.generic.fail",
     partial: "Otherscape.moves.trackedOutcome.partial",
     success: "Otherscape.moves.trackedOutcome.success",
+    system: "otherscape",
+    slot: 4,
     trackedEffects: [
         {
             key: "effect.bestow",
@@ -507,6 +458,8 @@ export const moveConfig = {
     fail: "Otherscape.moves.generic.fail",
     partial: "Otherscape.moves.trackedOutcome.partial",
     success: "Otherscape.moves.trackedOutcome.success",
+    system: "otherscape",
+    slot: 5,
     trackedEffects: [
         {
             key: "effect.advance",
@@ -538,6 +491,19 @@ export const moveConfig = {
         }]
     },
 
+    "OS: Roll with Noise": {
+        name: "Otherscape.terms.noise",
+        themeCategory: "noise",
+        subtitleImg: "modules/mist-hud/ui/icons/noise_os_icn.svg",   
+        fail: "Something doesn't work as intended and there are adverse Consequences.",
+        partial: "The action succeeds or benefits you, but there are still some Consequences",
+        success: "Strong hit! The action succeeds as intended, or better. There are no Consequences. You may choose to take Consequences for an even greater degree of success",
+        rollNoise: true,
+        system: "otherscape",
+        slot: 7,
+        image: "Noise-Roll.webp",
+    },
+
     "OS: Roll with Mythos": {
         name: "CityOfMist.terms.mythos",
         themeCategory: "mythosOS",
@@ -546,6 +512,9 @@ export const moveConfig = {
         partial: "The action succeeds or benefits you, but there are still some Consequences",
         success: "Strong hit! The action succeeds as intended, or better. There are no Consequences. You may choose to take Consequences for an even greater degree of success.",
         rollMythosOS: true,
+        system: "otherscape",
+        slot: 8,
+        image: "MythosOS-Roll.webp",
     },
 
     "OS: Roll with Self": {
@@ -556,16 +525,115 @@ export const moveConfig = {
         partial: "The action succeeds or benefits you, but there are still some Consequences",
         success: "Strong hit! The action succeeds as intended, or better. There are no Consequences. You may choose to take Consequences for an even greater degree of success",
         rollSelf: true,
+        system: "otherscape",
+        slot: 9,
+        image: "Self-Roll.webp",
     },
 
-    "OS: Roll with Noise": {
-        name: "Otherscape.terms.noise",
-        themeCategory: "noise",
-        subtitleImg: "modules/mist-hud/ui/icons/noise_os_icn.svg",   
-        fail: "Something doesn't work as intended and there are adverse Consequences.",
-        partial: "The action succeeds or benefits you, but there are still some Consequences",
-        success: "Strong hit! The action succeeds as intended, or better. There are no Consequences. You may choose to take Consequences for an even greater degree of success",
-        rollNoise: true,
-    }    
+    "Blaze of Glory (Significant)": {
+        name: "Otherscape.moves.blazeOfGlory.significant.name",
+        fail: "Otherscape.moves.blazeOfGlory.significant.fail",
+        partial: "Otherscape.moves.blazeOfGlory.significant.partial",
+        success: "Otherscape.moves.blazeOfGlory.significant.success",
+        system: "otherscape",
+        moveType: "cinematic",
+        slot: 11,
+        image: "GOIAB-Significant.webp",
+    },
+
+    "Blaze of Glory (No Return)": {
+        name: "Otherscape.moves.blazeOfGlory.noReturn.name",
+        fail: "Otherscape.moves.blazeOfGlory.noReturn.fail",
+        partial: "Otherscape.moves.blazeOfGlory.noReturn.partial",
+        success: "Otherscape.moves.blazeOfGlory.noReturn.success",
+        system: "otherscape",
+        moveType: "cinematic",
+        slot: 12,
+        image: "GOIAB-NoReturn.webp",
+    },
+
+    "Blaze of Glory (Ultimate)": {
+        name: "Otherscape.moves.blazeOfGlory.ultimate.name",
+        fail: "Otherscape.moves.blazeOfGlory.ultimate.fail",
+        partial: "Otherscape.moves.blazeOfGlory.ultimate.partial",
+        success: "Otherscape.moves.blazeOfGlory.ultimate.success",
+        system: "otherscape",
+        moveType: "cinematic",
+        slot: 13,
+        image: "GOIAB-Ultimate.webp",
+    },
+
+    "OS: Downtime": {
+        name: "Otherscape.moves.downtime.name",
+        fail: "Otherscape.moves.downtime.always",
+        partial: "Otherscape.moves.downtime.always",
+        success: "Otherscape.moves.downtime.always",
+        failEffects: [
+            "Otherscape.moves.downtime.0",
+            "Otherscape.moves.downtime.1",
+            "Otherscape.moves.downtime.2",
+            "Otherscape.moves.downtime.3",
+            "Otherscape.moves.downtime.4"
+        ],
+        partialEffects: [
+            "Otherscape.moves.downtime.0",
+            "Otherscape.moves.downtime.1",
+            "Otherscape.moves.downtime.2",
+            "Otherscape.moves.downtime.3",
+            "Otherscape.moves.downtime.4"
+        ],
+        successEffects: [
+            "Otherscape.moves.downtime.0",
+            "Otherscape.moves.downtime.1",
+            "Otherscape.moves.downtime.2",
+            "Otherscape.moves.downtime.3",
+            "Otherscape.moves.downtime.4"
+        ],
+        system: "otherscape",
+        moveType: "cinematic",
+        slot: 14,
+        image: "Downtime-OS.webp",
+    },
+
+    "OS: Session End": {
+        name: "Otherscape.moves.creditRoll.name",
+        fail: "Otherscape.moves.creditRoll.always",
+        partial: "Otherscape.moves.creditRoll.always",
+        success: "Otherscape.moves.creditRoll.always",
+        failEffects: [
+            "Otherscape.moves.creditRoll.0",
+            "Otherscape.moves.creditRoll.1",
+            "Otherscape.moves.creditRoll.2",
+            "Otherscape.moves.creditRoll.3",
+            "Otherscape.moves.creditRoll.4",
+            "Otherscape.moves.creditRoll.5",
+            "Otherscape.moves.creditRoll.6",
+            "Otherscape.moves.creditRoll.7"
+        ],
+        partialEffects: [
+            "Otherscape.moves.creditRoll.0",
+            "Otherscape.moves.creditRoll.1",
+            "Otherscape.moves.creditRoll.2",
+            "Otherscape.moves.creditRoll.3",
+            "Otherscape.moves.creditRoll.4",
+            "Otherscape.moves.creditRoll.5",
+            "Otherscape.moves.creditRoll.6",
+            "Otherscape.moves.creditRoll.7"
+        ],
+        successEffects: [
+            "Otherscape.moves.creditRoll.0",
+            "Otherscape.moves.creditRoll.1",
+            "Otherscape.moves.creditRoll.2",
+            "Otherscape.moves.creditRoll.3",
+            "Otherscape.moves.creditRoll.4",
+            "Otherscape.moves.creditRoll.5",
+            "Otherscape.moves.creditRoll.6",
+            "Otherscape.moves.creditRoll.7"
+        ],
+        system: "otherscape",
+        moveType: "cinematic",
+        slot: 15,
+        image: "Session End-OS.webp",
+    },
 
 };
