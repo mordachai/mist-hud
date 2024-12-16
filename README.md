@@ -58,7 +58,8 @@ Once installed and activated, the HUD will automatically appear when a character
 
 ![image](https://github.com/user-attachments/assets/df4d8706-5794-45bd-ac39-d0c8a7258e47)
 
-The results and move effects will be automatically displayed in the chat. Click the modifiers to open. Tracked Outcomes moves can also be opened.
+Roll results, outcomes, and move effects will be displayed on the chat. Clicking on the modifiers below the roll results shows the used tags and statuses.
+Clicking on the Tracked Outcomes (Otherscape) displays suggested tags.
 
 ![image](https://github.com/user-attachments/assets/6d5bfdec-84f9-4320-b73c-6196ff38c30b)
  
