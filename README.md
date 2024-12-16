@@ -46,12 +46,12 @@ Once installed and activated, the HUD will automatically appear when a character
 ![image](https://github.com/user-attachments/assets/7238d5a3-5cab-45ee-a5be-fddd352aa097)
 
 1. Select your character token. MCs: Click on Dangers/Threats with the right button. NPCs HUD doesn't affect rolls (for now).
-2. Choose tags (Power/Weakness) from the HUD. Scene tags and statuses can be used, select them normally.
+2. Choose TAGS (Power/Weakness) from the HUD. SCENE Tags and Statuses can be used, select them normally.
     - You can mark a tag to be burned on the next roll (+3). Burned tags cannot be selected, click on the fire icon again to "unburn" the tag.
     - Invert a weakness to be used as a _power tag_ by clicking on the double arrow icon
-3. Choose statuses. Click over them to toggle if they are positive, negative, or neutral:
-    - Yellow / Blue (+): will add to the tags calculated in the roll
-    - Red / Orange  (-): will subtract from the tags calculated in the roll
+3. Choose STATUSES. Click on them to toggle if they are positive, negative, or neutral (CoM/Otherscape):
+    - Yellow / Blue (+): will add to the roll result
+    - Red / Orange  (-): will subtract from the roll result
     - No Color (0): will do nothing to the roll. If a status has no use in the next roll let it be like this
 
 4. Click the corresponding move macro in the macro hotbar. There are moves for City of Mist and Otherscape available, depending on the selected system in the City of Mist game settings.
