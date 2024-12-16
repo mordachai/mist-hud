@@ -9,6 +9,9 @@
 - **Always-visible HUD**: Provides quick access to theme tags and statuses. You only have to select a PC token
 - **Danger/Threats HUD**: Keep the enemies close and at hand (see image below)
 - **Four Awesome Dice Sets**: the characteristic modified D12 with faces from one to six. One set for _City of Mist_ and three others for _Otherscape_: Noise, Mythos, and Self
+
+![image](https://github.com/user-attachments/assets/25d11478-1971-4e48-bec6-f4214f13f607)
+
 - **Hotbar Integration**: Auto-loads macros for core moves and cinematic moves: core moves on page 1 and cinematic moves on page 2 of the Macro Hotbar
 - **Quick Roll Support**: Allows rolling with selected tags and themes without navigating away from the HUD
 - **Draggable**: Drag it around, see your game while playing it!
@@ -55,15 +58,17 @@ Once installed and activated, the HUD will automatically appear when a character
 
 ![image](https://github.com/user-attachments/assets/df4d8706-5794-45bd-ac39-d0c8a7258e47)
 
-The results and move effects will be automatically displayed in the chat.
+The results and move effects will be automatically displayed in the chat. Click the modifiers to open. Tracked Outcomes moves also can be opened.
+![image](https://github.com/user-attachments/assets/6d5bfdec-84f9-4320-b73c-6196ff38c30b)
+ 
 
 ### Dynamite Move Control Panel
 
-To assign the _Dynamite!_ trait to any Core Move, run the **Dynamite Move Control Panel** macro from the **HUD Macros compendium**. 
+To assign the _Dynamite!_ trait to any Core Move of City of Mist, run the **Dynamite Move Control Panel** macro from the **HUD Macros compendium**. 
 
 When a roll of 12+ is made with a _Dynamite_ move, the roll effects will display the dynamite rules and a 🧨 symbol will appear on the roll card in the chat.
 
-![image](https://github.com/user-attachments/assets/26816df4-fd6f-45f6-bbb8-6dacc3d95368)
+![image](https://github.com/user-attachments/assets/262546e9-5460-4ecc-af36-d1ed21f20362)
 
 
 ## Known Issues
