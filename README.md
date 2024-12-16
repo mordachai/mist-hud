@@ -34,6 +34,7 @@ OR
 
 ## Usage
 
+
 Once installed and activated, the HUD will automatically appear when a character token is selected.
 
 ### Rolling a Move: Tags and Statuses
@@ -43,13 +44,14 @@ Once installed and activated, the HUD will automatically appear when a character
 1. Select your character token.
 2. Choose tags (Power/Weakness) from the HUD.
     - You can mark a tag to be burned on the next roll (+3). Burned tags cannot be selected, click on the fire icon again to "unburn" the tag.
+    - Invert a weakness to be used as a _power tag_ by clicking on the double arrow icon
 3. Choose statuses. Click over them to toggle if they are positive, negative, or neutral:
     - Yellow / Blue (+): will add to the tags calculated in the roll
-    - Orange /  (-): will subtract from the tags calculated in the roll
-    - Grey (0): will do nothing to the roll. If a tag has no use in the next roll let it be like this
-4. Click the corresponding move macro in the macro hotbar.
+    - Red / Orange  (-): will subtract from the tags calculated in the roll
+    - No Color (0): will do nothing to the roll. If a status has no use in the next roll let it be like this
+![statuses](https://github.com/user-attachments/assets/a765fc7f-f838-4321-9604-5f5fd2cc612a)
 
-_**Note:** Check how on the roll card in the chat window the total modifier (⚡) displays the correct value with the status and tags summed up after the roll._
+4. Click the corresponding move macro in the macro hotbar. There is moves for City of Mist and Otherscape available, depending on the selected system in the City od Mist settings.
 
 ![image](https://github.com/user-attachments/assets/df4d8706-5794-45bd-ac39-d0c8a7258e47)
 
