@@ -45,7 +45,7 @@ Once installed and activated, the HUD will automatically appear when a character
 
 ![image](https://github.com/user-attachments/assets/7238d5a3-5cab-45ee-a5be-fddd352aa097)
 
-1. Select your character token.
+1. Select your character token. MCs: Click on Dangers/Threats with the right button. NPCs HUD doesn't affect rolls (for now).
 2. Choose tags (Power/Weakness) from the HUD.
     - You can mark a tag to be burned on the next roll (+3). Burned tags cannot be selected, click on the fire icon again to "unburn" the tag.
     - Invert a weakness to be used as a _power tag_ by clicking on the double arrow icon
