@@ -39,7 +39,7 @@ OR
 ## Usage
 
 
-Once installed and activated, the HUD will automatically appear when a character token is selected.
+Once installed and activated, the HUD will automatically appear when a character token is selected **(right click for NPCs)**.
 
 ### Rolling a Move: Tags! Statuses! Roll!
 
