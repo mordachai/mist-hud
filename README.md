@@ -46,9 +46,9 @@ Once installed and activated, the HUD will automatically appear when a character
 ![image](https://github.com/user-attachments/assets/7238d5a3-5cab-45ee-a5be-fddd352aa097)
 
 1. Select your character token. MCs: Click on Dangers/Threats with the right button. NPCs HUD doesn't affect rolls (for now).
-2. Choose TAGS (Power/Weakness) from the HUD. SCENE Tags and Statuses can be used, select them normally.
+2. Choose TAGS (Power, Weakness, Story, Loadout) from the HUD. SCENE story tags and statuses can be used, select them normally.
     - You can mark a tag to be burned on the next roll (+3). Burned tags cannot be selected, click on the fire icon again to "unburn" the tag.
-    - Invert a weakness to be used as a _power tag_ by clicking on the double arrow icon
+    - Invert a weakness to be used as a _power tag_ by clicking on the double arrow icon. You can also invert story tags.
 3. Choose STATUSES. Click on them to toggle if they are positive, negative, or neutral (CoM/Otherscape):
     - Yellow / Blue (+): will add to the roll result
     - Red / Orange  (-): will subtract from the roll result
@@ -58,7 +58,7 @@ Once installed and activated, the HUD will automatically appear when a character
 
 ![image](https://github.com/user-attachments/assets/df4d8706-5794-45bd-ac39-d0c8a7258e47)
 
-Roll results, outcomes, and move effects will be displayed on the chat. Clicking on the modifiers below the roll results shows the used tags and statuses.
+Roll results, outcomes, and move effects will be displayed on the chat. Clicking on the modifiers below the roll results shows the tags and statuses that were used.
 Clicking on the Tracked Outcomes (Otherscape) displays suggested tags.
 
 ![image](https://github.com/user-attachments/assets/6d5bfdec-84f9-4320-b73c-6196ff38c30b)
@@ -76,7 +76,7 @@ When a roll of 12+ is made with a _Dynamite_ move, the roll effects will display
 
 - The dice selector in the settings is not working. Use Dice So Nice settings to select your dice preset
 - The inputs are not bidirectional. Use the normal character sheet to register anything, the only purpose of the HUD is to make rolls easier and quick. Be especially aware of your burned tags.
-- NPCs (Dangers/Threats) don't affect rolls. Use the modifier at the HUD bottom to automatically affect player's rolls.
+- NPCs (Dangers/Threats) don't affect rolls. Use the modifier at the HUD bottom to automatically affect the player's rolls.
 
 ## Compatibility
 
