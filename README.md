@@ -1,6 +1,6 @@
 # Mist Engine HUD
 
-**Mist Engine HUD:** is a simple always-open, never-in-the-way HUD for _City of Mist_ and _Otherscape_ game systems made [by Taragnor for Foundry](https://foundryvtt.com/packages/city-of-mist). It allows players to quickly select tags and statuses and do the Moves rolls, with no questions or menus to answer. Just select what you need and roll using the Moves in the hotbar. Fast and streamlined like any _action-packed game_ should be!
+**Mist Engine HUD:** is a simple always-open, never-in-the-way HUD for _City of Mist_ and _Otherscape_ game systems made [by Taragnor for Foundry](https://foundryvtt.com/packages/city-of-mist). It allows players to quickly select tags and statuses and do the Moves rolls, with no questions or menus to answer. Just select what you need and roll using the Moves in the hotbar. Fast and streamlined like any _action-packed game_ should be! ([this module completely replaces the CoM Character HUD](https://github.com/mordachai/com-hud)).
 
 ![image](https://github.com/user-attachments/assets/dd7544e7-1eca-43c5-85fb-0c4e6be58942)
 
