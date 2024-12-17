@@ -74,8 +74,9 @@ When a roll of 12+ is made with a _Dynamite_ move, the roll effects will display
 
 ## Known Issues
 
+- The dice selector in the settings is not working. Use Dice So Nice settings to select your dice preset
 - The inputs are not bidirectional. Use the normal character sheet to register anything, the only purpose of the HUD is to make rolls easier and quick. Be especially aware of your burned tags.
-- NPCs (Dangers/Threats) don't affect rolls. Use the modifier at the HUD bottom to automatically affect players' rolls.
+- NPCs (Dangers/Threats) don't affect rolls. Use the modifier at the HUD bottom to automatically affect player's rolls.
 
 ## Compatibility
 
