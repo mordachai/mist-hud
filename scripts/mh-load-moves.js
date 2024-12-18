@@ -14,8 +14,6 @@ async function clearPlayerHotbars() {
     console.log("Hotbars cleared.");
 }
 
-
-
 /**
  * Creates and assigns macros dynamically for the active system.
  * Ensures macros are visible to players.

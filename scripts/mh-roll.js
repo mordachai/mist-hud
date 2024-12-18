@@ -4,7 +4,8 @@ import { MistHUD } from './mist-hud.js';
 import { moveConfig } from './mh-theme-config.js';
 import { getSceneStatuses } from './mist-hud.js';
 import { getScnTags } from './mist-hud.js';
-import { COM_mythosThemes, COM_logosThemes, COM_mistThemes, OS_selfThemes, OS_mythosThemes, OS_noiseThemes } from './mh-theme-config.js';
+import { themesConfig } from './mh-theme-config.js';
+// import { COM_mythosThemes, COM_logosThemes, COM_mistThemes, OS_selfThemes, OS_mythosThemes, OS_noiseThemes } from './mh-theme-config.js';
 import { initializeAccordions } from './accordion-handler.js';
 
 // Hooks.once('ready', () => {
@@ -319,34 +320,39 @@ function substituteText(text, totalPower) {
 
 // Function to count themebook types
 function countThemebookTypes(character) {
-  let mythosOSAmount = 0;
-  let selfAmount = 0;
-  let noiseAmount = 0;
-  let logosAmount = 0;
-  let mythosAmount = 0;
-  let mistAmount = 0;
+  // Initialize counters for each category
+  const counts = {
+    mythosOSAmount: 0,
+    selfAmount: 0,
+    noiseAmount: 0,
+    logosAmount: 0,
+    mythosAmount: 0,
+    mistAmount: 0,
+    extrasAmount: 0,
+    crewAmount: 0,
+    loadoutAmount: 0,
+  };
 
+  // Filter character items to themes
   const themes = character.items.filter(item => item.type === "theme");
 
+  // Iterate over themes and count based on their categories
   themes.forEach(theme => {
-    const themeName = theme.system.themebook_name.toLowerCase().replace(/\s+/g, "").trim();
+    const themeConfig = themesConfig[theme.system.themebook_id];
 
-    if (OS_mythosThemes.includes(themeName)) {
-      mythosOSAmount++;
-    } else if (OS_selfThemes.includes(themeName)) {
-      selfAmount++;
-    } else if (OS_noiseThemes.includes(themeName)) {
-      noiseAmount++;
-    } else if (COM_logosThemes.includes(themeName)) {
-      logosAmount++;
-    } else if (COM_mythosThemes.includes(themeName)) {
-      mythosAmount++;
-    } else if (COM_mistThemes.includes(themeName)) {
-      mistAmount++;
+    if (themeConfig && themeConfig.category) {
+      const counterKey = `${themeConfig.category}Amount`;
+      if (counts[counterKey] !== undefined) {
+        counts[counterKey]++;
+      } else {
+        console.warn(`Unknown category for theme ID: ${theme.system.themebook_id}`);
+      }
+    } else {
+      console.warn(`Theme configuration not found for theme ID: ${theme.system.themebook_id}`);
     }
   });
 
-  return { selfAmount, noiseAmount, mythosOSAmount, logosAmount, mythosAmount, mistAmount };
+  return counts;
 }
 
 // Adds Mythos or Logos count based on move flags.

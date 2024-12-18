@@ -1,26 +1,50 @@
 // mh-theme-config.js
 
-export const COM_mythosThemes = ["adaptation", "adaption", "bastion", "conjuration", "divination", "enclave", "esoterica", "expression", "familiar", "mobility", "relic"];
-export const COM_logosThemes = ["definingevent", "definingrelationship", "destiny", "mission", "personality", "possessions", "routine", "struggle", "subversion", "training", "tradition", "turf"];
-export const COM_mistThemes = ["shrouding", "advancedart", "unit"];
-export const OS_selfThemes = ["affiliation", "assets", "expertise", "horizon", "personality", "troubledPast"];
-export const OS_mythosThemes = ["artifact", "companion", "esoterica", "exposure"];
-export const OS_noiseThemes = ["augmentation", "cuttingEdge", "cyberspace", "drones"];
-
-
-// Function to get theme category by name
-export function getThemeCategory(themeName) {
-    // Normalize theme name by removing spaces and converting to lowercase
-    const normalizedThemeName = themeName.toLowerCase().trim().replace(/\s+/g, "");
-  
-    if (COM_mythosThemes.includes(normalizedThemeName)) return "mythos";
-    if (COM_logosThemes.includes(normalizedThemeName)) return "logos";
-    if (COM_mistThemes.includes(normalizedThemeName)) return "mist";
-    if (OS_selfThemes.includes(normalizedThemeName)) return "self";
-    if (OS_mythosThemes.includes(normalizedThemeName)) return "mythosOS";
-    if (OS_noiseThemes.includes(normalizedThemeName)) return "noise";
-    return null;  // Return null if theme is not recognized
-}
+// Grouped themes by categories
+export const themesConfig = {
+    // Unified theme configuration with category and localization key
+    "ySNMzgkxKYROxiVY": { category: "logos", localizationKey: "CityOfMist.themebook.definingevent.name"},
+    "iD8KFIFWDxoKoYrD": { category: "logos", localizationKey: "CityOfMist.themebook.definingrelationship.name"},
+    "k3XJLcAqTiG4EC5k": { category: "logos", localizationKey: "CityOfMist.themebook.mission.name"},
+    "WUNJcnSqW6o8Ky0p": { category: "logos", localizationKey: "CityOfMist.themebook.personality.name"},
+    "TddJzLIHRJpdUL8N": { category: "logos", localizationKey: "CityOfMist.themebook.possessions.name"},
+    "WDS5DQzwtPH4mcCA": { category: "logos", localizationKey: "CityOfMist.themebook.routine.name"},
+    "UckXkveVIfX3iGIC": { category: "logos", localizationKey: "CityOfMist.themebook.struggle.name"},
+    "0DeYkksmQPGfBgXb": { category: "logos", localizationKey: "CityOfMist.themebook.tradition.name"},
+    "av7nmMtNtyfM3EyC": { category: "logos", localizationKey: "CityOfMist.themebook.training.name"},
+    "1z5W0q4yin2dVSmw": { category: "logos", localizationKey: "CityOfMist.themebook.turf.name"},
+    "oN7A78HsYWdnK69D": { category: "mythos", localizationKey: "CityOfMist.themebook.adaption.name" },
+    "mST8BN0opZNnsiJw": { category: "mythos", localizationKey: "CityOfMist.themebook.bastion.name" },
+    "kllV9UaMbgBnc6sw": { category: "mythos", localizationKey: "CityOfMist.themebook.conjuration.name" },
+    "eiEBOE0Ksmw54CpV": { category: "mythos", localizationKey: "CityOfMist.themebook.destiny.name" },
+    "fjm9pNo8udF6JNBs": { category: "mythos", localizationKey: "CityOfMist.themebook.divination.name" },
+    "411xA6UATRGhj0S9": { category: "mythos", localizationKey: "CityOfMist.themebook.enclave.name" },
+    "9hZ78zaiBAfOWD9d": { category: "mythos", localizationKey: "CityOfMist.themebook.esoterica.name" },
+    "zQbEKTXuVmYyZCTb": { category: "mythos", localizationKey: "CityOfMist.themebook.expression.name" },
+    "MV4PUY0lzRFgrJpk": { category: "mythos", localizationKey: "CityOfMist.themebook.familiar.name" },
+    "KC4izKbFszg6PVRz": { category: "crew", localizationKey: "CityOfMist.themebook.crew.name" },
+    "TLihUIPUef6qz08e": { category: "logos", localizationKey: "CityOfMist.themebook.extra.ally.name" },
+    "BkhIz9fellq9S2jk": { category: "logos", localizationKey: "CityOfMist.themebook.extra.base.name" },
+    "XuwKwP2NDsVIlHXI": { category: "logos", localizationKey: "CityOfMist.themebook.extra.ride.name" },
+    "ll4esBP99oStT0TH": { category: "mist", localizationKey: "CityOfMist.themebook.advancedart.name" },
+    "nopE3UjirO3CIKFB": { category: "mist", localizationKey: "CityOfMist.themebook.shrouding.name" },
+    "WUWnwsC9FYAGzgpH": { category: "mist", localizationKey: "CityOfMist.themebook.unit.name" },
+    "sXQ4DJvPy9GwATCn": { category: "loadout", localizationKey: "Otherscape.themebook.loadout.name" },
+    "NgbUT22G4qsBqSwn": { category: "mythosOS", localizationKey: "Otherscape.themebook.artifact.name" },
+    "K1T0cmc315lR55ql": { category: "mythosOS", localizationKey: "Otherscape.themebook.companion.name" },
+    "f0Hldws5yB2ezw1Z": { category: "mythosOS", localizationKey: "Otherscape.themebook.esoterica.name" },
+    "5CG8unkzHqU6xuQW": { category: "mythosOS", localizationKey: "Otherscape.themebook.exposure.name" },
+    "K3rvh4bMi0L6S4lS": { category: "noise", localizationKey: "Otherscape.themebook.augmentation.name" },
+    "eSg1666zWlbhuoyl": { category: "noise", localizationKey: "Otherscape.themebook.cuttingEdge.name" },
+    "D88XNZrAQ5oMfsFW": { category: "noise", localizationKey: "Otherscape.themebook.cyberspace.name" },
+    "3i6BJjmC1oKKQvCV": { category: "noise", localizationKey: "Otherscape.themebook.drones.name" },
+    "noqoLlmqIwjirJ52": { category: "self", localizationKey: "Otherscape.themebook.affiliation.name" },
+    "m7aMSrzoz8iEjrXi": { category: "self", localizationKey: "Otherscape.themebook.assets.name" },
+    "FUhv3c81M1tcVSJD": { category: "self", localizationKey: "Otherscape.themebook.expertise.name" },
+    "WQ1gYMo8oWoiPX2a": { category: "self", localizationKey: "Otherscape.themebook.horizon.name" },
+    "FW5g6LLhbaf5BFFm": { category: "self", localizationKey: "Otherscape.themebook.personality.name" },
+    "snHXQlSZdGALWPNq": { category: "self", localizationKey: "Otherscape.themebook.troubledPast.name" }
+};
 
 export const moveConfig = {
 

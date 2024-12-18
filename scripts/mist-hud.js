@@ -1,52 +1,18 @@
 // mist-hud.js
 
-import { getThemeCategory } from './mh-theme-config.js';
-
-// Helper function to localize themebook names using the system translation file
-// function localizeTheme(themebookName) {
-//   // Normalize themebook name: lowercase, trim, and replace special characters (including spaces) with underscores
-//   const normalizedThemebookName = themebookName.toLowerCase().trim().replace(/\s+/g, "").replace(/[^\w]/g, "");
-
-//   // Construct the correct localization key
-//   const key = `CityOfMist.themebook.${normalizedThemebookName}.name`;
-
-//   // Fetch the localized string based on the active language
-//   const localizedString = game.i18n.localize(key);
-
-//   // If the localization fails, return a fallback value (the original themebook name)
-//   if (localizedString === key) {
-//     console.warn(`Localization key not found: ${key}`);
-//     return themebookName;  // Fallback to the original themebook name
-//   }
-
-//   return localizedString;
-// }
-
-
+import { themesConfig } from './mh-theme-config.js';
 
 // Helper function to localize themebook CORRECTING TYPO ON THEME NAMES KEYS
 
-function localizeTheme(themebookName) {
-  // Normalize the themebook name to form the primary key
-  const normalizedThemebookName = themebookName.toLowerCase().trim().replace(/\s+/g, "").replace(/[^\w]/g, "");
-
-  // Construct the primary localization key
-  const primaryKey = `CityOfMist.themebook.${normalizedThemebookName}.name`;
-
-  // Alternative key if the system uses different spellings (e.g., "adaptation" vs. "adaption")
-  const alternateKey = normalizedThemebookName === "adaptation" ? "CityOfMist.themebook.adaption.name" : null;
-
-  // Attempt localization with the primary key
-  let localizedString = game.i18n.localize(primaryKey);
-
-  // If localization fails, use the alternative key or fallback to the original name
-  if (localizedString === primaryKey && alternateKey) {
-    localizedString = game.i18n.localize(alternateKey);
+export function localizeTheme(themeId) {
+  const theme = themesConfig[themeId];
+  if (!theme) {
+    console.warn(`Localization key not found for theme ID: ${themeId}`);
+    return "Unknown Theme";
   }
-  
-  // If both keys fail, return the original themebook name as a fallback
-  return localizedString === primaryKey || localizedString === alternateKey ? themebookName : localizedString;
+  return game.i18n.localize(theme.localizationKey) || "Unknown Theme";
 }
+
 
 // Register Handlebars helper for localizeTheme
 Handlebars.registerHelper('localizeTheme', function(themebookName) {
@@ -112,26 +78,6 @@ export class MistHUD extends Application {
     }
   }
    
-  // async _getHeaderButtons() {
-  //   const buttons = super._getHeaderButtons();
-
-  //   // Add a collapse button
-  //   buttons.unshift({
-  //     label: '',
-  //     class: 'mh-collapse-button',
-  //     icon: this.isCollapsed ? 'fas fa-angle-down' : 'fas fa-angle-up',
-  //     onclick: () => {
-  //       this.isCollapsed = !this.isCollapsed;
-  //       if (this.actor) {
-  //         this.actor.setFlag('mist-hud', 'isCollapsed', this.isCollapsed);
-  //       }
-  //       this.render(true);
-  //     },
-  //   });
-
-  //   return buttons;
-  // }
-
   injectCustomHeader() {
     
     // Use this.element to access the entire application window
@@ -369,49 +315,53 @@ export class MistHUD extends Application {
       event.stopPropagation();
     });
   }
-
+  
   getMysteryFromTheme(themeId) {
     if (!this.actor) {
-        console.warn("No actor set in MistHUD.");
-        return null;
+      console.warn("No actor set in MistHUD.");
+      return null;
     }
-
+  
+    // Retrieve the theme item from the actor by ID
     const theme = this.actor.items.find(item => item.type === 'theme' && item.id === themeId);
-
+  
     if (!theme) {
-        console.warn(`No theme found with ID: ${themeId}`);
-        return "No mystery defined.";
+      console.warn(`No theme found with ID: ${themeId}`);
+      return "No mystery defined.";
     }
-
-    // Get the category using getThemeCategory
-    const category = getThemeCategory(theme.system.themebook_name.toLowerCase());
-
-    // Determine the prefix based on the category
-    let prefix = '';
-    switch (category) {
-        case 'mythos':
-          prefix = '<span class="mystery-type mythos">Mystery:</span>';
-            break;
-        case 'logos':
-          prefix = '<span class="mystery-type logos">Identity:</span>';
-            break;
-        case 'self':
-            prefix = '<span class="mystery-type self">Identity:</span>';
-            break;
-        case 'mythosOS':
-            prefix = '<span class="mystery-type mythosOS">Ritual:</span>';
-            break;
-        case 'noise':
-            prefix = '<span class="mystery-type noise">Itch:</span>';
-            break;
-        default:
-            console.warn(`Unknown theme category for theme: ${theme.system.themebook_name}`);
+  
+    // Retrieve theme configuration from themesConfig using themebook ID
+    const themeConfig = themesConfig[theme.system.themebook_id];
+    if (!themeConfig) {
+      console.warn(`Theme configuration not found for themebook ID: ${theme.system.themebook_id}`);
+      return "No mystery defined.";
     }
-
+  
+    // Map of category to translation keys
+    const translationKeys = {
+      mythos: "CityOfMist.terms.mystery",
+      logos: "CityOfMist.terms.identity",
+      self: "CityOfMist.terms.identity",
+      mythosOS: "Otherscape.terms.ritual",
+      noise: "Otherscape.terms.itch",
+      mist: "CityOfMist.terms.directive",
+      extras: "CityOfMist.terms.extra",
+      crew: "CityOfMist.terms.crewTheme",
+      loadout: "Otherscape.terms.loadout"
+    };
+  
+    // Get the localized prefix
+    const prefixKey = translationKeys[themeConfig.category];
+    const prefix = prefixKey ? game.i18n.localize(prefixKey) : "Theme";
+  
+    // Retrieve the mystery text from the theme
     const mysteryText = theme.system.mystery || "No mystery defined.";
-    return `${prefix} <span class="mystery-text">${mysteryText}</span>`;
+  
+    // Return the formatted HTML
+    return `<span class="mystery-type ${themeConfig.category}">${prefix}:</span>
+            <span class="mystery-text">${mysteryText}</span>`;
   }
- 
+  
   addTooltipListeners(html) {
     html.find('.mh-theme-icon').each((index, element) => {
         const themeId = $(element).data('theme-id');
@@ -580,56 +530,61 @@ export class MistHUD extends Application {
 
   getThemesAndTags() {
     if (!this.actor) return {};
-
+  
     const items = this.actor.items.contents;
-
+  
     // Filter out __LOADOUT__ and properly categorize themes
     const themeItems = items.filter(item => item.type === 'theme' && item.name !== "__LOADOUT__");
     const tagItems = items.filter(item => item.type === 'tag');
-
+  
     // Organize subtags under their respective parent tags
     const subTagsByParent = tagItems.reduce((acc, tag) => {
-        if (tag.system.parentId) {
-            if (!acc[tag.system.parentId]) acc[tag.system.parentId] = [];
-            acc[tag.system.parentId].push(tag);
-        }
-        return acc;
+      if (tag.system.parentId) {
+        if (!acc[tag.system.parentId]) acc[tag.system.parentId] = [];
+        acc[tag.system.parentId].push(tag);
+      }
+      return acc;
     }, {});
-
-    // Use the getStoryTags function to fetch and process story tags
-    const storyTags = this.getStoryTags();
-
+  
     // Process themes and their tags
     const themes = themeItems.map(theme => {
-        const themebookName = theme.system.themebook_name || theme.name;
-        const themeId = theme._id;
-        const category = getThemeCategory(themebookName.toLowerCase());
-        const iconClass = category ? `mh-theme-icon ${category}` : 'mh-theme-icon';
-
-
-        // Use the getPowerTags and getWeaknessTags functions
-        const powerTags = this.getPowerTags(themeId, tagItems, subTagsByParent);
-        const weaknessTags = this.getWeaknessTags(themeId, tagItems, subTagsByParent);
-
-        return {
-            themebookName,
-            id: themeId,
-            localizedThemebookName: localizeTheme(themebookName),
-            themeName: theme.name,
-            iconClass,
-            category,
-            powerTags,
-            weaknessTags,
-        };
-    });
-
-
+      const themeId = theme._id;
+      const themeConfig = themesConfig[theme.system.themebook_id];
+  
+      // Skip if themeConfig is missing for this theme ID
+      if (!themeConfig) {
+        console.warn(`Theme configuration not found for theme ID: ${theme.system.themebook_id}`);
+        return null;
+      }
+  
+      const category = themeConfig.category;
+      const localizedThemebookName = game.i18n.localize(themeConfig.localizationKey);
+      const iconClass = `mh-theme-icon ${category}`;
+  
+      // Get power and weakness tags
+      const powerTags = this.getPowerTags(themeId, tagItems, subTagsByParent);
+      const weaknessTags = this.getWeaknessTags(themeId, tagItems, subTagsByParent);
+  
+      return {
+        id: themeId,
+        themeName: theme.name,
+        localizedThemebookName,
+        iconClass,
+        category,
+        powerTags,
+        weaknessTags,
+      };
+    }).filter(Boolean); // Remove null entries from invalid themes
+  
+    // Process story tags
+    const storyTags = this.getStoryTags();
+  
     return {
-        themes,
-        storyTags,
+      themes,
+      storyTags,
     };
   }
-
+  
   getLoadoutTags() {
     if (!this.actor) return [];
 

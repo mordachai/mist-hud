@@ -34,6 +34,48 @@
   --font-family-effects: Courier New;
   --hud-background1: url('../ui/os_hud_BG.webp');
   --hud-bg-color: rgba(0, 0, 0, 0.45);
+  --marker-positiveTag-color: #96f5ff;
+  --marker-negativeTag-color: #ffd4a8;
+}
+
+.mh-power-tag.selected,
+.mh-story-tag.selected,
+.mh-loadout-tag.selected,
+.mh-weakness-tag.inverted.selected {
+  /* font-weight: 700; */
+  /* text-shadow: var(--negative-tag-borderColor) 1px 1px 1px; */
+  color: white;
+  background: linear-gradient(0.25turn, var(--positive-tag-color), rgba(6, 95, 150, 0));
+  clip-path: polygon(
+  100% 0,   
+  100% 100%,
+  5%  100%,
+  0 80%,
+  0 0);
+  background-size: 90% 90%;
+  background-repeat: no-repeat;
+  background-position: center left;
+  border-left: 7px solid var(--marker-positiveTag-color);
+  margin-left: -7px;
+}
+
+.mh-weakness-tag.selected,
+.mh-story-tag.inverted.selected {
+  /* font-weight: 700; */
+  /* text-shadow: var(--positive-tag-borderColor) 0px 1px; */
+  color: white;
+  background: linear-gradient(0.25turn, var(--negative-tag-color), rgba(6, 95, 150, 0));
+  clip-path: polygon(
+    100% 0,   
+    100% 100%,
+    5%  100%,
+    0 80%,
+    0 0);
+  background-size: 90% 90%;
+  background-repeat: no-repeat;
+  background-position: center left;
+  border-left: 7px solid var(--marker-negativeTag-color);
+  margin-left: -7px;
 }
 
 .double-ones::after {

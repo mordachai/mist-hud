@@ -35,3 +35,35 @@
   --hud-background1: url('../ui/com_hud_BG.webp');
   --hud-bg-color: rgba(0, 0, 0, 0.45);
 }
+
+.mh-power-tag.selected,
+.mh-story-tag.selected,
+.mh-loadout-tag.selected,
+.mh-weakness-tag.inverted.selected {
+  /* font-weight: 700; */
+  /* text-shadow: var(--negative-tag-borderColor) 1px 1px 1px; */
+  color: white;
+  background: linear-gradient(0.25turn, var(--positive-tag-color), rgba(6, 95, 150, 0));
+  background-size: 90% 90%;
+  background-repeat: no-repeat;
+  background-position: center left;
+  border-top-left-radius: 50px 50px;
+  border-bottom-left-radius: 50px 50px;
+  border-left: 6px solid var(--positive-tag-borderColor);
+  margin-left: -6px;
+}
+
+.mh-weakness-tag.selected,
+.mh-story-tag.inverted.selected {
+  /* font-weight: 700; */
+  /* text-shadow: var(--positive-tag-borderColor) 0px 1px; */
+  color: white;
+  background: linear-gradient(0.25turn, var(--negative-tag-color), rgba(6, 95, 150, 0));
+  background-size: 90% 90%;
+  background-repeat: no-repeat;
+  background-position: center left;
+  border-top-left-radius: 50px 50px;
+  border-bottom-left-radius: 50px 50px;
+  border-left: 6px solid var(--negative-tag-borderColor);
+  margin-left: -6px;
+}
