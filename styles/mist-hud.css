@@ -85,14 +85,14 @@ border: none;
 #mist-hud .window-header {
   background: var(--hud-bg-color);
   display: flex;
+  flex-basis: 35px;
   flex-direction: column;
-  flex-basis: 40px;
   justify-content:center;
   align-content: space-between;
-  align-items: center; /* Vertically align items */
-  /* padding: 5px 10px; */
+  align-items: center;
   border-bottom: 1px solid white;
   cursor: grab;
+  border-radius: 8px;
 }
 
 #mist-hud ul {
@@ -131,6 +131,7 @@ border: none;
   filter: drop-shadow(1px 2px 3px var(--mythos-dark-color));
   align-self: flex-start;
   margin-left: 30px;
+  flex: 2;
 }
 
 #mist-hud.minimized .mh-char-name {
@@ -143,6 +144,7 @@ border: none;
   color: #ffffff;
   cursor: pointer;
   margin-left: auto;
+  flex: 1;
 }
 
 #mist-hud .mh-collapse-button:hover{
@@ -155,6 +157,8 @@ border: none;
   color: #ffffff;
   cursor: pointer;
   margin: auto;
+  flex: 1;
+  padding-top: 3px;
 }
 
 #mist-hud .mh-close-button:hover {
@@ -169,6 +173,7 @@ border: none;
   color: #00000000;
   background: var(--hud-bg-color);
   border: none;
+  border-radius: 8px;
 }
 
 #mist-hud .mh-content {
