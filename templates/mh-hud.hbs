@@ -49,34 +49,40 @@
     {{/each}}
 
     <!-- LOADOUT Section -->
-    {{#if loadoutTags.length}}
-      <div class="mh-story-tags-container">
-        <div class="mh-story-tags-title">Loadout</div>
-        <ul class="mh-tags">
-          {{#each loadoutTags}}
-            <li class="mh-loadout-tag {{this.cssClass}}" data-id="{{this.id}}">
-              <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
-              <span class="mh-tag-text">{{this.tagName}}</span>
-              {{#if subtags}}
-                <ul class="mh-subtag">
-                  {{#each subtags}}
-                    <li class="subtag-item {{cssClass}}">
-                      <span class="subtag-burn">{{{burnIcon}}}</span>
-                      <span class="subtag-name">{{tagName}}</span>
-                    </li>
-                  {{/each}}
-                </ul>
-              {{/if}}
-            </li>
-          {{/each}}
-        </ul>
+    {{#if isOtherscape}} 
+    <div class="theme-container-{{category}}">
+      <div class="mh-theme-header">
+        <span class="mh-theme-icon loadout"></span>
+        <span class="mh-theme-name mh-theme-name-neutral">{{localize "Otherscape.terms.loadoutTheme.name"}}</span>
       </div>
+      <ul class="mh-tags">
+          {{#each loadoutTags}}
+          <li class="mh-loadout-tag {{this.cssClass}}" data-id="{{this.id}}">
+            <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
+            <span class="mh-tag-text">{{this.tagName}}</span>
+            {{#if subtags}}
+              <ul class="mh-subtag">
+                {{#each subtags}}
+                  <li class="subtag-item {{cssClass}}">
+                    <span class="subtag-burn">{{{burnIcon}}}</span>
+                    <span class="subtag-name">{{tagName}}</span>
+                  </li>
+                {{/each}}
+              </ul>
+            {{/if}}
+          </li>
+        {{/each}}
+      </ul>
+    </div>
     {{/if}}
 
     <!-- Story Tags Section -->
     {{#if hasStoryTags}}
       <div class="mh-story-tags-container">
-        <div class="mh-story-tags-title">Story Tags</div>
+      <div class="mh-theme-header">
+        <span class="mh-theme-icon storytag"></span>
+        <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.storyTags"}}</span>
+      </div>
         <ul class="mh-tags">
           {{#each storyTags}}
             <li class="mh-story-tag {{this.cssClass}}" data-id="{{this.id}}" data-temporary="{{this.temporary}}" data-permanent="{{this.permanent}}">
@@ -95,8 +101,11 @@
     {{/if}}
 
     <!-- Statuses Section -->
-    <div class="mh-statuses">
-      <div class="mh-statuses-title">Statuses</div>
+    <div class="mh-statuses-container">
+      <div class="mh-theme-header">
+        <span class="mh-theme-icon statuses"></span>
+        <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.statuses"}}</span>
+      </div>
       <div class="mh-statuses-list">
         {{#each statuses}}
           <div class="mh-status {{#if selected}}selected{{/if}} {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
@@ -178,13 +187,12 @@
     {{#if isOtherscape}}
       <!-- Otherscape Content -->
       <div class="section otherscape">
-        <div class="mh-theme-name title-effect">
+        <div class="mh-theme-name mh-theme-name-neutral">
           <i class="fa-light fa-chart-radar"></i> Essence
         </div>
-        {{!-- <img src="modules/mist-hud/ui/Essence.webp" alt="essence chart" class="mh-essence-chart" /> --}}
         <div class="mh-essence-chart {{essenceClass}}"></div>
         <div class="mh-essence-title {{essenceClass}}">{{essence}}</div>
-        <p class="mh-essence-text">{{essenceText}}</p>
+        {{{essenceText}}}
       </div>
     {{/if}}
 

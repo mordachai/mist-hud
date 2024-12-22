@@ -664,3 +664,23 @@ export const moveConfig = {
     },
 
 };
+
+export const essenceDescriptions = {
+    Nexus: "<p class = 'mh-essence-text'>When you next replace a theme, if you’re still a Nexus after the transformation, it starts as a full theme, not a nascent one.</p>",
+    Spiritualist: "<p class = 'mh-essence-text'>Once per session, you can tap this bond to add your Mythos to the Power of an action that is primarily powered by Self themes, or add your Self to an action that is primarily powered by Mythos themes, or, if you are already rolling with Mythos or with Self, roll with both (Power of 4).</p>",
+    Cyborg: "<p class = 'mh-essence-text'>You can add your number of Self or Noise to the Power of any action to resist or shake off mythical forces that are not manifested as tangible or measurable effects, such as curses, hallucinations, or mental influences. You may do this once per session with your Self and once per session with your Noise, or you may use both in the same action.</p>",
+    Transhuman: "<p class = 'mh-essence-text'>Once per scene, when you invoke both mythical and technological tags in the same action, no matter their source, you can trade a miss (6 or less) outcome with a mixed hit (7-9).</p>",
+    Real: "<p class = 'mh-essence-text'>Whenever you take action to directly uphold or protect one of your Identities, you may roll with Self instead of counting positive tags.</p>",
+    "Avatar/Conduit": `
+    <p class='mh-essence-subheader'>AVATAR <span>(One Source)</span></p>
+    <p class='mh-essence-text'>
+       Suspend all your Rituals; instead, choose an Agenda, which, if ever ignored (defied even once), would instantly cause you to replace all of your themes (your new themes may not include Mythos themes of your lost Source). While you are an Avatar, you may instantly recover burned power tags.
+    </p>
+    <p class='mh-essence-subheader'>CONDUIT <span>(Multiple Sources)</span></p>
+    <p class='mh-essence-text'>
+       You may replace themes at will as long as you replace them with a Mythos theme. Any Source in your possession or even nearby can become your new Mythos theme and it begins as a full theme, not a nascent one.
+    </p>`,
+    Singularity: "<p class = 'mh-essence-text'>Psychological effects and intangible or unmeasurable mythical effects do not affect you. You can interface with ALL information, regardless of medium, and may roll with Noise to search it and, if it is recorded information, to manipulate it.</p>",
+    "City of Mist Character": "<p class = 'mh-essence-text'>City of Mist characters do not use Essence rules. Are you in the right active system?</p>",
+    Undefined: "<p class = 'mh-essence-text'>Essence is not defined for this character.</p>",
+  };

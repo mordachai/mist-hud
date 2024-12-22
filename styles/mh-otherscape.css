@@ -114,8 +114,7 @@
 .section.otherscape {
   border-radius: 8px;
   margin: 15px 0;
-  text-align: center;
-  color: #fff; /* Default text color */
+  color: whitesmoke; /* Default text color */
 }
 
 .mh-essence-title {
@@ -128,13 +127,28 @@
   text-align: center;
 }
 
-.mh-essence-text {
-  font-family: var(--font-family-main2);
+.mh-essence-subheader {
+  font-family: var(--font-family-main1);
+  font-weight: bold;
   font-size: 0.95rem;
-  line-height: 1.3rem;
-  text-align:left;
+  text-align: center;
+}
+
+.mh-essence-subheader span {
+  font-weight: normal;
+  font-size: 0.85rem;
+}
+
+.mh-essence-text {
+  font-family: var(--font-family-main1);
+  font-size: 0.90rem;
+  text-transform: uppercase;
+  line-height: 1.2rem;
+  text-align: justify;
   font-style: italic;
-  hyphens: auto;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
 }
 
 /* Essence-specific styles */
@@ -173,53 +187,58 @@
   text-shadow: var(--noise-dark-color) 2px 2px 6px;
 }
 
-.mh-essence-title.undefined {
-  background-color: #555; /* Gray */
+.mh-essence-title.city-of-mist {
+  background-color: #555;
+  padding: 4px 2px;
 }
 
 .mh-essence-chart{
   background-image: url('../ui/Essence.webp');
   background-repeat: no-repeat;
   max-width: 100%;
-  height: 160px;
-  border: 2px solid #555;
+  height: 170px;
+  border: 3px solid #7d7d7d;
   border-radius: 8px;
   margin: 10px 0;
 }
 
 .mh-essence-chart.nexus {
   background-position: center;
-  background-size: 200%;
+  background-size: 210%;
 }
 
 .mh-essence-chart.spiritualist {
-  background-position: left bottom;
-  background-size: 180%;
+  background-position: left -125px;
+  background-size: 200%;
 }
 
 .mh-essence-chart.cyborg {
-  background-position: right bottom;
-  background-size: 180%;
+  background-position: right -130px;
+  background-size: 200%;
 }
 
 .mh-essence-chart.transhuman {
-  background-position: center top;
-  background-size: 180%;
+  background-position: center 10px;
+  background-size: 200%;
 }
 
 .mh-essence-chart.real {
-  background-position: center bottom;
-  background-size: 210%;
+  background-position: center -160px;
+  background-size: 200%;
 }
 
 .mh-essence-chart.avatar-conduit {
-  background-position: left top;
-  background-size: 210%;
+  background-position: left -25px;
+  background-size: 200%;
 }
 
 .mh-essence-chart.singularity {
-  background-position: right top;
-  background-size: 210%;
+  background-position: right -25px;
+  background-size: 200%;
+}
+
+.mh-essence-chart.city-of-mist {
+  background-image: none;
 }
 
 

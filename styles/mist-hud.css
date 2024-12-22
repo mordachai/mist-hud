@@ -286,10 +286,26 @@ hr {
 
 .mh-theme-icon.loadout {
   width: 18px;
-  height: 17px;
+  height: 18px;
   background-image: url('../ui/icons/loadout_icn.svg');
-  filter: drop-shadow(1px 0 6px gray);
+  filter: drop-shadow(1px 0 4px rgb(238, 238, 238));
 }
+
+.mh-theme-icon.storytag {
+  width: 15px;
+  height: 18px;
+  background-image: url('../ui/icons/storytag_icn.svg');
+  transform: scaleX(-1);
+  filter: drop-shadow(1px 0 4px rgb(201, 201, 201));
+}
+
+.mh-theme-icon.statuses {
+  width: 18px;
+  height: 16px;
+  background-image: url('../ui/icons/statuses_icn.svg');
+  filter: drop-shadow(1px 0 4px rgb(201, 201, 201));
+}
+
 
 
 /* Theme Section */
@@ -343,6 +359,11 @@ hr {
 .mh-theme-name-com-noise {
   color: var(--noise-verylight-color);
   text-shadow: var(--noise-dark-color) 1px 1px 3px;
+}
+
+.mh-theme-name-neutral {
+  color: whitesmoke;
+  text-shadow: rgb(157, 69, 184) 1px 2px 2px;
 }
 
 .mh-theme-name {
@@ -520,8 +541,9 @@ hr {
 }
 
 /* Statuses */
-.mh-statuses {
-  padding: 5px;
+.mh-statuses-container {
+  padding: 0;
+  margin-bottom: 5px;
 }
 
 .mh-statuses-title {
@@ -536,9 +558,8 @@ hr {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
-  margin-top: 5px;
+  margin-top: 10px;
   align-items: center;
-  margin: 0;
   padding: 0;
 }
 
@@ -723,7 +744,7 @@ hr {
   top: 34px; /* Align below the HUD header */
   right: 0; /* Panel starts aligned to the right */
   height: calc(100% - 64px);
-  width: 180px;
+  width: 200px;
   background-color: none; /* Transparent when closed */
   /* border-left: 1px solid var(--mist-border-color); */
   border-radius: 0 0 8px 0;
