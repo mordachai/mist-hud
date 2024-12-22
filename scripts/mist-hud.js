@@ -2,22 +2,22 @@
 
 import { themesConfig } from './mh-theme-config.js';
 
-// Helper function to localize themebook CORRECTING TYPO ON THEME NAMES KEYS
-
-export function localizeTheme(themeId) {
-  const theme = themesConfig[themeId];
-  if (!theme) {
-    console.warn(`Localization key not found for theme ID: ${themeId}`);
-    return "Unknown Theme";
-  }
-  return game.i18n.localize(theme.localizationKey) || "Unknown Theme";
-}
-
-
 // Register Handlebars helper for localizeTheme
 Handlebars.registerHelper('localizeTheme', function(themebookName) {
   return localizeTheme(themebookName);
 });
+
+const essenceDescriptions = {
+  Nexus: "When you next replace a theme, if you’re still a Nexus after the transformation, it starts as a full theme, not a nascent one.",
+  Spiritualist: "Once per session, you can tap this bond to add your Mythos to the Power of an action that is primarily powered by Self themes, or add your Self to an action that is primarily powered by Mythos themes, or, if you are already rolling with Mythos or with Self, roll with both (Power of 4).",
+  Cyborg: "You can add your number of Self or Noise to the Power of any action to resist or shake off mythical forces that are not manifested as tangible or measurable effects, such as curses, hallucinations, or mental influences. You may do this once per session with your Self and once per session with your Noise, or you may use both in the same action.",
+  Transhuman: "Once per scene, when you invoke both mythical and technological tags in the same action, no matter their source, you can trade a miss (6 or less) outcome with a mixed hit (7-9).",
+  Real: "Whenever you take action to directly uphold or protect one of your Identities, you may roll with Self instead of counting positive tags.",
+  "Avatar/Conduit": "AVATAR: Suspend all your Rituals; instead, choose an Agenda, which, if ever ignored (defied even once), would instantly cause you to replace all of your themes (your new themes may not include Mythos themes of your lost Source). While you are an Avatar, you may instantly recover burned power tags. CONDUIT: You may replace themes at will as long as you replace them with a Mythos theme. Any Source in your possession or even nearby can become your new Mythos theme and it begins as a full theme, not a nascent one.",
+  Singularity: "Psychological effects and intangible or unmeasurable mythical effects do not affect you. You can interface with ALL information, regardless of medium, and may roll with Noise to search it and, if it is recorded information, to manipulate it.",
+  "City of Mist Character": "City of Mist characters do not fall into Otherscape categories.",
+  Undefined: "Essence is not defined for this character.",
+};
 
 
 export class MistHUD extends Application {
@@ -129,9 +129,17 @@ export class MistHUD extends Application {
     this.addHUDListeners(html);
     this.addModifierListeners(html);
     this.addTooltipListeners(html);
-   
-  // Debug: Log the entire HUD HTML
-  
+
+    
+
+  const slidingPanel = document.getElementById('mh-sliding-panel');
+  const panelEar = document.getElementById('mh-panel-ear');
+
+  panelEar.addEventListener('click', () => {
+    slidingPanel.classList.toggle('open');
+  });
+
+
   // Find the window header within the entire element
   const header = this.element.find('.window-header');
   
@@ -479,7 +487,76 @@ export class MistHUD extends Application {
     totalPower += scenePower;
      
     return totalPower;
-  }  
+  }
+
+  getJuiceAndClues() {
+    const items = this.actor?.items || [];
+    const characters = game.actors; // Access all actors in the world.
+
+    // Fetch character details based on ID
+    const resolveCharacter = (charId) => {
+        const char = characters.get(charId);
+        if (!char) return null;
+        return {
+            name: char.name,
+            tokenImage:
+                char.token?.texture.src ||
+                char.prototypeToken?.texture.src ||
+                char.img,
+        };
+    };
+
+    // Help and Hurt items with resolved character info
+    const helpItems = items.filter(item => 
+        item.type === "juice" && item.system.subtype === "help"
+    ).map(item => ({
+        amount: item.system.amount,
+        target: resolveCharacter(item.system.targetCharacterId),
+    })).filter(item => item.target !== null); // Filter out invalid targets
+
+    const hurtItems = items.filter(item => 
+        item.type === "juice" && item.system.subtype === "hurt"
+    ).map(item => ({
+        amount: item.system.amount,
+        target: resolveCharacter(item.system.targetCharacterId),
+    })).filter(item => item.target !== null); // Filter out invalid targets
+
+    // Clue items
+    const clueItems = items.filter(item =>
+        item.type === "clue" &&
+        item.system.amount &&
+        item.system.partial !== undefined &&
+        item.system.source &&
+        item.system.method
+    ).map(item => ({
+        name: item.name,
+        amount: item.system.amount,
+        partial: item.system.partial,
+        source: item.system.source,
+        method: item.system.method,
+    }));
+
+    // Juice items
+    const juiceItems = items.filter(item =>
+        item.type === "juice" &&
+        item.system.amount &&
+        item.system.source &&
+        item.system.method
+    ).map(item => ({
+        name: item.name,
+        amount: item.system.amount,
+        source: item.system.source,
+        method: item.system.method,
+        subtype: item.system.subtype,
+    }));
+
+    return {
+        helpItems,
+        hurtItems,
+        clueItems,
+        juiceItems,
+    };
+  }
   
   getPowerTags(themeId, tagItems, subTagsByParent) {
     // Filter power tags for the given theme
@@ -609,12 +686,66 @@ export class MistHUD extends Application {
     });
   }
 
+  getEssence(themes) {
+    // Initialize counters for each category
+    const categoryCounts = {
+        self: 0,
+        noise: 0,
+        mythosOS: 0,
+        logos: 0,
+        mythos: 0,
+        mist: 0,
+    };
+
+    for (const theme of themes) {
+        const themebookId = theme.system.themebook_id; // Extract themebook_id
+        const themeConfig = themesConfig[themebookId]; // Lookup in themesConfig
+
+        if (themeConfig) {
+            const category = themeConfig.category;
+            if (categoryCounts.hasOwnProperty(category)) {
+                categoryCounts[category]++;
+            }
+        } else {
+            console.warn(`Themebook ID not found in config: ${themebookId}`);
+        }
+    }
+
+    const { self, noise, mythosOS, logos, mythos, mist } = categoryCounts;
+
+    // Determine the essence and its class
+    if (self > 0 && noise > 0 && mythosOS > 0) {
+        return { essence: "Nexus", className: "nexus" };
+    } else if (self > 0 && mythosOS > 0 && noise === 0) {
+        return { essence: "Spiritualist", className: "spiritualist" };
+    } else if (self > 0 && noise > 0 && mythosOS === 0) {
+        return { essence: "Cyborg", className: "cyborg" };
+    } else if (mythosOS > 0 && noise > 0 && self === 0) {
+        return { essence: "Transhuman", className: "transhuman" };
+    } else if (self > 0 && noise === 0 && mythosOS === 0) {
+        return { essence: "Real", className: "real" };
+    } else if (mythosOS > 0 && self === 0 && noise === 0) {
+        return { essence: "Avatar/Conduit", className: "avatar-conduit" };
+    } else if (noise > 0 && self === 0 && mythosOS === 0) {
+        return { essence: "Singularity", className: "singularity" };
+    } else if (logos > 0 || mist > 0 || mythos > 0) {
+        return { essence: "City of Mist Character", className: "city-of-mist" };
+    } else {
+        return { essence: "Undefined", className: "undefined" };
+    }
+  }
+
   getData(options) {
     const data = super.getData(options);
     if (!this.actor) return data;
 
-    // Fetch the active system setting
-    const activeSystem = game.settings.get("city-of-mist", "system");
+  // Get the active system setting
+  const activeSystem = game.settings.get("city-of-mist", "system");
+  data.activeSystem = activeSystem;
+
+  // Define flags for supported systems
+  data.isCityOfMist = activeSystem === "city-of-mist";
+  data.isOtherscape = activeSystem === "otherscape";
   
     // Set actor-related data
     data.charName = this.actor.name;
@@ -633,8 +764,20 @@ export class MistHUD extends Application {
     data.modifier = this.modifier;
     data.loadoutTags = this.getLoadoutTags();
 
-    // Add the active system to the data context
-    data.activeSystem = activeSystem;
+    // Juice and clues for City of Mist
+    if (data.isCityOfMist && this.actor) {
+      const juiceAndClues = this.getJuiceAndClues();
+      data.helpItems = juiceAndClues.helpItems;
+      data.hurtItems = juiceAndClues.hurtItems;
+      data.clueItems = juiceAndClues.clueItems;
+      data.juiceItems = juiceAndClues.juiceItems;
+    } else if (data.isOtherscape && this.actor) {
+      const themes = this.actor.items.filter(item => item.type === "theme");
+      const essenceData = this.getEssence(themes);
+      data.essence = essenceData.essence;
+      data.essenceClass = essenceData.className;
+      data.essenceText = essenceDescriptions[essenceData.essence] || essenceDescriptions["Undefined"];
+  }
     
     return data;
   }
@@ -918,70 +1061,7 @@ export class MistHUD extends Application {
     };
 
   }
-
-  // getSelectedRollData() {
-  //   // Power Tags: name, toBurn (true/false), inverted (true/false)
-  //   const powerTags = this.element.find('.mh-power-tag.selected').map((i, el) => ({
-  //       name: $(el).text().trim(),
-  //       toBurn: $(el).find('.mh-burn-toggle').hasClass('toBurn'),
-  //       inverted: $(el).hasClass('inverted'),
-  //   })).get();
-
-  //   // Weakness Tags: name, inverted (true/false)
-  //   const weaknessTags = this.element.find('.mh-weakness-tag.selected').map((i, el) => ({
-  //       name: $(el).text().trim(),
-  //       inverted: $(el).hasClass('inverted'),
-  //   })).get();
-
-  //   // Story Tags: name, toBurn (true/false), inverted (true/false)
-  //   const storyTags = this.element.find('.mh-story-tag.selected').map((i, el) => ({
-  //       name: $(el).text().trim(),
-  //       toBurn: $(el).find('.mh-burn-toggle').hasClass('toBurn'),
-  //       inverted: $(el).hasClass('inverted'),
-  //   })).get();
-
-  //   // Loadout Tags: name, toBurn (true/false), inverted (true/false)
-  //   const loadoutTags = this.element.find('.mh-loadout-tag.selected').map((i, el) => ({
-  //       name: $(el).text().trim(),
-  //       toBurn: $(el).find('.mh-burn-toggle').hasClass('toBurn'),
-  //       inverted: $(el).hasClass('inverted'),
-  //   })).get();
-
-  //   // Statuses: name, tier, positive/negative
-  //   const statuses = this.element.find('.mh-status.selected').map((i, el) => ({
-  //       name: $(el).attr('data-status-name') || $(el).data('statusName'),
-  //       tier: parseInt($(el).data('tier')) || 0,
-  //       type: $(el).hasClass('positive') ? 'positive' : 'negative',
-  //   })).get();
-
-  //   // Scene Tags: from `getScnTags`
-  //   const scnTags = getScnTags();
-
-  //   // Scene Statuses: from `getSceneStatuses`
-  //   const sceneStatuses = getSceneStatuses().filter(status => status.isSelected).map(status => ({
-  //       name: status.name,
-  //       tier: status.tier,
-  //       type: status.type === 'positive' ? 'scene-positive' : 'scene-negative',
-  //       temporary: status.temporary,
-  //       permanent: status.permanent,
-  //   }));
-
-  //   // Current modifier
-  //   const modifier = this.modifier || 0;
-
-  //   // Return all collected data
-  //   return {
-  //       powerTags,
-  //       weaknessTags,
-  //       storyTags,
-  //       loadoutTags,
-  //       statuses,
-  //       scnTags,
-  //       sceneStatuses,
-  //       modifier: modifier ? modifier : null, // Null if no modifier
-  //   };
-  // }  
-
+  
   async cleanHUD() {
     try {
       // Check if actor exists
@@ -1142,3 +1222,4 @@ Hooks.on('updateActor', (actor, data, options, userId) => {
     MistHUD.getInstance().render(true);
   }
 });
+

@@ -38,7 +38,7 @@
   --mythosOS-dark-color:#9833f2;
   --mythosOS-light-color:#c160e8;
   --mythosOS-verylight-color:#f8f0ff;
-  --noise-dark-color: #00def6;
+  --noise-dark-color: #04e6fb;
   --noise-light-color: #0079a6;
   --noise-verylight-color: #f4feff;
 }
@@ -54,7 +54,7 @@
 /* Main HUD container */
 #mist-hud {
   position: absolute;
-  z-index: 105;
+  z-index: 2;
   border: 1px solid var(--mist-border-color);
   border-radius: 6px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -92,7 +92,7 @@ border: none;
   align-items: center;
   border-bottom: 1px solid white;
   cursor: grab;
-  border-radius: 8px;
+  border-radius: 0 8px 0 0;
 }
 
 #mist-hud ul {
@@ -114,7 +114,7 @@ border: none;
   border-radius: 50%; /* Make the image circular */
   overflow: hidden; /* Crop overflowing parts of the image */
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5); /* Add a floating effect */
-  z-index: 2; /* Ensure it appears above other elements */
+  z-index: 3; /* Ensure it appears above other elements */
 }
 
 .mh-token-image img {
@@ -132,6 +132,7 @@ border: none;
   align-self: flex-start;
   margin-left: 30px;
   flex: 2;
+  padding-top: 3px;
 }
 
 #mist-hud.minimized .mh-char-name {
@@ -158,7 +159,7 @@ border: none;
   cursor: pointer;
   margin: auto;
   flex: 1;
-  padding-top: 3px;
+  padding-top: 8px;
 }
 
 #mist-hud .mh-close-button:hover {
@@ -628,7 +629,6 @@ hr {
   filter: drop-shadow(1px 2px 3px var(--mythosOS-dark-color));
 }
 
-
 /* Scrollbar Styling */
 .mh-content::-webkit-scrollbar {
   width: 8px;
@@ -654,17 +654,9 @@ hr {
 
 /* MYSTERY /  TOOLTIP */
 
-/* .mh-tooltip{
-  background-color: #121212;
-  padding: 5px 10px;
-  font-family: var(--font-family-main1), sans-serif;
-  border-left: 3px solid white;
-  z-index: 5;
-} */
-
 .mh-tooltip {
   position: fixed; 
-  z-index: 9999;
+  z-index: 150;
   background: rgba(0, 0, 0, 0.9); 
   color: white;
   padding: 5px 10px;
@@ -674,7 +666,6 @@ hr {
   pointer-events: none; 
   white-space: nowrap;
 }
-
 
 .mystery-type {
   font-weight: bolder;
@@ -725,3 +716,151 @@ hr {
   font-size: 0.85em;  
   font-style: italic;
 }
+
+/* Sliding Panel Wrapper */
+.mh-sliding-panel {
+  position: absolute;
+  top: 34px; /* Align below the HUD header */
+  right: 0; /* Panel starts aligned to the right */
+  height: calc(100% - 64px);
+  width: 180px;
+  background-color: none; /* Transparent when closed */
+  /* border-left: 1px solid var(--mist-border-color); */
+  border-radius: 0 0 8px 0;
+  z-index: -1; /* Ensure it's above other elements when open */
+  transform: translateX(0); /* Panel hidden to the right when closed */
+  transition: transform 0.3s ease-in-out, background-color 0.5s ease-in-out;
+  overflow: visible; /* Allow ear to appear outside */
+  padding: 10px;
+}
+
+/* Open State */
+.mh-sliding-panel.open {
+  transform: translateX(100%); /* Slide into view */
+  background-color: rgba(0, 0, 0, 0.8); /* Opaque when open */
+  box-shadow: 0 0 10px rgb(0, 0, 0);
+  /* border-top: 1px solid;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+  border-color: whitesmoke; */
+}
+
+/* Panel Ear */
+.mh-panel-ear {
+  position: absolute;
+  top: 0; /* Adjust as needed */
+  right: -30px; /* Position it outside the panel on the right */
+  width: 30px;
+  height: 30px;
+  background-color: var(--hud-bg-color);
+  border-radius: 0 6px 6px 0; /* Rounded edges */
+  text-align: center;
+  line-height: 30px;
+  font-size: 1.2rem;
+  color: white;
+  cursor: pointer;
+  z-index: 20; /* Higher than panel to stay on top */
+  transition: background-color 0.3s ease-in-out;
+  /* border-top: 1px solid;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+  border-color: whitesmoke; */
+}
+
+/* Rotate the ear icon when open */
+.mh-sliding-panel.open .mh-panel-ear {
+  transform: rotate(180deg); /* Rotate the arrow */
+  border-radius: 6px 0 0 6px; /* Rounded edges */
+}
+
+/* Ear Hover Effect */
+.mh-panel-ear:hover {
+  background-color: var(--mist-light-color);
+}
+
+/* Panel Content */
+.mh-panel-content {
+  padding: 5px;
+  opacity: 0; /* Invisible when closed */
+  transition: opacity 0.4s ease-in-out;
+  pointer-events: none; /* Prevent interaction when invisible */
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  max-height: 100%; /* Ensure the panel content respects the container height */
+  box-sizing: border-box; /* Include padding in the element's height calculation */
+}
+
+/* Open State Content */
+.mh-sliding-panel.open .mh-panel-content {
+  opacity: 1; /* Fully visible when open */
+  pointer-events: auto; /* Enable interaction */
+  color: whitesmoke;
+}
+
+/* Section Titles */
+
+/* Divider */
+.panel-divider {
+  border: 0;
+  height: 1px;
+  background: #555;
+  margin: 5px 0;
+}
+
+.title-effect{
+  text-shadow: rgb(242, 242, 242) 1px 1px 6px;
+}
+
+/* Token Image */
+.token-image {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+  border: none;
+}
+
+/* Clue and Juice Containers */
+.clue-container,
+.juice-container {
+  border: 2px solid #555; /* Border color */
+  border-radius: 5px; /* Rounded corners */
+  padding: 5px; /* Inner spacing */
+  margin-bottom: 10px; /* Space between containers */
+  background-color: #2c2c2c; /* Background color for contrast */
+}
+
+/* Item Name inside Containers */
+.clue-container .item-name,
+.juice-container .item-name {
+  font-size: 0.95rem;
+  font-weight: bold;
+  vertical-align: middle;
+  font-family: var(--font-family-main2);
+}
+
+/* Item Details inside Containers */
+.clue-container .item-details,
+.juice-container .item-details {
+  margin-left: 2px;
+  font-family: var(--font-family-hud);
+}
+
+.partial-icon {
+  font-size: 12px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.detail-label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #aaa; /* Subtle gray for labels */
+}
+
+.detail-text {
+  font-size: 12px;
+  color: #f0f0f0; /* Standard light text */
+}
+

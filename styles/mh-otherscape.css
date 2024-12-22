@@ -109,3 +109,117 @@
 .outcome-success-double-sixes {
   text-shadow: var(--effects-color1) -3px 3px 15px;
 }
+
+/* General styling for the essence section */
+.section.otherscape {
+  border-radius: 8px;
+  margin: 15px 0;
+  text-align: center;
+  color: #fff; /* Default text color */
+}
+
+.mh-essence-title {
+  font-family: var(--font-family-move), sans-serif;
+  font-size: 1.4rem;
+  display: block;
+  margin: 4px 2px;
+  padding: 2px;
+  font-style: italic;
+  text-align: center;
+}
+
+.mh-essence-text {
+  font-family: var(--font-family-main2);
+  font-size: 0.95rem;
+  line-height: 1.3rem;
+  text-align:left;
+  font-style: italic;
+  hyphens: auto;
+}
+
+/* Essence-specific styles */
+.mh-essence-title.nexus {
+  color: whitesmoke;
+  text-shadow: white 2px 2px 5px;
+}
+
+.mh-essence-title.spiritualist {
+  color: var(--mythos-dark-color);
+  text-shadow: var(--self-dark-color) 1px 1px 7px;
+}
+
+.mh-essence-title.cyborg {
+  color: var(--self-dark-color);
+  text-shadow: var(--noise-dark-color) 1px 1px 7px;
+}
+
+.mh-essence-title.transhuman {
+  color: var(--noise-dark-color);
+  text-shadow: var(--mythosOS-dark-color) 1px 1px 7px;
+}
+
+.mh-essence-title.real {
+  color: var(--self-dark-color);
+  text-shadow: var(--self-dark-color) 2px 2px 6px;
+}
+
+.mh-essence-title.avatar-conduit {
+  color: var(--mythos-dark-color);
+  text-shadow: var(--mythosOS-dark-color) 2px 2px 6px;
+}
+
+.mh-essence-title.singularity {
+  color: var(--noise-dark-color);
+  text-shadow: var(--noise-dark-color) 2px 2px 6px;
+}
+
+.mh-essence-title.undefined {
+  background-color: #555; /* Gray */
+}
+
+.mh-essence-chart{
+  background-image: url('../ui/Essence.webp');
+  background-repeat: no-repeat;
+  max-width: 100%;
+  height: 160px;
+  border: 2px solid #555;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+.mh-essence-chart.nexus {
+  background-position: center;
+  background-size: 200%;
+}
+
+.mh-essence-chart.spiritualist {
+  background-position: left bottom;
+  background-size: 180%;
+}
+
+.mh-essence-chart.cyborg {
+  background-position: right bottom;
+  background-size: 180%;
+}
+
+.mh-essence-chart.transhuman {
+  background-position: center top;
+  background-size: 180%;
+}
+
+.mh-essence-chart.real {
+  background-position: center bottom;
+  background-size: 210%;
+}
+
+.mh-essence-chart.avatar-conduit {
+  background-position: left top;
+  background-size: 210%;
+}
+
+.mh-essence-chart.singularity {
+  background-position: right top;
+  background-size: 210%;
+}
+
+
