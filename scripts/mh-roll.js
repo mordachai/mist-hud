@@ -400,7 +400,6 @@ export async function rollSpecialMoves(moveName) {
   const rollResults = await rollDice();
   const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower;
 
-  // Determine roll outcome
   let outcome;
   let moveEffects = [];
   if (rollTotal >= 12) {
@@ -416,9 +415,9 @@ export async function rollSpecialMoves(moveName) {
     outcome = "fail";
     moveEffects = move.failEffects || [];
   }
-
+ 
   // Generate chat output
-  let outcomeMessage = game.i18n.localize(move[outcome]);
+  let outcomeMessage = move[outcome] ? game.i18n.localize(move[outcome]) : "";
   outcomeMessage = substituteText(outcomeMessage, totalPower);
 
   const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
