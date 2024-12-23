@@ -2,15 +2,11 @@
 
 import { MistHUD } from './mist-hud.js';
 import { moveConfig } from './mh-theme-config.js';
-import { getSceneStatuses } from './mist-hud.js';
-import { getScnTags } from './mist-hud.js';
+// import { getSceneStatuses } from './mist-hud.js';
+// import { getScnTags } from './mist-hud.js';
 import { themesConfig } from './mh-theme-config.js';
-// import { COM_mythosThemes, COM_logosThemes, COM_mistThemes, OS_selfThemes, OS_mythosThemes, OS_noiseThemes } from './mh-theme-config.js';
 import { initializeAccordions } from './accordion-handler.js';
-
-// Hooks.once('ready', () => {
-//   console.log("Initializing MistHUD:", MistHUD.getInstance());
-// });
+import { detectActiveSystem } from './mh-settings.js';
 
 
 // Debug mode setting
@@ -356,6 +352,120 @@ function countThemebookTypes(character) {
 }
 
 // Adds Mythos or Logos count based on move flags.
+// export async function rollSpecialMoves(moveName) {
+//   const move = moveConfig[moveName];
+//   if (!move) {
+//     console.error(`Move not found: ${moveName}`);
+//     return;
+//   }
+
+//   const hud = MistHUD.getInstance();
+//   const actor = hud.actor;
+//   if (!actor) {
+//     ui.notifications.warn("Please select an actor before attempting this special move.");
+//     return;
+//   }
+
+//   // Detect the active system
+//   const activeSystem = await detectActiveSystem();
+
+//   // Get theme counts for special move rolls
+//   const { selfAmount, noiseAmount, mythosOSAmount, logosAmount, mythosAmount, mistAmount } = countThemebookTypes(actor);
+
+//   // Mapping roll flags to theme counts and types
+//   const rollMappings = {
+//     rollLogos: { amount: logosAmount, type: "logos" },
+//     rollMythos: { amount: mythosAmount, type: "mythos" },
+//     rollMist: { amount: mistAmount, type: "mist" },
+//     rollSelf: { amount: selfAmount, type: "self" },
+//     rollNoise: { amount: noiseAmount, type: "noise" },
+//     rollMythosOS: { amount: mythosOSAmount, type: "mythosOS" }
+//   };
+
+//   // Determine active roll based on move configuration
+//   const activeRoll = Object.entries(rollMappings).find(([flag]) => move[flag]) || [];
+//   const { amount: themeCount = 0, type: themeType = null } = activeRoll[1] || {};
+
+//   // Calculate additional values
+//   const totalWeakness = calculateWeaknessTags();
+//   const totalStoryTags = calculateStoryTags();
+//   const totalLoadoutTags = calculateLoadoutTags();
+//   const totalCharStatuses = calculateCharacterStatuses();
+//   const totalSceneStatuses = calculateSceneStatuses();
+//   const totalScnTags = calculateScnTags();
+//   const modifier = getRollModifier() || 0;
+
+//   // Calculate roll results using theme count
+//   const totalPower = themeCount + totalWeakness + totalStoryTags + totalLoadoutTags + totalCharStatuses + totalSceneStatuses + totalScnTags + modifier;
+//   const rollResults = await rollDice();
+//   const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower;
+
+//   let outcome;
+//   let moveEffects = [];
+//   let diceClass = "default-dice";
+//   let outcomeClass = "default-outcome";
+//   const isDoubleOnes = rollResults.every(r => r === 1);
+//   const isDoubleSixes = rollResults.every(r => r === 6);
+//   if (activeSystem === "city-of-mist" && rollTotal >= 12) {
+//     outcome = "dynamite";
+//     moveEffects = move.dynamiteEffects || [];
+//   } else if (rollTotal >= 10) {
+//     outcome = "success";
+//     moveEffects = move.successEffects || [];
+//   } else if (rollTotal >= 7) {
+//     outcome = "partial";
+//     moveEffects = move.partialEffects || [];
+//   } else {
+//     outcome = "fail";
+//     moveEffects = move.failEffects || [];
+//   }
+ 
+//   // Generate chat output
+//   let outcomeMessage = move[outcome] ? game.i18n.localize(move[outcome]) : "";
+//   outcomeMessage = substituteText(outcomeMessage, totalPower);
+
+//   const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
+//   const displayRollTotal = rollTotal;
+
+//   // Prepare chat data for rendering
+//   const chatData = {
+//     moveName: move.name,
+//     themeCategory: move.themeCategory,
+//     subtitle: move.subtitle || "",
+//     subtitleImg: move.subtitleImg || "",
+//     actorName: actor.name,
+//     rollResults,
+//     outcomeMessage,
+//     themeCount,
+//     themeType,
+//     rollTotal: displayRollTotal,
+//     localizedMoveEffects,
+//     tagsData: hud.getSelectedRollData(),
+//     totalWeakness,
+//     totalStoryTags,
+//     totalLoadoutTags,
+//     totalCharStatuses,
+//     totalSceneStatuses,
+//     totalScnTags,
+//     modifier,
+//     diceClass,
+//     outcomeClass
+//   };
+
+//   // Render and send chat message
+  
+//   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
+//   ChatMessage.create({
+//     content: chatContent,
+//     speaker: { alias: actor.name },
+//     flags: {
+//       "mist-hud": { isCustomRoll: true } // Add this flag
+//     }
+//   });
+
+//   hud.cleanHUD(chatData.tagsData);
+// }
+
 export async function rollSpecialMoves(moveName) {
   const move = moveConfig[moveName];
   if (!move) {
@@ -370,6 +480,9 @@ export async function rollSpecialMoves(moveName) {
     return;
   }
 
+  // Detect the active system
+  const activeSystem = await detectActiveSystem();
+
   // Get theme counts for special move rolls
   const { selfAmount, noiseAmount, mythosOSAmount, logosAmount, mythosAmount, mistAmount } = countThemebookTypes(actor);
 
@@ -377,6 +490,7 @@ export async function rollSpecialMoves(moveName) {
   const rollMappings = {
     rollLogos: { amount: logosAmount, type: "logos" },
     rollMythos: { amount: mythosAmount, type: "mythos" },
+    rollMist: { amount: mistAmount, type: "mist" },
     rollSelf: { amount: selfAmount, type: "self" },
     rollNoise: { amount: noiseAmount, type: "noise" },
     rollMythosOS: { amount: mythosOSAmount, type: "mythosOS" }
@@ -395,27 +509,51 @@ export async function rollSpecialMoves(moveName) {
   const totalScnTags = calculateScnTags();
   const modifier = getRollModifier() || 0;
 
-  // Calculate roll results using theme count
-  const totalPower = themeCount + totalWeakness + totalStoryTags + totalLoadoutTags + totalCharStatuses + totalSceneStatuses + totalScnTags + modifier;
+  // Aggregate total power for the roll calculation
+  const totalPower = themeCount + totalWeakness + totalStoryTags + totalLoadoutTags +
+    totalCharStatuses + totalSceneStatuses + totalScnTags + modifier;
+
+  // Roll dice
   const rollResults = await rollDice();
   const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower;
 
+  // Special outcome flags
+  const isDoubleOnes = rollResults.every(r => r === 1);
+  const isDoubleSixes = rollResults.every(r => r === 6);
+
   let outcome;
   let moveEffects = [];
-  if (rollTotal >= 12) {
+  let diceClass = "default-dice";
+  let outcomeClass = "default-outcome";
+
+  // Determine outcome
+  if (isDoubleOnes) {
+    outcome = "snakeEyes";
+    moveEffects = move.snakeEyesEffects || [];
+    diceClass = "double-ones";
+    outcomeClass = "outcome-snake-eyes";
+  } else if (isDoubleSixes) {
+    outcome = "boxcars";
+    moveEffects = move.boxcarsEffects || [];
+    diceClass = "double-sixes";
+    outcomeClass = "outcome-boxcars";
+  } else if (activeSystem === "city-of-mist" && rollTotal >= 12) {
     outcome = "dynamite";
     moveEffects = move.dynamiteEffects || [];
   } else if (rollTotal >= 10) {
     outcome = "success";
     moveEffects = move.successEffects || [];
+    outcomeClass = "outcome-success";
   } else if (rollTotal >= 7) {
     outcome = "partial";
     moveEffects = move.partialEffects || [];
+    outcomeClass = "outcome-partial";
   } else {
     outcome = "fail";
     moveEffects = move.failEffects || [];
+    outcomeClass = "outcome-fail";
   }
- 
+
   // Generate chat output
   let outcomeMessage = move[outcome] ? game.i18n.localize(move[outcome]) : "";
   outcomeMessage = substituteText(outcomeMessage, totalPower);
@@ -436,11 +574,19 @@ export async function rollSpecialMoves(moveName) {
     themeType,
     rollTotal: displayRollTotal,
     localizedMoveEffects,
-    tagsData: hud.getSelectedRollData()
+    tagsData: hud.getSelectedRollData(),
+    totalWeakness,
+    totalStoryTags,
+    totalLoadoutTags,
+    totalCharStatuses,
+    totalSceneStatuses,
+    totalScnTags,
+    modifier,
+    diceClass,
+    outcomeClass
   };
 
   // Render and send chat message
-  
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
   ChatMessage.create({
     content: chatContent,
@@ -452,6 +598,8 @@ export async function rollSpecialMoves(moveName) {
 
   hud.cleanHUD(chatData.tagsData);
 }
+
+
 
 async function rollCinematicMove(moveName) {
   const move = moveConfig[moveName];

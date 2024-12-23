@@ -185,16 +185,6 @@ export const moveConfig = {
             "CityOfMist.moves.investigate.1",
             "CityOfMist.moves.investigate.2"
         ],
-        successEffects: [
-            "CityOfMist.moves.investigate.0",
-            "CityOfMist.moves.investigate.1",
-            "CityOfMist.moves.investigate.2"
-        ],
-        dynamiteEffects: [
-            "CityOfMist.moves.investigate.0",
-            "CityOfMist.moves.investigate.1",
-            "CityOfMist.moves.investigate.2"
-        ],
         hasDynamite: true,
         system: "city-of-mist",
         slot: 6,
@@ -208,16 +198,6 @@ export const moveConfig = {
         dynamite: "CityOfMist.moves.investigate.dynamite",
         themeCategory: "mythos",
         partialEffects: [
-            "CityOfMist.moves.investigate.0",
-            "CityOfMist.moves.investigate.1",
-            "CityOfMist.moves.investigate.2"
-        ],
-        successEffects: [
-            "CityOfMist.moves.investigate.0",
-            "CityOfMist.moves.investigate.1",
-            "CityOfMist.moves.investigate.2"
-        ],
-        dynamiteEffects: [
             "CityOfMist.moves.investigate.0",
             "CityOfMist.moves.investigate.1",
             "CityOfMist.moves.investigate.2"

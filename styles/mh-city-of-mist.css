@@ -67,3 +67,19 @@
   border-left: 6px solid var(--negative-tag-borderColor);
   margin-left: -6px;
 }
+
+/*Roll Icons*/
+.mhr-icon.mythos {
+  background-image: url('../ui/icons/mythos_icn.svg');
+  filter: brightness(0) saturate(100%) invert(5%) sepia(11%) saturate(3432%) hue-rotate(16deg) brightness(93%) contrast(89%);
+}
+
+.mhr-icon.logos {
+  background-image: url('../ui/icons/logos_icn.svg');
+  filter: brightness(0) saturate(100%) invert(5%) sepia(11%) saturate(3432%) hue-rotate(16deg) brightness(93%) contrast(89%);
+}
+
+.mhr-icon.mist {
+  background-image: url('../ui/icons/mist_icn.svg');
+  filter: brightness(0) saturate(100%) invert(5%) sepia(11%) saturate(3432%) hue-rotate(16deg) brightness(93%) contrast(89%);
+}

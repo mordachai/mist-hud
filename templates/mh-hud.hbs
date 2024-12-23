@@ -153,6 +153,7 @@
         <div class="mh-theme-name title-effect"><i class="fa-solid fa-magnifying-glass"></i> {{localize "CityOfMist.terms.clues"}}</div>
         {{#each clueItems}}
           <div class="clue-container">
+            <a class="item-control clue-delete" title="Delete Clue"><i class="fas fa-trash"></i></a>
             <div class="item-name">{{this.name}} ({{this.amount}})
               {{#if this.partial}}
                 <div class="partial-icon" title="{{localize "CityOfMist.terms.partialClue"}}">🧩{{localize "CityOfMist.terms.partialClue"}}</div>

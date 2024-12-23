@@ -31,7 +31,13 @@
   font-size: 0.8em !important;
 }
 
-
+.mhr-icon {
+  width: 17px;
+  height: 17px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
 
   /* General Styles */
   .roll-container {

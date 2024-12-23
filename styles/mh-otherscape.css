@@ -241,4 +241,15 @@
   background-image: none;
 }
 
+/*Roll icons*/
+.mhr-icon.self {
+  background-image: url('../ui/icons/self_os_icn.svg');
+}
 
+.mhr-icon.mythosOS {
+  background-image: url('../ui/icons/mythos_os_icn.svg');
+}
+
+.mhr-icon.noise {
+  background-image: url('../ui/icons/noise_os_icn.svg');
+}

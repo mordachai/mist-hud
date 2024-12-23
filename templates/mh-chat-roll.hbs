@@ -22,17 +22,7 @@
   <div class="accordion-container">
     <div class="mhr-roll-mdf accordion-header clickable">
       {{#if themeCount}}
-        {{#if (eq themeType "mythos")}}
-          <span class="mh-dropshadow-{{themeCategory}}"><i class="fa-solid fa-bolt"></i> {{themeCount}}</span>
-          {{else if (eq themeType "logos")}}
-          <span class="mh-dropshadow-{{themeCategory}}"><i class="fa-solid fa-mask"></i> {{themeCount}}</span>
-          {{else if (eq themeType "noise")}}
-          <span class="mh-dropshadow-{{themeCategory}}">Noise {{themeCount}}</span>
-          {{else if (eq themeType "self")}}
-          <span class="mh-dropshadow-{{themeCategory}}">Self {{themeCount}}</span>
-          {{else if (eq themeType "mythosOS")}}
-          <span class="mh-dropshadow-{{themeCategory}}">Mythos {{themeCount}}</span>
-      {{/if}}
+      <span class="mhr-icon {{themeCategory}}"></span><span> {{themeCount}}</span>
       {{/if}}
       {{#if calculatedPower}}
         <span><i class="fa-light fa-bolt"></i> {{calculatedPower}}</span>
