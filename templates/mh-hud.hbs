@@ -52,7 +52,7 @@
     {{#if isOtherscape}} 
     <div class="theme-container-{{category}}">
       <div class="mh-theme-header">
-        <span class="mh-theme-icon loadout"></span>
+        <span class="mh-theme-icon-notip loadout"></span>
         <span class="mh-theme-name mh-theme-name-neutral">{{localize "Otherscape.terms.loadoutTheme.name"}}</span>
       </div>
       <ul class="mh-tags">
@@ -80,8 +80,8 @@
     {{#if hasStoryTags}}
       <div class="mh-story-tags-container">
       <div class="mh-theme-header">
-        <span class="mh-theme-icon storytag"></span>
-        <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.storyTags"}}</span>
+        <span class="mh-theme-icon-notip storytag"></span>
+        <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.storyTags"}}{{#if isOtherscape}} / Relationships{{/if}}</span>
       </div>
         <ul class="mh-tags">
           {{#each storyTags}}
@@ -103,7 +103,7 @@
     <!-- Statuses Section -->
     <div class="mh-statuses-container">
       <div class="mh-theme-header">
-        <span class="mh-theme-icon statuses"></span>
+        <span class="mh-theme-icon-notip statuses"></span>
         <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.statuses"}}</span>
       </div>
       <div class="mh-statuses-list">
@@ -135,7 +135,21 @@
       <div class="section relationships">
         <div class="mh-theme-name title-effect"><i class="fa-solid fa-users"></i> {{localize "CityOfMist.terms.help"}} & {{localize "CityOfMist.terms.hurt"}}</div>
         {{#each helpItems}}
-          <div class="relationship-item">
+  <div class="relationship-item">
+    <input type="checkbox" class="help-toggle" data-target-id="{{this.target.id}}" {{#if this.active}}checked{{/if}}>
+    <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
+    <span class="item-name">{{this.target.name}} (+{{this.amount}})</span>
+      </div>
+{{/each}}
+{{#each hurtItems}}
+  <div class="relationship-item">
+    <input type="checkbox" class="hurt-toggle" data-target-id="{{this.target.id}}" {{#if this.active}}checked{{/if}}>
+    <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
+    <span class="item-name">{{this.target.name}} (-{{this.amount}})</span>
+  </div>
+{{/each}}
+
+          {{!-- <div class="relationship-item">
             <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
             <span class="item-name">{{this.target.name}} (+{{this.amount}})</span>
           </div>
@@ -145,7 +159,7 @@
             <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
             <span class="item-name">{{this.target.name}} (-{{this.amount}})</span>
           </div>
-        {{/each}}
+        {{/each}} --}}
       </div>
       <hr class="panel-divider" />
 
