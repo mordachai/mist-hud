@@ -852,6 +852,20 @@ hr {
 }
 
 /* Clue and Juice Containers */
+.mh-title-container{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 3px;
+}
+
+#mh-sliding-panel .clue-delete,
+#mh-sliding-panel .juice-delete {
+  font-size: 0.65rem;
+  margin-left: 5px;
+}
+
 .clue-container,
 .juice-container {
   border: 2px solid #555; /* Border color */
@@ -864,9 +878,9 @@ hr {
 /* Item Name inside Containers */
 .clue-container .item-name,
 .juice-container .item-name {
+  flex: row;
   font-size: 0.95rem;
   font-weight: bold;
-  vertical-align: middle;
   font-family: var(--font-family-main2);
 }
 

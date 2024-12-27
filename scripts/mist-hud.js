@@ -1,6 +1,7 @@
 // mist-hud.js
 
 import { themesConfig, essenceDescriptions } from './mh-theme-config.js';
+import { CityHelpers } from "/systems/city-of-mist/module/city-helpers.js";
 
 // Register Handlebars helper for localizeTheme
 Handlebars.registerHelper('localizeTheme', function(themebookName) {
@@ -60,6 +61,7 @@ export class MistHUD extends Application {
   }
 
   async render(force = false, options = {}) {
+    console.log(`[Help/Hurt Debug] Rendering HUD for actor:`, this.actor?.name);
     try {
       await super.render(true);
     } catch (error) {
@@ -286,7 +288,6 @@ export class MistHUD extends Application {
       // Recalculate total power to reflect deselection
       this.calculateTotalPower();
     });
-
   
     // Status selection cycle with .selected toggle
     html.find('.mh-status').on('click', (event) => {
@@ -306,10 +307,204 @@ export class MistHUD extends Application {
       this.calculateTotalPower();
     });
 
+    html.find('.help-toggle, .hurt-toggle').on('change', async (event) => {
+      const toggle = event.currentTarget;
+      const isChecked = toggle.checked;
+      const targetActorId = toggle.dataset.targetId; // ID of the receiving player
+      const bonusType = toggle.classList.contains('help-toggle') ? 'help' : 'hurt'; // Type of bonus
+      const amount = Number(toggle.dataset.amount); // Bonus value
+      const actorId = game.user.character?.id; // ID of the giving player
+  
+      console.log(`[Help/Hurt Debug] Checkbox State:`, {
+          isChecked,
+          bonusType,
+          amount,
+          givingPlayer: actorId,
+          receivingPlayer: targetActorId,
+      });
+  
+      if (!actorId) {
+          console.warn(`[Help/Hurt Debug] No actor linked to the giving player.`);
+          return;
+      }
+  
+      // Emit socket event to update all clients
+      game.socket.emit('system.mist-hud', {
+          type: 'update-bonus',
+          actorId, // Giving player
+          targetId: targetActorId, // Receiving player
+          bonusType,
+          active: isChecked,
+          amount,
+      });
+  
+      // Emit socket event to notify the receiving player
+      game.socket.emit('system.mist-hud', {
+        type: 'notify-bonus',
+        targetId: targetActorId,
+        giverId: actorId,
+        bonusType,
+        amount,
+        active: isChecked,
+      });
+  
+      console.log(`[Help/Hurt Debug] Emitted socket events for update and notify.`);
+    });
+
+    // Add listener for clue creation and deletion deletion
+    html.find('.clue-delete').on("click", this._deleteClueFromHUD.bind(this));
+    html.find('.create-clue').on("click", this._createClueFromHUD.bind(this));
+
+    // Add listeners for juice creation and deletion
+    html.find('.juice-delete').on("click", this._deleteJuiceFromHUD.bind(this));
+    html.find('.create-juice').on("click", this._createJuiceFromHUD.bind(this));
+
+    
     this.element.on('contextmenu', (event) => {
       event.preventDefault();
       event.stopPropagation();
     });
+  }
+
+  async _createClueFromHUD(event) {
+    event.stopPropagation();
+
+    const owner = this.actor;
+    if (!owner) {
+        console.error("Actor not found for clue creation.");
+        return;
+    }
+
+    // Create a new clue with a default name
+    const obj = await owner.createNewClue({ name: "Unnamed Clue" });
+    if (!obj) {
+        console.error("Failed to create a new clue.");
+        return;
+    }
+
+    // Retrieve the newly created clue
+    const clue = owner.getClue(obj.id);
+    if (!clue) {
+        console.error(`Clue with ID ${obj.id} not found.`);
+        return;
+    }
+
+    // Open the Clue/Journal Dialog (CJDialog) to edit the clue using CityHelpers
+    const updateObj = await CityHelpers.itemDialog(clue); // Replaced CJDialog
+    if (updateObj) {
+        // Log the creation if the user completes the dialog
+        const partialStr = clue.system.partial ? ", partial" : "";
+        CityHelpers.modificationLog(owner, "Created", clue, `${clue.system.amount}${partialStr}`);
+    } else {
+        // Delete the clue if the dialog is canceled
+        await owner.deleteClue(obj.id);
+    }
+
+    // Refresh the HUD to display the new clue
+    this.render(false);
+  }
+
+  async _deleteClueFromHUD(event) {
+    event.stopPropagation();
+    
+    // Get the clue and actor data from the clicked element
+    const clueId = event.currentTarget.closest("[data-clue-id]")?.dataset.clueId;
+    const actorId = event.currentTarget.closest("[data-owner-id]")?.dataset.ownerId;
+
+    if (!clueId || !actorId) {
+        console.error("Missing data attributes for clue deletion:", { clueId, actorId });
+        return;
+    }
+
+    // Retrieve the actor
+    const owner = game.actors.get(actorId);
+    if (!owner) {
+        console.error(`Actor with ID ${actorId} not found`);
+        return;
+    }
+
+    // Retrieve and delete the clue
+    const clue = owner.getClue(clueId);
+    if (!clue) {
+        console.error(`Clue with ID ${clueId} not found on actor ${actorId}`);
+        return;
+    }
+
+    await owner.deleteClue(clueId);
+
+    // Log the modification
+    CityHelpers.modificationLog(owner, "Removed", clue);
+
+    // Optionally, re-render the HUD if necessary
+    this.render(false);
+  }
+
+  async _createJuiceFromHUD(event) {
+    event.stopPropagation();
+
+    const owner = this.actor;
+    if (!owner) {
+        console.error("Actor not found for juice creation.");
+        return;
+    }
+
+    // Create a new juice item
+    const obj = await owner.createNewJuice("Unnamed Juice");
+    if (!obj) {
+        console.error("Failed to create a new juice.");
+        return;
+    }
+
+    // Retrieve the newly created juice
+    const juice = owner.getJuice(obj.id);
+    if (!juice) {
+        console.error(`Juice with ID ${obj.id} not found.`);
+        return;
+    }
+
+    // Open the Juice/Journal Dialog (CJDialog) to edit the juice
+    const updateObj = await CityHelpers.itemDialog(juice);
+    if (updateObj) {
+        CityHelpers.modificationLog(owner, "Created", juice, `${juice.system.amount}`);
+    } else {
+        // Delete the juice if the dialog is canceled
+        await owner.deleteJuice(obj.id);
+    }
+
+    // Refresh the HUD to display the new juice
+    this.render(false);
+  }
+
+  async _deleteJuiceFromHUD(event) {
+    event.stopPropagation();
+
+    const juiceId = event.currentTarget.closest("[data-juice-id]")?.dataset.juiceId;
+    const actorId = event.currentTarget.closest("[data-owner-id]")?.dataset.ownerId;
+
+    if (!juiceId || !actorId) {
+        console.error("Missing data attributes for juice deletion:", { juiceId, actorId });
+        return;
+    }
+
+    // Retrieve the actor
+    const owner = game.actors.get(actorId);
+    if (!owner) {
+        console.error(`Actor with ID ${actorId} not found`);
+        return;
+    }
+
+    // Retrieve and delete the juice
+    const juice = owner.getJuice(juiceId);
+    if (!juice) {
+        console.error(`Juice with ID ${juiceId} not found on actor ${actorId}`);
+        return;
+    }
+
+    await owner.deleteJuice(juiceId);
+    CityHelpers.modificationLog(owner, "Removed", juice);
+
+    // Refresh the HUD to display updated juice
+    this.render(false);
   }
   
   getMysteryFromTheme(themeId) {
@@ -491,52 +686,76 @@ export class MistHUD extends Application {
                 char.token?.texture.src ||
                 char.prototypeToken?.texture.src ||
                 char.img,
+            id: char.id
         };
     };
 
-    // Help and Hurt items with resolved character info
-    const helpItems = items.filter(item => 
-        item.type === "juice" && item.system.subtype === "help"
-    ).map(item => ({
-        amount: item.system.amount,
-        target: resolveCharacter(item.system.targetCharacterId),
-    })).filter(item => item.target !== null); // Filter out invalid targets
+    // Fetch active bonuses from actor flags
+    const activeBonuses = this.actor.getFlag('mist-hud', 'active-bonuses') || {};
 
-    const hurtItems = items.filter(item => 
-        item.type === "juice" && item.system.subtype === "hurt"
-    ).map(item => ({
-        amount: item.system.amount,
-        target: resolveCharacter(item.system.targetCharacterId),
-    })).filter(item => item.target !== null); // Filter out invalid targets
+    // Help items with resolved character info and active status
+    const helpItems = items
+        .filter(item => item.type === "juice" && item.system.subtype === "help")
+        .map(item => {
+            const target = resolveCharacter(item.system.targetCharacterId);
+            if (!target) return null;
+
+            const active = activeBonuses.help?.[target.id] || false;
+
+            return {
+                amount: item.system.amount,
+                target,
+                active,
+            };
+        })
+        .filter(item => item !== null); // Filter out invalid targets
+
+    // Hurt items with resolved character info and active status
+    const hurtItems = items
+        .filter(item => item.type === "juice" && item.system.subtype === "hurt")
+        .map(item => {
+            const target = resolveCharacter(item.system.targetCharacterId);
+            if (!target) return null;
+
+            const active = activeBonuses.hurt?.[target.id] || false;
+
+            return {
+                amount: item.system.amount,
+                target,
+                active,
+            };
+        })
+        .filter(item => item !== null); // Filter out invalid targets
 
     // Clue items
-    const clueItems = items.filter(item =>
-        item.type === "clue" &&
-        item.system.amount &&
-        item.system.partial !== undefined &&
-        item.system.source &&
-        item.system.method
-    ).map(item => ({
-        name: item.name,
-        amount: item.system.amount,
-        partial: item.system.partial,
-        source: item.system.source,
-        method: item.system.method,
+    const clueItems = items
+    .filter(item => item.type === "clue" && item.system)
+    .map(item => ({
+        id: item.id, // Include the clue's unique ID
+        actorId: this.actor.id, // Include the actor's ID for context
+        name: item.name || "Unnamed Clue",
+        amount: item.system.amount || 0,
+        partial: item.system.partial || false,
+        source: item.system.source || "Unknown",
+        method: item.system.method || "Unknown",
     }));
 
     // Juice items
-    const juiceItems = items.filter(item =>
+    const juiceItems = items
+    .filter(item =>
         item.type === "juice" &&
-        item.system.amount &&
-        item.system.source &&
-        item.system.method
-    ).map(item => ({
-        name: item.name,
-        amount: item.system.amount,
-        source: item.system.source,
-        method: item.system.method,
-        subtype: item.system.subtype,
+        item.system &&
+        (!item.system.subtype || !["help", "hurt"].includes(item.system.subtype)) // Exclude help and hurt subtypes
+    )
+    .map(item => ({
+        id: item.id,
+        actorId: this.actor.id,
+        name: item.name || "Unnamed Juice",
+        amount: item.system.amount || 0,
+        source: item.system.source || "Unknown",
+        method: item.system.method || "Unknown",
     }));
+
 
     return {
         helpItems,
@@ -699,82 +918,104 @@ export class MistHUD extends Application {
         }
     }
 
-    const { self, noise, mythosOS, logos, mythos, mist } = categoryCounts;
+    const { self, noise, mythosOS } = categoryCounts;
+
+    // Generate the image file name
+    const totalCount = self + noise + mythosOS;
+    let imageName = "blank.webp"; // Default image for undefined
+
+    if (totalCount === 4) {
+        const segments = [];
+        if (self > 0) segments.push(`${self}S`);
+        if (mythosOS > 0) segments.push(`${mythosOS}M`);
+        if (noise > 0) segments.push(`${noise}N`);
+        imageName = segments.join("") + ".svg";
+    } else if (categoryCounts.logos > 0 || categoryCounts.mist > 0 || categoryCounts.mythos > 0) {
+        imageName = "com.webp"; // City of Mist characters
+    }
 
     // Determine the essence and its class
+    let essenceData = { essence: "Undefined", className: "undefined", imageName };
+
     if (self > 0 && noise > 0 && mythosOS > 0) {
-        return { essence: "Nexus", className: "nexus" };
+        essenceData = { essence: "Nexus", className: "nexus", imageName };
     } else if (self > 0 && mythosOS > 0 && noise === 0) {
-        return { essence: "Spiritualist", className: "spiritualist" };
+        essenceData = { essence: "Spiritualist", className: "spiritualist", imageName };
     } else if (self > 0 && noise > 0 && mythosOS === 0) {
-        return { essence: "Cyborg", className: "cyborg" };
+        essenceData = { essence: "Cyborg", className: "cyborg", imageName };
     } else if (mythosOS > 0 && noise > 0 && self === 0) {
-        return { essence: "Transhuman", className: "transhuman" };
+        essenceData = { essence: "Transhuman", className: "transhuman", imageName };
     } else if (self > 0 && noise === 0 && mythosOS === 0) {
-        return { essence: "Real", className: "real" };
+        essenceData = { essence: "Real", className: "real", imageName };
     } else if (mythosOS > 0 && self === 0 && noise === 0) {
-        return { essence: "Avatar/Conduit", className: "avatar-conduit" };
+        essenceData = { essence: "Avatar/Conduit", className: "avatar-conduit", imageName };
     } else if (noise > 0 && self === 0 && mythosOS === 0) {
-        return { essence: "Singularity", className: "singularity" };
-    } else if (logos > 0 || mist > 0 || mythos > 0) {
-        return { essence: "City of Mist Character", className: "city-of-mist" };
-    } else {
-        return { essence: "Undefined", className: "undefined" };
+        essenceData = { essence: "Singularity", className: "singularity", imageName };
     }
+
+    return essenceData;
   }
 
   getData(options) {
     const data = super.getData(options);
     if (!this.actor) return data;
 
-  // Get the active system setting
-  const activeSystem = game.settings.get("city-of-mist", "system");
-  data.activeSystem = activeSystem;
+    // Get the active system setting
+    const activeSystem = game.settings.get("city-of-mist", "system");
+    data.activeSystem = activeSystem;
 
-  // Define flags for supported systems
-  data.isCityOfMist = activeSystem === "city-of-mist";
-  data.isOtherscape = activeSystem === "otherscape";
-  
+    // Define flags for supported systems
+    data.isCityOfMist = activeSystem === "city-of-mist";
+    data.isOtherscape = activeSystem === "otherscape";
+
     // Set actor-related data
     data.charName = this.actor.name;
     data.tokenImage =
-      this.actor.token?.texture.src ||
-      this.actor.prototypeToken.texture.src ||
-      this.actor.img;
+        this.actor.token?.texture.src ||
+        this.actor.prototypeToken?.texture.src ||
+        this.actor.img;
     data.isCollapsed = this.isCollapsed;
-  
-    // Retrieve themes and story tags separately
+
+    // Retrieve themes and story tags
     const themesAndTags = this.getThemesAndTags();
     data.themes = themesAndTags.themes;
     data.storyTags = themesAndTags.storyTags;
-    data.hasStoryTags = themesAndTags.storyTags && themesAndTags.storyTags.length > 0; // Check for story tags
+    data.hasStoryTags = !!(themesAndTags.storyTags && themesAndTags.storyTags.length > 0);
     data.statuses = this.getActorStatuses();
     data.modifier = this.modifier;
     data.loadoutTags = this.getLoadoutTags();
 
-    // Juice and clues for City of Mist
-    if (data.isCityOfMist && this.actor) {
-      const juiceAndClues = this.getJuiceAndClues();
-      data.helpItems = juiceAndClues.helpItems;
-      data.hurtItems = juiceAndClues.hurtItems;
-      data.clueItems = juiceAndClues.clueItems;
-      data.juiceItems = juiceAndClues.juiceItems;
-    } else if (data.isOtherscape && this.actor) {
-        // Get essence for Otherscape
+    // Process Juice and Clues for City of Mist
+      if (data.isCityOfMist) {
+      const { helpItems, hurtItems, clueItems, juiceItems } = this.getJuiceAndClues();
+        data.helpItems = helpItems || [];
+        data.hurtItems = hurtItems || [];
+        data.clueItems = clueItems || []; // Pass clueItems to the HUD
+        data.juiceItems = juiceItems || [];
+      } else if (data.isOtherscape) {
+        // Process essence for Otherscape
         const themes = this.actor.items.filter(item => item.type === "theme");
         const essenceData = this.getEssence(themes);
 
-        if (essenceData && essenceData.essence) {
+        if (essenceData?.essence) {
             data.essence = essenceData.essence;
             data.essenceClass = essenceData.className;
+            data.essenceImage = essenceData.imageName;
             data.essenceText = new Handlebars.SafeString(
                 essenceDescriptions[essenceData.essence] || essenceDescriptions["Undefined"]
             );
         } else {
             console.error("getEssence returned invalid data:", essenceData);
         }
-      }
-    
+    }
+
+    // Add Help and Hurt messages for the receiving player
+    const receivedBonuses = this.actor.getFlag('mist-hud', 'received-bonuses') || [];
+    console.log(`[Help/Hurt Debug] Bonuses fetched in getData:`, receivedBonuses);
+
+    data.helpHurtMessages = receivedBonuses.length > 0 ? receivedBonuses : null;
+    console.log(`[Help/Hurt Debug] Messages passed to HUD:`, data.helpHurtMessages);
+
     return data;
   }
    
@@ -1110,8 +1351,6 @@ export class MistHUD extends Application {
      
 }
 
-
-
 // Function to attach click listeners to each scene tag for dynamic updates
 function attachSceneTagListeners() {
   $('.scene-tag-window').on('click', '.tag-or-status .flex-row.tag', (event) => {
@@ -1219,3 +1458,53 @@ Hooks.on('updateActor', (actor, data, options, userId) => {
   }
 });
 
+Hooks.once('ready', () => {
+  game.socket.on('system.mist-hud', async (data) => {
+      console.log(`[Help/Hurt Debug] Socket event received:`, data);
+
+      if (data.type === 'notify-bonus' && game.user.character?.id === data.targetId) {
+          const targetActor = game.actors?.get(data.targetId);
+          const giverActor = game.actors?.get(data.giverId);
+
+          if (!targetActor || !giverActor) {
+              console.warn(`[Help/Hurt Debug] Invalid target or giver actor.`, { targetActor, giverActor });
+              return;
+          }
+
+          console.log(`[Help/Hurt Debug] Notification received:`, {
+              targetActor: targetActor.name,
+              giverActor: giverActor.name,
+              bonusType: data.bonusType,
+              amount: data.amount,
+              active: data.active,
+          });
+
+          const message = {
+              giverName: giverActor.name,
+              type: data.bonusType,
+              amount: data.amount,
+          };
+
+          const currentBonuses = targetActor.getFlag('mist-hud', 'received-bonuses') || [];
+          console.log(`[Help/Hurt Debug] Current bonuses before update for target "${targetActor.name}":`, currentBonuses);
+
+          if (data.active) {
+              currentBonuses.push(message);
+          } else {
+              const index = currentBonuses.findIndex(
+                  (bonus) => bonus.giverName === message.giverName && bonus.type === message.type
+              );
+              if (index !== -1) {
+                  currentBonuses.splice(index, 1);
+              }
+          }
+
+          // Update the flag and verify the change
+          await targetActor.setFlag('mist-hud', 'received-bonuses', currentBonuses);
+          const updatedBonuses = targetActor.getFlag('mist-hud', 'received-bonuses');
+          console.log(`[Help/Hurt Debug] Updated bonuses confirmed for target "${targetActor.name}":`, updatedBonuses);
+
+          MistHUD.getInstance().render(true);
+      }
+  });
+});

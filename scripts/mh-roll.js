@@ -74,6 +74,21 @@ async function rollMove(moveName, hasDynamite) {
   const totalScnTags = calculateScnTags();
   const modifier = getRollModifier() || 0;
 
+  const activeBonuses = actor.getFlag('mist-hud', 'received-bonuses') || [];
+  console.log(`[Help/Hurt Debug] Active Bonuses for Roll:`, activeBonuses);
+  
+  const helpBonuses = activeBonuses
+      .filter(bonus => bonus.type === 'help')
+      .reduce((sum, bonus) => sum + bonus.amount, 0);
+  
+  const hurtBonuses = activeBonuses
+      .filter(bonus => bonus.type === 'hurt')
+      .reduce((sum, bonus) => sum + bonus.amount, 0);
+  
+  const totalBonus = helpBonuses - hurtBonuses;
+  console.log(`[Roll Debug] Calculated Bonuses:`, { helpBonuses, hurtBonuses, totalBonus });
+  
+
   // Aggregate total power for the roll calculation
   const totalPower = calculatedPower + totalWeakness + totalStoryTags + totalLoadoutTags + totalCharStatuses + totalSceneStatuses + totalScnTags + modifier;
 
@@ -98,7 +113,9 @@ try {
 
   
   const rollResults = await rollDice();
-  const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower;
+  const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower + totalBonus;
+
+  console.log(`[Roll Debug] Final Roll Total:`, {rollResults,totalPower,totalBonus,rollTotal,});
 
   // Import the active system setting
   const activeSystem = game.settings.get("city-of-mist", "system");
@@ -210,6 +227,12 @@ try {
         "mist-hud": { isCustomRoll: true } // Add this flag
       }
   });
+
+  // Clean up received-bonuses after roll
+  await actor.unsetFlag('mist-hud', 'received-bonuses');
+  console.log(`[Help/Hurt Debug] Cleared bonuses after roll for actor:`, actor.name);
+
+  hud.render(true); // Re-render HUD to reflect cleared bonuses
 
   hud.cleanHUD(chatData.tagsData);
 }

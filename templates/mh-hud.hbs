@@ -123,89 +123,115 @@
       <input type="text" id="mh-mod-value" value="0" />
       <div id="mh-mod-increase" class="mh-mod-button">+</div>
     </div>
+
+    <!-- Help/Hurt Messages -->
+    {{!-- <div id="mh-help-hurt-messages" class="mh-help-hurt-messages">
+      {{#if helpHurtMessages}}
+        {{#each helpHurtMessages}}
+          <div class="help-hurt-message {{this.type}}">
+            {{this.giverName}} {{#if (eq this.type "help")}}helps{{else}}hurts{{/if}} you for {{this.amount}}
+          </div>
+        {{/each}}
+      {{else}}
+        <div class="help-hurt-message empty">No active Help or Hurt effects</div>
+      {{/if}}
+    </div> --}}
+
+
   </div>
 </div>
+
 
 {{!-- RIGHT PANEL --}}
 <div id="mh-sliding-panel" class="mh-sliding-panel">
   <div id="mh-panel-ear" class="mh-panel-ear">❯</div>
   <div id="mh-panel-content" class="mh-panel-content">
+    <!-- City of Mist Content -->
     {{#if isCityOfMist}}
-      <!-- City of Mist Content -->
-      <div class="section relationships">
-        <div class="mh-theme-name title-effect"><i class="fa-solid fa-users"></i> {{localize "CityOfMist.terms.help"}} & {{localize "CityOfMist.terms.hurt"}}</div>
-        {{#each helpItems}}
-  <div class="relationship-item">
-    <input type="checkbox" class="help-toggle" data-target-id="{{this.target.id}}" {{#if this.active}}checked{{/if}}>
-    <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
-    <span class="item-name">{{this.target.name}} (+{{this.amount}})</span>
+    <div class="section relationships">
+      <div class="mh-theme-name title-effect"><i class="fa-solid fa-users"></i> {{localize "CityOfMist.terms.help"}} & {{localize "CityOfMist.terms.hurt"}}</div>
+      {{#each helpItems}}
+      <div class="relationship-item">
+        <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
+        <span class="item-name">{{this.target.name}} (+{{this.amount}})</span>
+        {{!-- <input type="checkbox" class="help-toggle" data-target-id="{{this.target.id}}" data-amount="{{this.amount}}" {{#if this.active}}checked{{/if}}> --}}
       </div>
-{{/each}}
-{{#each hurtItems}}
-  <div class="relationship-item">
-    <input type="checkbox" class="hurt-toggle" data-target-id="{{this.target.id}}" {{#if this.active}}checked{{/if}}>
-    <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
-    <span class="item-name">{{this.target.name}} (-{{this.amount}})</span>
-  </div>
-{{/each}}
-
-          {{!-- <div class="relationship-item">
-            <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
-            <span class="item-name">{{this.target.name}} (+{{this.amount}})</span>
-          </div>
-        {{/each}}
-        {{#each hurtItems}}
-          <div class="relationship-item">
-            <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
-            <span class="item-name">{{this.target.name}} (-{{this.amount}})</span>
-          </div>
-        {{/each}} --}}
+      {{/each}}
+      {{#each hurtItems}}
+      <div class="relationship-item">
+        <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
+        <span class="item-name">{{this.target.name}} (-{{this.amount}})</span>
+        {{!-- <input type="checkbox" class="hurt-toggle" data-target-id="{{this.target.id}}" data-amount="{{this.amount}}" {{#if this.active}}checked{{/if}}> --}}
       </div>
-      <hr class="panel-divider" />
+      {{/each}}
 
-      <div class="section clues">
-        <div class="mh-theme-name title-effect"><i class="fa-solid fa-magnifying-glass"></i> {{localize "CityOfMist.terms.clues"}}</div>
+    </div>
+
+    <hr class="panel-divider" />
+
+    <div class="section clues">
+        <div class="mh-theme-name title-effect mh-title-container">
+            <div><i class="fa-solid fa-magnifying-glass"></i> {{localize "CityOfMist.terms.clues"}}</div>
+            <a class="create-clue" title="Create Clue"> <i class="fas fa-plus"></i></a>
+        </div>
         {{#each clueItems}}
-          <div class="clue-container">
-            <a class="item-control clue-delete" title="Delete Clue"><i class="fas fa-trash"></i></a>
-            <div class="item-name">{{this.name}} ({{this.amount}})
-              {{#if this.partial}}
-                <div class="partial-icon" title="{{localize "CityOfMist.terms.partialClue"}}">🧩{{localize "CityOfMist.terms.partialClue"}}</div>
-              {{/if}}</div>
-            <div class="item-details">
-              <span class="detail-label">{{localize "CityOfMist.terms.clueSource"}}:</span> 
-              <span class="detail-text">{{this.source}}</span><br />
-              <span class="detail-label">{{localize "CityOfMist.terms.clueMethod"}}:</span> 
-              <span class="detail-text">{{this.method}}</span>
+        <div class="clue-container" data-clue-id="{{this.id}}" data-owner-id="{{this.actorId}}">
+          <div class="mh-title-container">
+            <div class="item-name">
+                {{this.name}} ({{this.amount}})
             </div>
+             <a class="clue-delete" title="Delete Clue"><i class="fas fa-trash"></i></a>
           </div>
-        {{/each}}
+          {{#if this.partial}}
+          <div class="partial-icon" title="{{localize "CityOfMist.terms.partialClue"}}">
+              🧩{{localize "CityOfMist.terms.partialClue"}}
+          </div>
+          {{/if}}
+          <div class="item-details">
+              <span class="detail-label">{{localize "CityOfMist.terms.clueSource"}}:</span>
+              <span class="detail-text">{{this.source}}</span><br />
+              <span class="detail-label">{{localize "CityOfMist.terms.clueMethod"}}:</span>
+              <span class="detail-text">{{this.method}}</span>
+          </div>
       </div>
-      <hr class="panel-divider" />
+{{/each}}
 
-      <div class="section juice">
-        <div class="mh-theme-name title-effect"><i class="fa-sharp-duotone fa-regular fa-battery-bolt"></i> {{localize "CityOfMist.terms.juice"}}</div>
+    </div>
+
+    <hr class="panel-divider" />
+
+    <div class="section juice">
+        <div class="mh-theme-name title-effect mh-title-container">
+            <div><i class="fa-sharp-duotone fa-regular fa-battery-bolt"></i> {{localize "CityOfMist.terms.juice"}}</div>
+            <a class="create-juice" title="Create Juice"> <i class="fas fa-plus"></i></a>
+        </div>
         {{#each juiceItems}}
-          <div class="juice-container">
-            <div class="item-name">{{this.name}} ({{this.amount}})</div>
-            <div class="item-details">
-              <span class="detail-label">{{localize "CityOfMist.terms.clueSource"}}:</span> 
-              <span class="detail-text">{{this.source}}</span><br />
-              <span class="detail-label">{{localize "CityOfMist.terms.clueMethod"}}:</span> 
-              <span class="detail-text">{{this.method}}</span>
+        <div class="juice-container" data-juice-id="{{this.id}}" data-owner-id="{{this.actorId}}">
+            <div class="mh-title-container">
+                <div class="item-name">
+                    {{this.name}} ({{this.amount}})
+                </div>
+                <a class="juice-delete" title="Delete Juice"><i class="fas fa-trash"></i></a>
             </div>
-          </div>
+            <div class="item-details">
+                <span class="detail-label">{{localize "CityOfMist.terms.clueSource"}}:</span>
+                <span class="detail-text">{{this.source}}</span><br />
+                <span class="detail-label">{{localize "CityOfMist.terms.clueMethod"}}:</span>
+                <span class="detail-text">{{this.method}}</span>
+            </div>
+        </div>
         {{/each}}
-      </div>
+    </div>
+
     {{/if}}
 
     {{#if isOtherscape}}
       <!-- Otherscape Content -->
       <div class="section otherscape">
-        <div class="mh-theme-name mh-theme-name-neutral">
-          <i class="fa-light fa-chart-radar"></i> Essence
+        <div class="mh-theme-name mh-theme-name-neutral mh-essence-title">Essence</div>
+        <div class="mh-essence-chart {{essenceClass}}">
+          <img src="modules/mist-hud/ui/essences/{{essenceImage}}" alt="{{essence}}" />
         </div>
-        <div class="mh-essence-chart {{essenceClass}}"></div>
         <div class="mh-essence-title {{essenceClass}}">{{essence}}</div>
         {{{essenceText}}}
       </div>
