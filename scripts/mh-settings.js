@@ -65,19 +65,19 @@ Hooks.once('init', () => {
     const activeSystem = game.settings.get("city-of-mist", "system");
 
       // Register the game setting
-    game.settings.register(MODULE_ID, "preferredDice", {
-        name: "Preferred Dice",
-        hint: "Select your preferred dice set for rolls.",
-        scope: "world",
-        config: true,
-        type: String,
-        choices: getDiceChoices(activeSystem),
-        default: getDefaultDice(activeSystem),
-        onChange: value => {
-            console.log(`Preferred dice set changed to: ${value}`);
-            applyPreferredDice(value); // Apply the selected dice
-        },
-    });  
+    // game.settings.register(MODULE_ID, "preferredDice", {
+    //     name: "Preferred Dice",
+    //     hint: "Select your preferred dice set for rolls.",
+    //     scope: "world",
+    //     config: true,
+    //     type: String,
+    //     choices: getDiceChoices(activeSystem),
+    //     default: getDefaultDice(activeSystem),
+    //     onChange: value => {
+    //         console.log(`Preferred dice set changed to: ${value}`);
+    //         applyPreferredDice(value); // Apply the selected dice
+    //     },
+    // });  
     
     game.settings.register(MODULE_ID, 'npcAccordionState', {
         name: 'NPC Accordions Initial State',

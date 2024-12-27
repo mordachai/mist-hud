@@ -90,7 +90,7 @@ border: none;
   justify-content:center;
   align-content: space-between;
   align-items: center;
-  border-bottom: 1px solid white;
+  border-bottom: 2px solid white;
   cursor: grab;
   border-radius: 0 8px 0 0;
 }
@@ -107,9 +107,10 @@ border: none;
 /* Token image */
 .mh-token-image {
   position: absolute; /* Allow positioning relative to the header */
-  top: -30px; /* Adjust to float above the header */
+  top: -25px; /* Adjust to float above the header */
   left: -25px; /* Position it horizontally relative to the header */
   width: 60px; /* Adjust image size */
+  border: 2px solid whitesmoke;
   height: 60px; /* Match the width for a circular image */
   border-radius: 50%; /* Make the image circular */
   overflow: hidden; /* Crop overflowing parts of the image */
