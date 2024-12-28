@@ -7,8 +7,12 @@ import { detectActiveSystem } from "./mh-settings.js";
 async function clearPlayerHotbars() {
     for (const user of game.users.contents) {
         console.debug(`Clearing hotbar for user: ${user.name}`);
-        for (let i = 1; i <= 9; i++) await user.assignHotbarMacro(null, i);
-        for (let i = 11; i <= 19; i++) await user.assignHotbarMacro(null, i);
+        for (let i = 1; i <= 9; i++) {
+            await user.assignHotbarMacro(null, i);
+        }
+        for (let i = 11; i <= 19; i++) {
+            await user.assignHotbarMacro(null, i);
+        }
     }
 }
 
@@ -25,9 +29,9 @@ async function createAndAssignMacros() {
 
     const relevantMoves = Object.entries(moveConfig).filter(([_, move]) => move.system === activeSystem);
 
-    // Delete all existing macros matching relevant moves
-    const existingMacros = game.macros.filter(
-        (m) => relevantMoves.some(([name]) => m.name === name && m.author.id === game.user.id)
+    // Delete all existing macros matching relevant moves (created by current user/GM)
+    const existingMacros = game.macros.filter((m) =>
+        relevantMoves.some(([name]) => m.name === name && m.author?.id === game.user.id)
     );
     for (const macro of existingMacros) {
         await macro.delete();
@@ -37,29 +41,36 @@ async function createAndAssignMacros() {
     const createdMacros = {};
     for (const [name, move] of relevantMoves) {
         const macroName = name;
-        const macroImage = `/modules/mist-hud/ui/${move.image || `${name}.webp`}`;
+        const macroImage = `../ui/${move.image || `${name}.webp`}`;
 
         const macroData = {
             name: macroName,
             type: "script",
             img: macroImage,
             command: `CityOfMistRolls.executeMove("${name}");`,
-            folder: null,
+            folder: null
         };
 
         // Create the macro only if it doesn't already exist
-        let macro = game.macros.find((m) => m.name === macroName && m.author.id === game.user.id);
+        let macro = game.macros.find((m) => m.name === macroName && m.author?.id === game.user.id);
         if (!macro) {
             macro = await Macro.create(macroData);
-        } else {
         }
 
-        // Set ownership: Players have observer-level access
-        const ownership = {};
-        for (const player of game.users.filter((u) => u.role !== CONST.USER_ROLES.GAMEMASTER)) {
-            ownership[player.id] = CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER;
+        // ------------------------------
+        // UPDATED FOR FOUNDRY VTT v12:
+        // Set document permissions so that all players can at least observe (see) these macros.
+        // The GM will be the owner by default (since they created it).
+        // ------------------------------
+        const permissions = {};
+        for (const user of game.users) {
+            // If user is GM, be sure they're "OWNER"; else give them "OBSERVER"
+            permissions[user.id] = user.isGM
+                ? CONST.DOCUMENT_PERMISSION_LEVELS.OWNER
+                : CONST.DOCUMENT_PERMISSION_LEVELS.OBSERVER;
         }
-        await macro.update({ ownership });
+
+        await macro.update({ permission: permissions });
 
         // Save the macro reference for assignment
         createdMacros[macroName] = macro;
@@ -74,7 +85,6 @@ async function createAndAssignMacros() {
             }
         }
     }
-
 }
 
 /**
@@ -102,10 +112,9 @@ async function initializeForPlayer() {
 
     for (const [name, move] of relevantMoves) {
         const macroName = name;
-        const macro = game.macros.find(m => m.name === macroName);
+        const macro = game.macros.find((m) => m.name === macroName);
         if (macro) {
             await game.user.assignHotbarMacro(macro, move.slot);
-        } else {
         }
     }
 }
@@ -121,16 +130,15 @@ Hooks.once("init", () => {
         scope: "world",
         config: false,
         type: Boolean,
-        default: false,
+        default: false
     });
 });
 
 // Hook to handle system changes and reload macros
 Hooks.on("updateSetting", async (setting) => {
     if (setting.key === "city-of-mist.system" && game.user.isGM) {
-        
         // Clear all macros created by the GM
-        const allMacros = game.macros.filter((m) => m.author.id === game.user.id);
+        const allMacros = game.macros.filter((m) => m.author?.id === game.user.id);
         for (const macro of allMacros) {
             await macro.delete();
         }
@@ -139,7 +147,6 @@ Hooks.on("updateSetting", async (setting) => {
         await loadMoves();
     }
 });
-
 
 // Hook to initialize macros for individual players after they log in
 Hooks.on("ready", async () => {
