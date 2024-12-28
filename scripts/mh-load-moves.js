@@ -1,3 +1,5 @@
+//mh-load-moves.js
+
 import { moveConfig } from "./mh-theme-config.js";
 import { detectActiveSystem } from "./mh-settings.js";
 
@@ -41,8 +43,8 @@ async function createAndAssignMacros() {
     const createdMacros = {};
     for (const [name, move] of relevantMoves) {
         const macroName = name;
-        const macroImage = `../ui/${move.image || `${name}.webp`}`;
-
+        const macroImage = `modules/mist-hud/ui/${move.image || `${name}.webp`}`;
+        
         const macroData = {
             name: macroName,
             type: "script",
@@ -62,15 +64,20 @@ async function createAndAssignMacros() {
         // Set document permissions so that all players can at least observe (see) these macros.
         // The GM will be the owner by default (since they created it).
         // ------------------------------
+        const PERMISSION_LEVELS = {
+            NONE: 0,
+            LIMITED: 1,
+            OBSERVER: 2,
+            OWNER: 3
+          };
+          
         const permissions = {};
-        for (const user of game.users) {
-            // If user is GM, be sure they're "OWNER"; else give them "OBSERVER"
-            permissions[user.id] = user.isGM
-                ? CONST.DOCUMENT_PERMISSION_LEVELS.OWNER
-                : CONST.DOCUMENT_PERMISSION_LEVELS.OBSERVER;
-        }
-
+        permissions[game.user.id] = PERMISSION_LEVELS.OWNER; // Assign GM ownership
+        game.users.contents.forEach(user => {
+            permissions[user.id] = user.isGM ? PERMISSION_LEVELS.OWNER : PERMISSION_LEVELS.OBSERVER;
+        });
         await macro.update({ permission: permissions });
+          
 
         // Save the macro reference for assignment
         createdMacros[macroName] = macro;
