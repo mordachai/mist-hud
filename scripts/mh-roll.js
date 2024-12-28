@@ -2,8 +2,6 @@
 
 import { MistHUD } from './mist-hud.js';
 import { moveConfig } from './mh-theme-config.js';
-// import { getSceneStatuses } from './mist-hud.js';
-// import { getScnTags } from './mist-hud.js';
 import { themesConfig } from './mh-theme-config.js';
 import { initializeAccordions } from './accordion-handler.js';
 import { detectActiveSystem } from './mh-settings.js';
@@ -33,11 +31,12 @@ Hooks.once("init", () => {
 
 async function rollDice() {
   const roll = new Roll("2d6");
-  await roll.evaluate();
+  await roll.evaluate({async: true});
 
-  // Show Dice So Nice animation if available
+  // Check if Dice So Nice is active
   if (game.modules.get("dice-so-nice")?.active) {
-      await game.dice3d.showForRoll(roll);
+    // Show the 3D dice animation for all players
+    await game.dice3d.showForRoll(roll, game.user, true);
   }
 
   // Return the individual dice results

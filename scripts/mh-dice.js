@@ -30,7 +30,7 @@ Hooks.once('diceSoNiceReady', (dice3d) => {
         emissive: 0xdc39ff,
         emissiveIntensity: 0.25,
         colorset: "city-of-mist",
-    });
+    },"d12");
 
     dice3d.addDicePreset({
         system: "otherscape-mythos",
@@ -42,7 +42,7 @@ Hooks.once('diceSoNiceReady', (dice3d) => {
         emissive: 0xffffff,
         emissiveIntensity: 0.5,
         colorset: "otherscape-mythos",
-    });
+    },"d12");
 
     dice3d.addDicePreset({
         system: "otherscape-noise",
@@ -54,7 +54,7 @@ Hooks.once('diceSoNiceReady', (dice3d) => {
         emissive: 0xffffff,
         emissiveIntensity: 0.5,
         colorset: "otherscape-noise",
-    });
+    },"d12");
 
     dice3d.addDicePreset({
         system: "otherscape-self",
@@ -66,7 +66,7 @@ Hooks.once('diceSoNiceReady', (dice3d) => {
         emissive: 0xffffff,
         emissiveIntensity: 0.5,
         colorset: "otherscape-self",
-    });
+    },"d12");
 
     // Add all colorsets
     dice3d.addColorset({
