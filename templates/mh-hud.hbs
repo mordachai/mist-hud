@@ -146,6 +146,80 @@
 <div id="mh-sliding-panel" class="mh-sliding-panel">
   <div id="mh-panel-ear" class="mh-panel-ear">❯</div>
   <div id="mh-panel-content" class="mh-panel-content">
+    
+    {{!-- <div class="section improvements">
+        <div class="mh-theme-name title-effect"><i class="fa-solid fa-star"></i> {{localize "TYPES.Item.improvement"}}</div>
+        {{#each improvements}}
+        <div class="theme-container">
+            <div class="mh-theme-name title-effect mh-title-container mh-improvement-theme">
+                <div>
+                    <img src="{{this.icon}}" alt="theme-icon" class="theme-icon" /> {{this.name}}
+                </div>
+            </div>
+            {{#each this.improvements}}
+            <div class="improvement-container">
+                <div class="mh-title-container">
+                    <div class="item-name">
+                        {{this.name}}
+                        {{#if (gt this.uses.max 0)}}
+                        - {{this.uses.current}}/{{this.uses.max}}
+                        {{/if}}
+                        <a class="toggle-expended" data-item-id="{{this.id}}" data-actor-id="{{../id}}" title="Toggle Expended">
+                            <i class="fas fa-redo"></i>
+                        </a>
+                    </div>
+                </div>
+                {{#if this.description}}
+                <div class="item-description">{{this.description}}</div>
+                {{/if}}
+                {{#if this.choiceItem}}
+                <div class="item-choice">{{this.choiceItem}}</div>
+                {{/if}}
+            </div>
+            <hr />
+            {{/each}}
+        </div>
+        {{/each}}
+    </div> --}}
+    {{#if hasImprovements}}
+    <div class="section improvements">
+        <div class="mh-theme-name title-effect"><i class="fa-light fa-star"></i> {{localize "TYPES.Item.improvement"}}</div>
+        {{#each improvements}}
+        <div class="theme-container">
+            <div class="mh-theme-name mh-title-container mh-improvement-theme">
+                <div class="theme-type" data-theme-name="{{this.fullThemeName}}">
+                    {{this.name}}
+                </div>
+            </div>
+            {{#each this.improvements}}
+            <div class="improvement-container">
+                <div class="mh-title-container">
+                    <div class="item-name">
+                      <i class="fa-solid fa-star" style="font-size: 0.45rem; margin-right: 2px;"></i>
+                        {{this.name}}
+                        {{#if (gt this.uses.max 0)}}
+                        - {{this.uses.current}}/{{this.uses.max}}
+                        <a class="toggle-expended" data-item-id="{{this.id}}" data-actor-id="{{../id}}" title="Reset Uses">
+                            <i class="fas fa-redo"></i>
+                        </a>
+                        {{/if}}
+                    </div>
+                </div>
+                {{#if this.description}}
+                <div class="item-description">{{this.description}}</div>
+                {{/if}}
+                {{#if this.choiceItem}}
+                <div class="item-choice">{{this.choiceItem}}</div>
+                {{/if}}
+            </div>
+            <hr />
+            {{/each}}
+        </div>
+        {{/each}}
+    </div>
+    {{/if}}
+
+
     <!-- City of Mist Content -->
     {{#if isCityOfMist}}
     <div class="section relationships">

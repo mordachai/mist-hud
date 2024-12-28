@@ -90,7 +90,7 @@ Hooks.once('init', () => {
             'onlyMovesExpanded': 'Only Moves expanded',
             'allClosed': 'All closed'
         },
-        default: 'allExpanded',
+        default: 'allClosed',
         onChange: value => {
             // Notify the user that a refresh is required for changes to take effect
             ui.notifications.info("Changing the accordion state requires a refresh to take effect.");

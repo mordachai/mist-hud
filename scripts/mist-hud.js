@@ -359,11 +359,190 @@ export class MistHUD extends Application {
     html.find('.juice-delete').on("click", this._deleteJuiceFromHUD.bind(this));
     html.find('.create-juice').on("click", this._createJuiceFromHUD.bind(this));
 
-    
+        // Reset button functionality
+        html.on("click", ".toggle-expended", async (event) => {
+          event.preventDefault();
+          const button = $(event.currentTarget);
+          const itemId = button.data("itemId");
+          const actorId = button.data("actorId");
+          const actor = game.actors.get(actorId);
+  
+          if (actor) {
+              const item = actor.items.get(itemId);
+              if (item) {
+                  const max = item.system.uses?.max || 0;
+                  if (max > 0) {
+                      await item.update({ "system.uses.current": max });
+                      ui.notifications.info(`Reset uses of "${item.name}" to ${max}.`);
+                      this.render(); // Re-render the HUD to reflect changes
+                  }
+              }
+          }
+      });
+  
+      // Tooltip for theme type
+      html.find(".theme-type").hover(
+          (event) => {
+              const themeName = $(event.currentTarget).data("themeName");
+              if (!themeName) return;
+  
+              // Create and display tooltip
+              const tooltip = $(`<div class="mh-tooltip">${themeName}</div>`);
+              $("body").append(tooltip);
+  
+              tooltip.css({
+                  top: event.pageY + 10,
+                  left: event.pageX + 10
+              });
+  
+              $(event.currentTarget).data("tooltipElement", tooltip);
+          },
+          (event) => {
+              // Remove tooltip on hover out
+              const tooltip = $(event.currentTarget).data("tooltipElement");
+              if (tooltip) {
+                  tooltip.remove();
+                  $(event.currentTarget).removeData("tooltipElement");
+              }
+          }
+      );
+  
+      html.find(".theme-type").mousemove((event) => {
+          const tooltip = $(event.currentTarget).data("tooltipElement");
+          if (tooltip) {
+              tooltip.css({
+                  top: event.pageY + 10,
+                  left: event.pageX + 10
+              });
+          }
+      });
+      
     this.element.on('contextmenu', (event) => {
       event.preventDefault();
       event.stopPropagation();
     });
+  }
+
+  getData(options) {
+    const data = super.getData(options);
+    if (!this.actor) return data;
+
+    // Get the active system setting
+    const activeSystem = game.settings.get("city-of-mist", "system");
+    data.activeSystem = activeSystem;
+
+    // Define flags for supported systems
+    data.isCityOfMist = activeSystem === "city-of-mist";
+    data.isOtherscape = activeSystem === "otherscape";
+
+    // Set actor-related data
+    data.charName = this.actor.name;
+    data.tokenImage =
+        this.actor.token?.texture.src ||
+        this.actor.prototypeToken?.texture.src ||
+        this.actor.img;
+    data.isCollapsed = this.isCollapsed;
+
+    // Retrieve themes and story tags
+    const themesAndTags = this.getThemesAndTags();
+    data.themes = themesAndTags.themes;
+    data.storyTags = themesAndTags.storyTags;
+    data.hasStoryTags = !!(themesAndTags.storyTags && themesAndTags.storyTags.length > 0);
+    data.statuses = this.getActorStatuses();
+    data.modifier = this.modifier;
+    data.loadoutTags = this.getLoadoutTags();
+
+    // Process Juice and Clues for City of Mist
+      if (data.isCityOfMist) {
+      const { helpItems, hurtItems, clueItems, juiceItems } = this.getJuiceAndClues();
+        data.helpItems = helpItems || [];
+        data.hurtItems = hurtItems || [];
+        data.clueItems = clueItems || []; // Pass clueItems to the HUD
+        data.juiceItems = juiceItems || [];
+      } else if (data.isOtherscape) {
+        // Process essence for Otherscape
+        const themes = this.actor.items.filter(item => item.type === "theme");
+        const essenceData = this.getEssence(themes);
+
+        if (essenceData?.essence) {
+            data.essence = essenceData.essence;
+            data.essenceClass = essenceData.className;
+            data.essenceImage = essenceData.imageName;
+            data.essenceText = new Handlebars.SafeString(
+                essenceDescriptions[essenceData.essence] || essenceDescriptions["Undefined"]
+            );
+        } else {
+            console.error("getEssence returned invalid data:", essenceData);
+        }
+    }
+
+    // Add Help and Hurt messages for the receiving player
+    const receivedBonuses = this.actor.getFlag('mist-hud', 'received-bonuses') || [];
+    console.log(`[Help/Hurt Debug] Bonuses fetched in getData:`, receivedBonuses);
+
+    data.helpHurtMessages = receivedBonuses.length > 0 ? receivedBonuses : null;
+    console.log(`[Help/Hurt Debug] Messages passed to HUD:`, data.helpHurtMessages);
+
+    // Add improvements
+    const improvements = this.getImprovements();
+    data.improvements = improvements;
+    data.hasImprovements = improvements.length > 0; // Check if there are improvements
+
+    return data;
+  }
+
+  getImprovements() {
+    if (!this.actor) return [];
+
+    const items = this.actor.items.contents;
+
+    // Filter for improvements (no system_compatibility filtering)
+    const improvements = items.filter(item => item.type === "improvement");
+
+    // Group improvements by theme
+    const themes = {};
+    improvements.forEach(item => {
+        const themeId = item.system.theme_id || "no-theme";
+
+        if (!themes[themeId]) {
+            const theme = this.actor.items.find(i => i._id === themeId);
+
+            if (theme) {
+                const themeConfig = themesConfig[theme.system.themebook_id]; // Lookup configuration
+                if (!themeConfig) {
+                    console.warn(`Theme configuration not found for themebook ID: ${theme.system.themebook_id}`);
+                }
+
+                const localizedThemebookName = themeConfig
+                    ? game.i18n.localize(themeConfig.localizationKey)
+                    : "Unknown Themebook";
+
+                themes[themeId] = {
+                    id: themeId,
+                    name: localizedThemebookName, // Localized name of the themebook
+                    fullThemeName: theme.name || "Unnamed Theme", // Full theme name for the tooltip
+                    improvements: []
+                };
+            } else {
+                themes[themeId] = {
+                    id: themeId,
+                    name: "Unknown Theme",
+                    fullThemeName: "Unknown Theme",
+                    improvements: []
+                };
+            }
+        }
+
+        themes[themeId].improvements.push({
+            id: item.id,
+            name: item.name,
+            description: item.system.description || "",
+            choiceItem: item.system.choice_item || "",
+            uses: item.system.uses || { max: 0, current: 0, expended: false }
+        });
+    });
+
+    return Object.values(themes);
   }
 
   async _createClueFromHUD(event) {
@@ -956,69 +1135,6 @@ export class MistHUD extends Application {
     return essenceData;
   }
 
-  getData(options) {
-    const data = super.getData(options);
-    if (!this.actor) return data;
-
-    // Get the active system setting
-    const activeSystem = game.settings.get("city-of-mist", "system");
-    data.activeSystem = activeSystem;
-
-    // Define flags for supported systems
-    data.isCityOfMist = activeSystem === "city-of-mist";
-    data.isOtherscape = activeSystem === "otherscape";
-
-    // Set actor-related data
-    data.charName = this.actor.name;
-    data.tokenImage =
-        this.actor.token?.texture.src ||
-        this.actor.prototypeToken?.texture.src ||
-        this.actor.img;
-    data.isCollapsed = this.isCollapsed;
-
-    // Retrieve themes and story tags
-    const themesAndTags = this.getThemesAndTags();
-    data.themes = themesAndTags.themes;
-    data.storyTags = themesAndTags.storyTags;
-    data.hasStoryTags = !!(themesAndTags.storyTags && themesAndTags.storyTags.length > 0);
-    data.statuses = this.getActorStatuses();
-    data.modifier = this.modifier;
-    data.loadoutTags = this.getLoadoutTags();
-
-    // Process Juice and Clues for City of Mist
-      if (data.isCityOfMist) {
-      const { helpItems, hurtItems, clueItems, juiceItems } = this.getJuiceAndClues();
-        data.helpItems = helpItems || [];
-        data.hurtItems = hurtItems || [];
-        data.clueItems = clueItems || []; // Pass clueItems to the HUD
-        data.juiceItems = juiceItems || [];
-      } else if (data.isOtherscape) {
-        // Process essence for Otherscape
-        const themes = this.actor.items.filter(item => item.type === "theme");
-        const essenceData = this.getEssence(themes);
-
-        if (essenceData?.essence) {
-            data.essence = essenceData.essence;
-            data.essenceClass = essenceData.className;
-            data.essenceImage = essenceData.imageName;
-            data.essenceText = new Handlebars.SafeString(
-                essenceDescriptions[essenceData.essence] || essenceDescriptions["Undefined"]
-            );
-        } else {
-            console.error("getEssence returned invalid data:", essenceData);
-        }
-    }
-
-    // Add Help and Hurt messages for the receiving player
-    const receivedBonuses = this.actor.getFlag('mist-hud', 'received-bonuses') || [];
-    console.log(`[Help/Hurt Debug] Bonuses fetched in getData:`, receivedBonuses);
-
-    data.helpHurtMessages = receivedBonuses.length > 0 ? receivedBonuses : null;
-    console.log(`[Help/Hurt Debug] Messages passed to HUD:`, data.helpHurtMessages);
-
-    return data;
-  }
-   
   applyBurnState(actor, tagId, tagType) {
     const tagItem = actor.items.get(tagId);
     if (!tagItem || !tagItem.system) {

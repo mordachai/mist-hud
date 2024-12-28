@@ -909,3 +909,33 @@ hr {
   color: #f0f0f0; /* Standard light text */
 }
 
+.improvements .theme-container {
+  margin-bottom: 1em;
+}
+
+.improvements .mh-improvement-theme{
+  margin-bottom: 3px;
+}
+
+.improvements .theme-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 3px;
+}
+
+.improvements .item-name {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  font-weight: bold;
+}
+
+.improvements .item-description,
+.improvements .item-choice {
+  margin-left: 2px;
+  font-size: 0.85em;
+  color: whitesmoke;
+}
+
+
