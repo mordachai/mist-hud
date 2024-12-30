@@ -36,12 +36,32 @@
   --hud-bg-color: rgba(0, 0, 0, 0.45);
 }
 
+.mh-power-tag,
+.mh-weakness-tag,
+.mh-loadout-tag,
+.mh-story-tag {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0;
+  padding: 2px 6px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.mh-power-tag span,
+.mh-weakness-tag span,
+.mh-loadout-tag span,
+.mh-story-tag span {
+  display: flex;
+  align-items: center;
+
+}
+
 .mh-power-tag.selected,
 .mh-story-tag.selected,
 .mh-loadout-tag.selected,
 .mh-weakness-tag.inverted.selected {
-  /* font-weight: 700; */
-  /* text-shadow: var(--negative-tag-borderColor) 1px 1px 1px; */
   color: white;
   background: linear-gradient(0.25turn, var(--positive-tag-color), rgba(6, 95, 150, 0));
   background-size: 90% 90%;
@@ -55,8 +75,6 @@
 
 .mh-weakness-tag.selected,
 .mh-story-tag.inverted.selected {
-  /* font-weight: 700; */
-  /* text-shadow: var(--positive-tag-borderColor) 0px 1px; */
   color: white;
   background: linear-gradient(0.25turn, var(--negative-tag-color), rgba(6, 95, 150, 0));
   background-size: 90% 90%;
@@ -66,6 +84,15 @@
   border-bottom-left-radius: 50px 50px;
   border-left: 6px solid var(--negative-tag-borderColor);
   margin-left: -6px;
+}
+
+/* Burn Toggle Icon */
+.mh-burn-toggle,
+.mh-weakness-toggle {
+  display: inline-block;
+  padding-left: 5px;
+  padding-right: 5px;
+  cursor: pointer;
 }
 
 /*Roll Icons*/
@@ -82,4 +109,37 @@
 .mhr-icon.mist {
   background-image: url('../ui/icons/mist_icn.svg');
   filter: brightness(0) saturate(100%) invert(5%) sepia(11%) saturate(3432%) hue-rotate(16deg) brightness(93%) contrast(89%);
+}
+
+.burn-icon {
+  display: inline-block; /* Keep the inline-block for the background image behavior */
+  width: 17px;
+  height: 18px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  align-self: center;
+  vertical-align: middle;
+}
+
+/* Unburned state */
+.burn-icon.unburned {
+  background-image: url("../ui/icons/burn_com_empty_icn.svg");
+}
+
+/* To Burn state */
+.burn-icon.toBurn {
+  background-image: url("../ui/icons/burn_com_active_icn.svg");
+}
+
+/* Burned state */
+.burn-icon.burned {
+  background-image: url("../ui/icons/burn_com_full_icn.svg");
+}
+
+.mh-power-tag.burned,
+.mh-story-tag.burned,
+.mh-loadout-tag.burned  {
+  text-decoration: line-through;
+  color: #ffa742;
 }

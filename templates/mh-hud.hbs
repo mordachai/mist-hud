@@ -17,22 +17,24 @@
       <!-- Power Tags -->
       <ul class="mh-tags">
         {{#each powerTags}}
-        <li class="mh-power-tag {{this.cssClass}}" data-id="{{this.id}}">
-          <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
-          <span class="mh-tag-text">{{this.tagName}}</span>
+        <li class="mh-power-tag {{this.cssClass}} {{../category}}" data-id="{{this.id}}">
+          <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../category}}"></div>
+          <div class="mh-tag-text {{../category}}">{{this.tagName}}</div>
           {{#if subtags}}
             <ul class="mh-subtag">
               {{#each subtags}}
-                <li class="subtag-item {{cssClass}}">
-                  <span class="subtag-burn">{{{burnIcon}}}</span>
-                  <span class="subtag-name">{{this.tagName}}</span>
-                </li>
+              <li class="subtag-item {{cssClass}}">
+                <span class="subtag-burn burn-icon {{burnIcon}}"></span>
+                <span class="subtag-name">{{this.tagName}}</span>
+              </li>
               {{/each}}
             </ul>
           {{/if}}
         </li>
         {{/each}}
       </ul>
+
+
 
       <!-- Weakness Tags -->
       <ul class="mh-tags">
@@ -58,7 +60,7 @@
       <ul class="mh-tags">
           {{#each loadoutTags}}
           <li class="mh-loadout-tag {{this.cssClass}}" data-id="{{this.id}}">
-            <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
+          <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
             <span class="mh-tag-text">{{this.tagName}}</span>
             {{#if subtags}}
               <ul class="mh-subtag">
@@ -86,7 +88,7 @@
         <ul class="mh-tags">
           {{#each storyTags}}
             <li class="mh-story-tag {{this.cssClass}}" data-id="{{this.id}}" data-temporary="{{this.temporary}}" data-permanent="{{this.permanent}}">
-              <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
+              <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
               <span class="mh-tag-text">
                 {{#if temporary}}⏱️ {{/if}}
                 {{#if permanent}}💎 {{/if}}

@@ -36,7 +36,7 @@ export class MistHUD extends Application {
       resizable: false,
       popOut: true,
       minimizable: true,
-      width: 310,
+      // width: 250,
       height: 'auto',
       dragDrop: [{ dragSelector: '.window-header' }],
     });
@@ -246,49 +246,117 @@ export class MistHUD extends Application {
     });
   
     // Burn icon toggle for both power and story tags
+    // html.find('.mh-burn-toggle').on('click', async (event) => {
+    //   event.stopPropagation();
+    //   event.preventDefault();
+      
+    //   const burnElement = $(event.currentTarget);
+    //   const tagElement = burnElement.closest('.mh-power-tag, .mh-story-tag, .mh-loadout-tag');
+    //   const tagId = tagElement.data('id');
+  
+    //   const currentState = burnElement.hasClass('burned') ? "burned" :
+    //                        burnElement.hasClass('toBurn') ? "toBurn" : "unburned";
+  
+    //   // Determine new state
+    //   const newState = currentState === "unburned" ? "toBurn" :
+    //                    currentState === "toBurn" ? "burned" : "unburned";
+  
+    //   // Update the DOM classes for the icon and text
+    //   burnElement.removeClass('unburned toBurn burned').addClass(newState);
+    //   tagElement.removeClass('unburned toBurn burned').addClass(newState); // Also remove 'selected'
+  
+    //   // Update text state if necessary
+    //   const newIcon = MistHUD.getIcon(newState, 'burn');
+    //   burnElement.html(newIcon);
+  
+    //   if (newState === "burned") {
+    //       // Deselect the tag visually
+    //       tagElement.removeClass('selected');
+    //       tagElement.find('.tag-text').addClass('burned-text'); // Add burned text class
+    //   } else {
+    //       tagElement.find('.tag-text').removeClass('burned-text'); // Remove burned text class if not burned
+    //   }
+  
+    //   // Update the tag's state in the actor's data
+    //   const tagItem = this.actor.items.get(tagId);
+    //   if (tagItem) {
+    //       const updatedState = newState === "burned";
+    //       const burnState = newState === "toBurn" ? 1 : 0;
+    //       await tagItem.update({ "system.burned": updatedState, "system.burn_state": burnState });
+    //   }
+  
+    //   // Recalculate total power to reflect deselection
+    //   this.calculateTotalPower();
+    // });
+
+    // html.find('.mh-burn-toggle').on('click', async (event) => {
+    //   event.stopPropagation();
+    //   event.preventDefault();
+    
+    //   const burnElement = $(event.currentTarget);
+    //   const tagElement = burnElement.closest('.mh-power-tag, .mh-story-tag, .mh-loadout-tag');
+    //   const tagId = tagElement.data('id');
+    
+    //   const currentState = burnElement.hasClass('burned') ? "burned" :
+    //                        burnElement.hasClass('toBurn') ? "toBurn" : "unburned";
+    
+    //   // Determine new state
+    //   const newState = currentState === "unburned" ? "toBurn" :
+    //                    currentState === "toBurn" ? "burned" : "unburned";
+    
+    //   // Update the DOM classes for the icon and tag
+    //   burnElement.removeClass('unburned toBurn burned').addClass(newState);
+    //   tagElement.removeClass('unburned toBurn burned').addClass(newState); // Also remove 'selected'
+    
+    //   // Update the tag's state in the actor's data
+    //   const tagItem = this.actor.items.get(tagId);
+    //   if (tagItem) {
+    //     const updatedState = newState === "burned";
+    //     const burnState = newState === "toBurn" ? 1 : 0;
+    //     await tagItem.update({ "system.burned": updatedState, "system.burn_state": burnState });
+    //   }
+    
+    //   // Recalculate total power
+    //   this.calculateTotalPower();
+    // });
+
     html.find('.mh-burn-toggle').on('click', async (event) => {
       event.stopPropagation();
       event.preventDefault();
-      
+    
       const burnElement = $(event.currentTarget);
       const tagElement = burnElement.closest('.mh-power-tag, .mh-story-tag, .mh-loadout-tag');
       const tagId = tagElement.data('id');
-  
+    
+      // Determine the current state
       const currentState = burnElement.hasClass('burned') ? "burned" :
                            burnElement.hasClass('toBurn') ? "toBurn" : "unburned";
-  
-      // Determine new state
+    
+      // Cycle to the new state
       const newState = currentState === "unburned" ? "toBurn" :
                        currentState === "toBurn" ? "burned" : "unburned";
-  
-      // Update the DOM classes for the icon and text
+    
+      // Update the classes for the burn state
       burnElement.removeClass('unburned toBurn burned').addClass(newState);
-      tagElement.removeClass('unburned toBurn burned').addClass(newState); // Also remove 'selected'
-  
-      // Update text state if necessary
-      const newIcon = MistHUD.getIcon(newState, 'burn');
-      burnElement.html(newIcon);
-  
+      tagElement.removeClass('unburned toBurn burned').addClass(newState);
+    
+      // Automatically deselect the tag if the new state is "burned"
       if (newState === "burned") {
-          // Deselect the tag visually
-          tagElement.removeClass('selected');
-          tagElement.find('.tag-text').addClass('burned-text'); // Add burned text class
-      } else {
-          tagElement.find('.tag-text').removeClass('burned-text'); // Remove burned text class if not burned
+        tagElement.removeClass('selected'); // Deselect the tag
       }
-  
+    
       // Update the tag's state in the actor's data
       const tagItem = this.actor.items.get(tagId);
       if (tagItem) {
-          const updatedState = newState === "burned";
-          const burnState = newState === "toBurn" ? 1 : 0;
-          await tagItem.update({ "system.burned": updatedState, "system.burn_state": burnState });
+        const updatedState = newState === "burned"; // Boolean for burned state
+        const burnState = newState === "toBurn" ? 1 : 0; // Numeric for burn state
+        await tagItem.update({ "system.burned": updatedState, "system.burn_state": burnState });
       }
-  
-      // Recalculate total power to reflect deselection
+    
+      // Recalculate total power to reflect any changes
       this.calculateTotalPower();
     });
-  
+    
     // Status selection cycle with .selected toggle
     html.find('.mh-status').on('click', (event) => {
       event.stopPropagation();
@@ -359,63 +427,63 @@ export class MistHUD extends Application {
     html.find('.juice-delete').on("click", this._deleteJuiceFromHUD.bind(this));
     html.find('.create-juice').on("click", this._createJuiceFromHUD.bind(this));
 
-        // Reset button functionality
-        html.on("click", ".toggle-expended", async (event) => {
-          event.preventDefault();
-          const button = $(event.currentTarget);
-          const itemId = button.data("itemId");
-          const actorId = button.data("actorId");
-          const actor = game.actors.get(actorId);
-  
-          if (actor) {
-              const item = actor.items.get(itemId);
-              if (item) {
-                  const max = item.system.uses?.max || 0;
-                  if (max > 0) {
-                      await item.update({ "system.uses.current": max });
-                      ui.notifications.info(`Reset uses of "${item.name}" to ${max}.`);
-                      this.render(); // Re-render the HUD to reflect changes
-                  }
-              }
-          }
-      });
-  
-      // Tooltip for theme type
-      html.find(".theme-type").hover(
-          (event) => {
-              const themeName = $(event.currentTarget).data("themeName");
-              if (!themeName) return;
-  
-              // Create and display tooltip
-              const tooltip = $(`<div class="mh-tooltip">${themeName}</div>`);
-              $("body").append(tooltip);
-  
-              tooltip.css({
-                  top: event.pageY + 10,
-                  left: event.pageX + 10
-              });
-  
-              $(event.currentTarget).data("tooltipElement", tooltip);
-          },
-          (event) => {
-              // Remove tooltip on hover out
-              const tooltip = $(event.currentTarget).data("tooltipElement");
-              if (tooltip) {
-                  tooltip.remove();
-                  $(event.currentTarget).removeData("tooltipElement");
-              }
-          }
-      );
-  
-      html.find(".theme-type").mousemove((event) => {
-          const tooltip = $(event.currentTarget).data("tooltipElement");
-          if (tooltip) {
-              tooltip.css({
-                  top: event.pageY + 10,
-                  left: event.pageX + 10
-              });
-          }
-      });
+    // Reset button functionality
+    html.on("click", ".toggle-expended", async (event) => {
+        event.preventDefault();
+        const button = $(event.currentTarget);
+        const itemId = button.data("itemId");
+        const actorId = button.data("actorId");
+        const actor = game.actors.get(actorId);
+
+        if (actor) {
+            const item = actor.items.get(itemId);
+            if (item) {
+                const max = item.system.uses?.max || 0;
+                if (max > 0) {
+                    await item.update({ "system.uses.current": max });
+                    ui.notifications.info(`Reset uses of "${item.name}" to ${max}.`);
+                    this.render(); // Re-render the HUD to reflect changes
+                }
+            }
+        }
+    });
+
+    // Tooltip for theme type
+    html.find(".theme-type").hover(
+        (event) => {
+            const themeName = $(event.currentTarget).data("themeName");
+            if (!themeName) return;
+
+            // Create and display tooltip
+            const tooltip = $(`<div class="mh-tooltip">${themeName}</div>`);
+            $("body").append(tooltip);
+
+            tooltip.css({
+                top: event.pageY + 10,
+                left: event.pageX + 10
+            });
+
+            $(event.currentTarget).data("tooltipElement", tooltip);
+        },
+        (event) => {
+            // Remove tooltip on hover out
+            const tooltip = $(event.currentTarget).data("tooltipElement");
+            if (tooltip) {
+                tooltip.remove();
+                $(event.currentTarget).removeData("tooltipElement");
+            }
+        }
+    );
+
+    html.find(".theme-type").mousemove((event) => {
+        const tooltip = $(event.currentTarget).data("tooltipElement");
+        if (tooltip) {
+            tooltip.css({
+                top: event.pageY + 10,
+                left: event.pageX + 10
+            });
+        }
+    });
       
     this.element.on('contextmenu', (event) => {
       event.preventDefault();
@@ -1135,6 +1203,19 @@ export class MistHUD extends Application {
     return essenceData;
   }
 
+  static getIcon(state, type) {
+    if (type === 'burn') {
+        // Return an empty span with a dynamic class for styling
+        // return `<span class="mh-burn-toggle burn-icon ${state}"></span>`;
+        return state; // Only return the state string for dynamic class usage      
+    } else if (type === 'weakness') {
+        // Weakness icons remain as FontAwesome
+        return state
+            ? '<i class="fa-regular fa-angles-up"></i>'
+            : '<i class="fa-light fa-angles-down"></i>';
+    }
+  }
+
   applyBurnState(actor, tagId, tagType) {
     const tagItem = actor.items.get(tagId);
     if (!tagItem || !tagItem.system) {
@@ -1143,13 +1224,11 @@ export class MistHUD extends Application {
             id: tagId,
             burnState: "unburned",
             cssClass: "unburned",
-            burnIcon: '<i class="fa-light fa-fire"></i>',
+            burnIcon: this.constructor.getIcon("unburned", "burn"),
             permanent: false,
             temporary: false,
             isInverted: false,
-            inversionIcon: tagType === 'story'
-                ? '<i class="fa-regular fa-angles-up"></i>'
-                : '<i class="fa-light fa-angles-down"></i>',
+            inversionIcon: this.constructor.getIcon(false, "weakness"),
         };
     }
 
@@ -1163,19 +1242,16 @@ export class MistHUD extends Application {
     }
 
     const cssClass = burnState;
-    const burnIcon = burnState === "burned"
-        ? '<i class="fa-solid fa-fire"></i>'
-        : burnState === "toBurn"
-        ? '<i class="fa-regular fa-fire"></i>'
-        : '<i class="fa-light fa-fire"></i>';
+    const burnIcon = this.constructor.getIcon(burnState, "burn");
 
     const permanent = tagItem.system.permanent || false;
     const temporary = tagItem.system.temporary || false;
     const isInverted = tagItem.system.isInverted || false;
 
-    const inversionIcon = isInverted
-        ? '<i class="fa-light fa-angles-down"></i>'
-        : (tagType === 'story' ? '<i class="fa-regular fa-angles-up"></i>' : '<i class="fa-light fa-angles-down"></i>');
+    const inversionIcon = this.constructor.getIcon(
+        isInverted || tagType === "story",
+        "weakness"
+    );
 
     return {
         id: tagId,
@@ -1221,25 +1297,6 @@ export class MistHUD extends Application {
           isSubtag: false,  // Default to false, but this will be set to true for subtags
           activatedLoadout: tag.system.activated_loadout || false,  // New: Whether the loadout tag is activated
       };
-  }
-
-  static getIcon(state, type) {
-    if (type === 'burn') {
-        switch (state) {
-            case "unburned":
-                return '<i class="fa-light fa-fire"></i>';
-            case "toBurn":
-                return '<i class="fa-regular fa-fire"></i>';
-            case "burned":
-                return '<i class="fa-solid fa-fire"></i>';
-            default:
-                return '<i class="fa-light fa-fire"></i>';
-        }
-    } else if (type === 'weakness') {
-        return state
-            ? '<i class="fa-regular fa-angles-up"></i>'
-            : '<i class="fa-light fa-angles-down"></i>';
-    }
   }
 
   getActorStatuses() {

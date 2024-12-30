@@ -59,7 +59,9 @@
   border-radius: 6px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   color: white;
-  max-width: fit-content;
+  min-width: 250px;
+  max-width: 300px !important;
+  min-height: 400px;
 }
 
 #mist-hud .window-app {
@@ -209,28 +211,6 @@ hr {
   margin: 5px 10px;
 
 }
-
-/* .theme-container-mythosOS{
-  background-image: url(../ui/mythosOS_BG.webp) ;
-  background-repeat: no-repeat;
-  background-size: 60%;
-  background-position: center right;
-}
-
-.theme-container-noise{
-  background-image: url(../ui/noise_BG.webp) ;
-  background-repeat: no-repeat;
-  background-size: 60%;
-  background-position: center right;
-}
-
-.theme-container-self{
-  background-image: url(../ui/self_BG.webp) ;
-  background-repeat: no-repeat;
-  background-size: 60%;
-  background-position: center right;
-} */
-
 
 /* General umbrella class for all theme icons */
 .mh-theme-icon {
@@ -416,8 +396,8 @@ hr {
 }
 
 .mh-tags li {
-  height: 1.4rem;
-  padding: 5px;
+  /* height: 1.4rem; */
+  /* padding: 5px; */
   color: whitesmoke;
 }
 
@@ -431,19 +411,12 @@ hr {
   color: whitesmoke;
   text-shadow: 1px 1px 1px var(--mythos-dark-color);
   padding-left: 5px;
-
 }
 
-.mh-power-tag,
-.mh-weakness-tag,
-.mh-loadout-tag,
-.mh-story-tag {
-  display: flex;
+.mh-burn-toggle,
+.mh-tag-text {
+  display: flex; /* Ensures these elements are also centered */
   align-items: center;
-  margin: 0;
-  padding: 0;
-  cursor: pointer;
-  text-align: left;
 }
 
 .mh-power-subtag,
@@ -452,15 +425,6 @@ hr {
   align-items: center;
   margin: 2px 0;
   padding-left: 15px;
-}
-
-/* Burn Toggle Icon */
-.mh-burn-toggle,
-.mh-weakness-toggle {
-  display: inline-block;
-  padding-left: 5px;
-  padding-right: 5px;
-  cursor: pointer;
 }
 
 .mh-story-invert-toggle {
@@ -483,72 +447,6 @@ hr {
   /* text-shadow: rgb(255, 208, 204) 1px 1px; */
 }
 
-.mh-burn-icon img {
-  width: 26px;  /* Adjust as needed */
-  height: 16px; /* Ensure consistent icon size */
-  vertical-align: middle; /* Align with text */
-}
-
-.mh-burn-icon img[alt="burned"] {
-  filter: none; /* Add specific styles for burned state if needed */
-}
-
-.mh-burn-icon img[alt="to burn"] {
-  filter: hue-rotate(30deg); /* Optional styling */
-}
-
-.mh-burn-icon img[alt="unburned"] {
-  opacity: 0.6; /* Make the unburned icon less prominent */
-}
-
-.mh-burn-toggle.unburned i, 
-.mh-weakness-toggle.default i {
-  color: #e2e2e2eb;
-}
-
-.mh-burn-toggle.toBurn i {
-  color: rgb(255, 208, 122);
-  /* text-shadow: rgb(255, 111, 75) 0px 0px 3px; */
-}
-
-.mh-burn-toggle.burned i {
-  color: orange;
-}
-
-.mh-weakness-toggle.inverted i {
-  color: lightgreen;
-}
-
-/* Add hover effect */
-.mh-burn-toggle:hover,
-.mh-weakness-toggle:hover,
-.mh-collapse-button:hover,
-.mh-close-button:hover {
-  opacity: 0.8;  /* Visual feedback when hovering */
-}
-
-/* Power Tags */
-/* .mh-power-tag {
-} */
-
-.mh-power-tag.burned,
-.mh-story-tag.burned,
-.mh-loadout-tag.burned  {
-  text-decoration: line-through;
-  color: #ffa742;
-}
-
-/* Weakness Tags */
-/* .mh-weakness-tag {
-} */
-
-.mh-subtag{
-  margin-left: 5px;
-}
-
-.subtag-item{
-  color: #00def6;
-}
 
 /* Statuses */
 .mh-statuses-container {

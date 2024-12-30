@@ -38,44 +38,205 @@
   --marker-negativeTag-color: #ffd4a8;
 }
 
-.mh-power-tag.selected,
+.mh-power-tag,
+.mh-weakness-tag,
+.mh-loadout-tag,
+.mh-story-tag {
+  display: grid;
+  flex-direction: row;
+  grid-template-columns: 25px auto auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 1px 3px;
+  padding: 2px;
+  cursor: pointer;
+  text-align: left;
+  height: fit-content;
+  font-family: var(--font-family-main1);
+  text-transform: uppercase;
+  list-style: none;
+  color: whitesmoke;
+  font-style: italic;
+}
+
+.mh-weakness-tag i {
+  padding-left: 12px;
+}
+
+.mh-power-tag.mythosOS span {
+color: var(--mythosOS-verylight-color);
+}
+
+.mh-power-tag.noise span {
+  color: var(--noise-verylight-color);
+}
+
+.mh-power-tag.self span {
+  color: var(--self-verylight-color);
+}
+
+.mh-power-tag.selected {
+  align-items: center;
+  color: white;
+  font-family: var(--font-family-main1);
+  text-transform: uppercase;
+  background-size: 100% 96%;
+  background-repeat: no-repeat;
+  background-position: left center;
+  height: fit-content;
+}
+
+.mh-power-tag.selected.mythosOS {
+  background-image: url('../ui/select-bar-mythosOS.webp');
+  filter: drop-shadow(0 0 3px var(--mythosOS-dark-color));
+}
+
+.mh-power-tag.selected.noise {
+  background-image: url('../ui/select-bar-noise.webp');
+  filter: drop-shadow(0 0 3px var(--noise-dark-color));
+}
+
+.mh-power-tag.selected.self {
+  background-image: url('../ui/select-bar-self.webp');
+  filter: drop-shadow(0 0 3px var(--self-dark-color));
+}
+
+.mh-power-tag.selected.toBurn.mythosOS {
+  background-image: url('../ui/select-bar-mythosOS-toburn.webp');
+  filter: drop-shadow(0 0 3px var(--mythosOS-dark-color));
+}
+
+.mh-power-tag.selected.toBurn.noise {
+  background-image: url('../ui/select-bar-noise-toburn.webp');
+  filter: drop-shadow(0 0 3px var(--noise-dark-color));
+}
+
+.mh-power-tag.selected.toBurn.self {
+  background-image: url('../ui/select-bar-self-toburn.webp');
+  filter: drop-shadow(0 0 3px var(--self-dark-color));
+}
+
 .mh-story-tag.selected,
 .mh-loadout-tag.selected,
 .mh-weakness-tag.inverted.selected {
-  /* font-weight: 700; */
-  /* text-shadow: var(--negative-tag-borderColor) 1px 1px 1px; */
+  align-items: center;
   color: white;
-  background: linear-gradient(0.25turn, var(--positive-tag-color), rgba(6, 95, 150, 0));
-  clip-path: polygon(
-  100% 0,   
-  100% 100%,
-  5%  100%,
-  0 80%,
-  0 0);
-  background-size: 90% 90%;
+  background-image: url('../ui/select-bar-neutral.webp');
+  filter: drop-shadow(0 0 2px var(--effects-color1));
+  font-style: italic;
+  font-family: var(--font-family-main1);
+  text-transform: uppercase;
+  background-size: 100% 95%;
   background-repeat: no-repeat;
-  background-position: center left;
-  border-left: 7px solid var(--marker-positiveTag-color);
-  margin-left: -7px;
+  background-position: left center;
+  height: fit-content;
+}
+
+.mh-story-tag.selected.toBurn,
+.mh-loadout-tag.selected.toBurn {
+  background-image: url('../ui/select-bar-neutral-toburn.webp');
+  filter: drop-shadow(0 0 2px var(--effects-color1));
 }
 
 .mh-weakness-tag.selected,
 .mh-story-tag.inverted.selected {
-  /* font-weight: 700; */
-  /* text-shadow: var(--positive-tag-borderColor) 0px 1px; */
+  /* display: flex; */
+  align-items: center;
   color: white;
-  background: linear-gradient(0.25turn, var(--negative-tag-color), rgba(6, 95, 150, 0));
-  clip-path: polygon(
-    100% 0,   
-    100% 100%,
-    5%  100%,
-    0 80%,
-    0 0);
-  background-size: 90% 90%;
+  background-image: url('../ui/select-bar-weakness.webp');
+  filter: drop-shadow(0 0 2px gray);
+  font-style: italic;
+  font-family: var(--font-family-main1);
+  text-transform: uppercase;
+  background-size: 100% 95%;
   background-repeat: no-repeat;
-  background-position: center left;
-  border-left: 7px solid var(--marker-negativeTag-color);
-  margin-left: -7px;
+  background-position: left center;
+  height: fit-content;
+}
+
+.mh-burn-toggle,
+.mh-tag-text {
+  align-items: center;
+}
+
+.mh-tag-text {
+  margin-left: 12px;
+}
+
+.burn-icon {
+  width: 22px;
+  height: 16px;
+  margin-left: 5px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  align-self: center;
+  vertical-align: middle;
+}
+
+.mh-power-tag.mythosOS .burn-icon.unburned  {
+  background-image: url("../ui/icons/burn_mythosOS_empty.svg");
+}
+
+.mh-power-tag.mythosOS .burn-icon.toBurn  {
+  background-image: url("../ui/icons/burn_mythosOS_toburn.svg");
+  filter: drop-shadow(0 0 2px white);
+}
+
+.mh-power-tag.mythosOS .burn-icon.burned {
+  background-image: url("../ui/icons/burn_mythosOS_burned.svg");
+}
+
+.mh-power-tag.self .burn-icon.unburned  {
+  background-image: url("../ui/icons/burn_self_empty.svg");
+}
+
+.mh-power-tag.self .burn-icon.toBurn {
+  background-image: url("../ui/icons/burn_self_toburn.svg");
+  filter: drop-shadow(0 0 2px white);
+}
+
+.mh-power-tag.self .burn-icon.burned  {
+  background-image: url("../ui/icons/burn_self_burned.svg");
+}
+
+.mh-power-tag.noise .burn-icon.unburned {
+  background-image: url("../ui/icons/burn_noise_empty.svg");
+}
+
+.mh-power-tag.noise .burn-icon.toBurn  {
+  background-image: url("../ui/icons/burn_noise_toburn.svg");
+  filter: drop-shadow(0 0 2px white);
+}
+
+.mh-power-tag.noise .burn-icon.burned  {
+  background-image: url("../ui/icons/burn_noise_burned.svg");
+}
+
+.mh-loadout-tag .burn-icon.unburned,
+.mh-story-tag .burn-icon.unburned {
+  background-image: url("../ui/icons/burn_neutral_empty.svg");
+}
+
+.mh-loadout-tag .burn-icon.toBurn,
+.mh-story-tag .burn-icon.toBurn {
+  background-image: url("../ui/icons/burn_neutral_toburn.svg");
+  filter: drop-shadow(0 0 2px var(--effects-color1));
+}
+
+.mh-loadout-tag .burn-icon.burned,
+.mh-story-tag .burn-icon.burned {
+  background-image: url("../ui/icons/burn_neutral_burned.svg");
+}
+
+.mh-power-tag.burned,
+.mh-story-tag.burned,
+.mh-loadout-tag.burned  {
+  text-decoration-line: line-through;
+  text-decoration-color: rgb(235, 235, 235);
+  text-decoration-thickness: 2px;
+  color: #b1c7ca;
 }
 
 .double-ones::after {
@@ -201,59 +362,6 @@
 .mh-essence-chart img{
   border: none;
 }
-
-/* .mh-essence-chart.nexus {
-  background: radial-gradient(closest-side, white, darkgray, #00000000);
-  background-size: 80% 75%;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.mh-essence-chart.spiritualist {
-  background: radial-gradient(closest-side, var(--self-dark-color), var(--mythosOS-dark-color), #00000000);
-  background-size: 80% 75%;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.mh-essence-chart.cyborg {
-  background: radial-gradient(closest-side, var(--self-dark-color), var(--noise-dark-color), #00000000);
-  background-size: 80% 75%;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.mh-essence-chart.transhuman {
-  background: radial-gradient(closest-side, var(--noise-dark-color), var(--mythosOS-dark-color), #00000000);
-  background-size: 80% 75%;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.mh-essence-chart.real {
-  background: radial-gradient(closest-side, var(--self-dark-color), var(--self-light-color), #00000000);
-  background-size: 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.mh-essence-chart.avatar-conduit {
-  background: radial-gradient(closest-side, var(--mythosOS-dark-color), var(--mythosOS-light-color), #00000000);
-  background-size: 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.mh-essence-chart.singularity {
-  background: radial-gradient(closest-side, var(--noise-dark-color), var(--noise-light-color), #00000000);
-  background-size: 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.mh-essence-chart.city-of-mist {
-  background-image: none;
-} */
 
 /*Roll icons*/
 .mhr-icon.self {
