@@ -79,17 +79,28 @@
     {{/if}}
 
     <!-- Story Tags Section -->
-    {{#if hasStoryTags}}
+    {{!-- {{#if hasStoryTags}} --}}
       <div class="mh-story-tags-container">
-      <div class="mh-theme-header">
-        <span class="mh-theme-icon-notip storytag"></span>
-        <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.storyTags"}}{{#if isOtherscape}} / Relationships{{/if}}</span>
+      <div class="mh-theme-header mh-title-container">
+        <div class="mh-title-container">
+          <span class="mh-theme-icon-notip storytag"></span>
+          <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.storyTags"}}{{#if isOtherscape}} / Relationships{{/if}}</span>
+        </div>
+        <a class="create-story-tag" 
+        data-owner-id="{{actor.id}}" 
+        data-token-id="{{token.id}}" 
+        data-scene-id="{{scene.id}}" 
+        title="Create Tag"> 
+        <i class="fas fa-plus"></i></a>
       </div>
         <ul class="mh-tags">
           {{#each storyTags}}
-            <li class="mh-story-tag {{this.cssClass}}" data-id="{{this.id}}" data-temporary="{{this.temporary}}" data-permanent="{{this.permanent}}">
+            <li class="mh-story-tag {{this.cssClass}} {{#if temporary}}temporary{{/if}}"
+            data-id="{{this.id}}" 
+            data-temporary="{{this.temporary}}" 
+            data-permanent="{{this.permanent}}">
               <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
-              <span class="mh-tag-text">
+              <span class="mh-tag-text {{#if temporary}}temporary{{/if}}">
                 {{#if temporary}}⏱️ {{/if}}
                 {{#if permanent}}💎 {{/if}}
                 {{this.tagName}}</span>
@@ -100,21 +111,31 @@
           {{/each}}
         </ul>
       </div>
-    {{/if}}
+    {{!-- {{/if}} --}}
 
     <!-- Statuses Section -->
     <div class="mh-statuses-container">
-      <div class="mh-theme-header">
-        <span class="mh-theme-icon-notip statuses"></span>
-        <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.statuses"}}</span>
+      <div class="mh-theme-header mh-title-container">
+        <div class="mh-title-container">
+          <span class="mh-theme-icon-notip statuses"></span>
+          <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.statuses"}}</span>
+        </div>
+        <a class="create-status" title="Create Status"> <i class="fas fa-plus"></i></a>
       </div>
       <div class="mh-statuses-list">
         {{#each statuses}}
-          <div class="mh-status {{#if selected}}selected{{/if}} {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
+        <div class="mh-status {{statusType}} {{#if selected}}selected{{/if}} {{#if temporary}}temporary{{/if}}" 
+            data-status-name="{{statusName}}" 
+            data-status-id="{{id}}" 
+            data-owner-id="{{actor.id}}" 
+            data-tier="{{statusTier}}" 
+            data-temporary="{{temporary}}" 
+            data-permanent="{{permanent}}">
             {{#if temporary}}⏱️ {{/if}}
             {{#if permanent}}💎 {{/if}}
             {{statusName}}-{{statusTier}}
-          </div>
+        </div>
+
         {{/each}}
       </div>
     </div>
@@ -149,40 +170,6 @@
   <div id="mh-panel-ear" class="mh-panel-ear">❯</div>
   <div id="mh-panel-content" class="mh-panel-content">
     
-    {{!-- <div class="section improvements">
-        <div class="mh-theme-name title-effect"><i class="fa-solid fa-star"></i> {{localize "TYPES.Item.improvement"}}</div>
-        {{#each improvements}}
-        <div class="theme-container">
-            <div class="mh-theme-name title-effect mh-title-container mh-improvement-theme">
-                <div>
-                    <img src="{{this.icon}}" alt="theme-icon" class="theme-icon" /> {{this.name}}
-                </div>
-            </div>
-            {{#each this.improvements}}
-            <div class="improvement-container">
-                <div class="mh-title-container">
-                    <div class="item-name">
-                        {{this.name}}
-                        {{#if (gt this.uses.max 0)}}
-                        - {{this.uses.current}}/{{this.uses.max}}
-                        {{/if}}
-                        <a class="toggle-expended" data-item-id="{{this.id}}" data-actor-id="{{../id}}" title="Toggle Expended">
-                            <i class="fas fa-redo"></i>
-                        </a>
-                    </div>
-                </div>
-                {{#if this.description}}
-                <div class="item-description">{{this.description}}</div>
-                {{/if}}
-                {{#if this.choiceItem}}
-                <div class="item-choice">{{this.choiceItem}}</div>
-                {{/if}}
-            </div>
-            <hr />
-            {{/each}}
-        </div>
-        {{/each}}
-    </div> --}}
     {{#if hasImprovements}}
     <div class="section improvements">
         <div class="mh-theme-name title-effect"><i class="fa-light fa-star"></i> {{localize "TYPES.Item.improvement"}}</div>
@@ -195,31 +182,35 @@
             </div>
             {{#each this.improvements}}
             <div class="improvement-container">
-                <div class="mh-title-container">
-                    <div class="item-name">
-                      <i class="fa-solid fa-star" style="font-size: 0.45rem; margin-right: 2px;"></i>
-                        {{this.name}}
-                        {{#if (gt this.uses.max 0)}}
-                        - {{this.uses.current}}/{{this.uses.max}}
-                        <a class="toggle-expended" data-item-id="{{this.id}}" data-actor-id="{{../id}}" title="Reset Uses">
-                            <i class="fas fa-redo"></i>
-                        </a>
-                        {{/if}}
-                    </div>
-                </div>
+              <div class="mh-title-container">
+                  <span class="item-name">
+                    <i class="fa-solid fa-star" style="font-size: 0.45rem; margin-right: 2px;"></i>
+                      {{this.name}}
+                      {{#if (gt this.uses.max 0)}}
+                      - {{this.uses.current}}/{{this.uses.max}}
+                      <a class="toggle-expended" data-item-id="{{this.id}}" data-actor-id="{{../id}}" title="Reset Uses">
+                          <i class="fas fa-redo"></i>
+                      </a>
+                      {{/if}}
+                  </span>
+              </div>
+              <div>
                 {{#if this.description}}
                 <div class="item-description">{{this.description}}</div>
                 {{/if}}
                 {{#if this.choiceItem}}
                 <div class="item-choice">{{this.choiceItem}}</div>
                 {{/if}}
+              </div>
             </div>
-            <hr />
+            {{!-- <hr /> --}}
             {{/each}}
         </div>
         {{/each}}
     </div>
     {{/if}}
+
+
 
 
     <!-- City of Mist Content -->
@@ -253,10 +244,8 @@
         {{#each clueItems}}
         <div class="clue-container" data-clue-id="{{this.id}}" data-owner-id="{{this.actorId}}">
           <div class="mh-title-container">
-            <div class="item-name">
-                {{this.name}} ({{this.amount}})
-            </div>
-             <a class="clue-delete" title="Delete Clue"><i class="fas fa-trash"></i></a>
+            <div class="item-name">{{this.name}} ({{this.amount}})</div>
+            <a class="clue-delete" title="Delete Clue"><i class="fas fa-trash"></i></a>
           </div>
           {{#if this.partial}}
           <div class="partial-icon" title="{{localize "CityOfMist.terms.partialClue"}}">

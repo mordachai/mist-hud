@@ -51,6 +51,8 @@ async function rollDice() {
 // }
 
 //Main Roll function
+
+
 async function rollMove(moveName, hasDynamite) {
   const hud = MistHUD.getInstance();
   const tagsData = hud.getSelectedRollData();
@@ -194,28 +196,30 @@ try {
   }
 
   const chatData = {
-      moveName: move.name,
-      actorName: actor.name,
-      subtitle: move.subtitle || "",
-      rollResults,
-      outcomeMessage,
-      calculatedPower,
-      totalLoadoutTags,
-      totalWeakness,
-      totalStoryTags,
-      totalScnTags,
-      totalCharStatuses,
-      totalSceneStatuses,
-      modifier,
-      rollTotal: displayRollTotal,
-      localizedMoveEffects,
-      tagsData,
-      trackedEffects,
-      diceClass,
-      outcomeClass
-  };
+    moveName: move.name,
+    actorName: actor.name,
+    subtitle: move.subtitle || "",
+    rollResults,
+    outcomeMessage,
+    calculatedPower,
+    totalLoadoutTags,
+    totalWeakness,
+    totalStoryTags,
+    totalScnTags,
+    totalCharStatuses,
+    totalSceneStatuses,
+    modifier,
+    rollTotal: displayRollTotal,
+    localizedMoveEffects,
+    tagsData,
+    statuses: tagsData.statuses, // Include statuses
+    trackedEffects,
+    diceClass,
+    outcomeClass
+};
 
-  console.log("Tags Data for Roll:", chatData.tagsData);
+console.log("Final Chat Data Sent to Roll Chat:", chatData);
+
 
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
 
@@ -290,9 +294,13 @@ function calculateCharacterStatuses() {
   const rollData = hud.getSelectedRollData();
 
   const characterStatusTotal = rollData.statuses.reduce((total, status) => {
-    return total + (status.typeClass === "positive" ? status.tier : -status.tier);
+      console.log(`Calculating Status Contribution: Name: ${status.name}, Tier: ${status.tier}, Type: ${status.typeClass}`);
+      const contribution = status.typeClass === "positive" ? status.tier : -status.tier;
+      console.log(`Contribution for ${status.name}: ${contribution}`);
+      return total + contribution;
   }, 0);
 
+  console.log("Total Character Status Contribution to Roll:", characterStatusTotal);
   return characterStatusTotal;
 }
 
@@ -487,6 +495,7 @@ export async function rollSpecialMoves(moveName) {
     totalLoadoutTags,
     totalCharStatuses,
     totalSceneStatuses,
+    statuses: tagsData.statuses,
     totalScnTags,
     modifier,
     diceClass,
@@ -505,8 +514,6 @@ export async function rollSpecialMoves(moveName) {
 
   hud.cleanHUD(chatData.tagsData);
 }
-
-
 
 async function rollCinematicMove(moveName) {
   const move = moveConfig[moveName];

@@ -2,6 +2,9 @@
 
 import { themesConfig, essenceDescriptions } from './mh-theme-config.js';
 import { CityHelpers } from "/systems/city-of-mist/module/city-helpers.js";
+import { StoryTagDisplayContainer } from "/systems/city-of-mist/module/story-tag-window.js";
+import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
+
 
 // Register Handlebars helper for localizeTheme
 Handlebars.registerHelper('localizeTheme', function(themebookName) {
@@ -20,10 +23,7 @@ export class MistHUD extends Application {
   }
 
   async minimize() {
-    console.log("Before calling super.minimize()"); // Debug
     const result = await super.minimize();
-    console.log("After calling super.minimize(), HUD state:", this._state); // Debug
-    console.log("HUD minimized class present?", this.element.hasClass("minimized")); // Debug
     return result;
 }
 
@@ -357,23 +357,99 @@ export class MistHUD extends Application {
       this.calculateTotalPower();
     });
     
-    // Status selection cycle with .selected toggle
-    html.find('.mh-status').on('click', (event) => {
-      event.stopPropagation();
-      event.preventDefault();
-      const statusElement = $(event.currentTarget);
+    // html.find('.mh-status').on('click', async (event) => {
+    //   event.stopPropagation();
+    //   event.preventDefault();
   
-    // Cycle through status states: neutral -> negative -> positive -> neutral
-    if (statusElement.hasClass('neutral')) {
-      statusElement.removeClass('neutral').addClass('negative selected');
-    } else if (statusElement.hasClass('negative')) {
-      statusElement.removeClass('negative').addClass('positive selected');
-    } else if (statusElement.hasClass('positive')) {
-      statusElement.removeClass('positive').addClass('neutral').removeClass('selected');
-    }
-      
+    //   const statusElement = $(event.currentTarget);
+    //   const statusId = statusElement.data('status-id');
+  
+    //   if (!statusId) {
+    //       console.error("Missing status ID for state update.");
+    //       return;
+    //   }
+  
+    //   // Cycle through states: neutral -> negative -> positive -> neutral
+    //   let newState = 'neutral';
+    //   if (statusElement.hasClass('neutral')) {
+    //       newState = 'negative';
+    //       statusElement.removeClass('neutral').addClass('negative selected');
+    //   } else if (statusElement.hasClass('negative')) {
+    //       newState = 'positive';
+    //       statusElement.removeClass('negative').addClass('positive selected');
+    //   } else if (statusElement.hasClass('positive')) {
+    //       newState = 'neutral';
+    //       statusElement.removeClass('positive selected').addClass('neutral');
+    //   }
+  
+    //   // Add or remove the `selected` class based on state
+    //   if (newState === 'neutral') {
+    //       statusElement.removeClass('selected'); // Neutral status is not selected
+    //   } else {
+    //       statusElement.addClass('selected'); // Non-neutral statuses are selected
+    //   }
+  
+    //   // Persist state to actor flags
+    //   const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
+    //   savedStates[statusId] = {
+    //       state: newState,
+    //       selected: newState !== 'neutral' // Selected if not neutral
+    //   };
+    //   await this.actor.setFlag('mist-hud', 'status-states', savedStates);
+  
+    //   console.log(`Status ${statusId} updated to ${newState}`);
+  
+    //   // Recalculate total power after updating the status
+    //   this.calculateTotalPower();
+    // });
+     
+
+    html.find('.mh-status').on('click', async (event) => {
+      event.stopPropagation(); // Stop the event from propagating to parent elements
+      event.preventDefault();
+  
+      const statusElement = $(event.currentTarget);
+      const statusId = statusElement.data('status-id');
+  
+      if (!statusId) {
+          console.error("Missing status ID for state update.");
+          return;
+      }
+  
+      // Cycle through states: neutral -> negative -> positive -> neutral
+      let newState = 'neutral';
+      if (statusElement.hasClass('neutral')) {
+          newState = 'negative';
+          statusElement.removeClass('neutral').addClass('negative selected');
+      } else if (statusElement.hasClass('negative')) {
+          newState = 'positive';
+          statusElement.removeClass('negative').addClass('positive selected');
+      } else if (statusElement.hasClass('positive')) {
+          newState = 'neutral';
+          statusElement.removeClass('positive selected').addClass('neutral');
+      }
+  
+      // Add or remove the `selected` class based on state
+      if (newState === 'neutral') {
+          statusElement.removeClass('selected'); // Neutral status is not selected
+      } else {
+          statusElement.addClass('selected'); // Non-neutral statuses are selected
+      }
+  
+      // Persist state to actor flags
+      const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
+      savedStates[statusId] = {
+          state: newState,
+          selected: newState !== 'neutral' // Selected if not neutral
+      };
+      await this.actor.setFlag('mist-hud', 'status-states', savedStates);
+  
+      console.log(`Status ${statusId} updated to ${newState}`);
+  
+      // Recalculate total power after updating the status
       this.calculateTotalPower();
     });
+  
 
     html.find('.help-toggle, .hurt-toggle').on('change', async (event) => {
       const toggle = event.currentTarget;
@@ -415,8 +491,6 @@ export class MistHUD extends Application {
         amount,
         active: isChecked,
       });
-  
-      console.log(`[Help/Hurt Debug] Emitted socket events for update and notify.`);
     });
 
     // Add listener for clue creation and deletion deletion
@@ -484,16 +558,114 @@ export class MistHUD extends Application {
             });
         }
     });
+
+    html.find('.create-story-tag').on("click", this._createStoryTagFromHUD.bind(this));
+
+    html.find('.create-status').on("click", this._createStatusFromHUD.bind(this));
+
+    // Right-click to delete story tags
+    html.find('.mh-story-tag').on('contextmenu', async (event) => {
+        event.preventDefault();
+        const tagId = $(event.currentTarget).data('id');
+        const actorId = this.actor?.id;
+
+        if (!tagId || !actorId) {
+            console.error("Missing tagId or actorId for story tag deletion.");
+            return;
+        }
+
+        const actor = game.actors.get(actorId);
+        if (!actor) {
+            console.error(`Actor with ID ${actorId} not found.`);
+            return;
+        }
+
+        await actor.deleteTag(tagId);
+        console.log(`Story tag ${tagId} deleted.`);
+        this.render(false); // Refresh the HUD
+    });
+
+    // Right-click to delete statuses
+    html.find('.mh-status').on('contextmenu', async (event) => {
+      event.preventDefault();
+      const statusId = $(event.currentTarget).data('status-id'); // Get statusId from data attribute
+      const actorId = this.actor?.id; // Retrieve actor ID from the current actor
+  
+      if (!statusId || !actorId) {
+          console.error("Missing statusId or actorId for status deletion.");
+          return;
+      }
+  
+      const actor = game.actors.get(actorId);
+      if (!actor) {
+          console.error(`Actor with ID ${actorId} not found.`);
+          return;
+      }
+  
+      await actor.deleteStatus(statusId);
+      console.log(`Status ${statusId} deleted.`);
+      this.render(false); // Refresh the HUD
+    }); 
+
+    //Double click to edit story tags
+    html.find('.mh-story-tag').on('dblclick', async (event) => {
+      event.preventDefault();
+      const tagId = $(event.currentTarget).data('id');
+      const actorId = this.actor?.id;
+  
+      if (!tagId || !actorId) {
+          console.error("Missing tagId or actorId for story tag editing.");
+          return;
+      }
+  
+      const actor = game.actors.get(actorId);
+      const tag = actor?.getTag(tagId);
+      if (!tag) {
+          console.error(`Tag with ID ${tagId} not found on actor ${actorId}.`);
+          return;
+      }
+  
+      await CityDialogs.itemEditDialog(tag); // Open the edit dialog
+      console.log(`Story tag ${tagId} edited.`);
+      this.render(false); // Refresh the HUD
+    });
+    //Double click to edit statuses
+    html.find('.mh-status').on('dblclick', async (event) => {
+        event.preventDefault();
+        const statusId = $(event.currentTarget).data('status-id');
+        const actorId = this.actor?.id;
+    
+        if (!statusId || !actorId) {
+            console.error("Missing statusId or actorId for status editing.");
+            return;
+        }
+    
+        const actor = game.actors.get(actorId);
+        const status = actor?.getStatus(statusId);
+        if (!status) {
+            console.error(`Status with ID ${statusId} not found on actor ${actorId}.`);
+            return;
+        }
+    
+        await CityDialogs.itemEditDialog(status); // Open the edit dialog
+        console.log(`Status ${statusId} edited.`);
+        this.render(false); // Refresh the HUD
+    });
+  
       
     this.element.on('contextmenu', (event) => {
       event.preventDefault();
       event.stopPropagation();
     });
   }
-
+  
   getData(options) {
     const data = super.getData(options);
     if (!this.actor) return data;
+
+    data.actor = this.actor;
+    data.token = canvas.tokens.controlled[0] || null;
+    data.scene = game.scenes.current || null;
 
     // Get the active system setting
     const activeSystem = game.settings.get("city-of-mist", "system");
@@ -516,18 +688,29 @@ export class MistHUD extends Application {
     data.themes = themesAndTags.themes;
     data.storyTags = themesAndTags.storyTags;
     data.hasStoryTags = !!(themesAndTags.storyTags && themesAndTags.storyTags.length > 0);
-    data.statuses = this.getActorStatuses();
-    data.modifier = this.modifier;
     data.loadoutTags = this.getLoadoutTags();
 
+    const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
+    data.statuses = this.getActorStatuses().map((status) => {
+        const savedState = savedStates[status.id] || { state: 'neutral', selected: false };
+        return {
+            ...status,
+            statusType: savedState.state || 'neutral',
+            selected: savedState.selected || false,
+        };
+    });
+
+    // Add modifier
+    data.modifier = this.modifier;
+
     // Process Juice and Clues for City of Mist
-      if (data.isCityOfMist) {
-      const { helpItems, hurtItems, clueItems, juiceItems } = this.getJuiceAndClues();
+    if (data.isCityOfMist) {
+        const { helpItems, hurtItems, clueItems, juiceItems } = this.getJuiceAndClues();
         data.helpItems = helpItems || [];
         data.hurtItems = hurtItems || [];
-        data.clueItems = clueItems || []; // Pass clueItems to the HUD
+        data.clueItems = clueItems || [];
         data.juiceItems = juiceItems || [];
-      } else if (data.isOtherscape) {
+    } else if (data.isOtherscape) {
         // Process essence for Otherscape
         const themes = this.actor.items.filter(item => item.type === "theme");
         const essenceData = this.getEssence(themes);
@@ -546,15 +729,13 @@ export class MistHUD extends Application {
 
     // Add Help and Hurt messages for the receiving player
     const receivedBonuses = this.actor.getFlag('mist-hud', 'received-bonuses') || [];
-    console.log(`[Help/Hurt Debug] Bonuses fetched in getData:`, receivedBonuses);
 
     data.helpHurtMessages = receivedBonuses.length > 0 ? receivedBonuses : null;
-    console.log(`[Help/Hurt Debug] Messages passed to HUD:`, data.helpHurtMessages);
 
     // Add improvements
     const improvements = this.getImprovements();
     data.improvements = improvements;
-    data.hasImprovements = improvements.length > 0; // Check if there are improvements
+    data.hasImprovements = improvements.length > 0;
 
     return data;
   }
@@ -753,7 +934,62 @@ export class MistHUD extends Application {
     // Refresh the HUD to display updated juice
     this.render(false);
   }
-  
+
+  async _createStatusFromHUD(event) {
+    event.stopPropagation();
+
+    const owner = this.actor;
+    if (!owner) {
+        console.error("Actor not found for status creation.");
+        return;
+    }
+
+    // Create a new status with a default name
+    const obj = await owner.createNewStatus("Unnamed Status");
+    if (!obj) {
+        console.error("Failed to create a new status.");
+        return;
+    }
+
+    // Retrieve the newly created status
+    const status = owner.getStatus(obj.id);
+    if (!status) {
+        console.error(`Status with ID ${obj.id} not found.`);
+        return;
+    }
+
+    // Open the dialog to edit the status
+    const updateObj = await CityHelpers.itemDialog(status);
+    if (updateObj) {
+        CityHelpers.modificationLog(owner, "Created", status, `${status.system.amount || ""}`);
+    } else {
+        // Delete the status if the dialog is canceled
+        await owner.deleteStatus(obj.id);
+    }
+
+    // Refresh the HUD to display the new status
+    this.render(false);
+  }
+
+  async _createStoryTagFromHUD(event) {
+    event.stopPropagation();
+
+    try {
+        const createdTag = await StoryTagDisplayContainer.prototype.createStoryTag(event);
+
+        // Check if tag creation was successful (assume creation succeeded if no error is thrown)
+        if (createdTag === undefined) {
+            console.log("Story tag created successfully, but no return value provided by createStoryTag.");
+        } else {
+            console.log("Story tag created successfully:", createdTag);
+        }
+
+        this.render(false); // Refresh the HUD
+    } catch (err) {
+        console.error("Error creating a story tag:", err);
+    }
+  }
+
   getMysteryFromTheme(themeId) {
     if (!this.actor) {
       console.warn("No actor set in MistHUD.");
@@ -841,81 +1077,92 @@ export class MistHUD extends Application {
   
   calculateTotalPower() {
     let totalPower = 0;
-  
+
+    // Fetch saved states for statuses
+    const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
+
     // Calculate power tags
     $('.mh-power-tag.selected').each((index, element) => {
-      const tagElement = $(element);
-      const burnElement = tagElement.find('.mh-burn-toggle');
-  
-      if (burnElement.hasClass('toBurn')) {
-        totalPower += 3;  // Burned power tag selected adds +3
-      } else {
-        totalPower += 1;  // Regular power tag selected adds +1
-      }
+        const tagElement = $(element);
+        const burnElement = tagElement.find('.mh-burn-toggle');
+
+        if (burnElement.hasClass('toBurn')) {
+            totalPower += 3;  // Burned power tag selected adds +3
+        } else {
+            totalPower += 1;  // Regular power tag selected adds +1
+        }
     });
 
     // Calculate loadout tags
     $('.mh-loadout-tag.selected').each((index, element) => {
-      const tagElement = $(element);
-      const burnElement = tagElement.find('.mh-burn-toggle');
-  
-      if (burnElement.hasClass('toBurn')) {
-        totalPower += 3;  // Burned loadout tag selected adds +3
-      } else {
-        totalPower += 1;  // Regular loadout tag selected adds +1
-      }
+        const tagElement = $(element);
+        const burnElement = tagElement.find('.mh-burn-toggle');
+
+        if (burnElement.hasClass('toBurn')) {
+            totalPower += 3;  // Burned loadout tag selected adds +3
+        } else {
+            totalPower += 1;  // Regular loadout tag selected adds +1
+        }
     });
-  
+
     // Calculate weakness tags
     $('.mh-weakness-tag.selected').each((index, element) => {
-      const tagElement = $(element);
-      if (tagElement.hasClass('inverted')) {
-        totalPower += 1;  // Inverted weakness tag adds +1
-      } else {
-        totalPower -= 1;  // Normal weakness tag adds -1
-      }
+        const tagElement = $(element);
+        if (tagElement.hasClass('inverted')) {
+            totalPower += 1;  // Inverted weakness tag adds +1
+        } else {
+            totalPower -= 1;  // Normal weakness tag adds -1
+        }
     });
-  
+
     // Calculate story tags
     $('.mh-story-tag.selected').each((index, element) => {
-      const tagElement = $(element);
-      const isInverted = tagElement.hasClass('inverted');
-      const burnElement = tagElement.find('.mh-burn-toggle');
-      const isToBurn = burnElement.hasClass('toBurn');
-  
-      if (isInverted) {
-        totalPower -= 1;  // Inverted story tag adds -1
-      } else {
-        totalPower += 1;  // Regular story tag adds +1
-      }
-  
-      // Apply additional value if `toBurn` is active and not inverted
-      if (isToBurn && !isInverted) {
-        totalPower += 3;  // `toBurn` story tag selected adds +3 if not inverted
-      }
+        const tagElement = $(element);
+        const isInverted = tagElement.hasClass('inverted');
+        const burnElement = tagElement.find('.mh-burn-toggle');
+        const isToBurn = burnElement.hasClass('toBurn');
+
+        if (isInverted) {
+            totalPower -= 1;  // Inverted story tag adds -1
+        } else {
+            totalPower += 1;  // Regular story tag adds +1
+        }
+
+        // Apply additional value if `toBurn` is active and not inverted
+        if (isToBurn && !isInverted) {
+            totalPower += 3;  // `toBurn` story tag selected adds +3 if not inverted
+        }
     });
-  
-    // Calculate status values from the character
-    $('.mh-status.positive').each((index, element) => {
-      const statusElement = $(element);
-      const tier = parseInt(statusElement.data('tier')) || 0;
-      totalPower += tier;  // Positive status adds its tier value
+
+    // Calculate status values using saved states
+    $('.mh-status').each((index, element) => {
+        const statusElement = $(element);
+        const statusId = statusElement.data('status-id');
+        const tier = parseInt(statusElement.data('tier')) || 0;
+
+        // Use saved state if available; fallback to class-based state
+        const state = savedStates[statusId] || 
+                      (statusElement.hasClass('positive') ? 'positive' :
+                      statusElement.hasClass('negative') ? 'negative' : 'neutral');
+
+        if (state === 'positive') {
+            totalPower += tier;  // Positive status adds its tier value
+        } else if (state === 'negative') {
+            totalPower -= tier;  // Negative status subtracts its tier value
+        }
     });
-  
-    $('.mh-status.negative').each((index, element) => {
-      const statusElement = $(element);
-      const tier = parseInt(statusElement.data('tier')) || 0;
-      totalPower -= tier;  // Negative status subtracts its tier value
-    });
-  
+
     // Add modifier to total power
     totalPower += this.modifier || 0;  // Modifier can be positive or negative
-  
+
     // Correctly process scene statuses
     const sceneStatuses = getSceneStatuses();
-    const scenePower = sceneStatuses.reduce((acc, status) => acc + (status.type === 'positive' ? status.tier : -status.tier), 0);
+    const scenePower = sceneStatuses.reduce(
+        (acc, status) => acc + (status.type === 'positive' ? status.tier : -status.tier),
+        0
+    );
     totalPower += scenePower;
-     
+
     return totalPower;
   }
 
@@ -1053,10 +1300,17 @@ export class MistHUD extends Application {
             processedTag.inversionIcon = processedTag.isInverted 
                 ? '<i class="fa-light fa-angles-up"></i>' 
                 : '<i class="fa-light fa-angles-down"></i>';
+
+            // Check if the tag is temporary and add the temporary property
+            processedTag.temporary = tag.system.temporary || false;
+
             return processedTag;
         }).filter(Boolean); // Remove any null or invalid entries
+        console.log("Processed Story Tags:", storyTags);
+
 
     return storyTags;
+    
   }
 
   getThemesAndTags() {
@@ -1301,28 +1555,31 @@ export class MistHUD extends Application {
 
   getActorStatuses() {
     if (!this.actor) return [];
-  
+
+    const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {}; // Retrieve saved states
+
     const statusMap = new Map();
-  
+
     this.actor.items
-      .filter((item) => item.type === 'status')
-      .forEach((status) => {
-        const key = `${status.name}-${status.system.tier}`; // Unique key by name and tier
-  
-        // Add status to map only if unique by name and tier
-        if (!statusMap.has(key)) {
-          statusMap.set(key, {
-            statusName: status.name,
-            statusTier: status.system.tier,
-            statusType: status.system.specialType || 'neutral',
-            temporary: !!status.system.temporary,  // Force boolean value
-            permanent: !!status.system.permanent   // Force boolean value
-          });
-        } else {
-          console.warn(`Duplicate status detected for key: ${key}`);
-        }
-      });
-  
+        .filter((item) => item.type === 'status')
+        .forEach((status) => {
+            const key = `${status.id}`; // Use status ID as the unique key
+            const savedState = savedStates[key] || 'neutral'; // Default to 'neutral' if no saved state
+
+            if (!statusMap.has(key)) {
+                statusMap.set(key, {
+                    id: status.id,
+                    statusName: status.name,
+                    statusTier: status.system.tier,
+                    statusType: savedState, // Use saved state
+                    temporary: !!status.system.temporary,
+                    permanent: !!status.system.permanent,
+                });
+            } else {
+                console.warn(`Duplicate status detected for key: ${key}`);
+            }
+        });
+
     const statuses = Array.from(statusMap.values());
     return statuses;
   }
@@ -1380,26 +1637,37 @@ export class MistHUD extends Application {
       this.close();
     });
   }
-
+  
   getSelectedRollData() {
     console.log("getSelectedRollData called."); // Debug log
 
+    // Fetch selected power tags
     const powerTags = this.element.find('.mh-power-tag.selected').map((i, el) => ({
         tagName: $(el).text().trim(),
         id: $(el).data('id'),
         stateClass: $(el).find('.mh-burn-toggle').hasClass('toBurn') ? "to-burn" :
-                    $(el).find('.mh-burn-toggle').hasClass('burned') ? "burned" : ""
+                    $(el).find('.mh-burn-toggle').hasClass('burned') ? "burned" : "selected"
     })).get();
 
+    // Fetch selected weakness tags
     const weaknessTags = this.element.find('.mh-weakness-tag.selected').map((i, el) => ({
         tagName: $(el).text().trim(),
         id: $(el).data('id'),
         stateClass: $(el).hasClass('inverted') ? "inverted" : "normal"
     })).get();
 
-    const storyTags = this.element.find('.mh-story-tag.selected').map((i, el) => {
+    // Fetch selected story tags
+    const storyTags = this.element.find('.mh-story-tag.selected').map((i, el) => ({
+      tagName: $(el).text().trim(),
+      id: $(el).data('id'),
+      temporary: $(el).data('temporary') || false,
+      permanent: $(el).data('permanent') || false,
+      stateClass: "selected"
+  })).get();
+
+    // Fetch selected loadout tags
+    const loadoutTags = this.element.find('.mh-loadout-tag.selected').map((i, el) => {
         const tagElement = $(el);
-        const isInverted = tagElement.hasClass('inverted');
         const burnElement = tagElement.find('.mh-burn-toggle');
 
         let stateClass;
@@ -1408,7 +1676,7 @@ export class MistHUD extends Application {
         } else if (burnElement.hasClass('toBurn')) {
             stateClass = "to-burn";
         } else {
-            stateClass = isInverted ? "inverted" : "selected";
+            stateClass = "selected";
         }
 
         return {
@@ -1418,47 +1686,43 @@ export class MistHUD extends Application {
         };
     }).get();
 
-    const loadoutTags = this.element.find('.mh-loadout-tag.selected').map((i, el) => {
-      const tagElement = $(el);
-      const burnElement = tagElement.find('.mh-burn-toggle');
-
-      let stateClass;
-      if (burnElement.hasClass('burned')) {
-          stateClass = "burned";
-      } else if (burnElement.hasClass('toBurn')) {
-          stateClass = "to-burn";
-      } else {
-          stateClass = "selected";
-      }
-
+    // Fetch selected character statuses
+    const selectedStatuses = this.element.find('.mh-status.selected').map((i, el) => {
+      const name = $(el).attr('data-status-name') || $(el).data('statusName');
+      const tier = parseInt($(el).data('tier')) || 0;
+      const typeClass = $(el).hasClass('positive') ? "positive" :
+                        $(el).hasClass('negative') ? "negative" : "neutral";
+  
+      console.log(`Status Selected for Roll: ID: ${$(el).data('status-id')}, Name: ${name}, Tier: ${tier}, Type: ${typeClass}`);
+  
       return {
-          tagName: tagElement.text().trim(),
-          id: tagElement.data('id'),
-          stateClass
+          name,
+          tier,
+          typeClass,
+          temporary: $(el).data('temporary') || false,
+          permanent: $(el).data('permanent') || false
       };
-    }).get();
-
-    const selectedStatuses = this.element.find('.mh-status.selected').map((i, el) => ({
-        name: $(el).attr('data-status-name') || $(el).data('statusName'),
-        tier: parseInt($(el).data('tier')),
-        typeClass: $(el).hasClass('positive') ? "positive" : "negative",
-        temporary: $(el).data('temporary') || false,
-        permanent: $(el).data('permanent') || false
-    })).get();
-
+  }).get();
+  
+  console.log("All Selected Statuses for Roll:", selectedStatuses);
+  
+  
+    // Modifier value
     const modifier = this.modifier || 0;
 
-    // Retrieve scene tags from getScnTags
+    // Retrieve scene tags
     const scnTags = getScnTags();
 
+    // Fetch scene statuses
     const sceneStatuses = getSceneStatuses().filter(sceneStatus => sceneStatus.isSelected).map(sceneStatus => ({
-      name: sceneStatus.name,
-      tier: sceneStatus.tier,
-      typeClass: sceneStatus.type === "positive" ? "scene-positive" : "scene-negative",
-      temporary: sceneStatus.temporary,
-      permanent: sceneStatus.permanent
+        name: sceneStatus.name,
+        tier: sceneStatus.tier,
+        typeClass: sceneStatus.type === "positive" ? "scene-positive" : "scene-negative",
+        temporary: sceneStatus.temporary,
+        permanent: sceneStatus.permanent
     }));
 
+    // Return all gathered data
     return {
         powerTags,
         weaknessTags,
@@ -1469,59 +1733,89 @@ export class MistHUD extends Application {
         scnTags,
         modifier: modifier ? modifier : null
     };
-
   }
   
   async cleanHUD() {
     try {
-      // Check if actor exists
-      if (!this.actor) {
-        console.warn("No actor set for MistHUD. Skipping actor updates.");
-        return;
-      }
-  
-      // Update `.toBurn` tags to `.burned` in the actor's data and DOM
-      const tagsToUpdate = this.element.find('.mh-power-tag.toBurn, .mh-weakness-tag.toBurn, .mh-story-tag.toBurn, .mh-loadout-tag.toBurn');
-      for (const element of tagsToUpdate) {
-        const $tag = $(element);
-        const tagId = $tag.data('id');
-        const tagItem = this.actor.items.get(tagId);
-  
-        // Update actor's data for burned state
-        if (tagItem) {
-          await tagItem.update({
-            "system.burned": true,
-            "system.burn_state": 0 // Ensure the burn state is set to burned
-          });
+        if (!this.actor) {
+            console.warn("No actor set for MistHUD. Skipping actor updates.");
+            return;
         }
-  
-        // Update the HUD element
-        $tag.removeClass('toBurn').addClass('burned');
-        $tag.find('.mh-burn-toggle').removeClass('toBurn').addClass('burned');
-      }
-  
-      // Remove `.selected` from all elements
-      //this.element.find('.selected').removeClass('selected');
-  
-      // Change `.mh-status.positive` and `.mh-status.negative` to `.mh-status.neutral`
-      this.element.find('.mh-status.positive, .mh-status.negative').each((index, element) => {
-        const $status = $(element);
-        $status.removeClass('positive negative').addClass('neutral');
-      });
-  
-      // Reset the modifier to 0 and update the display
-      this.modifier = 0;
-      this.updateModifierDisplay();
-  
-      // Delete any elements with the `.temporary` class
-      this.element.find('.temporary').remove();
-  
-      await this.render(true); // Ensure HUD is re-rendered to reflect changes
+
+        // Update `.toBurn` tags to `.burned`
+        const tagsToUpdate = this.element.find('.mh-power-tag.toBurn, .mh-weakness-tag.toBurn, .mh-story-tag.toBurn, .mh-loadout-tag.toBurn');
+        for (const element of tagsToUpdate) {
+            const $tag = $(element);
+            const tagId = $tag.data('id');
+            const tagItem = this.actor.items.get(tagId);
+
+            if (tagItem) {
+                await tagItem.update({
+                    "system.burned": true,
+                    "system.burn_state": 0
+                });
+            }
+
+            $tag.removeClass('toBurn').addClass('burned');
+            $tag.find('.mh-burn-toggle').removeClass('toBurn').addClass('burned');
+        }
+
+        // Delete temporary statuses
+        const statusesToDelete = this.element.find('.mh-status.selected[data-temporary="true"]');
+        for (const element of statusesToDelete) {
+            const $status = $(element);
+            const statusId = $status.data('status-id');
+            if (statusId) {
+                console.log(`Deleting temporary status: ${$status.data('status-name')}`);
+                await this.actor.deleteEmbeddedDocuments("Item", [statusId]);
+            }
+        }
+
+        // Delete temporary tags used in the roll
+        // DOESN'T WORK DONT KNOW WHY NEITHER DOES THE MACHINE
+        // const tagsToDelete = this.element.find('.mh-story-tag.selected[data-temporary="true"]');
+        // for (const element of tagsToDelete) {
+        //     const $tag = $(element);
+        //     const tagId = $tag.data('id');
+        //     const tagName = $tag.data('tag-name') || "Unnamed Tag";
+
+        //     if (tagId) {
+        //         console.log(`Deleting temporary tag used in roll: ${tagName} (ID: ${tagId})`);
+        //         await this.actor.deleteEmbeddedDocuments("Item", [tagId]);
+        //     } else {
+        //         console.error(`Failed to delete tag: Missing tag ID for ${tagName}`);
+        //     }
+        // }
+
+
+
+        // Preserve `selected` and `statusType` for statuses
+        const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
+        this.element.find('.mh-status').each((index, element) => {
+            const statusElement = $(element);
+            const statusId = statusElement.data('status-id');
+
+            if (statusId && savedStates[statusId]) {
+                const state = savedStates[statusId].state;
+                statusElement
+                    .removeClass('neutral positive negative selected')
+                    .addClass(state);
+
+                if (savedStates[statusId].selected) {
+                    statusElement.addClass('selected');
+                }
+            }
+        });
+
+        this.modifier = 0;
+        this.updateModifierDisplay();
+        await this.render(true);
     } catch (error) {
-      console.error("Error during HUD cleanup:", error);
+        console.error("Error during HUD cleanup:", error);
     }
   }
-     
+
+  
 }
 
 // Function to attach click listeners to each scene tag for dynamic updates
@@ -1633,7 +1927,6 @@ Hooks.on('updateActor', (actor, data, options, userId) => {
 
 Hooks.once('ready', () => {
   game.socket.on('system.mist-hud', async (data) => {
-      console.log(`[Help/Hurt Debug] Socket event received:`, data);
 
       if (data.type === 'notify-bonus' && game.user.character?.id === data.targetId) {
           const targetActor = game.actors?.get(data.targetId);

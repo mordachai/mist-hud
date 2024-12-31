@@ -741,12 +741,16 @@ hr {
 }
 
 /* Token Image */
-.token-image {
+.relationship-item .token-image {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  margin-right: 8px;
+  margin-right: 3px;
   vertical-align: middle;
+  border: none;
+}
+
+.relationship-item .token-image img {
   border: none;
 }
 
@@ -757,6 +761,7 @@ hr {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 3px;
+  align-items: center;
 }
 
 #mh-sliding-panel .clue-delete,
@@ -772,6 +777,11 @@ hr {
   padding: 5px; /* Inner spacing */
   margin-bottom: 10px; /* Space between containers */
   background-color: #2c2c2c; /* Background color for contrast */
+}
+
+.relationship-item .item-name {
+  font-size: 0.85rem;
+  font-family: var(--font-family-tags);
 }
 
 /* Item Name inside Containers */
@@ -811,6 +821,14 @@ hr {
   margin-bottom: 1em;
 }
 
+.improvements .improvement-container {
+  border: 2px solid #555;
+  border-radius: 5px;
+  padding: 4px;
+  margin-bottom: 5px;
+  background-color: #2c2c2c;
+}
+
 .improvements .mh-improvement-theme{
   margin-bottom: 3px;
 }
@@ -827,6 +845,8 @@ hr {
   justify-content: flex-start;
   align-items: center;
   font-weight: bold;
+  font-family: var(--font-family-main2);
+  font-size: 0.85rem;
 }
 
 .improvements .item-description,

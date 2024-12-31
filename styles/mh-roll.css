@@ -238,19 +238,11 @@
     text-transform: lowercase;
   }
 
-  .mhr-temporary-status {
-    background-color: var(--destroyed-tag-color) !important;
-    color: var(--text-tag-color);
+  .mhr-temporary-status,
+  .mhr-temporary-tag {
+    border: 2px solid var(--destroyed-tag-color) !important;
   }
-
-  /* .mhr-permanent-status {
-  } */
-
-    /* .power-tag.to-burn {
-    border-left: 3px solid #ff4500;
-    margin-left: -3px;
-  } */
-  
+ 
   .to-burn {
     color: var(--toBurn-text-color);
     text-shadow: 0 0 3px #ff4500;

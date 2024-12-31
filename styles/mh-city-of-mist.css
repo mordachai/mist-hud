@@ -114,7 +114,7 @@
 .burn-icon {
   display: inline-block; /* Keep the inline-block for the background image behavior */
   width: 17px;
-  height: 18px;
+  height: 15px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
