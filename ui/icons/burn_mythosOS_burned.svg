@@ -1,16 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33.52 18.67">
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 20.41 17.67">
   <defs>
     <style>
       .cls-1 {
-        fill: #fff;
-        stroke: #532e88;
+        fill: url(#radial-gradient);
+        stroke: #7d56a4;
         stroke-miterlimit: 10;
-        stroke-width: 2px;
       }
     </style>
+    <radialGradient id="radial-gradient" cx="10.2" cy="8.84" fx="10.2" fy="8.84" r="9" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ef4136"/>
+      <stop offset=".14" stop-color="#eb3e35"/>
+      <stop offset=".25" stop-color="#e13733"/>
+      <stop offset=".36" stop-color="#d02b30"/>
+      <stop offset=".44" stop-color="#be1e2d"/>
+      <stop offset=".47" stop-color="#ba1e2c"/>
+      <stop offset=".51" stop-color="#ae1e2b"/>
+      <stop offset=".55" stop-color="#9b1e2a"/>
+      <stop offset=".58" stop-color="#7f1e27"/>
+      <stop offset=".62" stop-color="#5c1e24"/>
+      <stop offset=".65" stop-color="#311e21"/>
+      <stop offset=".66" stop-color="#231f20"/>
+    </radialGradient>
   </defs>
   <g id="Layer_1-2" data-name="Layer 1">
-    <path class="cls-1" d="M24.19,1c-2.8,0-13.39,5.21-13.39,5.21l5.25,1.36c-.03.13-11.07,2.46-11.07,2.46,0,0,11.43,2.28,11.46,2.36l-5.64,1.46s11.52,3.83,13.39,3.83c4.6,0,8.34-3.73,8.34-8.34S28.79,1,24.19,1Z"/>
+    <polygon class="cls-1" points="15.02 .5 5.39 .5 .58 8.84 5.39 17.17 15.02 17.17 19.83 8.84 15.02 .5"/>
   </g>
 </svg>

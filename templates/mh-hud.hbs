@@ -2,9 +2,7 @@
   <div class="mh-content">
     {{#each themes}}
     <div class="theme-container-{{category}}">
-      <div class="mh-theme-header">
-        <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
-
+      <div class="mh-theme-header {{category}}">
       {{#if (eq ../activeSystem "city-of-mist")}}
         <span class="mh-theme-name mh-theme-name-com-{{category}}">{{themeName}}</span> <!-- Render only if system is City of Mist -->
       {{/if}}
@@ -12,6 +10,7 @@
       {{#if (or (eq ../activeSystem "otherscape") (eq ../activeSystem "legend"))}}
         <span class="mh-theme-name mh-theme-name-com-{{category}}">{{localizedThemebookName}}</span> <!-- Render only if system is Otherscape or Legends in the Mist -->
       {{/if}}
+      <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
       </div>
 
       <!-- Power Tags -->
@@ -52,8 +51,8 @@
 
     <!-- LOADOUT Section -->
     {{#if isOtherscape}} 
-    <div class="theme-container-{{category}}">
-      <div class="mh-theme-header">
+    <div class="theme-container">
+      <div class="mh-theme-header {{#if isOtherscape}}neutral{{/if}}">
         <span class="mh-theme-icon-notip loadout"></span>
         <span class="mh-theme-name mh-theme-name-neutral">{{localize "Otherscape.terms.loadoutTheme.name"}}</span>
       </div>
@@ -81,7 +80,7 @@
     <!-- Story Tags Section -->
     {{!-- {{#if hasStoryTags}} --}}
       <div class="mh-story-tags-container">
-      <div class="mh-theme-header mh-title-container">
+      <div class="mh-theme-header {{#if isOtherscape}}spaced{{/if}} mh-title-container">
         <div class="mh-title-container">
           <span class="mh-theme-icon-notip storytag"></span>
           <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.storyTags"}}{{#if isOtherscape}} / Relationships{{/if}}</span>
@@ -91,7 +90,7 @@
         data-token-id="{{token.id}}" 
         data-scene-id="{{scene.id}}" 
         title="Create Tag"> 
-        <i class="fas fa-plus"></i></a>
+        <i class="fa-regular fa-octagon-plus"></i></a>
       </div>
         <ul class="mh-tags">
           {{#each storyTags}}
@@ -115,12 +114,12 @@
 
     <!-- Statuses Section -->
     <div class="mh-statuses-container">
-      <div class="mh-theme-header mh-title-container">
+      <div class="mh-theme-header {{#if isOtherscape}}spaced{{/if}} mh-title-container">
         <div class="mh-title-container">
           <span class="mh-theme-icon-notip statuses"></span>
           <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.statuses"}}</span>
         </div>
-        <a class="create-status" title="Create Status"> <i class="fas fa-plus"></i></a>
+        <a class="create-status" title="Create Status"><i class="fa-regular fa-octagon-plus"></i></a>
       </div>
       <div class="mh-statuses-list">
         {{#each statuses}}
@@ -172,7 +171,10 @@
     
     {{#if hasImprovements}}
     <div class="section improvements">
-        <div class="mh-theme-name title-effect"><i class="fa-light fa-star"></i> {{localize "TYPES.Item.improvement"}}</div>
+        <div class="mh-theme-name title-effect"><i class="fa-light fa-star"></i>
+          {{#if isCityOfMist}}{{localize "TYPES.Item.improvement"}}{{/if}}
+          {{#if isOtherscape}}Theme Specials{{/if}}
+        </div>
         {{#each improvements}}
         <div class="theme-container">
             <div class="mh-theme-name mh-title-container mh-improvement-theme">

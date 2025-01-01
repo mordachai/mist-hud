@@ -48,8 +48,8 @@
   flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-start;
-  margin: 1px 3px;
-  padding: 2px;
+  margin: 1px 1px;
+  padding: 2px 0px;
   cursor: pointer;
   text-align: left;
   height: fit-content;
@@ -89,32 +89,32 @@ color: var(--mythosOS-verylight-color);
 
 .mh-power-tag.selected.mythosOS {
   background-image: url('../ui/select-bar-mythosOS.webp');
-  filter: drop-shadow(0 0 3px var(--mythosOS-dark-color));
+  /* filter: drop-shadow(0 0 3px var(--mythosOS-dark-color)); */
 }
 
 .mh-power-tag.selected.noise {
   background-image: url('../ui/select-bar-noise.webp');
-  filter: drop-shadow(0 0 3px var(--noise-dark-color));
+  /* filter: drop-shadow(0 0 3px var(--noise-dark-color)); */
 }
 
 .mh-power-tag.selected.self {
   background-image: url('../ui/select-bar-self.webp');
-  filter: drop-shadow(0 0 3px var(--self-dark-color));
+  /* filter: drop-shadow(0 0 3px var(--self-dark-color)); */
 }
 
 .mh-power-tag.selected.toBurn.mythosOS {
   background-image: url('../ui/select-bar-mythosOS-toburn.webp');
-  filter: drop-shadow(0 0 3px var(--mythosOS-dark-color));
+  /* filter: drop-shadow(0 0 3px var(--mythosOS-dark-color)); */
 }
 
 .mh-power-tag.selected.toBurn.noise {
   background-image: url('../ui/select-bar-noise-toburn.webp');
-  filter: drop-shadow(0 0 3px var(--noise-dark-color));
+  /* filter: drop-shadow(0 0 3px var(--noise-dark-color)); */
 }
 
 .mh-power-tag.selected.toBurn.self {
   background-image: url('../ui/select-bar-self-toburn.webp');
-  filter: drop-shadow(0 0 3px var(--self-dark-color));
+  /* filter: drop-shadow(0 0 3px var(--self-dark-color)); */
 }
 
 .mh-story-tag.selected,
@@ -122,8 +122,8 @@ color: var(--mythosOS-verylight-color);
 .mh-weakness-tag.inverted.selected {
   align-items: center;
   color: white;
-  background-image: url('../ui/select-bar-neutral.webp');
-  filter: drop-shadow(0 0 2px var(--effects-color1));
+  background-image: url('../ui/select-bar-neutral2.webp');
+  /* filter: drop-shadow(0 0 2px var(--effects-color1)); */
   font-style: italic;
   font-family: var(--font-family-main1);
   text-transform: uppercase;
@@ -135,8 +135,8 @@ color: var(--mythosOS-verylight-color);
 
 .mh-story-tag.selected.toBurn,
 .mh-loadout-tag.selected.toBurn {
-  background-image: url('../ui/select-bar-neutral-toburn.webp');
-  filter: drop-shadow(0 0 2px var(--effects-color1));
+  background-image: url('../ui/select-bar-neutral2-toburn.webp');
+  /* filter: drop-shadow(0 0 2px var(--effects-color1)); */
 }
 
 .mh-weakness-tag.selected,
@@ -145,7 +145,7 @@ color: var(--mythosOS-verylight-color);
   align-items: center;
   color: white;
   background-image: url('../ui/select-bar-weakness.webp');
-  filter: drop-shadow(0 0 2px gray);
+  /* filter: drop-shadow(0 0 2px gray); */
   font-style: italic;
   font-family: var(--font-family-main1);
   text-transform: uppercase;
@@ -161,18 +161,39 @@ color: var(--mythosOS-verylight-color);
 }
 
 .mh-tag-text {
-  margin-left: 12px;
+  margin-left: 10px;
+}
+
+.create-story-tag i,
+.create-status i {
+  position: relative;
+  top: -5px;
+  right: -2px;
+  font-size: 1.0rem;
+}
+
+.mh-story-toggle i{
+  position: relative;
+  top: 0;
+  right: -1px;
+  font-size: 0.90rem;
 }
 
 .burn-icon {
   width: 22px;
   height: 16px;
-  margin-left: 5px;
+  margin-left: 6px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   align-self: center;
   vertical-align: middle;
+}
+
+.burn-icon.burned {
+  width: 15px;
+  height: 15px;
+  margin-left: 13px;
 }
 
 .mh-power-tag.mythosOS .burn-icon.unburned  {
@@ -181,7 +202,7 @@ color: var(--mythosOS-verylight-color);
 
 .mh-power-tag.mythosOS .burn-icon.toBurn  {
   background-image: url("../ui/icons/burn_mythosOS_toburn.svg");
-  filter: drop-shadow(0 0 2px white);
+  filter: drop-shadow(0 0 3px lime);
 }
 
 .mh-power-tag.mythosOS .burn-icon.burned {
@@ -194,7 +215,7 @@ color: var(--mythosOS-verylight-color);
 
 .mh-power-tag.self .burn-icon.toBurn {
   background-image: url("../ui/icons/burn_self_toburn.svg");
-  filter: drop-shadow(0 0 2px white);
+  filter: drop-shadow(0 0 3px lime);
 }
 
 .mh-power-tag.self .burn-icon.burned  {
@@ -207,7 +228,7 @@ color: var(--mythosOS-verylight-color);
 
 .mh-power-tag.noise .burn-icon.toBurn  {
   background-image: url("../ui/icons/burn_noise_toburn.svg");
-  filter: drop-shadow(0 0 2px white);
+  filter: drop-shadow(0 0 3px lime);
 }
 
 .mh-power-tag.noise .burn-icon.burned  {

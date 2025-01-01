@@ -183,8 +183,8 @@ border: none;
 #mist-hud .mh-content {
   overflow-y: auto;
   overflow-x: hidden;
-  margin-top: 10px;
-  padding: 5px;
+  margin-top: 5px;
+  padding: 1px;
   color: whitesmoke;
 }
 
@@ -209,7 +209,6 @@ hr {
   border: none;
   border-top: 1px solid #444;
   margin: 5px 10px;
-
 }
 
 /* General umbrella class for all theme icons */
@@ -245,22 +244,31 @@ hr {
 }
 
 .mh-theme-icon.self {
-  width: 20px;
-  height: 18px;
+  position: relative;
+  right: -10px;
+  top: -2px;
+  width: 28px;
+  height: 24px;
   background-image: url('../ui/icons/self_os_icn.svg');
   filter: drop-shadow(1px 0 4px var(--self-dark-color));
 }
 
 .mh-theme-icon.mythosOS {
-  width: 19px;
-  height: 20px;
+  position: relative;
+  right: -6px;
+  top: 2px;
+  width: 24px;
+  height: 24px;
   background-image: url('../ui/icons/mythos_os_icn.svg');
   filter: drop-shadow(1px 0 4px var(--mythosOS-light-color));
 }
 
 .mh-theme-icon.noise {
-  width: 18px;
-  height: 18px;
+  position: relative;
+  right: -7px;
+  top: -1px;
+  width: 24px;
+  height: 24px;
   background-image: url('../ui/icons/noise_os_icn.svg');
   filter: drop-shadow(1px 0 4px var(--noise-dark-color));
 }
@@ -305,10 +313,44 @@ hr {
 
 .mh-theme-header {
   display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   align-items: center;
   flex-direction: row;
-  margin: 0px 3px 2px 2px;
-  height: 20px;
+  margin: -3px -0px 1px -0px;
+  height: 28px;
+  padding: 0 10px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.mh-theme-header.neutral {
+  background-image: url('../ui/header-neutral.webp');
+  justify-content: flex-start;
+  margin-top: 2px;
+  /* text-shadow: 1px 1px 2px var(--effects-color1); */
+}
+
+.mh-theme-header.spaced {
+  background-image: url('../ui/header-neutral.webp');
+  justify-content: space-between;
+  margin-top: 2px;
+  /* text-shadow: 1px 1px 2px var(--effects-color1); */
+}
+
+.mh-theme-header.mythosOS {
+  background-image: url('../ui/header-mythosOS.webp');
+}
+
+.mh-theme-header.noise {
+  background-image: url('../ui/header-noise.webp');
+  padding-top: 2px;
+}
+
+.mh-theme-header.self {
+  background-image: url('../ui/header-self.webp');
+  padding-top: 2px;
 }
 
 .mh-themebook-name {
@@ -338,30 +380,32 @@ hr {
 
 .mh-theme-name-com-self {
   color: var(--self-verylight-color);
-  text-shadow: var(--self-dark-color) 1px 1px 3px;
+  font-family: var(--font-family-main1), sans-serif;
+  /* text-shadow: var(--self-dark-color) 1px 1px 3px; */
 }
 
 .mh-theme-name-com-mythosOS {
   color: var(--mythosOS-verylight-color);
-  text-shadow: var(--mythosOS-dark-color) 1px 1px 3px;
+  font-family: var(--font-family-move), sans-serif;
+  /* text-shadow: var(--mythosOS-dark-color) 1px 1px 3px; */
 }
 
 .mh-theme-name-com-noise {
   color: var(--noise-verylight-color);
-  text-shadow: var(--noise-dark-color) 1px 1px 3px;
+  font-family: var(--font-family-move), sans-serif;
+  /* text-shadow: var(--noise-dark-color) 1px 1px 3px; */
 }
 
 .mh-theme-name-neutral {
   color: whitesmoke;
-  text-shadow: rgb(157, 69, 184) 1px 2px 2px;
+  /* text-shadow: rgb(157, 69, 184) 1px 2px 2px; */
 }
 
 .mh-theme-name {
   font-family: var(--font-family-move), sans-serif;
-  font-size: 1.2em;
+  font-size: 1.3em;
   display: block;
   margin: 4px 2px;
-  font-style: italic;
 }
 
 /* Mythos Theme Name Styling */
@@ -760,7 +804,6 @@ hr {
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 3px;
   align-items: center;
 }
 

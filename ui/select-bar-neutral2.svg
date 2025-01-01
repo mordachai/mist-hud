@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288.86 22.66">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        stroke-width: 0px;
+      }
+
+      .cls-2 {
+        fill: #2e4436;
+      }
+
+      .cls-3 {
+        fill: #29332c;
+      }
+
+      .cls-4 {
+        fill: none;
+        stroke: #738393;
+        stroke-linejoin: bevel;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <g>
+        <polyline class="cls-3" points="273.53 .5 288.36 .5 288.36 22.16 273.53 22.16"/>
+        <polyline class="cls-4" points="273.53 .5 288.36 .5 288.36 22.16 273.53 22.16"/>
+      </g>
+      <g>
+        <polyline class="cls-2" points="273.53 22.16 6 22.16 .5 16.65 .5 .5 273.53 .5"/>
+        <polyline class="cls-4" points="273.53 22.16 6 22.16 .5 16.65 .5 .5 273.53 .5"/>
+      </g>
+      <polygon class="cls-1" points=".98 .98 .98 16.44 5.91 21.38 5.91 .98 .98 .98"/>
+      <g>
+        <polyline class="cls-3" points="35.45 22.16 6.41 22.16 6.41 .5 35.45 .5"/>
+        <polyline class="cls-4" points="35.45 22.16 6.41 22.16 6.41 .5 35.45 .5"/>
+      </g>
+    </g>
+  </g>
+</svg>
