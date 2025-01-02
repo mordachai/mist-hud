@@ -61,7 +61,7 @@
                     {{#if (eq activeSystem 'city-of-mist')}}
                         MC Moves
                     {{else}}
-                        Threats and Consequences
+                        ›Threats / »Consequences
                     {{/if}}
                 </div>
             </div>
@@ -75,7 +75,7 @@
                         {{#each moves}}
                         <li>
                             {{#unless system.hideName}}
-                                <span class="npc-move-name">{{name}}</span> -
+                            <span class="npc-move-name">{{name}}</span> -
                             {{/unless}}
                             <span class="npc-move-description">{{parseStatus system.description}}</span>
                         </li>

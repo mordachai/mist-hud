@@ -229,7 +229,7 @@ margin: 5px;
 
 /* Subtitle for Each Move Type */
 .npc-move-subtitle {
-    font-size: 1.2rem;
+    font-size: 0.95rem;
     color: var(--text-hud-subtitles-color);
     text-transform: capitalize;
     font-weight: bold;
@@ -323,9 +323,8 @@ margin: 5px;
 .npc-subtitle-text {
     text-transform: uppercase;
     font-family: var(--font-family-main1);
-    font-weight: bold;
     color: var(--text-hud-subtitles-color);
-    font-size: 1.0rem;
+    font-size: 0.85rem;
     white-space: nowrap;
 }
 
@@ -440,7 +439,6 @@ margin: 5px;
     margin: -2px;
 }
 
-.npc-limit.burned,
 .npc-story-tag.burned,
 .npc-status.burned {
     opacity: 0.8;
@@ -453,20 +451,20 @@ margin: 5px;
 /* Container for Tags & Statuses */
 .npc-tags-statuses-container {
     display: flex;
-    flex-wrap: wrap; /* Allows items to break to the next line if necessary */
-    justify-content: center; /* Centers the items horizontally */
-    align-items: center; /* Centers items vertically */
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
     gap: 5px;
-    padding: 3px; /* Adds some padding around the container */
-    max-width: 100%; /* Ensures the container doesn't exceed its parent's width */
+    padding: 3px;
+    max-width: 100%;
 }
 
 /* Tags & Statuses Items */
 .npc-storytags-list,
 .npc-statuses-list {
     display: flex;
-    flex-wrap: nowrap; /* Items inside lists will also wrap if needed */
-    gap: 4px 8px; /* Adds space between list items */
+    flex-wrap: nowrap;
+    gap: 4px 8px;
     list-style: none;
     padding: 0;
     margin: 0;
@@ -476,9 +474,8 @@ margin: 5px;
 
 /* Responsive Behavior */
 .npc-tags-statuses-container li {
-    flex: 0 1 auto; /* Allow items to grow/shrink as needed */
-    max-width: 150px; /* Optional: Set a maximum width for individual items */
-    text-align: center; /* Center the content inside each item */
+    flex: 1; 
+    text-align: center;
 }
 
 /* Scrollbar Styling (Optional for Overflow Cases) */
@@ -502,7 +499,6 @@ margin: 5px;
     position: relative;
     top: 2px;
     line-height: 1rem;
-
 }
 
 .npc-threat{
@@ -512,7 +508,6 @@ margin: 5px;
     font-style: italic;
     margin-bottom: 1px;
     line-height: 1.2rem;
-    font-weight: 700;
 }
 
 .npc-consequence{

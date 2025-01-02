@@ -64,8 +64,7 @@ export class NpcHUD extends Application {
 
         data.hasDescriptionBiography = hasContent;
         data.descriptionBiography = `${description.trim()}${biography.trim() ?"" + biography.trim() : ""}`;
-    
-        
+       
         const system = await detectActiveSystem();
         data.activeSystem = system;
 
@@ -146,7 +145,8 @@ export class NpcHUD extends Application {
     
         return data;
     }
-    
+
+     
     getActorStatuses() {
         if (!this.actor) return [];
     
@@ -312,86 +312,6 @@ export class NpcHUD extends Application {
         }
     }
 
-    // activateListeners(html) {
-    //     super.activateListeners(html);
-
-    //     // Initialize accordions
-    //     initializeAccordions();
-
-    //     // Find the window header within the entire element
-    //     const header = this.element.find('.window-header');
-        
-    //     if (header.length === 0) {
-    //         console.warn("Header element not found during injection!");
-    //         return;
-    //     }
-
-    //     // Inject the custom header without passing any parameters
-    //     this.injectCustomHeader();
-
-    //        // Close button
-    //     html.find('.npc-close-button').click((event) => {
-    //         event.stopPropagation();
-    //         this.saveHUDPosition();
-    //         this.close();
-    //     });
-    
-    //     // Story tag selection toggle
-    //     html.find('.npc-story-tag').on('click', (event) => {
-    //         event.stopPropagation();
-    //         event.preventDefault();
-    //         const tagElement = $(event.currentTarget);
-    
-    //         // Prevent selection if burned
-    //         if (tagElement.hasClass('burned')) return;
-    
-    //         // Toggle the selected state
-    //         tagElement.toggleClass('selected');
-    //     });
-    
-    //     // Burn icon toggle for story tags
-    //     html.find('.mh-burn-toggle').on('click', async (event) => {
-    //         event.stopPropagation();
-    //         event.preventDefault();
-            
-    //         const burnElement = $(event.currentTarget);
-    //         const tagElement = burnElement.closest('.npc-story-tag');
-    //         const tagId = tagElement.data('id');
-    
-    //         const currentState = burnElement.hasClass('burned') ? "burned" :
-    //                              burnElement.hasClass('toBurn') ? "toBurn" : "unburned";
-    
-    //         // Determine new state
-    //         const newState = currentState === "unburned" ? "toBurn" :
-    //                          currentState === "toBurn" ? "burned" : "unburned";
-    
-    //         // Update the DOM classes for the icon and text
-    //         burnElement.removeClass('unburned toBurn burned').addClass(newState);
-    //         tagElement.removeClass('unburned toBurn burned selected').addClass(newState); // Also remove 'selected'
-    
-    //         // Update text state if necessary
-    //         const newIcon = this.getIcon(newState);
-    //         burnElement.html(newIcon);
-    
-    //         if (newState === "burned") {
-    //             tagElement.removeClass('selected');
-    //         }
-    
-    //         // Update the tag's state in the actor's data
-    //         const tagItem = this.actor.items.get(tagId);
-    //         if (tagItem) {
-    //             const updatedState = newState === "burned";
-    //             const burnState = newState === "toBurn" ? 1 : 0;
-    //             await tagItem.update({ "system.burned": updatedState, "system.burn_state": burnState });
-    //         }
-    //     });
-    
-    //     this.element.on('contextmenu', (event) => {
-    //         event.preventDefault();
-    //         event.stopPropagation();
-    //     });
-    // }
-
     activateListeners(html) {
         super.activateListeners(html);
     
@@ -461,9 +381,7 @@ export class NpcHUD extends Application {
         });
     }
     
-    
 }
-
 
 // Register the parseStatus helper
 Handlebars.registerHelper('parseStatus', function(description) {
@@ -521,13 +439,40 @@ Handlebars.registerHelper('parseMaxTier', function (maxTier) {
     return maxTier === 999 ? '-' : maxTier;
 });
 
+
 Hooks.on('renderTokenHUD', (app, html, data) => {
     if (!game.user.isGM) return;
 
     const actor = game.actors.get(data.actorId);
     if (actor && actor.type === 'threat') {
-        const hud = NpcHUD.getInstance(actor);
+        const hud = NpcHUD.getInstance();
         hud.setActor(actor);
+    }
+});
+
+// Listen for actor updates
+Hooks.on('updateActor', (actor, data, options, userId) => {
+    if (!game.user.isGM) return;
+
+    const hud = NpcHUD.getInstance();
+    if (hud.actor && hud.actor.id === actor.id) {
+        hud.render(false); // Re-render the HUD with updated data
+    }
+});
+
+// Listen for item updates
+Hooks.on('updateItem', (item, data, options, userId) => {
+    const hud = NpcHUD.getInstance();
+    if (hud.actor && hud.actor.id === item.parent.id) {
+        hud.render(false); // Re-render the HUD with updated data
+    }
+});
+
+// Optional: Handle actor deletion
+Hooks.on('deleteActor', (actor, options, userId) => {
+    const hud = NpcHUD.getInstance();
+    if (hud.actor && hud.actor.id === actor.id) {
+        hud.close(); // Close the HUD if the actor is deleted
     }
 });
 
