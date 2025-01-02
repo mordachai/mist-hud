@@ -663,4 +663,4 @@ export const essenceDescriptions = {
     Singularity: "<p class = 'mh-essence-text'>Psychological effects and intangible or unmeasurable mythical effects do not affect you. You can interface with ALL information, regardless of medium, and may roll with Noise to search it and, if it is recorded information, to manipulate it.</p>",
     "City of Mist Character": "<p class = 'mh-essence-text'>City of Mist characters do not use Essence rules. Are you in the right active system?</p>",
     Undefined: "<p class = 'mh-essence-text'>Essence is not defined for this character.</p>",
-  };
+};

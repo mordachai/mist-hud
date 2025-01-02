@@ -318,19 +318,6 @@ hr {
   font-family: var(--font-family-main2), cursive;
 }
 
-.mh-theme-header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  flex-direction: row;
-  margin: -3px -0px 1px -0px;
-  height: 28px;
-  padding: 0 10px;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-}
 
 .mh-theme-header.neutral {
   background-image: url('../ui/header-neutral.webp');

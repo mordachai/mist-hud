@@ -17,8 +17,9 @@
   --negative-tag-borderColor: #fb7b6d;
   --destroyed-tag-color: rgba(255, 40, 40, 0.825);
   --spectrum-color:#dc9c67;
-  --status-color: rgb(0, 93, 93);
-  --storytag-color: rgb(199, 69, 33);
+  --limit-color: #ae295b;
+  --status-color: rgb(142, 50, 170);
+  --storytag-color: rgb(63, 81, 161);
   --divider-roll-color: rgba(255, 255, 255, 0.3);
   --divider-color1: rgba(255, 255, 255, 0.3);
   --roll-shadow-color:#d542b7;
@@ -27,6 +28,7 @@
   --font-family-main1: Rift;
   --font-family-main2: Averia Serif Libre;
   --font-family-move: Rift Bold;
+  --font-family-npcmoves: Barlow Condensed;
   --font-family-roll: Averia Serif Libre;
   --font-family-tags: Roboto Condensed;
   --font-family-outcome: Averia Serif Libre;
@@ -34,6 +36,35 @@
   --font-family-effects: Averia Serif Libre;
   --hud-background1: url('../ui/com_hud_BG.webp');
   --hud-bg-color: rgba(0, 0, 0, 0.45);
+  --hud-bg-color: #191c1f6e;
+  --hud-bg-color2: #0708096c;
+  --npc-hud-bg-prime: rgba(0, 0, 0, 0.45);
+}
+
+.mh-theme-header {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: flex-end;
+  margin: -3px -0px 1px -0px;
+  height: 28px;
+  padding: 0 10px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.mh-theme-header.extras {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between; 
+  margin: -3px -0px 1px -0px;
+  height: 28px;
+  padding: 0 10px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
 .mh-power-tag,
@@ -43,8 +74,8 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin: 0;
-  padding: 2px 6px;
+  margin-left: 5px;
+  padding: 2px 5px;
   cursor: pointer;
   text-align: left;
 }
@@ -55,7 +86,6 @@
 .mh-story-tag span {
   display: flex;
   align-items: center;
-
 }
 
 .mh-power-tag.selected,
@@ -70,7 +100,7 @@
   border-top-left-radius: 50px 50px;
   border-bottom-left-radius: 50px 50px;
   border-left: 6px solid var(--positive-tag-borderColor);
-  margin-left: -6px;
+  margin-left: -1px;
 }
 
 .mh-weakness-tag.selected,
@@ -83,7 +113,7 @@
   border-top-left-radius: 50px 50px;
   border-bottom-left-radius: 50px 50px;
   border-left: 6px solid var(--negative-tag-borderColor);
-  margin-left: -6px;
+  margin-left: -1px;
 }
 
 /* Burn Toggle Icon */

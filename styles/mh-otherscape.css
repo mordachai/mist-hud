@@ -18,7 +18,8 @@
   --destroyed-tag-color: rgba(255, 40, 40, 0.825);
   --spectrum-color:#abff00;
   --status-color: rgb(0, 93, 93);
-  --storytag-color: rgb(199, 69, 33);
+  --storytag-color: #646800;
+  --limit-color: #ae295b;
   --divider-roll-color: rgba(255, 255, 255, 0.3);
   --divider-color1: rgba(255, 255, 255, 0.3);
   --roll-shadow-color:#00def6;
@@ -34,9 +35,25 @@
   --font-family-effects: Courier New;
   --font-family-npcmoves: Barlow Condensed;
   --hud-background1: url('../ui/os_hud_BG.webp');
-  --hud-bg-color: rgba(0, 0, 0, 0.45);
+  --hud-bg-color: #2d42536e;
+  --hud-bg-color2: #1a28356c;
+  --npc-hud-bg-prime: #384d5e51;
   --marker-positiveTag-color: #96f5ff;
   --marker-negativeTag-color: #ffd4a8;
+}
+
+.mh-theme-header,
+.mh-theme-header.extras {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between; 
+  margin: -3px -0px 1px -0px;
+  height: 28px;
+  padding: 0 10px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
 .mh-power-tag,
