@@ -365,27 +365,104 @@ export class NpcHUD extends Application {
 }
 
 // Register the parseStatus helper
-Handlebars.registerHelper('parseStatus', function(description) {
+// Handlebars.registerHelper('parseStatus', function(description) {
+//     return new Handlebars.SafeString(
+//         description
+//             .replace(/\[([^\]]+)\]/g, (match, content) => {
+//                 // Trim content to ensure no leading/trailing whitespace
+//                 const trimmedContent = content.trim();
+
+//                 // Check if content contains words (with optional spaces/hyphens) followed by ' - ' and a number
+//                 if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
+//                     return `<span class="npc-status">${trimmedContent}</span>`;
+//                 }
+//                 // Check if content contains words (with optional spaces) followed by ':' and a number
+//                 if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
+//                     return `<span class="npc-limit">${trimmedContent}</span>`;
+//                 }
+//                 // Default case for other content inside brackets
+//                 return `<span class="npc-storytag">${trimmedContent}</span>`;
+//             })
+//             .replace(/\n/g, '</p><p>') // Handle newlines as new paragraphs
+//     );
+// });
+
+// Register the parseStatus helper
+Handlebars.registerHelper('parseStatus', function (description) {
     return new Handlebars.SafeString(
         description
-            .replace(/\[([^\]]+)\]/g, (match, content) => {
-                // Trim content to ensure no leading/trailing whitespace
-                const trimmedContent = content.trim();
+            // Handle text within (tc when processing
+            .replace(/\(tc\)([\s\S]*?)\(\/tc\)/g, (match, content) => {
+                // Process (tc)...(/tc) with special handling for \n
+                const parsedContent = content
+                    .replace(/\(t\)(.*?)\(\/t\)/gs, (match, innerContent) => {
+                        const processed = innerContent.trim().replace(/\[([^\]]+)\]/g, (match, innerContent) => {
+                            const trimmedContent = innerContent.trim();
 
-                // Check if content contains words (with optional spaces/hyphens) followed by ' - ' and a number
-                if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
-                    return `<span class="npc-status">${trimmedContent}</span>`;
-                }
-                // Check if content contains words (with optional spaces) followed by ':' and a number
-                if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
-                    return `<span class="npc-limit">${trimmedContent}</span>`;
-                }
-                // Default case for other content inside brackets
-                return `<span class="npc-storytag">${trimmedContent}</span>`;
+                            if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
+                                return `<span class="npc-status">${trimmedContent}</span>`;
+                            }
+                            if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
+                                return `<span class="npc-limit">${trimmedContent}</span>`;
+                            }
+                            return `<span class="npc-storytag">${trimmedContent}</span>`;
+                        });
+                        return `<p class="npc-threat"><span class="npc-tc-marker">›</span> ${processed}</p>`;
+                    })
+                    .replace(/\(c\)(.*?)\(\/c\)/gs, (match, innerContent) => {
+                        const processed = innerContent.trim().replace(/\[([^\]]+)\]/g, (match, innerContent) => {
+                            const trimmedContent = innerContent.trim();
+
+                            if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
+                                return `<span class="npc-status">${trimmedContent}</span>`;
+                            }
+                            if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
+                                return `<span class="npc-limit">${trimmedContent}</span>`;
+                            }
+                            return `<span class="npc-storytag">${trimmedContent}</span>`;
+                        });
+                        return `<p class="npc-consequence"><span class="npc-tc-marker">»</span> ${processed}</p>`;
+                    })
+                    .replace(/\s*\n\s*/g, ' ') // Replace \n with space inside (tc)...(/tc)
+                    .replace(/<\/p>\s*<p>/g, '</p><p>'); // Remove unintended gaps
+                return parsedContent;
             })
-            .replace(/\n/g, '</p><p>') // Handle newlines as new paragraphs
+            // Handle cases outside (tc)...(/tc)
+            .replace(/\(t\)(.*?)\(\/t\)/gs, (match, content) => {
+                const parsedContent = content.trim().replace(/\[([^\]]+)\]/g, (match, innerContent) => {
+                    const trimmedContent = innerContent.trim();
+
+                    if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
+                        return `<span class="npc-status">${trimmedContent}</span>`;
+                    }
+                    if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
+                        return `<span class="npc-limit">${trimmedContent}</span>`;
+                    }
+                    return `<span class="npc-storytag">${trimmedContent}</span>`;
+                });
+                return `<p class="npc-threat">› ${parsedContent}</p>`;
+            })
+            .replace(/\(c\)(.*?)\(\/c\)/gs, (match, content) => {
+                const parsedContent = content.trim().replace(/\[([^\]]+)\]/g, (match, innerContent) => {
+                    const trimmedContent = innerContent.trim();
+
+                    if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
+                        return `<span class="npc-status">${trimmedContent}</span>`;
+                    }
+                    if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
+                        return `<span class="npc-limit">${trimmedContent}</span>`;
+                    }
+                    return `<span class="npc-storytag">${trimmedContent}</span>`;
+                });
+                return `<p class="npc-consequence">» ${parsedContent}</p>`;
+            })
     );
 });
+
+
+
+
+
 
 Hooks.on('renderTokenHUD', (app, html, data) => {
     if (!game.user.isGM) return;

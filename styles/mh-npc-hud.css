@@ -215,9 +215,9 @@ overflow-y: hidden;
 
 /* Scrollable content */
 .npc-moves-container {
-    flex-grow: 1; /* Allow this container to take up remaining space */
-    overflow-y: auto; /* Enable vertical scrolling */
-    padding: 10px; /* Add padding inside the scrollable area */
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 3px;
 }
 
 /* Each Move Type Container */
@@ -364,7 +364,7 @@ overflow-y: hidden;
 }
 
 .npc-list li:not(:last-child) {
-    border-bottom: 1px solid var(--divider-color1); /* Semi-transparent white line */
+    border-bottom: 2px solid var(--divider-color1);
 }
 
 .npc-spectrum-list{
@@ -463,6 +463,36 @@ overflow-y: hidden;
 
 .npc-tags-statuses-container::-webkit-scrollbar-track {
     background: transparent;
+}
+
+.npc-tc-marker {
+    color: var(--spectrum-color);
+    font-size: 1.6rem;
+    font-weight: 400;
+    position: relative;
+    top: 2px;
+    line-height: 1rem;
+
+}
+
+.npc-threat{
+    font-family: var(--font-family-npcmoves);
+    color: white;
+    font-size: 1.0rem;
+    font-style: italic;
+    margin-bottom: 1px;
+    line-height: 1.2rem;
+    font-weight: 700;
+}
+
+.npc-consequence{
+    font-family: var(--font-family-hud);
+    color: whitesmoke;
+    font-size: .95rem;
+    font-style: normal;
+    padding-left: 5px;
+    margin-bottom: 1px;
+    line-height: 1.2rem;
 }
 
 

@@ -18,6 +18,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Barlow Condensed';
+  src: url('../ui/fonts/barlowcondensed-regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   /* Global Colors */
   --mythos-dark-color:#b90ded;
