@@ -1,30 +1,30 @@
 <div class="mh-hud">
   <div class="mh-content">
-    {{#each themes}}
-    <div class="theme-container-{{category}}">
-      <div class="mh-theme-header {{category}}">
+    {{#each themebooks}}
+    <div class="theme-container-{{this.themeType}}">
+      <div class="mh-theme-header {{this.themeType}}">
       {{#if (eq ../activeSystem "city-of-mist")}}
-        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{themeName}}</span> <!-- Render only if system is City of Mist -->
+        <span class="mh-theme-name mh-theme-name-com-{{this.themeType}}">{{this.themebook_name}}</span> <!-- Render only if system is City of Mist -->
       {{/if}}
 
       {{#if (or (eq ../activeSystem "otherscape") (eq ../activeSystem "legend"))}}
-        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{localizedThemebookName}}</span> <!-- Render only if system is Otherscape or Legends in the Mist -->
+        <span class="mh-theme-name mh-theme-name-com-{{this.themeType}}">{{this.themebook_name}}</span> <!-- Render only if system is Otherscape or Legends in the Mist -->
       {{/if}}
-      <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
+      <span class="{{themeIcon}}" data-theme-id="{{id}}"></span>
       </div>
 
       <!-- Power Tags -->
       <ul class="mh-tags">
         {{#each powerTags}}
-        <li class="mh-power-tag {{this.cssClass}} {{../category}}" data-id="{{this.id}}">
-          <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../category}}"></div>
-          <div class="mh-tag-text {{../category}}">{{this.tagName}}</div>
+        <li class="mh-power-tag {{../this.themeType}}" data-id="{{this.id}}">
+          <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../this.themeType}}"></div>
+          <div class="mh-tag-text {{../this.themeType}}">{{this.name}}</div>
           {{#if subtags}}
             <ul class="mh-subtag">
               {{#each subtags}}
-              <li class="subtag-item {{cssClass}}">
+              <li class="subtag-item {{../this.themeType}}">
                 <span class="subtag-burn burn-icon {{burnIcon}}"></span>
-                <span class="subtag-name">{{this.tagName}}</span>
+                <span class="subtag-name">{{this.name}}</span>
               </li>
               {{/each}}
             </ul>
@@ -38,11 +38,11 @@
       <!-- Weakness Tags -->
       <ul class="mh-tags">
         {{#each weaknessTags}}
-          <li class="mh-weakness-tag {{this.cssClass}}" data-id="{{this.id}}">
+          <li class="mh-weakness-tag {{../this.themeType}}" data-id="{{this.id}}">
             <span class="mh-weakness-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
               {{{this.inversionIcon}}}
             </span>
-            <span class="mh-tag-text">{{this.tagName}}</span>
+            <span class="mh-tag-text">{{this.name}}</span>
           </li>
         {{/each}}
       </ul>

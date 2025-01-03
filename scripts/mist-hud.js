@@ -42,7 +42,6 @@ export class MistHUD extends Application {
     });
   }
 
-
   static getInstance() {
     if (!MistHUD.instance) {
       MistHUD.instance = new MistHUD();
@@ -684,11 +683,13 @@ export class MistHUD extends Application {
     data.isCollapsed = this.isCollapsed;
 
     // Retrieve themes and story tags
-    const themesAndTags = this.getThemesAndTags();
+    const themesAndTags = this.getThemebooks();
     data.themes = themesAndTags.themes;
-    data.storyTags = themesAndTags.storyTags;
-    data.hasStoryTags = !!(themesAndTags.storyTags && themesAndTags.storyTags.length > 0);
     data.loadoutTags = this.getLoadoutTags();
+
+    // Retrieve story tags
+    data.storyTags = this.getStoryTags();
+    data.hasStoryTags = !!(data.storyTags && data.storyTags.length > 0);
 
     const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
     data.statuses = this.getActorStatuses().map((status) => {
@@ -702,6 +703,9 @@ export class MistHUD extends Application {
 
     // Add modifier
     data.modifier = this.modifier;
+
+    //Themebook data
+    data.themebooks = this.getThemebooks();
 
     // Process Juice and Clues for City of Mist
     if (data.isCityOfMist) {
@@ -1279,6 +1283,96 @@ export class MistHUD extends Application {
     });
   }
 
+  getThemebooks() {
+    if (!this.actor || !this.actor.items) {
+        console.error("Invalid actor provided.");
+        return [];
+    }
+
+    const items = this.actor.items.contents;
+
+    // Step 1: Extract themes
+    const themes = items.filter(item => item.type === "theme" && item.name !== "__LOADOUT__");
+    const tagItems = items.filter(item => item.type === "tag");
+
+    // Organize subtags under their respective parent tags
+    // const subTagsByParent = tagItems.reduce((acc, tag) => {
+    //     if (tag.system.parentId) {
+    //         if (!acc[tag.system.parentId]) acc[tag.system.parentId] = [];
+    //         acc[tag.system.parentId].push(tag);
+    //     }
+    //     return acc;
+    // }, {});
+
+    // Step 2: Map theme information with related data
+    return themes.map(theme => {
+        let realThemebook;
+        const themebook = theme.themebook;
+
+        if (themebook?.isThemeKit()) {
+            realThemebook = themebook.themebook;
+        } else {
+            realThemebook = themebook;
+        }
+
+        // Ensure the realThemebook is not null
+        if (!realThemebook) {
+            console.warn(`Themebook is null for theme: ${theme.name}`);
+            return null;
+        }
+            // Logar o conteúdo completo do themebook
+    console.log(`Themebook for theme "${theme.name}":`, realThemebook);
+
+        const themeIcon = `mh-theme-icon ${realThemebook.system.subtype || "default-icon"}`;
+
+        const themeType = realThemebook.system.subtype;
+
+        // Get power and weakness tags
+        // const powerTags = tagItems.filter(tag =>
+        //   tag.system.theme_id === theme._id &&
+        //   tag.system.subtype === "power");
+
+        const powerTags = tagItems.filter(tag => tag.system.theme_id === theme._id && tag.system.subtype === "power")
+    .map(tag => {
+        const processedTag = this.applyBurnState(this.actor, tag._id, "power"); // Utilize applyBurnState
+        return {
+            id: processedTag.id,
+            name: processedTag.tagName,
+            burnState: processedTag.burnState,
+            cssClass: processedTag.cssClass,
+            burnIcon: processedTag.burnIcon,
+            isInverted: processedTag.isInverted,
+        };
+    });
+
+        const weaknessTags = tagItems.filter(tag => tag.system.theme_id === theme._id && tag.system.subtype === "weakness")
+          .map(tag => {
+              const processedTag = { id: tag._id, name: tag.name };
+              processedTag.isInverted = tag.system.inverted || false;
+              processedTag.inversionIcon = processedTag.isInverted 
+                  ? '<i class="fa-light fa-angles-up"></i>' 
+                  : '<i class="fa-light fa-angles-down"></i>';
+              return processedTag;
+          });
+
+        return {
+            id: theme._id,
+            themeName: theme.name,
+            themebook_id: realThemebook._id,
+            themebook_name: realThemebook.name,
+            themeIcon,
+            themeType,
+            powerTags,
+            weaknessTags,
+            mystery: theme.system.mystery,
+            themeInfo: {
+                motivation: realThemebook.system.motivation,
+                locale_name: realThemebook.system.locale_name?.replace(/^#/, "") // Remove leading #
+            }
+        };
+    }).filter(Boolean); // Remove null entries from invalid themes
+  }
+
   getStoryTags() {
     if (!this.actor) return [];
 
@@ -1312,64 +1406,7 @@ export class MistHUD extends Application {
     return storyTags;
     
   }
-
-  getThemesAndTags() {
-    if (!this.actor) return {};
-  
-    const items = this.actor.items.contents;
-  
-    // Filter out __LOADOUT__ and properly categorize themes
-    const themeItems = items.filter(item => item.type === 'theme' && item.name !== "__LOADOUT__");
-    const tagItems = items.filter(item => item.type === 'tag');
-  
-    // Organize subtags under their respective parent tags
-    const subTagsByParent = tagItems.reduce((acc, tag) => {
-      if (tag.system.parentId) {
-        if (!acc[tag.system.parentId]) acc[tag.system.parentId] = [];
-        acc[tag.system.parentId].push(tag);
-      }
-      return acc;
-    }, {});
-  
-    // Process themes and their tags
-    const themes = themeItems.map(theme => {
-      const themeId = theme._id;
-      const themeConfig = themesConfig[theme.system.themebook_id];
-  
-      // Skip if themeConfig is missing for this theme ID
-      if (!themeConfig) {
-        console.warn(`Theme configuration not found for theme ID: ${theme.system.themebook_id}`);
-        return null;
-      }
-  
-      const category = themeConfig.category;
-      const localizedThemebookName = game.i18n.localize(themeConfig.localizationKey);
-      const iconClass = `mh-theme-icon ${category}`;
-  
-      // Get power and weakness tags
-      const powerTags = this.getPowerTags(themeId, tagItems, subTagsByParent);
-      const weaknessTags = this.getWeaknessTags(themeId, tagItems, subTagsByParent);
-  
-      return {
-        id: themeId,
-        themeName: theme.name,
-        localizedThemebookName,
-        iconClass,
-        category,
-        powerTags,
-        weaknessTags,
-      };
-    }).filter(Boolean); // Remove null entries from invalid themes
-  
-    // Process story tags
-    const storyTags = this.getStoryTags();
-  
-    return {
-      themes,
-      storyTags,
-    };
-  }
-  
+    
   getLoadoutTags() {
     if (!this.actor) return [];
 
@@ -1814,7 +1851,6 @@ export class MistHUD extends Application {
         console.error("Error during HUD cleanup:", error);
     }
   }
-
   
 }
 

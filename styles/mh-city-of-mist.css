@@ -125,20 +125,94 @@
   cursor: pointer;
 }
 
+/* Mythos Themebook Name Styling */
+.mh-themebook-name-com-Mythos {
+  color: var(--mythosOS-verylight-color);
+  text-shadow: var(--mythosOS-dark-color) 1px 0 6px;
+}
+
+/* Logos Themebook Name Styling */
+.mh-themebook-name-com-Logos {
+  color: var(--logos-verylight-color-color);
+  text-shadow: var(--logos-dark-color) 1px 0 6px;
+}
+
+/* Mist Themebook Name Styling */
+.mh-themebook-name-com-Mist {
+  color: var(--mist-verylight-color);
+  text-shadow: var(--mist-dark-color) 1px 0 6px;
+}
+
+/* Specific icons for Mythos, Logos, and Mist themes */
+.mh-theme-icon.Mythos {
+  width: 11px;
+  height: 18px;
+  background-image: url('../ui/icons/mythos_icn.svg');
+  filter: drop-shadow(1px 0 6px var(--mythosOS-dark-color));
+}
+
+.mh-theme-icon.Logos {
+  width: 18px;
+  height: 12px;
+  background-image: url('../ui/icons/logos_icn.svg');
+  filter: drop-shadow(1px 0 6px var(--logos-dark-color));
+}
+
+.mh-theme-icon.Mist {
+  width: 18px;
+  height: 18px;
+  background-image: url('../ui/icons/mist_icn.svg');
+  filter: drop-shadow(1px 0 6px var(--mist-dark-color));
+}
+
+.mystery-type.Mythos {
+  color: var(--mythos-verylight-color);
+  text-shadow: var(--mythos-dark-color) 1px 1px 1px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin: auto;
+}
+
+.mystery-type.Logos {
+  color: var(--logos-verylight-color);
+  text-shadow: var(--logos-dark-color) 1px 1px 1px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin: auto;
+}
+
 /*Roll Icons*/
-.mhr-icon.mythos {
+.mhr-icon.Mythos {
   background-image: url('../ui/icons/mythos_icn.svg');
   filter: brightness(0) saturate(100%) invert(5%) sepia(11%) saturate(3432%) hue-rotate(16deg) brightness(93%) contrast(89%);
 }
 
-.mhr-icon.logos {
+.mhr-icon.Logos {
   background-image: url('../ui/icons/logos_icn.svg');
   filter: brightness(0) saturate(100%) invert(5%) sepia(11%) saturate(3432%) hue-rotate(16deg) brightness(93%) contrast(89%);
 }
 
-.mhr-icon.mist {
+.mhr-icon.Mist {
   background-image: url('../ui/icons/mist_icn.svg');
   filter: brightness(0) saturate(100%) invert(5%) sepia(11%) saturate(3432%) hue-rotate(16deg) brightness(93%) contrast(89%);
+}
+
+/* Mythos Theme Name Styling */
+.mh-theme-name-com-Mythos {
+  color: var(--mythosOS-verylight-color);
+  text-shadow: var(--mythosOS-dark-color) 1px 1px;
+}
+
+/* Logos Theme Name Styling */
+.mh-theme-name-com-Logos {
+  color: var(--logos-verylight-color-color);
+  text-shadow: var(--logos-dark-color) 1px 1px;
+}
+
+/* Mist Theme Name Styling */
+.mh-theme-name-com-Mist {
+  color: var(--mist-verylight-color);
+  text-shadow: var(--mist-dark-color) 1px 1px;
 }
 
 .burn-icon {
@@ -173,3 +247,4 @@
   text-decoration: line-through;
   color: #ffa742;
 }
+
