@@ -87,8 +87,6 @@ async function rollMove(moveName, hasDynamite) {
       .reduce((sum, bonus) => sum + bonus.amount, 0);
   
   const totalBonus = helpBonuses - hurtBonuses;
-  console.log(`[Roll Debug] Calculated Bonuses:`, { helpBonuses, hurtBonuses, totalBonus });
-  
 
   // Aggregate total power for the roll calculation
   const totalPower = calculatedPower + totalWeakness + totalStoryTags + totalLoadoutTags + totalCharStatuses + totalSceneStatuses + totalScnTags + modifier;
@@ -115,8 +113,6 @@ try {
   
   const rollResults = await rollDice();
   const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower + totalBonus;
-
-  console.log(`[Roll Debug] Final Roll Total:`, {rollResults,totalPower,totalBonus,rollTotal,});
 
   // Import the active system setting
   const activeSystem = game.settings.get("city-of-mist", "system");
@@ -212,13 +208,11 @@ try {
     rollTotal: displayRollTotal,
     localizedMoveEffects,
     tagsData,
-    statuses: tagsData.statuses, // Include statuses
+    // statuses: tagsData.statuses,
     trackedEffects,
     diceClass,
     outcomeClass
 };
-
-console.log("Final Chat Data Sent to Roll Chat:", chatData);
 
 
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
@@ -495,7 +489,7 @@ export async function rollSpecialMoves(moveName) {
     totalLoadoutTags,
     totalCharStatuses,
     totalSceneStatuses,
-    statuses: tagsData.statuses,
+    // statuses: tagsData.statuses,
     totalScnTags,
     modifier,
     diceClass,
