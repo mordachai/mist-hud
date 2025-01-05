@@ -2,7 +2,6 @@
 
 import { MistHUD } from './mist-hud.js';
 import { moveConfig } from './mh-theme-config.js';
-import { themesConfig } from './mh-theme-config.js';
 import { initializeAccordions } from './accordion-handler.js';
 import { detectActiveSystem } from './mh-settings.js';
 
@@ -87,6 +86,8 @@ async function rollMove(moveName, hasDynamite) {
       .reduce((sum, bonus) => sum + bonus.amount, 0);
   
   const totalBonus = helpBonuses - hurtBonuses;
+  console.log(`[Roll Debug] Calculated Bonuses:`, { helpBonuses, hurtBonuses, totalBonus });
+  
 
   // Aggregate total power for the roll calculation
   const totalPower = calculatedPower + totalWeakness + totalStoryTags + totalLoadoutTags + totalCharStatuses + totalSceneStatuses + totalScnTags + modifier;
@@ -113,6 +114,8 @@ try {
   
   const rollResults = await rollDice();
   const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower + totalBonus;
+
+  console.log(`[Roll Debug] Final Roll Total:`, {rollResults,totalPower,totalBonus,rollTotal,});
 
   // Import the active system setting
   const activeSystem = game.settings.get("city-of-mist", "system");
@@ -208,11 +211,13 @@ try {
     rollTotal: displayRollTotal,
     localizedMoveEffects,
     tagsData,
-    // statuses: tagsData.statuses,
+    statuses: tagsData.statuses, // Include statuses
     trackedEffects,
     diceClass,
     outcomeClass
 };
+
+console.log("Final Chat Data Sent to Roll Chat:", chatData);
 
 
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
@@ -340,35 +345,40 @@ function substituteText(text, totalPower) {
 
 // Function to count themebook types
 function countThemebookTypes(character) {
-  // Initialize counters for each category
   const counts = {
-    mythosOSAmount: 0,
-    selfAmount: 0,
-    noiseAmount: 0,
-    logosAmount: 0,
-    mythosAmount: 0,
-    mistAmount: 0,
-    extrasAmount: 0,
-    crewAmount: 0,
-    loadoutAmount: 0,
+    LogosAmount: 0,
+    MythosAmount: 0,
+    MistAmount: 0,
+    SelfAmount: 0,
+    NoiseAmount: 0,
   };
 
-  // Filter character items to themes
   const themes = character.items.filter(item => item.type === "theme");
 
-  // Iterate over themes and count based on their categories
   themes.forEach(theme => {
-    const themeConfig = themesConfig[theme.system.themebook_id];
+    let realThemebook;
+    const themebook = theme.themebook;
 
-    if (themeConfig && themeConfig.category) {
-      const counterKey = `${themeConfig.category}Amount`;
-      if (counts[counterKey] !== undefined) {
-        counts[counterKey]++;
-      } else {
-        console.warn(`Unknown category for theme ID: ${theme.system.themebook_id}`);
-      }
+    if (themebook?.isThemeKit()) {
+      realThemebook = themebook.themebook;
     } else {
-      console.warn(`Theme configuration not found for theme ID: ${theme.system.themebook_id}`);
+      realThemebook = themebook;
+    }
+
+    if (!realThemebook) {
+      console.warn(`Themebook is null for theme: ${theme.name}`);
+      return;
+    }
+
+    const category = realThemebook.system.subtype;
+
+    if (category) {
+      const key = `${category}Amount`;
+      if (counts[key] !== undefined) {
+        counts[key]++;
+      } else {
+        console.warn(`Unknown category "${category}" for themebook ID: ${realThemebook._id}`);
+      }
     }
   });
 
@@ -393,16 +403,15 @@ export async function rollSpecialMoves(moveName) {
   const activeSystem = await detectActiveSystem();
 
   // Get theme counts for special move rolls
-  const { selfAmount, noiseAmount, mythosOSAmount, logosAmount, mythosAmount, mistAmount } = countThemebookTypes(actor);
+  const { SelfAmount, NoiseAmount, LogosAmount, MythosAmount, MistAmount } = countThemebookTypes(actor);
 
   // Mapping roll flags to theme counts and types
   const rollMappings = {
-    rollLogos: { amount: logosAmount, type: "logos" },
-    rollMythos: { amount: mythosAmount, type: "mythos" },
-    rollMist: { amount: mistAmount, type: "mist" },
-    rollSelf: { amount: selfAmount, type: "self" },
-    rollNoise: { amount: noiseAmount, type: "noise" },
-    rollMythosOS: { amount: mythosOSAmount, type: "mythosOS" }
+    rollLogos: { amount: LogosAmount, type: "Logos" },
+    rollMythos: { amount: MythosAmount, type: "Mythos" },
+    rollMist: { amount: MistAmount, type: "Mist" },
+    rollSelf: { amount: SelfAmount, type: "Self" },
+    rollNoise: { amount: NoiseAmount, type: "Noise" }
   };
 
   // Determine active roll based on move configuration
@@ -436,32 +445,69 @@ export async function rollSpecialMoves(moveName) {
   let outcomeClass = "default-outcome";
 
   // Determine outcome
-  if (isDoubleOnes) {
-    outcome = "snakeEyes";
-    moveEffects = move.snakeEyesEffects || [];
-    diceClass = "double-ones";
-    outcomeClass = "outcome-snake-eyes";
-  } else if (isDoubleSixes) {
-    outcome = "boxcars";
-    moveEffects = move.boxcarsEffects || [];
-    diceClass = "double-sixes";
-    outcomeClass = "outcome-boxcars";
-  } else if (activeSystem === "city-of-mist" && rollTotal >= 12) {
-    outcome = "dynamite";
-    moveEffects = move.dynamiteEffects || [];
-  } else if (rollTotal >= 10) {
-    outcome = "success";
-    moveEffects = move.successEffects || [];
-    outcomeClass = "outcome-success";
-  } else if (rollTotal >= 7) {
-    outcome = "partial";
-    moveEffects = move.partialEffects || [];
-    outcomeClass = "outcome-partial";
+  // if (isDoubleOnes) {
+  //   outcome = "snakeEyes";
+  //   moveEffects = move.snakeEyesEffects || [];
+  //   diceClass = "double-ones";
+  //   outcomeClass = "outcome-snake-eyes";
+  // } else if (isDoubleSixes) {
+  //   outcome = "boxcars";
+  //   moveEffects = move.boxcarsEffects || [];
+  //   diceClass = "double-sixes";
+  //   outcomeClass = "outcome-boxcars";
+  // } else if (activeSystem === "city-of-mist" && rollTotal >= 12) {
+  //   outcome = "dynamite";
+  //   moveEffects = move.dynamiteEffects || [];
+  // } else if (rollTotal >= 10) {
+  //   outcome = "success";
+  //   moveEffects = move.successEffects || [];
+  //   outcomeClass = "outcome-success";
+  // } else if (rollTotal >= 7) {
+  //   outcome = "partial";
+  //   moveEffects = move.partialEffects || [];
+  //   outcomeClass = "outcome-partial";
+  // } else {
+  //   outcome = "fail";
+  //   moveEffects = move.failEffects || [];
+  //   outcomeClass = "outcome-fail";
+  // }
+
+// Determine outcome
+if (isDoubleOnes) {
+  outcome = "snakeEyes";
+  moveEffects = move.snakeEyesEffects || [];
+  diceClass = "double-ones";
+  outcomeClass = "outcome-snake-eyes";
+} else if (isDoubleSixes) {
+  outcome = "boxcars";
+  moveEffects = move.boxcarsEffects || [];
+  diceClass = "double-sixes";
+  outcomeClass = "outcome-boxcars";
+} else if (activeSystem === "city-of-mist" && rollTotal >= 12) {
+  // Dynamite is optional
+  if (move.dynamite) {
+      outcome = "dynamite";
+      moveEffects = move.dynamiteEffects || [];
+      outcomeClass = "outcome-dynamite";
   } else {
-    outcome = "fail";
-    moveEffects = move.failEffects || [];
-    outcomeClass = "outcome-fail";
+      outcome = "success"; // Fallback to success if dynamite isn't defined
+      moveEffects = move.successEffects || [];
+      outcomeClass = "outcome-success";
   }
+} else if (rollTotal >= 10) {
+  outcome = "success";
+  moveEffects = move.successEffects || [];
+  outcomeClass = "outcome-success";
+} else if (rollTotal >= 7) {
+  outcome = "partial";
+  moveEffects = move.partialEffects || [];
+  outcomeClass = "outcome-partial";
+} else {
+  outcome = "fail";
+  moveEffects = move.failEffects || [];
+  outcomeClass = "outcome-fail";
+}
+
 
   // Generate chat output
   let outcomeMessage = move[outcome] ? game.i18n.localize(move[outcome]) : "";
@@ -489,7 +535,6 @@ export async function rollSpecialMoves(moveName) {
     totalLoadoutTags,
     totalCharStatuses,
     totalSceneStatuses,
-    // statuses: tagsData.statuses,
     totalScnTags,
     modifier,
     diceClass,

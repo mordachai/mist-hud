@@ -1,30 +1,31 @@
 <div class="mh-hud">
   <div class="mh-content">
-    {{#each themebooks}}
-    <div class="theme-container-{{this.themeType}}">
-      <div class="mh-theme-header {{this.themeType}}">
+    {{#each themes}}
+    <div class="theme-container-{{category}}">
+      <div class="mh-theme-header {{category}}">
+        <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
+
       {{#if (eq ../activeSystem "city-of-mist")}}
-        <span class="mh-theme-name mh-theme-name-com-{{this.themeType}}">{{this.themebook_name}}</span> <!-- Render only if system is City of Mist -->
+        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{themeName}}</span> <!-- Render only if system is City of Mist -->
       {{/if}}
 
       {{#if (or (eq ../activeSystem "otherscape") (eq ../activeSystem "legend"))}}
-        <span class="mh-theme-name mh-theme-name-com-{{this.themeType}}">{{this.themebook_name}}</span> <!-- Render only if system is Otherscape or Legends in the Mist -->
+        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{localizedThemebookName}}</span> <!-- Render only if system is Otherscape or Legends in the Mist -->
       {{/if}}
-      <span class="{{themeIcon}}" data-theme-id="{{id}}"></span>
       </div>
 
       <!-- Power Tags -->
       <ul class="mh-tags">
         {{#each powerTags}}
-        <li class="mh-power-tag {{../this.themeType}}" data-id="{{this.id}}">
-          <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../this.themeType}}"></div>
-          <div class="mh-tag-text {{../this.themeType}}">{{this.name}}</div>
+        <li class="mh-power-tag {{this.cssClass}} {{../category}}" data-id="{{this.id}}">
+          <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../category}}"></div>
+          <div class="mh-tag-text {{../category}}">{{this.tagName}}</div>
           {{#if subtags}}
             <ul class="mh-subtag">
               {{#each subtags}}
-              <li class="subtag-item {{../this.themeType}}">
+              <li class="subtag-item {{cssClass}}">
                 <span class="subtag-burn burn-icon {{burnIcon}}"></span>
-                <span class="subtag-name">{{this.name}}</span>
+                <span class="subtag-name">{{this.tagName}}</span>
               </li>
               {{/each}}
             </ul>
@@ -38,11 +39,11 @@
       <!-- Weakness Tags -->
       <ul class="mh-tags">
         {{#each weaknessTags}}
-          <li class="mh-weakness-tag {{../this.themeType}}" data-id="{{this.id}}">
+          <li class="mh-weakness-tag {{this.cssClass}}" data-id="{{this.id}}">
             <span class="mh-weakness-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
               {{{this.inversionIcon}}}
             </span>
-            <span class="mh-tag-text">{{this.name}}</span>
+            <span class="mh-tag-text">{{this.tagName}}</span>
           </li>
         {{/each}}
       </ul>
@@ -52,9 +53,9 @@
     <!-- LOADOUT Section -->
     {{#if isOtherscape}} 
     <div class="theme-container">
-      <div class="mh-theme-header {{#if isOtherscape}}neutral{{/if}}">
-        <span class="mh-theme-icon-notip loadout"></span>
+      <div class="mh-theme-header neutral loadout mh-title-container">
         <span class="mh-theme-name mh-theme-name-neutral">{{localize "Otherscape.terms.loadoutTheme.name"}}</span>
+        <span class="mh-theme-icon-notip loadout"></span>
       </div>
       <ul class="mh-tags">
           {{#each loadoutTags}}
@@ -80,7 +81,7 @@
     <!-- Story Tags Section -->
     {{!-- {{#if hasStoryTags}} --}}
       <div class="mh-story-tags-container">
-      <div class="mh-theme-header extras {{#if isOtherscape}}spaced{{/if}} mh-title-container">
+      <div class="mh-theme-header neutral extras mh-title-container">
         <div class="mh-title-container">
           <span class="mh-theme-icon-notip storytag"></span>
           <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.storyTags"}}{{#if isOtherscape}} / Relationships{{/if}}</span>
@@ -90,7 +91,7 @@
         data-token-id="{{token.id}}" 
         data-scene-id="{{scene.id}}" 
         title="Create Tag"> 
-        <i class="fa-regular fa-octagon-plus"></i></a>
+        <i class="fa-regular fa-circle-plus"></i></a>
       </div>
         <ul class="mh-tags">
           {{#each storyTags}}
@@ -114,12 +115,12 @@
 
     <!-- Statuses Section -->
     <div class="mh-statuses-container">
-      <div class="mh-theme-header extras {{#if isOtherscape}}spaced{{/if}} mh-title-container">
+      <div class="mh-theme-header extras neutral mh-title-container">
         <div class="mh-title-container">
           <span class="mh-theme-icon-notip statuses"></span>
           <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.statuses"}}</span>
         </div>
-        <a class="create-status" title="Create Status"><i class="fa-regular fa-octagon-plus"></i></a>
+        <a class="create-status" title="Create Status"> <i class="fa-regular fa-circle-plus"></i></a>
       </div>
       <div class="mh-statuses-list">
         {{#each statuses}}
@@ -171,15 +172,12 @@
     
     {{#if hasImprovements}}
     <div class="section improvements">
-        <div class="mh-theme-name title-effect"><i class="fa-light fa-star"></i>
-          {{#if isCityOfMist}}{{localize "TYPES.Item.improvement"}}{{/if}}
-          {{#if isOtherscape}}Theme Specials{{/if}}
-        </div>
+        <div class="mh-theme-name title-effect"><i class="fa-light fa-star"></i> {{localize "TYPES.Item.improvement"}}</div>
         {{#each improvements}}
         <div class="theme-container">
             <div class="mh-theme-name mh-title-container mh-improvement-theme">
-                <div class="theme-type" data-theme-name="{{this.fullThemeName}}">
-                    {{this.name}}
+                <div class="theme-type {{themeType}}" data-theme-id="{{id}}">
+                    {{this.themebookName}}
                 </div>
             </div>
             {{#each this.improvements}}
@@ -190,9 +188,9 @@
                       {{this.name}}
                       {{#if (gt this.uses.max 0)}}
                       - {{this.uses.current}}/{{this.uses.max}}
-                      <a class="toggle-expended" data-item-id="{{this.id}}" data-actor-id="{{../id}}" title="Reset Uses">
+                      {{!-- <a class="toggle-expended" data-item-id="{{this.id}}" data-actor-id="{{../id}}" title="Reset Uses">
                           <i class="fas fa-redo"></i>
-                      </a>
+                      </a> --}}
                       {{/if}}
                   </span>
               </div>

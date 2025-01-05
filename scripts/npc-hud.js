@@ -64,7 +64,8 @@ export class NpcHUD extends Application {
 
         data.hasDescriptionBiography = hasContent;
         data.descriptionBiography = `${description.trim()}${biography.trim() ?"" + biography.trim() : ""}`;
-       
+    
+        
         const system = await detectActiveSystem();
         data.activeSystem = system;
 
@@ -79,58 +80,8 @@ export class NpcHUD extends Application {
     
         // Retrieve and group Moves by subtype
         data.moves = this.actor.items.filter(i => i.type === 'gmmove');
-
         data.moveGroups = data.moves.reduce((groups, move) => {
-            let subtype = move.system.subtype || 'default';
-
-            // Check the active system
-            if (data.activeSystem === 'city-of-mist') {
-                // City of Mist switch case
-                switch (subtype) {
-                    case 'soft':
-                        subtype = game.i18n.localize("CityOfMist.terms.softMove");
-                        break;
-                    case 'hard':
-                        subtype = game.i18n.localize("CityOfMist.terms.hardMoves");
-                        break;
-                    case 'intrusion':
-                        subtype = game.i18n.localize("CityOfMist.terms.intrusions");
-                        break;
-                    case 'downtime':
-                        subtype = game.i18n.localize("CityOfMist.terms.downtimeMoves");
-                        break;
-                    case 'custom':
-                        subtype = game.i18n.localize("CityOfMist.terms.customMoves");
-                        break;
-                    case 'entrance':
-                        subtype = game.i18n.localize("CityOfMist.terms.enterScene");
-                        break;
-                }
-            } else if (data.activeSystem === 'otherscape') {
-                // Otherscape switch case
-                switch (subtype) {
-                    case 'soft':
-                        subtype = "";
-                        break;
-                    case 'hard':
-                        subtype = "Specials";
-                        break;
-                    case 'intrusion':
-                        subtype = game.i18n.localize("CityOfMist.terms.intrusions");
-                        break;
-                    case 'downtime':
-                        subtype = game.i18n.localize("CityOfMist.terms.downtimeMoves");
-                        break;
-                    case 'custom':
-                        subtype = game.i18n.localize("CityOfMist.terms.customMoves");
-                        break;
-                    case 'entrance':
-                        subtype = game.i18n.localize("CityOfMist.terms.enterScene");
-                        break;
-                }
-            }
-
-            // Group moves by subtype
+            const subtype = move.system.subtype || 'default';
             if (!groups[subtype]) groups[subtype] = [];
             groups[subtype].push(move);
             return groups;
@@ -145,8 +96,7 @@ export class NpcHUD extends Application {
     
         return data;
     }
-
-     
+    
     getActorStatuses() {
         if (!this.actor) return [];
     
@@ -254,6 +204,20 @@ export class NpcHUD extends Application {
         return storyTags;
     }
 
+    // Helper method for icon retrieval
+    getIcon(state) {
+        switch (state) {
+            case "unburned":
+                return '<i class="fa-light fa-fire"></i>';
+            case "toBurn":
+                return '<i class="fa-regular fa-fire"></i>';
+            case "burned":
+                return '<i class="fa-solid fa-fire"></i>';
+            default:
+                return '<i class="fa-light fa-fire"></i>';
+        }
+    }
+
     async toggleCollapse() {
         this.isCollapsed = !this.isCollapsed;
         await this.actor.setFlag('mist-hud', 'isCollapsed', this.isCollapsed);
@@ -314,12 +278,26 @@ export class NpcHUD extends Application {
 
     activateListeners(html) {
         super.activateListeners(html);
-    
+
         // Initialize accordions
         initializeAccordions();
-    
-        // Inject custom header
+
+        // Find the window header within the entire element
+        const header = this.element.find('.window-header');
+        
+        if (header.length === 0) {
+            console.warn("Header element not found during injection!");
+            return;
+        }
+
+        // Inject the custom header without passing any parameters
         this.injectCustomHeader();
+
+        // Collapse button toggle
+        html.find('.npc-collapse-button').click((event) => {
+            event.stopPropagation();
+            this.toggleCollapse();
+        });
     
         // Close button
         html.find('.npc-close-button').click((event) => {
@@ -328,53 +306,56 @@ export class NpcHUD extends Application {
             this.close();
         });
     
-        // Toggle state for NPC story tags
-        html.find('.npc-story-tag').on('click', (event) => {
+        // Story tag selection toggle
+        html.find('.mh-story-tag').on('click', (event) => {
             event.stopPropagation();
             event.preventDefault();
-    
             const tagElement = $(event.currentTarget);
     
-            // Toggle between `selected` and `burned`
-            if (tagElement.hasClass('burned')) {
-                tagElement.removeClass('burned').addClass('unburned');
-            } else if (tagElement.hasClass('selected')) {
-                tagElement.removeClass('selected').addClass('burned');
-            } else {
-                tagElement.addClass('selected');
+            // Prevent selection if burned
+            if (tagElement.hasClass('burned')) return;
+    
+            // Toggle the selected state
+            tagElement.toggleClass('selected');
+        });
+    
+        // Burn icon toggle for story tags
+        html.find('.mh-burn-toggle').on('click', async (event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            const burnElement = $(event.currentTarget);
+            const tagElement = burnElement.closest('.mh-story-tag');
+            const tagId = tagElement.data('id');
+    
+            const currentState = burnElement.hasClass('burned') ? "burned" :
+                                 burnElement.hasClass('toBurn') ? "toBurn" : "unburned";
+    
+            // Determine new state
+            const newState = currentState === "unburned" ? "toBurn" :
+                             currentState === "toBurn" ? "burned" : "unburned";
+    
+            // Update the DOM classes for the icon and text
+            burnElement.removeClass('unburned toBurn burned').addClass(newState);
+            tagElement.removeClass('unburned toBurn burned selected').addClass(newState); // Also remove 'selected'
+    
+            // Update text state if necessary
+            const newIcon = this.getIcon(newState);
+            burnElement.html(newIcon);
+    
+            if (newState === "burned") {
+                tagElement.removeClass('selected');
+            }
+    
+            // Update the tag's state in the actor's data
+            const tagItem = this.actor.items.get(tagId);
+            if (tagItem) {
+                const updatedState = newState === "burned";
+                const burnState = newState === "toBurn" ? 1 : 0;
+                await tagItem.update({ "system.burned": updatedState, "system.burn_state": burnState });
             }
         });
     
-        // Cycle status types for NPC statuses
-        html.find('.npc-status').on('click', async (event) => {
-            event.stopPropagation();
-            event.preventDefault();
-        
-            const statusElement = $(event.currentTarget);
-            const statusId = statusElement.data('status-id');
-        
-            // Cycle through status types: positive -> negative -> neutral
-            const currentType = statusElement.attr('data-status-type');
-            let newType = 'positive'; // Default to positive if neutral
-        
-            if (currentType === 'positive') {
-                newType = 'negative';
-            } else if (currentType === 'negative') {
-                newType = 'neutral';
-            }
-        
-            // Update the DOM
-            statusElement.attr('data-status-type', newType);
-            statusElement.removeClass('neutral positive negative').addClass(newType);
-        
-            // Update the actor's data
-            const statusItem = this.actor.items.get(statusId);
-            if (statusItem) {
-                await statusItem.update({ "system.specialType": newType });
-            }
-        });        
-    
-        // Prevent context menu actions
         this.element.on('contextmenu', (event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -387,92 +368,32 @@ export class NpcHUD extends Application {
 Handlebars.registerHelper('parseStatus', function(description) {
     return new Handlebars.SafeString(
         description
-            // First check if there are any (tc) markers
-            .replace(/\(tc\)([\s\S]*?)\(\/tc\)/g, (match, content) => {
-                // Process content within (tc)...(/tc)
-                return content
-                    .replace(/\(t\)(.*?)\(\/t\)/gs, (match, innerContent) => {
-                        const processed = innerContent.trim().replace(/\[([^\]]+)\]/g, (match, tagContent) => {
-                            const trimmedContent = tagContent.trim();
-                            if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
-                                return `<span class="npc-status">${trimmedContent}</span>`;
-                            }
-                            if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
-                                return `<span class="npc-limit">${trimmedContent}</span>`;
-                            }
-                            return `<span class="npc-story-tag">${trimmedContent}</span>`;
-                        });
-                        return `<p class="npc-threat"><span class="npc-tc-marker">›</span> ${processed}</p>`;
-                    })
-                    .replace(/\(c\)(.*?)\(\/c\)/gs, (match, innerContent) => {
-                        const processed = innerContent.trim().replace(/\[([^\]]+)\]/g, (match, tagContent) => {
-                            const trimmedContent = tagContent.trim();
-                            if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
-                                return `<span class="npc-status">${trimmedContent}</span>`;
-                            }
-                            if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
-                                return `<span class="npc-limit">${trimmedContent}</span>`;
-                            }
-                            return `<span class="npc-story-tag">${trimmedContent}</span>`;
-                        });
-                        return `<p class="npc-consequence"><span class="npc-tc-marker">»</span> ${processed}</p>`;
-                    })
-                    .replace(/\s*\n\s*/g, ' ') // Replace newlines with space inside (tc)
-                    .replace(/<\/p>\s*<p>/g, '</p><p>'); // Clean up spacing between paragraphs
-            })
-            // For content outside (tc) or when no (tc) markers exist, apply simpler processing
             .replace(/\[([^\]]+)\]/g, (match, content) => {
+                // Trim content to ensure no leading/trailing whitespace
                 const trimmedContent = content.trim();
+
+                // Check if content contains words (with optional spaces/hyphens) followed by ' - ' and a number
                 if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
                     return `<span class="npc-status">${trimmedContent}</span>`;
                 }
+                // Check if content contains words (with optional spaces) followed by ':' and a number
                 if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
                     return `<span class="npc-limit">${trimmedContent}</span>`;
                 }
-                return `<span class="npc-story-tag">${trimmedContent}</span>`;
+                // Default case for other content inside brackets
+                return `<span class="npc-storytag">${trimmedContent}</span>`;
             })
-            .replace(/\n/g, '</p><p>') // Handle regular newlines as paragraph breaks
+            .replace(/\n/g, '</p><p>') // Handle newlines as new paragraphs
     );
 });
-
-Handlebars.registerHelper('parseMaxTier', function (maxTier) {
-    return maxTier === 999 ? '-' : maxTier;
-});
-
 
 Hooks.on('renderTokenHUD', (app, html, data) => {
     if (!game.user.isGM) return;
 
     const actor = game.actors.get(data.actorId);
     if (actor && actor.type === 'threat') {
-        const hud = NpcHUD.getInstance();
+        const hud = NpcHUD.getInstance(actor);
         hud.setActor(actor);
-    }
-});
-
-// Listen for actor updates
-Hooks.on('updateActor', (actor, data, options, userId) => {
-    if (!game.user.isGM) return;
-
-    const hud = NpcHUD.getInstance();
-    if (hud.actor && hud.actor.id === actor.id) {
-        hud.render(false); // Re-render the HUD with updated data
-    }
-});
-
-// Listen for item updates
-Hooks.on('updateItem', (item, data, options, userId) => {
-    const hud = NpcHUD.getInstance();
-    if (hud.actor && hud.actor.id === item.parent.id) {
-        hud.render(false); // Re-render the HUD with updated data
-    }
-});
-
-// Optional: Handle actor deletion
-Hooks.on('deleteActor', (actor, options, userId) => {
-    const hud = NpcHUD.getInstance();
-    if (hud.actor && hud.actor.id === actor.id) {
-        hud.close(); // Close the HUD if the actor is deleted
     }
 });
 

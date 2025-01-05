@@ -69,6 +69,7 @@
   min-width: 250px;
   max-width: 300px !important;
   min-height: 400px;
+  max-height: calc(100vh - 150px);
 }
 
 #mist-hud .window-app {
@@ -219,15 +220,7 @@ hr {
 }
 
 /* General umbrella class for all theme icons */
-.mh-theme-icon {
-  display: inline-block;
-  margin-right: 3px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  vertical-align: middle;
-  align-self: center;
-}
-
+.mh-theme-icon,
 .mh-theme-icon-notip {
   display: inline-block;
   margin-right: 3px;
@@ -236,6 +229,15 @@ hr {
   vertical-align: middle;
   align-self: center;
 }
+
+/* .mh-theme-icon-notip {
+  display: inline-block;
+  margin-right: 3px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  vertical-align: middle;
+  align-self: center;
+} */
 
 .mh-theme-icon-notip.loadout {
   width: 18px;
@@ -296,6 +298,7 @@ hr {
   font-size: 1.3em;
   display: block;
   margin: 4px 2px;
+  font-style: italic;
 }
 
 /* Tags */

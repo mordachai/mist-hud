@@ -78,26 +78,6 @@
     padding-top: 5px;
   }
 
-  .mh-dropshadow-mythos{
-    filter: drop-shadow(1px 1px 5px var(--mythos-dark-color));
-  }
-
-  .mh-dropshadow-logos{
-    filter: drop-shadow(2px 2px 5px var(--logos-dark-color));
-  }
-
-  .mh-dropshadow-self{
-    filter: drop-shadow(2px 2px  var(--self-dark-color));
-  }
-
-  .mh-dropshadow-noise{
-    filter: drop-shadow(1px 1px var(--noise-dark-color));
-  }
-
-  .mh-dropshadow-mythosOS{
-    filter: drop-shadow(2px 2px var(--mythosOS-dark-color));
-  }
-
   .mhr-subtitleImg img{
     border: none;
   }

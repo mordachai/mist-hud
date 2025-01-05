@@ -1,6 +1,6 @@
 // mist-hud.js
 
-import { themesConfig, essenceDescriptions } from './mh-theme-config.js';
+import { essenceDescriptions } from './mh-theme-config.js';
 import { CityHelpers } from "/systems/city-of-mist/module/city-helpers.js";
 import { StoryTagDisplayContainer } from "/systems/city-of-mist/module/story-tag-window.js";
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
@@ -25,7 +25,7 @@ export class MistHUD extends Application {
   async minimize() {
     const result = await super.minimize();
     return result;
-}
+  }
 
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
@@ -657,7 +657,7 @@ export class MistHUD extends Application {
       event.stopPropagation();
     });
   }
-  
+ 
   getData(options) {
     const data = super.getData(options);
     if (!this.actor) return data;
@@ -674,6 +674,11 @@ export class MistHUD extends Application {
     data.isCityOfMist = activeSystem === "city-of-mist";
     data.isOtherscape = activeSystem === "otherscape";
 
+    //Themebook data
+    data.themebooks = this.getThemebooks();
+    console.log("Data themebooks: ",data.themebooks);
+
+
     // Set actor-related data
     data.charName = this.actor.name;
     data.tokenImage =
@@ -683,13 +688,11 @@ export class MistHUD extends Application {
     data.isCollapsed = this.isCollapsed;
 
     // Retrieve themes and story tags
-    const themesAndTags = this.getThemebooks();
+    const themesAndTags = this.getThemesAndTags();
     data.themes = themesAndTags.themes;
+    data.storyTags = themesAndTags.storyTags;
+    data.hasStoryTags = !!(themesAndTags.storyTags && themesAndTags.storyTags.length > 0);
     data.loadoutTags = this.getLoadoutTags();
-
-    // Retrieve story tags
-    data.storyTags = this.getStoryTags();
-    data.hasStoryTags = !!(data.storyTags && data.storyTags.length > 0);
 
     const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
     data.statuses = this.getActorStatuses().map((status) => {
@@ -703,9 +706,6 @@ export class MistHUD extends Application {
 
     // Add modifier
     data.modifier = this.modifier;
-
-    //Themebook data
-    data.themebooks = this.getThemebooks();
 
     // Process Juice and Clues for City of Mist
     if (data.isCityOfMist) {
@@ -744,59 +744,171 @@ export class MistHUD extends Application {
     return data;
   }
 
-  getImprovements() {
-    if (!this.actor) return [];
+  getThemesAndTags() {
+    if (!this.actor) return {};
+  
+    const items = this.actor.items.contents;
+  
+    const themeItems = items.filter(item => item.type === 'theme' && item.name !== "__LOADOUT__");
+    const tagItems = items.filter(item => item.type === 'tag');
+  
+    const subTagsByParent = tagItems.reduce((acc, tag) => {
+      if (tag.system.parentId) {
+        if (!acc[tag.system.parentId]) acc[tag.system.parentId] = [];
+        acc[tag.system.parentId].push(tag);
+      }
+      return acc;
+    }, {});
+  
+    const themes = themeItems.map(theme => {
+      const themeId = theme._id;
+      let realThemebook;
+      const themebook = theme.themebook;
+  
+      if (themebook?.isThemeKit()) {
+        realThemebook = themebook.themebook;
+      } else {
+        realThemebook = themebook;
+      }
+  
+      if (!realThemebook) {
+        console.warn(`Themebook is null for theme: ${theme.name}`);
+        return null;
+      }
+  
+      const themeType = realThemebook.system?.subtype || "default-icon";
+      
+      const powerTags = this.getPowerTags(themeId, tagItems, subTagsByParent);
+      const weaknessTags = this.getWeaknessTags(themeId, tagItems, subTagsByParent);
+  
+      return {
+        id: themeId,
+        themeName: theme.name,
+        category: themeType,
+        iconClass: `mh-theme-icon ${themeType}`,
+        powerTags,
+        weaknessTags,
+        localizedThemebookName: realThemebook.name
+      };
+    }).filter(Boolean);
+  
+    const storyTags = this.getStoryTags();
+  
+    return {
+      themes,
+      storyTags,
+    };
+  }
+
+  getThemebooks() {
+    if (!this.actor || !this.actor.items) {
+        console.error("Invalid actor provided.");
+        return [];
+    }
 
     const items = this.actor.items.contents;
 
-    // Filter for improvements (no system_compatibility filtering)
-    const improvements = items.filter(item => item.type === "improvement");
+    // Passo 1: Extrair temas e tags
+    const themes = items.filter(item => item.type === "theme" && item.name !== "__LOADOUT__");
+    const tagItems = items.filter(item => item.type === "tag");
 
-    // Group improvements by theme
-    const themes = {};
-    improvements.forEach(item => {
-        const themeId = item.system.theme_id || "no-theme";
+    return themes.map(theme => {
+        let realThemebook;
+        const themebook = theme.themebook;
 
-        if (!themes[themeId]) {
-            const theme = this.actor.items.find(i => i._id === themeId);
-
-            if (theme) {
-                const themeConfig = themesConfig[theme.system.themebook_id]; // Lookup configuration
-                if (!themeConfig) {
-                    console.warn(`Theme configuration not found for themebook ID: ${theme.system.themebook_id}`);
-                }
-
-                const localizedThemebookName = themeConfig
-                    ? game.i18n.localize(themeConfig.localizationKey)
-                    : "Unknown Themebook";
-
-                themes[themeId] = {
-                    id: themeId,
-                    name: localizedThemebookName, // Localized name of the themebook
-                    fullThemeName: theme.name || "Unnamed Theme", // Full theme name for the tooltip
-                    improvements: []
-                };
-            } else {
-                themes[themeId] = {
-                    id: themeId,
-                    name: "Unknown Theme",
-                    fullThemeName: "Unknown Theme",
-                    improvements: []
-                };
-            }
+        if (themebook?.isThemeKit()) {
+            realThemebook = themebook.themebook;
+        } else {
+            realThemebook = themebook;
         }
 
-        themes[themeId].improvements.push({
-            id: item.id,
-            name: item.name,
-            description: item.system.description || "",
-            choiceItem: item.system.choice_item || "",
-            uses: item.system.uses || { max: 0, current: 0, expended: false }
-        });
-    });
+        // Garantir que o realThemebook não é nulo
+        if (!realThemebook) {
+            console.warn(`Themebook is null for theme: ${theme.name}`);
+            return null;
+        }
 
-    return Object.values(themes);
+        const themeType = realThemebook.system?.subtype || "default-icon";
+        const themeIcon = `mh-theme-icon ${themeType}`;
+
+        return {
+            id: theme._id,
+            themeName: theme.name,
+            themebook_id: realThemebook._id,
+            themebook_name: realThemebook.name,
+            themeIcon,
+            themeType,
+            burnState: theme.system?.burned ? 'burned' : '',
+            mystery: theme.system?.mystery || "",
+            themeInfo: {
+                motivation: realThemebook.system?.motivation || "",
+                locale_name: realThemebook.system?.locale_name?.replace(/^#/, "") || "" // Remover #
+            }
+        };
+
+    }).filter(Boolean); // Remover entradas nulas de temas inválidos
   }
+
+  getImprovements() {
+    if (!this.actor) return [];
+  
+    const items = this.actor.items.contents;
+  
+    // Filter for themes and build a map of theme information
+    const themes = items
+      .filter(item => item.type === "theme")
+      .reduce((acc, theme) => {
+        let realThemebook;
+        const themebook = theme.themebook;
+  
+        if (themebook?.isThemeKit()) {
+          realThemebook = themebook.themebook;
+        } else {
+          realThemebook = themebook;
+        }
+  
+        if (!realThemebook) {
+          console.warn(`No themebook found for theme: ${theme.name}`);
+          return acc;
+        }
+  
+        acc[theme._id] = {
+          id: theme._id,
+          name: theme.name || "Unnamed Theme",
+          themebookName: realThemebook.name || "Unnamed Themebook",
+          themeType: realThemebook.system.subtype || "Unknown Type",
+        };
+        return acc;
+      }, {});
+  
+    // Group improvements under their associated themebooks
+    const improvementsGroupedByThemebook = items
+      .filter(item => item.type === "improvement" && themes[item.system.theme_id]) // Only improvements with valid themes
+      .reduce((acc, item) => {
+        const theme = themes[item.system.theme_id];
+        const themebookName = theme.themebookName;
+  
+        if (!acc[themebookName]) {
+          acc[themebookName] = {
+            themebookName,
+            themeType: theme.themeType,
+            improvements: [],
+          };
+        }
+  
+        acc[themebookName].improvements.push({
+          id: item.id,
+          name: item.name,
+          description: item.system.description || "No description provided.",
+          choiceItem: item.system.choice_item || null,
+          uses: item.system.uses || { max: 0, current: 0, expended: false },
+        });
+  
+        return acc;
+      }, {});
+  
+    return Object.values(improvementsGroupedByThemebook);
+  }  
 
   async _createClueFromHUD(event) {
     event.stopPropagation();
@@ -996,49 +1108,71 @@ export class MistHUD extends Application {
 
   getMysteryFromTheme(themeId) {
     if (!this.actor) {
-      console.warn("No actor set in MistHUD.");
-      return null;
+        console.warn("No actor set in MistHUD.");
+        return null;
     }
-  
-    // Retrieve the theme item from the actor by ID
+
     const theme = this.actor.items.find(item => item.type === 'theme' && item.id === themeId);
-  
+
     if (!theme) {
-      console.warn(`No theme found with ID: ${themeId}`);
-      return "No mystery defined.";
+        console.warn(`No theme found with ID: ${themeId}`);
+        return "No mystery defined.";
     }
-  
-    // Retrieve theme configuration from themesConfig using themebook ID
-    const themeConfig = themesConfig[theme.system.themebook_id];
-    if (!themeConfig) {
-      console.warn(`Theme configuration not found for themebook ID: ${theme.system.themebook_id}`);
-      return "No mystery defined.";
+
+    let realThemebook;
+    const themebook = theme.themebook;
+
+    if (themebook?.isThemeKit()) {
+        realThemebook = themebook.themebook;
+    } else {
+        realThemebook = themebook;
     }
-  
-    // Map of category to translation keys
-    const translationKeys = {
-      mythos: "CityOfMist.terms.mystery",
-      logos: "CityOfMist.terms.identity",
-      self: "CityOfMist.terms.identity",
-      mythosOS: "Otherscape.terms.ritual",
-      noise: "Otherscape.terms.itch",
-      mist: "CityOfMist.terms.directive",
-      extras: "CityOfMist.terms.extra",
-      crew: "CityOfMist.terms.crewTheme",
-      loadout: "Otherscape.terms.loadout"
-    };
-  
-    // Get the localized prefix
-    const prefixKey = translationKeys[themeConfig.category];
+
+    if (!realThemebook) {
+        console.warn(`No themebook found for theme: ${theme.name}`);
+        return "No mystery defined.";
+    }
+
+    const category = realThemebook.system.subtype || "unknown";
+    const system = game.settings.get("city-of-mist", "system");
+
+    let prefixKey;
+
+    switch (category) {
+        case "Mythos":
+            prefixKey = (system === "city-of-mist") ? "CityOfMist.terms.mystery" :
+                        (system === "otherscape") ? "Otherscape.terms.ritual" :
+                        null; // Important: handle unknown systems
+            break;
+        case "Logos":
+        case "Self":
+            prefixKey = "CityOfMist.terms.identity";
+            break;
+        case "Noise":
+            prefixKey = "Otherscape.terms.itch";
+            break;
+        case "Mist":
+            prefixKey = "CityOfMist.terms.directive";
+            break;
+        case "Extras":
+            prefixKey = "CityOfMist.terms.extra";
+            break;
+        case "Crew":
+            prefixKey = "CityOfMist.terms.crewTheme";
+            break;
+        case "Loadout":
+            prefixKey = "Otherscape.terms.loadout";
+            break;
+        default:
+          console.warn(`Unknown category: ${category}`);
+          prefixKey = null; // Important: handle unknown categories
+    }
+
     const prefix = prefixKey ? game.i18n.localize(prefixKey) : "Theme";
-  
-    // Retrieve the mystery text from the theme
     const mysteryText = theme.system.mystery || "No mystery defined.";
-  
-    // Return the formatted HTML
-    return `<span class="mystery-type ${themeConfig.category}">${prefix}:</span>
-            <span class="mystery-text">${mysteryText}</span>`;
-  }
+
+    return `<span class="mystery-type ${category}">${prefix}:</span><span class="mystery-text">${mysteryText}</span>`;
+  }  
   
   addTooltipListeners(html) {
     html.find('.mh-theme-icon').each((index, element) => {
@@ -1283,96 +1417,6 @@ export class MistHUD extends Application {
     });
   }
 
-  getThemebooks() {
-    if (!this.actor || !this.actor.items) {
-        console.error("Invalid actor provided.");
-        return [];
-    }
-
-    const items = this.actor.items.contents;
-
-    // Step 1: Extract themes
-    const themes = items.filter(item => item.type === "theme" && item.name !== "__LOADOUT__");
-    const tagItems = items.filter(item => item.type === "tag");
-
-    // Organize subtags under their respective parent tags
-    // const subTagsByParent = tagItems.reduce((acc, tag) => {
-    //     if (tag.system.parentId) {
-    //         if (!acc[tag.system.parentId]) acc[tag.system.parentId] = [];
-    //         acc[tag.system.parentId].push(tag);
-    //     }
-    //     return acc;
-    // }, {});
-
-    // Step 2: Map theme information with related data
-    return themes.map(theme => {
-        let realThemebook;
-        const themebook = theme.themebook;
-
-        if (themebook?.isThemeKit()) {
-            realThemebook = themebook.themebook;
-        } else {
-            realThemebook = themebook;
-        }
-
-        // Ensure the realThemebook is not null
-        if (!realThemebook) {
-            console.warn(`Themebook is null for theme: ${theme.name}`);
-            return null;
-        }
-            // Logar o conteúdo completo do themebook
-    console.log(`Themebook for theme "${theme.name}":`, realThemebook);
-
-        const themeIcon = `mh-theme-icon ${realThemebook.system.subtype || "default-icon"}`;
-
-        const themeType = realThemebook.system.subtype;
-
-        // Get power and weakness tags
-        // const powerTags = tagItems.filter(tag =>
-        //   tag.system.theme_id === theme._id &&
-        //   tag.system.subtype === "power");
-
-        const powerTags = tagItems.filter(tag => tag.system.theme_id === theme._id && tag.system.subtype === "power")
-    .map(tag => {
-        const processedTag = this.applyBurnState(this.actor, tag._id, "power"); // Utilize applyBurnState
-        return {
-            id: processedTag.id,
-            name: processedTag.tagName,
-            burnState: processedTag.burnState,
-            cssClass: processedTag.cssClass,
-            burnIcon: processedTag.burnIcon,
-            isInverted: processedTag.isInverted,
-        };
-    });
-
-        const weaknessTags = tagItems.filter(tag => tag.system.theme_id === theme._id && tag.system.subtype === "weakness")
-          .map(tag => {
-              const processedTag = { id: tag._id, name: tag.name };
-              processedTag.isInverted = tag.system.inverted || false;
-              processedTag.inversionIcon = processedTag.isInverted 
-                  ? '<i class="fa-light fa-angles-up"></i>' 
-                  : '<i class="fa-light fa-angles-down"></i>';
-              return processedTag;
-          });
-
-        return {
-            id: theme._id,
-            themeName: theme.name,
-            themebook_id: realThemebook._id,
-            themebook_name: realThemebook.name,
-            themeIcon,
-            themeType,
-            powerTags,
-            weaknessTags,
-            mystery: theme.system.mystery,
-            themeInfo: {
-                motivation: realThemebook.system.motivation,
-                locale_name: realThemebook.system.locale_name?.replace(/^#/, "") // Remove leading #
-            }
-        };
-    }).filter(Boolean); // Remove null entries from invalid themes
-  }
-
   getStoryTags() {
     if (!this.actor) return [];
 
@@ -1406,7 +1450,7 @@ export class MistHUD extends Application {
     return storyTags;
     
   }
-    
+ 
   getLoadoutTags() {
     if (!this.actor) return [];
 
@@ -1434,63 +1478,74 @@ export class MistHUD extends Application {
   getEssence(themes) {
     // Initialize counters for each category
     const categoryCounts = {
-        self: 0,
-        noise: 0,
-        mythosOS: 0,
-        logos: 0,
-        mythos: 0,
-        mist: 0,
+      Self: 0,
+      Noise: 0,
+      Logos: 0,
+      Mythos: 0,
+      Mist: 0,
     };
-
+  
     for (const theme of themes) {
-        const themebookId = theme.system.themebook_id; // Extract themebook_id
-        const themeConfig = themesConfig[themebookId]; // Lookup in themesConfig
-
-        if (themeConfig) {
-            const category = themeConfig.category;
-            if (categoryCounts.hasOwnProperty(category)) {
-                categoryCounts[category]++;
-            }
-        } else {
-            console.warn(`Themebook ID not found in config: ${themebookId}`);
-        }
+      // Retrieve the themebook associated with the theme
+      let realThemebook;
+      const themebook = theme.themebook;
+  
+      if (themebook?.isThemeKit()) {
+        realThemebook = themebook.themebook;
+      } else {
+        realThemebook = themebook;
+      }
+  
+      if (!realThemebook) {
+        console.warn(`No themebook found for theme: ${theme.name}`);
+        continue;
+      }
+  
+      // Determine the category of the themebook
+      const category = realThemebook.system.subtype;
+  
+      if (category && categoryCounts.hasOwnProperty(category)) {
+        categoryCounts[category]++;
+      } else {
+        console.warn(`Unknown or missing category for theme: ${theme.name}`);
+      }
     }
-
-    const { self, noise, mythosOS } = categoryCounts;
-
+  
+    const { Self, Noise, Mythos } = categoryCounts;
+  
     // Generate the image file name
-    const totalCount = self + noise + mythosOS;
-    let imageName = "blank.webp"; // Default image for undefined
-
+    const totalCount = Self + Noise + Mythos;
+    let imageName = "blank.svg"; // Default image for undefined
+  
     if (totalCount === 4) {
-        const segments = [];
-        if (self > 0) segments.push(`${self}S`);
-        if (mythosOS > 0) segments.push(`${mythosOS}M`);
-        if (noise > 0) segments.push(`${noise}N`);
-        imageName = segments.join("") + ".svg";
-    } else if (categoryCounts.logos > 0 || categoryCounts.mist > 0 || categoryCounts.mythos > 0) {
-        imageName = "com.webp"; // City of Mist characters
+      const segments = [];
+      if (Self > 0) segments.push(`${Self}S`);
+      if (Mythos > 0) segments.push(`${Mythos}M`);
+      if (Noise > 0) segments.push(`${Noise}N`);
+      imageName = segments.join("") + ".svg";
+    } else if (categoryCounts.Logos > 0 || categoryCounts.Mist > 0 || categoryCounts.Mythos > 0) {
+      imageName = "com.webp"; // City of Mist characters
     }
-
+  
     // Determine the essence and its class
     let essenceData = { essence: "Undefined", className: "undefined", imageName };
-
-    if (self > 0 && noise > 0 && mythosOS > 0) {
-        essenceData = { essence: "Nexus", className: "nexus", imageName };
-    } else if (self > 0 && mythosOS > 0 && noise === 0) {
-        essenceData = { essence: "Spiritualist", className: "spiritualist", imageName };
-    } else if (self > 0 && noise > 0 && mythosOS === 0) {
-        essenceData = { essence: "Cyborg", className: "cyborg", imageName };
-    } else if (mythosOS > 0 && noise > 0 && self === 0) {
-        essenceData = { essence: "Transhuman", className: "transhuman", imageName };
-    } else if (self > 0 && noise === 0 && mythosOS === 0) {
-        essenceData = { essence: "Real", className: "real", imageName };
-    } else if (mythosOS > 0 && self === 0 && noise === 0) {
-        essenceData = { essence: "Avatar/Conduit", className: "avatar-conduit", imageName };
-    } else if (noise > 0 && self === 0 && mythosOS === 0) {
-        essenceData = { essence: "Singularity", className: "singularity", imageName };
+  
+    if (Self > 0 && Noise > 0 && Mythos > 0) {
+      essenceData = { essence: "Nexus", className: "nexus", imageName };
+    } else if (Self > 0 && Mythos > 0 && Noise === 0) {
+      essenceData = { essence: "Spiritualist", className: "spiritualist", imageName };
+    } else if (Self > 0 && Noise > 0 && Mythos === 0) {
+      essenceData = { essence: "Cyborg", className: "cyborg", imageName };
+    } else if (Mythos > 0 && Noise > 0 && Self === 0) {
+      essenceData = { essence: "Transhuman", className: "transhuman", imageName };
+    } else if (Self > 0 && Noise === 0 && Mythos === 0) {
+      essenceData = { essence: "Real", className: "real", imageName };
+    } else if (Mythos > 0 && Self === 0 && Noise === 0) {
+      essenceData = { essence: "Avatar/Conduit", className: "avatar-conduit", imageName };
+    } else if (Noise > 0 && Self === 0 && Mythos === 0) {
+      essenceData = { essence: "Singularity", className: "singularity", imageName };
     }
-
+  
     return essenceData;
   }
 
@@ -1851,6 +1906,7 @@ export class MistHUD extends Application {
         console.error("Error during HUD cleanup:", error);
     }
   }
+
   
 }
 

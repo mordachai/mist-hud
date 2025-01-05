@@ -43,9 +43,9 @@
 
 .mh-theme-header {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   margin: -3px -0px 1px -0px;
   height: 28px;
   padding: 0 10px;
@@ -184,16 +184,22 @@
 /*Roll Icons*/
 .mhr-icon.Mythos {
   background-image: url('../ui/icons/mythos_icn.svg');
+  width: 20px;
+  height: 20px;
   filter: brightness(0) saturate(100%) invert(5%) sepia(11%) saturate(3432%) hue-rotate(16deg) brightness(93%) contrast(89%);
 }
 
 .mhr-icon.Logos {
   background-image: url('../ui/icons/logos_icn.svg');
+  width: 20px;
+  height: 20px;
   filter: brightness(0) saturate(100%) invert(5%) sepia(11%) saturate(3432%) hue-rotate(16deg) brightness(93%) contrast(89%);
 }
 
 .mhr-icon.Mist {
   background-image: url('../ui/icons/mist_icn.svg');
+  width: 20px;
+  height: 20px;
   filter: brightness(0) saturate(100%) invert(5%) sepia(11%) saturate(3432%) hue-rotate(16deg) brightness(93%) contrast(89%);
 }
 
@@ -246,5 +252,13 @@
 .mh-loadout-tag.burned  {
   text-decoration: line-through;
   color: #ffa742;
+}
+
+.mh-dropshadow-Mythos{
+  filter: drop-shadow(1px 1px 5px var(--mythos-dark-color));
+}
+
+.mh-dropshadow-Logos{
+  filter: drop-shadow(2px 2px 5px var(--logos-dark-color));
 }
 

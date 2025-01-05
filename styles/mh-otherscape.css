@@ -42,7 +42,19 @@
   --marker-negativeTag-color: #ffd4a8;
 }
 
-.mh-theme-header,
+.mh-theme-header {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: space-between; 
+  margin: -3px -0px 1px -0px;
+  height: 28px;
+  padding: 0 10px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
 .mh-theme-header.extras {
   display: flex;
   flex-direction: row;
@@ -54,6 +66,10 @@
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
+}
+
+.mh-theme-header.loadout {
+  justify-content: flex-end; 
 }
 
 .mh-theme-header.Mythos {
@@ -491,12 +507,30 @@ color: var(--mythosOS-verylight-color);
 /*Roll icons*/
 .mhr-icon.Self {
   background-image: url('../ui/icons/self_os_icn.svg');
+  width: 20px;
+  height: 20px;
 }
 
 .mhr-icon.Mythos {
   background-image: url('../ui/icons/mythos_os_icn.svg');
+  width: 20px;
+  height: 20px;
 }
 
 .mhr-icon.Noise {
   background-image: url('../ui/icons/noise_os_icn.svg');
+  width: 20px;
+  height: 20px;
+}
+
+.mh-dropshadow-Self{
+  filter: drop-shadow(2px 2px  var(--self-dark-color));
+}
+
+.mh-dropshadow-Noise{
+  filter: drop-shadow(1px 1px var(--noise-dark-color));
+}
+
+.mh-dropshadow-Mythos{
+  filter: drop-shadow(2px 2px var(--mythosOS-dark-color));
 }
