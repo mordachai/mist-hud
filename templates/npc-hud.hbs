@@ -20,38 +20,39 @@
         </div>
         <ul class="npc-spectrum-list">
             {{#each spectrums}}
-            <li><span class="npc-spectrum">{{name}}: <span class="npc-spectrum-tier">{{system.maxTier}}</span></span></li>
+            <li><span class="npc-spectrum">{{name}}: <span class="npc-spectrum-tier">{{parseMaxTier system.maxTier}}</span></span></li>
             {{/each}}
         </ul>
 
-        {{#if statuses.length}}
+        {{!-- {{#if (or statuses.length storyTags.length)}} --}}
             <div class="npc-subtitle-container-c">
                 <div class="npc-subtitle-text">Tags & Statuses</div>
             </div>
             <div class="npc-tags-statuses-container">
                 <ul class="npc-storytags-list">
                     {{#each storyTags}}
-                    <li class="mh-story-tag {{this.cssClass}} no-wrap" data-id="{{this.id}}" data-temporary="{{this.temporary}}" data-permanent="{{this.permanent}}">
-                        <span class="mh-burn-toggle {{this.cssClass}}">{{{this.burnIcon}}}</span>
-                        {{#if temporary}}⏱️{{/if}}
-                        {{#if permanent}}💎{{/if}}
-                        <span class="mh-tags">{{this.tagName}}</span>
-                    </li>
+                    <div class="npc-story-tag {{this.cssClass}} no-wrap" data-id="{{this.id}}" data-temporary="{{this.temporary}}" data-permanent="{{this.permanent}}">
+                        <span class="npc-tag-name">{{this.tagName}}</span>
+                        <span class="npc-tag-icon">
+                            {{#if temporary}}⏱️{{/if}}
+                            {{#if permanent}}💎{{/if}}
+                        </span>
+                    </div>
                     {{/each}}
                 </ul>
                 <ul class="npc-statuses-list">
                     {{#each statuses}}
-                    <li>
-                        <div class="mh-status {{#if selected}}selected{{/if}} {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
-                            {{#if temporary}}⏱️ {{/if}}
-                            {{#if permanent}}💎 {{/if}}
+                    <div>
+                        <span class="npc-status {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
                             {{statusName}}-{{statusTier}}
-                        </div>
-                    </li>
+                            {{#if temporary}}⏱️{{/if}}
+                            {{#if permanent}}💎{{/if}}
+                        </span>
+                    </div>
                     {{/each}}
                 </ul>
             </div>
-        {{/if}}
+        {{!-- {{/if}} --}}
 
         <div class="npc-moves-section">
             <!-- Title stays fixed -->
@@ -60,7 +61,7 @@
                     {{#if (eq activeSystem 'city-of-mist')}}
                         MC Moves
                     {{else}}
-                        Threats and Consequences
+                        ›Threats / »Consequences
                     {{/if}}
                 </div>
             </div>
@@ -69,12 +70,12 @@
             <div class="npc-moves-container">
                 {{#each moveGroups as |moves subtype|}}
                 <div class="npc-move-type">
-                    <div class="npc-subtitle-container-l npc-subtitle-text">{{subtype}} Moves</div>
+                    <div class="npc-subtitle-container-l npc-subtitle-text">{{subtype}}</div>
                     <ul class="npc-list">
                         {{#each moves}}
                         <li>
                             {{#unless system.hideName}}
-                                <span class="npc-move-name">{{name}}</span> -
+                            <span class="npc-move-name">{{name}}</span> -
                             {{/unless}}
                             <span class="npc-move-description">{{parseStatus system.description}}</span>
                         </li>
