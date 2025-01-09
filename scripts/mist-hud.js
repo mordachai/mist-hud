@@ -1440,15 +1440,12 @@ export class MistHUD extends Application {
                 : '<i class="fa-light fa-angles-down"></i>';
 
             // Check if the tag is temporary and add the temporary property
-            processedTag.temporary = tag.system.temporary || false;
+            // processedTag.temporary = tag.system.temporary || false;
 
             return processedTag;
         }).filter(Boolean); // Remove any null or invalid entries
-        console.log("Processed Story Tags:", storyTags);
-
 
     return storyTags;
-    
   }
  
   getLoadoutTags() {
@@ -1749,13 +1746,27 @@ export class MistHUD extends Application {
     })).get();
 
     // Fetch selected story tags
-    const storyTags = this.element.find('.mh-story-tag.selected').map((i, el) => ({
-      tagName: $(el).text().trim(),
-      id: $(el).data('id'),
-      temporary: $(el).data('temporary') || false,
-      permanent: $(el).data('permanent') || false,
-      stateClass: "selected"
-  })).get();
+    const storyTags = this.element.find('.mh-story-tag.selected').map((i, el) => {
+      const tagElement = $(el);
+      const isInverted = tagElement.hasClass('inverted');
+      const burnElement = tagElement.find('.mh-burn-toggle');
+
+      let stateClass;
+      if (burnElement.hasClass('burned')) {
+          stateClass = "burned";
+      } else if (burnElement.hasClass('toBurn')) {
+          stateClass = "to-burn";
+      } else {
+          stateClass = isInverted ? "inverted" : "selected";
+      }
+
+      return {
+          tagName: tagElement.text().trim(),
+          id: tagElement.data('id'),
+          stateClass
+      };
+    }).get();
+
 
     // Fetch selected loadout tags
     const loadoutTags = this.element.find('.mh-loadout-tag.selected').map((i, el) => {
