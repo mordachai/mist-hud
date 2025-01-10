@@ -267,38 +267,11 @@ hr {
 }
 
 
-.mh-theme-header.neutral {
-  background-image: url('../ui/header-neutral.webp');
-  justify-content: flex-start;
-  margin-top: 2px;
-  /* text-shadow: 1px 1px 2px var(--effects-color1); */
-}
-
-.mh-theme-header.spaced {
-  background-image: url('../ui/header-neutral.webp');
-  justify-content: space-between;
-  margin-top: 2px;
-  /* text-shadow: 1px 1px 2px var(--effects-color1); */
-}
-
 .mh-themebook-name {
   font-family: var(--font-family-main2), cursive;
   font-style: italic;
   white-space: nowrap;
   font-size: 1.0em;
-}
-
-.mh-theme-name-neutral {
-  color: whitesmoke;
-  /* text-shadow: rgb(157, 69, 184) 1px 2px 2px; */
-}
-
-.mh-theme-name {
-  font-family: var(--font-family-move), sans-serif;
-  font-size: 1.3em;
-  display: block;
-  margin: 4px 2px;
-  font-style: italic;
 }
 
 /* Tags */

@@ -86,6 +86,28 @@
   padding-top: 2px;
 }
 
+.mh-theme-header.neutral {
+  background-image: url('../ui/header-neutral.webp');
+  /* justify-content: flex-start; */
+  margin-top: 2px;
+  /* text-shadow: 1px 1px 2px var(--effects-color1); */
+}
+
+.mh-theme-header.spaced {
+  background-image: url('../ui/header-neutral.webp');
+  justify-content: space-between;
+  margin-top: 2px;
+  /* text-shadow: 1px 1px 2px var(--effects-color1); */
+}
+
+.mh-theme-name {
+  font-family: var(--font-family-move), sans-serif;
+  font-size: 1.3em;
+  display: block;
+  margin: 4px 2px;
+  font-style: italic;
+}
+
 .mh-theme-name-com-Self {
   color: var(--self-verylight-color);
   font-family: var(--font-family-main1), sans-serif;
@@ -102,6 +124,11 @@
   color: var(--noise-verylight-color);
   font-family: var(--font-family-move), sans-serif;
   /* text-shadow: var(--noise-dark-color) 1px 1px 3px; */
+}
+
+.mh-theme-name-neutral {
+  color: whitesmoke;
+  /* text-shadow: rgb(157, 69, 184) 1px 2px 2px; */
 }
 
 .mh-theme-icon.Self {
@@ -160,15 +187,15 @@
   padding-left: 12px;
 }
 
-.mh-power-tag.Mythos span {
+.mh-power-tag.Mythos {
 color: var(--mythosOS-verylight-color);
 }
 
-.mh-power-tag.Noise span {
+.mh-power-tag.Noise {
   color: var(--noise-verylight-color);
 }
 
-.mh-power-tag.Self span {
+.mh-power-tag.Self {
   color: var(--self-verylight-color);
 }
 
@@ -265,7 +292,7 @@ color: var(--mythosOS-verylight-color);
   position: relative;
   top: -5px;
   right: -2px;
-  font-size: 1.0rem;
+  font-size: 0.85rem;
 }
 
 .mh-story-toggle i{
