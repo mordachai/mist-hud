@@ -336,6 +336,14 @@ hr {
 .mh-tag-text {
   display: flex; /* Ensures these elements are also centered */
   align-items: center;
+  align-self: center;
+  vertical-align: middle;
+}
+
+.mh-tag-text i {
+  font-size: 0.75em;
+  align-self: center;
+  padding: 3px 2px 0 6px;
 }
 
 .mh-power-subtag,

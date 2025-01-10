@@ -101,9 +101,11 @@
             data-permanent="{{this.permanent}}">
               <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
               <span class="mh-tag-text {{#if temporary}}temporary{{/if}}">
-                {{#if temporary}}⏱️ {{/if}}
-                {{#if permanent}}💎 {{/if}}
-                {{this.tagName}}</span>
+                {{this.tagName}}
+                {{!-- {{#if temporary}}⏱️{{/if}} --}}
+                {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
+                {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}</span>
+                {{!-- {{#if permanent}}💎{{/if}}</span> --}}
               <span class="mhr-mls mh-story-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
                 {{{this.inversionIcon}}}
               </span>

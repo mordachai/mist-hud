@@ -409,6 +409,8 @@ margin: 5px;
     font-style: oblique;
     padding: 0px 2px;
     cursor: pointer;
+    white-space: nowrap;
+    display: inline-block; 
 }
 
 .npc-status {
@@ -418,6 +420,8 @@ margin: 5px;
     font-style: oblique;
     padding: 0px 2px ;
     cursor: pointer;
+    white-space: nowrap;
+    display: inline-block;
 }
 
 .npc-story-tag.selected {
@@ -447,6 +451,10 @@ margin: 5px;
     text-decoration-thickness: 2px;
 }
 
+.npc-tag-name {
+    display: inline-block;
+}
+
 /* Container for Tags & Statuses */
 .npc-tags-statuses-container {
     display: flex;
@@ -456,13 +464,14 @@ margin: 5px;
     gap: 5px;
     padding: 3px;
     max-width: 100%;
+    overflow: visible; 
 }
 
 /* Tags & Statuses Items */
 .npc-storytags-list,
 .npc-statuses-list {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap; 
     gap: 4px 8px;
     list-style: none;
     padding: 0;
