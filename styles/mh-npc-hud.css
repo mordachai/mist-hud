@@ -37,14 +37,12 @@
     border: none;
 }
   
-  
-  /* Customize the Foundry header */
 #npc-hud .window-header {
     background: var(--hud-bg-color);
-    display: flex;
-    flex-direction: column;
-    flex-basis: 40px;
-    justify-content:center;
+    display: grid;
+    grid-template-columns: auto 10px;
+    flex-basis: min-content;
+    justify-content: space-between;
     align-content: space-between;
     padding: 5px 10px;
     border-bottom: 1px solid white;
@@ -53,11 +51,13 @@
 
 /* Character name */
 #npc-hud .mh-char-name {
-    font-size: 1.2rem;
-    font-family: var(--font-family-move), sans-serif;
-    filter: drop-shadow(1px 2px 3px var(--mythos-dark-color));
+    font-size: 1.4rem;
+    font-family: 'Rift Bold';
+    filter: drop-shadow(2px 2px 2px black);
     align-self: flex-start;
     margin-left: 30px;
+    color: var(--spectrum-color);
+    padding-right: 15px;
 }
 
 #npc-hud.minimized .mh-char-name {
@@ -82,6 +82,10 @@ font-size: 1.2rem;
 color: #ffffff;
 cursor: pointer;
 margin: auto;
+}
+
+h4.window-title .mh-close-button {
+    display: none !important; /* Ensure it's completely hidden */
 }
 
 #npc-hud .mh-close-button:hover {
@@ -117,10 +121,23 @@ margin: 5px;
   
   /* Minimized state header */
 #npc-hud.minimized .window-header {
-    height: 50px;
-    overflow: visible; /* Allow overflow */
-    min-width: 180px;
+    /* height: 50px;
+    overflow: visible;
+    min-width: 180px; */
+    background: var(--hud-bg-color);
+    display: grid;
+    grid-template-columns: 0px auto 10px;
+    flex-basis: min-content;
+    justify-content: space-between;
+    align-content: space-between;
+    padding: 5px 10px;
+    border-bottom: 1px solid white;
+    cursor: grab;
+    width: max-content;
+    padding-left: 40px;
 }
+
+
 
 .npc-collapse-button,
 .npc-close-button {
@@ -197,6 +214,15 @@ margin: 5px;
     max-height: calc(80vh - 40vh);
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    margin-top: 10px;
+    border-top: 1px solid var(--divider-color1);
+    padding-top: 20px;
+}
+
+/* Optional scrollbar styling */
+.npc-moves-section::-webkit-scrollbar {
+    width: 6px;
 }
 
 /* Title Styling (Fixed at the top of the section) */
@@ -252,6 +278,16 @@ margin: 5px;
     font-family: var(--font-family-npcmoves);
     font-style: italic;
     font-weight: bold;
+}
+
+.npc-move-name.limit:before {
+    content: '';
+    display: inline-block;
+    width: 25px;
+    height: 14px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("../ui/icons/limit_icn.svg");
 }
 
 .npc-move-description {
@@ -343,10 +379,6 @@ margin: 5px;
     text-overflow: ellipsis; /* Adds ellipsis (...) to overflowing text */
 }
 
-.npc-move-name {
-    font-weight: bold;
-}
-
 .npc-list ul {
     list-style: none;
     padding: 0;
@@ -361,13 +393,19 @@ margin: 5px;
     border-bottom: 2px solid var(--divider-color1);
 }
 
-.npc-spectrum-list{
+.npc-list.limit{
     list-style: none;
     padding: 0;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.npc-spectrum-list{
     display: flex ;
     justify-content: space-around;
     gap: 10px 5px;
     flex-wrap: wrap;
+    margin-bottom: 10px !important;
 }
 
 .npc-spectrum {

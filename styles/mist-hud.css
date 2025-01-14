@@ -137,7 +137,7 @@ border: none;
 
 /* Character name */
 #mist-hud .mh-char-name {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-family: var(--font-family-move), sans-serif;
   filter: drop-shadow(1px 2px 3px var(--mythos-dark-color));
   align-self: flex-start;
@@ -209,6 +209,7 @@ border: none;
   height: 50px;
   overflow: visible; /* Allow overflow */
   min-width: 200px;
+  padding-left: 40px;
 }
 
 

@@ -23,68 +23,107 @@
             <li><span class="npc-spectrum">{{name}}: <span class="npc-spectrum-tier">{{parseMaxTier system.maxTier}}</span></span></li>
             {{/each}}
         </ul>
+        {{#if (eq activeSystem "otherscape")}}
+        <!-- Limits -->
+        <ul class="npc-list limit">
+        {{#each moveGroups.Limits}}
+            <li>
+            <span class="npc-move-name limit">{{name}}</span> - 
+            <span class="npc-move-description">{{parseStatus system.description}}</span>
+            </li>
+        {{/each}}
+        </ul>
+        {{/if}}
 
-        {{!-- {{#if (or statuses.length storyTags.length)}} --}}
-            <div class="npc-subtitle-container-c">
-                <div class="npc-subtitle-text">Tags & Statuses</div>
-            </div>
-            <div class="npc-tags-statuses-container">
-                <ul class="npc-storytags-list">
-                    {{#each storyTags}}
-                    <div class="npc-story-tag {{this.cssClass}} no-wrap" data-id="{{this.id}}" data-temporary="{{this.temporary}}" data-permanent="{{this.permanent}}">
-                        <span class="npc-tag-name">{{this.tagName}}</span>
-                        <span class="npc-tag-icon">
-                            {{#if temporary}}⏱️{{/if}}
-                            {{#if permanent}}💎{{/if}}
-                        </span>
-                    </div>
-                    {{/each}}
-                </ul>
-                <ul class="npc-statuses-list">
-                    {{#each statuses}}
-                    <div>
-                        <span class="npc-status {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
-                            {{statusName}}-{{statusTier}}
-                            {{#if temporary}}⏱️{{/if}}
-                            {{#if permanent}}💎{{/if}}
-                        </span>
-                    </div>
-                    {{/each}}
-                </ul>
-            </div>
-        {{!-- {{/if}} --}}
+        <div class="npc-subtitle-container-c">
+            <div class="npc-subtitle-text">Tags & Statuses</div>
+        </div>
 
-        <div class="npc-moves-section">
-            <!-- Title stays fixed -->
-            <div class="npc-subtitle-container-c">
-                <div class="npc-subtitle-text">
-                    {{#if (eq activeSystem 'city-of-mist')}}
-                        MC Moves
-                    {{else}}
-                        ›Threats / »Consequences
-                    {{/if}}
-                </div>
-            </div>
-
-            <!-- Scrollable content -->
-            <div class="npc-moves-container">
-                {{#each moveGroups as |moves subtype|}}
-                <div class="npc-move-type">
-                    <div class="npc-subtitle-container-l npc-subtitle-text">{{subtype}}</div>
-                    <ul class="npc-list">
-                        {{#each moves}}
-                        <li>
-                            {{#unless system.hideName}}
-                            <span class="npc-move-name">{{name}}</span> -
-                            {{/unless}}
-                            <span class="npc-move-description">{{parseStatus system.description}}</span>
-                        </li>
-                        {{/each}}
-                    </ul>
+        <div class="npc-tags-statuses-container">
+            <ul class="npc-storytags-list">
+                {{#each storyTags}}
+                <div class="npc-story-tag {{this.cssClass}} no-wrap" data-id="{{this.id}}" data-temporary="{{this.temporary}}" data-permanent="{{this.permanent}}">
+                    <span class="npc-tag-name">{{this.tagName}}</span>
+                    <span class="npc-tag-icon">
+                        {{#if temporary}}⏱️{{/if}}
+                        {{#if permanent}}💎{{/if}}
+                    </span>
                 </div>
                 {{/each}}
-            </div>
+            </ul>
+            <ul class="npc-statuses-list">
+                {{#each statuses}}
+                <div>
+                    <span class="npc-status {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
+                        {{statusName}}-{{statusTier}}
+                        {{#if temporary}}⏱️{{/if}}
+                        {{#if permanent}}💎{{/if}}
+                    </span>
+                </div>
+                {{/each}}
+            </ul>
         </div>
+
+        <div class="npc-moves-section">
+        {{#if (eq activeSystem "otherscape")}}
+            <!-- Specials -->
+            {{#if moveGroups.Specials.length}}
+            <div class="npc-subtitle-container-l">
+            <div class="npc-subtitle-text">Specials</div>
+            </div>
+            <ul class="npc-list">
+            {{#each moveGroups.Specials}}
+                <li>
+                <span class="npc-move-name">{{name}}</span> - 
+                <span class="npc-move-description">{{parseStatus system.description}}</span>
+                </li>
+            {{/each}}
+            </ul>
+            {{/if}}
+
+            <!-- Threats -->
+            <div class="npc-subtitle-container-l">
+            <div class="npc-subtitle-text">›Threats / »Consequences</div>
+            </div>
+            {{#each moveGroups.Threats}}
+            <div class="npc-threat">
+                {{!-- <div class="npc-threat-name">{{name}}</div> --}}
+                <span class="npc-tc-marker">›</span>
+                <span class="npc-threat-description">{{parseStatus system.description}}</span>
+                <ul>
+                {{#each consequences}}
+                    <li>
+                    {{!-- <span class="npc-move-name">{{name}}</span> -  --}}
+                    <span class="npc-tc-marker">»</span>
+                    <span class="npc-move-description">{{parseStatus system.description}}</span>
+                    </li>
+                {{/each}}
+                </ul>
+                <hr class="npc-hr">
+            </div>
+            {{/each}}
+        {{else}}
+            <!-- Default grouping for City of Mist -->
+            {{#each moveGroups as |moves subtype|}}
+            <div class="npc-move-type">
+                <div class="npc-subtitle-container-l npc-subtitle-text">{{subtype}}</div>
+                <ul class="npc-list">
+                {{#each moves}}
+                    <li>
+                    {{#unless system.hideName}}
+                        <span class="npc-move-name">{{name}}</span> - 
+                    {{/unless}}
+                    <span class="npc-move-description">{{parseStatus system.description}}</span>
+                    </li>
+                {{/each}}
+                </ul>
+            </div>
+            {{/each}}
+        {{/if}}
+        </div>
+
+
+
     </div>
     {{/unless}}
 </div>
