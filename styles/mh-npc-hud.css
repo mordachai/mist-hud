@@ -7,26 +7,30 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     color: whitesmoke;
     max-width: fit-content;
-    min-width: 220px;
-    max-height: 80vh;
+    max-height: 85vh;
     background-color: var(--npc-hud-bg-prime);
 }
+
   
-#npc-hud .window-app {
+#npc-hud .window-app,
+#npc-hud.minimized .window-app {
   padding: 0;
   margin: 0;
+  color: #00000000;
   list-style: none;
   background: none;
   border: none;
 }
   
-#npc-hud .app {
+#npc-hud .app,
+#npc-hud.minimized .app {
     padding: 0;
     margin: 0;
     list-style: none;
     color: #00000000;
     background: none;
     border: none;
+    width: 100%;
 }
 
 #npc-hud ul {
@@ -39,30 +43,33 @@
   
 #npc-hud .window-header {
     background: var(--hud-bg-color);
-    display: grid;
-    grid-template-columns: auto 10px;
+    display: flex;
+    flex-direction: row;
     flex-basis: min-content;
+    align-items: center;
     justify-content: space-between;
-    align-content: space-between;
     padding: 5px 10px;
-    border-bottom: 1px solid white;
+    border-bottom: 1px solid rgb(206, 206, 206);
     cursor: grab;
+    margin-left: 0px;
+    padding-left: 30px;
 }
 
 /* Character name */
 #npc-hud .mh-char-name {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
+    flex: 4;
     font-family: 'Rift Bold';
     filter: drop-shadow(2px 2px 2px black);
     align-self: flex-start;
     margin-left: 30px;
     color: var(--spectrum-color);
-    padding-right: 15px;
 }
 
 #npc-hud.minimized .mh-char-name {
     margin-left: 0px;
-  }
+    flex: 4;
+}
 
 /* Collapse Buttons */
 #npc-hud .mh-collapse-button {
@@ -82,6 +89,8 @@ font-size: 1.2rem;
 color: #ffffff;
 cursor: pointer;
 margin: auto;
+text-align: right;
+flex: 1;
 }
 
 h4.window-title .mh-close-button {
@@ -121,20 +130,21 @@ margin: 5px;
   
   /* Minimized state header */
 #npc-hud.minimized .window-header {
-    /* height: 50px;
-    overflow: visible;
-    min-width: 180px; */
     background: var(--hud-bg-color);
-    display: grid;
-    grid-template-columns: 0px auto 10px;
-    flex-basis: min-content;
+    display: flex;
+    flex-direction: row;
+    flex-basis: max-content;
+    align-items: center;
     justify-content: space-between;
-    align-content: space-between;
-    padding: 5px 10px;
-    border-bottom: 1px solid white;
+    padding: 5px 10px 5px 15px;
+    border-bottom: 1px solid rgb(206, 206, 206);
     cursor: grab;
-    width: max-content;
-    padding-left: 40px;
+    margin-left: 0px;
+}
+
+#npc-hud.minimized .window-app {
+    min-width: 300px;
+    color: blue;
 }
 
 
@@ -215,7 +225,6 @@ margin: 5px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    margin-top: 10px;
     border-top: 1px solid var(--divider-color1);
     padding-top: 20px;
 }
@@ -484,7 +493,7 @@ margin: 5px;
 .npc-status.burned {
     opacity: 0.8;
     background-color: var(--destroyed-tag-color);
-    text-decoration-line: line-through;
+    text-decoration-line: line-through !important;
     text-decoration-color: var(--destroyed-tag-color);
     text-decoration-thickness: 2px;
 }

@@ -42,113 +42,6 @@ export class NpcHUD extends Application {
         this.render(true);
     }
 
-    // async getData() {
-    //     const data = super.getData();
-    //     if (!this.actor) return data;
-        
-    //     // Pass npcAccordionState to the template
-    //     data.npcAccordionState = game.settings.get('mist-hud', 'npcAccordionState');
-    
-    //     // Retrieve the prototype token name
-    //     data.tokenName = this.actor.prototypeToken?.name || this.actor.name;
-        
-    //     data.isCollapsed = this.isCollapsed;
-    //     data.name = this.actor.name;
-    //     data.mythos = this.actor.system.mythos;
-    //     data.tokenImage = this.actor.prototypeToken.texture.src;
-
-    //     // Check if Description and Biography are non-empty
-    //     const description = this.actor.system.description || "";
-    //     const biography = this.actor.system.biography || "";
-    //     const hasContent = description.trim().length > 0 || biography.trim().length > 0;
-
-    //     data.hasDescriptionBiography = hasContent;
-    //     data.descriptionBiography = `${description.trim()}${biography.trim() ?"" + biography.trim() : ""}`;
-       
-    //     const system = await detectActiveSystem();
-    //     data.activeSystem = system;
-
-    //     // Dynamically set the spectrum/limit label
-    //     if (system === "otherscape" || system === "legend") {
-    //         data.spectrumLabel = "Limits";
-    //     } else {
-    //         data.spectrumLabel = "Spectrums";
-    //     }
-
-    //     data.spectrums = this.actor.items.filter(i => i.type === 'spectrum');
-    
-    //     // Retrieve and group Moves by subtype
-    //     data.moves = this.actor.items.filter(i => i.type === 'gmmove');
-
-    //     data.moveGroups = data.moves.reduce((groups, move) => {
-    //         let subtype = move.system.subtype || 'default';
-
-    //         // Check the active system
-    //         if (data.activeSystem === 'city-of-mist') {
-    //             // City of Mist switch case
-    //             switch (subtype) {
-    //                 case 'soft':
-    //                     subtype = game.i18n.localize("CityOfMist.terms.softMove");
-    //                     break;
-    //                 case 'hard':
-    //                     subtype = game.i18n.localize("CityOfMist.terms.hardMoves");
-    //                     break;
-    //                 case 'intrusion':
-    //                     subtype = game.i18n.localize("CityOfMist.terms.intrusions");
-    //                     break;
-    //                 case 'downtime':
-    //                     subtype = game.i18n.localize("CityOfMist.terms.downtimeMoves");
-    //                     break;
-    //                 case 'custom':
-    //                     subtype = game.i18n.localize("CityOfMist.terms.customMoves");
-    //                     break;
-    //                 case 'entrance':
-    //                     subtype = game.i18n.localize("CityOfMist.terms.enterScene");
-    //                     break;
-    //             }
-    //         } else if (data.activeSystem === 'otherscape') {
-    //             // Otherscape switch case
-    //             switch (subtype) {
-    //                 case 'soft':
-    //                     subtype = "";
-    //                     break;
-    //                 case 'hard':
-    //                     subtype = "Specials";
-    //                     break;
-    //                 case 'intrusion':
-    //                     subtype = "Limits";
-    //                     break;
-    //                 case 'downtime':
-    //                     subtype = game.i18n.localize("CityOfMist.terms.downtimeMoves");
-    //                     break;
-    //                 case 'custom':
-    //                     subtype = game.i18n.localize("CityOfMist.terms.customMoves");
-    //                     break;
-    //                 case 'entrance':
-    //                     subtype = game.i18n.localize("CityOfMist.terms.enterScene");
-    //                     break;
-    //             }
-    //         }
-
-    //         // Group moves by subtype
-    //         if (!groups[subtype]) groups[subtype] = [];
-    //         groups[subtype].push(move);
-    //         return groups;
-    //     }, {});
-    
-    //     // Retrieve Story Tags
-    //     data.storyTags = this.getStoryTags();
-    //     data.hasStoryTags = data.storyTags.length > 0;
-    
-    //     // Retrieve Statuses
-    //     data.statuses = this.getActorStatuses();
-    
-    //     return data;
-    // }
-
-    
-
-
     async getData() {
         const data = super.getData();
         if (!this.actor) return data;
@@ -510,59 +403,6 @@ export class NpcHUD extends Application {
     
 }
 
-// Register the parseStatus helper
-// Handlebars.registerHelper('parseStatus', function(description) {
-//     return new Handlebars.SafeString(
-//         description
-//             // First check if there are any (tc) markers
-//             .replace(/\(tc\)([\s\S]*?)\(\/tc\)/g, (match, content) => {
-//                 // Process content within (tc)...(/tc)
-//                 return content
-//                     .replace(/\(t\)(.*?)\(\/t\)/gs, (match, innerContent) => {
-//                         const processed = innerContent.trim().replace(/\[([^\]]+)\]/g, (match, tagContent) => {
-//                             const trimmedContent = tagContent.trim();
-//                             if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
-//                                 return `<span class="npc-status">${trimmedContent}</span>`;
-//                             }
-//                             if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
-//                                 return `<span class="npc-limit">${trimmedContent}</span>`;
-//                             }
-//                             return `<span class="npc-story-tag">${trimmedContent}</span>`;
-//                         });
-//                         return `<p class="npc-threat"><span class="npc-tc-marker">›</span> ${processed}</p>`;
-//                     })
-//                     .replace(/\(c\)(.*?)\(\/c\)/gs, (match, innerContent) => {
-//                         const processed = innerContent.trim().replace(/\[([^\]]+)\]/g, (match, tagContent) => {
-//                             const trimmedContent = tagContent.trim();
-//                             if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
-//                                 return `<span class="npc-status">${trimmedContent}</span>`;
-//                             }
-//                             if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
-//                                 return `<span class="npc-limit">${trimmedContent}</span>`;
-//                             }
-//                             return `<span class="npc-story-tag">${trimmedContent}</span>`;
-//                         });
-//                         return `<p class="npc-consequence"><span class="npc-tc-marker">»</span> ${processed}</p>`;
-//                     })
-//                     .replace(/\s*\n\s*/g, ' ') // Replace newlines with space inside (tc)
-//                     .replace(/<\/p>\s*<p>/g, '</p><p>'); // Clean up spacing between paragraphs
-//             })
-//             // For content outside (tc) or when no (tc) markers exist, apply simpler processing
-//             .replace(/\[([^\]]+)\]/g, (match, content) => {
-//                 const trimmedContent = content.trim();
-//                 if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
-//                     return `<span class="npc-status">${trimmedContent}</span>`;
-//                 }
-//                 if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
-//                     return `<span class="npc-limit">${trimmedContent}</span>`;
-//                 }
-//                 return `<span class="npc-story-tag">${trimmedContent}</span>`;
-//             })
-//             .replace(/\n/g, '</p><p>') // Handle regular newlines as paragraph breaks
-//     );
-// });
-
-
 Handlebars.registerHelper('parseStatus', function(description) {
     return new Handlebars.SafeString(
         description
@@ -582,28 +422,6 @@ Handlebars.registerHelper('parseStatus', function(description) {
             .replace(/<p><\/p>/g, '') // Remove empty <p> elements
     );
 });
-
-
-
-
-
-// Handlebars.registerHelper('parseStatus', function(description) {
-//     return new Handlebars.SafeString(
-//         description
-//             .replace(/\[([^\]]+)\]/g, (match, content) => {
-//                 const trimmedContent = content.trim();
-//                 if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
-//                     return `<span class="npc-status">${trimmedContent}</span>`;
-//                 }
-//                 if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
-//                     return `<span class="npc-limit">${trimmedContent}</span>`;
-//                 }
-//                 return `<span class="npc-story-tag">${trimmedContent}</span>`;
-//             })
-//             .replace(/\n/g, '</p><p>') // Handle regular newlines as paragraph breaks
-//     );
-// });
-
 
 Handlebars.registerHelper('parseMaxTier', function (maxTier) {
     return maxTier === 999 ? '-' : maxTier;

@@ -103,6 +103,7 @@ border: none;
   border-bottom: 2px solid white;
   cursor: grab;
   border-radius: 0 8px 0 0;
+  padding-left: 30px;
 }
 
 #mist-hud ul {
@@ -208,7 +209,7 @@ border: none;
 #mist-hud.minimized .window-header {
   height: 50px;
   overflow: visible; /* Allow overflow */
-  min-width: 200px;
+  min-width: fit-content;
   padding-left: 40px;
 }
 

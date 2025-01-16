@@ -27,6 +27,10 @@ Hooks.once("init", () => {
 //   if (debug) console.log("MistHUD |", ...args);
 // }
 
+let toBurnTags = $('.mh-power-tag.toBurn, .mh-power-tag.crew.toBurn').toArray().map(tag => $(tag).data('id'));
+console.log("[Burn Debug] Stored `toBurn` Tag IDs Before Roll:", toBurnTags);
+
+
 
 async function rollDice() {
   const roll = new Roll("2d6");
@@ -50,11 +54,12 @@ async function rollDice() {
 // }
 
 //Main Roll function
-
-
 async function rollMove(moveName, hasDynamite) {
   const hud = MistHUD.getInstance();
   const tagsData = hud.getSelectedRollData();
+
+  console.log("[Burn Debug] Power Tags Before Roll:", hud.getSelectedRollData().powerTags);
+
 
   if (!hud || !hud.actor) {
       ui.notifications.warn("MistHUD is not ready. Please select an actor.");
@@ -75,7 +80,7 @@ async function rollMove(moveName, hasDynamite) {
   const modifier = getRollModifier() || 0;
 
   const activeBonuses = actor.getFlag('mist-hud', 'received-bonuses') || [];
-  console.log(`[Help/Hurt Debug] Active Bonuses for Roll:`, activeBonuses);
+  //console.log(`[Help/Hurt Debug] Active Bonuses for Roll:`, activeBonuses);
   
   const helpBonuses = activeBonuses
       .filter(bonus => bonus.type === 'help')
@@ -86,7 +91,7 @@ async function rollMove(moveName, hasDynamite) {
       .reduce((sum, bonus) => sum + bonus.amount, 0);
   
   const totalBonus = helpBonuses - hurtBonuses;
-  console.log(`[Roll Debug] Calculated Bonuses:`, { helpBonuses, hurtBonuses, totalBonus });
+  //console.log(`[Roll Debug] Calculated Bonuses:`, { helpBonuses, hurtBonuses, totalBonus });
   
 
   // Aggregate total power for the roll calculation
@@ -110,12 +115,11 @@ try {
   console.error("Error minimizing HUD before roll:", error);
 }
 
-
   
   const rollResults = await rollDice();
   const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower + totalBonus;
 
-  console.log(`[Roll Debug] Final Roll Total:`, {rollResults,totalPower,totalBonus,rollTotal,});
+  //console.log(`[Roll Debug] Final Roll Total:`, {rollResults,totalPower,totalBonus,rollTotal,});
 
   // Import the active system setting
   const activeSystem = game.settings.get("city-of-mist", "system");
@@ -217,9 +221,6 @@ try {
     outcomeClass
 };
 
-console.log("Final Chat Data Sent to Roll Chat:", chatData);
-
-
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
 
   ChatMessage.create({
@@ -232,11 +233,12 @@ console.log("Final Chat Data Sent to Roll Chat:", chatData);
 
   // Clean up received-bonuses after roll
   await actor.unsetFlag('mist-hud', 'received-bonuses');
-  console.log(`[Help/Hurt Debug] Cleared bonuses after roll for actor:`, actor.name);
+  //console.log(`[Help/Hurt Debug] Cleared bonuses after roll for actor:`, actor.name);
 
   hud.render(true); // Re-render HUD to reflect cleared bonuses
 
   hud.cleanHUD(chatData.tagsData);
+
 }
 
 function calculatePowerTags() {
@@ -293,13 +295,13 @@ function calculateCharacterStatuses() {
   const rollData = hud.getSelectedRollData();
 
   const characterStatusTotal = rollData.statuses.reduce((total, status) => {
-      console.log(`Calculating Status Contribution: Name: ${status.name}, Tier: ${status.tier}, Type: ${status.typeClass}`);
+      //console.log(`Calculating Status Contribution: Name: ${status.name}, Tier: ${status.tier}, Type: ${status.typeClass}`);
       const contribution = status.typeClass === "positive" ? status.tier : -status.tier;
-      console.log(`Contribution for ${status.name}: ${contribution}`);
+      //console.log(`Contribution for ${status.name}: ${contribution}`);
       return total + contribution;
   }, 0);
 
-  console.log("Total Character Status Contribution to Roll:", characterStatusTotal);
+  //console.log("Total Character Status Contribution to Roll:", characterStatusTotal);
   return characterStatusTotal;
 }
 
@@ -551,7 +553,8 @@ if (isDoubleOnes) {
     }
   });
 
-  hud.cleanHUD(chatData.tagsData);
+  hud.cleanHUD();
+  console.log("[Burn Debug] HUD cleaned after roll.");
 }
 
 async function rollCinematicMove(moveName) {
@@ -594,7 +597,7 @@ async function rollCinematicMove(moveName) {
     }
   });
 
-  hud.cleanHUD(chatData.tagsData);
+  hud.cleanHUD();
 }
 
 // Wrapper function to determine which roll function to use

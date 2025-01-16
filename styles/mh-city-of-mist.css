@@ -165,6 +165,13 @@
   filter: drop-shadow(1px 0 6px var(--mist-dark-color));
 }
 
+.mh-theme-icon.crew {
+  width: 18px;
+  height: 15px;
+  background-image: url('../ui/icons/crew_icn.svg');
+  filter: drop-shadow(1px 0 6px whitesmoke);
+}
+
 .mystery-type.Mythos {
   color: var(--mythos-verylight-color);
   text-shadow: var(--mythos-dark-color) 1px 1px 1px;
@@ -176,6 +183,14 @@
 .mystery-type.Logos {
   color: var(--logos-verylight-color);
   text-shadow: var(--logos-dark-color) 1px 1px 1px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin: auto;
+}
+
+.mystery-type.crew {
+  color: whitesmoke;
+  text-shadow: whitesmoke 1px 1px 1px;
   padding: 1px 2px;
   border-radius: 2px;
   margin: auto;
@@ -206,7 +221,7 @@
 .mh-theme-name {
   font-family: var(--font-family-move), sans-serif;
   font-size: 1.2em;
-  display: block;
+  /* display: block; */
   margin: 4px 2px;
   font-style: italic;
 }

@@ -34,8 +34,6 @@
         {{/each}}
       </ul>
 
-
-
       <!-- Weakness Tags -->
       <ul class="mh-tags">
         {{#each weaknessTags}}
@@ -49,6 +47,58 @@
       </ul>
     </div>
     {{/each}}
+
+
+  {{#if hasCrewThemes}}
+    {{#each crewThemes}}
+    <div class="theme-container-{{category}}">
+      <div class="mh-theme-header {{category}}">
+        <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
+
+      {{#if (eq ../activeSystem "city-of-mist")}}
+        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{themeName}}</span> <!-- Render only if system is City of Mist -->
+      {{/if}}
+
+      {{#if (or (eq ../activeSystem "otherscape") (eq ../activeSystem "legend"))}}
+        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{crewName}}</span> <!-- Render only if system is Otherscape or Legends in the Mist -->
+      {{/if}}
+      </div>
+
+      <!-- Crew Power Tags -->
+      <ul class="mh-tags">
+        {{#each powerTags}}
+        <li class="mh-power-tag {{this.cssClass}} {{../category}}" data-id="{{this.id}}">
+          <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../category}}"></div>
+          <div class="mh-tag-text {{../category}}">{{this.tagName}}</div>
+          {{#if subtags}}
+            <ul class="mh-subtag">
+              {{#each subtags}}
+              <li class="subtag-item {{cssClass}}">
+                <span class="subtag-burn burn-icon {{burnIcon}}"></span>
+                <span class="subtag-name">{{this.tagName}}</span>
+              </li>
+              {{/each}}
+            </ul>
+          {{/if}}
+        </li>
+        {{/each}}
+      </ul>
+
+      <!-- Crew Weakness Tags -->
+      <ul class="mh-tags">
+        {{#each weaknessTags}}
+          <li class="mh-weakness-tag {{this.cssClass}}" data-id="{{this.id}}">
+            <span class="mh-weakness-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
+              {{{this.inversionIcon}}}
+            </span>
+            <span class="mh-tag-text">{{this.tagName}}</span>
+          </li>
+        {{/each}}
+      </ul>
+    </div>
+    {{/each}}
+  {{/if}}
+
 
     <!-- LOADOUT Section -->
     {{#if isOtherscape}} 
@@ -172,7 +222,7 @@
 <div id="mh-sliding-panel" class="mh-sliding-panel">
   <div id="mh-panel-ear" class="mh-panel-ear">❯</div>
   <div id="mh-panel-content" class="mh-panel-content">
-    
+
     {{#if hasImprovements}}
     <div class="section improvements">
       {{#if (eq activeSystem "city-of-mist")}}
