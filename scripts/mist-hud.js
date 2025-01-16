@@ -758,11 +758,12 @@ export class MistHUD extends Application {
     data.isCityOfMist = activeSystem === "city-of-mist";
     data.isOtherscape = activeSystem === "otherscape";
 
-    // Retrieve themes and tags
     const themesAndTags = this.getThemesAndTags();
-    data.themes = themesAndTags.themes;        // Actor themes
-    data.crewThemes = themesAndTags.crewThemes; // Crew themes
-    data.storyTags = themesAndTags.storyTags;  // Story tags
+    data.themes = themesAndTags.themes;
+    data.storyTags = themesAndTags.storyTags;
+    data.hasStoryTags = !!(themesAndTags.storyTags && themesAndTags.storyTags.length > 0);
+    data.loadoutTags = this.getLoadoutTags();
+    data.crewThemes = themesAndTags.crewThemes;
 
     // Ensure crew themes are flagged
     data.hasCrewThemes = data.crewThemes && data.crewThemes.length > 0;
