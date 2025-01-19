@@ -48,8 +48,7 @@
     </div>
     {{/each}}
 
-
-  {{#if hasCrewThemes}}
+    {{#if hasCrewThemes}}
     {{#each crewThemes}}
     <div class="theme-container-{{category}}">
       <div class="mh-theme-header {{category}}">
@@ -97,8 +96,7 @@
       </ul>
     </div>
     {{/each}}
-  {{/if}}
-
+    {{/if}}
 
     <!-- LOADOUT Section -->
     {{#if isOtherscape}} 
@@ -175,46 +173,43 @@
         <a class="create-status" title="Create Status"> <i class="fa-regular fa-circle-plus"></i></a>
       </div>
       <div class="mh-statuses-list">
-        {{#each statuses}}
+        {{#each statuses as |status|}}
         <div class="mh-status {{statusType}} {{#if selected}}selected{{/if}} {{#if temporary}}temporary{{/if}}" 
-            data-status-name="{{statusName}}" 
-            data-status-id="{{id}}" 
+            data-status-name="{{status.name}}" 
+            data-status-id="{{status.id}}" 
             data-owner-id="{{actor.id}}" 
-            data-tier="{{statusTier}}" 
+            data-tier="{{status.tier}}" 
             data-temporary="{{temporary}}" 
             data-permanent="{{permanent}}">
-            {{#if temporary}}⏱️ {{/if}}
-            {{#if permanent}}💎 {{/if}}
-            {{statusName}}-{{statusTier}}
+            {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
+            {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
+            {{name}}-{{status.tier}}
         </div>
-
         {{/each}}
       </div>
     </div>
-
-
-
-
   </div>
-      <!-- Modifier Bar -->
-    <div class="mh-modifier-bar">
-      <div id="mh-mod-decrease" class="mh-mod-button">-</div>
-      <input type="text" id="mh-mod-value" value="0" />
-      <div id="mh-mod-increase" class="mh-mod-button">+</div>
-    </div>
 
-    <!-- Help/Hurt Messages -->
-    {{!-- <div id="mh-help-hurt-messages" class="mh-help-hurt-messages">
-      {{#if helpHurtMessages}}
-        {{#each helpHurtMessages}}
-          <div class="help-hurt-message {{this.type}}">
-            {{this.giverName}} {{#if (eq this.type "help")}}helps{{else}}hurts{{/if}} you for {{this.amount}}
-          </div>
-        {{/each}}
-      {{else}}
-        <div class="help-hurt-message empty">No active Help or Hurt effects</div>
-      {{/if}}
-    </div> --}}
+      <!-- Modifier Bar -->
+      <div class="mh-modifier-bar">
+        <div id="mh-mod-decrease" class="mh-mod-button">-</div>
+        <input type="text" id="mh-mod-value" value="0" />
+        <div id="mh-mod-increase" class="mh-mod-button">+</div>
+      </div>
+
+      <!-- Help/Hurt Messages -->
+      {{!-- <div id="mh-help-hurt-messages" class="mh-help-hurt-messages">
+        {{#if helpHurtMessages}}
+          {{#each helpHurtMessages}}
+            <div class="help-hurt-message {{this.type}}">
+              {{this.giverName}} {{#if (eq this.type "help")}}helps{{else}}hurts{{/if}} you for {{this.amount}}
+            </div>
+          {{/each}}
+        {{else}}
+          <div class="help-hurt-message empty">No active Help or Hurt effects</div>
+        {{/if}}
+      </div> --}}
+
 </div>
 
 

@@ -90,8 +90,6 @@ export class MistHUD extends Application {
     const tokenImg = $(`<div class="mh-token-image"><img src="${this.actor?.token?.texture.src || this.actor?.img}" alt="Character Token"></div>`);
     const charName = $(`<div class="mh-char-name">${this.actor?.name || 'Character'}</div>`);
     const closeButton = $(`<i class="mh-close-button fa-solid fa-xmark"></i>`);
-
-
   
     // Append custom elements to the header
     header.append(tokenImg, charName, closeButton);
@@ -658,7 +656,7 @@ export class MistHUD extends Application {
     });
   }
  
-  // getData(options) {
+  //OLD OLD getData(options) {
   //   const data = super.getData(options);
   //   if (!this.actor) return data;
 
@@ -742,6 +740,75 @@ export class MistHUD extends Application {
   //   return data;
   // }
 
+
+
+  // getData(options) {
+  //   const data = super.getData(options);
+  //   if (!this.actor) return data;
+
+  //   data.actor = this.actor;
+  //   data.token = canvas.tokens.controlled[0] || null;
+  //   data.scene = game.scenes.current || null;
+
+  //   // Get the active system setting
+  //   const activeSystem = game.settings.get("city-of-mist", "system");
+  //   data.activeSystem = activeSystem;
+
+  //   // Define flags for supported systems
+  //   data.isCityOfMist = activeSystem === "city-of-mist";
+  //   data.isOtherscape = activeSystem === "otherscape";
+
+  //   const themesAndTags = this.getThemesAndTags();
+  //   data.themes = themesAndTags.themes;
+  //   data.storyTags = themesAndTags.storyTags;
+  //   data.hasStoryTags = !!(themesAndTags.storyTags && themesAndTags.storyTags.length > 0);
+  //   data.loadoutTags = this.getLoadoutTags();
+  //   data.crewThemes = themesAndTags.crewThemes;
+
+  //   // Ensure crew themes are flagged
+  //   data.hasCrewThemes = data.crewThemes && data.crewThemes.length > 0;
+  //   console.log("Crew Themes:", data.crewThemes);
+
+  //   //
+
+  //      // Process Juice and Clues for City of Mist
+  //   if (data.isCityOfMist) {
+  //       const { helpItems, hurtItems, clueItems, juiceItems } = this.getJuiceAndClues();
+  //       data.helpItems = helpItems || [];
+  //       data.hurtItems = hurtItems || [];
+  //       data.clueItems = clueItems || [];
+  //       data.juiceItems = juiceItems || [];
+  //   } else if (data.isOtherscape) {
+  //       // Process essence for Otherscape
+  //       const themes = this.actor.items.filter(item => item.type === "theme");
+  //       const essenceData = this.getEssence(themes);
+
+  //       if (essenceData?.essence) {
+  //           data.essence = essenceData.essence;
+  //           data.essenceClass = essenceData.className;
+  //           data.essenceImage = essenceData.imageName;
+  //           data.essenceText = new Handlebars.SafeString(
+  //               essenceDescriptions[essenceData.essence] || essenceDescriptions["Undefined"]
+  //           );
+  //       } else {
+  //           console.error("getEssence returned invalid data:", essenceData);
+  //       }
+  //   }
+
+  //   // Add Help and Hurt messages for the receiving player
+  //   const receivedBonuses = this.actor.getFlag('mist-hud', 'received-bonuses') || [];
+
+  //   data.helpHurtMessages = receivedBonuses.length > 0 ? receivedBonuses : null;
+
+  //   // Add improvements
+  //   const improvements = this.getImprovements();
+  //   data.improvements = improvements;
+  //   data.hasImprovements = improvements.length > 0;
+
+  //   return data;
+  // }
+
+
   getData(options) {
     const data = super.getData(options);
     if (!this.actor) return data;
@@ -769,7 +836,23 @@ export class MistHUD extends Application {
     data.hasCrewThemes = data.crewThemes && data.crewThemes.length > 0;
     console.log("Crew Themes:", data.crewThemes);
 
-    //
+    // 1) Basic raw statuses
+    const rawStatuses = this.getActorStatuses();
+
+    // 2) The savedStates from flags
+    const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
+
+    data.statuses = rawStatuses.map(st => {
+      // If no savedState for this ID, default to neutral
+      const {state="neutral", selected=false} = savedStates[st.id] || {};
+      
+      // Merge them into a single object for the template
+      return {
+        ...st,
+        statusType: state,   // e.g., "neutral", "positive", or "negative"
+        selected
+      };
+    });
 
        // Process Juice and Clues for City of Mist
     if (data.isCityOfMist) {
@@ -1600,20 +1683,19 @@ getCrewThemes() {
             tagName: tag.name || tagData.tagName || `Unnamed Power Tag`,
         };
     });
-}
+  }
 
-getWeaknessTags(themeId, tagItems, subTagsByParent, actor) {
-    const weaknessTags = tagItems.filter(tag => tag.system.theme_id === themeId && tag.system.subtype === "weakness");
+  getWeaknessTags(themeId, tagItems, subTagsByParent, actor) {
+      const weaknessTags = tagItems.filter(tag => tag.system.theme_id === themeId && tag.system.subtype === "weakness");
 
-    return this.formatTagsHierarchy(weaknessTags, subTagsByParent).map(tag => {
-        const tagData = this.applyBurnState(actor, tag.id, "weakness"); // Pass the correct actor
-        return {
-            ...tagData,
-            tagName: tag.name || tagData.tagName || `Unnamed Weakness Tag`,
-        };
-    });
-}
-
+      return this.formatTagsHierarchy(weaknessTags, subTagsByParent).map(tag => {
+          const tagData = this.applyBurnState(actor, tag.id, "weakness"); // Pass the correct actor
+          return {
+              ...tagData,
+              tagName: tag.name || tagData.tagName || `Unnamed Weakness Tag`,
+          };
+      });
+  }
 
   getStoryTags() {
     if (!this.actor) return [];
@@ -1879,36 +1961,53 @@ getWeaknessTags(themeId, tagItems, subTagsByParent, actor) {
       };
   }
 
+  // getActorStatuses() {
+  //   if (!this.actor) return [];
+
+  //   const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {}; // Retrieve saved states
+
+  //   const statusMap = new Map();
+
+  //   this.actor.items
+  //       .filter((item) => item.type === 'status')
+  //       .forEach((status) => {
+  //           const key = `${status.id}`; // Use status ID as the unique key
+  //           const savedState = savedStates[key] || 'neutral'; // Default to 'neutral' if no saved state
+
+  //           if (!statusMap.has(key)) {
+  //               statusMap.set(key, {
+  //                   id: status.id,
+  //                   statusName: status.name,
+  //                   statusTier: status.system.tier,
+  //                   statusType: savedState, // Use saved state
+  //                   temporary: !!status.system.temporary,
+  //                   permanent: !!status.system.permanent,
+  //               });
+  //           } else {
+  //               console.warn(`Duplicate status detected for key: ${key}`);
+  //           }
+  //       });
+
+  //   const statuses = Array.from(statusMap.values());
+  //   return statuses;
+  // }
+
+
   getActorStatuses() {
     if (!this.actor) return [];
-
-    const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {}; // Retrieve saved states
-
-    const statusMap = new Map();
-
-    this.actor.items
-        .filter((item) => item.type === 'status')
-        .forEach((status) => {
-            const key = `${status.id}`; // Use status ID as the unique key
-            const savedState = savedStates[key] || 'neutral'; // Default to 'neutral' if no saved state
-
-            if (!statusMap.has(key)) {
-                statusMap.set(key, {
-                    id: status.id,
-                    statusName: status.name,
-                    statusTier: status.system.tier,
-                    statusType: savedState, // Use saved state
-                    temporary: !!status.system.temporary,
-                    permanent: !!status.system.permanent,
-                });
-            } else {
-                console.warn(`Duplicate status detected for key: ${key}`);
-            }
-        });
-
-    const statuses = Array.from(statusMap.values());
-    return statuses;
+  
+    // Return ONLY what you want to display
+    return this.actor.items
+      .filter(item => item.type === 'status')
+      .map(status => ({
+        id: status.id,
+        name: status.name,                  // match the property names you use in Handlebars
+        tier: status.system.tier,
+        temporary: !!status.system.temporary,
+        permanent: !!status.system.permanent
+      }));
   }
+  
   
   updateModifierDisplay() {
     const modifierInput = this.element.find('#mh-mod-value');
@@ -2316,3 +2415,32 @@ Hooks.once('ready', () => {
       }
   });
 });
+
+// In your module or main script file, register these once during init or ready:
+Hooks.on('createItem', (item, options, userId) => {
+  // Only for items embedded in an Actor:
+  if (!item.isEmbedded) return;
+  const actor = item.parent;
+  // Make sure the MistHUD is open for this actor:
+  if (!actor || !MistHUD.instance || actor.id !== MistHUD.instance.actor?.id) return;
+
+  // Re-render the HUD if the Actor that owns the item is the same as the HUD’s actor
+  MistHUD.instance.render(true);
+});
+
+Hooks.on('updateItem', (item, diff, options, userId) => {
+  if (!item.isEmbedded) return;
+  const actor = item.parent;
+  if (!actor || !MistHUD.instance || actor.id !== MistHUD.instance.actor?.id) return;
+
+  MistHUD.instance.render(true);
+});
+
+Hooks.on('deleteItem', (item, options, userId) => {
+  if (!item.isEmbedded) return;
+  const actor = item.parent;
+  if (!actor || !MistHUD.instance || actor.id !== MistHUD.instance.actor?.id) return;
+
+  MistHUD.instance.render(true);
+});
+
