@@ -72,9 +72,9 @@
           {{#if subtags}}
             <ul class="mh-subtag">
               {{#each subtags}}
-              <li class="subtag-item {{cssClass}}">
-                <span class="subtag-burn burn-icon {{burnIcon}}"></span>
-                <span class="subtag-name">{{this.tagName}}</span>
+              <li class="subtag-item {{this.cssClass}} {{../category}}" data-id="{{this.id}}">
+                <span class="subtag-burn burn-icon {{this.burnState}} {{../category}}"></span>
+                <span class="subtag-name {{../category}}">{{this.tagName}}</span>
               </li>
               {{/each}}
             </ul>

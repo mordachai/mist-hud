@@ -163,9 +163,6 @@ export class NpcHUD extends Application {
     
         return data;
     }
-    
-    
-
      
     getActorStatuses() {
         if (!this.actor) return [];
@@ -392,8 +389,8 @@ export class NpcHUD extends Application {
             if (statusItem) {
                 await statusItem.update({ "system.specialType": newType });
             }
-        });        
-    
+        });
+            
         // Prevent context menu actions
         this.element.on('contextmenu', (event) => {
             event.preventDefault();

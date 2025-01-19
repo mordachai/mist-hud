@@ -1,16 +1,14 @@
 // mist-hud.js
 
 import { essenceDescriptions } from './mh-theme-config.js';
-import { CityHelpers } from "/systems/city-of-mist/module/city-helpers.js";
 import { StoryTagDisplayContainer } from "/systems/city-of-mist/module/story-tag-window.js";
+import { CityHelpers } from "/systems/city-of-mist/module/city-helpers.js";
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
-
 
 // Register Handlebars helper for localizeTheme
 Handlebars.registerHelper('localizeTheme', function(themebookName) {
   return localizeTheme(themebookName);
 });
-
 
 export class MistHUD extends Application {
   static instance = null;
@@ -66,7 +64,7 @@ export class MistHUD extends Application {
     } catch (error) {
     }
   }
-   
+  
   injectCustomHeader() {
     
     // Use this.element to access the entire application window
@@ -602,7 +600,30 @@ export class MistHUD extends Application {
       await actor.deleteStatus(statusId);
       // console.log(`Status ${statusId} deleted.`);
       this.render(false); // Refresh the HUD
-    }); 
+    });
+
+    // Make each .mh-status element draggable
+    html.find('.mh-status').each((i, el) => {
+      el.setAttribute('draggable', 'true');
+
+      el.addEventListener('dragstart', (ev) => {
+        // 1) Gather the data
+        const name = el.dataset.statusName;   // "status" or whatever is stored
+        const tier = parseInt(el.dataset.tier) || 1;
+        const actorId = el.dataset.ownerId || this.actor?.id || null;
+
+        // 2) Build a data object
+        const statusData = {
+          type: "status",
+          name,
+          tier,
+          actorId
+        };
+
+        // 3) Store it in the dataTransfer
+        ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
+      });
+    });
 
     //Double click to edit story tags
     html.find('.mh-story-tag').on('dblclick', async (event) => {
@@ -648,6 +669,94 @@ export class MistHUD extends Application {
         // console.log(`Status ${statusId} edited.`);
         this.render(false); // Refresh the HUD
     });
+
+  // ==============================
+  // Double-click to edit Clues
+  // ==============================
+  html.find('.clue-container').on('dblclick', async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // 1) Grab Clue and Actor IDs from data attributes
+    const clueId = $(event.currentTarget).data('clue-id');
+    // Some templates store actor ID in data-owner-id or fallback to this.actor.id
+    const actorId = $(event.currentTarget).data('owner-id') || this.actor?.id;
+
+    if (!clueId || !actorId) {
+      console.error("Missing clueId or actorId for clue editing.", { clueId, actorId });
+      return;
+    }
+
+    // 2) Retrieve the Actor
+    const actor = game.actors.get(actorId);
+    if (!actor) {
+      console.error(`Actor with ID ${actorId} not found.`);
+      return;
+    }
+
+    // 3) Retrieve the Clue item
+    const clue = actor.getClue(clueId);
+    if (!clue) {
+      console.error(`Clue with ID ${clueId} not found on actor ${actorId}.`);
+      return;
+    }
+
+    // 4) Open the dialog to edit this Clue
+    //    (CityDialogs.itemEditDialog calls the same form as a typical sheet edit)
+    await CityDialogs.itemEditDialog(clue);
+
+    // 5) Re-render the HUD so it shows any updated data
+    this.render(false);
+  });
+
+  html.find('.juice-container').on('dblclick', async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  
+    // 1) Get the Juice ID and Actor ID from data attributes
+    const juiceId = $(event.currentTarget).data('juice-id');
+    const actorId = $(event.currentTarget).data('owner-id') || this.actor?.id;
+  
+    if (!juiceId || !actorId) {
+      console.error("Missing juiceId or actorId for juice editing.", { juiceId, actorId });
+      return;
+    }
+  
+    // 2) Retrieve the actor
+    const actor = game.actors.get(actorId);
+    if (!actor) {
+      console.error(`Actor with ID ${actorId} not found.`);
+      return;
+    }
+  
+    // 3) Retrieve the juice item
+    const juice = actor.getJuice(juiceId);
+    if (!juice) {
+      console.error(`Juice with ID ${juiceId} not found on actor ${actorId}.`);
+      return;
+    }
+  
+    // 4) Store the old name/amount for logging
+    const oldname = juice.name;
+    const oldamount = juice.system.amount;
+  
+    // 5) Use the same dialog the system uses
+    //    (this is basically what _juiceEdit does internally)
+    const updateObj = await CityDialogs.itemEditDialog(juice);
+  
+    // 6) If user saved changes, log them
+    if (updateObj) {
+      CityHelpers.modificationLog(
+        actor,
+        "Edited",
+        juice,
+        `${oldname} (${oldamount}) edited --> ${updateObj.name} (${updateObj.system.amount})`
+      );
+    }
+  
+    // 7) Re-render HUD so it shows the updated juice
+    this.render(false);
+  });
   
       
     this.element.on('contextmenu', (event) => {
@@ -656,159 +765,6 @@ export class MistHUD extends Application {
     });
   }
  
-  //OLD OLD getData(options) {
-  //   const data = super.getData(options);
-  //   if (!this.actor) return data;
-
-  //   data.actor = this.actor;
-  //   data.token = canvas.tokens.controlled[0] || null;
-  //   data.scene = game.scenes.current || null;
-
-  //   // Get the active system setting
-  //   const activeSystem = game.settings.get("city-of-mist", "system");
-  //   data.activeSystem = activeSystem;
-
-  //   // Define flags for supported systems
-  //   data.isCityOfMist = activeSystem === "city-of-mist";
-  //   data.isOtherscape = activeSystem === "otherscape";
-
-  //   //Themebook data
-  //   data.themebooks = this.getThemebooks();
-
-  //   // Set actor-related data
-  //   data.charName = this.actor.name;
-  //   data.tokenImage =
-  //       this.actor.token?.texture.src ||
-  //       this.actor.prototypeToken?.texture.src ||
-  //       this.actor.img;
-  //   data.isCollapsed = this.isCollapsed;
-
-  //   // Retrieve themes and story tags
-  //   const themesAndTags = this.getThemesAndTags();
-  //   data.themes = themesAndTags.themes;
-  //   data.storyTags = themesAndTags.storyTags;
-  //   data.hasStoryTags = !!(themesAndTags.storyTags && themesAndTags.storyTags.length > 0);
-  //   data.loadoutTags = this.getLoadoutTags();
-
-  //   const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
-  //   data.statuses = this.getActorStatuses().map((status) => {
-  //       const savedState = savedStates[status.id] || { state: 'neutral', selected: false };
-  //       return {
-  //           ...status,
-  //           statusType: savedState.state || 'neutral',
-  //           selected: savedState.selected || false,
-  //       };
-  //   });
-
-  //   // Add modifier
-  //   data.modifier = this.modifier;
-
-  //   // Process Juice and Clues for City of Mist
-  //   if (data.isCityOfMist) {
-  //       const { helpItems, hurtItems, clueItems, juiceItems } = this.getJuiceAndClues();
-  //       data.helpItems = helpItems || [];
-  //       data.hurtItems = hurtItems || [];
-  //       data.clueItems = clueItems || [];
-  //       data.juiceItems = juiceItems || [];
-  //   } else if (data.isOtherscape) {
-  //       // Process essence for Otherscape
-  //       const themes = this.actor.items.filter(item => item.type === "theme");
-  //       const essenceData = this.getEssence(themes);
-
-  //       if (essenceData?.essence) {
-  //           data.essence = essenceData.essence;
-  //           data.essenceClass = essenceData.className;
-  //           data.essenceImage = essenceData.imageName;
-  //           data.essenceText = new Handlebars.SafeString(
-  //               essenceDescriptions[essenceData.essence] || essenceDescriptions["Undefined"]
-  //           );
-  //       } else {
-  //           console.error("getEssence returned invalid data:", essenceData);
-  //       }
-  //   }
-
-  //   // Add Help and Hurt messages for the receiving player
-  //   const receivedBonuses = this.actor.getFlag('mist-hud', 'received-bonuses') || [];
-
-  //   data.helpHurtMessages = receivedBonuses.length > 0 ? receivedBonuses : null;
-
-  //   // Add improvements
-  //   const improvements = this.getImprovements();
-  //   data.improvements = improvements;
-  //   data.hasImprovements = improvements.length > 0;
-
-  //   return data;
-  // }
-
-
-
-  // getData(options) {
-  //   const data = super.getData(options);
-  //   if (!this.actor) return data;
-
-  //   data.actor = this.actor;
-  //   data.token = canvas.tokens.controlled[0] || null;
-  //   data.scene = game.scenes.current || null;
-
-  //   // Get the active system setting
-  //   const activeSystem = game.settings.get("city-of-mist", "system");
-  //   data.activeSystem = activeSystem;
-
-  //   // Define flags for supported systems
-  //   data.isCityOfMist = activeSystem === "city-of-mist";
-  //   data.isOtherscape = activeSystem === "otherscape";
-
-  //   const themesAndTags = this.getThemesAndTags();
-  //   data.themes = themesAndTags.themes;
-  //   data.storyTags = themesAndTags.storyTags;
-  //   data.hasStoryTags = !!(themesAndTags.storyTags && themesAndTags.storyTags.length > 0);
-  //   data.loadoutTags = this.getLoadoutTags();
-  //   data.crewThemes = themesAndTags.crewThemes;
-
-  //   // Ensure crew themes are flagged
-  //   data.hasCrewThemes = data.crewThemes && data.crewThemes.length > 0;
-  //   console.log("Crew Themes:", data.crewThemes);
-
-  //   //
-
-  //      // Process Juice and Clues for City of Mist
-  //   if (data.isCityOfMist) {
-  //       const { helpItems, hurtItems, clueItems, juiceItems } = this.getJuiceAndClues();
-  //       data.helpItems = helpItems || [];
-  //       data.hurtItems = hurtItems || [];
-  //       data.clueItems = clueItems || [];
-  //       data.juiceItems = juiceItems || [];
-  //   } else if (data.isOtherscape) {
-  //       // Process essence for Otherscape
-  //       const themes = this.actor.items.filter(item => item.type === "theme");
-  //       const essenceData = this.getEssence(themes);
-
-  //       if (essenceData?.essence) {
-  //           data.essence = essenceData.essence;
-  //           data.essenceClass = essenceData.className;
-  //           data.essenceImage = essenceData.imageName;
-  //           data.essenceText = new Handlebars.SafeString(
-  //               essenceDescriptions[essenceData.essence] || essenceDescriptions["Undefined"]
-  //           );
-  //       } else {
-  //           console.error("getEssence returned invalid data:", essenceData);
-  //       }
-  //   }
-
-  //   // Add Help and Hurt messages for the receiving player
-  //   const receivedBonuses = this.actor.getFlag('mist-hud', 'received-bonuses') || [];
-
-  //   data.helpHurtMessages = receivedBonuses.length > 0 ? receivedBonuses : null;
-
-  //   // Add improvements
-  //   const improvements = this.getImprovements();
-  //   data.improvements = improvements;
-  //   data.hasImprovements = improvements.length > 0;
-
-  //   return data;
-  // }
-
-
   getData(options) {
     const data = super.getData(options);
     if (!this.actor) return data;
@@ -892,87 +848,29 @@ export class MistHUD extends Application {
   }
 
 
-getCrewThemes() {
-  if (!this.actor) return [];
+  getCrewThemes() {
+    if (!this.actor) return [];
 
-  const nonGMOwners = game.users.filter(user => 
-      !user.isGM && this.actor.testUserPermission(user, "OWNER")
-  );
+    const nonGMOwners = game.users.filter(user => 
+        !user.isGM && this.actor.testUserPermission(user, "OWNER")
+    );
 
-  const ownedCrews = game.actors.contents.filter(actor => 
-      actor.type === "crew" &&
-      nonGMOwners.some(user => actor.testUserPermission(user, "OWNER"))
-  );
+    const ownedCrews = game.actors.contents.filter(actor => 
+        actor.type === "crew" &&
+        nonGMOwners.some(user => actor.testUserPermission(user, "OWNER"))
+    );
 
-  // console.log("Owned Crews:", ownedCrews);
+    // console.log("Owned Crews:", ownedCrews);
 
-  return ownedCrews.flatMap(crew =>
-      crew.items.filter(item => item.type === "theme").map(theme => ({
-          id: theme.id,
-          name: theme.name,
-          crewName: crew.name,
-          actorId: crew.id, // Include the actor ID for easier lookup
-      }))
-  );
-}
-
-
-  // getThemesAndTags() {
-  //   if (!this.actor) return {};
-  
-  //   const items = this.actor.items.contents;
-  
-  //   const themeItems = items.filter(item => item.type === 'theme' && item.name !== "__LOADOUT__");
-  //   const tagItems = items.filter(item => item.type === 'tag');
-  
-  //   const subTagsByParent = tagItems.reduce((acc, tag) => {
-  //     if (tag.system.parentId) {
-  //       if (!acc[tag.system.parentId]) acc[tag.system.parentId] = [];
-  //       acc[tag.system.parentId].push(tag);
-  //     }
-  //     return acc;
-  //   }, {});
-  
-  //   const themes = themeItems.map(theme => {
-  //     const themeId = theme._id;
-  //     let realThemebook;
-  //     const themebook = theme.themebook;
-  
-  //     if (themebook?.isThemeKit()) {
-  //       realThemebook = themebook.themebook;
-  //     } else {
-  //       realThemebook = themebook;
-  //     }
-  
-  //     if (!realThemebook) {
-  //       console.warn(`Themebook is null for theme: ${theme.name}`);
-  //       return null;
-  //     }
-  
-  //     const themeType = realThemebook.system?.subtype || "default-icon";
-      
-  //     const powerTags = this.getPowerTags(themeId, tagItems, subTagsByParent);
-  //     const weaknessTags = this.getWeaknessTags(themeId, tagItems, subTagsByParent);
-  
-  //     return {
-  //       id: themeId,
-  //       themeName: theme.name,
-  //       category: themeType,
-  //       iconClass: `mh-theme-icon ${themeType}`,
-  //       powerTags,
-  //       weaknessTags,
-  //       localizedThemebookName: realThemebook.name
-  //     };
-  //   }).filter(Boolean);
-  
-  //   const storyTags = this.getStoryTags();
-  
-  //   return {
-  //     themes,
-  //     storyTags,
-  //   };
-  // }  
-
+    return ownedCrews.flatMap(crew =>
+        crew.items.filter(item => item.type === "theme").map(theme => ({
+            id: theme.id,
+            name: theme.name,
+            crewName: crew.name,
+            actorId: crew.id, // Include the actor ID for easier lookup
+        }))
+    );
+  }
   
   getThemesAndTags() {
     if (!this.actor) return {};
@@ -1653,26 +1551,6 @@ getCrewThemes() {
     };
   }
   
-  // getPowerTags(themeId, tagItems, subTagsByParent) {
-  //   // Filter power tags for the given theme
-  //   const powerTags = tagItems.filter(tag => tag.system.theme_id === themeId && tag.system.subtype === 'power');
-
-  //   return this.formatTagsHierarchy(powerTags, subTagsByParent).map(tag => {
-  //       const tagged = this.applyBurnState(this.actor, tag.id);
-  //       return tagged;
-  //   });
-  // }
-
-  // getWeaknessTags(themeId, tagItems, subTagsByParent) {
-  //   // Filter weakness tags for the given theme
-  //   const weaknessTags = tagItems.filter(tag => tag.system.theme_id === themeId && tag.system.subtype === 'weakness');
-
-  //   return this.formatTagsHierarchy(weaknessTags, subTagsByParent).map(tag => {
-  //       const tagged = this.applyBurnState(this.actor, tag.id, 'weakness');
-  //       return tagged;
-  //   });
-  // }
-
   getPowerTags(themeId, tagItems, subTagsByParent, actor) {
     const powerTags = tagItems.filter(tag => tag.system.theme_id === themeId && tag.system.subtype === "power");
 
@@ -1839,56 +1717,6 @@ getCrewThemes() {
     }
   }
 
-  // applyBurnState(actor, tagId, tagType) {
-  //   const tagItem = actor.items.get(tagId);
-  //   if (!tagItem || !tagItem.system) {
-  //       console.error(`Invalid or missing tag item for ID: ${tagId}`);
-  //       return {
-  //           id: tagId,
-  //           burnState: "unburned",
-  //           cssClass: "unburned",
-  //           burnIcon: this.constructor.getIcon("unburned", "burn"),
-  //           permanent: false,
-  //           temporary: false,
-  //           isInverted: false,
-  //           inversionIcon: this.constructor.getIcon(false, "weakness"),
-  //       };
-  //   }
-
-  //   let burnState;
-  //   if (tagItem.system.burned) {
-  //       burnState = "burned";
-  //   } else if (tagItem.system.burn_state === 1) {
-  //       burnState = "toBurn";
-  //   } else {
-  //       burnState = "unburned";
-  //   }
-
-  //   const cssClass = burnState;
-  //   const burnIcon = this.constructor.getIcon(burnState, "burn");
-
-  //   const permanent = tagItem.system.permanent || false;
-  //   const temporary = tagItem.system.temporary || false;
-  //   const isInverted = tagItem.system.isInverted || false;
-
-  //   const inversionIcon = this.constructor.getIcon(
-  //       isInverted || tagType === "story",
-  //       "weakness"
-  //   );
-
-  //   return {
-  //       id: tagId,
-  //       tagName: tagItem.name,
-  //       burnState,
-  //       cssClass,
-  //       burnIcon,
-  //       permanent,
-  //       temporary,
-  //       isInverted,
-  //       inversionIcon,
-  //   };
-  // }
-
   applyBurnState(actor, tagId, tagType = "power") {
     const tagItem = actor?.items?.get(tagId);
 
@@ -1902,6 +1730,7 @@ getCrewThemes() {
             burnIcon: this.constructor.getIcon("unburned", "burn"),
             permanent: false,
             temporary: false,
+            crispy: false,
             isInverted: false,
             inversionIcon: this.constructor.getIcon(false, "weakness"),
         };
@@ -1921,12 +1750,11 @@ getCrewThemes() {
         burnIcon: this.constructor.getIcon(burnState, "burn"),
         permanent: tagItem.system.permanent || false,
         temporary: tagItem.system.temporary || false,
+        crispy: tagItem.system.crispy || false,
         isInverted: tagItem.system.isInverted || false,
         inversionIcon: this.constructor.getIcon(tagItem.system.isInverted, "weakness"),
     };
   }
-
-
 
   formatTagsHierarchy(tags, subTagsByParent) {
     return tags.map((tag) => {
@@ -1961,47 +1789,17 @@ getCrewThemes() {
       };
   }
 
-  // getActorStatuses() {
-  //   if (!this.actor) return [];
-
-  //   const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {}; // Retrieve saved states
-
-  //   const statusMap = new Map();
-
-  //   this.actor.items
-  //       .filter((item) => item.type === 'status')
-  //       .forEach((status) => {
-  //           const key = `${status.id}`; // Use status ID as the unique key
-  //           const savedState = savedStates[key] || 'neutral'; // Default to 'neutral' if no saved state
-
-  //           if (!statusMap.has(key)) {
-  //               statusMap.set(key, {
-  //                   id: status.id,
-  //                   statusName: status.name,
-  //                   statusTier: status.system.tier,
-  //                   statusType: savedState, // Use saved state
-  //                   temporary: !!status.system.temporary,
-  //                   permanent: !!status.system.permanent,
-  //               });
-  //           } else {
-  //               console.warn(`Duplicate status detected for key: ${key}`);
-  //           }
-  //       });
-
-  //   const statuses = Array.from(statusMap.values());
-  //   return statuses;
-  // }
-
-
   getActorStatuses() {
     if (!this.actor) return [];
+
+    const actorId = this.actor.id;
   
-    // Return ONLY what you want to display
     return this.actor.items
       .filter(item => item.type === 'status')
       .map(status => ({
+        actorId,
         id: status.id,
-        name: status.name,                  // match the property names you use in Handlebars
+        name: status.name,
         tier: status.system.tier,
         temporary: !!status.system.temporary,
         permanent: !!status.system.permanent
@@ -2254,8 +2052,6 @@ getCrewThemes() {
         console.error("Error during HUD cleanup:", error);
     }
   }
-
-
   
 }
 
@@ -2443,4 +2239,3 @@ Hooks.on('deleteItem', (item, options, userId) => {
 
   MistHUD.instance.render(true);
 });
-
