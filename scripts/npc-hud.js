@@ -390,6 +390,30 @@ export class NpcHUD extends Application {
                 await statusItem.update({ "system.specialType": newType });
             }
         });
+
+        html.find('.npc-status').each((i, el) => {
+            el.setAttribute('draggable', 'true');
+            el.addEventListener('dragstart', (ev) => {
+              const text = el.textContent.trim();
+              let name = text;
+              let tier = 1;
+        
+              const match = text.match(/^(.*?)-(\d+)$/);
+              if (match) {
+                name = match[1];
+                tier = parseInt(match[2], 10);
+              }
+        
+              const statusData = {
+                type: "status",
+                name,
+                tier,
+                actorId: this.actor?.id || null
+              };
+        
+              ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
+            });
+        });
             
         // Prevent context menu actions
         this.element.on('contextmenu', (event) => {

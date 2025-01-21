@@ -444,7 +444,29 @@ export class MistHUD extends Application {
       // Recalculate total power after updating the status
       this.calculateTotalPower();
     });
-  
+
+    html.find('.mh-status').each((i, el) => {
+      el.setAttribute('draggable', 'true');
+      el.addEventListener('dragstart', (ev) => {
+        // 1) Gather the data
+        const name = el.dataset.statusName;
+        const tier = parseInt(el.dataset.tier) || 1;
+    
+        // 2) Build a data object
+        const statusData = {
+          type: "status",
+          name,
+          tier
+        };
+    
+        // DEBUG: confirm the code runs
+        console.log(`[DEBUG] dragstart for status: ${name}-${tier}`, statusData);
+    
+        // 3) Store it
+        ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
+      });
+    });
+    
 
     html.find('.help-toggle, .hurt-toggle').on('change', async (event) => {
       const toggle = event.currentTarget;
@@ -846,7 +868,6 @@ export class MistHUD extends Application {
 
     return data;
   }
-
 
   getCrewThemes() {
     if (!this.actor) return [];
@@ -1804,8 +1825,7 @@ export class MistHUD extends Application {
         temporary: !!status.system.temporary,
         permanent: !!status.system.permanent
       }));
-  }
-  
+  }  
   
   updateModifierDisplay() {
     const modifierInput = this.element.find('#mh-mod-value');
@@ -2141,6 +2161,7 @@ function getScnTags() {
 
 export { getScnTags };
 
+
 // Hook to attach listeners after the Foundry VTT application is ready
 Hooks.on('ready', () => {
   attachSceneTagListeners();
@@ -2239,3 +2260,57 @@ Hooks.on('deleteItem', (item, options, userId) => {
 
   MistHUD.instance.render(true);
 });
+
+Hooks.on("dropCanvasData", async (canvas, dropData) => {
+  if (dropData?.type !== "status") return;
+
+
+  const { name = "Unnamed Status", tier = 1 } = dropData;
+  console.log("[dropCanvasData] Received status drop:", dropData);
+  
+  const { x, y } = dropData;
+  const token = canvas.tokens.placeables.find(t => t.bounds?.contains(x, y));
+  if (!token) {
+    console.warn("No token found under drop location.");
+    return;
+  }
+
+  const actor = token.actor;
+  if (!actor) {
+    console.warn("No actor found on target token.");
+    return;
+  }
+
+  const itemData = {
+    name,
+    type: "status",
+    system: {
+      pips: 0,
+      tier,
+      description: "",
+      locked: false,
+      version: "1",
+      free_content: false,
+      hidden: false,
+      temporary: false,
+      permanent: false,
+      sceneId: null,
+      showcased: false,
+      specialType: ""
+    },
+
+    img: "icons/svg/item-bag.svg"
+  };
+
+
+  try {
+    const [newStatus] = await actor.createEmbeddedDocuments("Item", [itemData]);
+    console.log(
+      `Created new status [${newStatus.name}] tier ${newStatus.system.tier} on ${actor.name}`
+    );
+    ui.notifications.info(`Gave ${actor.name} status: ${newStatus.name}-${newStatus.system.tier}`);
+  } catch (err) {
+    console.error("Error creating status on actor:", err);
+  }
+});
+
