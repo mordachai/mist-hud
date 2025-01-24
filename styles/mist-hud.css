@@ -725,4 +725,74 @@ hr {
   color: whitesmoke;
 }
 
+/*Change Numbers in Hotbar*/
+.bm-dialog-body {color: black;}
+.bm-primary-nav__element.svelte-hpna8u {color: rgb(231, 209, 177);}
+
+
+.scene-tag-window {
+	background: rgba(0,0,0,0.5);
+	color: whitesmoke;
+	font-weight: normal;
+}
+
+.combatant-name{
+	color: black;
+	text-shadow: -1px 1px 3px white, 0px 0px 6px #18faf5;
+	gap: 10px;
+}
+
+.create-status:hover,
+.create-story-tag:hover{
+	text-shadow: -1px -1px 4px yellow, 1px 1px 4px gold;
+}
+
+
+li.tag-or-status {
+	margin: 2px 0;
+}
+
+.item-selection-context .status-name,
+.item-selection-context .story-tag {
+	font-weight: normal;
+	background-image: none;
+	border-radius: 0.8em 0.3em;
+  margin-left: 2px;
+}
+
+.item-selection-context .status-name:hover,
+.item-selection-context .story-tag:hover {
+	font-weight: normal;
+	background-image: none;
+	border: 2px solid whitesmoke;
+	padding: 1px;
+	margin: -3px;
+	text-shadow: 0 0 3px orange;
+	border-radius: 0.8em 0.3em;
+  margin-left: 2px;
+}
+
+.item-selection-context .status .positive-selected,
+.item-selection-context .tag .positive-selected {
+  font-weight: normal;
+	color: black;
+	background-image: linear-gradient(to right, rgb(255, 165, 0, 0.85), rgb(255, 140, 0, 0.85));
+  border-radius: 0.8em 0.3em;	
+  margin-left: 2px;
+}
+
+.item-selection-context .status .negative-selected,
+.item-selection-context .tag .negative-selected {
+  font-weight: normal;
+	color: black;
+	background-image: linear-gradient(to right, rgb(255, 255, 153, 0.85), rgb(255, 215, 0, 0.85));
+  border-radius: 0.8em 0.3em;
+  margin-left: 2px;
+}
+
+
+
+
+
+
 
