@@ -18,7 +18,7 @@
   --destroyed-tag-color: rgba(255, 40, 40, 0.825);
   --spectrum-color:#dc9c67;
   --limit-color: #ae295b;
-  --status-color: rgb(142, 50, 170);
+  --status-color: rgb(102 31 131);
   --storytag-color: rgb(63, 81, 161);
   --divider-roll-color: rgba(255, 255, 255, 0.3);
   --divider-color1: rgba(255, 255, 255, 0.3);
@@ -289,4 +289,12 @@
 .mh-dropshadow-Logos{
   filter: drop-shadow(2px 2px 5px var(--logos-dark-color));
 }
+
+/* Hover effect for the entire row in the Screen Status list */
+.status-category-list:hover {
+  background: rgba(78, 2, 88, 0.204);
+  border: #d12ebb 1px solid;
+}
+
+
 

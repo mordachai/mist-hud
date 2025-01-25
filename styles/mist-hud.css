@@ -912,3 +912,115 @@ li.tag-or-status {
   height: 40px;
   object-fit: contain;
 }
+
+/* STATUSES SCREEN*/
+
+#status-screen {
+  background: none !important;
+  border: none;
+  box-shadow: none;
+  min-width: fit-content;
+  border: #374e5c 1px solid;
+  border-radius: 8px;
+} 
+
+#status-screen .window-content {
+  background: none !important;
+  padding: 3px;
+  min-width: fit-content;
+  max-height: fit-content;
+  border: 1px solid var(--mist-border-color);
+}
+
+#status-screen .window-header {
+  background: rgba(0, 0, 0, 0.6) !important;
+}
+
+.status-screen{
+  color: rgb(229, 229, 229);
+  font-size: 1rem;
+  overflow-wrap: break-word;
+  background: rgba(0, 0, 0, 0.8) !important;
+  min-width: fit-content;
+  max-height: fit-content;
+}
+
+.status-screen-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex: 1;
+  align-items: center;
+  font-size: 1.2rem;
+  padding: 5px;
+  margin: 10px;
+  gap: 10px;
+  border-bottom: 2px solid #444;
+}
+
+.statuses-screen-title {
+  flex: 4;
+  font-size: 1.6rem;
+  font-family: var(--font-family-main1), sans-serif;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px var(--mythos-dark-color);
+  padding-left: 5px;
+}
+
+.status-screen-header button{
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: rgb(199, 199, 199);
+  margin: auto;
+  flex: 1;
+  padding-top: 8px;
+}
+
+
+/* Alternating backgrounds for better readability */
+.status-category-list:nth-child(odd) {
+  background: rgba(30, 30, 30, 0.6); 
+}
+
+.status-category-list:nth-child(even) {
+  background: rgba(50, 50, 50, 0.6); 
+}
+
+.status-category-list {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2px 8px;
+  margin: 3px 10px;
+  border-radius: 4px;
+  transition: background 0.2s ease-in-out;
+  min-height: 28px;
+  border: #d12ebb00 1px solid;
+}
+
+/* Ensure text elements inside also fit nicely */
+.npc-status-group {
+  font-weight: bold;
+  font-size: 13px;
+  color: #dddddd;
+  padding-right: 8px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+/* Reduce UL spacing to avoid extra height */
+.status-category-list ul {
+  display: flex;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  line-height: 1.2;
+}
+
+.npc-status:hover {
+  text-shadow: 0 0 2px #fff;
+}
+
+
+

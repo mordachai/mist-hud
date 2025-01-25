@@ -1,0 +1,74 @@
+[
+    {
+        "status_type": "Injury",
+        "status_scale": ["ouch-1", "stinging-pain-2", "broken-arm-3", "multiple-fractures-4", "dying-5", "dead-6"]
+    },
+    {
+        "status_type": "Gunfire",
+        "status_scale": ["grazed-1", "flesh-wound-2", "gunshot-wound-3", "bleeding-out-4", "dying-5", "dead-6"]
+    },
+    {
+        "status_type": "Subdual",
+        "status_scale": ["tangled-1", "restricted-2", "cuffed-2", "tied-up-3", "pinned-down-4", "overpowered-5"]
+    },
+    {
+        "status_type": "Exhaustion",
+        "status_scale": ["tired-1", "groggy-2", "fatigued-3", "exhausted-4", "passed-out-5"]
+    },
+    {
+        "status_type": "Poison",
+        "status_scale": ["rash-1", "spreading-venom-2", "paralyzed-leg-3", "spasms-4", "system-shock-5", "dead-6"]
+    },
+    {
+        "status_type": "Disease",
+        "status_scale": ["cough-1", "infected-2", "sick-3", "bedridden-4", "system-shock-5", "dead-6"]
+    },
+    {
+        "status_type": "Vision",
+        "status_scale": ["obstructed-1", "clouded-2", "disoriented-3", "can-hardly-see-4", "blinded-5", "legally-blind-6"]
+    },
+    {
+        "status_type": "Social (+)",
+        "status_scale": ["attention-1", "interesting-2", "admired-3", "life-of-the-party-4", "media-craze-5"]
+    },
+    {
+        "status_type": "Social (-)",
+        "status_scale": ["embarrassed-1", "on-the-spot-2", "humiliated-3", "laughing-stock-4", "ostracized-5"]
+    },
+    {
+        "status_type": "Fear",
+        "status_scale": ["hesitant-1", "daunted-2", "fearful-3", "terror-struck-4", "petrified-5", "scared-to-death-6"]
+    },
+    {
+        "status_type": "Mood",
+        "status_scale": ["melancholic-1", "sad-2", "depressed-3", "shattered-4", "despaired-5", "suicidal-6"]
+    },
+    {
+        "status_type": "Charm",
+        "status_scale": ["interested-1", "beguiled-2", "charmed-3", "mesmerized-4", "controlled-5", "enslaved-6"]
+    },
+    {
+        "status_type": "Combat (+)",
+        "status_scale": ["upper-hand-1", "behind-cover-2", "in-my-sight-3", "tactical-superiority-4"]
+    },
+    {
+        "status_type": "Combat (-)",
+        "status_scale": ["distracted-1", "exposed-2", "surprised-3", "overrun-4", "surrounded-5", "defeated-6"]
+    },
+    {
+        "status_type": "Legal",
+        "status_scale": ["warning-1", "watched-2", "warrant-for-arrest-3", "wanted-4", "most-wanted-5"]
+    },
+    {
+        "status_type": "Financial",
+        "status_scale": ["strained-budget-1", "overspending-2", "financial-risk-3", "indebted-4", "bankrupt-5"]
+    },
+    {
+        "status_type": "Mental (also intoxication)",
+        "status_scale": ["scattered-1", "dazed-2", "confused-3", "bewildered-4", "psychotic-5"]
+    },
+    {
+        "status_type": "The Mist",
+        "status_scale": ["vague-details-1", "memory-lapse-2", "memory-loss-3", "amnesia-4", "oblivious-5"]
+    }
+]

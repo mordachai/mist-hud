@@ -594,3 +594,9 @@ color: var(--mythosOS-verylight-color);
 .mh-dropshadow-Mythos{
   filter: drop-shadow(2px 2px var(--mythosOS-dark-color));
 }
+
+/* Hover effect for the entire row in the Screen Status list */
+.status-category-list:hover {
+  background: rgba(2, 88, 16, 0.204);
+  border: #0f9823 1px solid;
+}

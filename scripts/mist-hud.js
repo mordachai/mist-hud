@@ -2430,3 +2430,60 @@ Hooks.on("renderMistHUD", (app, html, data) => {
   rollBar.append(coreMovesContainer, specialMovesContainer, toggleButton);
   html.find(".mh-content").prepend(rollBar);
 });
+
+import statusScreenApp from "./statusScreenApp.js";
+
+Hooks.once("init", async function () {
+  console.log("MistHUD | Initializing");
+
+  game.settings.register("mist-hud", "importedStatusCollection", {
+      name: "Imported Statuses",
+      hint: "Stores the imported status collections from JSON.",
+      scope: "world",
+      config: false,
+      type: Object,
+      default: []
+  });
+
+  game.mistHUD = game.mistHUD || {}; // Ensure the object exists
+
+  Hooks.once("ready", () => {
+      game.mistHUD.statusScreen = new statusScreenApp();
+      console.log("MistHUD | statusScreenApp Initialized");
+  });
+});
+
+
+
+Hooks.once("ready", () => {
+  console.log("MistHUD | Ready");
+});
+
+
+Hooks.on("getSceneControlButtons", (controls) => {
+  // Find the token control section
+  const tokenControls = controls.find((c) => c.name === "token");
+  if (!tokenControls) return;
+
+  // Add the new button
+  tokenControls.tools.push({
+      name: "statusScreen",
+      title: "Open Status Screen",
+      icon: "fa-solid fa-list", // You can replace this with a custom icon
+      button: true,
+      visible: game.user.isGM || game.user.isPlayer,
+      onClick: () => {
+          if (!game.mistHUD?.statusScreen) {
+              ui.notifications.warn("MistHUD: Status Screen not found!");
+              return;
+          }
+          game.mistHUD.statusScreen.render(true);
+      }
+  });
+
+  console.log("MistHUD | Status Screen button added to Token Controls.");
+});
+
+
+
+
