@@ -918,9 +918,13 @@ li.tag-or-status {
 #status-screen {
   background: none !important;
   border: none;
-  box-shadow: none;
-  min-width: fit-content;
-  border: #374e5c 1px solid;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+  min-width: 400px;
+  min-height: 300px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  border: #374e5c 2px solid;
   border-radius: 8px;
 } 
 

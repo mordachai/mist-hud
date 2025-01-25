@@ -1,6 +1,6 @@
 class statusScreenApp extends Application {
     constructor() {
-        super({ title: "Statuses MC Screen", id: "status-screen", width: 'auto', height: 'auto' });
+        super({ title: "Statuses MC Screen", id: "status-screen", width: 'fit-content', height: 'fit-content' });
         this.statuses = [];
     }
 
@@ -31,7 +31,10 @@ class statusScreenApp extends Application {
     
     render(force = false, options = {}) {
         super.render(force, options);
-        this.element.css({ display: "block", height: "fit-content", width: "fit-content" });
+        // Ensure it runs AFTER Foundry finishes rendering
+        setTimeout(() => {
+            this.element.css({ display: "block", height: "auto", width: "auto" });
+        }, 50);  // Small delay to ensure Foundry completes layout
         this.resetWindowSize();
     } 
     
@@ -152,6 +155,13 @@ class statusScreenApp extends Application {
 
     activateListeners(html) {
         super.activateListeners(html);
+
+        // Prevent window from collapsing after dragging
+        this.element.on("mouseup", ".window-header", () => {
+            setTimeout(() => {
+                this.element.css({ height: "auto", width: "auto" });
+            }, 50);
+        });
 
         // html.find(".mh-import-json").on("click", () => this.importJSON());
 
