@@ -899,6 +899,12 @@ li.tag-or-status {
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0.75;
+}
+
+.mh-roll-button-img:hover {
+  opacity: 1.0;
+  box-shadow: #04e6fb 0px 0px 3px;
 }
 
 .mh-roll-img {
