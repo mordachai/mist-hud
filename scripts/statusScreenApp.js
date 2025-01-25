@@ -31,42 +31,89 @@ class statusScreenApp extends Application {
     
     render(force = false, options = {}) {
         super.render(force, options);
-    }
-        
-    importJSON() {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = ".json";
-        input.addEventListener("change", async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
+        this.resetWindowSize();
+    } 
     
-            const reader = new FileReader();
-            reader.onload = async (e) => {
+    //NOT IN USE
+    async importJSON() {
+        new FilePicker({
+            type: "file",
+            current: "/",
+            callback: async (path) => {
                 try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (!Array.isArray(importedData)) throw new Error("Invalid JSON format.");
+                    const response = await fetch(path);
+                    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+    
+                    const importedData = await response.json();
+                    if (!Array.isArray(importedData)) throw new Error("Invalid JSON format. Expected an array.");
     
                     // Store in Foundry settings
                     await game.settings.set("mist-hud", "importedStatusCollection", importedData);
-                    
+    
                     // Update local list and re-render
                     this.statuses = importedData;
+
                     this.render(true);
+                    this.resetWindowSize();
+
                     ui.notifications.info("Statuses imported successfully!");
                 } catch (error) {
                     ui.notifications.error("Failed to import JSON: " + error.message);
                 }
-            };
-            reader.readAsText(file);
-        });
+            },
+            extensions: [".json"],
+        }).browse();
+    }
     
-        input.click();
+    async importCSV() {
+        new FilePicker({
+            type: "file",
+            current: "/",
+            callback: async (path) => {
+                try {
+                    const response = await fetch(path);
+                    if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+    
+                    const csvText = await response.text();
+                    const importedData = this.parseCSV(csvText);
+    
+                    if (!Array.isArray(importedData)) throw new Error("Invalid CSV format. Expected an array.");
+    
+                    // Store in Foundry settings
+                    await game.settings.set("mist-hud", "importedStatusCollection", importedData);
+    
+                    // Update local list and re-render
+                    this.statuses = importedData;
+                    this.render(true);
+                    ui.notifications.info("CSV imported successfully!");
+                } catch (error) {
+                    ui.notifications.error("Failed to import CSV: " + error.message);
+                }
+            },
+            extensions: [".csv"],
+        }).browse();
     }
 
+    parseCSV(csvText) {
+        const rows = csvText.split("\n").map(row => row.trim()).filter(row => row.length);
+        const headers = rows.shift().split(",").map(header => header.trim().replace(/^"(.*)"$/, '$1')); // Removes quotes
+    
+        if (headers[0] !== "status_type") {
+            throw new Error("Invalid CSV format: First column must be 'status_type'.");
+        }
+    
+        return rows.map(row => {
+            const cols = row.split(",").map(col => col.trim().replace(/^"(.*)"$/, '$1')); // Removes surrounding quotes
+            const statusType = cols.shift(); // First column is status_type
+            const statusScale = cols.filter(Boolean); // Remaining columns are tier statuses
+    
+            return { status_type: statusType, status_scale: statusScale };
+        });
+    }
+  
     async resetToDefault() {
         try {
-            // Load default statuses from file
+            // Load default statuses from the module folder
             const defaultStatuses = await this.loadStatuses();
     
             // Store in Foundry settings
@@ -75,13 +122,28 @@ class statusScreenApp extends Application {
             // Update local list and re-render
             this.statuses = defaultStatuses;
             this.render(true);
-            
+            this.resetWindowSize();
+    
             ui.notifications.info("Statuses reset to default!");
         } catch (error) {
             ui.notifications.error("Failed to reset statuses: " + error.message);
         }
     }
 
+    downloadSampleCSV() {
+        const filePath = "/modules/mist-hud/data/statuses-collection-sample.csv";
+        
+        // Create a hidden anchor element and trigger the download
+        const link = document.createElement("a");
+        link.href = filePath;
+        link.download = "statuses-collection-sample.csv";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    
+        ui.notifications.info("Downloading sample CSV...");
+    }    
+    
     async loadStatuses() {
         const response = await fetch("modules/mist-hud/data/status-collection.json");
         return response.json();
@@ -90,7 +152,11 @@ class statusScreenApp extends Application {
     activateListeners(html) {
         super.activateListeners(html);
 
-        html.find(".mh-import-json").on("click", () => this.importJSON());
+        // html.find(".mh-import-json").on("click", () => this.importJSON());
+
+        html.find(".mh-sample-csv").on("click", () => this.downloadSampleCSV());
+
+        html.find(".mh-import-csv").on("click", () => this.importCSV());
 
         html.find(".mh-reset-json").on("click", () => this.resetToDefault());
 
@@ -99,16 +165,15 @@ class statusScreenApp extends Application {
             el.addEventListener("dragstart", (ev) => {
                 const text = el.textContent.trim();
     
-                // ✅ Improved Regex: Extracts last number as tier
                 const match = text.match(/^(.*?)-(\d+)$/);
                 let name, tier;
     
                 if (match) {
-                    name = match[1]; // Everything before the last hyphen
-                    tier = parseInt(match[2], 10); // The last number
+                    name = match[1];
+                    tier = parseInt(match[2], 10);
                 } else {
                     name = text;
-                    tier = 1; // Default to tier 1 if parsing fails
+                    tier = 1;
                 }
     
                 const statusData = { type: "status", name, tier };
@@ -116,6 +181,26 @@ class statusScreenApp extends Application {
             });
         });
     }
+
+    resetWindowSize() {
+        setTimeout(() => {
+            const app = this.element;
+            if (!app.length) return;
+    
+            // Auto-adjust the window size to fit content
+            const content = app.find(".window-content");
+            const width = content.outerWidth(true) + 20; // Add padding
+            const height = content.outerHeight(true) + 40;
+    
+            app.css({ width: `${width}px`, height: `${height}px` });
+            this.setPosition({ width, height });
+    
+        }, 50); // Small delay to ensure Foundry has re-rendered content
+    }
+    
 }
 
 export default statusScreenApp;
+
+
+

@@ -968,12 +968,13 @@ li.tag-or-status {
 }
 
 .status-screen-header button{
-  font-size: 0.85rem;
+  font-size: 0.80rem;
   cursor: pointer;
   color: rgb(199, 199, 199);
   margin: auto;
   flex: 1;
   padding-top: 8px;
+  white-space: nowrap;
 }
 
 
@@ -1021,6 +1022,4 @@ li.tag-or-status {
 .npc-status:hover {
   text-shadow: 0 0 2px #fff;
 }
-
-
 
