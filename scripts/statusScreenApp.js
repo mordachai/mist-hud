@@ -31,6 +31,7 @@ class statusScreenApp extends Application {
     
     render(force = false, options = {}) {
         super.render(force, options);
+        this.element.css({ display: "block", height: "fit-content", width: "fit-content" });
         this.resetWindowSize();
     } 
     
