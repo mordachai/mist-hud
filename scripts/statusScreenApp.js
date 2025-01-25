@@ -1,6 +1,6 @@
 class statusScreenApp extends Application {
     constructor() {
-        super({ title: "Statuses MC Screen", id: "status-screen", width: 'fit-content', height: 'fit-content' });
+        super({ title: "Statuses MC Screen", id: "status-screen", width: 'auto', height: 'auto' });
         this.statuses = [];
     }
 

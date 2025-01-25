@@ -2468,7 +2468,7 @@ Hooks.on("getSceneControlButtons", (controls) => {
   // Add the new button
   tokenControls.tools.push({
       name: "statusScreen",
-      title: "Open Status Screen",
+      title: "Statuses MC Screen",
       icon: "fa-solid fa-list", // You can replace this with a custom icon
       button: true,
       visible: game.user.isGM || game.user.isPlayer,
