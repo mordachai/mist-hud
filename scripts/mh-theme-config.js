@@ -1,58 +1,8 @@
 // mh-theme-config.js
 
-// Grouped themes by categories
-// export const themesConfig = {
-//     // Unified theme configuration with category and localization key
-//     "ySNMzgkxKYROxiVY": { category: "logos", localizationKey: "CityOfMist.themebook.definingevent.name"},
-//     "iD8KFIFWDxoKoYrD": { category: "logos", localizationKey: "CityOfMist.themebook.definingrelationship.name"},
-//     "k3XJLcAqTiG4EC5k": { category: "logos", localizationKey: "CityOfMist.themebook.mission.name"},
-//     "WUNJcnSqW6o8Ky0p": { category: "logos", localizationKey: "CityOfMist.themebook.personality.name"},
-//     "TddJzLIHRJpdUL8N": { category: "logos", localizationKey: "CityOfMist.themebook.possessions.name"},
-//     "WDS5DQzwtPH4mcCA": { category: "logos", localizationKey: "CityOfMist.themebook.routine.name"},
-//     "UckXkveVIfX3iGIC": { category: "logos", localizationKey: "CityOfMist.themebook.struggle.name"},
-//     "0DeYkksmQPGfBgXb": { category: "logos", localizationKey: "CityOfMist.themebook.tradition.name"},
-//     "av7nmMtNtyfM3EyC": { category: "logos", localizationKey: "CityOfMist.themebook.training.name"},
-//     "1z5W0q4yin2dVSmw": { category: "logos", localizationKey: "CityOfMist.themebook.turf.name"},
-//     "TLihUIPUef6qz08e": { category: "logos", localizationKey: "CityOfMist.themebook.extra.ally.name"},
-//     "BkhIz9fellq9S2jk": { category: "logos", localizationKey: "CityOfMist.themebook.extra.base.name"},
-//     "XuwKwP2NDsVIlHXI": { category: "logos", localizationKey: "CityOfMist.themebook.extra.ride.name"},
-//     "oN7A78HsYWdnK69D": { category: "mythos", localizationKey: "CityOfMist.themebook.adaption.name"},
-//     "mST8BN0opZNnsiJw": { category: "mythos", localizationKey: "CityOfMist.themebook.bastion.name"},
-//     "kllV9UaMbgBnc6sw": { category: "mythos", localizationKey: "CityOfMist.themebook.conjuration.name"},
-//     "eiEBOE0Ksmw54CpV": { category: "mythos", localizationKey: "CityOfMist.themebook.destiny.name"},
-//     "fjm9pNo8udF6JNBs": { category: "mythos", localizationKey: "CityOfMist.themebook.divination.name"},
-//     "411xA6UATRGhj0S9": { category: "mythos", localizationKey: "CityOfMist.themebook.enclave.name"},
-//     "9hZ78zaiBAfOWD9d": { category: "mythos", localizationKey: "CityOfMist.themebook.esoterica.name"},
-//     "zQbEKTXuVmYyZCTb": { category: "mythos", localizationKey: "CityOfMist.themebook.expression.name"},
-//     "MV4PUY0lzRFgrJpk": { category: "mythos", localizationKey: "CityOfMist.themebook.familiar.name"},
-//     "BbrgN4PsgGgugAT7": { category: "mythos", localizationKey: "CityOfMist.themebook.mobility.name"},
-//     "b9cXJ12RlHpigpF5": { category: "mythos", localizationKey: "CityOfMist.themebook.relic.name"},
-//     "zr99KnWATSh6gjyd": { category: "mythos", localizationKey: "CityOfMist.themebook.subversion.name"},
-//     "KC4izKbFszg6PVRz": { category: "crew", localizationKey: "CityOfMist.themebook.crew.name" },
-//     "ll4esBP99oStT0TH": { category: "mist", localizationKey: "CityOfMist.themebook.advancedart.name" },
-//     "nopE3UjirO3CIKFB": { category: "mist", localizationKey: "CityOfMist.themebook.shrouding.name" },
-//     "WUWnwsC9FYAGzgpH": { category: "mist", localizationKey: "CityOfMist.themebook.unit.name" },
-//     "sXQ4DJvPy9GwATCn": { category: "loadout", localizationKey: "Otherscape.themebook.loadout.name" },
-//     "NgbUT22G4qsBqSwn": { category: "mythosOS", localizationKey: "Otherscape.themebook.artifact.name" },
-//     "K1T0cmc315lR55ql": { category: "mythosOS", localizationKey: "Otherscape.themebook.companion.name" },
-//     "f0Hldws5yB2ezw1Z": { category: "mythosOS", localizationKey: "Otherscape.themebook.esoterica.name" },
-//     "5CG8unkzHqU6xuQW": { category: "mythosOS", localizationKey: "Otherscape.themebook.exposure.name" },
-//     "K3rvh4bMi0L6S4lS": { category: "noise", localizationKey: "Otherscape.themebook.augmentation.name" },
-//     "eSg1666zWlbhuoyl": { category: "noise", localizationKey: "Otherscape.themebook.cuttingEdge.name" },
-//     "D88XNZrAQ5oMfsFW": { category: "noise", localizationKey: "Otherscape.themebook.cyberspace.name" },
-//     "3i6BJjmC1oKKQvCV": { category: "noise", localizationKey: "Otherscape.themebook.drones.name" },
-//     "noqoLlmqIwjirJ52": { category: "self", localizationKey: "Otherscape.themebook.affiliation.name" },
-//     "m7aMSrzoz8iEjrXi": { category: "self", localizationKey: "Otherscape.themebook.assets.name" },
-//     "FUhv3c81M1tcVSJD": { category: "self", localizationKey: "Otherscape.themebook.expertise.name" },
-//     "WQ1gYMo8oWoiPX2a": { category: "self", localizationKey: "Otherscape.themebook.horizon.name" },
-//     "FW5g6LLhbaf5BFFm": { category: "self", localizationKey: "Otherscape.themebook.personality.name" },
-//     "snHXQlSZdGALWPNq": { category: "self", localizationKey: "Otherscape.themebook.troubledPast.name" }
-// };
-
 export const moveConfig = {
 
     // City of Mist moves
-
     "Change the Game": {
         name: "CityOfMist.moves.CTG.name",
         fail: "CityOfMist.moves.genericFail",
@@ -88,6 +38,7 @@ export const moveConfig = {
         hasDynamite: true,
         system: "city-of-mist",
         slot: 1,
+        image:"Change the Game.webp",
     },
 
     "Convince": {
@@ -99,6 +50,7 @@ export const moveConfig = {
         hasDynamite: true,
         system: "city-of-mist",
         slot: 2,
+        image: "Convince.webp",
     },
 
     "Face Danger": {
@@ -114,6 +66,7 @@ export const moveConfig = {
         hasDynamite: true,
         system: "city-of-mist",
         slot: 3,
+        image: "Face Danger.webp",
     },
 
     "Go Toe To Toe": {
@@ -140,6 +93,7 @@ export const moveConfig = {
         hasDynamite: true,
         system: "city-of-mist",
         slot: 4,
+        image: "Go Toe To Toe.webp",
     },
 
     "Hit with All You Got": {
@@ -172,6 +126,7 @@ export const moveConfig = {
         hasDynamite: true,
         system: "city-of-mist",
         slot: 5,
+        image: "Hit with All You Got.webp",
     },
 
     "Investigate": {
@@ -188,6 +143,7 @@ export const moveConfig = {
         hasDynamite: true,
         system: "city-of-mist",
         slot: 6,
+        image: "Investigate.webp",
     },
 
     "Look Beyond the Mist": {
@@ -206,6 +162,7 @@ export const moveConfig = {
         rollMythos: true,
         system: "city-of-mist",
         slot: 7,
+        image: "Look Beyond the Mist.webp",
 
     },
 
@@ -223,6 +180,7 @@ export const moveConfig = {
         hasDynamite: true,
         system: "city-of-mist",
         slot: 8,
+        image: "Sneak Around.webp",
     },
 
     "Take the Risk": {
@@ -234,6 +192,7 @@ export const moveConfig = {
         hasDynamite: true,
         system: "city-of-mist",
         slot: 9,
+        image: "Take the Risk.webp",
     },
 
     "Stop. Holding. Back. (Significant)": {
@@ -280,6 +239,7 @@ export const moveConfig = {
         system: "city-of-mist",
         moveType: "cinematic",
         slot: 15,
+        image: "Monologue.webp",
     },
 
     "Flashback": {
@@ -302,6 +262,7 @@ export const moveConfig = {
         system: "city-of-mist",
         moveType: "cinematic",
         slot: 16,
+        image: "Flashback.webp",
     },
 
     "Downtime": {
@@ -333,6 +294,7 @@ export const moveConfig = {
         system: "city-of-mist",
         moveType: "cinematic",
         slot: 17,
+        image: "Downtime.webp",
     },
 
     "Session End": {
@@ -358,6 +320,7 @@ export const moveConfig = {
         system: "city-of-mist",
         moveType: "cinematic",
         slot: 18,
+        image: "Session End.webp",
     },
 
     // Otherscape moves
@@ -368,7 +331,8 @@ export const moveConfig = {
         partial: "Otherscape.moves.mitigate.partial",
         success: "Otherscape.moves.mitigate.success",
         system: "otherscape",
-        slot: 1
+        slot: 1,
+        image: "Mitigate Consequences.webp",
     },
 
 
@@ -378,7 +342,8 @@ export const moveConfig = {
         partial: "Otherscape.moves.quickOutcome.partial",
         success: "Otherscape.moves.quickOutcome.success",
         system: "otherscape",
-        slot: 2
+        slot: 2,
+        image: "Quick Outcome.webp",
     },
 
     "Tracked Outcome - Attack": {
@@ -389,6 +354,7 @@ export const moveConfig = {
         success: "Otherscape.moves.trackedOutcome.success",
         system: "otherscape",
         slot: 3,
+        image: "Tracked Outcome - Attack.webp",
         trackedEffects: [
         {
             key: "effect.attack",
@@ -428,6 +394,7 @@ export const moveConfig = {
     success: "Otherscape.moves.trackedOutcome.success",
     system: "otherscape",
     slot: 4,
+    image: "Tracked Outcome - Empower.webp",
     trackedEffects: [
         {
             key: "effect.bestow",
@@ -467,6 +434,7 @@ export const moveConfig = {
     success: "Otherscape.moves.trackedOutcome.success",
     system: "otherscape",
     slot: 5,
+    image: "Tracked Outcome - Extras.webp",
     trackedEffects: [
         {
             key: "effect.advance",

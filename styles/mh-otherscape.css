@@ -108,6 +108,11 @@
 }
 
 .mh-theme-name {
+  display: flex;
+  align-items: center; /* Align text and stars */
+  gap: 5px;
+
+
   font-family: var(--font-family-move), sans-serif;
   font-size: 1.3em;
   display: block;

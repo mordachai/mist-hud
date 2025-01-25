@@ -1,20 +1,6 @@
 //mh-load-moves.js
 import { moveConfig } from "./mh-theme-config.js";
 import { detectActiveSystem } from "./mh-settings.js";
-/**
- * Clears macros from specific hotbar slots for all players.
- */
-async function clearPlayerHotbars() {
-    for (const user of game.users.contents) {
-        console.debug(`Clearing hotbar for user: ${user.name}`);
-        for (let i = 1; i <= 9; i++) {
-            await user.assignHotbarMacro(null, i);
-        }
-        for (let i = 11; i <= 19; i++) {
-            await user.assignHotbarMacro(null, i);
-        }
-    }
-}
 
 /**
  * Creates and assigns macros dynamically for the active system.
@@ -84,22 +70,50 @@ async function createAndAssignMacros() {
     }
 }
 
-/**
- * Main function to load moves.
- * Clears hotbars and assigns macros for all users.
- */
+export async function clearPlayerHotbars() {
+    for (const user of game.users.contents) {
+        console.debug(`Clearing hotbar for user: ${user.name}`);
+        for (let i = 1; i <= 9; i++) {
+            await user.assignHotbarMacro(null, i);
+        }
+        for (let i = 11; i <= 19; i++) {
+            await user.assignHotbarMacro(null, i);
+        }
+    }
+
+    // Delete all macros created by the module
+    const existingMacros = game.macros.filter(macro => 
+        Object.keys(moveConfig).includes(macro.name) && macro.author?.id === game.user.id
+    );
+
+    for (const macro of existingMacros) {
+        console.debug(`Deleting macro: ${macro.name}`);
+        await macro.delete();
+    }
+
+    ui.notifications.info("Mist HUD macros have been removed from the hotbar.");
+}
+
 async function loadMoves() {
     if (!game.user.isGM) {
         console.error("Only the GM can run this script.");
         return;
     }
-    await clearPlayerHotbars();
-    await createAndAssignMacros();
-    ui.notifications.info("Moves have been loaded and assigned to player hotbars.");
+
+    // Check if we should use the hotbar instead of HUD
+    const useHotbar = game.settings.get("mist-hud", "useHotbarForRolls");
+
+    // Clear hotbars only if using the hotbar for rolls
+    if (useHotbar) {
+        await clearPlayerHotbars();
+        await createAndAssignMacros();
+        ui.notifications.info("Moves have been loaded and assigned to player hotbars.");
+    } else {
+        console.log("HUD mode is enabled. Skipping hotbar move assignment.");
+    }
 }
-/**
- * Initialize macros when the game finishes loading for a user.
- */
+
+//Initialize macros when the game finishes loading for a user.
 async function initializeForPlayer() {
     const activeSystem = await detectActiveSystem();
     if (!activeSystem) return;
@@ -112,8 +126,10 @@ async function initializeForPlayer() {
         }
     }
 }
+
 // Export loadMoves for manual execution
 export { loadMoves };
+
 // Hook to register game settings during initialization
 Hooks.once("init", () => {
     game.settings.register("mist-hud", "movesLoaded", {
@@ -125,6 +141,7 @@ Hooks.once("init", () => {
         default: false
     });
 });
+
 // Hook to handle system changes and reload macros
 Hooks.on("updateSetting", async (setting) => {
     if (setting.key === "city-of-mist.system" && game.user.isGM) {
@@ -137,6 +154,7 @@ Hooks.on("updateSetting", async (setting) => {
         await loadMoves();
     }
 });
+
 // Hook to initialize macros for individual players after they log in
 Hooks.on("ready", async () => {
     if (game.user.isGM) {

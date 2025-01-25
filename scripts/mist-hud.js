@@ -4,11 +4,21 @@ import { essenceDescriptions } from './mh-theme-config.js';
 import { StoryTagDisplayContainer } from "/systems/city-of-mist/module/story-tag-window.js";
 import { CityHelpers } from "/systems/city-of-mist/module/city-helpers.js";
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
+import { moveConfig } from "/modules/mist-hud/scripts/mh-theme-config.js";
 
 // Register Handlebars helper for localizeTheme
 Handlebars.registerHelper('localizeTheme', function(themebookName) {
   return localizeTheme(themebookName);
 });
+
+Handlebars.registerHelper("times", function(n, block) {
+  let output = "";
+  for (let i = 0; i < n; i++) {
+      output += block.fn(i);
+  }
+  return output;
+});
+
 
 export class MistHUD extends Application {
   static instance = null;
@@ -939,6 +949,8 @@ export class MistHUD extends Application {
             powerTags,
             weaknessTags,
             localizedThemebookName: realThemebook.name, // Ensure localized name
+            unspent_upgrades: theme.system.unspent_upgrades || 0
+
         };
     }).filter(Boolean);
 
@@ -2314,3 +2326,107 @@ Hooks.on("dropCanvasData", async (canvas, dropData) => {
   }
 });
 
+Hooks.on("renderMistHUD", (app, html, data) => {
+  // Remove existing roll bars to prevent duplication
+  html.find(".mh-roll-bar").remove();
+
+  // Check if roll buttons should be in the hotbar instead of the HUD
+  const useHotbar = game.settings.get("mist-hud", "useHotbarForRolls");
+  if (useHotbar) return; // Skip rendering roll buttons in the HUD
+
+  // Get user setting for text or image display
+  const useText = game.settings.get("mist-hud", "useTextButtons");
+
+  // Detect the active system (from Foundry settings)
+  const activeSystem = game.settings.get("city-of-mist", "system");
+
+  // Create roll bar and move containers
+  const rollBar = $(`<div class="mh-roll-bar"></div>`);
+  const coreMovesContainer = $(`<div class="mh-roll-container core-moves"></div>`);
+  const specialMovesContainer = $(`<div class="mh-roll-container special-moves"></div>`);
+
+  Object.keys(moveConfig).forEach(moveName => {
+    const moveData = moveConfig[moveName];
+    if (!moveData || !moveData.name || moveData.system !== activeSystem) return;
+
+    const translatedName = game.i18n.localize(moveData.name);
+    let tooltipText = translatedName;
+
+    let buttonContent;
+    let buttonClass = "mh-roll-button"; // Default button class
+
+    if (moveData.subtitle) {
+      const translatedSubtitle = game.i18n.localize(moveData.subtitle);
+      tooltipText += ` - ${translatedSubtitle}`;
+    }
+
+    if (!useText && moveData.image) { // Use images if text mode is NOT enabled
+      buttonContent = `<img src="modules/mist-hud/ui/${moveData.image}" alt="${translatedName}" class="mh-roll-img">`;
+      buttonClass += " mh-roll-button-img"; // Apply special styling for images
+      } else {
+          const shortName = translatedName.slice(0, 3).toUpperCase();
+          let subtitleRow = "";
+          if (moveData.subtitle) {
+              const translatedSubtitle = game.i18n.localize(moveData.subtitle);
+              const shortSubtitle = translatedSubtitle.slice(0, 3).toUpperCase();
+              subtitleRow = `<div class="mh-roll-sub">${shortSubtitle}</div>`;
+          }
+          buttonContent = `<div class="mh-roll-main">${shortName}</div>${subtitleRow}`;
+      }  
+
+    const button = $(`
+      <button class="${buttonClass}" data-move="${moveName}" title="${tooltipText}">
+        ${buttonContent}
+      </button>
+    `);
+
+    button.on("click", () => {
+      console.log(`Executing move: ${tooltipText}`);
+      CityOfMistRolls.executeMove(moveName);
+    });
+
+    // Assign moves to the correct page based on slot
+    if (moveData.slot >= 1 && moveData.slot <= 10) {
+      coreMovesContainer.append(button);
+    } else if (moveData.slot >= 11 && moveData.slot <= 20) {
+      specialMovesContainer.append(button);
+    }
+  });
+
+  // Initially, hide the special moves container
+  specialMovesContainer.hide();
+
+  // Get localized tooltips
+  const coreMovesText = game.i18n.localize("CityOfMist.terms.coreMoves");
+  const specialMovesText = game.i18n.localize("CityOfMist.terms.specialMoves");
+
+  // Create the page toggle button with initial tooltip
+  const toggleButton = $(`
+    <button class="mh-roll-toggle" title="${specialMovesText}">
+      <i class="fa-solid fa-caret-up"></i>
+    </button>
+  `);
+
+  let isCoreMovesVisible = true;
+
+  toggleButton.on("click", () => {
+    if (isCoreMovesVisible) {
+      coreMovesContainer.slideUp(300, () => {
+        specialMovesContainer.slideDown(300);
+      });
+      toggleButton.find("i").removeClass("fa-caret-up").addClass("fa-caret-down");
+      toggleButton.attr("title", coreMovesText);
+    } else {
+      specialMovesContainer.slideUp(300, () => {
+        coreMovesContainer.slideDown(300);
+      });
+      toggleButton.find("i").removeClass("fa-caret-down").addClass("fa-caret-up");
+      toggleButton.attr("title", specialMovesText);
+    }
+    isCoreMovesVisible = !isCoreMovesVisible;
+  });
+
+  // Append containers and toggle button
+  rollBar.append(coreMovesContainer, specialMovesContainer, toggleButton);
+  html.find(".mh-content").prepend(rollBar);
+});

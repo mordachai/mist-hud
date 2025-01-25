@@ -1,16 +1,44 @@
 <div class="mh-hud">
+
+
   <div class="mh-content">
+
+    <div class="mh-roll-bar">
+      {{#each moveButtons}}
+      <button class="mh-roll-button" data-move="{{this.name}}" title="{{this.name}}">
+        {{this.short}}
+      </button>
+      {{/each}}
+    </div>
+
+
     {{#each themes}}
     <div class="theme-container-{{category}}">
       <div class="mh-theme-header {{category}}">
         <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
 
+        {{log "Theme Debug:" themeName "Upgrades:" unspent_upgrades}}
+
       {{#if (eq ../activeSystem "city-of-mist")}}
-        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{themeName}}</span> <!-- Render only if system is City of Mist -->
+        <span class="mh-theme-name mh-theme-name-com-{{category}}">
+          {{themeName}}{{#if unspent_upgrades}}
+          <span class="mh-improvement-marker {{category}}">
+            {{#times unspent_upgrades}}
+              <i class="fa-light fa-star"></i>
+            {{/times}}
+        </span>{{/if}}
+          </span>
       {{/if}}
 
       {{#if (or (eq ../activeSystem "otherscape") (eq ../activeSystem "legend"))}}
-        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{localizedThemebookName}}</span> <!-- Render only if system is Otherscape or Legends in the Mist -->
+        <span class="mh-theme-name mh-theme-name-com-{{category}}">
+          {{localizedThemebookName}}{{#if unspent_upgrades}}
+          <span class="mh-improvement-marker {{category}}">
+            {{#times unspent_upgrades}}
+              <i class="fa-light fa-star"></i>
+            {{/times}}
+          </span>{{/if}}
+        </span>
       {{/if}}
       </div>
 

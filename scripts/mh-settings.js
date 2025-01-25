@@ -64,7 +64,7 @@ Hooks.once('init', () => {
     // Detect the active system
     const activeSystem = game.settings.get("city-of-mist", "system");
 
-      // Register the game setting
+    // Register the game setting
     // game.settings.register(MODULE_ID, "preferredDice", {
     //     name: "Preferred Dice",
     //     hint: "Select your preferred dice set for rolls.",
@@ -146,6 +146,62 @@ Hooks.once('init', () => {
             }).render(true);
         }
     });
+
+    // game.settings.register("mist-hud", "useHotbarForRolls", {
+    //     name: "Roll Moves using Hotbar",
+    //     hint: "If enabled, roll buttons will be placed in the hotbar instead of the HUD.",
+    //     scope: "world",
+    //     config: true,
+    //     type: Boolean,
+    //     default: false,
+    //     onChange: async (value) => {
+    //         ui.notifications.info("Roll button placement setting changed. Refresh to apply.");
+    
+    //         if (value) {
+    //             console.log("Hotbar mode enabled. Loading move macros...");
+    //             (async () => {
+    //                 const module = await import("/modules/mist-hud/scripts/mh-load-moves.js");
+    //                 await module.loadMoves();
+    //             })();
+    //         }
+    //     }
+    // });     
+
+    game.settings.register("mist-hud", "useHotbarForRolls", {
+        name: "Roll Moves using Hotbar",
+        hint: "If enabled, roll buttons will be placed in the hotbar instead of the HUD.",
+        scope: "world",
+        config: true,
+        type: Boolean,
+        default: false,
+        onChange: async (value) => {
+            ui.notifications.info("Roll button placement setting changed. Refresh to apply.");
+    
+            const module = await import("/modules/mist-hud/scripts/mh-load-moves.js");
+    
+            if (value) {
+                console.log("Hotbar mode enabled. Loading move macros...");
+                await module.loadMoves();
+            } else {
+                console.log("Hotbar mode disabled. Clearing macros...");
+                await module.clearPlayerHotbars();
+            }
+        }
+    });
+    
+    
+    game.settings.register("mist-hud", "useTextButtons", {
+        name: "Use Text for Roll Buttons",
+        hint: "If enabled, roll buttons will use text instead of images.",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: false, // Default is images
+        onChange: () => {
+            ui.notifications.info("Button display setting changed. Refresh to apply.");
+        }
+    }); 
+        
 });
 
 // Function to get dice choices based on the active system

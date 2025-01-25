@@ -725,6 +725,26 @@ hr {
   color: whitesmoke;
 }
 
+.mh-improvement-marker {
+  display: flex;
+  align-items: center; /* Centers stars vertically */
+  color: whitesmoke;
+  font-weight: bold;
+  margin-left: 5px; 
+  display: inline-block;
+}
+
+.mh-improvement-marker i {
+  vertical-align: middle;
+  font-size: 0.70rem;
+  line-height: 1; 
+  transform: translateY(0px);
+}
+
+.mh-improvement-marker.Self i {
+  transform: translateY(-3px);
+}
+
 /*Change Numbers in Hotbar*/
 .bm-dialog-body {color: black;}
 .bm-primary-nav__element.svelte-hpna8u {color: rgb(231, 209, 177);}
@@ -790,9 +810,99 @@ li.tag-or-status {
   margin-left: 2px;
 }
 
+/* Roll Bar */
 
+.mh-roll-bar {
+  position: absolute;
+  left: -50px;
+  top: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background-color: #191919d7;
+  min-width: 45px;
+  border-radius: 5px;
+  align-items: center;
+  padding: 6px 0;
+}
 
+.mh-roll-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
 
+.mh-roll-container.hidden {
+  display: none;
+}
 
+.mh-roll-toggle {
+  margin-top: 10px;
+  width: 35px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
 
+.mh-roll-toggle i {
+  font-size: 16px;
+}
 
+.mh-roll-toggle:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.mh-roll-button {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid white;
+  border-radius: 5px;
+  color: white;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+  font-family: 'Rift';
+}
+
+.mh-roll-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.mh-roll-main {
+  font-size: 16px;
+}
+
+.mh-roll-sub {
+  font-size: 16px;
+  color: #d2d2d2;
+  margin-top: 2px;
+}
+
+/* Image buttons */
+.mh-roll-button-img {
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mh-roll-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
