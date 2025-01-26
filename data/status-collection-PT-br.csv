@@ -1,0 +1,73 @@
+category,status_type,tier_1,tier_2,tier_3,tier_4,tier_5,tier_6
+Físico,Lesão no Braço,braço-hematoma-1,pulso-esticado-2,braço-fraturado-3,ombro-deslocado-4,braço-inútil-5,amputado-6
+Físico,Garras,arranhado-1,raspe-2,corte-profundo-3,desfigurado-4,eviscerado-5,rasgado-6
+Físico,Pancadas,hematoma-1,espancado-2,ossos-quebrados-3,trauma-grave-4,ossos-moídos-5,crânio-afundado-6
+Físico,Combate (-),distraído-1,exposto-2,surpreso-3,sobrepujado-4,cercado-5,derrotado-6
+Físico,Combate (+),vantagem-1,atrás-cobertura-2,no-meu-campo-3,superioridade-tática-4,,
+Físico,Exaustão,cansado-1,aturdido-2,fatigado-3,exausto-4,desmaiado-5,
+Físico,Explosão,choque-explosivo-1,queimado-2,ferimentos-espala-3,trauma-severo-4,incapacitado-5,obliterado-6
+Físico,Armas de Fogo,golpe-rasgado-1,ferida-carnuda-2,ferida-bala-3,sangrando-4,morrendo-5,morto-6
+Físico,Cabeça,cabeça-batida-1,concussão-2,crânio-fraturado-3,visão-borrada-4,desmaiado-5,morto-cerebral-6
+Físico,Ferimentos,ouch!-1,dor-picante-2,braço-quebrado-3,fraturas-múltiplas-4,morrendo-5,morto-6
+Físico,Facas,cortado-levemente-1,cortado-2,ferida-profunda-3,esfaqueado-4,sangrando-5,impalado-6
+Físico,Pernas,tornozelo-torcido-1,perna-hematoma-2,fêmur-fraturado-3,ligamento-rasgado-4,imóvel-5,amputado-6
+Físico,Supressão,entrelaçado-1,restrito-2,algemado-2,amarrado-3,imobilizado-4,sobrepujado-5
+Físico,Espadas,arranhado-1,esfarrapado-2,ferida-séria-3,esmagado-4,dismembered-5,decapitado-6
+Físico,Tronco,costelas-hematoma-1,sem-fôlego-2,costelas-quebradas-3,sangramento-interno-4,pulmão-colapsado-5,morto-6
+Tech,Cibernético,glitch-sensorial-1,resposta-atrasada-2,mal-funcionamento-hardware-3,falha-crítica-4,desligamento-sistema-5,desativado-permanentemente-6
+Tech,Contramedidas,firewall-1,intrusão-detectada-2,bloqueio-acesso-3,lockdown-4,violação-segurança-5,sistema-zerado-6
+Tech,Disfarce Digital,falsificação-1,proxy-roteado-2,identidade-mascarada-3,deepfake-4,completamente-anônimo-5,inrastreável-6
+Tech,Drones & Robótica,interferido-1,ralentado-2,glitcheado-3,mal-funcionando-4,tomado-controle-5,autodestruído-6
+Tech,Hackeamento,sondagem-1,varredura-2,violação-3,acesso-profundo-4,controle-root-5,sistema-controlado-6
+Tech,Infiltração de Rede,ping-1,escutando-2,homem-no-meio-3,sniffing-total-4,controlando-tráfego-5,sobrescrever-total-6
+Tech,Estabilidade do Sistema,lag-leve-1,glitchy-2,instável-3,erros-críticos-4,crashed-5,falha-total-6
+Defesa,Cobertura,meia-cobertura-1,cobertura-boa-2,fortificada-3,abrigado-4,,
+Defesa,Linha de Tiro,alvo-aberto-1,parcialmente-coberto-2,bem-coberto-3,fortificado-4,,
+Defesa,Posicionamento,meio-coberto-1,atrás-obstáculo-2,bom-ponto-3,high-ground-4,,
+Elemental,Ácido,pele-irritada-1,bolhas-2,corroído-3,queimaduras-severas-4,dissolvendo-5,derretido-6
+Elemental,Químico,exposição-leve-1,tonto-2,enjoado-3,dano-interno-4,falha-sistema-5,morto-6
+Elemental,Compressão,costelas-amassadas-1,esforço-interno-2,órgãos-rupturados-3,pulmões-amassados-4,achatado-5,pulverizado-6
+Elemental,Terra,arenoso-1,prejudicado-por-rochas-2,esmagado-3,amassado-4,enterrado-5,obliterado-6
+Elemental,Elétrico,choque-estático-1,dedos-numb-2,espasmos-musculares-3,paralisado-4,coracao-parado-5,fritado-6
+Elemental,Fogo,queimado-levemente-1,bolha-queimadura-2,pele-carbonizada-3,queimaduras-severas-4,inconsciente-queimaduras-5,queimado-em-cenizas-6
+Elemental,Fumos,tossindo-1,falta-oxigênio-2,engasgando-3,asfixiando-4,desmaiado-5,morto-6
+Elemental,Gelo,congelado-1,numb-2,membros-congelados-3,hipotermia-4,congelado-sólido-5,quebrado-6
+Elemental,Laser,queimado-1,queimado-2,explodido-3,derretendo-4,separado-5,desintegrado-6
+Elemental,Sufocação,falta-oxigênio-1,ar-esgotado-2,pânico-3,desmaio-4,inconsciente-5,morto-6
+Elemental,Água,encharcado-1,lutando-na-água-2,pânico-3,pulmões-enchendo-água-4,afogado-5,corpo-recuperado-6
+Saúde,Contaminação,exposição-1,pele-coceira-2,enjoado-3,febril-4,falha-orgânica-5,morto-6
+Saúde,Doença,tosse-1,infectado-2,doente-3,deitado-cama-4,choque-sistema-5,morto-6
+Saúde,Intoxicação Alimentar,náusea-1,cãibras-estomacais-2,vômito-violento-3,doente-exausto-4,hospitalizado-5,morto-6
+Saúde,Mental (também intoxicação),disperso-1,atordoado-2,confuso-3,perplexo-4,psicótico-5,
+Saúde,Venenos,erupção-1,veneno-espalhando-2,paralisado-3,espasmos-4,choque-sistema-5,morto-6
+Saúde,Poluição,garganta-irritada-1,tosse-persistente-2,dificuldade-respirar-3,dano-pulmonar-4,falha-respiratória-5,morto-6
+Saúde,Radiação,exposição-1,queimaduras-radiação-2,tosse-sangue-3,falha-orgânica-4,doença-terminal-radiação-5,morto-6
+Perseguição,Sendo Seguido,suspeito-1,notado-2,evasivo-3,quase-perdido-4,indo-5,pego-6
+Perseguição,Perseguição,spotado-1,caindo-atraso-2,fechando-gap-3,lado-a-lado-4,encurralado-5,destruído-6
+Perseguição,Perseguindo a Pé,atrasando-1,acelerando-2,fechando-3,quase-lá-4,tackle-5,neutralizado-6
+Perseguição,Fugindo,spotado-1,gainando-distância-2,quase-claro-3,fora-de-visão-4,fugiu-5,
+Perseguição,Fugindo a Pé,spotado-1,quebrando-longe-2,quase-claro-3,fora-de-visão-4,fugiu-5,sem-rastros-6
+Perseguição,Seguindo,trailing-1,mantendo-distância-2,fechando-3,quase-lá-4,direita-atras-5,pego-6
+Sensorial,Consciência,inconsciente-1,distraído-2,atento-3,sentidos-afiados-4,hiper-consciente-5,
+Sensorial,Camuflagem,parcialmente-mesclado-1,mesclado-2,perfeitamente-combinando-3,camuflagem-adaptativa-4,camarão-5,invisível-6
+Sensorial,Vantagem na Escuridão,luz-fraca-1,sombreado-2,oculto-sombras-3,quase-invisível-4,único-com-escuridão-5,
+Sensorial,Disfarce,alteração-minor-1,cobertura-plausível-2,convincente-3,imitação-perfeita-4,mestre-disfarce-5,inreconhecível-6
+Sensorial,Medo,hesitante-1,desanimado-2,medroso-3,aterrorizado-4,petrificado-5,assustado-morte-6
+Sensorial,Concentração (-),distraído-1,perdendo-concentração-2,confuso-3,desorientado-4,mentalmente-bloqueado-5,
+Sensorial,Concentração (+),alerta-1,concentrado-2,no-zona-3,hiper-focado-4,,
+Sensorial,Oculto,oculto-1,obscurecido-2,bem-oculto-3,invisível-4,mesclado-sombra-5,indetectável-6
+Sensorial,Humor,melancólico-1,triste-2,deprimido-3,quebrado-4,desesperado-5,suicida-6
+Sensorial,Movendo-Despercebido,quieto-1,furtivo-2,fantasma-3,mesclando-4,inrastreável-5,fantasma-6
+Sensorial,Surpresa,assustado-1,choque-2,atordoado-3,sobrecarga-4,completamente-perdido-5,
+Sensorial,Visão,obstruído-1,nublado-2,desorientado-3,mal-virando-4,cego-5,legalmente-cego-6
+Sociedade,Charme,interessado-1,encantado-2,charmoso-3,hipnotizado-4,controlado-5,escravizado-6
+Sociedade,Financeiro,orçamento-tenso-1,excedendo-gastos-2,risco-financeiro-3,endividado-4,falido-5,
+Sociedade,Legal,advertência-1,monitorado-2,mandado-prisão-3,procurado-4,mais-procurado-5,
+Sociedade,Sociedade (-),envergonhado-1,no-momento-2,humilhado-3,piada-popular-4,ostracizado-5,
+Sociedade,Sociedade (+),atenção-1,interessante-2,admirado-3,vida-festa-4,mania-mídia-5,
+Sobrenatural,Demoníaco,marcado-1,manchado-2,corrompido-3,influência-demoníaca-4,possuído-5,devorado-6
+Sobrenatural,Divino,tocado-1,abençoado-2,empoderado-3,radiância-sagrada-4,ascendido-5,transcendido-6
+Sobrenatural,Fey,iluminado-1,encantado-2,glamourizado-3,prisioneiro-sonhos-4,toque-fey-5,perdido-feywild-6
+Sobrenatural,Mágico,faísca-1,resíduo-arcano-2,amaldiçoado-3,amaldiçoado-4,distorcido-5,desfeito-6
+Sobrenatural,A-Névoa,detalhes-vagos-1,lapso-memória-2,perda-memória-3,amnésia-4,oblivioso-5,
+Sobrenatural,Morto-Vivo,assombrado-1,drenado-2,morto-vivo-3,possuído-4,desfeito-5,devorado-6

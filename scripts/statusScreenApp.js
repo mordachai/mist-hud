@@ -24,7 +24,7 @@ class statusScreenApp extends Application {
     async getData() {
         let storedStatuses = game.settings.get("mist-hud", "importedStatusCollection") || [];
         if (!this.statuses.length) {
-            this.statuses = storedStatuses.length ? storedStatuses : await this.loadStatuses();
+            this.statuses = storedStatuses.length ? storedStatuses : await this.loadCSV("modules/mist-hud/data/status-collection-default.csv");
         }
     
         const enableTabs = game.settings.get("mist-hud", "enableStatusTabs");
@@ -175,11 +175,6 @@ class statusScreenApp extends Application {
         ui.notifications.info("Downloading sample CSV...");
     }    
     
-    async loadStatuses() {
-        const response = await fetch("modules/mist-hud/data/status-collection.json");
-        return response.json();
-    }
-
     makeStatusesDraggable(html) {
         html.find(".npc-status").each((i, el) => {
             el.setAttribute("draggable", "true");
