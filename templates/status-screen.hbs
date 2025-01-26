@@ -1,23 +1,48 @@
 <form class="status-screen">
-    
     <div class="status-screen-header">
         <div class="statuses-screen-title" title="Drag and drop statuses onto tokens.">Statuses List</div>
-        <button type="button" class="mh-sample-csv" title="Download a sample CSV to create your own status list."><i class="fa-regular fa-file-export"></i>Get Sample</button>
-        <button type="button" class="mh-import-csv" title="Import a CSV file to replace the current list."><i class="fas fa-file-csv"></i> Import CSV</button>
-        {{!-- <button type="button" class="mh-import-json"><i class="fa-regular fa-file-import"></i>Import JSON</button> --}}
-        <button type="button" class="mh-reset-json" title="Reset to the default status list."><i class="fas fa-undo"></i>Reset</button>
+        <button type="button" class="mh-sample-csv" title="Download a sample CSV to create your own status list.">
+            <i class="fa-regular fa-file-export"></i> Get Sample
+        </button>
+        <button type="button" class="mh-import-csv" title="Import a CSV file to replace the current list.">
+            <i class="fas fa-file-csv"></i> Import CSV
+        </button>
+        <button type="button" class="mh-reset-json" title="Reset to the default status list.">
+            <i class="fas fa-undo"></i> Reset
+        </button>
     </div>
 
-    
-    {{#each statuses as |category|}}
-    <div class="status-category-list">
-        <div class="npc-status-group">{{category.status_type}}:</div>
-        <ul>
-            {{#each category.status_scale as |status|}}
-            <li class="npc-status">{{status}}</li>
+    {{#if enableTabs}}
+        <nav class="status-tabs">
+            {{#each statusesGrouped as |statuses category|}}
+                <button type="button" class="status-tab" data-tab="{{category}}">{{category}}</button>
             {{/each}}
-        </ul>
-    </div>
-    {{/each}}
-</form>
+        </nav>
 
+        <div class="status-tab-content">
+            {{#each statusesGrouped as |statuses category|}}
+                <div class="status-category-list tab-content" data-tab="{{category}}" style="display: none;">
+                    {{#each statuses as |status|}}
+                    <div class="status-group-container">{{status.status_type}}:
+                        <ul>
+                            {{#each status.status_scale as |statusItem|}}
+                                <li class="npc-status">{{statusItem}}</li>
+                            {{/each}}
+                        </ul></div>
+                    {{/each}}
+                </div>
+            {{/each}}
+        </div>
+    {{else}}
+        {{#each statuses as |status|}}
+            <div class="status-category-list">
+                <div class="status-group-container">{{status.status_type}}:</div>
+                <ul>
+                    {{#each status.status_scale as |statusItem|}}
+                        <li class="npc-status">{{statusItem}}</li>
+                    {{/each}}
+                </ul>
+            </div>
+        {{/each}}
+    {{/if}}
+</form>

@@ -291,7 +291,7 @@
 }
 
 /* Hover effect for the entire row in the Screen Status list */
-.status-category-list:hover {
+.status-group-container:hover {
   background: rgba(78, 2, 88, 0.204);
   border: #d12ebb 1px solid;
 }

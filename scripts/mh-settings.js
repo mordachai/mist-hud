@@ -147,25 +147,13 @@ Hooks.once('init', () => {
         }
     });
 
-    // game.settings.register("mist-hud", "useHotbarForRolls", {
-    //     name: "Roll Moves using Hotbar",
-    //     hint: "If enabled, roll buttons will be placed in the hotbar instead of the HUD.",
-    //     scope: "world",
-    //     config: true,
-    //     type: Boolean,
-    //     default: false,
-    //     onChange: async (value) => {
-    //         ui.notifications.info("Roll button placement setting changed. Refresh to apply.");
-    
-    //         if (value) {
-    //             console.log("Hotbar mode enabled. Loading move macros...");
-    //             (async () => {
-    //                 const module = await import("/modules/mist-hud/scripts/mh-load-moves.js");
-    //                 await module.loadMoves();
-    //             })();
-    //         }
-    //     }
-    // });     
+    game.settings.register("mist-hud", "lastSelectedTab", {
+        name: "Last Selected Tab",
+        scope: "client",
+        config: false,
+        type: String,
+        default: ""
+    });
 
     game.settings.register("mist-hud", "useHotbarForRolls", {
         name: "Roll Moves using Hotbar",
@@ -187,8 +175,7 @@ Hooks.once('init', () => {
                 await module.clearPlayerHotbars();
             }
         }
-    });
-    
+    });    
     
     game.settings.register("mist-hud", "useTextButtons", {
         name: "Use Text for Roll Buttons",
@@ -201,6 +188,19 @@ Hooks.once('init', () => {
             ui.notifications.info("Button display setting changed. Refresh to apply.");
         }
     }); 
+
+    game.settings.register("mist-hud", "enableStatusTabs", {
+        name: "Use Status Tabs",
+        hint: "Enable to organize statuses into tabs based on category.",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: true,
+        onChange: () => {
+            ui.notifications.info("Status screen tabs setting changed. Reopen the status screen to apply.");
+        }
+    });
+    
         
 });
 
