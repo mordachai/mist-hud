@@ -923,7 +923,7 @@ li.tag-or-status {
   min-height: 300px;
   max-width: 50vw;
   max-height: 80vh;
-  overflow-x: hidden;
+  overflow-x: auto;
   overflow-y: hidden;
   border: #374e5c 2px solid;
   border-radius: 8px;

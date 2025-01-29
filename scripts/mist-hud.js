@@ -19,6 +19,17 @@ Handlebars.registerHelper("times", function(n, block) {
   return output;
 });
 
+function handleTagClick(event, tagType) {
+  event.stopPropagation();
+  event.preventDefault();
+  const tagElement = $(event.currentTarget);
+
+  if (tagElement.hasClass('burned')) return;
+
+  tagElement.toggleClass('selected');
+  this.calculateTotalPower();
+}
+
 
 export class MistHUD extends Application {
   static instance = null;
@@ -145,49 +156,10 @@ export class MistHUD extends Application {
   // Inject the custom header without passing any parameters
   this.injectCustomHeader();
     
-    // Power tag selection
-    html.find('.mh-power-tag').on('click', (event) => {
-      event.stopPropagation();
-      event.preventDefault();
-      const tagElement = $(event.currentTarget);
-  
-      // Prevent selection if burned
-      if (tagElement.hasClass('burned')) return;
-  
-      // Toggle selection state
-      tagElement.toggleClass('selected');
-      this.calculateTotalPower();
-    });
-
-    // Loadout tag selection
-    html.find('.mh-loadout-tag').on('click', (event) => {
-      event.stopPropagation();
-      event.preventDefault();
-      const tagElement = $(event.currentTarget);
-
-      // Prevent selection if burned
-      if (tagElement.hasClass('burned')) return;
-
-      // Toggle selection state
-      tagElement.toggleClass('selected');
-      this.calculateTotalPower();
-    });
-  
-    // Story tag selection toggle
-    html.find('.mh-story-tag').on('click', (event) => {
-      event.stopPropagation();
-      event.preventDefault();
-      const tagElement = $(event.currentTarget);
-
-      // Prevent selection if burned
-      if (tagElement.hasClass('burned')) return;
-
-      // Toggle the selected state
-      tagElement.toggleClass('selected');
-      
-      // Recalculate the power after selection state changes
-      this.calculateTotalPower();
-    });
+    html.find('.mh-power-tag').on('click', (event) => handleTagClick(event, 'power'));
+    html.find('.mh-weakness-tag').on('click', (event) => handleTagClick(event, 'weakness'));
+    html.find('.mh-story-tag').on('click', (event) => handleTagClick(event, 'story'));
+    html.find('.mh-loadout-tag').on('click', (event) => handleTagClick(event, 'loadout'));
 
     // Story tag inversion toggle (clicking only the inversion icon)
     html.find('.mh-story-toggle').on('click', (event) => {
@@ -215,18 +187,6 @@ export class MistHUD extends Application {
       this.calculateTotalPower();
     });
   
-    // Weakness tag selection toggle
-    html.find('.mh-weakness-tag').on('click', (event) => {
-      event.stopPropagation();
-      event.preventDefault();
-      const tagElement = $(event.currentTarget);
-
-      // Toggle the selected state
-      tagElement.toggleClass('selected');
-      
-      // Recalculate the power after selection state changes
-      this.calculateTotalPower();
-    });
 
     // Weakness tag inversion toggle
     html.find('.mh-weakness-toggle').on('click', (event) => {

@@ -247,41 +247,21 @@ try {
 }
 
 async function trackWeaknessAttention(actor, weaknessTags) {
-  if (!weaknessTags.length) {
-      console.log("[Weakness Tracking] ❌ No weakness tags used in this roll.");
-      return;
-  }
-
-  console.log("[Weakness Tracking] 🔍 Checking for weakness tag usage...");
-  console.log(`[Weakness Tracking] 🔹 Weakness Tags Passed (Final):`, weaknessTags.map(tag => tag.tagName));
-
   // Get all themes and weakness tags from the actor
   const themes = actor.items.filter(item => item.type === "theme");
   const allWeaknessTags = actor.items.filter(item => item.type === "tag" && item.system.subtype === "weakness");
 
-  console.log(`[Weakness Tracking] 🔹 Actor has ${themes.length} themes.`);
-  console.log(`[Weakness Tracking] 🔹 Actor has ${allWeaknessTags.length} weakness tags.`);
-
   for (const theme of themes) {
-      console.log(`[Weakness Tracking] 🔍 Checking theme: ${theme.name}`);
 
       // Find weakness tags that belong to this theme
       const themeWeaknessTags = allWeaknessTags.filter(tag => tag.system.theme_id === theme._id);
-      console.log(`[Weakness Tracking] 🔹 Weakness Tags in Theme "${theme.name}":`, themeWeaknessTags.map(tag => tag.name));
 
       for (const weaknessTag of weaknessTags) {
-          console.log(`[Weakness Tracking] 🔍 Checking if "${weaknessTag.tagName}" matches any theme weakness tags...`);
 
           // ✅ FIX: Compare `weaknessTag.tagName` with `tag.name` (not `tag.tagName`)
           if (themeWeaknessTags.some(tag => tag.name === weaknessTag.tagName) && weaknessTag.stateClass !== "inverted") {
-            console.log(`[Weakness Tracking] ✅ MATCH FOUND: "${weaknessTag.tagName}" in theme "${theme.name}"`);
-
               let attention = Array.isArray(theme.system.attention) ? [...theme.system.attention] : [0, 0, 0];
               let unspentUpgrades = theme.system.unspent_upgrades || 0;
-
-              console.log(`[Weakness Tracking] 🔄 BEFORE UPDATE - Theme: ${theme.name}`);
-              console.log(`  🔹 Attention: ${attention.join(", ")}`);
-              console.log(`  🔹 Unspent Upgrades: ${unspentUpgrades}`);
 
               let updated = false;
 
@@ -296,14 +276,9 @@ async function trackWeaknessAttention(actor, weaknessTags) {
 
               // ✅ If all slots are filled, reset attention and increase `unspent_upgrades`
               if (attention.every(a => a === 1)) {
-                  console.log(`[Weakness Tracking] 🎉 ${theme.name} has gained an upgrade!`);
                   attention = [0, 0, 0]; // Reset attention
                   unspentUpgrades += 1;
               }
-
-              console.log(`[Weakness Tracking] 🔄 AFTER UPDATE - Theme: ${theme.name}`);
-              console.log(`  🔹 Attention: ${attention.join(", ")}`);
-              console.log(`  🔹 Unspent Upgrades: ${unspentUpgrades}`);
 
               // ✅ Force Foundry to recognize the update
               await theme.update({
@@ -311,7 +286,6 @@ async function trackWeaknessAttention(actor, weaknessTags) {
                   [`system.unspent_upgrades`]: unspentUpgrades
               });
 
-              console.log(`[Weakness Tracking] ✅ Theme Updated: ${theme.name}`);
               return; // Stop after updating the first valid theme
           }
       }
@@ -326,8 +300,6 @@ function calculateWeaknessTags() {
   let totalWeakness = weaknessTags.reduce((total, tag) => {
       return total + (tag.stateClass === "normal" ? -1 : 0);
   }, 0);
-
-  console.log("[Weakness Debug] Final Total Weakness (Excluding Inverted):", totalWeakness);
 
   return totalWeakness; // ✅ Only return weakness count, do NOT track attention here
 }

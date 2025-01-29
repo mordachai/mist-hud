@@ -6,9 +6,7 @@ Cyber & Tech,Drone & Robotics,jammed-1,slowed-2,glitched-3,malfunctioning-4,hija
 Cyber & Tech,Hacking,probing-1,scanning-2,breaching-3,deep-access-4,root-control-5,system-owned-6
 Cyber & Tech,Network Infiltration,pinging-1,listening-2,man-in-the-middle-3,full-sniffing-4,controlling-traffic-5,total-override-6
 Cyber & Tech,System Stability,minor-lag-1,glitchy-2,unstable-3,critical-errors-4,crashed-5,total-failure-6
-Defense,Cover,half-cover-1,good-cover-2,fortified-3,bunker-4,,
-Defense,Gunfire Positioning,open-target-1,partially-covered-2,well-covered-3,fortified-4,,
-Defense,Positioning,exposed-1,behind-obstacle-2,good-spot-3,high-ground-4,,
+
 Elemental,Acid,irritated-skin-1,blistering-2,corroded-3,severe-burns-4,dissolving-5,melted-6
 Elemental,Chemical,mild-exposure-1,dizzy-2,nauseated-3,internal-damage-4,system-failure-5,dead-6
 Elemental,Compression,crushed-ribs-1,internal-strain-2,ruptured-organs-3,crushed-lungs-4,flattened-5,pulverized-6
@@ -20,6 +18,7 @@ Elemental,Ice,frostbitten-1,numb-2,frozen-limbs-3,hypothermia-4,frozen-solid-5,s
 Elemental,Laser,scorched-1,burned-2,blasted-3,melting-4,severed-5,disintegrated-6
 Elemental,Suffocation,short-of-breath-1,air-starved-2,panicking-3,blacking-out-4,unconscious-5,dead-6
 Elemental,Water,soaked-1,struggling-in-water-2,panicking-3,lungs-filling-with-water-4,drowned-5,body-recovered-6
+
 Health,Contamination,exposure-1,itchy-skin-2,nausea-3,feverish-4,organ-failure-5,dead-6
 Health,Disease,cough-1,infected-2,sick-3,bedridden-4,system-shock-5,dead-6
 Health,Food Poisoning,queasy-1,stomach-cramps-2,violent-vomiting-3,sick-and-wasted-4,hospitalized-5,dead-6
@@ -27,27 +26,37 @@ Health,Mental (also intoxication),scattered-1,dazed-2,confused-3,bewildered-4,ps
 Health,Poison,rash-1,spreading-venom-2,paralyzed-3,spasms-4,system-shock-5,dead-6
 Health,Pollution,irritated-throat-1,persistent-cough-2,breathing-difficulty-3,lung-damage-4,respiratory-failure-5,dead-6
 Health,Radiation,exposure-1,radiation-burns-2,coughing-blood-3,organ-failure-4,terminal-radiation-sickness-5,dead-6
-Physical,Arm Injury,bruised-arm-1,sprained-wrist-2,fractured-arm-3,dislocated-shoulder-4,useless-arm-5,amputated-6
-Physical,Claws,scratched-1,raked-2,deep-gash-3,maimed-4,eviscerated-5,ripped-apart-6
-Physical,Clubs,bruised-1,battered-2,cracked-bone-3,blunt-trauma-4,shattered-bones-5,caved-skull-6
-Physical,Combat (-),distracted-1,exposed-2,surprised-3,overrun-4,surrounded-5,defeated-6
-Physical,Combat (+),upper-hand-1,behind-cover-2,in-my-sight-3,tactical-superiority-4,,
-Physical,Exhaustion,tired-1,groggy-2,fatigued-3,exhausted-4,passed-out-5,
-Physical,Explosion Injury,shell-shocked-1,burned-2,shrapnel-wounds-3,severe-trauma-4,incapacitated-5,obliterated-6
-Physical,Gunfire,grazed-1,flesh-wound-2,gunshot-wound-3,bleeding-out-4,dying-5,dead-6
-Physical,Head Injury,bumped-head-1,concussed-2,fractured-skull-3,blurry-vision-4,knocked-out-5,brain-dead-6
-Physical,Injury,ouch-1,stinging-pain-2,broken-arm-3,multiple-fractures-4,dying-5,dead-6
-Physical,Knives,nicked-1,cut-2,deep-wound-3,stabbed-4,bleeding-out-5,impaled-6
-Physical,Leg Injury,twisted-ankle-1,bruised-leg-2,fractured-femur-3,torn-ligament-4,immobile-5,amputated-6
-Physical,Subdual,tangled-1,restricted-2,cuffed-2,tied-up-3,pinned-down-4,overpowered-5
-Physical,Swords,scratched-1,slashed-2,serious-gash-3,cleaved-4,dismembered-5,decapitated-6
-Physical,Torso Injury,bruised-ribs-1,winded-2,cracked-ribs-3,internal-bleeding-4,collapsed-lung-5,dead-6
+
+Combat,Cover,lite-cover-1,good-cover-2,full-cover-3,bunkered-4,,
+Combat,Positioning,exposed-1,behind-obstacle-2,good-spot-3,high-ground-4,,
+
+Combat,Injury,ouch-1,stinging-pain-2,broken-3,multiple-fractures-4,dying-5,dead-6
+Combat,Head Injury,bumped-head-1,concussed-2,head-trauma-3,fractured-skull-4,knocked-out-5,brain-dead-6
+Combat,Arm Injury,bruised-arm-1,sprained-wrist-2,fractured-arm-3,shattered-bones-4,useless-arm-5,amputated-6
+Combat,Torso Injury,bruised-ribs-1,winded-2,cracked-ribs-3,internal-bleeding-4,collapsed-lung-5,dead-6
+Combat,Leg Injury,twisted-ankle-1,bruised-leg-2,fractured-legs-3,torn-ligament-4,paralyzed-5,dismembered-6
+
+Combat,Clubs,bruised-1,battered-2,cracked-bone-3,blunt-trauma-4,shattered-bones-5,disfigured-6
+Combat,Claws,scratched-1,raked-2,deep-gash-3,maimed-4,eviscerated-5,ripped-apart-6
+Combat,Knives,nicked-1,cut-2,deep-wound-3,stabbed-4,bleeding-out-5,impaled-6
+Combat,Swords,scratched-1,slashed-2,serious-gash-3,cleaved-4,gushing-wound-5,deadly-wound-6
+
+Combat,Combat (-),distracted-1,exposed-2,surprised-3,overrun-4,surrounded-5,defeated-6
+Combat,Combat (+),upper-hand-1,behind-cover-2,in-my-sight-3,tactical-superiority-4,,
+Combat,Exhaustion,tired-1,groggy-2,fatigued-3,exhausted-4,passed-out-5,
+Combat,Subdual,tangled-1,restricted-2,cuffed-2,tied-up-3,pinned-down-4,overpowered-5
+
+Combat,Explosion,shell-shocked-1,burned-2,shrapnel-wounds-3,severe-trauma-4,incapacitated-5,obliterated-6
+Combat,Gunfire,grazed-1,flesh-wound-2,gunshot-wound-3,bleeding-out-4,dying-5,dead-6
+Combat,Aiming,aiming-1,good-position-2,plain-sight-3,clear-shot-4,sitting-duck-5,deadshot-6
+
 Pursuit,Being Followed,suspicious-1,noticed-2,evasive-3,almost-lost-4,gone-5,caught-6
 Pursuit,Chase,spotted-1,falling-behind-2,closing-gap-3,side-by-side-4,cornered-5,wrecked-6
 Pursuit,Chasing on Foot,lagging-1,pacing-up-2,closing-in-3,almost-there-4,tackled-5,neutralized-6
 Pursuit,Escaping,spotted-1,gaining-distance-2,almost-clear-3,out-of-sight-4,escaped-5,
 Pursuit,Escaping on Foot,spotted-1,breaking-away-2,almost-clear-3,out-of-sight-4,escaped-5,no-traces-6
 Pursuit,Following,trailing-1,keeping-distance-2,closing-in-3,almost-there-4,right-behind-5,caught-6
+
 Sensory,Awareness,unaware-1,distracted-2,attentive-3,keen-senses-4,hyper-aware-5,
 Sensory,Camouflage,partially-blended-1,blended-2,perfectly-matching-3,adaptive-camo-4,chameleon-5,invisible-6
 Sensory,Darkness Advantage,dim-light-1,shaded-2,cloaked-in-shadows-3,near-invisible-4,one-with-darkness-5,
@@ -60,11 +69,29 @@ Sensory,Mood,melancholic-1,sad-2,depressed-3,shattered-4,despaired-5,suicidal-6
 Sensory,Moving Unnoticed,quiet-1,sneaky-2,ghosting-3,blending-in-4,untraceable-5,phantom-6
 Sensory,Surprise,startled-1,shocked-2,stunned-3,overwhelmed-4,completely-lost-5,
 Sensory,Vision,obstructed-1,clouded-2,disoriented-3,can-hardly-see-4,blinded-5,legally-blind-6
+Sensory,Investigation (+),observant-1, analytical-2, insightful-3, sharp-detective-4, master-investigator-5, omniscient-6
+Sensory,Investigation (-),distracted-1, careless-2, misled-3, obstructed-4, blind-spot-5, completely-lost-6
+
 Society,Charm,interested-1,beguiled-2,charmed-3,mesmerized-4,controlled-5,enslaved-6
 Society,Financial,strained-budget-1,overspending-2,financial-risk-3,indebted-4,bankrupt-5,
 Society,Legal,warning-1,watched-2,warrant-for-arrest-3,wanted-4,most-wanted-5,
 Society,Society (-),embarrassed-1,on-the-spot-2,humiliated-3,laughing-stock-4,ostracized-5,
 Society,Society (+),attention-1,interesting-2,admired-3,life-of-the-party-4,media-craze-5,
+Society,Leadership (+),confident-1, respected-2, rallying-3, strategic-4, inspiring-leader-5, legendary-commander-6
+Society,Leadership (-),uncertain-1, overlooked-2, untrusted-3, divisive-4, mutinous-5, disgraced-6
+Society,Social (+),charismatic-1, persuasive-2, inspiring-3, trusted-4, idolized-5, legendary-6
+Society,Social (-),awkward-1, unconvincing-2, misunderstood-3, distrusted-4, outcast-5, infamous-6
+Society,Negotiation (+),reasonable-1, promising-deal-2, advantageous-offer-3, leverage-4, deal-closer-5
+Society,Negotiation (-),hesitant-1, pressured-2, unprepared-3, outmaneuvered-4, ruined-bargain-5
+Society,Deception (+),convincing-lie-1, believable-story-2, expertly-fabricated-3, flawless-disguise-4, untraceable-5
+Society,Deception (-),obvious-lie-1, poorly-spun-2, suspicious-3, exposed-4, condemned-5
+Society,Intimidation (+),unnerving-1, assertive-2, commanding-3, fearsome-4, terrifying-5
+Society,Intimidation (-),hesitant-1, weak-threat-2, unimposing-3, ridiculed-4, humiliated-5
+Society,Charm (+),pleasant-1, likable-2, enchanting-3, magnetic-4, irresistible-5
+Society,Charm (-),bland-1, unappealing-2, off-putting-3, abrasive-4, repulsive-5
+Society,Teamwork (+),cooperative-1, supportive-2, well-coordinated-3, cohesive-4, seamless-synergy-5
+Society,Teamwork (-),uncooperative-1, self-centered-2, argumentative-3, disruptive-4, sabotaging-5
+
 Supernatural,Demonic,marked-1,tainted-2,corrupted-3,demonic-influence-4,possessed-5,devoured-6
 Supernatural,Divine,touched-1,blessed-2,empowered-3,holy-radiance-4,ascended-5,transcended-6
 Supernatural,Fey,enlightened-1,bewitched-2,glamoured-3,trapped-in-dreams-4,fey-touched-5,lost-to-feywild-6
