@@ -72,11 +72,11 @@ Sensory,Vision,obstructed-1,clouded-2,disoriented-3,can-hardly-see-4,blinded-5,l
 Sensory,Investigation (+),observant-1, analytical-2, insightful-3, sharp-detective-4, master-investigator-5, omniscient-6
 Sensory,Investigation (-),distracted-1, careless-2, misled-3, obstructed-4, blind-spot-5, completely-lost-6
 
-Society,Charm,interested-1,beguiled-2,charmed-3,mesmerized-4,controlled-5,enslaved-6
 Society,Financial,strained-budget-1,overspending-2,financial-risk-3,indebted-4,bankrupt-5,
 Society,Legal,warning-1,watched-2,warrant-for-arrest-3,wanted-4,most-wanted-5,
 Society,Society (-),embarrassed-1,on-the-spot-2,humiliated-3,laughing-stock-4,ostracized-5,
 Society,Society (+),attention-1,interesting-2,admired-3,life-of-the-party-4,media-craze-5,
+Society,Seduction,interested-1,beguiled-2,charmed-3,mesmerized-4,controlled-5,enslaved-6
 Society,Leadership (+),confident-1, respected-2, rallying-3, strategic-4, inspiring-leader-5, legendary-commander-6
 Society,Leadership (-),uncertain-1, overlooked-2, untrusted-3, divisive-4, mutinous-5, disgraced-6
 Society,Social (+),charismatic-1, persuasive-2, inspiring-3, trusted-4, idolized-5, legendary-6

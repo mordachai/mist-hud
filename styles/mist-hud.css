@@ -1102,3 +1102,21 @@ li.tag-or-status {
   font-weight: bold;
 }
 
+/* Tooltip styling for hover-only tooltips */
+.mh-tooltip {
+  pointer-events: none; 
+  z-index: 1000;
+}
+
+/* Menu styling for the interactive menu */
+.mh-menu {
+  position: absolute;
+  z-index: 1100;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+

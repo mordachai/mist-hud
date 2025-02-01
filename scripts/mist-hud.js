@@ -5,7 +5,20 @@ import { StoryTagDisplayContainer } from "/systems/city-of-mist/module/story-tag
 import { CityHelpers } from "/systems/city-of-mist/module/city-helpers.js";
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
 import { moveConfig } from "/modules/mist-hud/scripts/mh-theme-config.js";
-
+import statusScreenApp from "./statusScreenApp.js";
+import { showTooltip, hideTooltip } from '/modules/mist-hud/scripts/tooltip.js';
+import { 
+  getCrewThemes, 
+  getMysteryFromTheme, 
+  getThemesAndTags, 
+  getThemebooks, 
+  getImprovements, 
+  getActorStatuses, 
+  getJuiceAndClues, 
+  getEssence, 
+  getLoadoutTags,
+  applyBurnState
+} from './mh-getters.js';
 // Register Handlebars helper for localizeTheme
 Handlebars.registerHelper('localizeTheme', function(themebookName) {
   return localizeTheme(themebookName);
@@ -19,17 +32,52 @@ Handlebars.registerHelper("times", function(n, block) {
   return output;
 });
 
-function handleTagClick(event, tagType) {
+async function handleTagClick(event, tagType) {
   event.stopPropagation();
   event.preventDefault();
   const tagElement = $(event.currentTarget);
 
+  // Prevent any toggling if the tag is burned
   if (tagElement.hasClass('burned')) return;
 
+  // Toggle the "selected" class in the DOM immediately.
   tagElement.toggleClass('selected');
-  this.calculateTotalPower();
+  const tagId = tagElement.data('id');
+  if (!tagId) {
+    console.error("Tag element is missing a data-id attribute.");
+    return;
+  }
+
+  // Get the current actor from the MistHUD instance.
+  const actor = MistHUD.getInstance().actor;
+  if (!actor) return;
+  
+  // Retrieve the current persistent selection (an array of tag IDs)
+  let selectedTags = actor.getFlag('mist-hud', 'selected-tags') || [];
+  
+  // Update based on the new DOM state.
+  if (tagElement.hasClass('selected')) {
+    if (!selectedTags.includes(tagId)) {
+      selectedTags.push(tagId);
+    }
+  } else {
+    selectedTags = selectedTags.filter(id => id !== tagId);
+  }
+  
+  // Persist the updated selection. (This update might trigger a re-render.)
+  await actor.setFlag('mist-hud', 'selected-tags', selectedTags);
+  
+  // Recalculate total power.
+  MistHUD.getInstance().calculateTotalPower();
 }
 
+function toggleInversion(tagElement, inversionIconConfig) {
+  tagElement.toggleClass('inverted');
+  const isInverted = tagElement.hasClass('inverted');
+  const inversionIcon = isInverted ? inversionIconConfig.active : inversionIconConfig.default;
+  tagElement.find(inversionIconConfig.selector).html(inversionIcon);
+  MistHUD.getInstance().calculateTotalPower();
+}
 
 export class MistHUD extends Application {
   static instance = null;
@@ -156,135 +204,37 @@ export class MistHUD extends Application {
   // Inject the custom header without passing any parameters
   this.injectCustomHeader();
     
-    html.find('.mh-power-tag').on('click', (event) => handleTagClick(event, 'power'));
-    html.find('.mh-weakness-tag').on('click', (event) => handleTagClick(event, 'weakness'));
-    html.find('.mh-story-tag').on('click', (event) => handleTagClick(event, 'story'));
-    html.find('.mh-loadout-tag').on('click', (event) => handleTagClick(event, 'loadout'));
+  html.find('.mh-power-tag').on('click', (event) => handleTagClick(event, 'power'));
+  html.find('.mh-weakness-tag').on('click', (event) => handleTagClick(event, 'weakness'));
+  html.find('.mh-story-tag').on('click', (event) => handleTagClick(event, 'story'));
+  html.find('.mh-loadout-tag').on('click', (event) => handleTagClick(event, 'loadout'));
+  
 
-    // Story tag inversion toggle (clicking only the inversion icon)
     html.find('.mh-story-toggle').on('click', (event) => {
       event.stopPropagation();
       event.preventDefault();
       const invertElement = $(event.currentTarget);
       const tagElement = invertElement.closest('.mh-story-tag');
-
-      // Prevent inversion if burned
       if (tagElement.hasClass('burned')) return;
+      toggleInversion(tagElement, {
+        active: '<i class="fa-light fa-angles-up"></i>',
+        default: '<i class="fa-light fa-angles-down"></i>',
+        selector: '.mh-story-toggle'
+      });
+    });  
 
-      // Toggle inverted state
-      const isCurrentlyInverted = tagElement.hasClass('inverted');
-      tagElement.toggleClass('inverted');
-
-      // Update the inversion icon based on the new inverted state
-      const inversionIcon = isCurrentlyInverted
-        ? '<i class="fa-light fa-angles-up"></i>'  // Default icon when positive
-        : '<i class="fa-light fa-angles-down"></i>'; // Icon when inverted (negative)
-
-      // Update the HTML content of the inversion icon
-      invertElement.html(inversionIcon);
-
-      // Recalculate the power after inversion state changes
-      this.calculateTotalPower();
-    });
-  
-
-    // Weakness tag inversion toggle
     html.find('.mh-weakness-toggle').on('click', (event) => {
       event.stopPropagation();
       event.preventDefault();
       const invertElement = $(event.currentTarget);
       const tagElement = invertElement.closest('.mh-weakness-tag');
-      
-      // Toggle inverted state
-      tagElement.toggleClass('inverted');  // Ensure 'inverted' class is added when toggled
-
-      // Update inversion icon based on inverted state
-      const isCurrentlyInverted = tagElement.hasClass('inverted');
-      const inversionIcon = isCurrentlyInverted
-        ? '<i class="fa-regular fa-angles-up"></i>'  // Icon when inverted (positive state)
-        : '<i class="fa-light fa-angles-down"></i>'; // Default icon (negative state)
-
-      // Update the HTML content of the inversion icon
-      invertElement.html(inversionIcon);
-
-      this.calculateTotalPower();
+      toggleInversion(tagElement, {
+        active: '<i class="fa-regular fa-angles-up"></i>',
+        default: '<i class="fa-light fa-angles-down"></i>',
+        selector: '.mh-weakness-toggle'
+      });
     });
-  
-    // Burn icon toggle for both power and story tags
-    // html.find('.mh-burn-toggle').on('click', async (event) => {
-    //   event.stopPropagation();
-    //   event.preventDefault();
-      
-    //   const burnElement = $(event.currentTarget);
-    //   const tagElement = burnElement.closest('.mh-power-tag, .mh-story-tag, .mh-loadout-tag');
-    //   const tagId = tagElement.data('id');
-  
-    //   const currentState = burnElement.hasClass('burned') ? "burned" :
-    //                        burnElement.hasClass('toBurn') ? "toBurn" : "unburned";
-  
-    //   // Determine new state
-    //   const newState = currentState === "unburned" ? "toBurn" :
-    //                    currentState === "toBurn" ? "burned" : "unburned";
-  
-    //   // Update the DOM classes for the icon and text
-    //   burnElement.removeClass('unburned toBurn burned').addClass(newState);
-    //   tagElement.removeClass('unburned toBurn burned').addClass(newState); // Also remove 'selected'
-  
-    //   // Update text state if necessary
-    //   const newIcon = MistHUD.getIcon(newState, 'burn');
-    //   burnElement.html(newIcon);
-  
-    //   if (newState === "burned") {
-    //       // Deselect the tag visually
-    //       tagElement.removeClass('selected');
-    //       tagElement.find('.tag-text').addClass('burned-text'); // Add burned text class
-    //   } else {
-    //       tagElement.find('.tag-text').removeClass('burned-text'); // Remove burned text class if not burned
-    //   }
-  
-    //   // Update the tag's state in the actor's data
-    //   const tagItem = this.actor.items.get(tagId);
-    //   if (tagItem) {
-    //       const updatedState = newState === "burned";
-    //       const burnState = newState === "toBurn" ? 1 : 0;
-    //       await tagItem.update({ "system.burned": updatedState, "system.burn_state": burnState });
-    //   }
-  
-    //   // Recalculate total power to reflect deselection
-    //   this.calculateTotalPower();
-    // });
-
-    // html.find('.mh-burn-toggle').on('click', async (event) => {
-    //   event.stopPropagation();
-    //   event.preventDefault();
     
-    //   const burnElement = $(event.currentTarget);
-    //   const tagElement = burnElement.closest('.mh-power-tag, .mh-story-tag, .mh-loadout-tag');
-    //   const tagId = tagElement.data('id');
-    
-    //   const currentState = burnElement.hasClass('burned') ? "burned" :
-    //                        burnElement.hasClass('toBurn') ? "toBurn" : "unburned";
-    
-    //   // Determine new state
-    //   const newState = currentState === "unburned" ? "toBurn" :
-    //                    currentState === "toBurn" ? "burned" : "unburned";
-    
-    //   // Update the DOM classes for the icon and tag
-    //   burnElement.removeClass('unburned toBurn burned').addClass(newState);
-    //   tagElement.removeClass('unburned toBurn burned').addClass(newState); // Also remove 'selected'
-    
-    //   // Update the tag's state in the actor's data
-    //   const tagItem = this.actor.items.get(tagId);
-    //   if (tagItem) {
-    //     const updatedState = newState === "burned";
-    //     const burnState = newState === "toBurn" ? 1 : 0;
-    //     await tagItem.update({ "system.burned": updatedState, "system.burn_state": burnState });
-    //   }
-    
-    //   // Recalculate total power
-    //   this.calculateTotalPower();
-    // });
-
     html.find('.mh-burn-toggle').on('click', async (event) => {
       event.stopPropagation();
       event.preventDefault();
@@ -292,83 +242,58 @@ export class MistHUD extends Application {
       const burnElement = $(event.currentTarget);
       const tagElement = burnElement.closest('.mh-power-tag, .mh-story-tag, .mh-loadout-tag');
       const tagId = tagElement.data('id');
+      const actor = MistHUD.getInstance().actor;
+      if (!tagId || !actor) return;
     
       // Determine the current state
-      const currentState = burnElement.hasClass('burned') ? "burned" :
-                           burnElement.hasClass('toBurn') ? "toBurn" : "unburned";
+      const currentState = burnElement.hasClass('burned')
+        ? "burned"
+        : burnElement.hasClass('toBurn')
+          ? "toBurn"
+          : "unburned";
     
-      // Cycle to the new state
-      const newState = currentState === "unburned" ? "toBurn" :
-                       currentState === "toBurn" ? "burned" : "unburned";
+      // Cycle states: unburned -> toBurn -> burned -> unburned
+      const newState = currentState === "unburned"
+        ? "toBurn"
+        : currentState === "toBurn"
+          ? "burned"
+          : "unburned";
     
-      // Update the classes for the burn state
+      // Update DOM classes for the burn toggle and tag element
       burnElement.removeClass('unburned toBurn burned').addClass(newState);
       tagElement.removeClass('unburned toBurn burned').addClass(newState);
     
-      // Automatically deselect the tag if the new state is "burned"
-      if (newState === "burned") {
-        tagElement.removeClass('selected'); // Deselect the tag
+      // Update selection based on the new state:
+      if (newState === "toBurn") {
+        // Force the tag to be selected if it's set to "toBurn"
+        tagElement.addClass('selected');
+        let selectedTags = actor.getFlag('mist-hud', 'selected-tags') || [];
+        if (!selectedTags.includes(tagId)) {
+          selectedTags.push(tagId);
+        }
+        await actor.setFlag('mist-hud', 'selected-tags', selectedTags);
+      } else if (newState === "burned") {
+        // When burned, deselect the tag
+        tagElement.removeClass('selected');
+        let selectedTags = actor.getFlag('mist-hud', 'selected-tags') || [];
+        selectedTags = selectedTags.filter(id => id !== tagId);
+        await actor.setFlag('mist-hud', 'selected-tags', selectedTags);
       }
+      // If newState is "unburned", leave selection as is (i.e. if the user
+      // manually selected it, that remains intact).
     
-      // Update the tag's state in the actor's data
-      const tagItem = this.actor.items.get(tagId);
+      // Update the tag's state in the actor's data:
+      const tagItem = actor.items.get(tagId);
       if (tagItem) {
-        const updatedState = newState === "burned"; // Boolean for burned state
-        const burnState = newState === "toBurn" ? 1 : 0; // Numeric for burn state
+        const updatedState = newState === "burned"; // boolean for burned state
+        const burnState = newState === "toBurn" ? 1 : 0; // numeric value for burn state
         await tagItem.update({ "system.burned": updatedState, "system.burn_state": burnState });
       }
     
-      // Recalculate total power to reflect any changes
-      this.calculateTotalPower();
-    });
-    
-    // html.find('.mh-status').on('click', async (event) => {
-    //   event.stopPropagation();
-    //   event.preventDefault();
-  
-    //   const statusElement = $(event.currentTarget);
-    //   const statusId = statusElement.data('status-id');
-  
-    //   if (!statusId) {
-    //       console.error("Missing status ID for state update.");
-    //       return;
-    //   }
-  
-    //   // Cycle through states: neutral -> negative -> positive -> neutral
-    //   let newState = 'neutral';
-    //   if (statusElement.hasClass('neutral')) {
-    //       newState = 'negative';
-    //       statusElement.removeClass('neutral').addClass('negative selected');
-    //   } else if (statusElement.hasClass('negative')) {
-    //       newState = 'positive';
-    //       statusElement.removeClass('negative').addClass('positive selected');
-    //   } else if (statusElement.hasClass('positive')) {
-    //       newState = 'neutral';
-    //       statusElement.removeClass('positive selected').addClass('neutral');
-    //   }
-  
-    //   // Add or remove the `selected` class based on state
-    //   if (newState === 'neutral') {
-    //       statusElement.removeClass('selected'); // Neutral status is not selected
-    //   } else {
-    //       statusElement.addClass('selected'); // Non-neutral statuses are selected
-    //   }
-  
-    //   // Persist state to actor flags
-    //   const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
-    //   savedStates[statusId] = {
-    //       state: newState,
-    //       selected: newState !== 'neutral' // Selected if not neutral
-    //   };
-    //   await this.actor.setFlag('mist-hud', 'status-states', savedStates);
-  
-    //   console.log(`Status ${statusId} updated to ${newState}`);
-  
-    //   // Recalculate total power after updating the status
-    //   this.calculateTotalPower();
-    // });
+      // Recalculate total power
+      MistHUD.getInstance().calculateTotalPower();
+    });       
      
-
     html.find('.mh-status').on('click', async (event) => {
       event.stopPropagation(); // Stop the event from propagating to parent elements
       event.preventDefault();
@@ -414,6 +339,7 @@ export class MistHUD extends Application {
       // Recalculate total power after updating the status
       this.calculateTotalPower();
     });
+    
 
     html.find('.mh-status').each((i, el) => {
       el.setAttribute('draggable', 'true');
@@ -435,8 +361,7 @@ export class MistHUD extends Application {
         // 3) Store it
         ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
       });
-    });
-    
+    });    
 
     html.find('.help-toggle, .hurt-toggle').on('change', async (event) => {
       const toggle = event.currentTarget;
@@ -508,44 +433,7 @@ export class MistHUD extends Application {
             }
         }
     });
-
-    // Tooltip for theme type
-    html.find(".theme-type").hover(
-        (event) => {
-            const themeName = $(event.currentTarget).data("themeName");
-            if (!themeName) return;
-
-            // Create and display tooltip
-            const tooltip = $(`<div class="mh-tooltip">${themeName}</div>`);
-            $("body").append(tooltip);
-
-            tooltip.css({
-                top: event.pageY + 10,
-                left: event.pageX + 10
-            });
-
-            $(event.currentTarget).data("tooltipElement", tooltip);
-        },
-        (event) => {
-            // Remove tooltip on hover out
-            const tooltip = $(event.currentTarget).data("tooltipElement");
-            if (tooltip) {
-                tooltip.remove();
-                $(event.currentTarget).removeData("tooltipElement");
-            }
-        }
-    );
-
-    html.find(".theme-type").mousemove((event) => {
-        const tooltip = $(event.currentTarget).data("tooltipElement");
-        if (tooltip) {
-            tooltip.css({
-                top: event.pageY + 10,
-                left: event.pageX + 10
-            });
-        }
-    });
-
+    
     html.find('.create-story-tag').on("click", this._createStoryTagFromHUD.bind(this));
 
     html.find('.create-status').on("click", this._createStatusFromHUD.bind(this));
@@ -756,305 +644,99 @@ export class MistHUD extends Application {
       event.stopPropagation();
     });
   }
- 
+  
   getData(options) {
     const data = super.getData(options);
     if (!this.actor) return data;
-
+  
     data.actor = this.actor;
     data.token = canvas.tokens.controlled[0] || null;
     data.scene = game.scenes.current || null;
-
-    // Get the active system setting
+  
     const activeSystem = game.settings.get("city-of-mist", "system");
     data.activeSystem = activeSystem;
-
-    // Define flags for supported systems
     data.isCityOfMist = activeSystem === "city-of-mist";
     data.isOtherscape = activeSystem === "otherscape";
-
-    const themesAndTags = this.getThemesAndTags();
+  
+    // Get the persisted selected tag IDs (assumed to be stored as an array)
+    const selectedTags = this.actor.getFlag('mist-hud', 'selected-tags') || [];
+  
+    // Use the imported getters:
+    const themesAndTags = getThemesAndTags(this.actor);
+  
+    // Update themes' power and weakness tags to include the selected property:
+    themesAndTags.themes = themesAndTags.themes.map(theme => {
+      if (theme.powerTags && Array.isArray(theme.powerTags)) {
+        theme.powerTags = theme.powerTags.map(tag => ({
+          ...tag,
+          selected: selectedTags.includes(tag.id)
+        }));
+      }
+      if (theme.weaknessTags && Array.isArray(theme.weaknessTags)) {
+        theme.weaknessTags = theme.weaknessTags.map(tag => ({
+          ...tag,
+          selected: selectedTags.includes(tag.id)
+        }));
+      }
+      return theme;
+    });
+  
+    // Update story tags to include the selected property:
+    themesAndTags.storyTags = themesAndTags.storyTags.map(tag => ({
+      ...tag,
+      selected: selectedTags.includes(tag.id)
+    }));
+  
+    // Get and update loadout tags:
+    const loadoutTags = getLoadoutTags(this.actor).map(tag => ({
+      ...tag,
+      selected: selectedTags.includes(tag.id)
+    }));
+  
     data.themes = themesAndTags.themes;
     data.storyTags = themesAndTags.storyTags;
     data.hasStoryTags = !!(themesAndTags.storyTags && themesAndTags.storyTags.length > 0);
-    data.loadoutTags = this.getLoadoutTags();
+    data.loadoutTags = loadoutTags;
     data.crewThemes = themesAndTags.crewThemes;
-
-    // Ensure crew themes are flagged
-    data.hasCrewThemes = data.crewThemes && data.crewThemes.length > 0;
-    console.log("Crew Themes:", data.crewThemes);
-
-    // 1) Basic raw statuses
-    const rawStatuses = this.getActorStatuses();
-
-    // 2) The savedStates from flags
+  
+    // Process statuses:
+    const rawStatuses = getActorStatuses(this.actor);
     const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
-
-    data.statuses = rawStatuses.map(st => {
-      // If no savedState for this ID, default to neutral
-      const {state="neutral", selected=false} = savedStates[st.id] || {};
-      
-      // Merge them into a single object for the template
-      return {
-        ...st,
-        statusType: state,   // e.g., "neutral", "positive", or "negative"
-        selected
-      };
-    });
-
-       // Process Juice and Clues for City of Mist
+    data.statuses = rawStatuses.map(st => ({
+      ...st,
+      statusType: savedStates[st.id]?.state || "neutral",
+      selected: savedStates[st.id]?.selected || false,
+    }));
+  
     if (data.isCityOfMist) {
-        const { helpItems, hurtItems, clueItems, juiceItems } = this.getJuiceAndClues();
-        data.helpItems = helpItems || [];
-        data.hurtItems = hurtItems || [];
-        data.clueItems = clueItems || [];
-        data.juiceItems = juiceItems || [];
+      const { helpItems, hurtItems, clueItems, juiceItems } = getJuiceAndClues(this.actor);
+      data.helpItems = helpItems;
+      data.hurtItems = hurtItems;
+      data.clueItems = clueItems;
+      data.juiceItems = juiceItems;
     } else if (data.isOtherscape) {
-        // Process essence for Otherscape
-        const themes = this.actor.items.filter(item => item.type === "theme");
-        const essenceData = this.getEssence(themes);
-
-        if (essenceData?.essence) {
-            data.essence = essenceData.essence;
-            data.essenceClass = essenceData.className;
-            data.essenceImage = essenceData.imageName;
-            data.essenceText = new Handlebars.SafeString(
-                essenceDescriptions[essenceData.essence] || essenceDescriptions["Undefined"]
-            );
-        } else {
-            console.error("getEssence returned invalid data:", essenceData);
-        }
+      const themes = this.actor.items.contents.filter(item => item.type === "theme");
+      const essenceData = getEssence(themes);
+      if (essenceData?.essence) {
+        data.essence = essenceData.essence;
+        data.essenceClass = essenceData.className;
+        data.essenceImage = essenceData.imageName;
+        data.essenceText = new Handlebars.SafeString(
+          essenceDescriptions[essenceData.essence] || essenceDescriptions["Undefined"]
+        );
+      } else {
+        console.error("getEssence returned invalid data:", essenceData);
+      }
     }
-
-    // Add Help and Hurt messages for the receiving player
+  
     const receivedBonuses = this.actor.getFlag('mist-hud', 'received-bonuses') || [];
-
     data.helpHurtMessages = receivedBonuses.length > 0 ? receivedBonuses : null;
-
-    // Add improvements
-    const improvements = this.getImprovements();
+  
+    const improvements = getImprovements(this.actor);
     data.improvements = improvements;
     data.hasImprovements = improvements.length > 0;
-
+  
     return data;
-  }
-
-  getCrewThemes() {
-    if (!this.actor) return [];
-
-    const nonGMOwners = game.users.filter(user => 
-        !user.isGM && this.actor.testUserPermission(user, "OWNER")
-    );
-
-    const ownedCrews = game.actors.contents.filter(actor => 
-        actor.type === "crew" &&
-        nonGMOwners.some(user => actor.testUserPermission(user, "OWNER"))
-    );
-
-    // console.log("Owned Crews:", ownedCrews);
-
-    return ownedCrews.flatMap(crew =>
-        crew.items.filter(item => item.type === "theme").map(theme => ({
-            id: theme.id,
-            name: theme.name,
-            crewName: crew.name,
-            actorId: crew.id, // Include the actor ID for easier lookup
-        }))
-    );
-  }
-  
-  getThemesAndTags() {
-    if (!this.actor) return {};
-
-    const items = this.actor.items.contents;
-
-    // Filter out standard themes and tags
-    const themeItems = items.filter(item => item.type === "theme" && item.name !== "__LOADOUT__");
-    const tagItems = items.filter(item => item.type === "tag");
-
-    // Group subtags by their parent
-    const subTagsByParent = tagItems.reduce((acc, tag) => {
-        if (tag.system.parentId) {
-            if (!acc[tag.system.parentId]) acc[tag.system.parentId] = [];
-            acc[tag.system.parentId].push(tag);
-        }
-        return acc;
-    }, {});
-
-    // Process actor themes
-    const themes = themeItems.map(theme => {
-        const themeId = theme.id;
-        let realThemebook = theme.themebook;
-
-        // Resolve the correct themebook for Otherscape
-        if (realThemebook?.isThemeKit && realThemebook.isThemeKit()) {
-            realThemebook = realThemebook.themebook;
-        }
-
-        if (!realThemebook) {
-            console.warn(`Themebook is missing or null for theme: ${theme.name}`);
-            return null;
-        }
-
-        const themeType = realThemebook.system?.subtype || "default-icon";
-
-        const powerTags = this.getPowerTags(themeId, tagItems, subTagsByParent, this.actor);
-        const weaknessTags = this.getWeaknessTags(themeId, tagItems, subTagsByParent, this.actor);
-
-        return {
-            id: themeId,
-            themeName: theme.name,
-            category: themeType, // Assign Mythos, Logos, Noise, etc.
-            iconClass: `mh-theme-icon ${themeType}`,
-            powerTags,
-            weaknessTags,
-            localizedThemebookName: realThemebook.name, // Ensure localized name
-            unspent_upgrades: theme.system.unspent_upgrades || 0
-
-        };
-    }).filter(Boolean);
-
-    // Process crew themes
-    const crewThemes = this.getCrewThemes().map(crewTheme => {
-        const crewActor = game.actors.get(crewTheme.actorId); // Fetch the crew actor
-        const crewTags = crewActor?.items?.filter(item => item.type === "tag") || [];
-        const crewSubTagsByParent = crewTags.reduce((acc, tag) => {
-            if (tag.system.parentId) {
-                if (!acc[tag.system.parentId]) acc[tag.system.parentId] = [];
-                acc[tag.system.parentId].push(tag);
-            }
-            return acc;
-        }, {});
-
-        return {
-            id: crewTheme.id,
-            themeName: crewTheme.name,
-            crewName: crewTheme.crewName,
-            category: "crew", // Differentiate crew themes
-            iconClass: "mh-theme-icon crew",
-            powerTags: this.getPowerTags(crewTheme.id, crewTags, crewSubTagsByParent, crewActor),
-            weaknessTags: this.getWeaknessTags(crewTheme.id, crewTags, crewSubTagsByParent, crewActor),
-        };
-    });
-
-    // Retrieve story tags
-    const storyTags = this.getStoryTags();
-
-    return {
-        themes,       // Actor themes
-        crewThemes,   // Crew themes
-        storyTags,    // Story tags
-    };
-  }
- 
-  getThemebooks() {
-    if (!this.actor || !this.actor.items) {
-        console.error("Invalid actor provided.");
-        return [];
-    }
-
-    const items = this.actor.items.contents;
-
-    // Passo 1: Extrair temas e tags
-    const themes = items.filter(item => item.type === "theme" && item.name !== "__LOADOUT__");
-    const tagItems = items.filter(item => item.type === "tag");
-
-    return themes.map(theme => {
-        let realThemebook;
-        const themebook = theme.themebook;
-
-        if (themebook?.isThemeKit()) {
-            realThemebook = themebook.themebook;
-        } else {
-            realThemebook = themebook;
-        }
-
-        // Garantir que o realThemebook não é nulo
-        if (!realThemebook) {
-            console.warn(`Themebook is null for theme: ${theme.name}`);
-            return null;
-        }
-
-        const themeType = realThemebook.system?.subtype || "default-icon";
-        const themeIcon = `mh-theme-icon ${themeType}`;
-
-        return {
-            id: theme._id,
-            themeName: theme.name,
-            themebook_id: realThemebook._id,
-            themebook_name: realThemebook.name,
-            themeIcon,
-            themeType,
-            burnState: theme.system?.burned ? 'burned' : '',
-            mystery: theme.system?.mystery || "",
-            themeInfo: {
-                motivation: realThemebook.system?.motivation || "",
-                locale_name: realThemebook.system?.locale_name?.replace(/^#/, "") || "" // Remover #
-            }
-        };
-
-    }).filter(Boolean); // Remover entradas nulas de temas inválidos
-  }
-
-  getImprovements() {
-    if (!this.actor) return [];
-  
-    const items = this.actor.items.contents;
-  
-    // Filter for themes and build a map of theme information
-    const themes = items
-      .filter(item => item.type === "theme")
-      .reduce((acc, theme) => {
-        let realThemebook;
-        const themebook = theme.themebook;
-  
-        if (themebook?.isThemeKit()) {
-          realThemebook = themebook.themebook;
-        } else {
-          realThemebook = themebook;
-        }
-  
-        if (!realThemebook) {
-          console.warn(`No themebook found for theme: ${theme.name}`);
-          return acc;
-        }
-  
-        acc[theme._id] = {
-          id: theme._id,
-          name: theme.name || "Unnamed Theme",
-          themebookName: realThemebook.name || "Unnamed Themebook",
-          themeType: realThemebook.system.subtype || "Unknown Type",
-        };
-        return acc;
-      }, {});
-  
-    // Group improvements under their associated themebooks
-    const improvementsGroupedByThemebook = items
-      .filter(item => item.type === "improvement" && themes[item.system.theme_id]) // Only improvements with valid themes
-      .reduce((acc, item) => {
-        const theme = themes[item.system.theme_id];
-        const themebookName = theme.themebookName;
-  
-        if (!acc[themebookName]) {
-          acc[themebookName] = {
-            themebookName,
-            themeType: theme.themeType,
-            improvements: [],
-          };
-        }
-  
-        acc[themebookName].improvements.push({
-          id: item.id,
-          name: item.name,
-          description: item.system.description || "No description provided.",
-          choiceItem: item.system.choice_item || null,
-          uses: item.system.uses || { max: 0, current: 0, expended: false },
-        });
-  
-        return acc;
-      }, {});
-  
-    return Object.values(improvementsGroupedByThemebook);
   }  
 
   async _createClueFromHUD(event) {
@@ -1253,113 +935,26 @@ export class MistHUD extends Application {
     }
   }
 
-  getMysteryFromTheme(themeId) {
-    if (!this.actor) {
-        console.warn("No actor set in MistHUD.");
-        return null;
-    }
-
-    const theme = this.actor.items.find(item => item.type === 'theme' && item.id === themeId);
-
-    if (!theme) {
-        console.warn(`No theme found with ID: ${themeId}`);
-        return "No mystery defined.";
-    }
-
-    let realThemebook;
-    const themebook = theme.themebook;
-
-    if (themebook?.isThemeKit()) {
-        realThemebook = themebook.themebook;
-    } else {
-        realThemebook = themebook;
-    }
-
-    if (!realThemebook) {
-        console.warn(`No themebook found for theme: ${theme.name}`);
-        return "No mystery defined.";
-    }
-
-    const category = realThemebook.system.subtype || "unknown";
-    const system = game.settings.get("city-of-mist", "system");
-
-    let prefixKey;
-
-    switch (category) {
-        case "Mythos":
-            prefixKey = (system === "city-of-mist") ? "CityOfMist.terms.mystery" :
-                        (system === "otherscape") ? "Otherscape.terms.ritual" :
-                        null; // Important: handle unknown systems
-            break;
-        case "Logos":
-        case "Self":
-            prefixKey = "CityOfMist.terms.identity";
-            break;
-        case "Noise":
-            prefixKey = "Otherscape.terms.itch";
-            break;
-        case "Mist":
-            prefixKey = "CityOfMist.terms.directive";
-            break;
-        case "Extras":
-            prefixKey = "CityOfMist.terms.extra";
-            break;
-        case "Crew":
-            prefixKey = "CityOfMist.terms.crewTheme";
-            break;
-        case "Loadout":
-            prefixKey = "Otherscape.terms.loadout";
-            break;
-        default:
-          console.warn(`Unknown category: ${category}`);
-          prefixKey = null; // Important: handle unknown categories
-    }
-
-    const prefix = prefixKey ? game.i18n.localize(prefixKey) : "Theme";
-    const mysteryText = theme.system.mystery || "No mystery defined.";
-
-    return `<span class="mystery-type ${category}">${prefix}:</span><span class="mystery-text">${mysteryText}</span>`;
-  }  
-  
   addTooltipListeners(html) {
     html.find('.mh-theme-icon').each((index, element) => {
-        const themeId = $(element).data('theme-id');
-
-        $(element).hover(
-            (event) => {
-                const mystery = this.getMysteryFromTheme(themeId);
-                this.showTooltip(event, mystery);
-            },
-            () => this.hideTooltip()
-        );
+      const themeId = $(element).data('theme-id');
+      $(element).hover(
+        (event) => {
+          // Call the imported function with the actor and themeId
+          const mystery = getMysteryFromTheme(this.actor, themeId);
+          // Save the tooltip reference on the element or the instance
+          this.currentTooltip = showTooltip(event, mystery);
+        },
+        () => {
+          if (this.currentTooltip) {
+            hideTooltip(this.currentTooltip);
+            this.currentTooltip = null;
+          }
+        }
+      );
     });
-  }
-
-  showTooltip(event, mystery) {
-    if (!mystery) {
-        console.warn("No mystery found for tooltip.");
-        return;
-    }
-
-    const tooltip = $(`<div class="mh-tooltip"></div>`);
-    tooltip.html(mystery); // Ensure this renders HTML content
-    $('body').append(tooltip); // Append tooltip to the body for higher z-index context
-
-    tooltip.css({
-        top: event.pageY + 10, // Position near the mouse cursor
-        left: event.pageX + 10
-    });
-
-    this.currentTooltip = tooltip; // Store reference to remove later
-  }
-
-  hideTooltip() {
-    if (this.currentTooltip) {
-        this.currentTooltip.remove();
-        this.currentTooltip = null;
-    }
-  }
-  
+  }  
+   
   calculateTotalPower() {
     let totalPower = 0;
 
@@ -1450,305 +1045,7 @@ export class MistHUD extends Application {
 
     return totalPower;
   }
-
-  getJuiceAndClues() {
-    const items = this.actor?.items || [];
-    const characters = game.actors; // Access all actors in the world.
-
-    // Fetch character details based on ID
-    const resolveCharacter = (charId) => {
-        const char = characters.get(charId);
-        if (!char) return null;
-        return {
-            name: char.name,
-            tokenImage:
-                char.token?.texture.src ||
-                char.prototypeToken?.texture.src ||
-                char.img,
-            id: char.id
-        };
-    };
-
-    // Fetch active bonuses from actor flags
-    const activeBonuses = this.actor.getFlag('mist-hud', 'active-bonuses') || {};
-
-    // Help items with resolved character info and active status
-    const helpItems = items
-        .filter(item => item.type === "juice" && item.system.subtype === "help")
-        .map(item => {
-            const target = resolveCharacter(item.system.targetCharacterId);
-            if (!target) return null;
-
-            const active = activeBonuses.help?.[target.id] || false;
-
-            return {
-                amount: item.system.amount,
-                target,
-                active,
-            };
-        })
-        .filter(item => item !== null); // Filter out invalid targets
-
-    // Hurt items with resolved character info and active status
-    const hurtItems = items
-        .filter(item => item.type === "juice" && item.system.subtype === "hurt")
-        .map(item => {
-            const target = resolveCharacter(item.system.targetCharacterId);
-            if (!target) return null;
-
-            const active = activeBonuses.hurt?.[target.id] || false;
-
-            return {
-                amount: item.system.amount,
-                target,
-                active,
-            };
-        })
-        .filter(item => item !== null); // Filter out invalid targets
-
-    // Clue items
-    const clueItems = items
-    .filter(item => item.type === "clue" && item.system)
-    .map(item => ({
-        id: item.id, // Include the clue's unique ID
-        actorId: this.actor.id, // Include the actor's ID for context
-        name: item.name || "Unnamed Clue",
-        amount: item.system.amount || 0,
-        partial: item.system.partial || false,
-        source: item.system.source || "Unknown",
-        method: item.system.method || "Unknown",
-    }));
-
-    // Juice items
-    const juiceItems = items
-    .filter(item =>
-        item.type === "juice" &&
-        item.system &&
-        (!item.system.subtype || !["help", "hurt"].includes(item.system.subtype)) // Exclude help and hurt subtypes
-    )
-    .map(item => ({
-        id: item.id,
-        actorId: this.actor.id,
-        name: item.name || "Unnamed Juice",
-        amount: item.system.amount || 0,
-        source: item.system.source || "Unknown",
-        method: item.system.method || "Unknown",
-    }));
-
-
-    return {
-        helpItems,
-        hurtItems,
-        clueItems,
-        juiceItems,
-    };
-  }
   
-  getPowerTags(themeId, tagItems, subTagsByParent, actor) {
-    const powerTags = tagItems.filter(tag => tag.system.theme_id === themeId && tag.system.subtype === "power");
-
-    return this.formatTagsHierarchy(powerTags, subTagsByParent).map(tag => {
-        const tagData = this.applyBurnState(actor, tag.id); // Pass the correct actor
-        return {
-            ...tagData,
-            tagName: tag.name || tagData.tagName || `Unnamed Power Tag`,
-        };
-    });
-  }
-
-  getWeaknessTags(themeId, tagItems, subTagsByParent, actor) {
-      const weaknessTags = tagItems.filter(tag => tag.system.theme_id === themeId && tag.system.subtype === "weakness");
-
-      return this.formatTagsHierarchy(weaknessTags, subTagsByParent).map(tag => {
-          const tagData = this.applyBurnState(actor, tag.id, "weakness"); // Pass the correct actor
-          return {
-              ...tagData,
-              tagName: tag.name || tagData.tagName || `Unnamed Weakness Tag`,
-          };
-      });
-  }
-
-  getStoryTags() {
-    if (!this.actor) return [];
-
-    // Get all tag items
-    const items = this.actor.items.contents;
-    const tagItems = items.filter(item => item.type === 'tag');
-
-    // Filter and process only the story tags
-    const storyTags = tagItems.filter(tag => tag.system.subtype === 'story')
-        .map(tag => {
-            if (!tag || !tag._id || !tag.system) {
-                console.error("Invalid tag item or missing system data in applyBurnState:", tag);
-                return null; // Skip invalid tags
-            }
-
-            // Apply burn state and handle inversion
-            const processedTag = this.applyBurnState(this.actor, tag._id, 'story');
-            processedTag.isInverted = tag.system.inverted || false;
-            processedTag.inversionIcon = processedTag.isInverted 
-                ? '<i class="fa-light fa-angles-up"></i>' 
-                : '<i class="fa-light fa-angles-down"></i>';
-
-            // Check if the tag is temporary and add the temporary property
-            // processedTag.temporary = tag.system.temporary || false;
-
-            return processedTag;
-        }).filter(Boolean); // Remove any null or invalid entries
-
-    return storyTags;
-  }
- 
-  getLoadoutTags() {
-    if (!this.actor) return [];
-
-    return this.actor.items.filter(item =>
-        item.type === 'tag' &&
-        item.system.subtype === 'loadout' &&
-        item.system.activated_loadout === true
-    ).map(tag => {
-        const burnData = this.applyBurnState(this.actor, tag.id);
-
-        return {
-            id: tag.id,
-            tagName: tag.name,
-            burnState: burnData.burnState,
-            cssClass: burnData.cssClass,
-            burnIcon: burnData.burnIcon,
-            permanent: burnData.permanent,
-            temporary: burnData.temporary,
-            isInverted: burnData.isInverted, // For consistency, though likely not used for loadout tags
-            activatedLoadout: tag.system.activated_loadout,
-        };
-    });
-  }
-
-  getEssence(themes) {
-    // Initialize counters for each category
-    const categoryCounts = {
-      Self: 0,
-      Noise: 0,
-      Logos: 0,
-      Mythos: 0,
-      Mist: 0,
-    };
-  
-    for (const theme of themes) {
-      // Retrieve the themebook associated with the theme
-      let realThemebook;
-      const themebook = theme.themebook;
-  
-      if (themebook?.isThemeKit()) {
-        realThemebook = themebook.themebook;
-      } else {
-        realThemebook = themebook;
-      }
-  
-      if (!realThemebook) {
-        console.warn(`No themebook found for theme: ${theme.name}`);
-        continue;
-      }
-  
-      // Determine the category of the themebook
-      const category = realThemebook.system.subtype;
-  
-      if (category && categoryCounts.hasOwnProperty(category)) {
-        categoryCounts[category]++;
-      } else {
-        console.warn(`Unknown or missing category for theme: ${theme.name}`);
-      }
-    }
-  
-    const { Self, Noise, Mythos } = categoryCounts;
-  
-    // Generate the image file name
-    const totalCount = Self + Noise + Mythos;
-    let imageName = "blank.svg"; // Default image for undefined
-  
-    if (totalCount === 4) {
-      const segments = [];
-      if (Self > 0) segments.push(`${Self}S`);
-      if (Mythos > 0) segments.push(`${Mythos}M`);
-      if (Noise > 0) segments.push(`${Noise}N`);
-      imageName = segments.join("") + ".svg";
-    } else if (categoryCounts.Logos > 0 || categoryCounts.Mist > 0 || categoryCounts.Mythos > 0) {
-      imageName = "com.webp"; // City of Mist characters
-    }
-  
-    // Determine the essence and its class
-    let essenceData = { essence: "Undefined", className: "undefined", imageName };
-  
-    if (Self > 0 && Noise > 0 && Mythos > 0) {
-      essenceData = { essence: "Nexus", className: "nexus", imageName };
-    } else if (Self > 0 && Mythos > 0 && Noise === 0) {
-      essenceData = { essence: "Spiritualist", className: "spiritualist", imageName };
-    } else if (Self > 0 && Noise > 0 && Mythos === 0) {
-      essenceData = { essence: "Cyborg", className: "cyborg", imageName };
-    } else if (Mythos > 0 && Noise > 0 && Self === 0) {
-      essenceData = { essence: "Transhuman", className: "transhuman", imageName };
-    } else if (Self > 0 && Noise === 0 && Mythos === 0) {
-      essenceData = { essence: "Real", className: "real", imageName };
-    } else if (Mythos > 0 && Self === 0 && Noise === 0) {
-      essenceData = { essence: "Avatar/Conduit", className: "avatar-conduit", imageName };
-    } else if (Noise > 0 && Self === 0 && Mythos === 0) {
-      essenceData = { essence: "Singularity", className: "singularity", imageName };
-    }
-  
-    return essenceData;
-  }
-
-  static getIcon(state, type) {
-    if (type === 'burn') {
-        // Return an empty span with a dynamic class for styling
-        // return `<span class="mh-burn-toggle burn-icon ${state}"></span>`;
-        return state; // Only return the state string for dynamic class usage      
-    } else if (type === 'weakness') {
-        // Weakness icons remain as FontAwesome
-        return state
-            ? '<i class="fa-regular fa-angles-up"></i>'
-            : '<i class="fa-light fa-angles-down"></i>';
-    }
-  }
-
-  applyBurnState(actor, tagId, tagType = "power") {
-    const tagItem = actor?.items?.get(tagId);
-
-    if (!tagItem || !tagItem.system) {
-        console.warn(`Invalid or missing tag item for ID: ${tagId}`);
-        return {
-            id: tagId,
-            tagName: `Unknown ${tagType} Tag`,
-            burnState: "unburned",
-            cssClass: "unburned",
-            burnIcon: this.constructor.getIcon("unburned", "burn"),
-            permanent: false,
-            temporary: false,
-            crispy: false,
-            isInverted: false,
-            inversionIcon: this.constructor.getIcon(false, "weakness"),
-        };
-    }
-
-    const burnState = tagItem.system.burned
-        ? "burned"
-        : tagItem.system.burn_state === 1
-        ? "toBurn"
-        : "unburned";
-
-    return {
-        id: tagId,
-        tagName: tagItem.name || `Unnamed ${tagType} Tag`, // Ensure tag name is passed
-        burnState,
-        cssClass: burnState,
-        burnIcon: this.constructor.getIcon(burnState, "burn"),
-        permanent: tagItem.system.permanent || false,
-        temporary: tagItem.system.temporary || false,
-        crispy: tagItem.system.crispy || false,
-        isInverted: tagItem.system.isInverted || false,
-        inversionIcon: this.constructor.getIcon(tagItem.system.isInverted, "weakness"),
-    };
-  }
-
   formatTagsHierarchy(tags, subTagsByParent) {
     return tags.map((tag) => {
         // Format the parent tag
@@ -1781,24 +1078,7 @@ export class MistHUD extends Application {
           activatedLoadout: tag.system.activated_loadout || false,  // New: Whether the loadout tag is activated
       };
   }
-
-  getActorStatuses() {
-    if (!this.actor) return [];
-
-    const actorId = this.actor.id;
-  
-    return this.actor.items
-      .filter(item => item.type === 'status')
-      .map(status => ({
-        actorId,
-        id: status.id,
-        name: status.name,
-        tier: status.system.tier,
-        temporary: !!status.system.temporary,
-        permanent: !!status.system.permanent
-      }));
-  }  
-  
+ 
   updateModifierDisplay() {
     const modifierInput = this.element.find('#mh-mod-value');
     if (modifierInput.length) {
@@ -1962,89 +1242,182 @@ export class MistHUD extends Application {
     };
   }
   
+  // async cleanHUD() {
+  //   try {
+  //       if (!this.actor) {
+  //           console.warn("No actor set for MistHUD. Skipping actor updates.");
+  //           return;
+  //       }
+
+  //       console.log("[Burn Debug] Cleaning HUD and applying burn state updates...");
+
+  //       // Update `.toBurn` tags to `.burned`
+  //       const tagsToUpdate = this.element.find('.mh-power-tag.toBurn, .mh-weakness-tag.toBurn, .mh-story-tag.toBurn, .mh-loadout-tag.toBurn');
+  //       for (const element of tagsToUpdate) {
+  //           const $tag = $(element);
+  //           const tagId = $tag.data('id');
+  //           const tagItem = this.actor.items.get(tagId);
+
+  //           if (tagItem) {
+  //             console.log(`[Burn Debug] Marking tag '${tagItem.name}' as burned.`);
+  //               await tagItem.update({
+  //                   "system.burned": true,
+  //                   "system.burn_state": 0
+  //               });
+  //           }
+
+  //           $tag.removeClass('toBurn').addClass('burned');
+  //           $tag.find('.mh-burn-toggle').removeClass('toBurn').addClass('burned');
+  //       }
+
+  //       // Delete temporary statuses
+  //       const statusesToDelete = this.element.find('.mh-status.selected[data-temporary="true"]');
+  //       for (const element of statusesToDelete) {
+  //           const $status = $(element);
+  //           const statusId = $status.data('status-id');
+  //           if (statusId) {
+  //               console.log(`Deleting temporary status: ${$status.data('status-name')}`);
+  //               await this.actor.deleteEmbeddedDocuments("Item", [statusId]);
+  //           }
+  //       }
+
+  //       // Delete temporary tags used in the roll
+  //       // DOESN'T WORK DONT KNOW WHY NEITHER DOES THE MACHINE
+  //       // const tagsToDelete = this.element.find('.mh-story-tag.selected[data-temporary="true"]');
+  //       // for (const element of tagsToDelete) {
+  //       //     const $tag = $(element);
+  //       //     const tagId = $tag.data('id');
+  //       //     const tagName = $tag.data('tag-name') || "Unnamed Tag";
+
+  //       //     if (tagId) {
+  //       //         console.log(`Deleting temporary tag used in roll: ${tagName} (ID: ${tagId})`);
+  //       //         await this.actor.deleteEmbeddedDocuments("Item", [tagId]);
+  //       //     } else {
+  //       //         console.error(`Failed to delete tag: Missing tag ID for ${tagName}`);
+  //       //     }
+  //       // }
+
+
+
+  //       // Preserve `selected` and `statusType` for statuses
+  //       const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
+  //       this.element.find('.mh-status').each((index, element) => {
+  //           const statusElement = $(element);
+  //           const statusId = statusElement.data('status-id');
+
+  //           if (statusId && savedStates[statusId]) {
+  //               const state = savedStates[statusId].state;
+  //               statusElement
+  //                   .removeClass('neutral positive negative selected')
+  //                   .addClass(state);
+
+  //               if (savedStates[statusId].selected) {
+  //                   statusElement.addClass('selected');
+  //               }
+  //           }
+  //       });
+
+  //       this.modifier = 0;
+  //       this.updateModifierDisplay();
+  //       await this.render(true);
+  //   } catch (error) {
+  //       console.error("Error during HUD cleanup:", error);
+  //   }
+  // }
+
   async cleanHUD() {
     try {
-        if (!this.actor) {
-            console.warn("No actor set for MistHUD. Skipping actor updates.");
-            return;
+      if (!this.actor) {
+        console.warn("No actor set for MistHUD. Skipping actor updates.");
+        return;
+      }
+  
+      console.log("[Burn Debug] Cleaning HUD and applying burn state updates...");
+  
+      // 1. Convert all tags in the "toBurn" state to "burned"
+      const tagsToUpdate = this.element.find(
+        '.mh-power-tag.toBurn, .mh-weakness-tag.toBurn, .mh-story-tag.toBurn, .mh-loadout-tag.toBurn'
+      );
+      for (const element of tagsToUpdate) {
+        const $tag = $(element);
+        const tagId = $tag.data('id');
+        const tagItem = this.actor.items.get(tagId);
+        if (tagItem) {
+          console.log(`[Burn Debug] Marking tag '${tagItem.name}' as burned.`);
+          await tagItem.update({
+            "system.burned": true,
+            "system.burn_state": 0
+          });
         }
-
-        console.log("[Burn Debug] Cleaning HUD and applying burn state updates...");
-
-        // Update `.toBurn` tags to `.burned`
-        const tagsToUpdate = this.element.find('.mh-power-tag.toBurn, .mh-weakness-tag.toBurn, .mh-story-tag.toBurn, .mh-loadout-tag.toBurn');
-        for (const element of tagsToUpdate) {
-            const $tag = $(element);
-            const tagId = $tag.data('id');
-            const tagItem = this.actor.items.get(tagId);
-
-            if (tagItem) {
-              console.log(`[Burn Debug] Marking tag '${tagItem.name}' as burned.`);
-                await tagItem.update({
-                    "system.burned": true,
-                    "system.burn_state": 0
-                });
-            }
-
-            $tag.removeClass('toBurn').addClass('burned');
-            $tag.find('.mh-burn-toggle').removeClass('toBurn').addClass('burned');
+        // Update the DOM classes
+        $tag.removeClass('toBurn').addClass('burned');
+        $tag.find('.mh-burn-toggle').removeClass('toBurn').addClass('burned');
+      }
+  
+      // 2. Delete temporary statuses
+      // (Assumes that temporary statuses have a property system.temporary == true)
+      const statusesToDelete = this.element.find('.mh-status.selected[data-temporary="true"]');
+      for (const element of statusesToDelete) {
+        const $status = $(element);
+        const statusId = $status.data('status-id');
+        if (statusId) {
+          console.log(`Deleting temporary status: ${$status.data('status-name')}`);
+          await this.actor.deleteEmbeddedDocuments("Item", [statusId]);
         }
-
-        // Delete temporary statuses
-        const statusesToDelete = this.element.find('.mh-status.selected[data-temporary="true"]');
-        for (const element of statusesToDelete) {
-            const $status = $(element);
-            const statusId = $status.data('status-id');
-            if (statusId) {
-                console.log(`Deleting temporary status: ${$status.data('status-name')}`);
-                await this.actor.deleteEmbeddedDocuments("Item", [statusId]);
-            }
+      }
+  
+      // 3. Optionally, delete temporary tags used in the roll.
+      // If you have temporary tags (e.g. with system.temporary == true) that should be removed,
+      // you can uncomment and adjust the code below.
+      /*
+      const temporaryTags = this.actor.items.contents.filter(item =>
+        item.type === 'tag' && item.system.temporary === true
+      );
+      for (const tag of temporaryTags) {
+        console.log(`Deleting temporary tag: ${tag.name}`);
+        await this.actor.deleteEmbeddedDocuments("Item", [tag.id]);
+        // Also update the persisted selected-tags flag, if needed.
+        let selectedTags = this.actor.getFlag('mist-hud', 'selected-tags') || [];
+        selectedTags = selectedTags.filter(id => id !== tag.id);
+        await this.actor.setFlag('mist-hud', 'selected-tags', selectedTags);
+      }
+      */
+  
+      // 4. Preserve statuses selection from saved flags.
+      // (Your statuses flag is maintained separately.)
+      const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
+      this.element.find('.mh-status').each((index, element) => {
+        const $el = $(element);
+        const statusId = $el.data('status-id');
+        if (statusId && savedStates[statusId]) {
+          const state = savedStates[statusId].state;
+          $el.removeClass('neutral positive negative selected').addClass(state);
+          if (savedStates[statusId].selected) {
+            $el.addClass('selected');
+          }
         }
-
-        // Delete temporary tags used in the roll
-        // DOESN'T WORK DONT KNOW WHY NEITHER DOES THE MACHINE
-        // const tagsToDelete = this.element.find('.mh-story-tag.selected[data-temporary="true"]');
-        // for (const element of tagsToDelete) {
-        //     const $tag = $(element);
-        //     const tagId = $tag.data('id');
-        //     const tagName = $tag.data('tag-name') || "Unnamed Tag";
-
-        //     if (tagId) {
-        //         console.log(`Deleting temporary tag used in roll: ${tagName} (ID: ${tagId})`);
-        //         await this.actor.deleteEmbeddedDocuments("Item", [tagId]);
-        //     } else {
-        //         console.error(`Failed to delete tag: Missing tag ID for ${tagName}`);
-        //     }
-        // }
-
-
-
-        // Preserve `selected` and `statusType` for statuses
-        const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
-        this.element.find('.mh-status').each((index, element) => {
-            const statusElement = $(element);
-            const statusId = statusElement.data('status-id');
-
-            if (statusId && savedStates[statusId]) {
-                const state = savedStates[statusId].state;
-                statusElement
-                    .removeClass('neutral positive negative selected')
-                    .addClass(state);
-
-                if (savedStates[statusId].selected) {
-                    statusElement.addClass('selected');
-                }
-            }
-        });
-
-        this.modifier = 0;
-        this.updateModifierDisplay();
-        await this.render(true);
+      });
+  
+      // 5. IMPORTANT: Do not clear the persistent tag selections.
+      // If you want tag selections (for power, weakness, story, loadout tags) to persist between rolls,
+      // do not clear the "selected-tags" flag.
+      //
+      // (If you DO want to clear them after a roll, you could do:
+      await this.actor.unsetFlag('mist-hud', 'selected-tags');
+      // But that would force the user to reselect their tags.)
+  
+      // 6. Reset modifier and update its display.
+      this.modifier = 0;
+      this.updateModifierDisplay();
+  
+      // 7. Finally, re-render the HUD so that the getData() method re-applies the correct data,
+      // including restoring persistent tag selections.
+      await this.render(true);
     } catch (error) {
-        console.error("Error during HUD cleanup:", error);
+      console.error("Error during HUD cleanup:", error);
     }
   }
-  
+    
 }
 
 // Function to attach click listeners to each scene tag for dynamic updates
@@ -2103,8 +1476,6 @@ function getSceneStatuses() {
 
   return selectedStatuses; // Return selected scene statuses with temporary and permanent information
 }
-
-// Ensure exports and references use the new name
 export { getSceneStatuses };
 
 function getScnTags() {
@@ -2130,7 +1501,6 @@ function getScnTags() {
 
   return tags;
 }
-
 export { getScnTags };
 
 
@@ -2391,8 +1761,6 @@ Hooks.on("renderMistHUD", (app, html, data) => {
   html.find(".mh-content").prepend(rollBar);
 });
 
-import statusScreenApp from "./statusScreenApp.js";
-
 Hooks.once("init", async function () {
   console.log("MistHUD | Initializing");
 
@@ -2413,12 +1781,9 @@ Hooks.once("init", async function () {
   });
 });
 
-
-
 Hooks.once("ready", () => {
   console.log("MistHUD | Ready");
 });
-
 
 Hooks.on("getSceneControlButtons", (controls) => {
   // Find the token control section
@@ -2443,7 +1808,4 @@ Hooks.on("getSceneControlButtons", (controls) => {
 
   console.log("MistHUD | Status Screen button added to Token Controls.");
 });
-
-
-
 

@@ -45,7 +45,7 @@
       <!-- Power Tags -->
       <ul class="mh-tags">
         {{#each powerTags}}
-        <li class="mh-power-tag {{this.cssClass}} {{../category}}" data-id="{{this.id}}">
+        <li class="mh-power-tag {{this.cssClass}} {{../category}} {{#if selected}}selected{{/if}}" data-id="{{this.id}}">
           <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../category}}"></div>
           <div class="mh-tag-text {{../category}}">{{this.tagName}}</div>
           {{#if subtags}}
@@ -65,7 +65,7 @@
       <!-- Weakness Tags -->
       <ul class="mh-tags">
         {{#each weaknessTags}}
-          <li class="mh-weakness-tag {{this.cssClass}}" data-id="{{this.id}}">
+          <li class="mh-weakness-tag {{this.cssClass}} {{#if selected}}selected{{/if}}" data-id="{{this.id}}">
             <span class="mh-weakness-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
               {{{this.inversionIcon}}}
             </span>
@@ -94,7 +94,7 @@
       <!-- Crew Power Tags -->
       <ul class="mh-tags">
         {{#each powerTags}}
-        <li class="mh-power-tag {{this.cssClass}} {{../category}}" data-id="{{this.id}}">
+        <li class="mh-power-tag {{this.cssClass}} {{../category}} {{#if selected}}selected{{/if}}" data-id="{{this.id}}">
           <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../category}}"></div>
           <div class="mh-tag-text {{../category}}">{{this.tagName}}</div>
           {{#if subtags}}
@@ -114,7 +114,7 @@
       <!-- Crew Weakness Tags -->
       <ul class="mh-tags">
         {{#each weaknessTags}}
-          <li class="mh-weakness-tag {{this.cssClass}}" data-id="{{this.id}}">
+          <li class="mh-weakness-tag {{this.cssClass}} {{#if selected}}selected{{/if}}" data-id="{{this.id}}">
             <span class="mh-weakness-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
               {{{this.inversionIcon}}}
             </span>
@@ -135,7 +135,7 @@
       </div>
       <ul class="mh-tags">
           {{#each loadoutTags}}
-          <li class="mh-loadout-tag {{this.cssClass}}" data-id="{{this.id}}">
+          <li class="mh-loadout-tag {{this.cssClass}} {{#if selected}}selected{{/if}}"  data-id="{{this.id}}">
           <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
             <span class="mh-tag-text">{{this.tagName}}</span>
             {{#if subtags}}
@@ -171,7 +171,7 @@
       </div>
         <ul class="mh-tags">
           {{#each storyTags}}
-            <li class="mh-story-tag {{this.cssClass}} {{#if temporary}}temporary{{/if}}"
+            <li class="mh-story-tag {{this.cssClass}} {{#if temporary}}temporary{{/if}} {{#if selected}}selected{{/if}}"
             data-id="{{this.id}}" 
             data-temporary="{{this.temporary}}" 
             data-permanent="{{this.permanent}}">
