@@ -33,14 +33,15 @@ export class NpcHUD extends Application {
     }
 
     setActor(actor) {
-        if (!actor || actor.type !== 'threat') { // Adjust 'character' to your actual actor type
-          console.warn("Attempted to set an invalid actor.");
-          return;
+        if (!actor || actor.type !== 'threat') { 
+            console.warn("Attempted to set an invalid actor.");
+            return;
         }
         this.actor = actor;
-        this.isCollapsed = actor.getFlag('mist-hud', 'isCollapsed') || false;
+        this.isCollapsed = actor.getFlag('mist-hud', 'isCollapsed') ?? false; // Ensure boolean default
         this.render(true);
     }
+    
 
     async getData() {
         const data = super.getData();
@@ -280,11 +281,12 @@ export class NpcHUD extends Application {
 
     async render(force = false, options = {}) {
         try {
-          await super.render(true);
+            await super.render(force, options); // Use the correct 'force' value
         } catch (error) {
-          console.error("Deu Error during NpcHUD render:", error);
+            console.error("Error during NpcHUD render:", error);
         }
     }
+    
 
     injectCustomHeader() {
     
@@ -424,30 +426,33 @@ export class NpcHUD extends Application {
     
 }
 
-Handlebars.registerHelper('parseStatus', function(description) {
-    return new Handlebars.SafeString(
-        description
-            .replace(/\[([^\]]+)\]/g, (match, content) => {
-                const trimmedContent = content.trim();
-                if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
-                    return `<span class="npc-status">${trimmedContent}</span>`;
-                }
-                if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
-                    return `<span class="npc-limit">${trimmedContent}</span>`;
-                }
-                return `<span class="npc-story-tag">${trimmedContent}</span>`;
-            })
-            .replace(/^\s*$/gm, '') // Remove empty lines
-            .replace(/\n+/g, '</p><p>') // Replace newlines with paragraph breaks
-            .replace(/^<\/p><p>/, '') // Remove leading <p> if the first line is empty
-            .replace(/<p><\/p>/g, '') // Remove empty <p> elements
-    );
-});
+Hooks.once("init", () => {
+    console.log("Registering Handlebars helpers...");
 
-Handlebars.registerHelper('parseMaxTier', function (maxTier) {
-    return maxTier === 999 ? '-' : maxTier;
-});
+    Handlebars.registerHelper("parseMaxTier", function (maxTier) {
+        return maxTier === 999 ? "-" : maxTier;
+    });
 
+    Handlebars.registerHelper("parseStatus", function (description) {
+        return new Handlebars.SafeString(
+            description
+                .replace(/\[([^\]]+)\]/g, (match, content) => {
+                    const trimmedContent = content.trim();
+                    if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
+                        return `<span class="npc-status">${trimmedContent}</span>`;
+                    }
+                    if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
+                        return `<span class="npc-limit">${trimmedContent}</span>`;
+                    }
+                    return `<span class="npc-story-tag">${trimmedContent}</span>`;
+                })
+                .replace(/^\s*$/gm, '') // Remove empty lines
+                .replace(/\n+/g, '</p><p>') // Replace newlines with paragraph breaks
+                .replace(/^<\/p><p>/, '') // Remove leading <p> if the first line is empty
+                .replace(/<p><\/p>/g, '') // Remove empty <p> elements
+        );
+    });
+});
 
 Hooks.on('renderTokenHUD', (app, html, data) => {
     if (!game.user.isGM) return;
