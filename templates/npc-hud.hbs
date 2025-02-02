@@ -36,7 +36,9 @@
         {{/if}}
 
         <div class="npc-subtitle-container-c">
+            <div class="create-npc-tag"><i class="fa-duotone fa-regular fa-tags"></i></div>
             <div class="npc-subtitle-text">Tags & Statuses</div>
+            <div class="create-npc-status"><i class="fa-duotone fa-light fa-suitcase-medical"></i></div>
         </div>
 
         <div class="npc-tags-statuses-container">
@@ -54,7 +56,7 @@
             <ul class="npc-statuses-list">
                 {{#each statuses}}
                 <div>
-                    <span class="npc-status {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
+                    <span class="npc-status {{statusType}}" data-status-name="{{statusName}}" data-tier="{{statusTier}}" data-status-id="{{this.id}}" data-temporary="{{temporary}}" data-permanent="{{permanent}}">
                         {{statusName}}-{{statusTier}}
                         {{#if temporary}}⏱️{{/if}}
                         {{#if permanent}}💎{{/if}}

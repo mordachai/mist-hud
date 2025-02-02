@@ -338,30 +338,7 @@ export class MistHUD extends Application {
   
       // Recalculate total power after updating the status
       this.calculateTotalPower();
-    });
-    
-
-    html.find('.mh-status').each((i, el) => {
-      el.setAttribute('draggable', 'true');
-      el.addEventListener('dragstart', (ev) => {
-        // 1) Gather the data
-        const name = el.dataset.statusName;
-        const tier = parseInt(el.dataset.tier) || 1;
-    
-        // 2) Build a data object
-        const statusData = {
-          type: "status",
-          name,
-          tier
-        };
-    
-        // DEBUG: confirm the code runs
-        console.log(`[DEBUG] dragstart for status: ${name}-${tier}`, statusData);
-    
-        // 3) Store it
-        ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
-      });
-    });    
+    });      
 
     html.find('.help-toggle, .hurt-toggle').on('change', async (event) => {
       const toggle = event.currentTarget;
@@ -436,8 +413,6 @@ export class MistHUD extends Application {
     
     html.find('.create-story-tag').on("click", this._createStoryTagFromHUD.bind(this));
 
-    html.find('.create-status').on("click", this._createStatusFromHUD.bind(this));
-
     // Right-click to delete story tags
     html.find('.mh-story-tag').on('contextmenu', async (event) => {
         event.preventDefault();
@@ -458,51 +433,6 @@ export class MistHUD extends Application {
         await actor.deleteTag(tagId);
         // console.log(`Story tag ${tagId} deleted.`);
         this.render(false); // Refresh the HUD
-    });
-
-    // Right-click to delete statuses
-    html.find('.mh-status').on('contextmenu', async (event) => {
-      event.preventDefault();
-      const statusId = $(event.currentTarget).data('status-id'); // Get statusId from data attribute
-      const actorId = this.actor?.id; // Retrieve actor ID from the current actor
-  
-      if (!statusId || !actorId) {
-          console.error("Missing statusId or actorId for status deletion.");
-          return;
-      }
-  
-      const actor = game.actors.get(actorId);
-      if (!actor) {
-          console.error(`Actor with ID ${actorId} not found.`);
-          return;
-      }
-  
-      await actor.deleteStatus(statusId);
-      // console.log(`Status ${statusId} deleted.`);
-      this.render(false); // Refresh the HUD
-    });
-
-    // Make each .mh-status element draggable
-    html.find('.mh-status').each((i, el) => {
-      el.setAttribute('draggable', 'true');
-
-      el.addEventListener('dragstart', (ev) => {
-        // 1) Gather the data
-        const name = el.dataset.statusName;   // "status" or whatever is stored
-        const tier = parseInt(el.dataset.tier) || 1;
-        const actorId = el.dataset.ownerId || this.actor?.id || null;
-
-        // 2) Build a data object
-        const statusData = {
-          type: "status",
-          name,
-          tier,
-          actorId
-        };
-
-        // 3) Store it in the dataTransfer
-        ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
-      });
     });
 
     //Double click to edit story tags
@@ -527,6 +457,31 @@ export class MistHUD extends Application {
       // console.log(`Story tag ${tagId} edited.`);
       this.render(false); // Refresh the HUD
     });
+
+    html.find('.create-status').on("click", this._createStatusFromHUD.bind(this));
+
+    // Right-click to delete statuses
+    html.find('.mh-status').on('contextmenu', async (event) => {
+      event.preventDefault();
+      const statusId = $(event.currentTarget).data('status-id'); // Get statusId from data attribute
+      const actorId = this.actor?.id; // Retrieve actor ID from the current actor
+  
+      if (!statusId || !actorId) {
+          console.error("Missing statusId or actorId for status deletion.");
+          return;
+      }
+  
+      const actor = game.actors.get(actorId);
+      if (!actor) {
+          console.error(`Actor with ID ${actorId} not found.`);
+          return;
+      }
+  
+      await actor.deleteStatus(statusId);
+      // console.log(`Status ${statusId} deleted.`);
+      this.render(false); // Refresh the HUD
+    });
+    
     //Double click to edit statuses
     html.find('.mh-status').on('dblclick', async (event) => {
         event.preventDefault();
@@ -548,6 +503,29 @@ export class MistHUD extends Application {
         await CityDialogs.itemEditDialog(status); // Open the edit dialog
         // console.log(`Status ${statusId} edited.`);
         this.render(false); // Refresh the HUD
+    });
+
+    // Make each .mh-status element draggable
+    html.find('.mh-status').each((i, el) => {
+      el.setAttribute('draggable', 'true');
+
+      el.addEventListener('dragstart', (ev) => {
+        // 1) Gather the data
+        const name = el.dataset.statusName;   // "status" or whatever is stored
+        const tier = parseInt(el.dataset.tier) || 1;
+        const actorId = el.dataset.ownerId || this.actor?.id || null;
+
+        // 2) Build a data object
+        const statusData = {
+          type: "status",
+          name,
+          tier,
+          actorId
+        };
+
+        // 3) Store it in the dataTransfer
+        ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
+      });
     });
 
   // ==============================
@@ -1242,89 +1220,6 @@ export class MistHUD extends Application {
     };
   }
   
-  // async cleanHUD() {
-  //   try {
-  //       if (!this.actor) {
-  //           console.warn("No actor set for MistHUD. Skipping actor updates.");
-  //           return;
-  //       }
-
-  //       console.log("[Burn Debug] Cleaning HUD and applying burn state updates...");
-
-  //       // Update `.toBurn` tags to `.burned`
-  //       const tagsToUpdate = this.element.find('.mh-power-tag.toBurn, .mh-weakness-tag.toBurn, .mh-story-tag.toBurn, .mh-loadout-tag.toBurn');
-  //       for (const element of tagsToUpdate) {
-  //           const $tag = $(element);
-  //           const tagId = $tag.data('id');
-  //           const tagItem = this.actor.items.get(tagId);
-
-  //           if (tagItem) {
-  //             console.log(`[Burn Debug] Marking tag '${tagItem.name}' as burned.`);
-  //               await tagItem.update({
-  //                   "system.burned": true,
-  //                   "system.burn_state": 0
-  //               });
-  //           }
-
-  //           $tag.removeClass('toBurn').addClass('burned');
-  //           $tag.find('.mh-burn-toggle').removeClass('toBurn').addClass('burned');
-  //       }
-
-  //       // Delete temporary statuses
-  //       const statusesToDelete = this.element.find('.mh-status.selected[data-temporary="true"]');
-  //       for (const element of statusesToDelete) {
-  //           const $status = $(element);
-  //           const statusId = $status.data('status-id');
-  //           if (statusId) {
-  //               console.log(`Deleting temporary status: ${$status.data('status-name')}`);
-  //               await this.actor.deleteEmbeddedDocuments("Item", [statusId]);
-  //           }
-  //       }
-
-  //       // Delete temporary tags used in the roll
-  //       // DOESN'T WORK DONT KNOW WHY NEITHER DOES THE MACHINE
-  //       // const tagsToDelete = this.element.find('.mh-story-tag.selected[data-temporary="true"]');
-  //       // for (const element of tagsToDelete) {
-  //       //     const $tag = $(element);
-  //       //     const tagId = $tag.data('id');
-  //       //     const tagName = $tag.data('tag-name') || "Unnamed Tag";
-
-  //       //     if (tagId) {
-  //       //         console.log(`Deleting temporary tag used in roll: ${tagName} (ID: ${tagId})`);
-  //       //         await this.actor.deleteEmbeddedDocuments("Item", [tagId]);
-  //       //     } else {
-  //       //         console.error(`Failed to delete tag: Missing tag ID for ${tagName}`);
-  //       //     }
-  //       // }
-
-
-
-  //       // Preserve `selected` and `statusType` for statuses
-  //       const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
-  //       this.element.find('.mh-status').each((index, element) => {
-  //           const statusElement = $(element);
-  //           const statusId = statusElement.data('status-id');
-
-  //           if (statusId && savedStates[statusId]) {
-  //               const state = savedStates[statusId].state;
-  //               statusElement
-  //                   .removeClass('neutral positive negative selected')
-  //                   .addClass(state);
-
-  //               if (savedStates[statusId].selected) {
-  //                   statusElement.addClass('selected');
-  //               }
-  //           }
-  //       });
-
-  //       this.modifier = 0;
-  //       this.updateModifierDisplay();
-  //       await this.render(true);
-  //   } catch (error) {
-  //       console.error("Error during HUD cleanup:", error);
-  //   }
-  // }
-
   async cleanHUD() {
     try {
       if (!this.actor) {
