@@ -1360,8 +1360,8 @@ export class MistHUD extends Application {
         // Update the DOM classes
         $tag.removeClass('toBurn mh-crispy').addClass('burned');
         $tag.find('.mh-burn-toggle').removeClass('toBurn').addClass('burned');
-    }
-    
+      }
+   
   
       // 2. Delete temporary statuses
       // (Assumes that temporary statuses have a property system.temporary == true)

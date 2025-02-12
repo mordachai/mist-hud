@@ -152,7 +152,7 @@
 .mh-theme-icon.Self {
   position: relative;
   right: -10px;
-  top: -2px;
+  top: -11px;
   width: 28px;
   height: 24px;
   background-image: url('../ui/icons/self_os_icn.svg');
@@ -162,7 +162,7 @@
 .mh-theme-icon.Mythos {
   position: relative;
   right: -6px;
-  top: 2px;
+  top: -5px;
   width: 24px;
   height: 24px;
   background-image: url('../ui/icons/mythos_os_icn.svg');
@@ -172,7 +172,7 @@
 .mh-theme-icon.Noise {
   position: relative;
   right: -7px;
-  top: -1px;
+  top: -9px;
   width: 24px;
   height: 24px;
   background-image: url('../ui/icons/noise_os_icn.svg');
@@ -182,11 +182,39 @@
 .mh-theme-icon.Crew {
   position: relative;
   right: -8px;
-  top: 2px;
+  top: -5px;
   width: 24px;
   height: 21px;
   background-image: url('../ui/icons/crew_OS_icn.svg');
   filter: drop-shadow(1px 0 4px var(--effects-color1));
+}
+
+.mh-theme-icon-notip.loadout {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  top: -5px;
+  background-image: url('../ui/icons/loadout_icn.svg');
+  filter: drop-shadow(1px 0 4px rgb(238, 238, 238));
+}
+
+.mh-theme-icon-notip.storytag {
+  position: relative;
+  top: -5px;
+  width: 15px;
+  height: 18px;
+  background-image: url('../ui/icons/storytag_icn.svg');
+  transform: scaleX(-1);
+  filter: drop-shadow(1px 0 4px rgb(201, 201, 201));
+}
+
+.mh-theme-icon-notip.statuses {
+  position: relative;
+  top: -5px;
+  width: 18px;
+  height: 16px;
+  background-image: url('../ui/icons/statuses_icn.svg');
+  filter: drop-shadow(1px 0 4px rgb(201, 201, 201));
 }
 
 .mh-power-tag,
