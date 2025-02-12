@@ -277,21 +277,19 @@ export class NpcHUD extends Application {
         return storyTags;
     }
 
-    async toggleCollapse() {
-        this.isCollapsed = !this.isCollapsed;
-        await this.actor.setFlag('mist-hud', 'isCollapsed', this.isCollapsed);
-        this.saveHUDPosition();
-        this.render(false);
-    }
-
     async render(force = false, options = {}) {
         try {
-            await super.render(force, options); // Use the correct 'force' value
+          await super.render(force, options);
+          // After rendering, check the isCollapsed flag.
+          if (this.isCollapsed) {
+            this.element.addClass("collapsed");
+          } else {
+            this.element.removeClass("collapsed");
+          }
         } catch (error) {
-            console.error("Error during NpcHUD render:", error);
+          console.error("Error during NpcHUD render:", error);
         }
-    }
-    
+    }    
 
     injectCustomHeader() {
     
@@ -410,53 +408,7 @@ export class NpcHUD extends Application {
             }
             await CityDialogs.itemEditDialog(status);
             this.render(false);
-        });            
-    
-        // Toggle state for NPC story tags
-        // html.find('.npc-story-tag').on('click', (event) => {
-        //     event.stopPropagation();
-        //     event.preventDefault();
-    
-        //     const tagElement = $(event.currentTarget);
-    
-        //     // Toggle between `selected` and `burned`
-        //     if (tagElement.hasClass('burned')) {
-        //         tagElement.removeClass('burned').addClass('unburned');
-        //     } else if (tagElement.hasClass('selected')) {
-        //         tagElement.removeClass('selected').addClass('burned');
-        //     } else {
-        //         tagElement.addClass('selected');
-        //     }
-        // });
-    
-        // Cycle status types for NPC statuses
-        // html.find('.npc-status').on('click', async (event) => {
-        //     event.stopPropagation();
-        //     event.preventDefault();
-        
-        //     const statusElement = $(event.currentTarget);
-        //     const statusId = statusElement.data('status-id');
-        
-        //     // Cycle through status types: positive -> negative -> neutral
-        //     const currentType = statusElement.attr('data-status-type');
-        //     let newType = 'positive'; // Default to positive if neutral
-        
-        //     if (currentType === 'positive') {
-        //         newType = 'negative';
-        //     } else if (currentType === 'negative') {
-        //         newType = 'neutral';
-        //     }
-        
-        //     // Update the DOM
-        //     statusElement.attr('data-status-type', newType);
-        //     statusElement.removeClass('neutral positive negative').addClass(newType);
-        
-        //     // Update the actor's data
-        //     const statusItem = this.actor.items.get(statusId);
-        //     if (statusItem) {
-        //         await statusItem.update({ "system.specialType": newType });
-        //     }
-        // });
+        });           
 
         html.find('.npc-status').each((i, el) => {
             el.setAttribute('draggable', 'true');
@@ -506,33 +458,6 @@ export class NpcHUD extends Application {
             this.render(false);
         });        
 
-        // Double-click to edit an NPC Story Tag
-        // html.find('.npc-story-tag').on('dblclick', async (event) => {
-        //     event.preventDefault();
-        //     const tagId = $(event.currentTarget).data('id');
-            
-        //     if (!tagId) {
-        //         console.error("Missing tagId for NPC story tag editing.");
-        //         return;
-        //     }
-            
-        //     // Use the actor from the HUD (the unlinked token’s actor)
-        //     const actor = this.actor;
-        //     if (!actor) {
-        //         console.error("Actor not found on NPC HUD.");
-        //         return;
-        //     }
-            
-        //     const tag = actor.items.get(tagId);
-        //     if (!tag) {
-        //         console.error(`Tag with ID ${tagId} not found on the unlinked actor.`);
-        //         return;
-        //     }
-            
-        //     await CityDialogs.itemEditDialog(tag);
-        //     this.render(false);
-        // });
-
         // Create NPC Status
         html.find('.create-npc-status').on("click", this._createStatusFromHUD.bind(this));
 
@@ -557,35 +482,80 @@ export class NpcHUD extends Application {
             await actor.deleteEmbeddedDocuments("Item", [statusId]);
             this.render(false); // Refresh the HUD after deletion
         });
-
-        // Double-click to edit an NPC Status
-        // html.find('.npc-status').on('dblclick', async (event) => {
-        //     event.preventDefault();
-        //     const statusId = $(event.currentTarget).data('status-id');
-        //     const actorId = this.actor?.id;
-            
-        //     if (!statusId || !actorId) {
-        //         console.error("Missing statusId or actorId for NPC status editing.");
-        //         return;
-        //     }
-            
-        //     const actor = this.actor;
-        //     const status = actor.items.get(statusId);
-        //     if (!status) {
-        //         console.error(`Status with ID ${statusId} not found on actor ${actorId}.`);
-        //         return;
-        //     }
-            
-        //     // Open an edit dialog (reusing CityDialogs or your custom dialog)
-        //     await CityDialogs.itemEditDialog(status);
-        //     this.render(false); // Refresh the HUD after editing
-        // });
             
         // Prevent context menu actions
         this.element.on('contextmenu', (event) => {
             event.preventDefault();
             event.stopPropagation();
         });
+    }
+
+    async _toggleTagState(tagElement) {
+        // Retrieve the tag ID from the element.
+        const tagId = tagElement.data('id');
+        // Use the HUD's actor property.
+        const actor = this.actor;
+        if (!actor) return;
+        
+        const tagItem = actor.items.get(tagId);
+        if (!tagItem) return;
+        
+        // Determine the new state.
+        // We'll assume three states: "unburned" (default), "selected", and "burned".
+        let newState;
+        if (tagElement.hasClass('burned')) {
+          newState = 'unburned';
+        } else if (tagElement.hasClass('selected')) {
+          newState = 'burned';
+        } else {
+          newState = 'selected';
+        }
+        
+        // Update the DOM: remove the possible classes and add the new one.
+        tagElement.removeClass('unburned selected burned').addClass(newState);
+        
+        // Define the data to update based on the new state.
+        let updateData = {};
+        if (newState === 'burned') {
+          updateData = { "system.burn_state": 2, "system.burned": true };
+        } else if (newState === 'selected') {
+          updateData = { "system.burn_state": 1, "system.burned": false };
+        } else {  // unburned
+          updateData = { "system.burn_state": 0, "system.burned": false };
+        }
+        
+        // Update the embedded tag document so that the state is saved.
+        await tagItem.update(updateData);
+        // Re-render the HUD so that the state persists on subsequent renders.
+        this.render(false);
+    }
+      
+    async _toggleStatusState(statusElement) {
+    // Retrieve the status ID from the element.
+    const statusId = statusElement.data('status-id');
+    const actor = this.actor;
+    if (!actor) return;
+    
+    const statusItem = actor.items.get(statusId);
+    if (!statusItem) return;
+    
+    // Cycle through the types: positive -> negative -> neutral -> positive...
+    const currentType = statusElement.attr('data-status-type') || 'neutral';
+    let newType;
+    if (currentType === 'positive') {
+        newType = 'negative';
+    } else if (currentType === 'negative') {
+        newType = 'neutral';
+    } else {
+        newType = 'positive';
+    }
+    
+    // Update the DOM.
+    statusElement.attr('data-status-type', newType);
+    statusElement.removeClass('neutral positive negative').addClass(newType);
+    
+    // Update the embedded status document.
+    await statusItem.update({ "system.specialType": newType });
     }
 
     async _createStatusFromHUD(event) {
@@ -672,76 +642,7 @@ export class NpcHUD extends Application {
         
         // Refresh the HUD.
         this.render(false);
-    }
-
-    async _toggleTagState(tagElement) {
-        // Retrieve the tag ID from the element.
-        const tagId = tagElement.data('id');
-        // Use the HUD's actor property.
-        const actor = this.actor;
-        if (!actor) return;
-        
-        const tagItem = actor.items.get(tagId);
-        if (!tagItem) return;
-        
-        // Determine the new state.
-        // We'll assume three states: "unburned" (default), "selected", and "burned".
-        let newState;
-        if (tagElement.hasClass('burned')) {
-          newState = 'unburned';
-        } else if (tagElement.hasClass('selected')) {
-          newState = 'burned';
-        } else {
-          newState = 'selected';
-        }
-        
-        // Update the DOM: remove the possible classes and add the new one.
-        tagElement.removeClass('unburned selected burned').addClass(newState);
-        
-        // Define the data to update based on the new state.
-        let updateData = {};
-        if (newState === 'burned') {
-          updateData = { "system.burn_state": 2, "system.burned": true };
-        } else if (newState === 'selected') {
-          updateData = { "system.burn_state": 1, "system.burned": false };
-        } else {  // unburned
-          updateData = { "system.burn_state": 0, "system.burned": false };
-        }
-        
-        // Update the embedded tag document so that the state is saved.
-        await tagItem.update(updateData);
-        // Re-render the HUD so that the state persists on subsequent renders.
-        this.render(false);
-    }
-      
-    async _toggleStatusState(statusElement) {
-    // Retrieve the status ID from the element.
-    const statusId = statusElement.data('status-id');
-    const actor = this.actor;
-    if (!actor) return;
-    
-    const statusItem = actor.items.get(statusId);
-    if (!statusItem) return;
-    
-    // Cycle through the types: positive -> negative -> neutral -> positive...
-    const currentType = statusElement.attr('data-status-type') || 'neutral';
-    let newType;
-    if (currentType === 'positive') {
-        newType = 'negative';
-    } else if (currentType === 'negative') {
-        newType = 'neutral';
-    } else {
-        newType = 'positive';
-    }
-    
-    // Update the DOM.
-    statusElement.attr('data-status-type', newType);
-    statusElement.removeClass('neutral positive negative').addClass(newType);
-    
-    // Update the embedded status document.
-    await statusItem.update({ "system.specialType": newType });
-    }
-      
+    }      
    
 }
 

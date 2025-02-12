@@ -1,4 +1,4 @@
-<div class="mh-hud">
+<div class="mh-hud {{#if isCollapsed}}collapsed{{/if}}">
 
 
   <div class="mh-content">
@@ -45,7 +45,7 @@
       <!-- Power Tags -->
       <ul class="mh-tags">
         {{#each powerTags}}
-        <li class="mh-power-tag {{this.cssClass}} {{../category}} {{#if selected}}selected{{/if}}" data-id="{{this.id}}">
+        <li class="mh-power-tag {{this.cssClass}} {{../category}} {{#if selected}}selected{{/if}}" data-id="{{this.id}}" {{#if crispy}}data-crispy="true"{{/if}}>
           <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../category}}"></div>
           <div class="mh-tag-text {{../category}}">{{this.tagName}}</div>
           {{#if subtags}}
@@ -78,31 +78,31 @@
 
     {{#if hasCrewThemes}}
     {{#each crewThemes}}
-    <div class="theme-container-{{category}}">
-      <div class="mh-theme-header {{category}}">
-        <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
+    <div class="theme-container Crew">
+      <div class="mh-theme-header Crew">
+        <span class="mh-theme-icon Crew" data-theme-id="{{id}}"></span>
 
       {{#if (eq ../activeSystem "city-of-mist")}}
-        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{themeName}}</span> <!-- Render only if system is City of Mist -->
+        <span class="mh-theme-name mh-theme-name-com-Crew">{{name}}</span> <!-- Render only if system is City of Mist -->
       {{/if}}
 
-      {{#if (or (eq ../activeSystem "otherscape") (eq ../activeSystem "legend"))}}
-        <span class="mh-theme-name mh-theme-name-com-{{category}}">{{crewName}}</span> <!-- Render only if system is Otherscape or Legends in the Mist -->
+      {{#if (eq ../activeSystem "otherscape")}}
+        <span class="mh-theme-name mh-theme-name-com-Crew">{{crewName}}</span> <!-- Render only if system is Otherscape or Legends in the Mist -->
       {{/if}}
       </div>
 
       <!-- Crew Power Tags -->
       <ul class="mh-tags">
         {{#each powerTags}}
-        <li class="mh-power-tag {{this.cssClass}} {{../category}} {{#if selected}}selected{{/if}}" data-id="{{this.id}}">
-          <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../category}}"></div>
-          <div class="mh-tag-text {{../category}}">{{this.tagName}}</div>
+        <li class="mh-power-tag {{this.cssClass}} Crew {{#if selected}}selected{{/if}} {{#if crispy}}mh-crispy{{/if}}" data-id="{{this.id}}" {{#if crispy}}data-crispy="true" {{/if}}data-actor-id="{{actorId}}">
+          <div class="mh-burn-toggle burn-icon {{this.burnState}} Crew {{#if crispy}}mh-crispy{{/if}}"></div>
+          <div class="mh-tag-text Crew">{{this.tagName}}</div>
           {{#if subtags}}
             <ul class="mh-subtag">
               {{#each subtags}}
-              <li class="subtag-item {{this.cssClass}} {{../category}}" data-id="{{this.id}}">
-                <span class="subtag-burn burn-icon {{this.burnState}} {{../category}}"></span>
-                <span class="subtag-name {{../category}}">{{this.tagName}}</span>
+              <li class="subtag-item {{this.cssClass}} Crew" data-id="{{this.id}}">
+                <span class="subtag-burn burn-icon {{this.burnState}} Crew"></span>
+                <span class="subtag-name Crew">{{this.tagName}}</span>
               </li>
               {{/each}}
             </ul>
@@ -114,8 +114,8 @@
       <!-- Crew Weakness Tags -->
       <ul class="mh-tags">
         {{#each weaknessTags}}
-          <li class="mh-weakness-tag {{this.cssClass}} {{#if selected}}selected{{/if}}" data-id="{{this.id}}">
-            <span class="mh-weakness-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
+          <li class="mh-weakness-tag {{this.cssClass}} Crew {{#if selected}}selected{{/if}}" data-id="{{this.id}}" data-actor-id="{{actorId}}">
+            <span class="mh-weakness-toggle Crew clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
               {{{this.inversionIcon}}}
             </span>
             <span class="mh-tag-text">{{this.tagName}}</span>
@@ -245,6 +245,7 @@
 <div id="mh-sliding-panel" class="mh-sliding-panel">
   <div id="mh-panel-ear" class="mh-panel-ear">❯</div>
   <div id="mh-panel-content" class="mh-panel-content">
+
 
     {{#if hasImprovements}}
     <div class="section improvements">

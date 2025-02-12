@@ -47,7 +47,7 @@
   align-items: center;
   justify-content: flex-start;
   margin: -3px -0px 1px -0px;
-  height: 28px;
+  height: fit-content;
   padding: 0 10px;
   background-repeat: no-repeat;
   background-size: cover;
@@ -126,19 +126,19 @@
 }
 
 /* Mythos Themebook Name Styling */
-.mh-themebook-name-com-Mythos {
+.mh-themebook-name-com-Mythos, .theme-type.Mythos {
   color: var(--mythosOS-verylight-color);
   text-shadow: var(--mythosOS-dark-color) 1px 0 6px;
 }
 
 /* Logos Themebook Name Styling */
-.mh-themebook-name-com-Logos {
+.mh-themebook-name-com-Logos, .theme-type.Logos {
   color: var(--logos-verylight-color-color);
   text-shadow: var(--logos-dark-color) 1px 0 6px;
 }
 
 /* Mist Themebook Name Styling */
-.mh-themebook-name-com-Mist {
+.mh-themebook-name-com-Mist, .theme-type.Mist {
   color: var(--mist-verylight-color);
   text-shadow: var(--mist-dark-color) 1px 0 6px;
 }
@@ -165,7 +165,8 @@
   filter: drop-shadow(1px 0 6px var(--mist-dark-color));
 }
 
-.mh-theme-icon.crew {
+.mh-theme-icon.Crew,
+.mh-theme-icon.Extra {
   width: 18px;
   height: 15px;
   background-image: url('../ui/icons/crew_icn.svg');
@@ -188,9 +189,18 @@
   margin: auto;
 }
 
-.mystery-type.crew {
+.mystery-type.Mist {
+  color: var(--mist-verylight-color);
+  text-shadow: var(--mist-dark-color) 1px 1px 1px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin: auto;
+}
+
+.mystery-type.crew,
+.mystery-type.Extra {
   color: whitesmoke;
-  text-shadow: whitesmoke 1px 1px 1px;
+  text-shadow: rgb(183, 183, 183) 1px 1px 1px;
   padding: 1px 2px;
   border-radius: 2px;
   margin: auto;

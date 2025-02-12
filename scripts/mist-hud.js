@@ -8,7 +8,6 @@ import { moveConfig } from "/modules/mist-hud/scripts/mh-theme-config.js";
 import statusScreenApp from "./statusScreenApp.js";
 import { showTooltip, hideTooltip } from '/modules/mist-hud/scripts/tooltip.js';
 import { 
-  getCrewThemes, 
   getMysteryFromTheme, 
   getThemesAndTags, 
   getThemebooks, 
@@ -19,6 +18,8 @@ import {
   getLoadoutTags,
   applyBurnState
 } from './mh-getters.js';
+
+
 // Register Handlebars helper for localizeTheme
 Handlebars.registerHelper('localizeTheme', function(themebookName) {
   return localizeTheme(themebookName);
@@ -37,36 +38,85 @@ async function handleTagClick(event, tagType) {
   event.preventDefault();
   const tagElement = $(event.currentTarget);
 
-  // Prevent any toggling if the tag is burned
+  // Prevent toggling if the tag is already burned
   if (tagElement.hasClass('burned')) return;
 
-  // Toggle the "selected" class in the DOM immediately.
-  tagElement.toggleClass('selected');
   const tagId = tagElement.data('id');
   if (!tagId) {
-    console.error("Tag element is missing a data-id attribute.");
-    return;
+      console.error("Tag element is missing a data-id attribute.");
+      return;
   }
 
   // Get the current actor from the MistHUD instance.
   const actor = MistHUD.getInstance().actor;
   if (!actor) return;
-  
-  // Retrieve the current persistent selection (an array of tag IDs)
+
+  // Check if the clicked tag is from a crew theme.
+  const isCrewTag = tagElement.closest('.theme-container').hasClass('Crew');
+
+  const isCrispy = tagElement.hasClass("mh-crispy");
+
+  // Retrieve current selected tags.
+  // For non-crew tags, we store an array of IDs.
   let selectedTags = actor.getFlag('mist-hud', 'selected-tags') || [];
-  
-  // Update based on the new DOM state.
+  // For crew tags, we now want to store a full object.
+  let selectedCrewTags = actor.getFlag('mist-hud', 'selected-crew-tags') || [];
+
   if (tagElement.hasClass('selected')) {
-    if (!selectedTags.includes(tagId)) {
-      selectedTags.push(tagId);
-    }
+      // **Deselect the tag**
+      tagElement.removeClass('selected');
+      selectedTags = selectedTags.filter(id => id !== tagId);
+      if (isCrewTag) {
+          // When deselecting a crew tag, remove any object whose id matches.
+          selectedCrewTags = selectedCrewTags.filter(tagObj => tagObj.id !== tagId);
+      }
+
+      // ✅ If a Crew Tag is deselected, reset its burn icon.
+      if (isCrewTag) {
+          tagElement.find('.mh-burn-toggle').removeClass('unburned').addClass('toBurn');
+          if (isCrispy) {
+              tagElement.addClass('mh-crispy'); 
+          }
+      }
   } else {
-    selectedTags = selectedTags.filter(id => id !== tagId);
+      // **Select the tag**
+      tagElement.addClass('selected');
+      if (!selectedTags.includes(tagId)) {
+          selectedTags.push(tagId);
+      }
+      if (isCrewTag) {
+          // Instead of storing just the tagId, store a full object.
+          // First, check if an object with this id is already stored.
+          const alreadySelected = selectedCrewTags.some(tagObj => tagObj.id === tagId);
+          if (!alreadySelected) {
+              // Use the actor's activeCrew getter to determine the active crew.
+              const activeCrew = actor.activeCrew;
+              const activeCrewId = activeCrew ? activeCrew.id : null;
+              
+              // Build the crew tag object.
+              const crewTagObj = {
+                  id: tagId,
+                  // Use the tag element's text (trimmed) as the tag name.
+                  tagName: tagElement.text().trim(),
+                  crispy: isCrispy,
+                  actorId: activeCrewId
+              };
+              selectedCrewTags.push(crewTagObj);
+          }
+      }
+
+      // ✅ If a Crew Tag is selected, set its burn icon to "toBurn"
+      if (isCrewTag) {
+          tagElement.find('.mh-burn-toggle').removeClass('unburned').addClass('toBurn');
+      }
   }
-  
-  // Persist the updated selection. (This update might trigger a re-render.)
+
+  // Persist the updated selections.
   await actor.setFlag('mist-hud', 'selected-tags', selectedTags);
-  
+  if (isCrewTag) {
+      await actor.setFlag('mist-hud', 'selected-crew-tags', selectedCrewTags);
+  }
+
   // Recalculate total power.
   MistHUD.getInstance().calculateTotalPower();
 }
@@ -126,11 +176,25 @@ export class MistHUD extends Application {
     this.render(true);
   }
 
+  // async render(force = false, options = {}) {
+  //   // console.log(`[Help/Hurt Debug] Rendering HUD for actor:`, this.actor?.name);
+  //   try {
+  //     await super.render(true);
+  //   } catch (error) {
+  //   }
+  // }
+
   async render(force = false, options = {}) {
-    // console.log(`[Help/Hurt Debug] Rendering HUD for actor:`, this.actor?.name);
     try {
-      await super.render(true);
+      await super.render(force, options);
+      // After rendering, if the HUD is collapsed, add a "collapsed" class.
+      if (this.isCollapsed) {
+        this.element.addClass("collapsed");
+      } else {
+        this.element.removeClass("collapsed");
+      }
     } catch (error) {
+      console.error("Error during MistHUD render:", error);
     }
   }
   
@@ -144,7 +208,6 @@ export class MistHUD extends Application {
       console.warn("Header element not found during injection!");
       return;
     }
-
  
     // Clear existing header content
     header.empty();
@@ -156,13 +219,17 @@ export class MistHUD extends Application {
 
     const tokenImg = $(`<div class="mh-token-image"><img src="${this.actor?.token?.texture.src || this.actor?.img}" alt="Character Token"></div>`);
     const charName = $(`<div class="mh-char-name">${this.actor?.name || 'Character'}</div>`);
+    // const collapseButton = $(`<i class="mh-collapse-button fa-thin fa-caret-down"></i>`);
     const closeButton = $(`<i class="mh-close-button fa-solid fa-xmark"></i>`);
   
     // Append custom elements to the header
-    header.append(tokenImg, charName, closeButton);
+    header.append(tokenImg, charName, closeButton); //, collapseButton);
   
     // Add event listener to the close button
     closeButton.on("click", () => this.close());
+
+    // Add event listener to the collapse button
+    // collapseButton.on("click", () => this.isCollapsed());
 
     // Add a custom class for additional styling if needed
     header.addClass('mh-custom-header');
@@ -171,10 +238,11 @@ export class MistHUD extends Application {
     const minimizedState = this.element.find('.window-title');
     if (minimizedState.length) {
       minimizedState.empty(); // Clear default content
-      minimizedState.append(tokenImg.clone(), closeButton.clone()); // Add image and close button
+      minimizedState.append(tokenImg.clone(), closeButton.clone()); // collapseButton.clone());
   
       // Rebind close event for the minimized state button
       minimizedState.find('.mh-close-button').on("click", () => this.close());
+      // minimizedState.find('.mh-collapse-button').on("click", () => this.isCollapsed());
     }
   }
     
@@ -208,6 +276,9 @@ export class MistHUD extends Application {
   html.find('.mh-weakness-tag').on('click', (event) => handleTagClick(event, 'weakness'));
   html.find('.mh-story-tag').on('click', (event) => handleTagClick(event, 'story'));
   html.find('.mh-loadout-tag').on('click', (event) => handleTagClick(event, 'loadout'));
+
+  html.find('.mh-pwrcrew-tag').on('click', (event) => { handleTagClick(event, 'power'); });
+  html.find('.mh-wkcrew-tag').on('click', (event) => { handleTagClick(event, 'weakness'); });
   
 
     html.find('.mh-story-toggle').on('click', (event) => {
@@ -234,7 +305,7 @@ export class MistHUD extends Application {
         selector: '.mh-weakness-toggle'
       });
     });
-    
+
     html.find('.mh-burn-toggle').on('click', async (event) => {
       event.stopPropagation();
       event.preventDefault();
@@ -242,10 +313,24 @@ export class MistHUD extends Application {
       const burnElement = $(event.currentTarget);
       const tagElement = burnElement.closest('.mh-power-tag, .mh-story-tag, .mh-loadout-tag');
       const tagId = tagElement.data('id');
-      const actor = MistHUD.getInstance().actor;
-      if (!tagId || !actor) return;
+      if (!tagId) return;
     
-      // Determine the current state
+      // Determine which actor owns this tag.
+      // Default to the main actor from MistHUD.
+      let tagActor = MistHUD.getInstance().actor;
+    
+      // If this tag is a crew tag, get the crew actor using the data attribute.
+      if (tagElement.hasClass('Crew')) {
+        const crewId = tagElement.data('actor-id');
+        if (crewId) {
+          const found = game.actors.get(crewId);
+          if (found) tagActor = found;
+        }
+      }
+    
+      if (!tagActor) return;
+    
+      // Determine current state from the DOM.
       const currentState = burnElement.hasClass('burned')
         ? "burned"
         : burnElement.hasClass('toBurn')
@@ -259,41 +344,42 @@ export class MistHUD extends Application {
           ? "burned"
           : "unburned";
     
-      // Update DOM classes for the burn toggle and tag element
+      // Update the DOM classes for both the burn toggle and the tag element.
       burnElement.removeClass('unburned toBurn burned').addClass(newState);
       tagElement.removeClass('unburned toBurn burned').addClass(newState);
     
-      // Update selection based on the new state:
+      // Update selection flags based on new state.
       if (newState === "toBurn") {
-        // Force the tag to be selected if it's set to "toBurn"
+        // Force selection if set to "toBurn"
         tagElement.addClass('selected');
-        let selectedTags = actor.getFlag('mist-hud', 'selected-tags') || [];
+        let selectedTags = tagActor.getFlag('mist-hud', 'selected-tags') || [];
         if (!selectedTags.includes(tagId)) {
           selectedTags.push(tagId);
         }
-        await actor.setFlag('mist-hud', 'selected-tags', selectedTags);
+        await tagActor.setFlag('mist-hud', 'selected-tags', selectedTags);
       } else if (newState === "burned") {
-        // When burned, deselect the tag
+        // When burned, deselect the tag.
         tagElement.removeClass('selected');
-        let selectedTags = actor.getFlag('mist-hud', 'selected-tags') || [];
+        let selectedTags = tagActor.getFlag('mist-hud', 'selected-tags') || [];
         selectedTags = selectedTags.filter(id => id !== tagId);
-        await actor.setFlag('mist-hud', 'selected-tags', selectedTags);
+        await tagActor.setFlag('mist-hud', 'selected-tags', selectedTags);
       }
-      // If newState is "unburned", leave selection as is (i.e. if the user
-      // manually selected it, that remains intact).
+      // (If newState is "unburned", leave the selection as is.)
     
-      // Update the tag's state in the actor's data:
-      const tagItem = actor.items.get(tagId);
+      // Now update the tag’s embedded document on the correct actor.
+      const tagItem = tagActor.items.get(tagId);
       if (tagItem) {
-        const updatedState = newState === "burned"; // boolean for burned state
-        const burnState = newState === "toBurn" ? 1 : 0; // numeric value for burn state
+        const updatedState = newState === "burned"; // true if burned, false otherwise.
+        const burnState = newState === "toBurn" ? 1 : 0; // numeric burn state.
         await tagItem.update({ "system.burned": updatedState, "system.burn_state": burnState });
+      } else {
+        console.warn(`[Burn Debug] Tag item not found on actor '${tagActor.name}' for tag ID: ${tagId}`);
       }
     
-      // Recalculate total power
+      // Recalculate total power.
       MistHUD.getInstance().calculateTotalPower();
     });       
-     
+    
     html.find('.mh-status').on('click', async (event) => {
       event.stopPropagation(); // Stop the event from propagating to parent elements
       event.preventDefault();
@@ -614,13 +700,12 @@ export class MistHUD extends Application {
   
     // 7) Re-render HUD so it shows the updated juice
     this.render(false);
-  });
-  
+  });  
       
-    this.element.on('contextmenu', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-    });
+  this.element.on('contextmenu', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  });
   }
   
   getData(options) {
@@ -630,6 +715,9 @@ export class MistHUD extends Application {
     data.actor = this.actor;
     data.token = canvas.tokens.controlled[0] || null;
     data.scene = game.scenes.current || null;
+
+    // this.isCollapsed = this.actor.getFlag('mist-hud', 'isCollapsed') || false;
+    // data.isCollapsed = this.isCollapsed;
   
     const activeSystem = game.settings.get("city-of-mist", "system");
     data.activeSystem = activeSystem;
@@ -638,6 +726,7 @@ export class MistHUD extends Application {
   
     // Get the persisted selected tag IDs (assumed to be stored as an array)
     const selectedTags = this.actor.getFlag('mist-hud', 'selected-tags') || [];
+    const selectedCrewTags = this.actor.getFlag('mist-hud', 'selected-crew-tags') || [];
   
     // Use the imported getters:
     const themesAndTags = getThemesAndTags(this.actor);
@@ -658,6 +747,25 @@ export class MistHUD extends Application {
       }
       return theme;
     });
+
+    // Apply the selected state to the crew themes separately
+    data.crewThemes = themesAndTags.crewThemes.map(crewTheme => {
+      if (crewTheme.powerTags) {
+          crewTheme.powerTags = crewTheme.powerTags.map(tag => ({
+              ...tag,
+              selected: selectedCrewTags.some(ct => ct.id === tag.id),
+              crispy: tag.crispy
+          }));
+      }
+      if (crewTheme.weaknessTags) {
+          crewTheme.weaknessTags = crewTheme.weaknessTags.map(tag => ({
+              ...tag,
+              selected: selectedCrewTags.some(ct => ct.id === tag.id)
+          }));
+      }
+      return crewTheme;
+    });
+    
   
     // Update story tags to include the selected property:
     themesAndTags.storyTags = themesAndTags.storyTags.map(tag => ({
@@ -676,7 +784,8 @@ export class MistHUD extends Application {
     data.hasStoryTags = !!(themesAndTags.storyTags && themesAndTags.storyTags.length > 0);
     data.loadoutTags = loadoutTags;
     data.crewThemes = themesAndTags.crewThemes;
-  
+    data.hasCrewThemes = data.crewThemes && data.crewThemes.length > 0;
+    
     // Process statuses:
     const rawStatuses = getActorStatuses(this.actor);
     const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
@@ -1095,41 +1204,48 @@ export class MistHUD extends Application {
   
   // Function to add HUD Listeners for collapse/close buttons
   addHUDListeners(html) {
-    html.find('.mh-collapse-button').click(() => {
-      this.isCollapsed = !this.isCollapsed;
-
-    // Save the collapsed state in actor flags
-    if (this.actor) {
-      this.actor.setFlag('mist-hud', 'isCollapsed', this.isCollapsed);
-    }
-
-      this.render(true);
-    });
-
     html.find('.mh-close-button').click(() => {
       this.close();
     });
   }
   
   getSelectedRollData() {
-    console.log("getSelectedRollData called."); // Debug log
-
     // Fetch selected power tags
     const powerTags = this.element.find('.mh-power-tag.selected').map((i, el) => ({
-        tagName: $(el).text().trim(),
-        id: $(el).data('id'),
-        stateClass: $(el).find('.mh-burn-toggle').hasClass('toBurn') ? "to-burn" :
-                    $(el).find('.mh-burn-toggle').hasClass('burned') ? "burned" : "selected"
+      tagName: $(el).text().trim(),
+      id: $(el).data('id'),
+      actorId: $(el).data('actor-id'),
+      stateClass: $(el).find('.mh-burn-toggle').hasClass('toBurn') ? "to-burn" :
+                  $(el).find('.mh-burn-toggle').hasClass('burned') ? "burned" : "selected",
+      crispy: $(el).hasClass('mh-crispy')
     })).get();
 
-    // Fetch selected weakness tags
     const weaknessTags = this.element.find('.mh-weakness-tag.selected').map((i, el) => ({
         tagName: $(el).text().trim(),
         id: $(el).data('id'),
+        actorId: $(el).data('actor-id'),
         stateClass: $(el).hasClass('inverted') ? "inverted" : "normal"
     })).get();
 
-    // Fetch selected story tags
+    const crewPowerTags = this.element.find('.mh-power-tag.Crew.selected').map((i, el) => ({
+      tagName: $(el).text().trim(),
+      id: $(el).data('id'),
+      actorId: $(el).data('actor-id'),
+      stateClass: $(el).find('.mh-burn-toggle').hasClass('toBurn') 
+                  ? "to-burn" 
+                  : $(el).find('.mh-burn-toggle').hasClass('burned') 
+                    ? "burned" 
+                    : "selected",
+      crispy: $(el).hasClass('mh-crispy') || ($(el).data('crispy') === true)
+    })).get();
+
+    const crewWeaknessTags = this.element.find('.mh-weakness-tag.Crew.selected').map((i, el) => ({
+        tagName: $(el).text().trim(),
+        id: $(el).data('id'),
+        actorId: $(el).data('actor-id'),
+        stateClass: $(el).hasClass('inverted') ? "inverted" : "normal"
+    })).get();
+
     const storyTags = this.element.find('.mh-story-tag.selected').map((i, el) => {
       const tagElement = $(el);
       const isInverted = tagElement.hasClass('inverted');
@@ -1151,8 +1267,6 @@ export class MistHUD extends Application {
       };
     }).get();
 
-
-    // Fetch selected loadout tags
     const loadoutTags = this.element.find('.mh-loadout-tag.selected').map((i, el) => {
         const tagElement = $(el);
         const burnElement = tagElement.find('.mh-burn-toggle');
@@ -1173,7 +1287,6 @@ export class MistHUD extends Application {
         };
     }).get();
 
-    // Fetch selected character statuses
     const selectedStatuses = this.element.find('.mh-status.selected').map((i, el) => {
       const name = $(el).attr('data-status-name') || $(el).data('statusName');
       const tier = parseInt($(el).data('tier')) || 0;
@@ -1189,16 +1302,12 @@ export class MistHUD extends Application {
           temporary: $(el).data('temporary') || false,
           permanent: $(el).data('permanent') || false
       };
-  }).get();
+  }).get();  
   
-  
-    // Modifier value
     const modifier = this.modifier || 0;
 
-    // Retrieve scene tags
     const scnTags = getScnTags();
 
-    // Fetch scene statuses
     const sceneStatuses = getSceneStatuses().filter(sceneStatus => sceneStatus.isSelected).map(sceneStatus => ({
         name: sceneStatus.name,
         tier: sceneStatus.tier,
@@ -1211,6 +1320,8 @@ export class MistHUD extends Application {
     return {
         powerTags,
         weaknessTags,
+        crewPowerTags,
+        crewWeaknessTags,
         storyTags,
         loadoutTags,
         statuses: selectedStatuses,
@@ -1229,25 +1340,28 @@ export class MistHUD extends Application {
   
       console.log("[Burn Debug] Cleaning HUD and applying burn state updates...");
   
-      // 1. Convert all tags in the "toBurn" state to "burned"
       const tagsToUpdate = this.element.find(
-        '.mh-power-tag.toBurn, .mh-weakness-tag.toBurn, .mh-story-tag.toBurn, .mh-loadout-tag.toBurn'
-      );
+        '.mh-power-tag.toBurn, .mh-weakness-tag.toBurn, .mh-story-tag.toBurn, .mh-loadout-tag.toBurn, .mh-power-tag.Crew.toBurn, .mh-power-tag[data-crispy="true"], .mh-power-tag.Crew[data-crispy="true"]'
+      );      
+             
       for (const element of tagsToUpdate) {
         const $tag = $(element);
         const tagId = $tag.data('id');
         const tagItem = this.actor.items.get(tagId);
+    
         if (tagItem) {
-          console.log(`[Burn Debug] Marking tag '${tagItem.name}' as burned.`);
-          await tagItem.update({
-            "system.burned": true,
-            "system.burn_state": 0
-          });
+            console.log(`[Burn Debug] Marking tag '${tagItem.name}' as burned.`);
+            await tagItem.update({
+                "system.burned": true,
+                "system.burn_state": 0
+            });
         }
+    
         // Update the DOM classes
-        $tag.removeClass('toBurn').addClass('burned');
+        $tag.removeClass('toBurn mh-crispy').addClass('burned');
         $tag.find('.mh-burn-toggle').removeClass('toBurn').addClass('burned');
-      }
+    }
+    
   
       // 2. Delete temporary statuses
       // (Assumes that temporary statuses have a property system.temporary == true)
@@ -1299,6 +1413,7 @@ export class MistHUD extends Application {
       //
       // (If you DO want to clear them after a roll, you could do:
       await this.actor.unsetFlag('mist-hud', 'selected-tags');
+      await this.actor.unsetFlag('mist-hud', 'selected-crew-tags');
       // But that would force the user to reselect their tags.)
   
       // 6. Reset modifier and update its display.
@@ -1312,7 +1427,7 @@ export class MistHUD extends Application {
       console.error("Error during HUD cleanup:", error);
     }
   }
-    
+
 }
 
 // Function to attach click listeners to each scene tag for dynamic updates

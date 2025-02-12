@@ -27,11 +27,17 @@
       {{#if calculatedPower}}
         <span><i class="fa-light fa-bolt"></i> {{calculatedPower}}</span>
       {{/if}}
+      {{#if totalCrewPowerTags}}
+        <span><i class="fa-solid fa-users"></i> {{totalCrewPowerTags}}</span>
+      {{/if}}
       {{#if totalLoadoutTags}}
         <span><i class="fa-regular fa-gear"></i> {{totalLoadoutTags}}</span>
       {{/if}}
       {{#if totalWeakness}}
         <span><i class="fa-light fa-angles-down mhr-mls"></i> {{totalWeakness}}</span>
+      {{/if}}
+      {{#if totalCrewWeaknessTags}}
+        <span><i class="fa-solid fa-users-slash"></i> {{totalCrewWeaknessTags}}</span>
       {{/if}}
       {{#if totalStoryTags}}
         <span><i class="fa-light fa-tag mhr-mls" style="transform: scaleX(-1);"></i> {{totalStoryTags}}</span>

@@ -127,6 +127,10 @@ margin: 5px;
 #npc-hud.minimized .window-content {
     display: none;
 }
+
+.npc-hud.collapsed .window-content {
+    display: none;
+  }  
   
   /* Minimized state header */
 #npc-hud.minimized .window-header {

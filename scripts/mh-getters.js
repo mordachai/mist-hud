@@ -1,4 +1,4 @@
-// mist-hud-getters.js
+// mh-getters.js
 
 /**
  * Returns an icon HTML string for a given state and type.
@@ -72,23 +72,38 @@ export function getIcon(state, type) {
  * @returns {Array}
  */
 export function getCrewThemes(actor) {
-    if (!actor) return [];
-    const nonGMOwners = game.users.filter(user =>
+  if (!actor) return [];
+  const nonGMOwners = game.users.filter(user =>
       !user.isGM && actor.testUserPermission(user, "OWNER")
-    );
-    const ownedCrews = game.actors.contents.filter(a =>
+  );
+  const ownedCrews = game.actors.contents.filter(a =>
       a.type === "crew" &&
       nonGMOwners.some(user => a.testUserPermission(user, "OWNER"))
-    );
-    return ownedCrews.flatMap(crew =>
-      crew.items.filter(item => item.type === "theme").map(theme => ({
-        id: theme.id,
-        name: theme.name,
-        crewName: crew.name,
-        actorId: crew.id,
-      }))
-    );
-  }
+  );
+  return ownedCrews.flatMap(crew => 
+      crew.items.filter(item => item.type === "theme").map(theme => {
+          const themeId = theme.id;
+          const tagItems = crew.items.filter(item => item.type === "tag");
+          const subTagsByParent = tagItems.reduce((acc, tag) => {
+              if (tag.system.parentId) {
+                  if (!acc[tag.system.parentId]) acc[tag.system.parentId] = [];
+                  acc[tag.system.parentId].push(tag);
+              }
+              return acc;
+          }, {});
+
+          return {
+              id: themeId,
+              name: theme.name,
+              crewName: crew.name,
+              actorId: crew.id,
+              powerTags: getPowerTags(themeId, tagItems, subTagsByParent, crew),
+              weaknessTags: getWeaknessTags(themeId, tagItems, subTagsByParent, crew)
+          };
+      })
+  );
+}
+
   
   /**
    * Get the mystery string from a given theme.
@@ -136,7 +151,7 @@ export function getCrewThemes(actor) {
       case "Mist":
         prefixKey = "CityOfMist.terms.directive";
         break;
-      case "Extras":
+      case "Extra":
         prefixKey = "CityOfMist.terms.extra";
         break;
       case "Crew":
@@ -437,6 +452,7 @@ export function getCrewThemes(actor) {
    * @param {Actor} actor 
    * @returns {Array}
    */
+
   export function getPowerTags(themeId, tagItems, subTagsByParent, actor) {
     const powerTags = tagItems.filter(tag => tag.system.theme_id === themeId && tag.system.subtype === "power");
     return powerTags.map(tag => {
@@ -444,10 +460,12 @@ export function getCrewThemes(actor) {
       return {
         ...tagData,
         tagName: tag.name || tagData.tagName || `Unnamed Power Tag`,
+        crispy: tag.system.crispy || false,
+        actorId: actor.id
       };
     });
   }
-  
+    
   export function getWeaknessTags(themeId, tagItems, subTagsByParent, actor) {
     const weaknessTags = tagItems.filter(tag => tag.system.theme_id === themeId && tag.system.subtype === "weakness");
     return weaknessTags.map(tag => {
@@ -455,9 +473,11 @@ export function getCrewThemes(actor) {
       return {
         ...tagData,
         tagName: tag.name || tagData.tagName || `Unnamed Weakness Tag`,
+        actorId: actor.id // <-- Add the actorId here as well
       };
     });
-  }  
+  }
+  
   
   /**
    * Get story tags for a given actor.
