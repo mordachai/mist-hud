@@ -29,6 +29,13 @@ Hooks.once("init", () => {
 
 let toBurnTags = $('.mh-power-tag.toBurn, .mh-power-tag.crew.toBurn').toArray().map(tag => $(tag).data('id'));
 
+// async function rollDice() {
+//   console.warn("rollDice is overridden for testing: always returns [1, 1]");
+  
+//   // Simulate a dice roll result of [1, 1]
+//   return [6, 6];
+// }
+
 async function rollDice() {
   const roll = new Roll("2d6");
   await roll.evaluate({async: true});
@@ -43,17 +50,24 @@ async function rollDice() {
   return roll.dice[0].results.map(die => die.result);
 }
 
-// async function rollDice() {
-//   console.warn("rollDice is overridden for testing: always returns [1, 1]");
-  
-//   // Simulate a dice roll result of [1, 1]
-//   return [6, 6];
-// }
-
 //Main Roll function
 async function rollMove(moveName, hasDynamite) {
   const hud = MistHUD.getInstance();
+
+  const activeSystem = game.settings.get("city-of-mist", "system");
+
   const tagsData = hud.getSelectedRollData();
+
+  // **Check if a tag is being burned for a hit**
+  const burningTags = tagsData.powerTags.filter(tag => tag.stateClass === "to-burn")
+    .concat(tagsData.crewPowerTags.filter(tag => tag.stateClass === "to-burn"))
+    .concat(tagsData.loadoutTags.filter(tag => tag.stateClass === "to-burn"));
+  
+  if (activeSystem === "city-of-mist" && burningTags.length > 0) {
+    return await rollBurnForHitCityOfMist(moveName);
+  }
+  
+  
 
   if (!hud || !hud.actor) {
       ui.notifications.warn("MistHUD is not ready. Please select an actor.");
@@ -62,8 +76,6 @@ async function rollMove(moveName, hasDynamite) {
 
   const actor = hud.actor;
   const move = moveConfig[moveName]; 
-
-  const activeSystem = game.settings.get("city-of-mist", "system");
 
   // Get selected tags
   const powerTags = hud.getSelectedRollData().powerTags || [];
@@ -140,15 +152,6 @@ try {
   
   const rollResults = await rollDice();
   const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower + totalBonus;
-
-  // **Check if a tag is being burned for a hit**
-  const burningTags = tagsData.powerTags.filter(tag => tag.stateClass === "to-burn")
-                      .concat(tagsData.crewPowerTags.filter(tag => tag.stateClass === "to-burn"))
-                      .concat(tagsData.loadoutTags.filter(tag => tag.stateClass === "to-burn"));
-
-    if (activeSystem === "city-of-mist" && burningTags.length > 0) {
-    return await rollBurnForHitCityOfMist(moveName);
-  }
 
   // Declare `dynamiteEnabled` variable
   let dynamiteEnabled = false; // Default to false for systems without dynamite moves
@@ -243,7 +246,8 @@ try {
     rollTotal: displayRollTotal,
     localizedMoveEffects,
     tagsData,
-    statuses: tagsData.statuses, // Include statuses
+    storyTags: tagsData.storyTags,
+    statuses: tagsData.statuses,
     trackedEffects,
     diceClass,
     outcomeClass
@@ -273,117 +277,6 @@ try {
   hud.cleanHUD(chatData.tagsData);
 
 }
-
-// async function rollBurnForHitCityOfMist(moveName) {
-//   const hud = MistHUD.getInstance();
-//   if (!hud || !hud.actor) {
-//       ui.notifications.warn("MistHUD is not ready. Please select an actor.");
-//       return;
-//   }
-//   const actor = hud.actor;
-//   const move = moveConfig[moveName];
-//   const activeSystem = game.settings.get("city-of-mist", "system");
-
-//   const rollData = hud.getSelectedRollData();
-
-//   // Determine burnBasePower: use 1 if any crew tag is selected, otherwise 3.
-//   let burnBasePower = 3;
-//   if (rollData.crewPowerTags && rollData.crewPowerTags.length > 0) {
-//     burnBasePower = 1;
-//   }
-  
-//   const fixedRoll = 7;
-
-//   // Get status adjustments (statuses, scene statuses, scene tags)
-//   const totalCharStatuses = calculateCharacterStatuses();
-//   const totalSceneStatuses = calculateSceneStatuses();
-//   const totalScnTags = calculateScnTags();
-//   const modifier = getRollModifier() || 0;
-
-//   // Final total is fixed + statuses/modifiers.
-//   const finalTotal = burnBasePower + fixedRoll + totalCharStatuses + totalSceneStatuses + totalScnTags + modifier;
-
-//   // Dynamite (firecracker) logic.
-//   // (Assumes that the actor flag "dynamiteMoves" is an array of move names that allow dynamite.)
-//   const dynamiteEnabled = (await actor.getFlag("mist-hud", "dynamiteMoves") || []).includes(moveName);
-
-//   let outcome, moveEffects, outcomeClass;
-//   if (dynamiteEnabled && finalTotal >= 12) {
-//     outcome = "dynamite";
-//     moveEffects = move.dynamiteEffects || [];
-//     outcomeClass = "outcome-success-double-sixes";
-//   } else if (finalTotal >= 10) {
-//     outcome = "success";
-//     moveEffects = move.successEffects || [];
-//     outcomeClass = "outcome-success";
-//   } else if (finalTotal >= 7) {
-//     outcome = "partial";
-//     moveEffects = move.partialEffects || [];
-//     outcomeClass = "outcome-partial";
-//   } else {
-//     outcome = "fail";
-//     moveEffects = move.failEffects || [];
-//     outcomeClass = "outcome-fail";
-//   }
-
-//   // Prepare display total (append firecracker emoji if dynamite applies).
-//   const displayRollTotal = (dynamiteEnabled && finalTotal >= 12)
-//                              ? `${finalTotal} 🧨`
-//                              : finalTotal;
-
-//   let outcomeMessage = game.i18n.localize(move[outcome]);
-//   outcomeMessage = substituteText(outcomeMessage, burnBasePower);
-
-//   const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
-
-//   const chatData = {
-//     moveName: move.name,
-//     actorName: actor.name,
-//     subtitle: move.subtitle || "",
-//     rollResults: [fixedRoll], // Only the fixed roll value is shown.
-//     outcomeMessage,
-//     calculatedPower: burnBasePower,
-//     totalCrewPowerTags: 0,  // Other tags do not contribute.
-//     totalCrewWeaknessTags: 0,
-//     totalLoadoutTags: 0,
-//     totalWeakness: 0,
-//     totalStoryTags: 0,
-//     totalScnTags: totalScnTags,
-//     totalCharStatuses: totalCharStatuses,
-//     totalSceneStatuses: totalSceneStatuses,
-//     modifier: modifier,
-//     rollTotal: displayRollTotal,
-//     localizedMoveEffects,
-//     tagsData: hud.getSelectedRollData(),
-//     statuses: hud.getSelectedRollData().statuses,
-//     trackedEffects: (outcome !== "fail" && Array.isArray(move.trackedEffects) && move.trackedEffects.length > 0)
-//                     ? move.trackedEffects
-//                     : null,
-//     diceClass: "default-dice",
-//     outcomeClass: outcomeClass
-//   };
-
-//   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
-//   ChatMessage.create({
-//     content: chatContent,
-//     speaker: { alias: actor.name },
-//     flags: {
-//       "mist-hud": { isCustomRoll: true }
-//     }
-//   });
-
-//   await actor.unsetFlag('mist-hud', 'received-bonuses');
-//   hud.render(true);
-
-//   // Burn the used tags.
-//   const tagsData = hud.getSelectedRollData();
-//   await burnCrispyTags(tagsData.powerTags);
-//   await burnCrispyTags(tagsData.crewPowerTags);
-//   await burnCrispyTags(tagsData.loadoutTags);
-
-//   // Clean up the HUD (which clears selections, etc.).
-//   hud.cleanHUD(tagsData);
-// }
 
 async function rollBurnForHitCityOfMist(moveName) {
   const hud = MistHUD.getInstance();
@@ -651,13 +544,10 @@ function calculateCharacterStatuses() {
   const rollData = hud.getSelectedRollData();
 
   const characterStatusTotal = rollData.statuses.reduce((total, status) => {
-      //console.log(`Calculating Status Contribution: Name: ${status.name}, Tier: ${status.tier}, Type: ${status.typeClass}`);
-      const contribution = status.typeClass === "positive" ? status.tier : -status.tier;
-      //console.log(`Contribution for ${status.name}: ${contribution}`);
-      return total + contribution;
+        const contribution = status.typeClass === "positive" ? status.tier : -status.tier;
+        return total + contribution;
   }, 0);
 
-  //console.log("Total Character Status Contribution to Roll:", characterStatusTotal);
   return characterStatusTotal;
 }
 

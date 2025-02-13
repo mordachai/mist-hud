@@ -473,7 +473,7 @@ export function getCrewThemes(actor) {
       return {
         ...tagData,
         tagName: tag.name || tagData.tagName || `Unnamed Weakness Tag`,
-        actorId: actor.id // <-- Add the actorId here as well
+        actorId: actor.id
       };
     });
   }
@@ -484,23 +484,66 @@ export function getCrewThemes(actor) {
    * @param {Actor} actor 
    * @returns {Array}
    */
+  // export function getStoryTags(actor) {
+  //   if (!actor) return [];
+  //   const items = actor.items.contents;
+  //   const tagItems = items.filter(item => item.type === 'tag');
+  //   const storyTags = tagItems.filter(tag => tag.system.subtype === 'story')
+  //     .map(tag => {
+  //       if (!tag || !tag._id || !tag.system) {
+  //         console.error("Invalid tag item in getStoryTags:", tag);
+  //         return null;
+  //       }
+  //       const processedTag = applyBurnState(actor, tag._id, 'story');
+  //       processedTag.isInverted = tag.system.inverted || false;
+  //       processedTag.inversionIcon = processedTag.isInverted 
+  //         ? '<i class="fa-light fa-angles-up"></i>' 
+  //         : '<i class="fa-light fa-angles-down"></i>';
+  //       return processedTag;
+  //     }).filter(Boolean);
+  //   return storyTags;
+  // }
+
   export function getStoryTags(actor) {
     if (!actor) return [];
     const items = actor.items.contents;
     const tagItems = items.filter(item => item.type === 'tag');
-    const storyTags = tagItems.filter(tag => tag.system.subtype === 'story')
+    const storyTags = tagItems
+      .filter(tag => tag.system.subtype === 'story')
       .map(tag => {
         if (!tag || !tag._id || !tag.system) {
           console.error("Invalid tag item in getStoryTags:", tag);
           return null;
         }
+        // Process the tag using your existing logic.
         const processedTag = applyBurnState(actor, tag._id, 'story');
+        // Ensure the tag has the following extra properties:
+        processedTag.actorId = actor.id;
+        processedTag.temporary = !!tag.system.temporary;
+        processedTag.permanent = !!tag.system.permanent;
+        
+        // Define a cssClass (or stateClass) based on the burn state.
+        // You might already have these computed in processedTag (e.g. via applyBurnState)
+        // For example, if applyBurnState sets:
+        //    processedTag.burned as true/false and processedTag.burn_state as numeric,
+        // then you can assign:
+        if (processedTag.burned) {
+          processedTag.cssClass = "burned";
+        } else if (processedTag.burn_state === 1) {
+          processedTag.cssClass = "to-burn";
+        } else {
+          processedTag.cssClass = "selected";
+        }
+  
+        // Also include the inversion icon and inverted flag as you already do:
         processedTag.isInverted = tag.system.inverted || false;
         processedTag.inversionIcon = processedTag.isInverted 
           ? '<i class="fa-light fa-angles-up"></i>' 
           : '<i class="fa-light fa-angles-down"></i>';
+        
         return processedTag;
-      }).filter(Boolean);
+      })
+      .filter(Boolean);
     return storyTags;
   }
   

@@ -68,7 +68,11 @@
           <span class="mhr-weakness-tag {{stateClass}}">{{tagName}}</span>
         {{/each}}
         {{#each tagsData.storyTags}}
-          <span class="mhr-story-tag {{stateClass}} {{#if temporary}}mhr-temporary-tag{{/if}}">{{tagName}}</span>
+          <span class="mhr-story-tag {{stateClass}} {{#if temporary}}mhr-temporary-tag{{/if}}">
+            {{#if temporary}}⏱️ {{/if}}
+            {{#if permanent}}💎 {{/if}}
+            {{tagName}}
+          </span>
         {{/each}}
         {{#each tagsData.statuses}}
           <span class="mhr-status-tag {{typeClass}} {{#if temporary}}mhr-temporary-status{{/if}} {{#if permanent}}mhr-permanent-status{{/if}}">

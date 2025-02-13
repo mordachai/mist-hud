@@ -1217,7 +1217,8 @@ export class MistHUD extends Application {
       actorId: $(el).data('actor-id'),
       stateClass: $(el).find('.mh-burn-toggle').hasClass('toBurn') ? "to-burn" :
                   $(el).find('.mh-burn-toggle').hasClass('burned') ? "burned" : "selected",
-      crispy: $(el).hasClass('mh-crispy')
+      crispy: $(el).hasClass('mh-crispy') || ($(el).data('crispy') === true)
+
     })).get();
 
     const weaknessTags = this.element.find('.mh-weakness-tag.selected').map((i, el) => ({
@@ -1263,7 +1264,9 @@ export class MistHUD extends Application {
       return {
           tagName: tagElement.text().trim(),
           id: tagElement.data('id'),
-          stateClass
+          stateClass,
+          temporary: $(el).data('temporary') || false,
+          permanent: $(el).data('permanent') || false
       };
     }).get();
 
@@ -1341,26 +1344,40 @@ export class MistHUD extends Application {
       console.log("[Burn Debug] Cleaning HUD and applying burn state updates...");
   
       const tagsToUpdate = this.element.find(
-        '.mh-power-tag.toBurn, .mh-weakness-tag.toBurn, .mh-story-tag.toBurn, .mh-loadout-tag.toBurn, .mh-power-tag.Crew.toBurn, .mh-power-tag[data-crispy="true"], .mh-power-tag.Crew[data-crispy="true"]'
-      );      
+        '.mh-power-tag.toBurn, .mh-weakness-tag.toBurn, .mh-story-tag.toBurn, .mh-loadout-tag.toBurn'
+      );    
              
       for (const element of tagsToUpdate) {
         const $tag = $(element);
         const tagId = $tag.data('id');
-        const tagItem = this.actor.items.get(tagId);
-    
+      
+        // Determine the correct actor for this tag.
+        let tagActor = this.actor; // default to main actor
+        if ($tag.hasClass('Crew')) {
+          const crewId = $tag.data('actor-id');
+          if (crewId) {
+            const crewActor = game.actors.get(crewId);
+            if (crewActor) {
+              tagActor = crewActor;
+            }
+          }
+        }
+      
+        // Now update the tag item from the correct actor.
+        const tagItem = tagActor.items.get(tagId);
         if (tagItem) {
-            console.log(`[Burn Debug] Marking tag '${tagItem.name}' as burned.`);
+            console.log(`[Burn Debug] Marking tag '${tagItem.name}' as burned on actor '${tagActor.name}'.`);
             await tagItem.update({
                 "system.burned": true,
                 "system.burn_state": 0
             });
         }
-    
-        // Update the DOM classes
+      
+        // Update the DOM classes.
         $tag.removeClass('toBurn mh-crispy').addClass('burned');
         $tag.find('.mh-burn-toggle').removeClass('toBurn').addClass('burned');
       }
+      
    
   
       // 2. Delete temporary statuses
@@ -1374,25 +1391,23 @@ export class MistHUD extends Application {
           await this.actor.deleteEmbeddedDocuments("Item", [statusId]);
         }
       }
-  
-      // 3. Optionally, delete temporary tags used in the roll.
-      // If you have temporary tags (e.g. with system.temporary == true) that should be removed,
-      // you can uncomment and adjust the code below.
-      /*
+
+     
+      // 4. Delete temporary tags (if any exist) after the roll.
       const temporaryTags = this.actor.items.contents.filter(item =>
         item.type === 'tag' && item.system.temporary === true
       );
       for (const tag of temporaryTags) {
         console.log(`Deleting temporary tag: ${tag.name}`);
         await this.actor.deleteEmbeddedDocuments("Item", [tag.id]);
+        
         // Also update the persisted selected-tags flag, if needed.
         let selectedTags = this.actor.getFlag('mist-hud', 'selected-tags') || [];
         selectedTags = selectedTags.filter(id => id !== tag.id);
         await this.actor.setFlag('mist-hud', 'selected-tags', selectedTags);
       }
-      */
-  
-      // 4. Preserve statuses selection from saved flags.
+ 
+      // 5. Preserve statuses selection from saved flags.
       // (Your statuses flag is maintained separately.)
       const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
       this.element.find('.mh-status').each((index, element) => {
@@ -1407,7 +1422,7 @@ export class MistHUD extends Application {
         }
       });
   
-      // 5. IMPORTANT: Do not clear the persistent tag selections.
+      // 6. IMPORTANT: Do not clear the persistent tag selections.
       // If you want tag selections (for power, weakness, story, loadout tags) to persist between rolls,
       // do not clear the "selected-tags" flag.
       //
@@ -1416,11 +1431,11 @@ export class MistHUD extends Application {
       await this.actor.unsetFlag('mist-hud', 'selected-crew-tags');
       // But that would force the user to reselect their tags.)
   
-      // 6. Reset modifier and update its display.
+      // 7. Reset modifier and update its display.
       this.modifier = 0;
       this.updateModifierDisplay();
   
-      // 7. Finally, re-render the HUD so that the getData() method re-applies the correct data,
+      // 8. Finally, re-render the HUD so that the getData() method re-applies the correct data,
       // including restoring persistent tag selections.
       await this.render(true);
     } catch (error) {
