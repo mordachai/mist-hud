@@ -111,63 +111,231 @@ export function getCrewThemes(actor) {
    * @param {string} themeId 
    * @returns {string}
    */
-  export function getMysteryFromTheme(actor, themeId) {
-    if (!actor) {
-      console.warn("No actor provided in getMysteryFromTheme.");
-      return "No mystery defined.";
-    }
-    const theme = actor.items.contents.find(item => item.type === 'theme' && item.id === themeId);
-    if (!theme) {
-      console.warn(`No theme found with ID: ${themeId}`);
-      return "No mystery defined.";
-    }
-    let realThemebook;
-    const themebook = theme.themebook;
-    if (themebook?.isThemeKit && themebook.isThemeKit()) {
-      realThemebook = themebook.themebook;
-    } else {
-      realThemebook = themebook;
-    }
-    if (!realThemebook) {
-      console.warn(`No themebook found for theme: ${theme.name}`);
-      return "No mystery defined.";
-    }
-    const category = realThemebook.system.subtype || "unknown";
-    const system = game.settings.get("city-of-mist", "system");
-    let prefixKey;
-    switch (category) {
-      case "Mythos":
-        prefixKey = (system === "city-of-mist") ? "CityOfMist.terms.mystery" :
-                    (system === "otherscape") ? "Otherscape.terms.ritual" :
-                    null;
-        break;
-      case "Logos":
-      case "Self":
-        prefixKey = "CityOfMist.terms.identity";
-        break;
-      case "Noise":
-        prefixKey = "Otherscape.terms.itch";
-        break;
-      case "Mist":
-        prefixKey = "CityOfMist.terms.directive";
-        break;
-      case "Extra":
-        prefixKey = "CityOfMist.terms.extra";
-        break;
-      case "Crew":
-        prefixKey = "CityOfMist.terms.crewTheme";
-        break;
-      case "Loadout":
-        prefixKey = "Otherscape.terms.loadout";
-        break;
-      default:
-        console.warn(`Unknown category: ${category}`);
-        prefixKey = null;
-    }
-    const prefix = prefixKey ? game.i18n.localize(prefixKey) : "Theme";
-    const mysteryText = theme.system.mystery || "No mystery defined.";
-    return `<span class="mystery-type ${category}">${prefix}:</span><span class="mystery-text">${mysteryText}</span>`;
+
+  
+// export function getMysteryFromTheme(actor, themeId) {
+//   if (!actor) {
+//     console.warn("No actor provided in getMysteryFromTheme.");
+//     return {
+//       category: "unknown",
+//       prefix: "Theme",
+//       mysteryText: "No mystery defined.",
+//       attention: [],
+//       crack: []
+//     };
+//   }
+
+//   const theme = actor.items.contents.find(item => item.type === 'theme' && item.id === themeId);
+//   if (!theme) {
+//     console.warn(`No theme found with ID: ${themeId}`);
+//     return {
+//       category: "unknown",
+//       prefix: "Theme",
+//       mysteryText: "No mystery defined.",
+//       attention: [],
+//       crack: []
+//     };
+//   }
+
+//   let realThemebook;
+//   const themebook = theme.themebook;
+//   if (themebook?.isThemeKit && themebook.isThemeKit()) {
+//     realThemebook = themebook.themebook;
+//   } else {
+//     realThemebook = themebook;
+//   }
+//   if (!realThemebook) {
+//     console.warn(`No themebook found for theme: ${theme.name}`);
+//     return {
+//       category: "unknown",
+//       prefix: "Theme",
+//       mysteryText: "No mystery defined.",
+//       attention: [],
+//       crack: []
+//     };
+//   }
+
+//   const category = realThemebook.system.subtype || "unknown";
+//   const system = game.settings.get("city-of-mist", "system");
+//   let prefixKey;
+//   switch (category) {
+//     case "Mythos":
+//       prefixKey = (system === "city-of-mist") ? "CityOfMist.terms.mystery"
+//                 : (system === "otherscape")   ? "Otherscape.terms.ritual"
+//                 : null;
+//       break;
+//     case "Logos":
+//     case "Self":
+//       prefixKey = "CityOfMist.terms.identity";
+//       break;
+//     case "Noise":
+//       prefixKey = "Otherscape.terms.itch";
+//       break;
+//     case "Mist":
+//       prefixKey = "CityOfMist.terms.directive";
+//       break;
+//     case "Extra":
+//       prefixKey = "CityOfMist.terms.extra";
+//       break;
+//     case "Crew":
+//       prefixKey = "CityOfMist.terms.crewTheme";
+//       break;
+//     case "Loadout":
+//       prefixKey = "Otherscape.terms.loadout";
+//       break;
+//     default:
+//       console.warn(`Unknown category: ${category}`);
+//       prefixKey = null;
+//   }
+
+//   const prefix = prefixKey ? game.i18n.localize(prefixKey) : "Theme";
+//   const mysteryText = theme.system.mystery || "No mystery defined.";
+
+//   // Return data needed by the Handlebars template
+//   return {
+//     category,
+//     prefix,
+//     mysteryText,
+//     attention: theme.system.attention ?? [],
+//     crack: theme.system.crack ?? []
+//   };
+// }
+
+
+// mh-getters.js
+export function getMysteryFromTheme(actor, themeId) {
+  if (!actor) {
+    console.warn("No actor provided in getMysteryFromTheme.");
+    return {
+      category: "unknown",
+      prefix: "Theme",
+      mysteryText: "No mystery defined.",
+      attention: [],
+      crack: [],
+      attentionLabel: "Attention",
+      crackLabel: "Crack"
+    };
   }
+
+  const theme = actor.items.contents.find(item => item.type === 'theme' && item.id === themeId);
+  if (!theme) {
+    console.warn(`No theme found with ID: ${themeId}`);
+    return {
+      category: "unknown",
+      prefix: "Theme",
+      mysteryText: "No mystery defined.",
+      attention: [],
+      crack: [],
+      attentionLabel: "Attention",
+      crackLabel: "Crack"
+    };
+  }
+
+  let realThemebook;
+  const themebook = theme.themebook;
+  if (themebook?.isThemeKit && themebook.isThemeKit()) {
+    realThemebook = themebook.themebook;
+  } else {
+    realThemebook = themebook;
+  }
+  if (!realThemebook) {
+    console.warn(`No themebook found for theme: ${theme.name}`);
+    return {
+      category: "unknown",
+      prefix: "Theme",
+      mysteryText: "No mystery defined.",
+      attention: [],
+      crack: [],
+      attentionLabel: "Attention",
+      crackLabel: "Crack"
+    };
+  }
+
+  const category = realThemebook.system.subtype || "unknown";
+  const system = game.settings.get("city-of-mist", "system");
+
+  // 1) Determine prefix label (mystery/ritual/etc.)
+  let prefixKey;
+  switch (category) {
+    case "Mythos":
+      prefixKey = (system === "city-of-mist") ? "CityOfMist.terms.mystery"
+                : (system === "otherscape")   ? "Otherscape.terms.ritual"
+                : null;
+      break;
+    case "Logos":
+    case "Self":
+      prefixKey = "CityOfMist.terms.identity";
+      break;
+    case "Noise":
+      prefixKey = "Otherscape.terms.itch";
+      break;
+    case "Mist":
+      prefixKey = "CityOfMist.terms.directive";
+      break;
+    case "Extra":
+      prefixKey = "CityOfMist.terms.extra";
+      break;
+    case "Crew":
+      prefixKey = "CityOfMist.terms.crewTheme";
+      break;
+    case "Loadout":
+      prefixKey = "Otherscape.terms.loadout";
+      break;
+    default:
+      console.warn(`Unknown category: ${category}`);
+      prefixKey = null;
+  }
+  const prefix = prefixKey ? game.i18n.localize(prefixKey) : "Theme";
+
+  // 2) Determine the text for "Attention" & "Crack" based on system + category
+  let attentionKey, crackKey;
+
+  if (system === "city-of-mist") {
+    // City of Mist
+    attentionKey = "CityOfMist.terms.attention";
+
+    // For Logos (or Self), "crack" is "fade"
+    if (category === "Logos" || category === "Self") {
+      crackKey = "CityOfMist.terms.fade";
+    }
+    // For Mythos, "crack" remains "crack"
+    else if (category === "Mythos") {
+      crackKey = "CityOfMist.terms.crack";
+    }
+    // Fallback or other categories:
+    else {
+      crackKey = "CityOfMist.terms.crack";
+    }
+  }
+  else if (system === "otherscape") {
+    // Otherscape
+    attentionKey = "Otherscape.terms.upgrade";
+    crackKey     = "Otherscape.terms.decay";
+  }
+
+  // 3) Localize the final strings
+  const attentionLabel = attentionKey ? game.i18n.localize(attentionKey) : "Attention";
+  const crackLabel = crackKey ? game.i18n.localize(crackKey) : "Crack";
+
+  // 4) Mystery text & resource arrays
+  const mysteryText = theme.system.mystery || "No mystery defined.";
+  const attention = theme.system.attention ?? [];
+  const crack = theme.system.crack ?? [];
+
+  // Return the data used by Handlebars
+  return {
+    category,
+    prefix,
+    mysteryText,
+    attention,
+    crack,
+    attentionLabel,
+    crackLabel
+  };
+}
+
+
+  
   
   /**
    * Get themes and tags from an actor.
@@ -484,25 +652,6 @@ export function getCrewThemes(actor) {
    * @param {Actor} actor 
    * @returns {Array}
    */
-  // export function getStoryTags(actor) {
-  //   if (!actor) return [];
-  //   const items = actor.items.contents;
-  //   const tagItems = items.filter(item => item.type === 'tag');
-  //   const storyTags = tagItems.filter(tag => tag.system.subtype === 'story')
-  //     .map(tag => {
-  //       if (!tag || !tag._id || !tag.system) {
-  //         console.error("Invalid tag item in getStoryTags:", tag);
-  //         return null;
-  //       }
-  //       const processedTag = applyBurnState(actor, tag._id, 'story');
-  //       processedTag.isInverted = tag.system.inverted || false;
-  //       processedTag.inversionIcon = processedTag.isInverted 
-  //         ? '<i class="fa-light fa-angles-up"></i>' 
-  //         : '<i class="fa-light fa-angles-down"></i>';
-  //       return processedTag;
-  //     }).filter(Boolean);
-  //   return storyTags;
-  // }
 
   export function getStoryTags(actor) {
     if (!actor) return [];

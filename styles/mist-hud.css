@@ -472,8 +472,8 @@ hr {
   z-index: 150;
   background: rgba(0, 0, 0, 0.9); 
   color: white;
-  padding: 5px 10px;
-  border: 1px solid white;
+  padding: 2px 5px;
+  border: 1px solid whitesmoke;
   border-radius: 5px;
   box-shadow: 0 4px 6px rgba(80, 52, 97, 0.5); 
   pointer-events: none; 
@@ -490,6 +490,35 @@ hr {
   font-style: italic;
   margin-left: 3px;
 }
+
+.mh-tooltip-theme {
+  position: relative;
+  padding: 8px; /* Adjust as needed */
+}
+
+.mh-resource-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center the boxes and label horizontally */
+}
+
+.mh-resource-group .boxes {
+  display: flex;
+  flex-direction: row;
+  gap: 1px;
+}
+
+.mh-box {
+  width: 10px;
+  height: 10px;
+}
+
+.mh-box.active {
+  width: 10px;
+  height: 10px;
+}
+
+
 
 /* Sliding Panel Wrapper */
 .mh-sliding-panel {

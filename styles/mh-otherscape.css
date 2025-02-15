@@ -628,3 +628,41 @@ color: var(--mythosOS-verylight-color);
   background: rgba(2, 88, 16, 0.204);
   border: #0f9823 1px solid;
 }
+
+/* Layout the resource bars side by side */
+.mh-resource-bar {
+  position: absolute;
+  bottom: -32px;
+  left: -30px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;  
+  background-color: #000000d6;
+  padding: 3px;
+  border: 1px solid whitesmoke;
+  border-radius: 4px;
+}
+
+/* Basic box style */
+.mh-box {
+  background-image: url('../ui/icons/track-os-empty.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+/* "Filled" or "active" state */
+.mh-box.active {
+  background-image: url('../ui/icons/track-os-full.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+/* Label under the boxes */
+.mh-resource-label {
+  font-family: var(--font-family-main1);
+  text-transform: uppercase;
+  margin-top: 3px;
+  font-size: 0.8em; /* Adjust font size as desired */
+  text-align: center;
+  color: var(--spectrum-color); /* Adjust text color to match your theme */
+}

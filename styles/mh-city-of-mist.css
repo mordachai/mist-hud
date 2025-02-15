@@ -329,5 +329,44 @@
   border: #d12ebb 1px solid;
 }
 
+/* Layout the resource bars side by side */
+.mh-resource-bar {
+  position: absolute;
+  bottom: -30px;
+  right: -30px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;  
+  background-color: #000000d6;
+  padding: 3px;
+  border: 1px solid whitesmoke;
+  border-radius: 4px;
+}
+
+.mh-box {
+  width: 12px;
+  height: 12px;
+  background-image: url('../ui/icons/track-com-empty.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+/* "Filled" or "active" state */
+.mh-box.active {
+  width: 12px;
+  height: 12px;
+  background-image: url('../ui/icons/track-com-full.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+/* Label under the boxes */
+.mh-resource-label {
+  margin-top: 4px;
+  font-size: 0.85em;
+  text-align: center;
+  color: whitesmoke; 
+}
+
 
 

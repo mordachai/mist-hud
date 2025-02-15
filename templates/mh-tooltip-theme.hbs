@@ -1,0 +1,28 @@
+<div class="mh-tooltip-theme">
+  <!-- Resource bars side by side -->
+  <div class="mh-resource-bar">
+    <!-- Attention Column -->
+    <div class="mh-resource-group attention-group">
+      <div class="boxes">
+        {{#each attention}}
+        <span class="mh-box {{#if this}}active{{/if}}"></span>
+        {{/each}}
+      </div>
+      <div class="mh-resource-label">{{attentionLabel}}</div>
+    </div>
+
+    <!-- Crack Column -->
+    <div class="mh-resource-group crack-group">
+      <div class="boxes">
+        {{#each crack}}
+        <span class="mh-box {{#if this}}active{{/if}}"></span>
+        {{/each}}
+      </div>
+      <div class="mh-resource-label">{{crackLabel}}</div>
+    </div>
+  </div>
+
+  <!-- Existing content for Mystery -->
+  <span class="mystery-type {{category}}">{{prefix}}:</span>
+  <span class="mystery-text">{{mysteryText}}</span>
+</div>

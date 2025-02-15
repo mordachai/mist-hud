@@ -4,9 +4,9 @@ import { essenceDescriptions } from './mh-theme-config.js';
 import { StoryTagDisplayContainer } from "/systems/city-of-mist/module/story-tag-window.js";
 import { CityHelpers } from "/systems/city-of-mist/module/city-helpers.js";
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
-import { moveConfig } from "/modules/mist-hud/scripts/mh-theme-config.js";
+import { moveConfig } from "./mh-theme-config.js";
 import statusScreenApp from "./statusScreenApp.js";
-import { showTooltip, hideTooltip } from '/modules/mist-hud/scripts/tooltip.js';
+import { showTooltip, hideTooltip } from './tooltip.js';
 import { 
   getMysteryFromTheme, 
   getThemesAndTags, 
@@ -1022,15 +1022,35 @@ export class MistHUD extends Application {
     }
   }
 
+  // addTooltipListeners(html) {
+  //   html.find('.mh-theme-icon').each((index, element) => {
+  //     const themeId = $(element).data('theme-id');
+  //     $(element).hover(
+  //       (event) => {
+  //         // Call the imported function with the actor and themeId
+  //         const mystery = getMysteryFromTheme(this.actor, themeId);
+  //         // Save the tooltip reference on the element or the instance
+  //         this.currentTooltip = showTooltip(event, mystery);
+  //       },
+  //       () => {
+  //         if (this.currentTooltip) {
+  //           hideTooltip(this.currentTooltip);
+  //           this.currentTooltip = null;
+  //         }
+  //       }
+  //     );
+  //   });
+  // }  
+   
+
   addTooltipListeners(html) {
     html.find('.mh-theme-icon').each((index, element) => {
       const themeId = $(element).data('theme-id');
       $(element).hover(
-        (event) => {
-          // Call the imported function with the actor and themeId
-          const mystery = getMysteryFromTheme(this.actor, themeId);
-          // Save the tooltip reference on the element or the instance
-          this.currentTooltip = showTooltip(event, mystery);
+        async (event) => {
+          // Get the data for the tooltip from the theme
+          const data = getMysteryFromTheme(this.actor, themeId);
+          this.currentTooltip = await showTooltip(event, data);
         },
         () => {
           if (this.currentTooltip) {
@@ -1040,8 +1060,8 @@ export class MistHUD extends Application {
         }
       );
     });
-  }  
-   
+  }
+  
   calculateTotalPower() {
     let totalPower = 0;
 
