@@ -639,7 +639,7 @@ color: var(--mythosOS-verylight-color);
   gap: 10px;  
   background-color: #000000d6;
   padding: 3px;
-  border: 1px solid whitesmoke;
+  border: 1px solid var(--spectrum-color);
   border-radius: 4px;
 }
 

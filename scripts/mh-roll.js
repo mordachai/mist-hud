@@ -77,22 +77,25 @@ async function rollMove(moveName, hasDynamite) {
   const actor = hud.actor;
   const move = moveConfig[moveName]; 
 
-  // Get selected tags
-  const powerTags = hud.getSelectedRollData().powerTags || [];
-  console.log("Power Tags:", powerTags);
-  const crewPowerTags = hud.getSelectedRollData().crewPowerTags || [];
-  console.log("Crew Power Tags:", crewPowerTags);
-  const loadoutTags = hud.getSelectedRollData().loadoutTags || [];
+  const powerTags = tagsData.powerTags || [];
+  const crewPowerTags = tagsData.crewPowerTags || [];
+  const loadoutTags = tagsData.loadoutTags || [];
+  const weaknessTags = tagsData.weaknessTags || [];
+  const crewWeaknessTags = tagsData.crewWeaknessTags || []; // <-- new for crew themes
   
-  // Initialize individual values
+  const totalWeakness = calculateWeaknessTags();
+  // Regular themes update
+  if (weaknessTags.length > 0) {
+    await trackWeaknessAttention(actor, weaknessTags);
+  }
+
+  // Crew themes update
+  if (crewWeaknessTags.length > 0) {
+    await trackWeaknessAttentionCrew(actor, crewWeaknessTags);
+  }
+
   const calculatedPower = calculatePowerTags();
-  const weaknessTags = hud.getSelectedRollData().weaknessTags || [];
-  const totalWeakness = calculateWeaknessTags();  
-    if (weaknessTags.length > 0) {
-        await trackWeaknessAttention(actor, weaknessTags);
-    }
   const totalStoryTags = calculateStoryTags();
-  
   const totalLoadoutTags = calculateLoadoutTags();
   const totalCharStatuses = calculateCharacterStatuses();
   const totalSceneStatuses = calculateSceneStatuses();
@@ -461,6 +464,68 @@ async function trackWeaknessAttention(actor, weaknessTags) {
               return; // Stop after updating the first valid theme
           }
       }
+  }
+}
+
+async function trackWeaknessAttentionCrew(actor, weaknessTags) {
+  // Get non-GM owners from the passed actor
+  const nonGMOwners = game.users.filter(user =>
+    !user.isGM && actor.testUserPermission(user, "OWNER")
+  );
+  
+  // Filter crew actors that the actor has permission over
+  const ownedCrews = game.actors.contents.filter(a =>
+    a.type === "crew" &&
+    nonGMOwners.some(user => a.testUserPermission(user, "OWNER"))
+  );
+  
+  // Iterate over each crew actor
+  for (const crewActor of ownedCrews) {
+    // Get all theme items on this crew actor
+    const themes = crewActor.items.filter(item => item.type === "theme");
+    // Get all weakness tags from this crew actor (assuming they have the same structure)
+    const allWeaknessTags = crewActor.items.filter(item => item.type === "tag" && item.system.subtype === "weakness");
+    
+    for (const theme of themes) {
+      // Find weakness tags that belong to this theme (assuming the theme ID is stored in tag.system.theme_id)
+      const themeWeaknessTags = allWeaknessTags.filter(tag => tag.system.theme_id === theme._id);
+      
+      // Iterate over the provided weaknessTags (from your roll, for example)
+      for (const weaknessTag of weaknessTags) {
+        // If a matching tag exists and the weakness isn't inverted
+        if (themeWeaknessTags.some(tag => tag.name === weaknessTag.tagName) && weaknessTag.stateClass !== "inverted") {
+          // Prepare a copy of the theme's attention array (or default to three slots)
+          let attention = Array.isArray(theme.system.attention) ? [...theme.system.attention] : [0, 0, 0];
+          let unspentUpgrades = theme.system.unspent_upgrades || 0;
+          let updated = false;
+          
+          // Find the first empty slot (0) and mark it as filled (1)
+          for (let i = 0; i < attention.length; i++) {
+            if (attention[i] === 0) {
+              attention[i] = 1;
+              updated = true;
+              break;
+            }
+          }
+          
+          // If all attention slots are already filled, reset and add one upgrade point
+          if (attention.every(a => a === 1)) {
+            attention = [0, 0, 0];
+            unspentUpgrades += 1;
+          }
+          
+          // Update the theme on the crew actor
+          await theme.update({
+            "system.attention": attention,
+            "system.unspent_upgrades": unspentUpgrades
+          });
+          
+          console.log(`Updated crew theme "${theme.name}" on crew "${crewActor.name}":`, theme.system);
+          // Stop after updating the first valid crew theme (if you want to update only one)
+          return;
+        }
+      }
+    }
   }
 }
 

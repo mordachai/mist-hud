@@ -16,9 +16,6 @@
     <div class="theme-container-{{category}}">
       <div class="mh-theme-header {{category}}">
         <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
-
-        {{log "Theme Debug:" themeName "Upgrades:" unspent_upgrades}}
-
       {{#if (eq ../activeSystem "city-of-mist")}}
         <span class="mh-theme-name mh-theme-name-com-{{category}}">
           {{themeName}}{{#if unspent_upgrades}}
@@ -78,19 +75,33 @@
 
 
     <!-- Crew theme Section -->
-    {{#if hasCrewThemes}}
+    {{!-- {{#if hasCrewThemes}}
     {{#each crewThemes}}
     <div class="theme-container Crew">
       <div class="mh-theme-header Crew">
-        <span class="mh-theme-icon Crew" data-theme-id="{{id}}"></span>
+        <span class="mh-theme-icon Crew" data-theme-id="{{id}}" data-theme-type="crew" data-mystery="{{mystery}}"></span>
 
-      {{#if (eq ../activeSystem "city-of-mist")}}
-        <span class="mh-theme-name mh-theme-name-com-Crew">{{name}}</span> <!-- Render only if system is City of Mist -->
-      {{/if}}
+        {{#if (eq ../activeSystem "city-of-mist")}}
+          <span class="mh-theme-name mh-theme-name-com-Crew">{{name}}</span>
+            {{themeName}}{{#if unspent_upgrades}}
+            <span class="mh-improvement-marker {{category}}">
+              {{#times unspent_upgrades}}
+                <i class="fa-light fa-star"></i>
+              {{/times}}
+          </span>{{/if}}
+            </span>
+        {{/if}}
 
-      {{#if (eq ../activeSystem "otherscape")}}
-        <span class="mh-theme-name mh-theme-name-com-Crew">{{crewName}}</span> <!-- Render only if system is Otherscape or Legends in the Mist -->
-      {{/if}}
+        {{#if (eq ../activeSystem "otherscape")}}
+          <span class="mh-theme-name mh-theme-name-com-Crew">{{crewName}}</span>
+            {{localizedThemebookName}}{{#if unspent_upgrades}}
+            <span class="mh-improvement-marker Crew">
+              {{#times unspent_upgrades}}
+                <i class="fa-light fa-star"></i>
+              {{/times}}
+            </span>{{/if}}
+          </span>
+        {{/if}}
       </div>
 
       <!-- Crew Power Tags -->
@@ -126,7 +137,80 @@
       </ul>
     </div>
     {{/each}}
-    {{/if}}
+    {{/if}} --}}
+                    
+                    
+                    <!-- Crew theme Section -->
+                    {{#if hasCrewThemes}}
+                      {{#each crewThemes}}
+                        <div class="theme-container Crew">
+                          <div class="mh-theme-header Crew">
+                            <span class="mh-theme-icon Crew" data-theme-id="{{id}}" data-theme-type="crew" data-mystery="{{mystery}}"></span>
+
+                            {{#if (eq ../activeSystem "city-of-mist")}}
+                              <span class="mh-theme-name mh-theme-name-com-Crew">
+                                {{name}} {{themeName}}
+                                {{#if unspent_upgrades}}
+                                  <span class="mh-improvement-marker {{category}}">
+                                    {{#times unspent_upgrades}}
+                                      <i class="fa-solid fa-star"></i>
+                                    {{/times}}
+                                  </span>
+                                {{/if}}
+                              </span>
+                            {{/if}}
+
+                            {{#if (eq ../activeSystem "otherscape")}}
+                              <span class="mh-theme-name mh-theme-name-com-Crew">
+                                {{crewName}} {{localizedThemebookName}}
+                                {{#if unspent_upgrades}}
+                                  <span class="mh-improvement-marker Crew">
+                                    {{#times unspent_upgrades}}
+                                      <i class="fa-solid fa-star"></i>
+                                    {{/times}}
+                                  </span>
+                                {{/if}}
+                              </span>
+                            {{/if}}
+                          </div>
+
+                          <!-- Crew Power Tags -->
+                          <ul class="mh-tags">
+                            {{#each powerTags}}
+                              <li class="mh-power-tag {{this.cssClass}} Crew {{#if selected}}selected{{/if}} {{#if crispy}}mh-crispy{{/if}}"
+                                  data-id="{{this.id}}" {{#if crispy}}data-crispy="true" {{/if}} data-actor-id="{{actorId}}">
+                                <div class="mh-burn-toggle burn-icon {{this.burnState}} Crew {{#if crispy}}mh-crispy{{/if}}"></div>
+                                <div class="mh-tag-text Crew">{{this.tagName}}</div>
+                                {{#if subtags}}
+                                  <ul class="mh-subtag">
+                                    {{#each subtags}}
+                                      <li class="subtag-item {{this.cssClass}} Crew" data-id="{{this.id}}">
+                                        <span class="subtag-burn burn-icon {{this.burnState}} Crew"></span>
+                                        <span class="subtag-name Crew">{{this.tagName}}</span>
+                                      </li>
+                                    {{/each}}
+                                  </ul>
+                                {{/if}}
+                              </li>
+                            {{/each}}
+                          </ul>
+
+                          <!-- Crew Weakness Tags -->
+                          <ul class="mh-tags">
+                            {{#each weaknessTags}}
+                              <li class="mh-weakness-tag {{this.cssClass}} Crew {{#if selected}}selected{{/if}}" data-id="{{this.id}}" data-actor-id="{{actorId}}">
+                                <span class="mh-weakness-toggle Crew clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
+                                  {{{this.inversionIcon}}}
+                                </span>
+                                <span class="mh-tag-text">{{this.tagName}}</span>
+                              </li>
+                            {{/each}}
+                          </ul>
+                        </div>
+                      {{/each}}
+                    {{/if}}
+
+
 
     <!-- LOADOUT Section -->
     {{#if isOtherscape}} 
@@ -291,8 +375,55 @@
             {{/each}}
         </div>
         {{/each}}
+
+{{#if hasCrewImprovements}}
+  <div class="section improvements">
+    {{#if (eq activeSystem "city-of-mist")}}
+      <div class="mh-theme-name title-effect">
+        <i class="fa-light fa-star"></i>  {{localize "TYPES.Item.improvement"}}</div>
+    {{/if}}
+    {{#if (eq activeSystem "otherscape")}}
+      <div class="mh-theme-name title-effect">
+        <i class="fa-light fa-star"></i> CREW SPECIALS</div>
+    {{/if}}
+    {{#each crewImprovements}}
+      <div class="theme-container Crew">
+        <div class="mh-theme-name mh-title-container mh-improvement-theme">
+          <div class="theme-type {{themeType}}" data-theme-id="{{id}}">
+            {{this.themebookName}}
+          </div>
+        </div>
+        {{#each this.improvements}}
+          <div class="improvement-container">
+            <div class="mh-title-container">
+              <span class="item-name">
+                <i class="fa-solid fa-star" style="font-size: 0.45rem; margin-right: 2px;"></i>
+                {{this.name}}
+                {{#if (gt this.uses.max 0)}}
+                  - {{this.uses.current}}/{{this.uses.max}}
+                {{/if}}
+              </span>
+            </div>
+            <div>
+              {{#if this.description}}
+                <div class="item-description">{{this.description}}</div>
+              {{/if}}
+              {{#if this.choiceItem}}
+                <div class="item-choice">{{this.choiceItem}}</div>
+              {{/if}}
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{/each}}
+  </div>
+{{/if}}
+
     </div>
     {{/if}}
+    {{!-- Crew Improvements Section --}}
+    
+
 
 
 

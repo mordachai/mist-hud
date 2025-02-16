@@ -344,17 +344,17 @@
 }
 
 .mh-box {
-  width: 12px;
-  height: 12px;
   background-image: url('../ui/icons/track-com-empty.svg');
   background-repeat: no-repeat;
   background-size: contain;
 }
 
+.mh-box.attention {
+  transform: rotateX(180deg);
+}
+
 /* "Filled" or "active" state */
 .mh-box.active {
-  width: 12px;
-  height: 12px;
   background-image: url('../ui/icons/track-com-full.svg');
   background-repeat: no-repeat;
   background-size: contain;
@@ -363,8 +363,9 @@
 /* Label under the boxes */
 .mh-resource-label {
   margin-top: 4px;
-  font-size: 0.85em;
+  font-size: 0.55rem;
   text-align: center;
+  text-transform: uppercase;
   color: whitesmoke; 
 }
 

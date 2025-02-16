@@ -71,39 +71,70 @@ export function getIcon(state, type) {
  * @param {Actor} actor 
  * @returns {Array}
  */
+
 export function getCrewThemes(actor) {
   if (!actor) return [];
+  
+  // Filter crew actors based on non-GM owners on the passed actor.
   const nonGMOwners = game.users.filter(user =>
-      !user.isGM && actor.testUserPermission(user, "OWNER")
+    !user.isGM && actor.testUserPermission(user, "OWNER")
   );
+  
   const ownedCrews = game.actors.contents.filter(a =>
-      a.type === "crew" &&
-      nonGMOwners.some(user => a.testUserPermission(user, "OWNER"))
+    a.type === "crew" &&
+    nonGMOwners.some(user => a.testUserPermission(user, "OWNER"))
   );
-  return ownedCrews.flatMap(crew => 
-      crew.items.filter(item => item.type === "theme").map(theme => {
-          const themeId = theme.id;
-          const tagItems = crew.items.filter(item => item.type === "tag");
-          const subTagsByParent = tagItems.reduce((acc, tag) => {
-              if (tag.system.parentId) {
-                  if (!acc[tag.system.parentId]) acc[tag.system.parentId] = [];
-                  acc[tag.system.parentId].push(tag);
-              }
-              return acc;
-          }, {});
-
-          return {
-              id: themeId,
-              name: theme.name,
-              crewName: crew.name,
-              actorId: crew.id,
-              powerTags: getPowerTags(themeId, tagItems, subTagsByParent, crew),
-              weaknessTags: getWeaknessTags(themeId, tagItems, subTagsByParent, crew)
-          };
-      })
+  
+  // Determine system settings and set keys for labels.
+  const system = game.settings.get("city-of-mist", "system");
+  let attentionKey, crackKey, prefix;
+  if (system === "city-of-mist") {
+    attentionKey = "CityOfMist.terms.attention";
+    crackKey = "CityOfMist.terms.crack";
+    // Combine two localized strings for the prefix
+    prefix = `${game.i18n.localize("CityOfMist.terms.mystery")}/${game.i18n.localize("CityOfMist.terms.identity")}`;
+  } else if (system === "otherscape") {
+    attentionKey = "Otherscape.terms.upgrade";
+    crackKey = "Otherscape.terms.decay";
+    prefix = `${game.i18n.localize("Otherscape.terms.ritual")}/${game.i18n.localize("CityOfMist.terms.identity")}/${game.i18n.localize("Otherscape.terms.itch")}`;
+  }
+  
+  const attentionLabel = attentionKey ? game.i18n.localize(attentionKey) : "Attention";
+  const crackLabel = crackKey ? game.i18n.localize(crackKey) : "Crack";
+  
+  return ownedCrews.flatMap(crew =>
+    crew.items.filter(item => item.type === 'theme').map(theme => {
+      const themeId = theme.id;
+      const tagItems = crew.items.filter(item => item.type === "tag");
+      const subTagsByParent = tagItems.reduce((acc, tag) => {
+        if (tag.system.parentId) {
+          if (!acc[tag.system.parentId]) acc[tag.system.parentId] = [];
+          acc[tag.system.parentId].push(tag);
+        }
+        return acc;
+      }, {});
+      
+      return {
+        id: themeId,
+        name: theme.name,
+        crewName: crew.name,
+        actorId: crew.id,
+        powerTags: getPowerTags(themeId, tagItems, subTagsByParent, crew),
+        weaknessTags: getWeaknessTags(themeId, tagItems, subTagsByParent, crew),
+        mystery: theme.system.mystery || "No mystery defined.",
+        // Provide mysteryText for tooltip consistency.
+        mysteryText: theme.system.mystery || "No mystery defined.",
+        attention: theme.system.attention ?? [],
+        crack: theme.system.crack ?? [],
+        // For styling and labeling in the tooltip.
+        category: "Crew",
+        prefix: prefix,
+        attentionLabel: attentionLabel,
+        crackLabel: crackLabel
+      };
+    })
   );
 }
-
   
   /**
    * Get the mystery string from a given theme.
@@ -111,98 +142,6 @@ export function getCrewThemes(actor) {
    * @param {string} themeId 
    * @returns {string}
    */
-
-  
-// export function getMysteryFromTheme(actor, themeId) {
-//   if (!actor) {
-//     console.warn("No actor provided in getMysteryFromTheme.");
-//     return {
-//       category: "unknown",
-//       prefix: "Theme",
-//       mysteryText: "No mystery defined.",
-//       attention: [],
-//       crack: []
-//     };
-//   }
-
-//   const theme = actor.items.contents.find(item => item.type === 'theme' && item.id === themeId);
-//   if (!theme) {
-//     console.warn(`No theme found with ID: ${themeId}`);
-//     return {
-//       category: "unknown",
-//       prefix: "Theme",
-//       mysteryText: "No mystery defined.",
-//       attention: [],
-//       crack: []
-//     };
-//   }
-
-//   let realThemebook;
-//   const themebook = theme.themebook;
-//   if (themebook?.isThemeKit && themebook.isThemeKit()) {
-//     realThemebook = themebook.themebook;
-//   } else {
-//     realThemebook = themebook;
-//   }
-//   if (!realThemebook) {
-//     console.warn(`No themebook found for theme: ${theme.name}`);
-//     return {
-//       category: "unknown",
-//       prefix: "Theme",
-//       mysteryText: "No mystery defined.",
-//       attention: [],
-//       crack: []
-//     };
-//   }
-
-//   const category = realThemebook.system.subtype || "unknown";
-//   const system = game.settings.get("city-of-mist", "system");
-//   let prefixKey;
-//   switch (category) {
-//     case "Mythos":
-//       prefixKey = (system === "city-of-mist") ? "CityOfMist.terms.mystery"
-//                 : (system === "otherscape")   ? "Otherscape.terms.ritual"
-//                 : null;
-//       break;
-//     case "Logos":
-//     case "Self":
-//       prefixKey = "CityOfMist.terms.identity";
-//       break;
-//     case "Noise":
-//       prefixKey = "Otherscape.terms.itch";
-//       break;
-//     case "Mist":
-//       prefixKey = "CityOfMist.terms.directive";
-//       break;
-//     case "Extra":
-//       prefixKey = "CityOfMist.terms.extra";
-//       break;
-//     case "Crew":
-//       prefixKey = "CityOfMist.terms.crewTheme";
-//       break;
-//     case "Loadout":
-//       prefixKey = "Otherscape.terms.loadout";
-//       break;
-//     default:
-//       console.warn(`Unknown category: ${category}`);
-//       prefixKey = null;
-//   }
-
-//   const prefix = prefixKey ? game.i18n.localize(prefixKey) : "Theme";
-//   const mysteryText = theme.system.mystery || "No mystery defined.";
-
-//   // Return data needed by the Handlebars template
-//   return {
-//     category,
-//     prefix,
-//     mysteryText,
-//     attention: theme.system.attention ?? [],
-//     crack: theme.system.crack ?? []
-//   };
-// }
-
-
-// mh-getters.js
 export function getMysteryFromTheme(actor, themeId) {
   if (!actor) {
     console.warn("No actor provided in getMysteryFromTheme.");
@@ -318,7 +257,7 @@ export function getMysteryFromTheme(actor, themeId) {
   const crackLabel = crackKey ? game.i18n.localize(crackKey) : "Crack";
 
   // 4) Mystery text & resource arrays
-  const mysteryText = theme.system.mystery || "No mystery defined.";
+  const mysteryText = theme.system.mystery || "Test Mystery";
   const attention = theme.system.attention ?? [];
   const crack = theme.system.crack ?? [];
 
@@ -334,10 +273,7 @@ export function getMysteryFromTheme(actor, themeId) {
   };
 }
 
-
-  
-  
-  /**
+   /**
    * Get themes and tags from an actor.
    * @param {Actor} actor 
    * @returns {Object}
@@ -498,6 +434,77 @@ export function getMysteryFromTheme(actor, themeId) {
     }, {});
     return Object.values(improvementsGrouped);
   }
+
+  export function getCrewImprovements(actor) {
+    if (!actor) return [];
+    
+    // Get non-GM users that the actor owns
+    const nonGMOwners = game.users.filter(user =>
+      !user.isGM && actor.testUserPermission(user, "OWNER")
+    );
+    
+    // Filter crew actors that this actor has permission for
+    const ownedCrews = game.actors.contents.filter(a =>
+      a.type === "crew" &&
+      nonGMOwners.some(user => a.testUserPermission(user, "OWNER"))
+    );
+    
+    // Create an object to group improvements by themebook name
+    const improvementsGrouped = {};
+    
+    // Loop through each crew actor
+    for (const crew of ownedCrews) {
+      const items = crew.items.contents;
+      
+      // Build a lookup of crew theme items
+      const themes = items.filter(item => item.type === "theme").reduce((acc, theme) => {
+        let realThemebook = theme.themebook;
+        if (realThemebook?.isThemeKit && realThemebook.isThemeKit()) {
+          realThemebook = realThemebook.themebook;
+        }
+        if (!realThemebook) {
+          console.warn(`No themebook found for crew theme: ${theme.name}`);
+          return acc;
+        }
+        acc[theme._id] = {
+          id: theme._id,
+          themeName: theme.name || "Unnamed Theme",
+          themebookName: realThemebook.name || "Unnamed Themebook",
+          themeType: realThemebook.system.subtype || "Unknown Type",
+          unspent_upgrades: theme.system.unspent_upgrades || 0
+        };
+        return acc;
+      }, {});
+      
+      // Now get improvement items that belong to a crew theme (i.e. matching theme_id)
+      const improvements = items.filter(item =>
+        item.type === "improvement" && themes[item.system.theme_id]
+      );
+      
+      // Group improvements by the themebook name from the matching crew theme
+      for (const item of improvements) {
+        const theme = themes[item.system.theme_id];
+        const themebookName = theme.themebookName;
+        if (!improvementsGrouped[themebookName]) {
+          improvementsGrouped[themebookName] = {
+            themebookName: themebookName,
+            themeType: theme.themeType,
+            improvements: []
+          };
+        }
+        improvementsGrouped[themebookName].improvements.push({
+          id: item.id,
+          name: item.name,
+          description: item.system.description || "No description provided.",
+          choiceItem: item.system.choice_item || null,
+          uses: item.system.uses || { max: 0, current: 0, expended: false }
+        });
+      }
+    }
+    
+    // Return an array of grouped improvements
+    return Object.values(improvementsGrouped);
+  }  
   
   /**
    * Get actor statuses.

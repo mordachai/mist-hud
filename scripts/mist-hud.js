@@ -8,10 +8,12 @@ import { moveConfig } from "./mh-theme-config.js";
 import statusScreenApp from "./statusScreenApp.js";
 import { showTooltip, hideTooltip } from './tooltip.js';
 import { 
-  getMysteryFromTheme, 
+  getMysteryFromTheme,
+  getCrewThemes,
   getThemesAndTags, 
   getThemebooks, 
-  getImprovements, 
+  getImprovements,
+  getCrewImprovements,
   getActorStatuses, 
   getJuiceAndClues, 
   getEssence, 
@@ -819,9 +821,15 @@ export class MistHUD extends Application {
     const receivedBonuses = this.actor.getFlag('mist-hud', 'received-bonuses') || [];
     data.helpHurtMessages = receivedBonuses.length > 0 ? receivedBonuses : null;
   
+    // Regular improvements getter
     const improvements = getImprovements(this.actor);
     data.improvements = improvements;
     data.hasImprovements = improvements.length > 0;
+
+    // Crew improvements getter (for crew themes)
+    const crewImprovements = getCrewImprovements(this.actor);
+    data.crewImprovements = crewImprovements;
+    data.hasCrewImprovements = crewImprovements.length > 0;
   
     return data;
   }  
@@ -1026,11 +1034,10 @@ export class MistHUD extends Application {
   //   html.find('.mh-theme-icon').each((index, element) => {
   //     const themeId = $(element).data('theme-id');
   //     $(element).hover(
-  //       (event) => {
-  //         // Call the imported function with the actor and themeId
-  //         const mystery = getMysteryFromTheme(this.actor, themeId);
-  //         // Save the tooltip reference on the element or the instance
-  //         this.currentTooltip = showTooltip(event, mystery);
+  //       async (event) => {
+  //         // Get the data for the tooltip from the theme
+  //         const data = getMysteryFromTheme(this.actor, themeId);
+  //         this.currentTooltip = await showTooltip(event, data);
   //       },
   //       () => {
   //         if (this.currentTooltip) {
@@ -1040,16 +1047,26 @@ export class MistHUD extends Application {
   //       }
   //     );
   //   });
-  // }  
-   
+  // }
 
   addTooltipListeners(html) {
     html.find('.mh-theme-icon').each((index, element) => {
       const themeId = $(element).data('theme-id');
+      const themeType = $(element).data('theme-type'); 
       $(element).hover(
         async (event) => {
-          // Get the data for the tooltip from the theme
-          const data = getMysteryFromTheme(this.actor, themeId);
+          let data;
+          if (themeType === "crew") {
+            const crewThemes = getCrewThemes(this.actor);
+            data = crewThemes.find(theme => theme.id === themeId);
+            if (data) {
+              // data.mysteryText, attention, crack, etc. are now available.
+            } else {
+              data = { mysteryText: "No mystery defined." };
+            }
+          } else {
+            data = getMysteryFromTheme(this.actor, themeId);
+          }
           this.currentTooltip = await showTooltip(event, data);
         },
         () => {
@@ -1061,6 +1078,7 @@ export class MistHUD extends Application {
       );
     });
   }
+  
   
   calculateTotalPower() {
     let totalPower = 0;
