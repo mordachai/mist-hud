@@ -107,6 +107,29 @@
   /* text-shadow: 1px 1px 2px var(--effects-color1); */
 }
 
+.theme-type.Mythos {
+  color: var(--mythosOS-verylight-color);
+  text-shadow: var(--mythosOS-dark-color) 1px 0 3px;
+}
+
+.theme-type.Noise {
+  color: var(--logos-verylight-color-color);
+  text-shadow: var(--noise-dark-color) 1px 0 3px;
+}
+
+.theme-type.Self{
+  color: var(--mist-verylight-color);
+  text-shadow: var(--self-dark-color) 1px 0 3px;
+}
+
+.theme-type.Crew{
+  color: whitesmoke;
+  text-shadow: whitesmoke 1px 0 3px;
+}
+
+
+
+
 .mh-theme-name {
   display: flex;
   align-items: center; /* Align text and stars */

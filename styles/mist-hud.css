@@ -477,7 +477,6 @@ hr {
   border-radius: 5px;
   box-shadow: 0 4px 6px rgba(80, 52, 97, 0.5); 
   pointer-events: none; 
-  white-space: nowrap;
 }
 
 .mystery-type {
@@ -489,11 +488,13 @@ hr {
   font-size: 0.85em;  
   font-style: italic;
   margin-left: 3px;
+  word-wrap: break-word;
 }
 
 .mh-tooltip-theme {
   position: relative;
-  padding: 8px; /* Adjust as needed */
+  padding: 5px; /* Adjust as needed */
+  max-width: 400px;
 }
 
 .mh-resource-group {
