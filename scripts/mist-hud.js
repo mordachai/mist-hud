@@ -20,6 +20,7 @@ import {
   getLoadoutTags,
   applyBurnState
 } from './mh-getters.js';
+import { getReceivedBonuses } from "./bonus-utils.js";
 
 
 // Register Handlebars helper for localizeTheme
@@ -130,6 +131,39 @@ function toggleInversion(tagElement, inversionIconConfig) {
   tagElement.find(inversionIconConfig.selector).html(inversionIcon);
   MistHUD.getInstance().calculateTotalPower();
 }
+
+// Register your socket listener. This code runs once during module initialization.
+Hooks.on("socketlib.ready", () => {
+  game.socket.on("module.mist-hud", async data => {
+    if (data.type === "updateBonus") {
+      // Find the target actor.
+      let targetActor = game.actors.get(data.targetId);
+      if (!targetActor) {
+        console.warn(`Target actor with id ${data.targetId} not found.`);
+        return;
+      }
+      
+      // Retrieve the current received bonuses (stored as an object keyed by provider actor id).
+      let receivedBonuses = targetActor.getFlag("mist-hud", "received-bonuses") || {};
+      
+      if (data.active) {
+        // Add or update the bonus entry.
+        receivedBonuses[data.providerActorId] = {
+          type: data.bonusType,
+          amount: data.amount,
+          giverName: data.providerName
+        };
+      } else {
+        // Remove the bonus entry.
+        delete receivedBonuses[data.providerActorId];
+      }
+      
+      // Update the target actor's flag.
+      await targetActor.setFlag("mist-hud", "received-bonuses", receivedBonuses);
+    }
+  });
+});
+
 
 export class MistHUD extends Application {
   static instance = null;
@@ -431,18 +465,23 @@ export class MistHUD extends Application {
     html.find('.help-toggle, .hurt-toggle').on('change', async (event) => {
       const toggle = event.currentTarget;
       const isChecked = toggle.checked;
-      const targetActorId = toggle.dataset.targetId; // ID of the receiving player
-      const bonusType = toggle.classList.contains('help-toggle') ? 'help' : 'hurt'; // Type of bonus
-      const amount = Number(toggle.dataset.amount); // Bonus value
-      const actorId = game.user.character?.id; // ID of the giving player
+      const targetActorId = toggle.dataset.targetId; // ID do jogador que recebe o bônus
+      const bonusType = toggle.classList.contains('help-toggle') ? 'help' : 'hurt'; // Tipo de bônus
+      const amount = Number(toggle.dataset.amount); // Valor do bônus
   
-      // console.log(`[Help/Hurt Debug] Checkbox State:`, {
-      //     isChecked,
-      //     bonusType,
-      //     amount,
-      //     givingPlayer: actorId,
-      //     receivingPlayer: targetActorId,
-      // });
+      // Busca alternativa para encontrar o personagem do jogador
+      let actor = game.user.character; // Primeiro, tenta pegar diretamente o personagem vinculado
+  
+      if (!actor) {
+          // Se game.user.character for undefined, busca um personagem manualmente
+          const ownedCharacters = game.actors.filter(a => a.isOwner && a.type === "character");
+          console.log("Owned Characters:", ownedCharacters);
+          actor = ownedCharacters.length > 0 ? ownedCharacters[0] : null;
+      }
+  
+      const actorId = actor?.id;
+  
+      console.log("Checking available actors for user:", game.actors.filter(a => a.isOwner));
   
       if (!actorId) {
           console.warn(`[Help/Hurt Debug] No actor linked to the giving player.`);
@@ -450,25 +489,26 @@ export class MistHUD extends Application {
       }
   
       // Emit socket event to update all clients
-      game.socket.emit('system.mist-hud', {
+      game.socket.emit('module.mist-hud', {
           type: 'update-bonus',
-          actorId, // Giving player
-          targetId: targetActorId, // Receiving player
+          actorId, // Quem está concedendo o bônus
+          targetId: targetActorId, // Quem está recebendo o bônus
           bonusType,
           active: isChecked,
           amount,
       });
   
-      // Emit socket event to notify the receiving player
-      game.socket.emit('system.mist-hud', {
-        type: 'notify-bonus',
-        targetId: targetActorId,
-        giverId: actorId,
-        bonusType,
-        amount,
-        active: isChecked,
+      // Evento separado para notificação
+      game.socket.emit('module.mist-hud', {
+          type: 'notify-bonus',
+          targetId: targetActorId,
+          giverId: actorId,
+          bonusType,
+          amount,
+          active: isChecked,
       });
-    });
+  });
+  
 
     // Add listener for clue creation and deletion deletion
     html.find('.clue-delete').on("click", this._deleteClueFromHUD.bind(this));
@@ -818,8 +858,11 @@ export class MistHUD extends Application {
       }
     }
   
-    const receivedBonuses = this.actor.getFlag('mist-hud', 'received-bonuses') || [];
-    data.helpHurtMessages = receivedBonuses.length > 0 ? receivedBonuses : null;
+    // Instead of scanning all actors, simply read the flag from the receiver's actor.
+    const receivedBonusesObj = this.actor.getFlag('mist-hud', 'received-bonuses') || {};
+    // Convert the object values to an array for the template.
+    data.helpHurtMessages = Object.values(receivedBonusesObj).length ? Object.values(receivedBonusesObj) : null;
+
   
     // Regular improvements getter
     const improvements = getImprovements(this.actor);
@@ -1030,25 +1073,6 @@ export class MistHUD extends Application {
     }
   }
 
-  // addTooltipListeners(html) {
-  //   html.find('.mh-theme-icon').each((index, element) => {
-  //     const themeId = $(element).data('theme-id');
-  //     $(element).hover(
-  //       async (event) => {
-  //         // Get the data for the tooltip from the theme
-  //         const data = getMysteryFromTheme(this.actor, themeId);
-  //         this.currentTooltip = await showTooltip(event, data);
-  //       },
-  //       () => {
-  //         if (this.currentTooltip) {
-  //           hideTooltip(this.currentTooltip);
-  //           this.currentTooltip = null;
-  //         }
-  //       }
-  //     );
-  //   });
-  // }
-
   addTooltipListeners(html) {
     html.find('.mh-theme-icon').each((index, element) => {
       const themeId = $(element).data('theme-id');
@@ -1077,8 +1101,7 @@ export class MistHUD extends Application {
         }
       );
     });
-  }
-  
+  }  
   
   calculateTotalPower() {
     let totalPower = 0;
@@ -1744,7 +1767,6 @@ Hooks.on("renderMistHUD", (app, html, data) => {
 
     const translatedName = game.i18n.localize(moveData.name);
     let tooltipText = translatedName;
-
     let buttonContent;
     let buttonClass = "mh-roll-button"; // Default button class
 
@@ -1756,16 +1778,16 @@ Hooks.on("renderMistHUD", (app, html, data) => {
     if (!useText && moveData.image) { // Use images if text mode is NOT enabled
       buttonContent = `<img src="modules/mist-hud/ui/${moveData.image}" alt="${translatedName}" class="mh-roll-img">`;
       buttonClass += " mh-roll-button-img"; // Apply special styling for images
-      } else {
-          const shortName = translatedName.slice(0, 3).toUpperCase();
-          let subtitleRow = "";
-          if (moveData.subtitle) {
-              const translatedSubtitle = game.i18n.localize(moveData.subtitle);
-              const shortSubtitle = translatedSubtitle.slice(0, 3).toUpperCase();
-              subtitleRow = `<div class="mh-roll-sub">${shortSubtitle}</div>`;
-          }
-          buttonContent = `<div class="mh-roll-main">${shortName}</div>${subtitleRow}`;
-      }  
+    } else {
+      const shortName = translatedName.slice(0, 3).toUpperCase();
+      let subtitleRow = "";
+      if (moveData.subtitle) {
+        const translatedSubtitle = game.i18n.localize(moveData.subtitle);
+        const shortSubtitle = translatedSubtitle.slice(0, 3).toUpperCase();
+        subtitleRow = `<div class="mh-roll-sub">${shortSubtitle}</div>`;
+      }
+      buttonContent = `<div class="mh-roll-main">${shortName}</div>${subtitleRow}`;
+    }
 
     const button = $(`
       <button class="${buttonClass}" data-move="${moveName}" title="${tooltipText}">
@@ -1778,7 +1800,7 @@ Hooks.on("renderMistHUD", (app, html, data) => {
       CityOfMistRolls.executeMove(moveName);
     });
 
-    // Assign moves to the correct page based on slot
+    // Assign moves to the correct container based on slot
     if (moveData.slot >= 1 && moveData.slot <= 10) {
       coreMovesContainer.append(button);
     } else if (moveData.slot >= 11 && moveData.slot <= 20) {
@@ -1789,9 +1811,29 @@ Hooks.on("renderMistHUD", (app, html, data) => {
   // Initially, hide the special moves container
   specialMovesContainer.hide();
 
-  // Get localized tooltips
+  // Get localized tooltips for page toggle
   const coreMovesText = game.i18n.localize("CityOfMist.terms.coreMoves");
   const specialMovesText = game.i18n.localize("CityOfMist.terms.specialMoves");
+
+// Dynamite Toggle Button (always created, but hidden if not City of Mist)
+const rollIsDynamiteButton = $(`
+  <button class="mh-roll-button-img mh-dynamite-toggle" title="Roll is Dynamite!" style="display: ${activeSystem === "city-of-mist" ? "flex" : "none"};">
+    <img src="modules/mist-hud/ui/Dynamite-OFF.webp" alt="Roll Is Dynamite" class="mh-roll-img">
+  </button>
+`);
+
+rollIsDynamiteButton.on("click", async () => {
+  // Only proceed if the setting exists (i.e., in City of Mist)
+  if (!game.settings.settings.has("mist-hud.rollIsDynamite")) return;
+  
+  const currentState = game.settings.get("mist-hud", "rollIsDynamite");
+  const newState = !currentState;
+  await game.settings.set("mist-hud", "rollIsDynamite", newState);
+  rollIsDynamiteButton.find("img").attr("src", newState 
+    ? "modules/mist-hud/ui/Dynamite-ON.webp" 
+    : "modules/mist-hud/ui/Dynamite-OFF.webp");
+  console.log(`🔥 Roll Is Dynamite: ${newState}`);
+});
 
   // Create the page toggle button with initial tooltip
   const toggleButton = $(`
@@ -1801,7 +1843,6 @@ Hooks.on("renderMistHUD", (app, html, data) => {
   `);
 
   let isCoreMovesVisible = true;
-
   toggleButton.on("click", () => {
     if (isCoreMovesVisible) {
       coreMovesContainer.slideUp(300, () => {
@@ -1819,8 +1860,9 @@ Hooks.on("renderMistHUD", (app, html, data) => {
     isCoreMovesVisible = !isCoreMovesVisible;
   });
 
-  // Append containers and toggle button
-  rollBar.append(coreMovesContainer, specialMovesContainer, toggleButton);
+  // Append containers and buttons in the desired order.
+  // The Roll Is Dynamite button is inserted along with the other controls.
+  rollBar.append(coreMovesContainer, specialMovesContainer, rollIsDynamiteButton, toggleButton);
   html.find(".mh-content").prepend(rollBar);
 });
 

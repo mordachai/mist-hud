@@ -893,7 +893,8 @@ li.tag-or-status {
 }
 
 /* Image buttons */
-.mh-roll-button-img {
+.mh-roll-button-img,
+.mh-dynamite-toggle {
   background: none;
   border: none;
   padding: 0;
@@ -914,6 +915,19 @@ li.tag-or-status {
   height: 40px;
   object-fit: contain;
 }
+
+/* Dynamite button */
+.mh-dynamite-toggle:hover {
+  opacity: 1.0;
+  box-shadow: #ff9100 0px 0px 3px;
+  background: none;
+}
+
+.mh-dynamite-toggle.active {
+  opacity: 1.0;
+  box-shadow: #ff4500 0px 0px 8px;
+}
+
 
 /* STATUSES SCREEN*/
 
@@ -1124,6 +1138,13 @@ li.tag-or-status {
   border-radius: 4px;
   padding: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+
+.mh-help-hurt-messages{
+  background-color: darkred;
+  color: whitesmoke;
+  height: 30px;
 }
 
 

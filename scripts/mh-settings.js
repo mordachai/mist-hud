@@ -64,6 +64,15 @@ Hooks.once('init', () => {
     // Detect the active system
     const activeSystem = game.settings.get("city-of-mist", "system");
 
+    game.settings.register("mist-hud", "rollIsDynamite", {
+        name: "Roll Is Dynamite",
+        hint: "Toggles whether the next roll is guaranteed to be Dynamite. (Only applicable in City of Mist)",
+        scope: "client",
+        config: false,
+        type: Boolean,
+        default: false
+      });
+
     // Register the game setting
     // game.settings.register(MODULE_ID, "preferredDice", {
     //     name: "Preferred Dice",
