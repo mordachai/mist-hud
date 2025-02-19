@@ -1101,7 +1101,7 @@ export class MistHUD extends Application {
         }
       );
     });
-  }  
+  }   
   
   calculateTotalPower() {
     let totalPower = 0;
@@ -1276,6 +1276,7 @@ export class MistHUD extends Application {
       tagName: $(el).text().trim(),
       id: $(el).data('id'),
       actorId: $(el).data('actor-id'),
+      themeId: $(el).data('theme-id'),
       stateClass: $(el).find('.mh-burn-toggle').hasClass('toBurn') ? "to-burn" :
                   $(el).find('.mh-burn-toggle').hasClass('burned') ? "burned" : "selected",
       crispy: $(el).hasClass('mh-crispy') || ($(el).data('crispy') === true)
@@ -1286,6 +1287,7 @@ export class MistHUD extends Application {
         tagName: $(el).text().trim(),
         id: $(el).data('id'),
         actorId: $(el).data('actor-id'),
+        themeId: $(el).data('theme-id'), 
         stateClass: $(el).hasClass('inverted') ? "inverted" : "normal"
     })).get();
 
@@ -1293,6 +1295,7 @@ export class MistHUD extends Application {
       tagName: $(el).text().trim(),
       id: $(el).data('id'),
       actorId: $(el).data('actor-id'),
+      themeId: $(el).data('theme-id'),
       stateClass: $(el).find('.mh-burn-toggle').hasClass('toBurn') 
                   ? "to-burn" 
                   : $(el).find('.mh-burn-toggle').hasClass('burned') 
@@ -1305,6 +1308,7 @@ export class MistHUD extends Application {
         tagName: $(el).text().trim(),
         id: $(el).data('id'),
         actorId: $(el).data('actor-id'),
+        themeId: $(el).data('theme-id'),
         stateClass: $(el).hasClass('inverted') ? "inverted" : "normal"
     })).get();
 
@@ -1325,6 +1329,8 @@ export class MistHUD extends Application {
       return {
           tagName: tagElement.text().trim(),
           id: tagElement.data('id'),
+          actorId: tagElement.data('actor-id'),
+          themeId: tagElement.data('theme-id'),
           stateClass,
           temporary: $(el).data('temporary') || false,
           permanent: $(el).data('permanent') || false
@@ -1347,6 +1353,8 @@ export class MistHUD extends Application {
         return {
             tagName: tagElement.text().trim(),
             id: tagElement.data('id'),
+            themeId: $(el).data('theme-id'),
+            actorId: $(el).data('actor-id'),
             stateClass
         };
     }).get();

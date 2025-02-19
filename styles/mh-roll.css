@@ -70,6 +70,12 @@
     font-style: italic;
   }
 
+  .firecracker-emoji{
+    font-size: 1.5rem;
+    align-self: center;
+    margin: auto;
+  }
+
   .mhr-subtitleImg{
     width: 35px;
     height: 35px;
@@ -120,7 +126,6 @@
     font-size: 1.0em;
     list-style: none;
     padding: 0 ;
-    
   }
 
   .mhr-move-list li{
@@ -289,37 +294,18 @@
   }
   
   /* Adjust the dice appearance */
-  
-  /* .mh-die-d6 {
-    background-color: #1e1354;
-    color: white;
-    border-radius: 6px;
-    border: 2px solid #fff;
-    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.5);
-    font-weight: bold;
-    width: 35px;
-    height: 35px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-family-main1), sans-serif;
-    font-size: 25px;
-    text-shadow: 0px 1px 2px rgb(243, 26, 113);
-    margin-top: 10px;
-  } */
-
 .mh-die-d6 {
   background-image: url('../ui/d12.svg');
   background-repeat: no-repeat;
   color: white;
   font-weight: bold;
-  width: 45px;
-  height: 45px;
+  width: 35px;
+  height: 35px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-family-main1), sans-serif;
-  font-size: 22px;
+  font-size: 21px;
   text-shadow: 0px 0px 3px rgb(243, 26, 113);
   margin-top: 5px;
   filter: drop-shadow(0 0 3px #010108);

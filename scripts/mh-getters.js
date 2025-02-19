@@ -386,6 +386,8 @@ export function getImprovements(actor) {
       id: item.id,
       name: item.name,
       description: item.system.description || "No description provided.",
+      effect_class: item.system.effect_class || null,
+      theme_id: item.system.theme_id || null,
       choiceItem: item.system.choice_item || null,
       uses: item.system.uses || { max: 0, current: 0, expended: false },
     });
@@ -455,6 +457,8 @@ export function getCrewImprovements(actor) {
         id: item.id,
         name: item.name,
         description: item.system.description || "No description provided.",
+        effect_class: item.system.effect_class || null,
+        theme_id: item.system.theme_id || null,
         choiceItem: item.system.choice_item || null,
         uses: item.system.uses || { max: 0, current: 0, expended: false }
       });
@@ -659,7 +663,8 @@ export function getPowerTags(themeId, tagItems, subTagsByParent, actor) {
       ...tagData,
       tagName: tag.name || tagData.tagName || `Unnamed Power Tag`,
       crispy: tag.system.crispy || false,
-      actorId: actor.id
+      actorId: actor.id,
+      themeId: tag.system.theme_id
     };
   });
 }
@@ -671,7 +676,8 @@ export function getWeaknessTags(themeId, tagItems, subTagsByParent, actor) {
     return {
       ...tagData,
       tagName: tag.name || tagData.tagName || `Unnamed Weakness Tag`,
-      actorId: actor.id
+      actorId: actor.id,
+      themeId: tag.system.theme_id
     };
   });
 } 
@@ -691,6 +697,7 @@ export function getStoryTags(actor) {
       const processedTag = applyBurnState(actor, tag._id, 'story');
       // Ensure the tag has the following extra properties:
       processedTag.actorId = actor.id;
+      processedTag.themeId = tag.system.theme_id;
       processedTag.temporary = !!tag.system.temporary;
       processedTag.permanent = !!tag.system.permanent;
       
@@ -730,6 +737,8 @@ export function getLoadoutTags(actor) {
     return {
       id: tag.id,
       tagName: tag.name,
+      actorId: actor.id,
+      themeId: tag.system.theme_id,
       burnState: burnData.burnState,
       cssClass: burnData.cssClass,
       burnIcon: burnData.burnIcon,

@@ -4,6 +4,7 @@ import { MistHUD } from './mist-hud.js';
 import { moveConfig } from './mh-theme-config.js';
 import { initializeAccordions } from './accordion-handler.js';
 import { detectActiveSystem } from './mh-settings.js';
+import { checkRolls } from "./bonus-utils.js";
 
 
 // Debug mode setting
@@ -145,12 +146,30 @@ async function rollMove(moveName, hasDynamite) {
     await game.settings.set("mist-hud", "rollIsDynamite", false);
   }
 
+  // Retrieve stored dynamite move flag (for always-dynamite moves)
+  const storedDynamiteMoves = (await actor.getFlag("mist-hud", "dynamiteMoves")) || [];
+  const storedDynamiteEnabled = storedDynamiteMoves.includes(moveName);
+
+  // Determine if the move should roll as Dynamite via improvements, tags, stored flag, or toggle.
+  let dynamiteEnabled = rollIsDynamiteForced || storedDynamiteEnabled || checkRolls(actor, move);
+
+
+  // Only check the "Roll is Dynamite!" toggle if the active system is City of Mist
+  // let rollIsDynamiteForced = false;
+  // if (activeSystem === "city-of-mist" && game.settings.settings.has("mist-hud.rollIsDynamite")) {
+  //   rollIsDynamiteForced = game.settings.get("mist-hud", "rollIsDynamite");
+  //   await game.settings.set("mist-hud", "rollIsDynamite", false);
+  // }
+
   // Retrieve stored dynamite move flag
-  let dynamiteEnabled = (await actor.getFlag("mist-hud", "dynamiteMoves") || []).includes(moveName);
+  //let dynamiteEnabled = (await actor.getFlag("mist-hud", "dynamiteMoves") || []).includes(moveName);
   // If the "Roll is Dynamite!" toggle is ON, force dynamite
-  if (rollIsDynamiteForced) {
-    dynamiteEnabled = true;
-  }
+  //if (rollIsDynamiteForced) {
+  //  dynamiteEnabled = true;
+  //}
+
+  // Determine if the move should roll as Dynamite via improvements, tags, or toggle.
+  //let dynamiteEnabled = checkRolls(actor, move) || rollIsDynamiteForced;
 
   let outcome;
   let moveEffects = [];
@@ -205,7 +224,7 @@ async function rollMove(moveName, hasDynamite) {
   let outcomeMessage = game.i18n.localize(move[outcome]);
   outcomeMessage = substituteText(outcomeMessage, totalPower);
   const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
-  const displayRollTotal = (dynamiteEnabled && rollTotal >= 12) ? `${rollTotal} 🧨` : rollTotal;
+  const displayRollTotal = (dynamiteEnabled && rollTotal >= 12) ? `<span>${rollTotal}</span><span class="firecracker-emoji">🧨</span>` : rollTotal;
 
   const chatData = {
     moveName: move.name,
@@ -276,19 +295,18 @@ async function rollBurnForHitCityOfMist(moveName) {
   // Calculate final total.
   const finalTotal = burnBasePower + fixedRoll + totalCharStatuses + totalSceneStatuses + totalScnTags + modifier;
 
-  // Dynamite (firecracker) logic.
-  //const dynamiteEnabled = (await actor.getFlag("mist-hud", "dynamiteMoves") || []).includes(moveName);
+// Check if the "Roll is Dynamite!" toggle is ON
+const rollIsDynamiteForced = game.settings.get("mist-hud", "rollIsDynamite");
 
-    // Check if the "Roll is Dynamite!" toggle is ON
-  const rollIsDynamiteForced = game.settings.get("mist-hud", "rollIsDynamite");
+// Retrieve stored dynamite move flag (for always-dynamite moves)
+const storedDynamiteEnabled = (await actor.getFlag("mist-hud", "dynamiteMoves") || []).includes(moveName);
 
-  // Retrieve stored dynamite move flag
-  let dynamiteEnabled = (await actor.getFlag("mist-hud", "dynamiteMoves") || []).includes(moveName);
+// Check for improvements/tags
+const improvementDynamite = checkRolls(actor, move);
 
-  // If "Roll is Dynamite!" is ON, override the dynamite check
-  if (rollIsDynamiteForced) {
-    dynamiteEnabled = true;
-  }
+// Combine all conditions
+const dynamiteEnabled = rollIsDynamiteForced || storedDynamiteEnabled || improvementDynamite;
+
 
   let outcome, moveEffects, outcomeClass;
   if (dynamiteEnabled && finalTotal >= 12) {
@@ -308,11 +326,9 @@ async function rollBurnForHitCityOfMist(moveName) {
     moveEffects = move.failEffects || [];
     outcomeClass = "outcome-fail";
   }
-
+  
   // Prepare display total.
-  const displayRollTotal = (dynamiteEnabled && finalTotal >= 12)
-    ? `${finalTotal} 🧨`
-    : finalTotal;
+  const displayRollTotal = (dynamiteEnabled && finalTotal >= 12) ? `<span>${finalTotal}</span><span class="firecracker-emoji">🧨</span>`: finalTotal;
 
   let outcomeMessage = game.i18n.localize(move[outcome]);
   outcomeMessage = substituteText(outcomeMessage, burnBasePower);

@@ -4,6 +4,7 @@ export const moveConfig = {
 
     // City of Mist moves
     "Change the Game": {
+        configKey: "Change the Game",
         name: "CityOfMist.moves.CTG.name",
         fail: "CityOfMist.moves.genericFail",
         partial: "CityOfMist.moves.CTG.partial",
@@ -39,9 +40,11 @@ export const moveConfig = {
         system: "city-of-mist",
         slot: 1,
         image:"Change the Game.webp",
+        abbreviation: "CHANGE",
     },
 
     "Convince": {
+        configKey: "Convince",
         name: "CityOfMist.moves.convince.name",
         fail: "CityOfMist.moves.genericFail",
         partial: "CityOfMist.moves.convince.partial",
@@ -51,9 +54,11 @@ export const moveConfig = {
         system: "city-of-mist",
         slot: 2,
         image: "Convince.webp",
+        abbreviation: "Conv",
     },
 
     "Face Danger": {
+        configKey: "Face Danger",
         name: "CityOfMist.moves.FD.name",
         fail: "CityOfMist.moves.FD.fail",
         partial: "CityOfMist.moves.FD.partial",
@@ -67,9 +72,11 @@ export const moveConfig = {
         system: "city-of-mist",
         slot: 3,
         image: "Face Danger.webp",
+        abbreviation: "FACE",
     },
 
     "Go Toe To Toe": {
+        configKey: "Go Toe To Toe",
         name: "CityOfMist.moves.GTTT.name",
         fail: "CityOfMist.moves.genericFail",
         partial: "CityOfMist.moves.GTTT.partial",
@@ -94,9 +101,11 @@ export const moveConfig = {
         system: "city-of-mist",
         slot: 4,
         image: "Go Toe To Toe.webp",
+        abbreviation: "GTtT",
     },
 
-    "Hit with All You Got": {
+    "Hit With All You've Got": {
+        configKey: "Hit With All You've Got",
         name: "CityOfMist.moves.HWAYG.name",
         fail: "CityOfMist.moves.genericFail",
         partial: "CityOfMist.moves.HWAYG.partial",
@@ -117,6 +126,11 @@ export const moveConfig = {
             "CityOfMist.moves.HWAYG.4"
         ],
         dynamiteEffects: [
+            "CityOfMist.moves.HWAYG.0",
+            "CityOfMist.moves.HWAYG.1",
+            "CityOfMist.moves.HWAYG.2",
+            "CityOfMist.moves.HWAYG.3",
+            "CityOfMist.moves.HWAYG.4",
             "CityOfMist.moves.HWAYG.5",
             "CityOfMist.moves.HWAYG.6",
             "CityOfMist.moves.HWAYG.7",
@@ -127,9 +141,11 @@ export const moveConfig = {
         system: "city-of-mist",
         slot: 5,
         image: "Hit with All You Got.webp",
+        abbreviation: "HIT",
     },
 
     "Investigate": {
+        configKey: "Investigate",
         name: "CityOfMist.moves.investigate.name",
         fail: "CityOfMist.moves.genericFail",
         partial: "CityOfMist.moves.investigate.partial",
@@ -144,9 +160,11 @@ export const moveConfig = {
         system: "city-of-mist",
         slot: 6,
         image: "Investigate.webp",
+        abbreviation: "Inv",
     },
 
     "Look Beyond the Mist": {
+        configKey: "Look Beyond the Mist",
         name: "CityOfMist.moves.lookBeyond.name",
         fail: "CityOfMist.moves.genericFail",
         partial: "CityOfMist.moves.investigate.partial",
@@ -163,10 +181,12 @@ export const moveConfig = {
         system: "city-of-mist",
         slot: 7,
         image: "Look Beyond the Mist.webp",
+        abbreviation: "LBM",
 
     },
 
-    "Sneak Around": {
+    "Sneak Around": {  
+        configKey: "Sneak Around",
         name: "CityOfMist.moves.sneak.name",
         fail: "CityOfMist.moves.genericFail",
         partial: "CityOfMist.moves.sneak.partial",
@@ -181,9 +201,11 @@ export const moveConfig = {
         system: "city-of-mist",
         slot: 8,
         image: "Sneak Around.webp",
+        abbreviation: "Snk",
     },
 
-    "Take the Risk": {
+    "Take The Risk": {
+        configKey: "Take The Risk",
         name: "CityOfMist.moves.TTR.name",
         fail: "CityOfMist.moves.genericFail",
         partial: "CityOfMist.moves.TTR.partial",
@@ -193,9 +215,11 @@ export const moveConfig = {
         system: "city-of-mist",
         slot: 9,
         image: "Take the Risk.webp",
+        abbreviation: "TTR",
     },
 
     "Stop. Holding. Back. (Significant)": {
+        configKey: "Stop. Holding. Back. (Significant)",
         name: "CityOfMist.moves.SHB.significant.name",
         fail: "CityOfMist.moves.SHB.significant.fail",
         partial: "CityOfMist.moves.SHB.significant.partial",
@@ -205,9 +229,11 @@ export const moveConfig = {
         system: "city-of-mist",
         slot: 11,
         image: "SHB-Significant.webp",
+        abbreviation: "SHBS",
     },
 
     "Stop. Holding. Back. (No Return)": {
+        configKey: "Stop. Holding. Back. (No Return)",
         name: "CityOfMist.moves.SHB.noReturn.name",
         fail: "CityOfMist.moves.SHB.noReturn.fail",
         partial: "CityOfMist.moves.SHB.noReturn.partial",
@@ -217,9 +243,11 @@ export const moveConfig = {
         system: "city-of-mist",
         slot: 12,
         image: "SHB-NoReturn.webp",
+        abbreviation: "SHBNR",
     },
 
     "Stop. Holding. Back. (Ultimate)": {
+        configKey: "Stop. Holding. Back. (Ultimate)",
         name: "CityOfMist.moves.SHB.ultimate.name",
         fail: "CityOfMist.moves.SHB.ultimate.fail",
         partial: "CityOfMist.moves.SHB.ultimate.partial",
@@ -229,9 +257,11 @@ export const moveConfig = {
         system: "city-of-mist",
         slot: 13,
         image: "SHB-Ultimate.webp",
+        abbreviation: "SHBU",
     },
 
     "Monologue": {
+        configKey: "Monologue",
         name: "CityOfMist.moves.monologue.name",
         fail: "CityOfMist.moves.monologue.always",
         partial: "CityOfMist.moves.monologue.always",
@@ -240,9 +270,11 @@ export const moveConfig = {
         moveType: "cinematic",
         slot: 15,
         image: "Monologue.webp",
+        abbreviation: "Mono",
     },
 
     "Flashback": {
+        configKey: "Flashback",
         name: "CityOfMist.moves.flashback.name",
         fail: "CityOfMist.moves.flashback.always",
         partial: "CityOfMist.moves.flashback.always",
@@ -263,9 +295,11 @@ export const moveConfig = {
         moveType: "cinematic",
         slot: 16,
         image: "Flashback.webp",
+        abbreviation: "FB",
     },
 
     "Downtime": {
+        configKey: "Downtime",
         name: "CityOfMist.moves.downtime.name",
         fail: "CityOfMist.moves.downtime.always",
         partial: "CityOfMist.moves.downtime.always",
@@ -295,9 +329,11 @@ export const moveConfig = {
         moveType: "cinematic",
         slot: 17,
         image: "Downtime.webp",
+        abbreviation: "DT",
     },
 
     "Session End": {
+        configKey: "Session End",
         name: "CityOfMist.moves.sessionEnd.name",
         fail: "CityOfMist.moves.sessionEnd.always",
         partial: "CityOfMist.moves.sessionEnd.always",
@@ -321,11 +357,13 @@ export const moveConfig = {
         moveType: "cinematic",
         slot: 18,
         image: "Session End.webp",
+        abbreviation: "SE",
     },
 
     // Otherscape moves
 
     "Mitigate Consequences": {
+        configKey: "Mitigate Consequences",
         name: "Otherscape.moves.mitigate.name",
         fail: "Otherscape.moves.mitigate.fail",
         partial: "Otherscape.moves.mitigate.partial",
@@ -333,10 +371,12 @@ export const moveConfig = {
         system: "otherscape",
         slot: 1,
         image: "Mitigate Consequences.webp",
+        abbreviation: "MC",
     },
 
 
     "Quick Outcome": {
+        configKey: "Quick Outcome",
         name: "Otherscape.moves.quickOutcome.name",
         fail: "Otherscape.moves.quickOutcome.fail",
         partial: "Otherscape.moves.quickOutcome.partial",
@@ -344,9 +384,11 @@ export const moveConfig = {
         system: "otherscape",
         slot: 2,
         image: "Quick Outcome.webp",
+        abbreviation: "QO",
     },
 
     "Tracked Outcome - Attack": {
+        configKey: "Tracked Outcome - Attack",
         name: "Otherscape.moves.trackedOutcome.name",
         subtitle: "Attack",
         fail: "Otherscape.moves.generic.fail",
@@ -355,6 +397,7 @@ export const moveConfig = {
         system: "otherscape",
         slot: 3,
         image: "Tracked Outcome - Attack.webp",
+        abbreviation: "TOA",
         trackedEffects: [
         {
             key: "effect.attack",
@@ -387,6 +430,7 @@ export const moveConfig = {
     },
 
     "Tracked Outcome - Empower": {
+    configKey: "Tracked Outcome - Empower",
     name: "Otherscape.moves.trackedOutcome.name",
     subtitle: "Empower",
     fail: "Otherscape.moves.generic.fail",
@@ -395,6 +439,7 @@ export const moveConfig = {
     system: "otherscape",
     slot: 4,
     image: "Tracked Outcome - Empower.webp",
+    abbreviation: "TOE",
     trackedEffects: [
         {
             key: "effect.bestow",
@@ -427,6 +472,7 @@ export const moveConfig = {
     },
 
     "Tracked Outcome - Extras": {
+    configKey: "Tracked Outcome - Extras",
     name: "Otherscape.moves.trackedOutcome.name",
     subtitle: "Extras",
     fail: "Otherscape.moves.generic.fail",
@@ -435,6 +481,7 @@ export const moveConfig = {
     system: "otherscape",
     slot: 5,
     image: "Tracked Outcome - Extras.webp",
+    abbreviation: "TOEx",
     trackedEffects: [
         {
             key: "effect.advance",
@@ -467,6 +514,7 @@ export const moveConfig = {
     },
 
     "OS: Roll with Noise": {
+        configKey: "OS: Roll with Noise",
         name: "Otherscape.terms.noise",
         themeCategory: "Noise",
         subtitleImg: "modules/mist-hud/ui/icons/noise_os_icn.svg",   
@@ -477,9 +525,11 @@ export const moveConfig = {
         system: "otherscape",
         slot: 7,
         image: "Noise-Roll.webp",
+        abbreviation: "RNoise",
     },
 
     "OS: Roll with Mythos": {
+        configKey: "OS: Roll with Mythos",
         name: "CityOfMist.terms.mythos",
         themeCategory: "Mythos",
         subtitleImg: "modules/mist-hud/ui/icons/mythos_os_icn.svg",
@@ -490,9 +540,11 @@ export const moveConfig = {
         system: "otherscape",
         slot: 8,
         image: "MythosOS-Roll.webp",
+        abbreviation: "RMythos",
     },
 
     "OS: Roll with Self": {
+        configKey: "OS: Roll with Self",
         name: "Otherscape.terms.self",
         themeCategory: "Self",
         subtitleImg: "modules/mist-hud/ui/icons/self_os_icn.svg",   
@@ -503,9 +555,11 @@ export const moveConfig = {
         system: "otherscape",
         slot: 9,
         image: "Self-Roll.webp",
+        abbreviation: "RSelf",
     },
 
     "Blaze of Glory (Significant)": {
+        configKey: "Blaze of Glory (Significant)",
         name: "Otherscape.moves.blazeOfGlory.significant.name",
         fail: "Otherscape.moves.blazeOfGlory.significant.fail",
         partial: "Otherscape.moves.blazeOfGlory.significant.partial",
@@ -513,9 +567,11 @@ export const moveConfig = {
         system: "otherscape",
         slot: 11,
         image: "GOIAB-Significant.webp",
+        abbreviation: "BOGS",
     },
 
     "Blaze of Glory (No Return)": {
+        configKey: "Blaze of Glory (No Return)",
         name: "Otherscape.moves.blazeOfGlory.noReturn.name",
         fail: "Otherscape.moves.blazeOfGlory.noReturn.fail",
         partial: "Otherscape.moves.blazeOfGlory.noReturn.partial",
@@ -523,9 +579,11 @@ export const moveConfig = {
         system: "otherscape",
         slot: 12,
         image: "GOIAB-NoReturn.webp",
+        abbreviation: "BOGNR",
     },
 
     "Blaze of Glory (Ultimate)": {
+        configKey: "Blaze of Glory (Ultimate)",
         name: "Otherscape.moves.blazeOfGlory.ultimate.name",
         fail: "Otherscape.moves.blazeOfGlory.ultimate.fail",
         partial: "Otherscape.moves.blazeOfGlory.ultimate.partial",
@@ -533,9 +591,11 @@ export const moveConfig = {
         system: "otherscape",
         slot: 13,
         image: "GOIAB-Ultimate.webp",
+        abbreviation: "BOGU",
     },
 
     "OS: Downtime": {
+        configKey: "OS: Downtime",
         name: "Otherscape.moves.downtime.name",
         fail: "Otherscape.moves.downtime.always",
         partial: "Otherscape.moves.downtime.always",
@@ -565,9 +625,11 @@ export const moveConfig = {
         moveType: "cinematic",
         slot: 14,
         image: "Downtime-OS.webp",
+        abbreviation: "DTOS",
     },
 
     "OS: Session End": {
+        configKey: "OS: Session End",
         name: "Otherscape.moves.creditRoll.name",
         fail: "Otherscape.moves.creditRoll.always",
         partial: "Otherscape.moves.creditRoll.always",
@@ -606,6 +668,7 @@ export const moveConfig = {
         moveType: "cinematic",
         slot: 15,
         image: "Session End-OS.webp",
+        abbreviation: "SEOS",
     },
 
 };
