@@ -470,8 +470,8 @@ hr {
 .mh-tooltip {
   position: fixed; 
   z-index: 150;
-  background: rgba(0, 0, 0, 0.9); 
-  color: white;
+  background: rgba(0, 0, 0, 0.85); 
+  color: whitesmoke;
   padding: 2px 5px;
   border: 1px solid whitesmoke;
   border-radius: 5px;
@@ -491,10 +491,17 @@ hr {
   word-wrap: break-word;
 }
 
+.mh-tooltip-title {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
 .mh-tooltip-theme {
   position: relative;
   padding: 5px; /* Adjust as needed */
-  max-width: 400px;
+  max-width: 300px;
 }
 
 .mh-resource-group {
@@ -799,14 +806,14 @@ li.tag-or-status {
   background-image: none;
 }
 
-.item-selection-context .status .positive-selected,
-.item-selection-context .tag .positive-selected {
+.item-selection-context .status .negative-selected,
+.item-selection-context .tag .negative-selected {
   color: black;
 	background-image: linear-gradient(to right, rgb(255, 165, 0, 0.85), rgba(255, 187, 105, 0.85));
 }
 
-.item-selection-context .status .negative-selected,
-.item-selection-context .tag .negative-selected {
+.item-selection-context .status .positive-selected,
+.item-selection-context .tag .positive-selected {
 	color: black;
 	background-image: linear-gradient(to right, rgb(255, 255, 153, 0.85), rgb(255, 215, 0, 0.85));
 }
@@ -815,7 +822,7 @@ li.tag-or-status {
 
 .mh-roll-bar {
   position: absolute;
-  left: -50px;
+  left: -52px;
   top: 36px;
   display: flex;
   flex-direction: column;
@@ -878,12 +885,26 @@ li.tag-or-status {
   font-family: 'Rift';
 }
 
+.mh-roll-button.dynamic {
+  max-width: 50px;
+  height: 40px;
+}
+
 .mh-roll-button:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
 .mh-roll-main {
   font-size: 16px;
+}
+
+.mh-roll-main.dynamic {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-size: 12px;
 }
 
 .mh-roll-sub {

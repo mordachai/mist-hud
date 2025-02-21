@@ -23,33 +23,20 @@ Hooks.once("init", () => {
   debug = game.settings.get("mist-hud", "debugMode");
 });
 
-// Utility function to log messages if debug is enabled
-// function debugLog(...args) {
-//   if (debug) console.log("MistHUD |", ...args);
-// }
 
 let toBurnTags = $('.mh-power-tag.toBurn, .mh-power-tag.crew.toBurn').toArray().map(tag => $(tag).data('id'));
-
-// async function rollDice() {
-//   console.warn("rollDice is overridden for testing: always returns [1, 1]");
-  
-//   // Simulate a dice roll result of [1, 1]
-//   return [6, 6];
-// }
 
 async function rollDice() {
   const roll = new Roll("2d6");
   await roll.evaluate({async: true});
 
-  // Check if Dice So Nice is active
   if (game.modules.get("dice-so-nice")?.active) {
-    // Show the 3D dice animation for all players
     await game.dice3d.showForRoll(roll, game.user, true);
   }
 
-  // Return the individual dice results
   return roll.dice[0].results.map(die => die.result);
 }
+
 
 //Main Roll function
 async function rollMove(moveName, hasDynamite) {
@@ -97,11 +84,9 @@ async function rollMove(moveName, hasDynamite) {
   const modifier = getRollModifier() || 0;
 
   const activeBonuses = Object.values(actor.getFlag('mist-hud', 'received-bonuses') || {});
-  const helpBonuses = activeBonuses
-      .filter(bonus => bonus.type === 'help')
+  const helpBonuses = activeBonuses.filter(bonus => bonus.type === 'help')
       .reduce((sum, bonus) => sum + bonus.amount, 0);
-  const hurtBonuses = activeBonuses
-      .filter(bonus => bonus.type === 'hurt')
+  const hurtBonuses = activeBonuses.filter(bonus => bonus.type === 'hurt')
       .reduce((sum, bonus) => sum + bonus.amount, 0);
   const totalBonus = helpBonuses - hurtBonuses;
 
@@ -152,24 +137,6 @@ async function rollMove(moveName, hasDynamite) {
 
   // Determine if the move should roll as Dynamite via improvements, tags, stored flag, or toggle.
   let dynamiteEnabled = rollIsDynamiteForced || storedDynamiteEnabled || checkRolls(actor, move);
-
-
-  // Only check the "Roll is Dynamite!" toggle if the active system is City of Mist
-  // let rollIsDynamiteForced = false;
-  // if (activeSystem === "city-of-mist" && game.settings.settings.has("mist-hud.rollIsDynamite")) {
-  //   rollIsDynamiteForced = game.settings.get("mist-hud", "rollIsDynamite");
-  //   await game.settings.set("mist-hud", "rollIsDynamite", false);
-  // }
-
-  // Retrieve stored dynamite move flag
-  //let dynamiteEnabled = (await actor.getFlag("mist-hud", "dynamiteMoves") || []).includes(moveName);
-  // If the "Roll is Dynamite!" toggle is ON, force dynamite
-  //if (rollIsDynamiteForced) {
-  //  dynamiteEnabled = true;
-  //}
-
-  // Determine if the move should roll as Dynamite via improvements, tags, or toggle.
-  //let dynamiteEnabled = checkRolls(actor, move) || rollIsDynamiteForced;
 
   let outcome;
   let moveEffects = [];
@@ -241,6 +208,7 @@ async function rollMove(moveName, hasDynamite) {
     totalScnTags,
     totalCharStatuses,
     totalSceneStatuses,
+    totalBonus,
     modifier,
     rollTotal: displayRollTotal,
     localizedMoveEffects,
@@ -391,9 +359,6 @@ async function burnCrispyTags(tagsArray) {
   const mainActor = hud.actor;
   for (const tag of tagsArray) {
     if (tag.crispy) {
-      console.log("Processing tag:", tag);
-      // Update the UI elements...
-      // Determine the correct actor using tag.actorId
       let tagActor = mainActor;
       if (tag.actorId && tag.actorId !== mainActor.id) {
         tagActor = game.actors.get(tag.actorId);
@@ -404,7 +369,6 @@ async function burnCrispyTags(tagsArray) {
       }
       const tagItem = tagActor.items.get(tag.id);
       if (tagItem) {
-        console.log(`[Burn Debug] Marking crispy tag '${tagItem.name}' as burned on actor '${tagActor.name}'.`);
         await tagItem.update({
           "system.burned": true,
           "system.burn_state": 0
@@ -456,9 +420,8 @@ async function trackWeaknessAttention(actor, weaknessTags) {
               });
 
               const updatedTheme = theme.toObject();
-              console.log(`Updated theme ${theme.name}:`, updatedTheme.system);
 
-              return; // Stop after updating the first valid theme
+              return;
           }
       }
   }
@@ -517,8 +480,6 @@ async function trackWeaknessAttentionCrew(actor, weaknessTags) {
             "system.unspent_upgrades": unspentUpgrades
           });
           
-          console.log(`Updated crew theme "${theme.name}" on crew "${crewActor.name}":`, theme.system);
-          // Stop after updating the first valid crew theme (if you want to update only one)
           return;
         }
       }
@@ -840,7 +801,6 @@ if (isDoubleOnes) {
   });
 
   hud.cleanHUD();
-  console.log("[Burn Debug] HUD cleaned after roll.");
 }
 
 async function rollCinematicMove(moveName) {

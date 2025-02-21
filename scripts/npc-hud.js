@@ -650,8 +650,7 @@ export class NpcHUD extends Application {
   
 
 Hooks.once("init", () => {
-    console.log("Registering Handlebars helpers...");
-
+    
     Handlebars.registerHelper("parseMaxTier", function (maxTier) {
         return maxTier === 999 ? "-" : maxTier;
     });

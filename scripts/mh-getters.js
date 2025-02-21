@@ -110,16 +110,19 @@ export function getCrewThemes(actor) {
         category: "Crew",
         prefix: prefix,
         attentionLabel: attentionLabel,
-        crackLabel: crackLabel
+        crackLabel: crackLabel,
+        activeSystem: game.settings.get("city-of-mist", "system")
       };
     })
   );
-}  
+}
 
 export function getMysteryFromTheme(actor, themeId) {
   if (!actor) {
     console.warn("No actor provided in getMysteryFromTheme.");
     return {
+      themeName: "Unknown Theme",
+      themebook_name: "Unknown Themebook",
       category: "unknown",
       prefix: "Theme",
       mysteryText: "No mystery defined.",
@@ -129,11 +132,14 @@ export function getMysteryFromTheme(actor, themeId) {
       crackLabel: "Crack"
     };
   }
+  
 
   const theme = actor.items.contents.find(item => item.type === 'theme' && item.id === themeId);
   if (!theme) {
     console.warn(`No theme found with ID: ${themeId}`);
     return {
+      themeName: "Unknown Theme",
+      themebook_name: "Unknown Themebook",
       category: "unknown",
       prefix: "Theme",
       mysteryText: "No mystery defined.",
@@ -154,6 +160,8 @@ export function getMysteryFromTheme(actor, themeId) {
   if (!realThemebook) {
     console.warn(`No themebook found for theme: ${theme.name}`);
     return {
+      themeName: theme.name,
+      themebook_name: "Unknown Themebook",
       category: "unknown",
       prefix: "Theme",
       mysteryText: "No mystery defined.",
@@ -167,7 +175,6 @@ export function getMysteryFromTheme(actor, themeId) {
   const category = realThemebook.system.subtype || "unknown";
   const system = game.settings.get("city-of-mist", "system");
 
-  // 1) Determine prefix label (mystery/ritual/etc.)
   let prefixKey;
   switch (category) {
     case "Mythos":
@@ -200,50 +207,44 @@ export function getMysteryFromTheme(actor, themeId) {
   }
   const prefix = prefixKey ? game.i18n.localize(prefixKey) : "Theme";
 
-  // 2) Determine the text for "Attention" & "Crack" based on system + category
   let attentionKey, crackKey;
-
   if (system === "city-of-mist") {
-    // City of Mist
     attentionKey = "CityOfMist.terms.attention";
-
-    // For Logos (or Self), "crack" is "fade"
     if (category === "Logos" || category === "Self") {
+      crackKey = "CityOfMist.terms.crack";
+    } else if (category === "Mythos") {
       crackKey = "CityOfMist.terms.fade";
-    }
-    // For Mythos, "crack" remains "crack"
-    else if (category === "Mythos") {
+    } else {
       crackKey = "CityOfMist.terms.crack";
     }
-    // Fallback or other categories:
-    else {
-      crackKey = "CityOfMist.terms.crack";
-    }
-  }
-  else if (system === "otherscape") {
-    // Otherscape
+  } else if (system === "otherscape") {
     attentionKey = "Otherscape.terms.upgrade";
     crackKey     = "Otherscape.terms.decay";
   }
-
-  // 3) Localize the final strings
   const attentionLabel = attentionKey ? game.i18n.localize(attentionKey) : "Attention";
   const crackLabel = crackKey ? game.i18n.localize(crackKey) : "Crack";
 
-  // 4) Mystery text & resource arrays
-  const mysteryText = theme.system.mystery || "Test Mystery";
+  const mysteryText = theme.system.mystery || "No mystery defined.";
   const attention = theme.system.attention ?? [];
   const crack = theme.system.crack ?? [];
 
-  // Return the data used by Handlebars
+  const localeKey = realThemebook.system?.locale_name || "";
+  const localizedLocaleName = localeKey ? game.i18n.localize(localeKey.replace(/^#/, "")) : "";
+
   return {
+    themeName: theme.name,
+    themebook_name: realThemebook.name,
     category,
     prefix,
     mysteryText,
     attention,
     crack,
     attentionLabel,
-    crackLabel
+    crackLabel,
+    themeInfo: {
+      locale_name: localizedLocaleName
+    },
+    activeSystem: game.settings.get("city-of-mist", "system")
   };
 }
 
@@ -317,7 +318,6 @@ export function getThemebooks(actor) {
   }
   const items = actor.items.contents;
   const themes = items.filter(item => item.type === "theme" && item.name !== "__LOADOUT__");
-  const tagItems = items.filter(item => item.type === "tag");
 
   return themes.map(theme => {
     let realThemebook;
@@ -335,7 +335,7 @@ export function getThemebooks(actor) {
     const themeIcon = `mh-theme-icon ${themeType}`;
     return {
       id: theme._id,
-      themeName: theme.name,
+      themeName: themes.name,
       themebook_id: realThemebook._id,
       themebook_name: realThemebook.name,
       themeIcon,
@@ -343,12 +343,58 @@ export function getThemebooks(actor) {
       burnState: theme.system?.burned ? 'burned' : '',
       mystery: theme.system?.mystery || "",
       themeInfo: {
-        motivation: realThemebook.system?.motivation || "",
         locale_name: realThemebook.system?.locale_name?.replace(/^#/, "") || ""
       }
     };
   }).filter(Boolean);
 }  
+
+// export function getImprovements(actor) {
+//   if (!actor) return [];
+//   const items = actor.items.contents;
+//   const themes = items.filter(item => item.type === "theme").reduce((acc, theme) => {
+//     let realThemebook = theme.themebook;
+//     if (realThemebook?.isThemeKit && realThemebook.isThemeKit()) {
+//       realThemebook = realThemebook.themebook;
+//     }
+//     if (!realThemebook) {
+//       console.warn(`No themebook found for theme: ${theme.name}`);
+//       return acc;
+//     }
+//     acc[theme._id] = {
+//       id: theme._id,
+//       name: theme.name || "Unnamed Theme",
+//       themebookName: realThemebook.name || "Unnamed Themebook",
+//       themeType: realThemebook.system.subtype || "Unknown Type",
+//     };
+//     return acc;
+//   }, {});
+
+//   const improvementsGrouped = items.filter(item =>
+//     item.type === "improvement" && themes[item.system.theme_id]
+//   ).reduce((acc, item) => {
+//     const theme = themes[item.system.theme_id];
+//     const themebookName = theme.themebookName;
+//     if (!acc[themebookName]) {
+//       acc[themebookName] = {
+//         themebookName,
+//         themeType: theme.themeType,
+//         improvements: [],
+//       };
+//     }
+//     acc[themebookName].improvements.push({
+//       id: item.id,
+//       name: item.name,
+//       description: item.system.description || "No description provided.",
+//       effect_class: item.system.effect_class || null,
+//       theme_id: item.system.theme_id || null,
+//       choiceItem: item.system.choice_item || null,
+//       uses: item.system.uses || { max: 0, current: 0, expended: false },
+//     });
+//     return acc;
+//   }, {});
+//   return Object.values(improvementsGrouped);
+// }
 
 export function getImprovements(actor) {
   if (!actor) return [];
@@ -362,14 +408,18 @@ export function getImprovements(actor) {
       console.warn(`No themebook found for theme: ${theme.name}`);
       return acc;
     }
+    // Localize the theme and themebook names
+    const localizedThemeName = game.i18n.localize(theme.name);
+    const localizedThemebookName = game.i18n.localize(realThemebook.name);
     acc[theme._id] = {
       id: theme._id,
-      name: theme.name || "Unnamed Theme",
-      themebookName: realThemebook.name || "Unnamed Themebook",
+      name: localizedThemeName || "Unnamed Theme",
+      themebookName: localizedThemebookName || "Unnamed Themebook",
       themeType: realThemebook.system.subtype || "Unknown Type",
     };
     return acc;
   }, {});
+
   const improvementsGrouped = items.filter(item =>
     item.type === "improvement" && themes[item.system.theme_id]
   ).reduce((acc, item) => {
@@ -382,42 +432,43 @@ export function getImprovements(actor) {
         improvements: [],
       };
     }
+    // Also localize the improvement name and description if needed
+    const localizedItemName = game.i18n.localize(item.name);
+    const localizedDescription = game.i18n.localize(item.system.description || "No description provided.");
     acc[themebookName].improvements.push({
       id: item.id,
-      name: item.name,
-      description: item.system.description || "No description provided.",
+      name: localizedItemName,
+      description: localizedDescription,
       effect_class: item.system.effect_class || null,
       theme_id: item.system.theme_id || null,
       choiceItem: item.system.choice_item || null,
       uses: item.system.uses || { max: 0, current: 0, expended: false },
     });
     return acc;
+    
   }, {});
   return Object.values(improvementsGrouped);
+  
 }
+
 
 export function getCrewImprovements(actor) {
   if (!actor) return [];
   
-  // Get non-GM users that the actor owns
   const nonGMOwners = game.users.filter(user =>
     !user.isGM && actor.testUserPermission(user, "OWNER")
   );
   
-  // Filter crew actors that this actor has permission for
   const ownedCrews = game.actors.contents.filter(a =>
     a.type === "crew" &&
     nonGMOwners.some(user => a.testUserPermission(user, "OWNER"))
   );
   
-  // Create an object to group improvements by themebook name
   const improvementsGrouped = {};
   
-  // Loop through each crew actor
   for (const crew of ownedCrews) {
     const items = crew.items.contents;
     
-    // Build a lookup of crew theme items
     const themes = items.filter(item => item.type === "theme").reduce((acc, theme) => {
       let realThemebook = theme.themebook;
       if (realThemebook?.isThemeKit && realThemebook.isThemeKit()) {
@@ -427,22 +478,25 @@ export function getCrewImprovements(actor) {
         console.warn(`No themebook found for crew theme: ${theme.name}`);
         return acc;
       }
+      const localizedThemeName = theme.name && theme.name.startsWith("#")
+        ? game.i18n.localize(theme.name)
+        : theme.name;
+      // For crew themes, you might want to use the crew's name as the localized themebook name:
+      const localizedThemebookName = crew.name; 
       acc[theme._id] = {
         id: theme._id,
-        themeName: theme.name || "Unnamed Theme",
-        themebookName: realThemebook.name || "Unnamed Themebook",
+        themeName: localizedThemeName || "Unnamed Theme",
+        themebookName: localizedThemebookName || "Unnamed Themebook",
         themeType: realThemebook.system.subtype || "Unknown Type",
         unspent_upgrades: theme.system.unspent_upgrades || 0
       };
       return acc;
     }, {});
     
-    // Now get improvement items that belong to a crew theme (i.e. matching theme_id)
     const improvements = items.filter(item =>
       item.type === "improvement" && themes[item.system.theme_id]
     );
     
-    // Group improvements by the themebook name from the matching crew theme
     for (const item of improvements) {
       const theme = themes[item.system.theme_id];
       const themebookName = theme.themebookName;
@@ -453,10 +507,16 @@ export function getCrewImprovements(actor) {
           improvements: []
         };
       }
+      const localizedItemName = item.name && item.name.startsWith("#")
+        ? game.i18n.localize(item.name)
+        : item.name;
+      const localizedDescription = item.system.description && item.system.description.startsWith("#")
+        ? game.i18n.localize(item.system.description)
+        : item.system.description || "No description provided.";
       improvementsGrouped[themebookName].improvements.push({
         id: item.id,
-        name: item.name,
-        description: item.system.description || "No description provided.",
+        name: localizedItemName,
+        description: localizedDescription,
         effect_class: item.system.effect_class || null,
         theme_id: item.system.theme_id || null,
         choiceItem: item.system.choice_item || null,
@@ -465,9 +525,81 @@ export function getCrewImprovements(actor) {
     }
   }
   
-  // Return an array of grouped improvements
   return Object.values(improvementsGrouped);
-} 
+}
+
+// export function getCrewImprovements(actor) {
+//   if (!actor) return [];
+  
+//   // Get non-GM users that the actor owns
+//   const nonGMOwners = game.users.filter(user =>
+//     !user.isGM && actor.testUserPermission(user, "OWNER")
+//   );
+  
+//   // Filter crew actors that this actor has permission for
+//   const ownedCrews = game.actors.contents.filter(a =>
+//     a.type === "crew" &&
+//     nonGMOwners.some(user => a.testUserPermission(user, "OWNER"))
+//   );
+  
+//   // Create an object to group improvements by themebook name
+//   const improvementsGrouped = {};
+  
+//   // Loop through each crew actor
+//   for (const crew of ownedCrews) {
+//     const items = crew.items.contents;
+    
+//     // Build a lookup of crew theme items
+//     const themes = items.filter(item => item.type === "theme").reduce((acc, theme) => {
+//       let realThemebook = theme.themebook;
+//       if (realThemebook?.isThemeKit && realThemebook.isThemeKit()) {
+//         realThemebook = realThemebook.themebook;
+//       }
+//       if (!realThemebook) {
+//         console.warn(`No themebook found for crew theme: ${theme.name}`);
+//         return acc;
+//       }
+//       acc[theme._id] = {
+//         id: theme._id,
+//         themeName: theme.name || "Unnamed Theme",
+//         themebookName: realThemebook.name || "Unnamed Themebook",
+//         themeType: realThemebook.system.subtype || "Unknown Type",
+//         unspent_upgrades: theme.system.unspent_upgrades || 0
+//       };
+//       return acc;
+//     }, {});
+    
+//     // Now get improvement items that belong to a crew theme (i.e. matching theme_id)
+//     const improvements = items.filter(item =>
+//       item.type === "improvement" && themes[item.system.theme_id]
+//     );
+    
+//     // Group improvements by the themebook name from the matching crew theme
+//     for (const item of improvements) {
+//       const theme = themes[item.system.theme_id];
+//       const themebookName = theme.themebookName;
+//       if (!improvementsGrouped[themebookName]) {
+//         improvementsGrouped[themebookName] = {
+//           themebookName: themebookName,
+//           themeType: theme.themeType,
+//           improvements: []
+//         };
+//       }
+//       improvementsGrouped[themebookName].improvements.push({
+//         id: item.id,
+//         name: item.name,
+//         description: item.system.description || "No description provided.",
+//         effect_class: item.system.effect_class || null,
+//         theme_id: item.system.theme_id || null,
+//         choiceItem: item.system.choice_item || null,
+//         uses: item.system.uses || { max: 0, current: 0, expended: false }
+//       });
+//     }
+//   }
+  
+//   // Return an array of grouped improvements
+//   return Object.values(improvementsGrouped);
+// } 
 
 export function getActorStatuses(actor) {
   if (!actor) return [];
@@ -522,6 +654,8 @@ export function getJuiceAndClues(actor) {
       if (!target) return null;
       const active = activeBonuses.help?.[target.id] || false;
       return {
+        id: item.id,
+        actorId: actor.id,
         amount: item.system.amount,
         target,
         active,
@@ -540,6 +674,8 @@ export function getJuiceAndClues(actor) {
       if (!target) return null;
       const active = activeBonuses.hurt?.[target.id] || false;
       return {
+        id: item.id,
+        actorId: actor.id,
         amount: item.system.amount,
         target,
         active,
@@ -551,8 +687,8 @@ export function getJuiceAndClues(actor) {
   const clueItems = items
     .filter((item) => item.type === "clue" && item.system)
     .map((item) => ({
-      id: item.id, // The unique ID for the clue.
-      actorId: actor.id, // Actor's ID for context.
+      id: item.id,
+      actorId: actor.id,
       name: item.name || "Unnamed Clue",
       amount: item.system.amount || 0,
       partial: item.system.partial || false,

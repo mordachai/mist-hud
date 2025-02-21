@@ -331,16 +331,10 @@
 
 /* Layout the resource bars side by side */
 .mh-resource-bar {
-  position: absolute;
-  bottom: -36px;
-  left: -30px;
   display: flex;
-  flex-direction: row;
-  gap: 10px;  
-  background-color: #000000dc;
-  padding: 6px;
-  border: 1px solid whitesmoke;
-  border-radius: 4px;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 3px;
 }
 
 .mh-box {

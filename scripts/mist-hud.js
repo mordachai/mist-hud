@@ -213,7 +213,7 @@ export class MistHUD extends Application {
   }
 
   // async render(force = false, options = {}) {
-  //   // console.log(`[Help/Hurt Debug] Rendering HUD for actor:`, this.actor?.name);
+  // console.log(`[Help/Hurt Debug] Rendering HUD for actor:`, this.actor?.name);
   //   try {
   //     await super.render(true);
   //   } catch (error) {
@@ -456,7 +456,6 @@ export class MistHUD extends Application {
       };
       await this.actor.setFlag('mist-hud', 'status-states', savedStates);
   
-      console.log(`Status ${statusId} updated to ${newState}`);
   
       // Recalculate total power after updating the status
       this.calculateTotalPower();
@@ -559,7 +558,6 @@ export class MistHUD extends Application {
         }
 
         await actor.deleteTag(tagId);
-        // console.log(`Story tag ${tagId} deleted.`);
         this.render(false); // Refresh the HUD
     });
 
@@ -582,7 +580,6 @@ export class MistHUD extends Application {
       }
   
       await CityDialogs.itemEditDialog(tag); // Open the edit dialog
-      // console.log(`Story tag ${tagId} edited.`);
       this.render(false); // Refresh the HUD
     });
 
@@ -606,7 +603,6 @@ export class MistHUD extends Application {
       }
   
       await actor.deleteStatus(statusId);
-      // console.log(`Status ${statusId} deleted.`);
       this.render(false); // Refresh the HUD
     });
     
@@ -629,7 +625,6 @@ export class MistHUD extends Application {
         }
     
         await CityDialogs.itemEditDialog(status); // Open the edit dialog
-        // console.log(`Status ${statusId} edited.`);
         this.render(false); // Refresh the HUD
     });
 
@@ -1059,15 +1054,7 @@ export class MistHUD extends Application {
 
     try {
         const createdTag = await StoryTagDisplayContainer.prototype.createStoryTag(event);
-
-        // Check if tag creation was successful (assume creation succeeded if no error is thrown)
-        // if (createdTag === undefined) {
-        //     console.log("Story tag created successfully, but no return value provided by createStoryTag.");
-        // } else {
-        //     console.log("Story tag created successfully:", createdTag);
-        // }
-
-        this.render(false); // Refresh the HUD
+        this.render(false);
     } catch (err) {
         console.error("Error creating a story tag:", err);
     }
@@ -1365,7 +1352,6 @@ export class MistHUD extends Application {
       const typeClass = $(el).hasClass('positive') ? "positive" :
                         $(el).hasClass('negative') ? "negative" : "neutral";
   
-      // console.log(`Status Selected for Roll: ID: ${$(el).data('status-id')}, Name: ${name}, Tier: ${tier}, Type: ${typeClass}`);
   
       return {
           name,
@@ -1410,7 +1396,6 @@ export class MistHUD extends Application {
         return;
       }
   
-      console.log("[Burn Debug] Cleaning HUD and applying burn state updates...");
   
       const tagsToUpdate = this.element.find(
         '.mh-power-tag.toBurn, .mh-weakness-tag.toBurn, .mh-story-tag.toBurn, .mh-loadout-tag.toBurn'
@@ -1435,7 +1420,6 @@ export class MistHUD extends Application {
         // Now update the tag item from the correct actor.
         const tagItem = tagActor.items.get(tagId);
         if (tagItem) {
-            console.log(`[Burn Debug] Marking tag '${tagItem.name}' as burned on actor '${tagActor.name}'.`);
             await tagItem.update({
                 "system.burned": true,
                 "system.burn_state": 0
@@ -1456,7 +1440,6 @@ export class MistHUD extends Application {
         const $status = $(element);
         const statusId = $status.data('status-id');
         if (statusId) {
-          console.log(`Deleting temporary status: ${$status.data('status-name')}`);
           await this.actor.deleteEmbeddedDocuments("Item", [statusId]);
         }
       }
@@ -1467,7 +1450,6 @@ export class MistHUD extends Application {
         item.type === 'tag' && item.system.temporary === true
       );
       for (const tag of temporaryTags) {
-        console.log(`Deleting temporary tag: ${tag.name}`);
         await this.actor.deleteEmbeddedDocuments("Item", [tag.id]);
         
         // Also update the persisted selected-tags flag, if needed.
@@ -1603,6 +1585,37 @@ Hooks.on('ready', () => {
   attachSceneTagListeners();
 });
 
+Hooks.once('ready', () => {
+  game.socket.on('module.mist-hud', async (data) => {
+    if (data.type === 'notify-bonus' && game.user.character?.id === data.targetId) {
+      const targetActor = game.actors.get(data.targetId);
+      const giverActor = game.actors.get(data.giverId);
+  
+      if (!targetActor || !giverActor) {
+        console.warn(`[Help/Hurt Debug] Invalid target or giver actor.`, { targetActor, giverActor });
+        return;
+      }
+  
+      // Retrieve the current bonuses (default to an empty object)
+      const currentBonuses = targetActor.getFlag('mist-hud', 'received-bonuses') || {};
+  
+      if (data.active) {
+        // Set/update the bonus using the giver's ID as key
+        currentBonuses[data.giverId] = { type: data.bonusType, amount: data.amount };
+      } else {
+        // Remove the bonus if the toggle is unchecked
+        delete currentBonuses[data.giverId];
+      }
+  
+      // Update the flag on the target actor
+      await targetActor.setFlag('mist-hud', 'received-bonuses', currentBonuses);
+  
+      // Re-render the HUD so that bonus messages update
+      MistHUD.getInstance().render(true);
+    }
+  });  
+});
+
 //Hook to control the HUD based on token selection
 Hooks.on('controlToken', (token, controlled) => {
   if (controlled && token.actor && token.actor.type === 'character') {
@@ -1617,56 +1630,6 @@ Hooks.on('updateActor', (actor, data, options, userId) => {
   if (MistHUD.instance && MistHUD.instance.actor?.id === actor.id) {
     MistHUD.getInstance().render(true);
   }
-});
-
-Hooks.once('ready', () => {
-  game.socket.on('system.mist-hud', async (data) => {
-
-      if (data.type === 'notify-bonus' && game.user.character?.id === data.targetId) {
-          const targetActor = game.actors?.get(data.targetId);
-          const giverActor = game.actors?.get(data.giverId);
-
-          if (!targetActor || !giverActor) {
-              console.warn(`[Help/Hurt Debug] Invalid target or giver actor.`, { targetActor, giverActor });
-              return;
-          }
-
-          // console.log(`[Help/Hurt Debug] Notification received:`, {
-          //     targetActor: targetActor.name,
-          //     giverActor: giverActor.name,
-          //     bonusType: data.bonusType,
-          //     amount: data.amount,
-          //     active: data.active,
-          // });
-
-          const message = {
-              giverName: giverActor.name,
-              type: data.bonusType,
-              amount: data.amount,
-          };
-
-          const currentBonuses = targetActor.getFlag('mist-hud', 'received-bonuses') || [];
-          // console.log(`[Help/Hurt Debug] Current bonuses before update for target "${targetActor.name}":`, currentBonuses);
-
-          if (data.active) {
-              currentBonuses.push(message);
-          } else {
-              const index = currentBonuses.findIndex(
-                  (bonus) => bonus.giverName === message.giverName && bonus.type === message.type
-              );
-              if (index !== -1) {
-                  currentBonuses.splice(index, 1);
-              }
-          }
-
-          // Update the flag and verify the change
-          await targetActor.setFlag('mist-hud', 'received-bonuses', currentBonuses);
-          // const updatedBonuses = targetActor.getFlag('mist-hud', 'received-bonuses');
-          // console.log(`[Help/Hurt Debug] Updated bonuses confirmed for target "${targetActor.name}":`, updatedBonuses);
-
-          MistHUD.getInstance().render(true);
-      }
-  });
 });
 
 // In your module or main script file, register these once during init or ready:
@@ -1702,7 +1665,6 @@ Hooks.on("dropCanvasData", async (canvas, dropData) => {
 
 
   const { name = "Unnamed Status", tier = 1 } = dropData;
-  console.log("[dropCanvasData] Received status drop:", dropData);
   
   const { x, y } = dropData;
   const token = canvas.tokens.placeables.find(t => t.bounds?.contains(x, y));
@@ -1741,9 +1703,6 @@ Hooks.on("dropCanvasData", async (canvas, dropData) => {
 
   try {
     const [newStatus] = await actor.createEmbeddedDocuments("Item", [itemData]);
-    console.log(
-      `Created new status [${newStatus.name}] tier ${newStatus.system.tier} on ${actor.name}`
-    );
     ui.notifications.info(`Gave ${actor.name} status: ${newStatus.name}-${newStatus.system.tier}`);
   } catch (err) {
     console.error("Error creating status on actor:", err);
@@ -1769,24 +1728,81 @@ Hooks.on("renderMistHUD", (app, html, data) => {
   const coreMovesContainer = $(`<div class="mh-roll-container core-moves"></div>`);
   const specialMovesContainer = $(`<div class="mh-roll-container special-moves"></div>`);
 
+  // Object.keys(moveConfig).forEach(moveName => {
+  //   const moveData = moveConfig[moveName];
+  //   if (!moveData || !moveData.name || moveData.system !== activeSystem) return;
+
+  //   const translatedName = game.i18n.localize(moveData.name);
+  //   let tooltipText = translatedName;
+  //   let buttonContent;
+  //   let buttonClass = "mh-roll-button"; // Default button class
+
+  //   if (moveData.subtitle) {
+  //     const translatedSubtitle = game.i18n.localize(moveData.subtitle);
+  //     tooltipText += ` - ${translatedSubtitle}`;
+  //   }
+
+  //   if (!useText && moveData.image) { // Use images if text mode is NOT enabled
+  //     buttonContent = `<img src="modules/mist-hud/ui/${moveData.image}" alt="${translatedName}" class="mh-roll-img">`;
+  //     buttonClass += " mh-roll-button-img"; // Apply special styling for images
+  //   } else {
+  //     const shortName = translatedName.slice(0, 3).toUpperCase();
+  //     let subtitleRow = "";
+  //     if (moveData.subtitle) {
+  //       const translatedSubtitle = game.i18n.localize(moveData.subtitle);
+  //       const shortSubtitle = translatedSubtitle.slice(0, 3).toUpperCase();
+  //       subtitleRow = `<div class="mh-roll-sub">${shortSubtitle}</div>`;
+  //     }
+  //     buttonContent = `<div class="mh-roll-main">${shortName}</div>${subtitleRow}`;
+  //   }
+
+  //   const button = $(`
+  //     <button class="${buttonClass}" data-move="${moveName}" title="${tooltipText}">
+  //       ${buttonContent}
+  //     </button>
+  //   `);
+
+  //   button.on("click", () => {
+  //     CityOfMistRolls.executeMove(moveName);
+  //   });
+
+  //   // Assign moves to the correct container based on slot
+  //   if (moveData.slot >= 1 && moveData.slot <= 10) {
+  //     coreMovesContainer.append(button);
+  //   } else if (moveData.slot >= 11 && moveData.slot <= 20) {
+  //     specialMovesContainer.append(button);
+  //   }
+  // });
+
+  // Initially, hide the special moves container
+  
   Object.keys(moveConfig).forEach(moveName => {
     const moveData = moveConfig[moveName];
     if (!moveData || !moveData.name || moveData.system !== activeSystem) return;
-
+  
+    // Localize the full move name
     const translatedName = game.i18n.localize(moveData.name);
     let tooltipText = translatedName;
     let buttonContent;
     let buttonClass = "mh-roll-button"; // Default button class
-
+  
+    // Append subtitle to tooltip if available
     if (moveData.subtitle) {
       const translatedSubtitle = game.i18n.localize(moveData.subtitle);
       tooltipText += ` - ${translatedSubtitle}`;
     }
-
-    if (!useText && moveData.image) { // Use images if text mode is NOT enabled
+  
+    // If not in text mode and an image is provided, use the image for the button
+    if (!useText && moveData.image) {
       buttonContent = `<img src="modules/mist-hud/ui/${moveData.image}" alt="${translatedName}" class="mh-roll-img">`;
-      buttonClass += " mh-roll-button-img"; // Apply special styling for images
+      buttonClass += " mh-roll-button-img"; // Apply special styling for image buttons
     } else {
+      // ================================
+      // OPTION 1: Use SHORT (abbreviated) name
+      // ================================
+      
+      // Create a short version (first 3 letters in uppercase)
+
       const shortName = translatedName.slice(0, 3).toUpperCase();
       let subtitleRow = "";
       if (moveData.subtitle) {
@@ -1795,28 +1811,37 @@ Hooks.on("renderMistHUD", (app, html, data) => {
         subtitleRow = `<div class="mh-roll-sub">${shortSubtitle}</div>`;
       }
       buttonContent = `<div class="mh-roll-main">${shortName}</div>${subtitleRow}`;
-    }
+      
+  
+      // ================================
+      // OPTION 2: Use FULL (normal) name
+      // ================================
+      // To use the full move name, comment out the above OPTION 1 block and uncomment the line below:
 
+      //buttonContent = `<div class="mh-roll-main dynamic">${translatedName}</div>`;
+    }
+  
+    // Create the button element with the computed class and content
     const button = $(`
       <button class="${buttonClass}" data-move="${moveName}" title="${tooltipText}">
         ${buttonContent}
       </button>
     `);
-
+  
+    // Bind a click event to execute the move
     button.on("click", () => {
-      console.log(`Executing move: ${tooltipText}`);
       CityOfMistRolls.executeMove(moveName);
     });
-
-    // Assign moves to the correct container based on slot
+  
+    // Assign moves to the correct container based on their slot value
     if (moveData.slot >= 1 && moveData.slot <= 10) {
       coreMovesContainer.append(button);
     } else if (moveData.slot >= 11 && moveData.slot <= 20) {
       specialMovesContainer.append(button);
     }
   });
-
-  // Initially, hide the special moves container
+  
+  
   specialMovesContainer.hide();
 
   // Get localized tooltips for page toggle
@@ -1840,7 +1865,6 @@ rollIsDynamiteButton.on("click", async () => {
   rollIsDynamiteButton.find("img").attr("src", newState 
     ? "modules/mist-hud/ui/Dynamite-ON.webp" 
     : "modules/mist-hud/ui/Dynamite-OFF.webp");
-  console.log(`🔥 Roll Is Dynamite: ${newState}`);
 });
 
   // Create the page toggle button with initial tooltip
@@ -1875,7 +1899,6 @@ rollIsDynamiteButton.on("click", async () => {
 });
 
 Hooks.once("init", async function () {
-  console.log("MistHUD | Initializing");
 
   game.settings.register("mist-hud", "importedStatusCollection", {
       name: "Imported Statuses",
@@ -1890,13 +1913,10 @@ Hooks.once("init", async function () {
 
   Hooks.once("ready", () => {
       game.mistHUD.statusScreen = new statusScreenApp();
-      console.log("MistHUD | statusScreenApp Initialized");
   });
 });
 
-Hooks.once("ready", () => {
-  console.log("MistHUD | Ready");
-});
+
 
 Hooks.on("getSceneControlButtons", (controls) => {
   // Find the token control section
@@ -1919,6 +1939,5 @@ Hooks.on("getSceneControlButtons", (controls) => {
       }
   });
 
-  console.log("MistHUD | Status Screen button added to Token Controls.");
 });
 

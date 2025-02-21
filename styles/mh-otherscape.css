@@ -654,16 +654,10 @@ color: var(--mythosOS-verylight-color);
 
 /* Layout the resource bars side by side */
 .mh-resource-bar {
-  position: absolute;
-  bottom: -32px;
-  left: -30px;
   display: flex;
-  flex-direction: row;
-  gap: 10px;  
-  background-color: #000000d6;
-  padding: 3px;
-  border: 1px solid var(--spectrum-color);
-  border-radius: 4px;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
 }
 
 /* Basic box style */
@@ -685,7 +679,7 @@ color: var(--mythosOS-verylight-color);
   font-family: var(--font-family-main1);
   text-transform: uppercase;
   margin-top: 3px;
-  font-size: 0.8em; /* Adjust font size as desired */
+  font-size: 0.8em;
   text-align: center;
-  color: var(--spectrum-color); /* Adjust text color to match your theme */
+  color: var(--effects-color3);
 }

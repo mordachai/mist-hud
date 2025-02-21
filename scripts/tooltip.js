@@ -4,7 +4,7 @@ export async function showTooltip(event, data) {
   const tooltip = $(`<div class="mh-tooltip">${htmlContent}</div>`);
   $("body").append(tooltip);
   tooltip.css({
-    top: event.pageY + 10,
+    top: event.pageY + 16,
     left: event.pageX + 10
   });
   return tooltip;
