@@ -68,12 +68,12 @@ async function rollMove(moveName, hasDynamite) {
   const crewWeaknessTags = tagsData.crewWeaknessTags || [];
   
   const totalWeakness = calculateWeaknessTags();
-  if (weaknessTags.length > 0) {
-    await trackWeaknessAttention(actor, weaknessTags);
-  }
-  if (crewWeaknessTags.length > 0) {
-    await trackWeaknessAttentionCrew(actor, crewWeaknessTags);
-  }
+    if (weaknessTags.length > 0) {
+      await trackWeaknessAttention(actor, weaknessTags);
+    }
+    if (crewWeaknessTags.length > 0) {
+      await trackWeaknessAttentionCrew(actor, crewWeaknessTags);
+    }
 
   const calculatedPower = calculatePowerTags();
   const totalStoryTags = calculateStoryTags();
@@ -83,7 +83,34 @@ async function rollMove(moveName, hasDynamite) {
   const totalScnTags = calculateScnTags();
   const modifier = getRollModifier() || 0;
 
-  const activeBonuses = Object.values(actor.getFlag('mist-hud', 'received-bonuses') || {});
+  // Retrieve the bonuses from the actor flag immediately
+  const receivedBonuses = actor.getFlag('mist-hud', 'received-bonuses') || {};
+
+  // Build bonus messages for the chat roll
+  const bonusMessages = [];
+  for (const giverId in receivedBonuses) {
+    const bonus = receivedBonuses[giverId];
+    const giverActor = game.actors.get(giverId);
+    bonusMessages.push({
+      type: bonus.type,
+      amount: bonus.amount,
+      giverName: giverActor ? giverActor.name : "Unknown"
+    });
+  }
+
+  // Notify each bonus giver that their bonus was used
+  for (const giverId in receivedBonuses) {
+    const bonusData = receivedBonuses[giverId];
+    game.socket.emit('module.mist-hud', {
+      type: 'notify-use',
+      actorId: giverId,
+      targetId: actor.id,
+      bonusType: bonusData.type,
+      amount: bonusData.amount
+    });
+  }
+  // Calculate totalBonus as before
+  const activeBonuses = Object.values(receivedBonuses);
   const helpBonuses = activeBonuses.filter(bonus => bonus.type === 'help')
       .reduce((sum, bonus) => sum + bonus.amount, 0);
   const hurtBonuses = activeBonuses.filter(bonus => bonus.type === 'hurt')
@@ -217,7 +244,8 @@ async function rollMove(moveName, hasDynamite) {
     statuses: tagsData.statuses,
     trackedEffects: move.trackedEffects || null,
     diceClass,
-    outcomeClass
+    outcomeClass,
+    helpHurtMessages: bonusMessages
   };
 
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
@@ -248,6 +276,42 @@ async function rollBurnForHitCityOfMist(moveName) {
   const move = moveConfig[moveName];
   const activeSystem = game.settings.get("city-of-mist", "system");
 
+  // Retrieve the bonuses from the actor flag immediately
+  const receivedBonuses = actor.getFlag('mist-hud', 'received-bonuses') || {};
+
+  // Build bonus messages for the chat roll
+  const bonusMessages = [];
+  for (const giverId in receivedBonuses) {
+    const bonus = receivedBonuses[giverId];
+    const giverActor = game.actors.get(giverId);
+    bonusMessages.push({
+      type: bonus.type,
+      amount: bonus.amount,
+      giverName: giverActor ? giverActor.name : "Unknown"
+    });
+  }
+
+  // Notify each bonus giver that their bonus was used
+  for (const giverId in receivedBonuses) {
+    const bonusData = receivedBonuses[giverId];
+    game.socket.emit('module.mist-hud', {
+      type: 'notify-use',
+      actorId: giverId,
+      targetId: actor.id,
+      bonusType: bonusData.type,
+      amount: bonusData.amount
+    });
+  }
+  // Calculate totalBonus as before
+  const activeBonuses = Object.values(receivedBonuses);
+  const helpBonuses = activeBonuses.filter(bonus => bonus.type === 'help')
+      .reduce((sum, bonus) => sum + bonus.amount, 0);
+  const hurtBonuses = activeBonuses.filter(bonus => bonus.type === 'hurt')
+      .reduce((sum, bonus) => sum + bonus.amount, 0);
+  const totalBonus = helpBonuses - hurtBonuses;
+
+
+
   // Instead of a fixed bonus of 3, we want to use +1 if a crew tag is marked to burn.
   // Look up in the HUD's DOM: if any crew power tag has the "toBurn" class, then use 1.
   const crewBurnTagExists = hud.element.find('.mh-power-tag.Crew.toBurn').length > 0;
@@ -261,7 +325,7 @@ async function rollBurnForHitCityOfMist(moveName) {
   const modifier = getRollModifier() || 0;
 
   // Calculate final total.
-  const finalTotal = burnBasePower + fixedRoll + totalCharStatuses + totalSceneStatuses + totalScnTags + modifier;
+  const finalTotal = burnBasePower + fixedRoll + totalCharStatuses + totalSceneStatuses + totalScnTags + totalBonus + modifier;
 
 // Check if the "Roll is Dynamite!" toggle is ON
 const rollIsDynamiteForced = game.settings.get("mist-hud", "rollIsDynamite");
@@ -321,6 +385,8 @@ const dynamiteEnabled = rollIsDynamiteForced || storedDynamiteEnabled || improve
     modifier: modifier,
     rollTotal: displayRollTotal,
     localizedMoveEffects,
+    totalBonus,
+    helpHurtMessages: bonusMessages,
     tagsData: hud.getSelectedRollData(),
     statuses: hud.getSelectedRollData().statuses,
     trackedEffects: (outcome !== "fail" && Array.isArray(move.trackedEffects) && move.trackedEffects.length > 0)

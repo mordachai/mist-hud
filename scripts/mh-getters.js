@@ -662,6 +662,7 @@ export function getJuiceAndClues(actor) {
       };
     })
     .filter((item) => item !== null);
+    console.log("helpItems", helpItems);
 
   // Process hurt items (juice items with subtype "hurt").
   const hurtItems = items

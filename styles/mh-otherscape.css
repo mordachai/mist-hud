@@ -161,7 +161,7 @@
   /* text-shadow: var(--noise-dark-color) 1px 1px 3px; */
 }
 
-.mh-theme-name-com-crew {
+.mh-theme-name-com-Crew {
   color: rgb(236, 244, 237);
   font-family: var(--font-family-main1), sans-serif;
   /* text-shadow: var(--noise-dark-color) 1px 1px 3px; */
@@ -368,12 +368,14 @@ color: var(--mythosOS-verylight-color);
   margin-left: 10px;
 }
 
+
 .create-story-tag i,
 .create-status i {
   position: relative;
-  top: -5px;
+  top: -3px;
   right: -2px;
   font-size: 0.85rem;
+  color: whitesmoke;
 }
 
 .mh-story-toggle i{
@@ -682,4 +684,26 @@ color: var(--mythosOS-verylight-color);
   font-size: 0.8em;
   text-align: center;
   color: var(--effects-color3);
+}
+
+.mh-improvement-marker {
+  display: flex;
+  align-items: center;
+  text-align: right;
+  color: whitesmoke;
+  font-weight: bold;
+  margin-left: 5px; 
+  display: inline-block;
+}
+
+.mh-improvement-marker i {
+  vertical-align: middle;
+  align-self: center;
+  font-size: 0.70rem;
+  line-height: 1; 
+  transform: translateY(0px);
+}
+
+.mh-improvement-marker.Self i {
+  transform: translateY(-3px);
 }

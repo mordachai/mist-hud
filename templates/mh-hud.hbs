@@ -1,114 +1,37 @@
 <div class="mh-hud {{#if isCollapsed}}collapsed{{/if}}">
-
-
-  <div class="mh-content">
-
-    <div class="mh-roll-bar">
-      {{#each moveButtons}}
-      <button class="mh-roll-button" data-move="{{this.name}}" title="{{this.name}}">
-        {{this.short}}
-      </button>
-      {{/each}}
-    </div>
-
-
-    {{#each themes}}
-    <div class="theme-container-{{category}}">
-      <div class="mh-theme-header {{category}}">
-        <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
-      {{#if (eq ../activeSystem "city-of-mist")}}
-        <span class="mh-theme-name mh-theme-name-com-{{category}}">
-          {{themeName}}{{#if unspent_upgrades}}
-          <span class="mh-improvement-marker {{category}}">
-            {{#times unspent_upgrades}}
-              <i class="fa-light fa-star"></i>
-            {{/times}}
-        </span>{{/if}}
-          </span>
-      {{/if}}
-
-      {{#if (or (eq ../activeSystem "otherscape") (eq ../activeSystem "legend"))}}
-        <span class="mh-theme-name mh-theme-name-com-{{category}}">
-          {{localizedThemebookName}}{{themeInfo.locale_name}}{{#if unspent_upgrades}}
-          <span class="mh-improvement-marker {{category}}">
-            {{#times unspent_upgrades}}
-              <i class="fa-light fa-star"></i>
-            {{/times}}
-          </span>{{/if}}
-        </span>
-      {{/if}}
+      <div class="mh-roll-bar">
+        {{#each moveButtons}}
+          <button class="mh-roll-button" data-move="{{this.name}}" title="{{this.name}}">
+            {{this.short}}
+          </button>
+        {{/each}}
       </div>
+  
+  <div class="mh-content-container">
 
-      <!-- Power Tags -->
-      <ul class="mh-tags">
-        {{#each powerTags}}
-        <li class="mh-power-tag {{this.cssClass}} {{../category}}
-        {{#if selected}}selected{{/if}}"
-        data-id="{{this.id}}"
-        data-theme-id="{{this.themeId}}"
-        data-actor-id="{{actorId}}"
-        {{#if crispy}}data-crispy="true"{{/if}}>
-          <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../category}}"></div>
-          <div class="mh-tag-text {{../category}}">{{this.tagName}}</div>
-          {{#if subtags}}
-            <ul class="mh-subtag">
-              {{#each subtags}}
-              <li class="subtag-item {{cssClass}}">
-                <span class="subtag-burn burn-icon {{burnIcon}}"></span>
-                <span class="subtag-name">{{this.tagName}}</span>
-              </li>
-              {{/each}}
-            </ul>
-          {{/if}}
-        </li>
-        {{/each}}
-      </ul>
+    <div class="mh-content">
 
-      <!-- Weakness Tags -->
-      <ul class="mh-tags">
-        {{#each weaknessTags}}
-          <li class="mh-weakness-tag {{this.cssClass}} {{#if selected}}selected{{/if}}"
-          data-id="{{this.id}}"
-          data-theme-id="{{this.themeId}}"
-          data-actor-id="{{actorId}}">
-            <span class="mh-weakness-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
-              {{{this.inversionIcon}}}
-            </span>
-            <span class="mh-tag-text">{{this.tagName}}</span>
-          </li>
-        {{/each}}
-      </ul>
-    </div>
-    {{/each}}
-                   
-                    
-    <!-- Crew theme Section -->
-    {{#if hasCrewThemes}}
-      {{#each crewThemes}}
-        <div class="theme-container Crew">
-          <div class="mh-theme-header Crew">
-            <span class="mh-theme-icon Crew" data-theme-id="{{id}}" data-theme-type="crew" data-mystery="{{mystery}}"></span>
 
+      {{!-- Themes, Tags, Crew Themes, Loadout, Story Tags, Statuses, etc. --}}
+      {{#each themes}}
+        <div class="theme-container-{{category}}">
+          <div class="mh-theme-header {{category}}">
+            <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
             {{#if (eq ../activeSystem "city-of-mist")}}
-              <span class="mh-theme-name mh-theme-name-com-Crew">
-                {{name}} {{themeName}}
-                {{#if unspent_upgrades}}
-                  <span class="mh-improvement-marker {{category}}">
-                    {{#times unspent_upgrades}}
-                      <i class="fa-solid fa-star"></i>
-                    {{/times}}
-                  </span>
-                {{/if}}
-              </span>
+            <span class="mh-theme-name mh-theme-name-com-{{category}}">{{themeName}}</span>
+            {{#if unspent_upgrades}}
+            <span class="mh-improvement-marker {{category}}">
+            {{#times unspent_upgrades}}<i class="fa-light fa-star"></i>{{/times}}
+            {{/if}}
+            </span>
             {{/if}}
 
             {{#if (eq ../activeSystem "otherscape")}}
-              <span class="mh-theme-name mh-theme-name-com-Crew">
-                {{crewName}} {{localizedThemebookName}}
-                {{#if unspent_upgrades}}
-                  <span class="mh-improvement-marker Crew">
+              <span class="mh-theme-name mh-theme-name-com-{{category}}">
+                {{localizedThemebookName}}{{themeInfo.locale_name}}{{#if unspent_upgrades}}
+                  <span class="mh-improvement-marker {{category}}">
                     {{#times unspent_upgrades}}
-                      <i class="fa-solid fa-star"></i>
+                      <i class="fa-light fa-star"></i>
                     {{/times}}
                   </span>
                 {{/if}}
@@ -116,21 +39,22 @@
             {{/if}}
           </div>
 
-          <!-- Crew Power Tags -->
+          <!-- Power Tags -->
           <ul class="mh-tags">
             {{#each powerTags}}
-              <li class="mh-power-tag {{this.cssClass}} Crew {{#if selected}}selected{{/if}} {{#if crispy}}mh-crispy{{/if}}"
-                  data-id="{{this.id}}" {{#if crispy}}data-crispy="true" {{/if}} data-actor-id="{{actorId}}"
+              <li class="mh-power-tag {{this.cssClass}} {{../category}} {{#if selected}}selected{{/if}}"
+                  data-id="{{this.id}}"
                   data-theme-id="{{this.themeId}}"
-                  data-actor-id="{{actorId}}">
-                <div class="mh-burn-toggle burn-icon {{this.burnState}} Crew {{#if crispy}}mh-crispy{{/if}}"></div>
-                <div class="mh-tag-text Crew">{{this.tagName}}</div>
+                  data-actor-id="{{actorId}}"
+                  {{#if crispy}}data-crispy="true"{{/if}}>
+                <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../category}}"></div>
+                <div class="mh-tag-text {{../category}}">{{this.tagName}}</div>
                 {{#if subtags}}
                   <ul class="mh-subtag">
                     {{#each subtags}}
-                      <li class="subtag-item {{this.cssClass}} Crew" data-id="{{this.id}}">
-                        <span class="subtag-burn burn-icon {{this.burnState}} Crew"></span>
-                        <span class="subtag-name Crew">{{this.tagName}}</span>
+                      <li class="subtag-item {{cssClass}}">
+                        <span class="subtag-burn burn-icon {{burnIcon}}"></span>
+                        <span class="subtag-name">{{this.tagName}}</span>
                       </li>
                     {{/each}}
                   </ul>
@@ -139,14 +63,14 @@
             {{/each}}
           </ul>
 
-          <!-- Crew Weakness Tags -->
+          <!-- Weakness Tags -->
           <ul class="mh-tags">
             {{#each weaknessTags}}
-              <li class="mh-weakness-tag {{this.cssClass}} Crew {{#if selected}}selected{{/if}}"
-              data-id="{{this.id}}"
-              data-actor-id="{{actorId}}"
-              data-theme-id="{{this.themeId}}">
-                <span class="mh-weakness-toggle Crew clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
+              <li class="mh-weakness-tag {{this.cssClass}} {{#if selected}}selected{{/if}}"
+                  data-id="{{this.id}}"
+                  data-theme-id="{{this.themeId}}"
+                  data-actor-id="{{actorId}}">
+                <span class="mh-weakness-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
                   {{{this.inversionIcon}}}
                 </span>
                 <span class="mh-tag-text">{{this.tagName}}</span>
@@ -155,70 +79,133 @@
           </ul>
         </div>
       {{/each}}
-    {{/if}}
 
-
-    <!-- LOADOUT Section -->
-    {{#if isOtherscape}} 
-    <div class="theme-container">
-      <div class="mh-theme-header neutral loadout mh-title-container">
-        <span class="mh-theme-name mh-theme-name-neutral">{{localize "Otherscape.terms.loadoutTheme.name"}}</span>
-        <span class="mh-theme-icon-notip loadout"></span>
-      </div>
-      <ul class="mh-tags">
-          {{#each loadoutTags}}
-          <li class="mh-loadout-tag {{this.cssClass}} {{#if selected}}selected{{/if}}"
-          data-id="{{this.id}}"
-          data-theme-id="{{this.themeId}}"
-          data-actor-id="{{actorId}}">
-          <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
-            <span class="mh-tag-text">{{this.tagName}}</span>
-            {{#if subtags}}
-              <ul class="mh-subtag">
-                {{#each subtags}}
-                  <li class="subtag-item {{cssClass}}">
-                    <span class="subtag-burn">{{{burnIcon}}}</span>
-                    <span class="subtag-name">{{tagName}}</span>
-                  </li>
-                {{/each}}
-              </ul>
-            {{/if}}
-          </li>
+      <!-- Crew Theme Section -->
+      {{#if hasCrewThemes}}
+        {{#each crewThemes}}
+          <div class="theme-container Crew">
+            <div class="mh-theme-header Crew">
+              <span class="mh-theme-icon Crew" data-theme-id="{{id}}" data-theme-type="crew" data-mystery="{{mystery}}"></span>
+              {{#if (eq ../activeSystem "city-of-mist")}}
+                <span class="mh-theme-name mh-theme-name-com-Crew">
+                  {{name}} {{themeName}}
+                  {{#if unspent_upgrades}}
+                    <span class="mh-improvement-marker {{category}}">
+                      {{#times unspent_upgrades}}
+                        <i class="fa-solid fa-star"></i>
+                      {{/times}}
+                    </span>
+                  {{/if}}
+                </span>
+              {{/if}}
+              {{#if (eq ../activeSystem "otherscape")}}
+                <span class="mh-theme-name mh-theme-name-com-Crew">
+                  {{crewName}} {{localizedThemebookName}}
+                  {{#if unspent_upgrades}}
+                    <span class="mh-improvement-marker Crew">
+                      {{#times unspent_upgrades}}
+                        <i class="fa-solid fa-star"></i>
+                      {{/times}}
+                    </span>
+                  {{/if}}
+                </span>
+              {{/if}}
+            </div>
+            <!-- Crew Power Tags -->
+            <ul class="mh-tags">
+              {{#each powerTags}}
+                <li class="mh-power-tag {{this.cssClass}} Crew {{#if selected}}selected{{/if}} {{#if crispy}}mh-crispy{{/if}}"
+                    data-id="{{this.id}}" {{#if crispy}}data-crispy="true"{{/if}} data-actor-id="{{actorId}}"
+                    data-theme-id="{{this.themeId}}">
+                  <div class="mh-burn-toggle burn-icon {{this.burnState}} Crew {{#if crispy}}mh-crispy{{/if}}"></div>
+                  <div class="mh-tag-text Crew">{{this.tagName}}</div>
+                  {{#if subtags}}
+                    <ul class="mh-subtag">
+                      {{#each subtags}}
+                        <li class="subtag-item {{this.cssClass}} Crew" data-id="{{this.id}}">
+                          <span class="subtag-burn burn-icon {{this.burnState}} Crew"></span>
+                          <span class="subtag-name Crew">{{this.tagName}}</span>
+                        </li>
+                      {{/each}}
+                    </ul>
+                  {{/if}}
+                </li>
+              {{/each}}
+            </ul>
+            <!-- Crew Weakness Tags -->
+            <ul class="mh-tags">
+              {{#each weaknessTags}}
+                <li class="mh-weakness-tag {{this.cssClass}} Crew {{#if selected}}selected{{/if}}"
+                    data-id="{{this.id}}"
+                    data-actor-id="{{actorId}}"
+                    data-theme-id="{{this.themeId}}">
+                  <span class="mh-weakness-toggle Crew clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
+                    {{{this.inversionIcon}}}
+                  </span>
+                  <span class="mh-tag-text">{{this.tagName}}</span>
+                </li>
+              {{/each}}
+            </ul>
+          </div>
         {{/each}}
-      </ul>
-    </div>
-    {{/if}}
+      {{/if}}
 
-    <!-- Story Tags Section -->
-    {{!-- {{#if hasStoryTags}} --}}
-      <div class="mh-story-tags-container">
-      <div class="mh-theme-header neutral extras mh-title-container">
-        <div class="mh-title-container">
-          <span class="mh-theme-icon-notip storytag"></span>
-          <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.storyTags"}}{{#if isOtherscape}} / Relationships{{/if}}</span>
+      <!-- LOADOUT Section -->
+      {{#if isOtherscape}}
+        <div class="theme-container">
+          <div class="mh-theme-header neutral loadout mh-title-container">
+            <span class="mh-theme-name mh-theme-name-neutral">{{localize "Otherscape.terms.loadoutTheme.name"}}</span>
+            <span class="mh-theme-icon-notip loadout"></span>
+          </div>
+          <ul class="mh-tags">
+            {{#each loadoutTags}}
+              <li class="mh-loadout-tag {{this.cssClass}} {{#if selected}}selected{{/if}}"
+                  data-id="{{this.id}}"
+                  data-theme-id="{{this.themeId}}"
+                  data-actor-id="{{actorId}}">
+                <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
+                <span class="mh-tag-text">{{this.tagName}}</span>
+                {{#if subtags}}
+                  <ul class="mh-subtag">
+                    {{#each subtags}}
+                      <li class="subtag-item {{cssClass}}">
+                        <span class="subtag-burn">{{{burnIcon}}}</span>
+                        <span class="subtag-name">{{tagName}}</span>
+                      </li>
+                    {{/each}}
+                  </ul>
+                {{/if}}
+              </li>
+            {{/each}}
+          </ul>
         </div>
-        <a class="create-story-tag" 
-        data-owner-id="{{actor.id}}" 
-        data-token-id="{{token.id}}" 
-        data-scene-id="{{scene.id}}" 
-        title="Create Tag"> 
-        <i class="fa-regular fa-circle-plus"></i></a>
-      </div>
+      {{/if}}
+
+      <!-- Story Tags Section -->
+      <div class="mh-story-tags-container">
+        <div class="mh-theme-header neutral extras mh-title-container">
+          <div class="mh-title-container">
+            <span class="mh-theme-icon-notip storytag"></span>
+            <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.storyTags"}}{{#if isOtherscape}} / Relationships{{/if}}</span>
+          </div>
+          <a class="create-story-tag" data-owner-id="{{actor.id}}" data-token-id="{{token.id}}" data-scene-id="{{scene.id}}" title="Create Tag">
+            <i class="fa-regular fa-circle-plus"></i>
+          </a>
+        </div>
         <ul class="mh-tags">
           {{#each storyTags}}
             <li class="mh-story-tag {{this.cssClass}} {{#if temporary}}temporary{{/if}} {{#if selected}}selected{{/if}}"
-            data-id="{{this.id}}"
-            data-theme-id="{{this.themeId}}"
-            data-actor-id="{{actorId}}"
-            data-temporary="{{this.temporary}}" 
-            data-permanent="{{this.permanent}}">
+                data-id="{{this.id}}"
+                data-theme-id="{{this.themeId}}"
+                data-actor-id="{{actorId}}"
+                data-temporary="{{this.temporary}}" 
+                data-permanent="{{this.permanent}}">
               <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
               <span class="mh-tag-text {{#if temporary}}temporary{{/if}}">
                 {{this.tagName}}
-                {{!-- {{#if temporary}}⏱️{{/if}} --}}
                 {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
-                {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}</span>
-                {{!-- {{#if permanent}}💎{{/if}}</span> --}}
+                {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
+              </span>
               <span class="mhr-mls mh-story-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
                 {{{this.inversionIcon}}}
               </span>
@@ -226,184 +213,168 @@
           {{/each}}
         </ul>
       </div>
-    {{!-- {{/if}} --}}
 
-    <!-- Statuses Section -->
-    <div class="mh-statuses-container">
-      <div class="mh-theme-header neutral extras mh-title-container">
-        <div class="mh-title-container">
-          <span class="mh-theme-icon-notip statuses"></span>
-          <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.statuses"}}</span>
+      <!-- Statuses Section -->
+      <div class="mh-statuses-container">
+        <div class="mh-theme-header neutral extras mh-title-container">
+          <div class="mh-title-container">
+            <span class="mh-theme-icon-notip statuses"></span>
+            <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.statuses"}}</span>
+          </div>
+          <a class="create-status" title="Create Status">
+            <i class="fa-regular fa-circle-plus"></i>
+          </a>
         </div>
-        <a class="create-status" title="Create Status"> <i class="fa-regular fa-circle-plus"></i></a>
-      </div>
-      <div class="mh-statuses-list">
-        {{#each statuses as |status|}}
-        <div class="mh-status {{statusType}} {{#if selected}}selected{{/if}} {{#if temporary}}temporary{{/if}}" 
-            data-status-name="{{status.name}}" 
-            data-status-id="{{status.id}}" 
-            data-owner-id="{{actor.id}}" 
-            data-tier="{{status.tier}}" 
-            data-temporary="{{temporary}}" 
-            data-permanent="{{permanent}}">
-            {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
-            {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
-            {{name}}-{{status.tier}}
-        </div>
-        {{/each}}
-      </div>
-    </div>
-  </div>
-
-      <!-- Modifier Bar -->
-      <div class="mh-modifier-bar">
-        <div id="mh-mod-decrease" class="mh-mod-button">-</div>
-        <input type="text" id="mh-mod-value" value="0" />
-        <div id="mh-mod-increase" class="mh-mod-button">+</div>
-      </div>
-
-      <!-- Help/Hurt Messages -->
-      <div id="mh-help-hurt-messages" class="mh-help-hurt-messages">
-        {{#if helpHurtMessages}}
-          {{#each helpHurtMessages}}
-            <div class="help-hurt-message {{this.type}}">
-              {{this.giverName}} {{#if (eq this.type "help")}}helps{{else}}hurts{{/if}} you for {{this.amount}}
+        <div class="mh-statuses-list">
+          {{#each statuses as |status|}}
+            <div class="mh-status {{statusType}} {{#if selected}}selected{{/if}} {{#if temporary}}temporary{{/if}}" 
+                 data-status-name="{{status.name}}" 
+                 data-status-id="{{status.id}}" 
+                 data-owner-id="{{actor.id}}" 
+                 data-tier="{{status.tier}}" 
+                 data-temporary="{{temporary}}" 
+                 data-permanent="{{permanent}}">
+              {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
+              {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
+              {{name}}-{{status.tier}}
             </div>
           {{/each}}
-        {{else}}
-          <div class="help-hurt-message empty">No active Help or Hurt effects</div>
-        {{/if}}
-      </div>
-
-</div>
-
-
-{{!-- RIGHT PANEL --}}
-<div id="mh-sliding-panel" class="mh-sliding-panel">
-  <div id="mh-panel-ear" class="mh-panel-ear">❯</div>
-  <div id="mh-panel-content" class="mh-panel-content">
-
-
-{{#if hasImprovements}}
-  <div class="section improvements">
-    {{#if (eq activeSystem "city-of-mist")}}
-      <div class="mh-theme-name title-effect">
-        <i class="fa-light fa-star"></i> {{localize "TYPES.Item.improvement"}}
-      </div>
-    {{/if}}
-    {{#if (eq activeSystem "otherscape")}}
-      <div class="mh-theme-name title-effect">
-        <i class="fa-light fa-star"></i> THEME SPECIALS
-      </div>
-    {{/if}}
-    {{#each improvements}}
-      <div class="theme-container">
-        <div class="mh-theme-name mh-title-container mh-improvement-theme">
-          <div class="theme-type {{themeType}}" data-theme-id="{{id}}">
-            {{this.themebookName}}
-          </div>
         </div>
-        {{#each this.improvements}}
-          <div class="improvement-container">
-            <div class="mh-title-container">
-              <span class="item-name">
-                <i class="fa-solid fa-star" style="font-size: 0.45rem; margin-right: 2px;"></i>
-                {{this.name}}
-                {{#if (gt this.uses.max 0)}}
-                  - {{this.uses.current}}/{{this.uses.max}}
-                {{/if}}
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer remains outside the scrolling content -->
+  <div class="mh-footer">
+    <!-- Modifier Bar -->
+    <div class="mh-modifier-bar">
+      <div id="mh-mod-decrease" class="mh-mod-button">-</div>
+      <input type="text" id="mh-mod-value" value="0" />
+      <div id="mh-mod-increase" class="mh-mod-button">+</div>
+    </div>
+
+    <!-- Improved Help/Hurt Messages -->
+    {{#if helpHurtMessages}}
+    {{#if (eq activeSystem "city-of-mist")}}
+      <div id="mh-help-hurt-messages" class="mh-help-hurt-messages">
+
+          {{#each helpHurtMessages}}
+          <div class="mh-help-hurt-items">
+            <div class="relationship-message {{this.type}}">
+              <img src="{{this.giverToken}}" alt="{{this.giverName}}" class="token-image-message" title="{{this.giverName}}">
+              <span class="bonus-amount">
+                {{#if (eq this.type "help")}}+{{else}}-{{/if}}{{this.amount}}
               </span>
             </div>
-            <div>
-              {{#if this.description}}
-                <div class="item-description">{{this.description}}</div>
-              {{/if}}
-              {{#if this.choiceItem}}
-                <div class="item-choice">{{this.choiceItem}}</div>
-              {{/if}}
-            </div>
           </div>
-        {{/each}}
+          {{/each}}
+        
       </div>
-    {{/each}}
+    {{/if}}
+    {{/if}}
+
   </div>
-{{/if}}
 
 
-    
-    <!-- City of Mist Content -->
-    {{#if isCityOfMist}}
-    <div class="section relationships">
-      <div class="mh-theme-name title-effect"><i class="fa-solid fa-users"></i> {{localize "CityOfMist.terms.help"}} & {{localize "CityOfMist.terms.hurt"}}</div>
-      {{#each helpItems}}
-      <div class="relationship-item">
-        <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
-        <span class="item-name">{{this.target.name}} (+{{this.amount}})</span>
-        <input type="checkbox" class="help-toggle"
-         data-id="{{this.id}}"
-         data-actor-id="{{actorId}}"
-         data-target-id="{{this.target.id}}"
-         data-amount="{{this.amount}}" {{#if this.active}}checked{{/if}}>
-      </div>
-      {{/each}}
-      {{#each hurtItems}}
-      <div class="relationship-item">
-        <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
-        <span class="item-name">{{this.target.name}} (-{{this.amount}})</span>
-        <input type="checkbox" class="hurt-toggle"
-         data-id="{{this.id}}"
-         data-actor-id="{{actorId}}"
-         data-target-id="{{this.target.id}}"
-         data-amount="{{this.amount}}" {{#if this.active}}checked{{/if}}>
-      </div>
-      {{/each}}
 
-    </div>
+  {{!-- RIGHT PANEL --}}
+  <div id="mh-sliding-panel" class="mh-sliding-panel">
+    <div id="mh-panel-ear" class="mh-panel-ear">❯</div>
+    <div id="mh-panel-content" class="mh-panel-content">
 
-    <hr class="panel-divider" />
-
-    <div class="section clues">
-        <div class="mh-theme-name title-effect mh-title-container">
-            <div><i class="fa-solid fa-magnifying-glass"></i> {{localize "CityOfMist.terms.clues"}}</div>
-            <a class="create-clue" title="Create Clue"> <i class="fas fa-plus"></i></a>
-        </div>
-        {{#each clueItems}}
-        <div class="clue-container" data-clue-id="{{this.id}}" data-owner-id="{{this.actorId}}">
-          <div class="mh-title-container">
-            <div class="item-name">{{this.name}} ({{this.amount}})</div>
-            <a class="clue-delete" title="Delete Clue"><i class="fas fa-trash"></i></a>
-          </div>
-          {{#if this.partial}}
-          <div class="partial-icon" title="{{localize "CityOfMist.terms.partialClue"}}">
-              🧩{{localize "CityOfMist.terms.partialClue"}}
-          </div>
-          {{/if}}
-          <div class="item-details">
-              <span class="detail-label">{{localize "CityOfMist.terms.clueSource"}}:</span>
-              <span class="detail-text">{{this.source}}</span><br />
-              <span class="detail-label">{{localize "CityOfMist.terms.clueMethod"}}:</span>
-              <span class="detail-text">{{this.method}}</span>
-          </div>
-      </div>
-{{/each}}
-
-    </div>
-
-    <hr class="panel-divider" />
-
-    <div class="section juice">
-        <div class="mh-theme-name title-effect mh-title-container">
-            <div><i class="fa-sharp-duotone fa-regular fa-battery-bolt"></i> {{localize "CityOfMist.terms.juice"}}</div>
-            <a class="create-juice" title="Create Juice"> <i class="fas fa-plus"></i></a>
-        </div>
-        {{#each juiceItems}}
-        <div class="juice-container" data-juice-id="{{this.id}}" data-owner-id="{{this.actorId}}">
-            <div class="mh-title-container">
-                <div class="item-name">
-                    {{this.name}} ({{this.amount}})
-                </div>
-                <a class="juice-delete" title="Delete Juice"><i class="fas fa-trash"></i></a>
+      {{#if hasImprovements}}
+        <div class="section improvements">
+          {{#if (eq activeSystem "city-of-mist")}}
+            <div class="mh-theme-name title-effect">
+              <i class="fa-light fa-star"></i> {{localize "TYPES.Item.improvement"}}
             </div>
+          {{/if}}
+          {{#if (eq activeSystem "otherscape")}}
+            <div class="mh-theme-name title-effect">
+              <i class="fa-light fa-star"></i> THEME SPECIALS
+            </div>
+          {{/if}}
+          {{#each improvements}}
+            <div class="theme-container">
+              <div class="mh-theme-name mh-title-container mh-improvement-theme">
+                <div class="theme-type {{themeType}}" data-theme-id="{{id}}">
+                  {{this.themebookName}}
+                </div>
+              </div>
+              {{#each this.improvements}}
+                <div class="improvement-container">
+                  <div class="mh-title-container">
+                    <span class="item-name">
+                      <i class="fa-solid fa-star" style="font-size: 0.45rem; margin-right: 2px;"></i>
+                      {{this.name}}
+                      {{#if (gt this.uses.max 0)}}
+                        - {{this.uses.current}}/{{this.uses.max}}
+                      {{/if}}
+                    </span>
+                  </div>
+                  <div>
+                    {{#if this.description}}
+                      <div class="item-description">{{this.description}}</div>
+                    {{/if}}
+                    {{#if this.choiceItem}}
+                      <div class="item-choice"><i class="fa-solid fa-right"></i> {{this.choiceItem}}</div>
+                    {{/if}}
+                  </div>
+                </div>
+              {{/each}}
+            </div>
+          {{/each}}
+        </div>
+      {{/if}}
+      
+      <!-- City of Mist Content -->
+      {{#if isCityOfMist}}
+      <div class="section relationships">
+        <div class="mh-theme-name title-effect"><i class="fa-solid fa-users"></i> {{localize "CityOfMist.terms.help"}} & {{localize "CityOfMist.terms.hurt"}}</div>
+        {{#each helpItems}}
+        <div class="relationship-item">
+          <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
+          <span class="item-name">{{this.target.name}} (+{{this.amount}})</span>
+          <input type="checkbox" class="help-toggle"
+          data-id="{{this.id}}"
+          data-actor-id="{{actorId}}"
+          data-target-id="{{this.target.id}}"
+          data-amount="{{this.amount}}" {{#if this.active}}checked{{/if}}>
+        </div>
+        {{/each}}
+        {{#each hurtItems}}
+        <div class="relationship-item">
+          <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
+          <span class="item-name">{{this.target.name}} (-{{this.amount}})</span>
+          <input type="checkbox" class="hurt-toggle"
+          data-id="{{this.id}}"
+          data-actor-id="{{actorId}}"
+          data-target-id="{{this.target.id}}"
+          data-amount="{{this.amount}}" {{#if this.active}}checked{{/if}}>
+        </div>
+        {{/each}}
+
+      </div>
+
+      <hr class="panel-divider" />
+
+      <div class="section clues">
+          <div class="mh-theme-name title-effect mh-title-container">
+              <div><i class="fa-solid fa-magnifying-glass"></i> {{localize "CityOfMist.terms.clues"}}</div>
+              <a class="create-clue" title="Create Clue"> <i class="fas fa-plus"></i></a>
+          </div>
+          {{#each clueItems}}
+          <div class="clue-container" data-clue-id="{{this.id}}" data-owner-id="{{this.actorId}}">
+            <div class="mh-title-container">
+              <div class="item-name">{{this.name}} ({{this.amount}})</div>
+              <a class="clue-delete" title="Delete Clue"><i class="fas fa-trash"></i></a>
+            </div>
+            {{#if this.partial}}
+            <div class="partial-icon" title="{{localize "CityOfMist.terms.partialClue"}}">
+                🧩{{localize "CityOfMist.terms.partialClue"}}
+            </div>
+            {{/if}}
             <div class="item-details">
                 <span class="detail-label">{{localize "CityOfMist.terms.clueSource"}}:</span>
                 <span class="detail-text">{{this.source}}</span><br />
@@ -411,34 +382,57 @@
                 <span class="detail-text">{{this.method}}</span>
             </div>
         </div>
-        {{/each}}
-    </div>
+  {{/each}}
 
-    {{/if}}
+      </div>
 
-    {{#if isOtherscape}}
-      <!-- Otherscape Content -->
-      <div class="section otherscape">
-        <div class="mh-theme-name mh-theme-name-neutral mh-essence-title">Essence</div>
-        <div class="mh-essence-chart {{essenceClass}}">
-          <img src="modules/mist-hud/ui/essences/{{essenceImage}}" alt="{{essence}}" />
+      <hr class="panel-divider" />
+
+      <div class="section juice">
+          <div class="mh-theme-name title-effect mh-title-container">
+              <div><i class="fa-sharp-duotone fa-regular fa-battery-bolt"></i> {{localize "CityOfMist.terms.juice"}}</div>
+              <a class="create-juice" title="Create Juice"> <i class="fas fa-plus"></i></a>
+          </div>
+          {{#each juiceItems}}
+          <div class="juice-container" data-juice-id="{{this.id}}" data-owner-id="{{this.actorId}}">
+              <div class="mh-title-container">
+                  <div class="item-name">
+                      {{this.name}} ({{this.amount}})
+                  </div>
+                  <a class="juice-delete" title="Delete Juice"><i class="fas fa-trash"></i></a>
+              </div>
+              <div class="item-details">
+                  <span class="detail-label">{{localize "CityOfMist.terms.clueSource"}}:</span>
+                  <span class="detail-text">{{this.source}}</span><br />
+                  <span class="detail-label">{{localize "CityOfMist.terms.clueMethod"}}:</span>
+                  <span class="detail-text">{{this.method}}</span>
+              </div>
+          </div>
+          {{/each}}
+      </div>
+
+      {{/if}}
+
+      {{#if isOtherscape}}
+        <!-- Otherscape Content -->
+        <div class="section otherscape">
+          <div class="mh-theme-name mh-theme-name-neutral mh-essence-title">Essence</div>
+          <div class="mh-essence-chart {{essenceClass}}">
+            <img src="modules/mist-hud/ui/essences/{{essenceImage}}" alt="{{essence}}" />
+          </div>
+          <div class="mh-essence-title {{essenceClass}}">{{essence}}</div>
+          {{{essenceText}}}
         </div>
-        <div class="mh-essence-title {{essenceClass}}">{{essence}}</div>
-        {{{essenceText}}}
-      </div>
-    {{/if}}
+      {{/if}}
 
 
-    {{!-- Add a default or fallback block if needed --}}
-    {{#unless (or isCityOfMist isOtherscape)}}
-      <div class="section fallback">
-        <div class="mh-theme-name"><i class="fa-solid fa-exclamation-triangle"></i> No Content Available</div>
-      </div>
-    {{/unless}}
+      {{!-- Add a default or fallback block if needed --}}
+      {{#unless (or isCityOfMist isOtherscape)}}
+        <div class="section fallback">
+          <div class="mh-theme-name"><i class="fa-solid fa-exclamation-triangle"></i> No Content Available</div>
+        </div>
+      {{/unless}}
+    </div>
   </div>
+
 </div>
-
-
-
-
-

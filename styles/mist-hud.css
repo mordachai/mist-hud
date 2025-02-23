@@ -68,8 +68,9 @@
   color: white;
   min-width: 250px;
   max-width: 300px !important;
-  min-height: 400px;
+  min-height: 500px;
   max-height: calc(100vh - 150px);
+  overflow: visible !important;
 }
 
 #mist-hud .window-app {
@@ -190,11 +191,7 @@ border: none;
 }
 
 #mist-hud .mh-content {
-  overflow-y: auto;
-  overflow-x: hidden;
-  margin-top: 5px;
-  padding: 1px;
-  color: whitesmoke;
+overflow: visible !important;
 }
 
 .window-app.minimized .mh-custom-header > * {
@@ -443,7 +440,7 @@ hr {
 }
 
 /* Scrollbar Styling */
-.mh-content::-webkit-scrollbar {
+/* .mh-content::-webkit-scrollbar {
   width: 8px;
 }
 
@@ -454,7 +451,7 @@ hr {
 
 .mh-content::-webkit-scrollbar-track {
   background-color: #222;
-}
+} */
 
 /* Text Wrapping */
 .mh-power-tag,
@@ -620,20 +617,6 @@ hr {
   text-shadow: rgb(242, 242, 242) 1px 1px 6px;
 }
 
-/* Token Image */
-.relationship-item .token-image {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  margin-right: 3px;
-  vertical-align: middle;
-  border: none;
-}
-
-.relationship-item .token-image img {
-  border: none;
-}
-
 /* Clue and Juice Containers */
 .mh-title-container{
   display: flex;
@@ -651,16 +634,11 @@ hr {
 
 .clue-container,
 .juice-container {
-  border: 2px solid #555; /* Border color */
-  border-radius: 5px; /* Rounded corners */
-  padding: 5px; /* Inner spacing */
-  margin-bottom: 10px; /* Space between containers */
-  background-color: #2c2c2c; /* Background color for contrast */
-}
-
-.relationship-item .item-name {
-  font-size: 0.85rem;
-  font-family: var(--font-family-tags);
+  border: 2px solid #555;
+  border-radius: 5px;
+  padding: 5px;
+  margin-bottom: 10px;
+  background-color: #2c2c2c;
 }
 
 /* Item Name inside Containers */
@@ -728,31 +706,17 @@ hr {
   font-size: 0.85rem;
 }
 
-.improvements .item-description,
-.improvements .item-choice {
+.improvements .item-description {
   margin-left: 2px;
   font-size: 0.85em;
   color: whitesmoke;
 }
 
-.mh-improvement-marker {
-  display: flex;
-  align-items: center; /* Centers stars vertically */
+.improvements .item-choice {
+  margin-left: 5px;
+  margin-top: 3px;
+  font-size: 0.85em;
   color: whitesmoke;
-  font-weight: bold;
-  margin-left: 5px; 
-  display: inline-block;
-}
-
-.mh-improvement-marker i {
-  vertical-align: middle;
-  font-size: 0.70rem;
-  line-height: 1; 
-  transform: translateY(0px);
-}
-
-.mh-improvement-marker.Self i {
-  transform: translateY(-3px);
 }
 
 /*Change Numbers in Hotbar*/
@@ -821,17 +785,19 @@ li.tag-or-status {
 /* Roll Bar */
 
 .mh-roll-bar {
-  position: absolute;
-  left: -52px;
-  top: 36px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  background-color: #191919d7;
-  min-width: 45px;
-  border-radius: 5px;
-  align-items: center;
-  padding: 6px 0;
+  position: absolute !important;
+  left: -52px !important;
+  top: 36px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  background-color: #191919d7 !important;
+  min-width: 45px !important;
+  border-radius: 5px !important;
+  align-items: center !important;
+  overflow: visible !important;
+  z-index: 1000 !important;
+  padding: 6px 0 !important;
 }
 
 .mh-roll-container {
@@ -1161,11 +1127,35 @@ li.tag-or-status {
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
+.mh-hud {
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  overflow: visible !important;
+}
 
-.mh-help-hurt-messages{
-  background-color: darkred;
-  color: whitesmoke;
-  height: 30px;
+#mist-hud,
+.mh-hud {
+  overflow: visible !important;
 }
 
 
+.mh-content-container {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-bottom: 35px; /* Garante espaço suficiente para o rodapé */
+  position: relative;
+  overflow: visible !important;
+}
+
+.mh-sliding-panel .mh-panel-content {
+  overflow-y: auto;
+}
+
+.mh-footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  max-height: 30px;
+}

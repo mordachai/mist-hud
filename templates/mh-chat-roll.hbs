@@ -51,6 +51,9 @@
       {{#if totalSceneStatuses}}
         <span><i class="fa-solid fa-suitcase-medical"></i> {{totalSceneStatuses}}</span>
       {{/if}}
+      {{#if totalBonus}}
+        <span><i class="fa-solid fa-life-ring"></i> {{totalBonus}}</span>
+      {{/if}}
       {{#if modifier}}
         <span><i class="fa-regular fa-hexagon-plus"></i> {{modifier}}</span>
       {{/if}}
@@ -83,7 +86,7 @@
         {{/each}}
         {{#each tagsData.scnTags}}   
         <span class="scene-tag-item {{#if (eq this.type "positive")}}scene-positive{{else}}scene-negative{{/if}}">
-          {{#if this.temporary}}⏱️ {{/if}}
+          {{#if this.temporary}}⏳ {{/if}}
           {{#if this.permanent}}💎 {{/if}}
           {{this.name}}
         </span>
@@ -93,6 +96,15 @@
                 {{#if temporary}}⏳{{/if}}
                 {{#if permanent}}💎{{/if}}
                 {{name}}-{{tier}}
+          </span>
+        {{/each}}
+        {{#each helpHurtMessages}}
+          <span class="mhr-help-hurt-tag {{#if (eq this.type "help")}}positive{{else}}negative{{/if}}">
+            {{#if (eq this.type "help")}}
+              {{this.giverName}} +{{this.amount}}
+            {{else}}
+              {{this.giverName}} -{{this.amount}}
+            {{/if}}
           </span>
         {{/each}}
       </span>

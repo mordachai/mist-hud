@@ -193,11 +193,11 @@
   .mhr-status-tag,
   .mhr-modifier .mhr-modifier-value,
   .mhr-permanent-status, .scene-tag-item,
-  .mhr-scene-status-tag {
+  .mhr-scene-status-tag,
+  .mhr-help-hurt-tag {
     display: inline-block;
     padding: 1px 2px;
     font-family: var(--font-family-tags), sans-serif;
-    /* font-family: var(--font-family-main1), sans-serif; */
     font-size: 0.9rem;
     line-height: 1rem;
     border-radius: 3px;
@@ -206,14 +206,14 @@
    
   .mhr-power-tag, .mhr-story-tag, .mhr-weakness-tag.inverted,
   .mhr-status-tag.positive, .mhr-status-tag.scene-positive, .scene-tag-item.scene-positive,
-  .mhr-scene-status-tag.scene-positive {
+  .mhr-scene-status-tag.scene-positive, .mhr-help-hurt-tag.positive {
     color: var(--text-tag-color);
     background-color: var(--positive-tag-borderColor);
   }
 
   .mhr-status-tag.negative, .mhr-weakness-tag,  .mhr-story-tag.inverted,
   .mhr-status-tag.scene-negative, .scene-tag-item.scene-negative,
-  .mhr-scene-status-tag.scene-negative {
+  .mhr-scene-status-tag.scene-negative, .mhr-help-hurt-tag.negative {
     color: var(--text-tag-color);
     background-color: var(--negative-tag-borderColor);
   }

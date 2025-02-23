@@ -36,15 +36,14 @@
   --font-family-effects: Averia Serif Libre;
   --hud-background1: url('../ui/com_hud_BG.webp');
   --hud-bg-color: rgba(0, 0, 0, 0.45);
-  --hud-bg-color: #191c1f6e;
   --hud-bg-color2: #0708096c;
   --npc-hud-bg-prime: rgba(0, 0, 0, 0.45);
 }
 
 .mh-theme-header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 20px 3fr auto;
+  align-items: flex-start;
   justify-content: flex-start;
   margin: -3px -0px 1px -0px;
   height: fit-content;
@@ -65,6 +64,15 @@
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
+}
+
+.create-story-tag i,
+.create-status i {
+  position: relative;
+  top: -3px;
+  right: -2px;
+  font-size: 0.85rem;
+  color: whitesmoke;
 }
 
 .mh-power-tag,
@@ -133,7 +141,7 @@
 
 /* Logos Themebook Name Styling */
 .mh-themebook-name-com-Logos, .theme-type.Logos {
-  color: var(--logos-verylight-color-color);
+  color: var(--logos-verylight-color);
   text-shadow: var(--logos-dark-color) 1px 0 6px;
 }
 
@@ -146,14 +154,18 @@
 /* Specific icons for Mythos, Logos, and Mist themes */
 .mh-theme-icon.Mythos {
   position: relative;
-  top: -4px;
-  width: 11px;
-  height: 18px;
+  top: -2px;
+  align-self: inherit;
+  justify-self: center;
+  width: 12px;
+  height: 17px;
   background-image: url('../ui/icons/mythos_icn.svg');
   filter: drop-shadow(1px 0 6px var(--mythosOS-dark-color));
 }
 
 .mh-theme-icon.Logos {
+  align-self: inherit;
+  justify-self: center;
   width: 18px;
   height: 12px;
   background-image: url('../ui/icons/logos_icn.svg');
@@ -161,6 +173,8 @@
 }
 
 .mh-theme-icon.Mist {
+  align-self: inherit;
+  justify-self: center;
   width: 18px;
   height: 18px;
   background-image: url('../ui/icons/mist_icn.svg');
@@ -169,8 +183,8 @@
 
 .mh-theme-icon.Crew,
 .mh-theme-icon.Extra {
-  position: relative;
-  top: -2px;
+  align-self: inherit;
+  justify-self: center;
   width: 18px;
   height: 15px;
   background-image: url('../ui/icons/crew_icn.svg');
@@ -189,7 +203,7 @@
 
 .mh-theme-icon-notip.statuses {
   position: relative;
-  top: -3px;
+  top: -4px;
   width: 18px;
   height: 16px;
   background-image: url('../ui/icons/statuses_icn.svg');
@@ -254,7 +268,6 @@
 .mh-theme-name {
   font-family: var(--font-family-move), sans-serif;
   font-size: 1.2em;
-  /* display: block; */
   margin: 4px 2px;
   font-style: italic;
 }
@@ -267,13 +280,18 @@
 
 /* Logos Theme Name Styling */
 .mh-theme-name-com-Logos {
-  color: var(--logos-verylight-color-color);
+  color: var(--logos-verylight-color);
   text-shadow: var(--logos-dark-color) 1px 1px;
 }
 
 /* Mist Theme Name Styling */
 .mh-theme-name-com-Mist {
   color: var(--mist-verylight-color);
+  text-shadow: var(--mist-dark-color) 1px 1px;
+}
+
+.mh-theme-name-com-Crew {
+  color: whitesmoke;
   text-shadow: var(--mist-dark-color) 1px 1px;
 }
 
@@ -362,6 +380,119 @@
   text-transform: uppercase;
   color: whitesmoke; 
 }
+
+.mh-improvement-marker {
+  display:table-row;
+  justify-content: flex-end;
+  text-align: right;
+  align-self: center;
+  vertical-align: middle;
+  color: whitesmoke;
+  font-weight: bold;
+  margin-left: 5px; 
+}
+
+.mh-improvement-marker i {
+  align-self: center;
+  font-size: 0.70rem;
+}
+
+/* MESSAGES HELP/HURT BOTTOM OF HUD */
+
+.mh-help-hurt-messages{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  color: whitesmoke;
+  height: 30px;
+  background-color: var(--hud-bg-color);
+  /* box-shadow: rgba(160, 22, 137, 0.855) inset 0px 0px 10px; */
+}
+
+.relationship-message {
+  display: grid;
+  grid-template-columns: 30px auto;
+  align-items: center;
+  font-size: 0.85rem;
+  gap: 5px;
+  font-family: var(--font-family-tags);
+}
+
+.token-image-message {
+  width: 25px;
+  height: 25px;
+  border: none;
+}
+
+/* ITEM HELP AND HUD */
+
+.relationship-item {
+  display: grid;
+  grid-template-columns: 34px 2fr 22px;
+  font-size: 0.85rem;
+  gap: 5px;
+  font-family: var(--font-family-tags);
+}
+
+/* Token Image */
+.relationship-item .token-image {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 3px;
+  vertical-align: middle;
+  border: none;
+}
+
+.relationship-item .token-image img {
+  border: none;
+  align-self: center;
+}
+
+.relationship-item .item-name {
+  font-size: 0.85rem;
+  font-family: var(--font-family-tags);
+  align-self: center;
+}
+
+/* Custom styling for the help/hurt-toggle checkbox */
+.help-toggle, .hurt-toggle {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid whitesmoke;
+  border-radius: 4px;
+  background-color: none;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+/* Style when the help toggle is checked (active help bonus) */
+.help-toggle:checked {
+  background-color: var(--positive-color, #4caf50); 
+}
+
+.hurt-toggle:checked {
+  background-color: var(--negative-color, #cf2f0b); 
+}
+
+/* Optionally, add a checkmark icon when checked */
+.help-toggle:checked::after, 
+.hurt-toggle:checked::after {
+  content: '✔';
+  display: block;
+  text-align: center;
+  color: white;
+  font-size: 16px;
+  line-height: 18px;
+}
+
+
 
 
 
