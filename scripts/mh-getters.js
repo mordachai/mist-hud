@@ -662,7 +662,7 @@ export function getJuiceAndClues(actor) {
       };
     })
     .filter((item) => item !== null);
-    console.log("helpItems", helpItems);
+    //console.log("helpItems", helpItems);
 
   // Process hurt items (juice items with subtype "hurt").
   const hurtItems = items
@@ -723,6 +723,75 @@ export function getJuiceAndClues(actor) {
   };
 }
 
+// export function getEssence(themes) {
+//   // Initialize counters for each category
+//   const categoryCounts = {
+//       Self: 0,
+//       Noise: 0,
+//       Logos: 0,
+//       Mythos: 0,
+//       Mist: 0,
+//   };
+
+//   // Loop through each theme and try to get the themebook's category
+//   for (const theme of themes) {
+//       let realThemebook;
+//       const themebook = theme.themebook;
+//       if (themebook?.isThemeKit && themebook.isThemeKit()) {
+//       realThemebook = themebook.themebook;
+//       } else {
+//       realThemebook = themebook;
+//       }
+//       if (!realThemebook) {
+//       console.warn(`No themebook found for theme: ${theme.name}`);
+//       continue;
+//       }
+//       const category = realThemebook.system.subtype;
+//       if (category && categoryCounts.hasOwnProperty(category)) {
+//       categoryCounts[category]++;
+//       } else {
+//       console.warn(`Unknown or missing category for theme: ${theme.name}`);
+//       }
+//   }
+
+//   // Destructure some of the counts for easier access
+//   const { Self, Noise, Mythos, Logos, Mist } = categoryCounts;
+//   const totalCount = Self + Noise + Mythos;
+
+//   // Determine an imageName based on counts (you can change this logic as needed)
+//   let imageName = "blank.svg"; // default image
+//   if (totalCount === 4) {
+//       const segments = [];
+//       if (Self > 0) segments.push(`${Self}S`);
+//       if (Mythos > 0) segments.push(`${Mythos}M`);
+//       if (Noise > 0) segments.push(`${Noise}N`);
+//       imageName = segments.join("") + ".svg";
+//   } else if (Logos > 0 || Mist > 0 || Mythos > 0) {
+//       imageName = "com.webp";
+//   }
+
+//   // Determine essence using your system's rules.
+//   // (These rules are just an example; adjust them to match your system.)
+//   let essenceData = { essence: "Undefined", className: "undefined", imageName };
+//   if (Self > 0 && Noise > 0 && Mythos > 0) {
+//       essenceData = { essence: "Nexus", className: "nexus", imageName };
+//   } else if (Self > 0 && Mythos > 0 && Noise === 0) {
+//       essenceData = { essence: "Spiritualist", className: "spiritualist", imageName };
+//   } else if (Self > 0 && Noise > 0 && Mythos === 0) {
+//       essenceData = { essence: "Cyborg", className: "cyborg", imageName };
+//   } else if (Mythos > 0 && Noise > 0 && Self === 0) {
+//       essenceData = { essence: "Transhuman", className: "transhuman", imageName };
+//   } else if (Self > 0 && Noise === 0 && Mythos === 0) {
+//       essenceData = { essence: "Real", className: "real", imageName };
+//   } else if (Mythos > 0 && Self === 0 && Noise === 0) {
+//       essenceData = { essence: "Avatar/Conduit", className: "avatar-conduit", imageName };
+//   } else if (Noise > 0 && Self === 0 && Mythos === 0) {
+//       essenceData = { essence: "Singularity", className: "singularity", imageName };
+//   }
+
+//   return essenceData;
+// }   
+
 export function getEssence(themes) {
   // Initialize counters for each category
   const categoryCounts = {
@@ -733,24 +802,27 @@ export function getEssence(themes) {
       Mist: 0,
   };
 
+  // Filter out the __LOADOUT__ theme before processing
+  const filteredThemes = themes.filter(theme => theme.name !== "__LOADOUT__");
+
   // Loop through each theme and try to get the themebook's category
-  for (const theme of themes) {
+  for (const theme of filteredThemes) {
       let realThemebook;
       const themebook = theme.themebook;
       if (themebook?.isThemeKit && themebook.isThemeKit()) {
-      realThemebook = themebook.themebook;
+        realThemebook = themebook.themebook;
       } else {
-      realThemebook = themebook;
+        realThemebook = themebook;
       }
       if (!realThemebook) {
-      console.warn(`No themebook found for theme: ${theme.name}`);
-      continue;
+        console.warn(`No themebook found for theme: ${theme.name}`);
+        continue;
       }
       const category = realThemebook.system.subtype;
       if (category && categoryCounts.hasOwnProperty(category)) {
-      categoryCounts[category]++;
+        categoryCounts[category]++;
       } else {
-      console.warn(`Unknown or missing category for theme: ${theme.name}`);
+        console.warn(`Unknown or missing category for theme: ${theme.name}`);
       }
   }
 
@@ -790,7 +862,7 @@ export function getEssence(themes) {
   }
 
   return essenceData;
-}   
+}
 
 export function getPowerTags(themeId, tagItems, subTagsByParent, actor) {
   const powerTags = tagItems.filter(tag => tag.system.theme_id === themeId && tag.system.subtype === "power");

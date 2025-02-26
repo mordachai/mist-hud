@@ -28,7 +28,7 @@ let toBurnTags = $('.mh-power-tag.toBurn, .mh-power-tag.crew.toBurn').toArray().
 
 async function rollDice() {
   const roll = new Roll("2d6");
-  await roll.evaluate({async: true});
+  await roll.evaluate();
 
   if (game.modules.get("dice-so-nice")?.active) {
     await game.dice3d.showForRoll(roll, game.user, true);
@@ -688,15 +688,20 @@ function countThemebookTypes(character) {
     MistAmount: 0,
     SelfAmount: 0,
     NoiseAmount: 0,
+    // Add LoadoutAmount to the object if you want to count it
+    LoadoutAmount: 0
   };
 
-  const themes = character.items.filter(item => item.type === "theme");
+  // Filter out the __LOADOUT__ theme before processing
+  const themes = character.items.filter(item => 
+    item.type === "theme" && item.name !== "__LOADOUT__"
+  );
 
   themes.forEach(theme => {
     let realThemebook;
     const themebook = theme.themebook;
 
-    if (themebook?.isThemeKit()) {
+    if (themebook?.isThemeKit && themebook.isThemeKit()) {
       realThemebook = themebook.themebook;
     } else {
       realThemebook = themebook;
@@ -714,7 +719,8 @@ function countThemebookTypes(character) {
       if (counts[key] !== undefined) {
         counts[key]++;
       } else {
-        console.warn(`Unknown category "${category}" for themebook ID: ${realThemebook._id}`);
+        // Instead of warning, we can log at a lower level since we're filtering __LOADOUT__
+        console.debug(`Category "${category}" not counted for themebook ID: ${realThemebook._id}`);
       }
     }
   });

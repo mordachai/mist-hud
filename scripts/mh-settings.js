@@ -30,19 +30,19 @@ export async function detectActiveSystem() {
 
     switch (systemSetting) {
         case "city-of-mist":
-            console.log("Active System: City of Mist");
+            //console.log("Active System: City of Mist");
             applySystemCSS("city-of-mist");
             return "city-of-mist";
         case "otherscape":
-            console.log("Active System: Otherscape");
+            //console.log("Active System: Otherscape");
             applySystemCSS("otherscape");
             return "otherscape";
         case "legend":
-            console.log("Active System: Legends in the Mist");
+            //console.log("Active System: Legends in the Mist");
             applySystemCSS("legend");
             return "legend";
         case "custom":
-            console.log("Active System: Custom");
+            //console.log("Active System: Custom");
             applySystemCSS("custom");
             return "custom";
         default:
@@ -177,10 +177,10 @@ Hooks.once('init', () => {
             const module = await import("/modules/mist-hud/scripts/mh-load-moves.js");
     
             if (value) {
-                console.log("Hotbar mode enabled. Loading move macros...");
+                //console.log("Hotbar mode enabled. Loading move macros...");
                 await module.loadMoves();
             } else {
-                console.log("Hotbar mode disabled. Clearing macros...");
+                //console.log("Hotbar mode disabled. Clearing macros...");
                 await module.clearPlayerHotbars();
             }
         }
@@ -251,7 +251,7 @@ function applyPreferredDice(diceSet) {
     // Set the preferred dice system
     dice3d.setSystem(diceSet);
 
-    console.log(`Applied preferred dice set: ${diceSet}`);
+    //console.log(`Applied preferred dice set: ${diceSet}`);
 }
 
 // Registrar as configurações (settings) do módulo
@@ -279,7 +279,7 @@ export function registerSettings() {
  * Run initializeAccordions whenever the game initializes.
  */
 Hooks.once("ready", () => {
-    console.log("Initializing accordions on game start...");
+    //console.log("Initializing accordions on game start...");
     initializeAccordions();
 });
 
@@ -287,9 +287,9 @@ Hooks.once("ready", () => {
  * Hook into chat messages to initialize accordions in chat rolls.
  */
 Hooks.on("renderChatMessage", (message, html) => {
-    console.log("Chat message rendered. Checking for accordions...");
+    //console.log("Chat message rendered. Checking for accordions...");
     if (html.find(".accordion-container").length > 0) {
-        console.log("Accordion container found in chat message. Initializing accordions...");
+        //console.log("Accordion container found in chat message. Initializing accordions...");
         initializeAccordions();
     }
 });

@@ -86,7 +86,7 @@ export function checkRolls(actor, move) {
 export function getReceivedBonuses(receiverActor) {
   if (!receiverActor) return [];
   const messages = [];
-  console.log("Scanning for bonuses for actor id:", receiverActor.id);
+  //console.log("Scanning for bonuses for actor id:", receiverActor.id);
 
   // Retrieve the active bonuses stored as an object keyed by provider IDs
   const activeBonuses = receiverActor.getFlag("mist-hud", "received-bonuses") || {}; 
@@ -95,7 +95,7 @@ export function getReceivedBonuses(receiverActor) {
   for (const provider of game.actors.contents) {
     // Skip if the provider is the receiver
     if (provider.id === receiverActor.id) continue;
-    console.log(`Checking provider ${provider.name} with id ${provider.id}:`, activeBonuses);
+    //console.log(`Checking provider ${provider.name} with id ${provider.id}:`, activeBonuses);
 
     // If the provider gave a help bonus, add a message
     if (activeBonuses[provider.id]?.type === "help") {
@@ -115,7 +115,7 @@ export function getReceivedBonuses(receiverActor) {
     }
   }
 
-  console.log("Found bonus messages:", messages);
+  //console.log("Found bonus messages:", messages);
   return messages;
 }
 

@@ -20,6 +20,7 @@
   list-style: none;
   background: none;
   border: none;
+  width: fit-content;
 }
   
 #npc-hud .app,
@@ -48,27 +49,49 @@
     flex-basis: min-content;
     align-items: center;
     justify-content: space-between;
-    padding: 5px 10px;
     border-bottom: 1px solid rgb(206, 206, 206);
     cursor: grab;
-    margin-left: 0px;
-    padding-left: 30px;
+    padding-left: 40px;
+    transition: padding-left 0.5s;
+}
+
+  /* Minimized state header */
+  #npc-hud.minimized .window-header {
+    background: var(--hud-bg-color);
+    display: flex;
+    flex-direction: row;
+    flex-basis: max-content;
+    align-items: center;
+    border-bottom: 1px solid rgb(206, 206, 206);
+    cursor: grab;
+    padding-left: 10px;
+    transition: padding-left 0.5s;
 }
 
 /* Character name */
 #npc-hud .mh-char-name {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     flex: 4;
     font-family: 'Rift Bold';
     filter: drop-shadow(2px 2px 2px black);
     align-self: flex-start;
-    margin-left: 30px;
     color: var(--spectrum-color);
+    white-space: nowrap;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
 #npc-hud.minimized .mh-char-name {
-    margin-left: 0px;
     flex: 4;
+    width: 100%;
+    padding-left: 20px;
+}
+
+#npc-hud.minimized .mh-token-image {
+    top: -13px;
+    transition: ease-in, top, 0.2s;
 }
 
 /* Collapse Buttons */
@@ -91,6 +114,7 @@ cursor: pointer;
 margin: auto;
 text-align: right;
 flex: 1;
+margin-left: 5px;
 }
 
 h4.window-title .mh-close-button {
@@ -108,11 +132,14 @@ margin: 0;
 list-style: none;
 color: #00000000;
 background: linear-gradient(var(--hud-bg-color), var(--hud-bg-color2));
-/* background: var(--hud-bg-color); */
 border: none;
 max-height: 80vh;
 overflow-y: hidden;
 margin: 5px;
+}
+
+#npc-hud.minimized .window-content {
+    display: none;
 }
   
 #npc-hud .mh-content {
@@ -121,36 +148,8 @@ margin: 5px;
     margin-top: 10px;
     padding: 5px;
     color: whitesmoke;
-}
+}  
   
-  
-#npc-hud.minimized .window-content {
-    display: none;
-}
-
-.npc-hud.collapsed .window-content {
-    display: none;
-  }  
-  
-  /* Minimized state header */
-#npc-hud.minimized .window-header {
-    background: var(--hud-bg-color);
-    display: flex;
-    flex-direction: row;
-    flex-basis: max-content;
-    align-items: center;
-    justify-content: space-between;
-    padding: 5px 10px 5px 15px;
-    border-bottom: 1px solid rgb(206, 206, 206);
-    cursor: grab;
-    margin-left: 0px;
-}
-
-#npc-hud.minimized .window-app {
-    min-width: 300px;
-    color: blue;
-}
-
 
 
 .npc-collapse-button,
@@ -480,7 +479,8 @@ margin: 5px;
     display: inline-block; 
 }
 
-.npc-status {
+.npc-status,
+.npc-status.neutral {
     font-family: var(--font-family-npcmoves);
     background-color: var(--status-color);
     text-transform: lowercase;
@@ -491,19 +491,19 @@ margin: 5px;
     display: inline-block;
 }
 
-.npc-story-tag.selected {
-    border: 2px solid white;
-    border-radius: 3px;
-    margin: -2px;
+.npc-status:hover {
+    text-shadow: 0 0 2px #fff;
 }
 
-.npc-status.positive {
+.npc-status.positive,
+.npc-story-tag.positive {
     border: 2px solid var(--positive-tag-borderColor);
     border-radius: 3px;
     margin: -2px;
 }
 
-.npc-status.negative {
+.npc-status.negative,
+.npc-story-tag.negative {
     border: 2px solid var(--negative-tag-borderColor);
     border-radius: 3px;
     margin: -2px;

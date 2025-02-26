@@ -6,14 +6,28 @@ import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
 // Global registry to store NPC HUD instances by actor ID
 const npcHudRegistry = new Map();
 
-let clickTimer;
-const clickDelay = 300; // milliseconds
+// Simple logging helper - won't break existing code
+const logger = {
+  debug: (...args) => console.debug("NPC-HUD |", ...args),
+  info: (...args) => console.info("NPC-HUD |", ...args),
+  warn: (...args) => console.warn("NPC-HUD |", ...args),
+  error: (...args) => console.error("NPC-HUD |", ...args)
+};
+
+function generateRandomId() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < 16; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
 
 export class NpcHUD extends Application {
 
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
-          id: 'npc-hud',
+          id: 'npc-hud',  // Keep original ID to maintain compatibility
           template: 'modules/mist-hud/templates/npc-hud.hbs',
           classes: ['npc-hud'],
           header: true,
@@ -35,19 +49,41 @@ export class NpcHUD extends Application {
 
     setActor(actor, token = null) {
         if (!actor || actor.type !== 'threat') { 
-            console.warn("Attempted to set an invalid actor.");
+            logger.warn("Attempted to set an invalid actor.");
             return;
         }
         this.actor = actor;
         this.token = token; // Save the token reference if provided
         this.isCollapsed = actor.getFlag('mist-hud', 'isCollapsed') ?? false; // Ensure boolean default
+        
+        // Store in registry
+        if (actor.id) npcHudRegistry.set(actor.id, this);
+        if (token?.id) npcHudRegistry.set(token.id, this);
+        
         this.render(true);
     }  
     
+    // Break down getData into smaller, more manageable functions
     async getData() {
         const data = super.getData();
         if (!this.actor) return data;
     
+        // Basic data preparation
+        this._prepareBasicData(data);
+        
+        // System-specific data preparation
+        await this._prepareSystemData(data);
+        
+        // Prepare moves data
+        this._prepareMovesData(data);
+        
+        // Prepare additional data (story tags, statuses)
+        this._prepareAdditionalData(data);
+        
+        return data;
+    }
+    
+    _prepareBasicData(data) {
         // Pass npcAccordionState to the template
         data.npcAccordionState = game.settings.get('mist-hud', 'npcAccordionState');
     
@@ -58,9 +94,8 @@ export class NpcHUD extends Application {
         data.name = this.actor.name;
         data.mythos = this.actor.system.mythos;
         data.tokenImage = (this.token && this.token.texture && this.token.texture.src)
-        ? this.token.texture.src
-        : this.actor.prototypeToken?.texture.src;
-    
+            ? this.token.texture.src
+            : this.actor.prototypeToken?.texture.src;
     
         // Check if Description and Biography are non-empty
         const description = this.actor.system.description || "";
@@ -69,7 +104,9 @@ export class NpcHUD extends Application {
     
         data.hasDescriptionBiography = hasContent;
         data.descriptionBiography = `${description.trim()}${biography.trim() ? "" + biography.trim() : ""}`;
+    }
     
+    async _prepareSystemData(data) {
         const system = await detectActiveSystem();
         data.activeSystem = system;
     
@@ -81,92 +118,102 @@ export class NpcHUD extends Application {
         }
     
         data.spectrums = this.actor.items.filter(i => i.type === 'spectrum');
+    }
     
+    _prepareMovesData(data) {
         // Retrieve and group Moves by subtype
         const moves = this.actor.items.filter(i => i.type === 'gmmove');
     
         if (data.activeSystem === 'otherscape') {
-            // Group moves specifically for Otherscape
-            const limits = [];
-            const specials = [];
-            const threats = [];
-    
-            // Collect soft moves and classify hard moves
-            const softMoves = new Map();
-            moves.forEach(move => {
-                const subtype = move.system.subtype;
-                if (subtype === "intrusion") {
-                    limits.push(move);
-                } else if (subtype === "hard" && !move.system.superMoveId) {
-                    specials.push(move);
-                } else if (subtype === "soft") {
-                    softMoves.set(move._id, { ...move, consequences: [] });
-                }
-            });
-    
-            // Link hard moves to their corresponding soft move
-            moves.forEach(move => {
-                if (move.system.subtype === "hard" && move.system.superMoveId) {
-                    const parentId = move.system.superMoveId;
-                    if (softMoves.has(parentId)) {
-                        softMoves.get(parentId).consequences.push(move);
-                    }
-                }
-            });
-    
-            // Add soft moves with consequences to threats
-            threats.push(...Array.from(softMoves.values()));
-    
-            // Assign grouped moves for Otherscape
-            data.moveGroups = {
-                Limits: limits,
-                Specials: specials,
-                Threats: threats,
-            };
+            this._prepareOtherscapeMoves(data, moves);
         } else {
             // Default grouping for City of Mist
-            data.moveGroups = moves.reduce((groups, move) => {
-                let subtype = move.system.subtype || 'default';
-    
-                // City of Mist grouping logic
-                switch (subtype) {
-                    case 'soft':
-                        subtype = game.i18n.localize("CityOfMist.terms.softMove");
-                        break;
-                    case 'hard':
-                        subtype = game.i18n.localize("CityOfMist.terms.hardMoves");
-                        break;
-                    case 'intrusion':
-                        subtype = game.i18n.localize("CityOfMist.terms.intrusions");
-                        break;
-                    case 'downtime':
-                        subtype = game.i18n.localize("CityOfMist.terms.downtimeMoves");
-                        break;
-                    case 'custom':
-                        subtype = game.i18n.localize("CityOfMist.terms.customMoves");
-                        break;
-                    case 'entrance':
-                        subtype = game.i18n.localize("CityOfMist.terms.enterScene");
-                        break;
-                    default:
-                        subtype = "default";
-                        break;
-                }
-    
-                if (!groups[subtype]) groups[subtype] = [];
-                groups[subtype].push(move);
-                return groups;
-            }, {});
+            this._prepareDefaultMoves(data, moves);
         }
+    }
     
+    _prepareOtherscapeMoves(data, moves) {
+        // Group moves specifically for Otherscape
+        const limits = [];
+        const specials = [];
+        const threats = [];
+
+        // Collect soft moves and classify hard moves
+        const softMoves = new Map();
+        moves.forEach(move => {
+            const subtype = move.system.subtype;
+            if (subtype === "intrusion") {
+                limits.push(move);
+            } else if (subtype === "hard" && !move.system.superMoveId) {
+                specials.push(move);
+            } else if (subtype === "soft") {
+                softMoves.set(move._id, { ...move, consequences: [] });
+            }
+        });
+
+        // Link hard moves to their corresponding soft move
+        moves.forEach(move => {
+            if (move.system.subtype === "hard" && move.system.superMoveId) {
+                const parentId = move.system.superMoveId;
+                if (softMoves.has(parentId)) {
+                    softMoves.get(parentId).consequences.push(move);
+                }
+            }
+        });
+
+        // Add soft moves with consequences to threats
+        threats.push(...Array.from(softMoves.values()));
+
+        // Assign grouped moves for Otherscape
+        data.moveGroups = {
+            Limits: limits,
+            Specials: specials,
+            Threats: threats,
+        };
+    }
+    
+    _prepareDefaultMoves(data, moves) {
+        data.moveGroups = moves.reduce((groups, move) => {
+            let subtype = move.system.subtype || 'default';
+
+            // City of Mist grouping logic
+            switch (subtype) {
+                case 'soft':
+                    subtype = game.i18n.localize("CityOfMist.terms.softMove");
+                    break;
+                case 'hard':
+                    subtype = game.i18n.localize("CityOfMist.terms.hardMoves");
+                    break;
+                case 'intrusion':
+                    subtype = game.i18n.localize("CityOfMist.terms.intrusions");
+                    break;
+                case 'downtime':
+                    subtype = game.i18n.localize("CityOfMist.terms.downtimeMoves");
+                    break;
+                case 'custom':
+                    subtype = game.i18n.localize("CityOfMist.terms.customMoves");
+                    break;
+                case 'entrance':
+                    subtype = game.i18n.localize("CityOfMist.terms.enterScene");
+                    break;
+                default:
+                    subtype = "default";
+                    break;
+            }
+
+            if (!groups[subtype]) groups[subtype] = [];
+            groups[subtype].push(move);
+            return groups;
+        }, {});
+    }
+    
+    _prepareAdditionalData(data) {
         // Retrieve Story Tags
         data.storyTags = this.getStoryTags();
         data.hasStoryTags = data.storyTags.length > 0;
     
         // Retrieve Statuses
         data.statuses = this.getActorStatuses();
-    
-        return data;
     }
      
     getActorStatuses() {
@@ -177,13 +224,15 @@ export class NpcHUD extends Application {
         this.actor.items
             .filter((item) => item.type === 'status')
             .forEach((status) => {
+                // Get the current type from the flag; if missing, fall back to system.specialType or default to "neutral"
+                const statusType = status.getFlag('mist-hud', 'statusType') || status.system.specialType || 'neutral';
                 const key = `${status.name}-${status.system.tier}`;
                 if (!statusMap.has(key)) {
                     statusMap.set(key, {
                         id: status.id,
                         statusName: status.name,
                         statusTier: status.system.tier,
-                        statusType: status.system.specialType || 'neutral',
+                        statusType,
                         temporary: !!status.system.temporary,
                         permanent: !!status.system.permanent
                     });
@@ -191,62 +240,47 @@ export class NpcHUD extends Application {
             });
     
         return Array.from(statusMap.values());
-    }
+    }    
     
     applyBurnState(actor, tagId, tagType) {
         const tagItem = actor.items.get(tagId);
         if (!tagItem || !tagItem.system) {
-            console.error(`Invalid or missing tag item for ID: ${tagId}`);
-            return {
-                id: tagId,
-                burnState: "unburned",
-                cssClass: "unburned",
-                burnIcon: '<i class="fa-light fa-fire"></i>',
-                permanent: false,
-                temporary: false,
-                isInverted: false,
-                inversionIcon: tagType === 'story'
-                    ? '<i class="fa-regular fa-angles-up"></i>'
-                    : '<i class="fa-light fa-angles-down"></i>',
-            };
+          logger.error(`Invalid or missing tag item for ID: ${tagId}`);
+          return null;
         }
-    
-        let burnState;
-        if (tagItem.system.burned) {
-            burnState = "burned";
-        } else if (tagItem.system.burn_state === 1) {
-            burnState = "toBurn";
+        
+        // Determine the burn state: 0 (normal) or 1 (burned)
+        const burnState = tagItem.system.burn_state === 1 ? 1 : 0;
+        
+        // Get the tag's positive/negative flag from the "mist-hud" namespace.
+        // Defaults to "neutral" if not set.
+        const tagFlag = tagItem.getFlag('mist-hud', 'tagState') || 'neutral';
+      
+        // Determine the appropriate CSS class based on the burn state and flag.
+        let cssClass = '';
+        if (burnState === 1) {
+          cssClass = 'burned';
         } else {
-            burnState = "unburned";
+          // Use the flag to determine the visual modifier.
+          if (tagFlag === 'negative') {
+            cssClass = 'negative';
+          } else if (tagFlag === 'positive') {
+            cssClass = 'positive';
+          } else {
+            cssClass = ''; // neutral state, no extra class
+          }
         }
-    
-        const cssClass = burnState;
-        const burnIcon = burnState === "burned"
-            ? '<i class="fa-solid fa-fire"></i>'
-            : burnState === "toBurn"
-            ? '<i class="fa-regular fa-fire"></i>'
-            : '<i class="fa-light fa-fire"></i>';
-    
-        const permanent = tagItem.system.permanent || false;
-        const temporary = tagItem.system.temporary || false;
-        const isInverted = tagItem.system.inverted || false;
-    
-        const inversionIcon = isInverted
-            ? '<i class="fa-light fa-angles-down"></i>'
-            : (tagType === 'story' ? '<i class="fa-regular fa-angles-up"></i>' : '<i class="fa-light fa-angles-down"></i>');
-    
+        
         return {
-            id: tagId,
-            tagName: tagItem.name,
-            burnState,
-            cssClass,
-            burnIcon,
-            permanent,
-            temporary,
-            isInverted,
-            inversionIcon,
+          id: tagId,
+          tagName: tagItem.name,
+          burnState,  // 0 for normal, 1 for burned
+          cssClass,
+          tagFlag,    // "neutral", "negative", or "positive"
+          permanent: tagItem.system.permanent || false,
+          temporary: tagItem.system.temporary || false,
         };
-    }
+    }      
     
     getStoryTags() {
         if (!this.actor) return [];
@@ -259,12 +293,14 @@ export class NpcHUD extends Application {
         const storyTags = tagItems.filter(tag => tag.system.subtype === 'story')
             .map(tag => {
                 if (!tag || !tag._id || !tag.system) {
-                    console.error("Invalid tag item or missing system data in applyBurnState:", tag);
+                    logger.error("Invalid tag item or missing system data in applyBurnState:", tag);
                     return null; // Skip invalid tags
                 }
     
                 // Apply burn state and handle inversion
                 const processedTag = this.applyBurnState(this.actor, tag._id, 'story');
+                if (!processedTag) return null;
+                
                 processedTag.tagName = tag.name;
                 processedTag.tagDescription = tag.system.description || '';
                 processedTag.isInverted = tag.system.inverted || false;
@@ -287,18 +323,36 @@ export class NpcHUD extends Application {
             this.element.removeClass("collapsed");
           }
         } catch (error) {
-          console.error("Error during NpcHUD render:", error);
+          logger.error("Error during NpcHUD render:", error);
         }
     }    
 
+    async close(options) {
+        try {
+            // Remove references from registry
+            if (this.actor?.id) npcHudRegistry.delete(this.actor.id);
+            if (this.token?.id) npcHudRegistry.delete(this.token.id);
+            
+            // Clean up event handlers
+            if (this.element) {
+                this.element.off('contextmenu');
+            }
+            
+            return await super.close(options);
+        } catch (err) {
+            logger.error("Error closing NPC HUD:", err);
+            return false;
+        }
+    }
+
     injectCustomHeader() {
-    
         // Use this.element to access the entire application window
         const header = this.element.find('.window-header');
         const window_title = header.find('.window-title')[0];
-        window_title.style.display = "None";
+        if (window_title) window_title.style.display = "None";
+        
         if (header.length === 0) {
-          console.warn("Header element not found during injection!");
+          logger.warn("Header element not found during injection!");
           return;
         }
     
@@ -308,9 +362,9 @@ export class NpcHUD extends Application {
         header.append(window_title);
       
         // Create custom header elements
-        const tokenImgSrc = this.actor?.token?.texture.src || this.actor?.img || 'default-token.png';
+        const tokenImgSrc = this.actor?.token?.texture.src || this.actor?.img || 'icons/svg/mystery-man.svg';
     
-        const tokenImg = $(`<div class="mh-token-image"><img src="${this.actor?.token?.texture.src || this.actor?.img}" alt="Character Token"></div>`);
+        const tokenImg = $(`<div class="mh-token-image"><img src="${tokenImgSrc}" alt="${this.actor?.name || 'Character'} Token"></div>`);
         const charName = $(`<div class="mh-char-name">${this.actor?.name || 'Character'}</div>`);
         const closeButton = $(`<i class="mh-close-button fa-solid fa-xmark"></i>`); // Using FontAwesome for the close icon
       
@@ -334,230 +388,201 @@ export class NpcHUD extends Application {
         }
     }
 
-    activateListeners(html) {
-        super.activateListeners(html);
-    
-        // Initialize accordions
-        initializeAccordions();
-    
-        // Inject custom header
-        this.injectCustomHeader();
-    
-        // Close button
-        html.find('.npc-close-button').click((event) => {
-            event.stopPropagation();
-            this.saveHUDPosition();
-            this.close();
-        });
-
-        html.find('.npc-story-tag')
-        .on('click', (event) => {
-          event.stopPropagation();
-          event.preventDefault();
-          // Clear any existing timer.
-          if (clickTimer) clearTimeout(clickTimer);
-          clickTimer = setTimeout(() => {
-            // Use the method on the HUD instance.
-            this._toggleTagState($(event.currentTarget));
-            clickTimer = null;
-          }, clickDelay);
-        })
-        .on('dblclick', async (event) => {
-          event.stopPropagation();
-          event.preventDefault();
-          if (clickTimer) {
-            clearTimeout(clickTimer);
-            clickTimer = null;
-          }
-          const tagId = $(event.currentTarget).data('id');
-          const actor = this.actor;
-          if (!actor) return;
-          const tag = actor.items.get(tagId);
-          if (!tag) {
-            console.error(`Tag with ID ${tagId} not found on the unlinked actor.`);
+    // Generic method to toggle states of tag/status items
+   
+   
+    async _toggleItemState(element, itemType, flagName, states, systemProperty = null) {
+        const itemId = itemType === 'tag' ? element.data('id') : element.data('status-id');
+        
+        if (!itemId) {
+            logger.error(`No item ID found for ${itemType}`);
             return;
-          }
-          await CityDialogs.itemEditDialog(tag);
-          this.render(false);
-        });
-
-        html.find('.npc-status')
-        .on('click', (event) => {
-            event.stopPropagation();
-            event.preventDefault();
-            if (clickTimer) clearTimeout(clickTimer);
-            clickTimer = setTimeout(async () => {
-            await this._toggleStatusState($(event.currentTarget));
-            clickTimer = null;
-            }, clickDelay);
-        })
-        .on('dblclick', async (event) => {
-            event.stopPropagation();
-            event.preventDefault();
-            if (clickTimer) {
-            clearTimeout(clickTimer);
-            clickTimer = null;
-            }
-            const statusId = $(event.currentTarget).data('status-id');
-            const actor = this.actor;
-            if (!actor) return;
-            const status = actor.items.get(statusId);
-            if (!status) {
-            console.error(`Status with ID ${statusId} not found on the unlinked actor.`);
-            return;
-            }
-            await CityDialogs.itemEditDialog(status);
-            this.render(false);
-        });           
-
-        html.find('.npc-status').each((i, el) => {
-            el.setAttribute('draggable', 'true');
-            el.addEventListener('dragstart', (ev) => {
-              const text = el.textContent.trim();
-              let name = text;
-              let tier = 1;
+        }
         
-              const match = text.match(/^(.*?)-(\d+)$/);
-              if (match) {
-                name = match[1];
-                tier = parseInt(match[2], 10);
-              }
-        
-              const statusData = {
-                type: "status",
-                name,
-                tier,
-                actorId: this.actor?.id || null
-              };
-        
-              ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
-            });
-        });
-
-        // Create NPC Story Tag
-        html.find('.create-npc-tag').on("click", this._createStoryTagFromHUD.bind(this));
-
-        // Right-click (contextmenu) to delete an NPC Story Tag
-        html.find('.npc-story-tag').on('contextmenu', async (event) => {
-            event.preventDefault();
-            const tagId = $(event.currentTarget).data('id');
-            
-            if (!tagId) {
-                console.error("Missing tagId for NPC story tag deletion.");
-                return;
-            }
-            
-            // Use the unlinked actor directly
-            const actor = this.actor;
-            if (!actor) {
-                console.error("Actor not found on NPC HUD.");
-                return;
-            }
-            
-            await actor.deleteEmbeddedDocuments("Item", [tagId]);
-            this.render(false);
-        });        
-
-        // Create NPC Status
-        html.find('.create-npc-status').on("click", this._createStatusFromHUD.bind(this));
-
-        // Right-click (contextmenu) to delete an NPC Status
-        html.find('.npc-status').on('contextmenu', async (event) => {
-            event.preventDefault();
-            const statusId = $(event.currentTarget).data('status-id');
-            const actorId = this.actor?.id;
-            
-            if (!statusId || !actorId) {
-                console.error("Missing statusId or actorId for NPC status deletion.");
-                return;
-            }
-            
-            const actor = this.actor;
-            if (!actor) {
-                console.error(`Actor with ID ${actorId} not found.`);
-                return;
-            }
-            
-            // Assumes your actor has a method `deleteStatus`
-            await actor.deleteEmbeddedDocuments("Item", [statusId]);
-            this.render(false); // Refresh the HUD after deletion
-        });
-            
-        // Prevent context menu actions
-        this.element.on('contextmenu', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-        });
-    }
-
-    async _toggleTagState(tagElement) {
-        // Retrieve the tag ID from the element.
-        const tagId = tagElement.data('id');
-        // Use the HUD's actor property.
         const actor = this.actor;
-        if (!actor) return;
+        if (!actor) {
+            logger.error(`No actor found in _toggle${itemType}State`);
+            return;
+        }
         
+        const item = actor.items.get(itemId);
+        if (!item) {
+            logger.error(`${itemType} with ID ${itemId} not found`);
+            return;
+        }
+        
+        // Get current state
+        const currentState = item.getFlag('mist-hud', flagName) || states[0];
+        const stateIndex = states.indexOf(currentState);
+        const newState = states[(stateIndex + 1) % states.length];
+        
+        try {
+            // Update flag
+            await item.setFlag('mist-hud', flagName, newState);
+            
+            // Update system property if provided
+            if (systemProperty) {
+                const updateData = {};
+                updateData[systemProperty] = newState;
+                await item.update(updateData);
+            }
+            
+            // Special handling for burned state if needed
+            if (itemType === 'tag' && newState === 'burned') {
+                await item.update({
+                    "system.burn_state": 1,
+                    "system.burned": true
+                });
+            } else if (itemType === 'tag') {
+                await item.update({
+                    "system.burn_state": 0,
+                    "system.burned": false
+                });
+            }
+            
+            // Re-render
+            this.render(false);
+        } catch (error) {
+            logger.error(`Error updating ${itemType} state:`, error);
+        }
+    }
+    
+    // Use original methods for compatibility
+    async _toggleTagState(tagElement) {
+        console.log("Toggling tag state for element:", tagElement);
+        // Retrieve the tag ID and corresponding tag item.
+        const tagId = tagElement.data('id');
+        const actor = this.actor;
+        if (!actor) {
+          console.error("No actor found in _toggleTagState");
+          return;
+        }
         const tagItem = actor.items.get(tagId);
-        if (!tagItem) return;
-        
-        // Determine the new state.
-        // We'll assume three states: "unburned" (default), "selected", and "burned".
+        if (!tagItem) {
+          console.error(`Tag with ID ${tagId} not found`);
+          return;
+        }
+      
+        // Get the current flag value (defaulting to "neutral")
+        let currentFlag = tagItem.getFlag('mist-hud', 'tagState') || 'neutral';
+        // Also, check if the tag is burned
+        let isBurned = tagItem.system.burn_state === 1;
+        console.log(`Current tag flag: ${currentFlag}, isBurned: ${isBurned}`);
+      
+        // Determine the new state in the cycle: neutral → negative → positive → burned → neutral.
         let newState;
-        if (tagElement.hasClass('burned')) {
-          newState = 'unburned';
-        } else if (tagElement.hasClass('selected')) {
+        if (isBurned) {
+          newState = 'neutral';
+        } else if (currentFlag === 'neutral') {
+          newState = 'negative';
+        } else if (currentFlag === 'negative') {
+          newState = 'positive';
+        } else if (currentFlag === 'positive') {
           newState = 'burned';
-        } else {
-          newState = 'selected';
         }
-        
-        // Update the DOM: remove the possible classes and add the new one.
-        tagElement.removeClass('unburned selected burned').addClass(newState);
-        
-        // Define the data to update based on the new state.
-        let updateData = {};
-        if (newState === 'burned') {
-          updateData = { "system.burn_state": 2, "system.burned": true };
-        } else if (newState === 'selected') {
-          updateData = { "system.burn_state": 1, "system.burned": false };
-        } else {  // unburned
-          updateData = { "system.burn_state": 0, "system.burned": false };
+        console.log(`New state determined: ${newState}`);
+      
+        // Update the DOM: remove existing state classes and add the appropriate one.
+        tagElement.removeClass('negative positive burned');
+        if (newState === 'negative') {
+          tagElement.addClass('negative');
+        } else if (newState === 'positive') {
+          tagElement.addClass('positive');
+        } else if (newState === 'burned') {
+          tagElement.addClass('burned');
         }
-        
-        // Update the embedded tag document so that the state is saved.
-        await tagItem.update(updateData);
-        // Re-render the HUD so that the state persists on subsequent renders.
+        console.log("Updated DOM classes:", tagElement.attr('class'));
+      
+        // Update the tag item accordingly.
+        try {
+          if (newState === 'negative') {
+            console.log("Setting state to negative");
+            await tagItem.setFlag('mist-hud', 'tagState', 'negative');
+            await tagItem.update({
+              "system.burn_state": 0,
+              "system.burned": false
+            });
+          } else if (newState === 'positive') {
+            console.log("Setting state to positive");
+            await tagItem.setFlag('mist-hud', 'tagState', 'positive');
+            await tagItem.update({
+              "system.burn_state": 0,
+              "system.burned": false
+            });
+          } else if (newState === 'burned') {
+            console.log("Setting state to burned");
+            await tagItem.setFlag('mist-hud', 'tagState', 'neutral'); // clear the flag when burned
+            await tagItem.update({
+              "system.burn_state": 1,
+              "system.burned": true
+            });
+          } else if (newState === 'neutral') {
+            console.log("Setting state to neutral");
+            await tagItem.setFlag('mist-hud', 'tagState', 'neutral');
+            await tagItem.update({
+              "system.burn_state": 0,
+              "system.burned": false
+            });
+          }
+          console.log("Tag update successful for tag ID:", tagId);
+        } catch (error) {
+          console.error("Error updating tag state:", error);
+        }
+      
+        // Re-render the HUD to reflect the change.
         this.render(false);
     }
-      
+         
     async _toggleStatusState(statusElement) {
-    // Retrieve the status ID from the element.
-    const statusId = statusElement.data('status-id');
-    const actor = this.actor;
-    if (!actor) return;
-    
-    const statusItem = actor.items.get(statusId);
-    if (!statusItem) return;
-    
-    // Cycle through the types: positive -> negative -> neutral -> positive...
-    const currentType = statusElement.attr('data-status-type') || 'neutral';
-    let newType;
-    if (currentType === 'positive') {
-        newType = 'negative';
-    } else if (currentType === 'negative') {
-        newType = 'neutral';
-    } else {
-        newType = 'positive';
+        console.log("Toggling status state for element:", statusElement);
+        // Retrieve the status ID and corresponding status item.
+        const statusId = statusElement.data('status-id');
+        const actor = this.actor;
+        if (!actor) {
+          console.error("No actor found in _toggleStatusState");
+          return;
+        }
+        const statusItem = actor.items.get(statusId);
+        if (!statusItem) {
+          console.error(`Status item with ID ${statusId} not found`);
+          return;
+        }
+        
+        // Get the current type from the flag (falling back to system field or "neutral")
+        const currentType = statusItem.getFlag('mist-hud', 'statusType') || statusItem.system.specialType || 'neutral';
+        console.log("Current status type (from flag or system):", currentType);
+        
+        let newType;
+        // Cycle: neutral → negative → positive → neutral.
+        if (currentType === 'neutral') {
+          newType = 'negative';
+        } else if (currentType === 'negative') {
+          newType = 'positive';
+        } else if (currentType === 'positive') {
+          newType = 'neutral';
+        }
+        console.log("New status type determined:", newType);
+        
+        // Update the DOM: update the data attribute and adjust CSS classes.
+        statusElement.attr('data-status-type', newType);
+        // Remove any extra state classes, but keep the base "npc-status"
+        statusElement.removeClass('negative positive neutral');
+        if (newType !== 'neutral') {
+          statusElement.addClass(newType);
+        }
+        console.log("Updated element classes:", statusElement.attr('class'));
+        
+        // Save the new state in the status document by updating the flag and optionally the system field.
+        try {
+          await statusItem.setFlag('mist-hud', 'statusType', newType);
+          // Optionally update system.specialType as well (if needed for other parts of your system)
+          await statusItem.update({ "system.specialType": newType });
+          console.log(`Status item ${statusId} updated to: ${newType}`);
+        } catch (error) {
+          console.error("Error updating status item:", error);
+        }
     }
-    
-    // Update the DOM.
-    statusElement.attr('data-status-type', newType);
-    statusElement.removeClass('neutral positive negative').addClass(newType);
-    
-    // Update the embedded status document.
-    await statusItem.update({ "system.specialType": newType });
-    }
-
+       
     async _createStatusFromHUD(event) {
         event.stopPropagation();
       
@@ -567,31 +592,63 @@ export class NpcHUD extends Application {
             return;
         }
       
-        // Create a new status with a default name
-        const obj = await owner.createNewStatus("Unnamed Status");
-        if (!obj) {
-            console.error("Failed to create a new status.");
-            return;
-        }
+        try {
+            // Create a new status with a default name
+            let obj;
+            if (owner.createNewStatus) {
+                obj = await owner.createNewStatus("Unnamed Status");
+            } else {
+                const createdItems = await owner.createEmbeddedDocuments("Item", [{
+                    name: "Unnamed Status",
+                    type: "status",
+                    system: {
+                        tier: 1
+                    }
+                }]);
+                obj = createdItems[0];
+            }
       
-        // Retrieve the newly created status
-        const status = owner.getStatus(obj.id);
-        if (!status) {
-            console.error(`Status with ID ${obj.id} not found.`);
-            return;
+            if (!obj) {
+                console.error("Failed to create a new status.");
+                return;
+            }
+          
+            // Retrieve the newly created status
+            const status = owner.getStatus ? 
+                          owner.getStatus(obj.id) : 
+                          owner.items.get(obj.id);
+                          
+            if (!status) {
+                console.error(`Status with ID ${obj.id} not found.`);
+                return;
+            }
+            
+            // Try different methods for editing depending on available API
+            let updated = false;
+            if (CityDialogs?.itemEditDialog) {
+                updated = await CityDialogs.itemEditDialog(status);
+            } else if (window.CityHelpers?.itemDialog) {
+                updated = await window.CityHelpers.itemDialog(status);
+            } else {
+                // Fallback to default item sheet
+                status.sheet.render(true);
+                updated = true;
+            }
+          
+            if (!updated) {
+                // Delete the status if the dialog is canceled
+                if (owner.deleteStatus) {
+                    await owner.deleteStatus(obj.id);
+                } else {
+                    await owner.deleteEmbeddedDocuments("Item", [obj.id]);
+                }
+            }
+          
+            // Refresh the HUD
+            this.render(false);
+        } catch (error) {
+            console.error("Error in _createStatusFromHUD:", error);
         }
-      
-        // Open the dialog to edit the status
-        const updateObj = await CityHelpers.itemDialog(status);
-        if (updateObj) {
-            CityHelpers.modificationLog(owner, "Created", status, `${status.system.amount || ""}`);
-        } else {
-            // Delete the status if the dialog is canceled
-            await owner.deleteStatus(obj.id);
-        }
-      
-        // Refresh the HUD to display the new status
-        this.render(false);
     }
 
     async _createStoryTagFromHUD(event) {
@@ -603,54 +660,228 @@ export class NpcHUD extends Application {
             return;
         }
       
-        // Define default data for a new tag.
-        // Adjust the type and system defaults as needed for your system.
-        const tagData = {
-          name: "Unnamed Tag",
-          type: "tag",  // Use the appropriate type for story tags
-          system: {
-            description: "",
-            subtype: "story",
-            // ... other default fields
-          }
-        };
-      
-        // Create the tag as an embedded document on the actor.
-        let created = await owner.createEmbeddedDocuments("Item", [tagData]);
-        if (!created || !created[0]) {
-          console.error("Failed to create a new story tag.");
-          return;
+        try {
+            // Define default data for a new tag.
+            // Adjust the type and system defaults as needed for your system.
+            const tagData = {
+              name: "Unnamed Tag",
+              type: "tag",  // Use the appropriate type for story tags
+              system: {
+                description: "",
+                subtype: "story",
+                // ... other default fields
+              }
+            };
+          
+            // Create the tag as an embedded document on the actor.
+            let created = await owner.createEmbeddedDocuments("Item", [tagData]);
+            if (!created || !created[0]) {
+              console.error("Failed to create a new story tag.");
+              return;
+            }
+            
+            // Retrieve the newly created tag.
+            const tag = owner.getEmbeddedDocument ? 
+                      owner.getEmbeddedDocument("Item", created[0].id) : 
+                      owner.items.get(created[0].id);
+                      
+            if (!tag) {
+              console.error(`Tag with ID ${created[0].id} not found.`);
+              return;
+            }
+            
+            // Open the dialog to edit the tag.
+            let updated = false;
+            if (CityDialogs?.itemEditDialog) {
+                updated = await CityDialogs.itemEditDialog(tag);
+            } else {
+                // Fallback to default item sheet
+                tag.sheet.render(true);
+                updated = true;
+            }
+            
+            if (!updated) {
+              // If the dialog is cancelled, delete the tag.
+              await owner.deleteEmbeddedDocuments("Item", [created[0].id]);
+            }
+            
+            // Refresh the HUD.
+            this.render(false);
+        } catch (error) {
+            console.error("Error in _createStoryTagFromHUD:", error);
         }
-        
-        // Retrieve the newly created tag.
-        const tag = owner.getEmbeddedDocument("Item", created[0].id);
-        if (!tag) {
-          console.error(`Tag with ID ${created[0].id} not found.`);
-          return;
-        }
-        
-        // Open the dialog to edit the tag.
-        // (Using CityDialogs.itemEditDialog as in your player HUD.)
-        const updateObj = await CityDialogs.itemEditDialog(tag);
-        if (updateObj) {
-          // Optionally log or handle the successful update here.
-          console.log("Tag updated:", tag);
-        } else {
-          // If the dialog is cancelled, delete the tag.
-          await owner.deleteEmbeddedDocuments("Item", [created[0].id]);
-        }
-        
-        // Refresh the HUD.
-        this.render(false);
     }      
-   
+
+    activateListeners(html) {
+        try {
+            super.activateListeners(html);
+        
+            // Initialize accordions
+            initializeAccordions();
+        
+            // Inject custom header
+            this.injectCustomHeader();
+        
+            // Close button
+            html.find('.npc-close-button').click((event) => {
+                event.stopPropagation();
+                this.close();
+            });
+    
+            // For NPC Story Tags
+            html.find('.npc-story-tag')
+            .on('click', (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                // If it's a single click, toggle the tag state immediately.
+                if (event.detail === 1) {
+                this._toggleTagState($(event.currentTarget));
+                }
+            })
+            .on('dblclick', async (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                const tagId = $(event.currentTarget).data('id');
+                const actor = this.actor;
+                if (!actor) return;
+                const tag = actor.items.get(tagId);
+                if (!tag) {
+                console.error(`Tag with ID ${tagId} not found on the actor.`);
+                return;
+                }
+                
+                if (CityDialogs?.itemEditDialog) {
+                    await CityDialogs.itemEditDialog(tag);
+                } else {
+                    tag.sheet.render(true);
+                }
+                this.render(false);
+            });
+    
+            // For NPC Statuses
+            html.find('.npc-status')
+            .on('click', (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                if (event.detail === 1) {
+                this._toggleStatusState($(event.currentTarget));
+                }
+            })
+            .on('dblclick', async (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                const statusId = $(event.currentTarget).data('status-id');
+                const actor = this.actor;
+                if (!actor) return;
+                const status = actor.items.get(statusId);
+                if (!status) {
+                console.error(`Status with ID ${statusId} not found on the actor.`);
+                return;
+                }
+                
+                if (CityDialogs?.itemEditDialog) {
+                    await CityDialogs.itemEditDialog(status);
+                } else {
+                    status.sheet.render(true);
+                }
+                this.render(false);
+            });       
+    
+            // Setup drag-and-drop for statuses
+            html.find('.npc-status').each((i, el) => {
+                el.setAttribute('draggable', 'true');
+                el.addEventListener('dragstart', (ev) => {
+                  const text = el.textContent.trim();
+                  let name = text;
+                  let tier = 1;
+            
+                  const match = text.match(/^(.*?)-(\d+)$/);
+                  if (match) {
+                    name = match[1];
+                    tier = parseInt(match[2], 10);
+                  }
+            
+                  const statusData = {
+                    type: "status",
+                    name,
+                    tier,
+                    actorId: this.actor?.id || null
+                  };
+            
+                  ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
+                });
+            });
+    
+            // Create NPC Story Tag
+            html.find('.create-npc-tag').on("click", this._createStoryTagFromHUD.bind(this));
+    
+            // Right-click (contextmenu) to delete an NPC Story Tag
+            html.find('.npc-story-tag').on('contextmenu', async (event) => {
+                event.preventDefault();
+                const tagId = $(event.currentTarget).data('id');
+                
+                if (!tagId) {
+                    console.error("Missing tagId for NPC story tag deletion.");
+                    return;
+                }
+                
+                // Use the unlinked actor directly
+                const actor = this.actor;
+                if (!actor) {
+                    console.error("Actor not found on NPC HUD.");
+                    return;
+                }
+                
+                try {
+                    await actor.deleteEmbeddedDocuments("Item", [tagId]);
+                    this.render(false);
+                } catch (error) {
+                    console.error("Error deleting tag:", error);
+                }
+            });        
+    
+            // Create NPC Status
+            html.find('.create-npc-status').on("click", this._createStatusFromHUD.bind(this));
+    
+            // Right-click (contextmenu) to delete an NPC Status
+            html.find('.npc-status').on('contextmenu', async (event) => {
+                event.preventDefault();
+                const statusId = $(event.currentTarget).data('status-id');
+                const actorId = this.actor?.id;
+                
+                if (!statusId || !actorId) {
+                    console.error("Missing statusId or actorId for NPC status deletion.");
+                    return;
+                }
+                
+                const actor = this.actor;
+                if (!actor) {
+                    console.error(`Actor with ID ${actorId} not found.`);
+                    return;
+                }
+                
+                try {
+                    // Delete the status
+                    await actor.deleteEmbeddedDocuments("Item", [statusId]);
+                    this.render(false); // Refresh the HUD after deletion
+                } catch (error) {
+                    console.error("Error deleting status:", error);
+                }
+            });
+                
+            // Prevent context menu actions
+            this.element.on('contextmenu', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+            });
+        } catch (error) {
+            console.error("Error in activateListeners:", error);
+        }
+    }
 }
 
-  
-  
-
+// Re-register the original hooks in the original way
 Hooks.once("init", () => {
-    
     Handlebars.registerHelper("parseMaxTier", function (maxTier) {
         return maxTier === 999 ? "-" : maxTier;
     });
@@ -658,24 +889,31 @@ Hooks.once("init", () => {
     Handlebars.registerHelper("parseStatus", function (description) {
         return new Handlebars.SafeString(
             description
-                .replace(/\[([^\]]+)\]/g, (match, content) => {
-                    const trimmedContent = content.trim();
-                    if (/^[a-zA-Z]+(?:[-\s][a-zA-Z]+)*-\d+$/.test(trimmedContent)) {
-                        return `<span class="npc-status">${trimmedContent}</span>`;
-                    }
-                    if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
-                        return `<span class="npc-limit">${trimmedContent}</span>`;
-                    }
-                    return `<span class="npc-story-tag">${trimmedContent}</span>`;
-                })
-                .replace(/^\s*$/gm, '') // Remove empty lines
-                .replace(/\n+/g, '</p><p>') // Replace newlines with paragraph breaks
-                .replace(/^<\/p><p>/, '') // Remove leading <p> if the first line is empty
-                .replace(/<p><\/p>/g, '') // Remove empty <p> elements
-        );
+              .replace(/\[([^\]]+)\]/g, (match, content) => {
+                const trimmedContent = content.trim();
+                // Capture groups: 1 - name, 2 - tier
+                const statusRegex = /^([a-zA-Z]+(?:[-\s][a-zA-Z]+)*)-(\d+)$/;
+                if (statusRegex.test(trimmedContent)) {
+                  const randomId = generateRandomId();
+                  const matches = trimmedContent.match(statusRegex);
+                  const statusName = matches[1];
+                  const tier = matches[2];
+                  return `<span class="npc-status" data-status-name="${statusName}" data-tier="${tier}" data-status-id="${randomId}" data-temporary="false" data-permanent="false" draggable="true">${trimmedContent}</span>`;
+                }
+                if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
+                  return `<span class="npc-limit">${trimmedContent}</span>`;
+                }
+                return `<span class="npc-story-tag">${trimmedContent}</span>`;
+              })
+              .replace(/\s*$/gm, '')
+              .replace(/\n+/g, '</p><p>')
+              .replace(/^<\/p><p>/, '')
+              .replace(/<p><\/p>/g, '')
+          );
     });
 });
 
+// Keep the original hook registration format
 Hooks.on('renderTokenHUD', (app, html, data) => {
     if (!game.user.isGM) return;
 
@@ -705,12 +943,13 @@ Hooks.on('updateActor', (actor, data, options, userId) => {
 
 // Listen for item updates
 Hooks.on('updateItem', (item, data, options, userId) => {
+    if (!item.parent) return;
+    
     const hud = npcHudRegistry.get(item.parent.id);
     if (hud) {
         hud.render(false); // Re-render the corresponding HUD
     }
 });
-
 
 // Optional: Handle actor deletion
 Hooks.on('deleteActor', (actor, options, userId) => {
@@ -721,5 +960,22 @@ Hooks.on('deleteActor', (actor, options, userId) => {
     }
 });
 
+// Add scene cleanup
+Hooks.on('canvasReady', () => {
+    // Optional: Clear HUDs when changing scenes
+    // This helps avoid stale HUDs persisting across scene changes
+    for (const [id, hud] of npcHudRegistry.entries()) {
+        // Check if this is a token ID and the token no longer exists on the current scene
+        const isTokenId = id.startsWith('Token.');
+        if (isTokenId && !canvas.tokens.get(id)) {
+            try {
+                hud.close();
+                npcHudRegistry.delete(id);
+            } catch (e) {
+                console.warn(`Error cleaning up HUD for ${id}:`, e);
+            }
+        }
+    }
+});
 
 export default NpcHUD;

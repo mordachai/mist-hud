@@ -457,8 +457,7 @@
   align-self: center;
 }
 
-/* Custom styling for the help/hurt-toggle checkbox */
-.help-toggle, .hurt-toggle {
+/* .help-toggle, .hurt-toggle {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -472,7 +471,6 @@
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
-/* Style when the help toggle is checked (active help bonus) */
 .help-toggle:checked {
   background-color: var(--positive-color, #4caf50); 
 }
@@ -481,7 +479,6 @@
   background-color: var(--negative-color, #cf2f0b); 
 }
 
-/* Optionally, add a checkmark icon when checked */
 .help-toggle:checked::after, 
 .hurt-toggle:checked::after {
   content: '✔';
@@ -490,9 +487,55 @@
   color: white;
   font-size: 16px;
   line-height: 18px;
+} */
+
+
+input[type="checkbox"].help-toggle,
+input[type="checkbox"].hurt-toggle {
+  width: 17px;
+  height: 17px;
 }
 
+/* Custom styling for the help/hurt-toggle checkbox */
+.help-toggle, .hurt-toggle {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: 2px solid whitesmoke;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: center;
+  transition: all 0.2s ease-in-out;
+  -webkit-mask: url("../ui/icons/arrow-up-empty.svg") center / contain no-repeat;
+  mask: url("../ui/icons/arrow-up-empty.svg") center / contain no-repeat;
+  background-color: whitesmoke;
+}
 
+/* Rotating the hurt toggle downward */
+.hurt-toggle {
+  transform: rotate(180deg);
+}
 
+/* Style when the help toggle is checked (active help bonus) */
+.help-toggle:checked {
+  -webkit-mask: url("../ui/icons/arrow-up-filled.svg") center / contain no-repeat;
+  mask: url("../ui/icons/arrow-up-filled.svg") center / contain no-repeat;
+  /* background-color: var(--positive-color, #4caf50); */
+  background: linear-gradient(#89fdc5, #13ab24);
+  border-color: var(--positive-color, #94f997);
+}
 
+/* Style when the hurt toggle is checked */
+.hurt-toggle:checked {
+  -webkit-mask: url("../ui/icons/arrow-up-filled.svg") center / contain no-repeat;
+  mask: url("../ui/icons/arrow-up-filled.svg") center / contain no-repeat;
+  /* background-color: var(--negative-color, #cf2f0b); */
+  background: linear-gradient(#ffb298, #cf2b16);
+  border-color: var(--negative-color, #cf2f0b);
+}
 
+/* Remove the checkmark */
+.help-toggle:checked::after, 
+.hurt-toggle:checked::after {
+  content: none;
+}
