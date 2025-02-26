@@ -1123,35 +1123,82 @@ export class MistHUD extends Application {
     }
   }
 
+  // addTooltipListeners(html) {
+  //   html.find('.mh-theme-icon').each((index, element) => {
+  //     const themeId = $(element).data('theme-id');
+  //     const themeType = $(element).data('theme-type'); 
+  //     $(element).hover(
+  //       async (event) => {
+  //         let data;
+  //         if (themeType === "crew") {
+  //           const crewThemes = getCrewThemes(this.actor);
+  //           data = crewThemes.find(theme => theme.id === themeId);
+  //           if (data) {
+  //             // data.mysteryText, attention, crack, etc. are now available.
+  //           } else {
+  //             data = { mysteryText: "No mystery defined." };
+  //           }
+  //         } else {
+  //           data = getMysteryFromTheme(this.actor, themeId);
+  //         }
+  //         this.currentTooltip = await showTooltip(event, data);
+  //       },
+  //       () => {
+  //         if (this.currentTooltip) {
+  //           hideTooltip(this.currentTooltip);
+  //           this.currentTooltip = null;
+  //         }
+  //       }
+  //     );
+  //   });
+  // }   
+  
   addTooltipListeners(html) {
     html.find('.mh-theme-icon').each((index, element) => {
-      const themeId = $(element).data('theme-id');
-      const themeType = $(element).data('theme-type'); 
-      $(element).hover(
-        async (event) => {
-          let data;
-          if (themeType === "crew") {
-            const crewThemes = getCrewThemes(this.actor);
-            data = crewThemes.find(theme => theme.id === themeId);
-            if (data) {
-              // data.mysteryText, attention, crack, etc. are now available.
-            } else {
-              data = { mysteryText: "No mystery defined." };
-            }
-          } else {
-            data = getMysteryFromTheme(this.actor, themeId);
+      const $element = $(element);
+      const themeId = $element.data('theme-id');
+      const themeType = $element.data('theme-type');
+  
+      // Remove any existing hover events to prevent duplicates
+      $element.off('mouseenter mouseleave');
+  
+      $element.on({
+        mouseenter: async (event) => {
+          // Cancel any existing tooltip
+          if (this.currentTooltip) {
+            hideTooltip(this.currentTooltip);
+            this.currentTooltip = null;
           }
-          this.currentTooltip = await showTooltip(event, data);
+  
+          try {
+            let data;
+            if (themeType === "crew") {
+              const crewThemes = getCrewThemes(this.actor);
+              data = crewThemes.find(theme => theme.id === themeId);
+              if (!data) {
+                data = { mysteryText: "No mystery defined." };
+              }
+            } else {
+              data = getMysteryFromTheme(this.actor, themeId);
+            }
+  
+            // Create and store the new tooltip
+            this.currentTooltip = await showTooltip(event, data);
+          } catch (error) {
+            console.error('Error creating tooltip:', error);
+            this.currentTooltip = null;
+          }
         },
-        () => {
+        mouseleave: () => {
+          // Ensure tooltip is removed on mouse leave
           if (this.currentTooltip) {
             hideTooltip(this.currentTooltip);
             this.currentTooltip = null;
           }
         }
-      );
+      });
     });
-  }   
+  }
   
   calculateTotalPower() {
     let totalPower = 0;
