@@ -176,6 +176,8 @@ Hooks.on("socketlib.ready", () => {
   });
 });
 
+const playerHudRegistry = new Map();
+
 export class MistHUD extends Application {
   static instance = null;
 
@@ -205,21 +207,30 @@ export class MistHUD extends Application {
       dragDrop: [{ dragSelector: '.window-header' }],
     });
   }
-
-  static getInstance() {
-    if (!MistHUD.instance) {
-      MistHUD.instance = new MistHUD();
+  
+  static getOrCreateHudForActor(actor) {
+    if (!actor) return null;
+    
+    let hud = playerHudRegistry.get(actor.id);
+    if (!hud) {
+      hud = new MistHUD();
+      hud.setActor(actor);
     }
-    return MistHUD.instance;
+    return hud;
   }
-
+  
+  // Update setActor to register the HUD
   setActor(actor) {
-    if (!actor || actor.type !== 'character') { // Adjust 'character' to your actual actor type
+    if (!actor || actor.type !== 'character') {
       console.warn("Attempted to set an invalid actor.");
       return;
     }
     this.actor = actor;
     this.isCollapsed = actor.getFlag('mist-hud', 'isCollapsed') || false;
+    
+    // Add to registry
+    playerHudRegistry.set(actor.id, this);
+    
     this.render(true);
   }
 
@@ -235,6 +246,14 @@ export class MistHUD extends Application {
     } catch (error) {
       console.error("Error during MistHUD render:", error);
     }
+  }
+
+  // Update close to remove from registry
+  async close(options) {
+    if (this.actor?.id) {
+      playerHudRegistry.delete(this.actor.id);
+    }
+    return super.close(options);
   }
   
   injectCustomHeader() {
@@ -291,15 +310,14 @@ export class MistHUD extends Application {
     this.addModifierListeners(html);
     this.addTooltipListeners(html);
 
-    
-
-  const slidingPanel = document.getElementById('mh-sliding-panel');
-  const panelEar = document.getElementById('mh-panel-ear');
-
-  panelEar.addEventListener('click', () => {
-    slidingPanel.classList.toggle('open');
-  });
-
+    const slidingPanel = html.find('.mh-sliding-panel')[0];  // Use class instead of ID
+    const panelEar = html.find('.mh-panel-ear')[0];          // Use class instead of ID
+  
+    if (panelEar && slidingPanel) {
+      panelEar.addEventListener('click', () => {
+        slidingPanel.classList.toggle('open');
+      });
+    }
 
   // Find the window header within the entire element
   const header = this.element.find('.window-header');
@@ -900,310 +918,163 @@ export class MistHUD extends Application {
     return data;
   }  
 
-  // async _createClueFromHUD(event) {
-  //   event.stopPropagation();
-
-  //   const owner = this.actor;
-  //   if (!owner) {
-  //       console.error("Actor not found for clue creation.");
-  //       return;
-  //   }
-
-  //   // Create a new clue with a default name
-  //   const obj = await owner.createNewClue({ name: "Unnamed Clue" });
-  //   if (!obj) {
-  //       console.error("Failed to create a new clue.");
-  //       return;
-  //   }
-
-  //   // Retrieve the newly created clue
-  //   const clue = owner.getClue(obj.id);
-  //   if (!clue) {
-  //       console.error(`Clue with ID ${obj.id} not found.`);
-  //       return;
-  //   }
-
-  //   // Open the Clue/Journal Dialog (CJDialog) to edit the clue using CityHelpers
-  //   const updateObj = await CityHelpers.itemDialog(clue); // Replaced CJDialog
-  //   if (updateObj) {
-  //       // Log the creation if the user completes the dialog
-  //       const partialStr = clue.system.partial ? ", partial" : "";
-  //       CityHelpers.modificationLog(owner, "Created", clue, `${clue.system.amount}${partialStr}`);
-  //   } else {
-  //       // Delete the clue if the dialog is canceled
-  //       await owner.deleteClue(obj.id);
-  //   }
-
-  //   // Refresh the HUD to display the new clue
-  //   this.render(false);
-  // }
-
-  // async _deleteClueFromHUD(event) {
-  //   event.stopPropagation();
+  async _updateHUDPreservePanel(force = false) {
+    // Check if the panel is open before render
+    const slidingPanel = document.getElementById('mh-sliding-panel');
+    const panelWasOpen = slidingPanel && slidingPanel.classList.contains('open');
     
-  //   // Get the clue and actor data from the clicked element
-  //   const clueId = event.currentTarget.closest("[data-clue-id]")?.dataset.clueId;
-  //   const actorId = event.currentTarget.closest("[data-owner-id]")?.dataset.ownerId;
-
-  //   if (!clueId || !actorId) {
-  //       console.error("Missing data attributes for clue deletion:", { clueId, actorId });
-  //       return;
-  //   }
-
-  //   // Retrieve the actor
-  //   const owner = game.actors.get(actorId);
-  //   if (!owner) {
-  //       console.error(`Actor with ID ${actorId} not found`);
-  //       return;
-  //   }
-
-  //   // Retrieve and delete the clue
-  //   const clue = owner.getClue(clueId);
-  //   if (!clue) {
-  //       console.error(`Clue with ID ${clueId} not found on actor ${actorId}`);
-  //       return;
-  //   }
-
-  //   await owner.deleteClue(clueId);
-
-  //   // Log the modification
-  //   CityHelpers.modificationLog(owner, "Removed", clue);
-
-  //   // Optionally, re-render the HUD if necessary
-  //   this.render(false);
-  // }
-
-  // async _createJuiceFromHUD(event) {
-  //   event.stopPropagation();
-
-  //   const owner = this.actor;
-  //   if (!owner) {
-  //       console.error("Actor not found for juice creation.");
-  //       return;
-  //   }
-
-  //   // Create a new juice item
-  //   const obj = await owner.createNewJuice("Unnamed Juice");
-  //   if (!obj) {
-  //       console.error("Failed to create a new juice.");
-  //       return;
-  //   }
-
-  //   // Retrieve the newly created juice
-  //   const juice = owner.getJuice(obj.id);
-  //   if (!juice) {
-  //       console.error(`Juice with ID ${obj.id} not found.`);
-  //       return;
-  //   }
-
-  //   // Open the Juice/Journal Dialog (CJDialog) to edit the juice
-  //   const updateObj = await CityHelpers.itemDialog(juice);
-  //   if (updateObj) {
-  //       CityHelpers.modificationLog(owner, "Created", juice, `${juice.system.amount}`);
-  //   } else {
-  //       // Delete the juice if the dialog is canceled
-  //       await owner.deleteJuice(obj.id);
-  //   }
-
-  //   // Refresh the HUD to display the new juice
-  //   this.render(false);
-  // }
-
-  // async _deleteJuiceFromHUD(event) {
-  //   event.stopPropagation();
-
-  //   const juiceId = event.currentTarget.closest("[data-juice-id]")?.dataset.juiceId;
-  //   const actorId = event.currentTarget.closest("[data-owner-id]")?.dataset.ownerId;
-
-  //   if (!juiceId || !actorId) {
-  //       console.error("Missing data attributes for juice deletion:", { juiceId, actorId });
-  //       return;
-  //   }
-
-  //   // Retrieve the actor
-  //   const owner = game.actors.get(actorId);
-  //   if (!owner) {
-  //       console.error(`Actor with ID ${actorId} not found`);
-  //       return;
-  //   }
-
-  //   // Retrieve and delete the juice
-  //   const juice = owner.getJuice(juiceId);
-  //   if (!juice) {
-  //       console.error(`Juice with ID ${juiceId} not found on actor ${actorId}`);
-  //       return;
-  //   }
-
-  //   await owner.deleteJuice(juiceId);
-  //   CityHelpers.modificationLog(owner, "Removed", juice);
-
-  //   // Refresh the HUD to display updated juice
-  //   this.render(false);
-  // }
-
-
-  /**
- * Update the HUD without closing the sliding panel
- * @param {boolean} force Force the update
- * @private
- */
-async _updateHUDPreservePanel(force = false) {
-  // Check if the panel is open before render
-  const slidingPanel = document.getElementById('mh-sliding-panel');
-  const panelWasOpen = slidingPanel && slidingPanel.classList.contains('open');
-  
-  // Render the HUD
-  await this.render(force);
-  
-  // If the panel was open, re-open it after rendering
-  if (panelWasOpen) {
-    const newPanel = document.getElementById('mh-sliding-panel');
-    if (newPanel) {
-      newPanel.classList.add('open');
+    // Render the HUD
+    await this.render(force);
+    
+    // If the panel was open, re-open it after rendering
+    if (panelWasOpen) {
+      const newPanel = document.getElementById('mh-sliding-panel');
+      if (newPanel) {
+        newPanel.classList.add('open');
+      }
     }
   }
-}
 
-async _createClueFromHUD(event) {
-  event.stopPropagation();
+  async _createClueFromHUD(event) {
+    event.stopPropagation();
 
-  const owner = this.actor;
-  if (!owner) {
-      console.error("Actor not found for clue creation.");
-      return;
+    const owner = this.actor;
+    if (!owner) {
+        console.error("Actor not found for clue creation.");
+        return;
+    }
+
+    // Create a new clue with a default name
+    const obj = await owner.createNewClue({ name: "Unnamed Clue" });
+    if (!obj) {
+        console.error("Failed to create a new clue.");
+        return;
+    }
+
+    // Retrieve the newly created clue
+    const clue = owner.getClue(obj.id);
+    if (!clue) {
+        console.error(`Clue with ID ${obj.id} not found.`);
+        return;
+    }
+
+    // Open the Clue/Journal Dialog (CJDialog) to edit the clue using CityHelpers
+    const updateObj = await CityHelpers.itemDialog(clue); // Replaced CJDialog
+    if (updateObj) {
+        // Log the creation if the user completes the dialog
+        const partialStr = clue.system.partial ? ", partial" : "";
+        CityHelpers.modificationLog(owner, "Created", clue, `${clue.system.amount}${partialStr}`);
+    } else {
+        // Delete the clue if the dialog is canceled
+        await owner.deleteClue(obj.id);
+    }
+
+    // Use the updated render method
+    await this._updateHUDPreservePanel(false);
   }
 
-  // Create a new clue with a default name
-  const obj = await owner.createNewClue({ name: "Unnamed Clue" });
-  if (!obj) {
-      console.error("Failed to create a new clue.");
-      return;
+  async _deleteClueFromHUD(event) {
+    event.stopPropagation();
+    
+    // Get the clue and actor data from the clicked element
+    const clueId = event.currentTarget.closest("[data-clue-id]")?.dataset.clueId;
+    const actorId = event.currentTarget.closest("[data-owner-id]")?.dataset.ownerId;
+
+    if (!clueId || !actorId) {
+        console.error("Missing data attributes for clue deletion:", { clueId, actorId });
+        return;
+    }
+
+    // Retrieve the actor
+    const owner = game.actors.get(actorId);
+    if (!owner) {
+        console.error(`Actor with ID ${actorId} not found`);
+        return;
+    }
+
+    // Retrieve and delete the clue
+    const clue = owner.getClue(clueId);
+    if (!clue) {
+        console.error(`Clue with ID ${clueId} not found on actor ${actorId}`);
+        return;
+    }
+
+    await owner.deleteClue(clueId);
+
+    // Log the modification
+    CityHelpers.modificationLog(owner, "Removed", clue);
+
+    // Use the updated render method
+    await this._updateHUDPreservePanel(false);
   }
 
-  // Retrieve the newly created clue
-  const clue = owner.getClue(obj.id);
-  if (!clue) {
-      console.error(`Clue with ID ${obj.id} not found.`);
-      return;
+  async _createJuiceFromHUD(event) {
+    event.stopPropagation();
+
+    const owner = this.actor;
+    if (!owner) {
+        console.error("Actor not found for juice creation.");
+        return;
+    }
+
+    // Create a new juice item
+    const obj = await owner.createNewJuice("Unnamed Juice");
+    if (!obj) {
+        console.error("Failed to create a new juice.");
+        return;
+    }
+
+    // Retrieve the newly created juice
+    const juice = owner.getJuice(obj.id);
+    if (!juice) {
+        console.error(`Juice with ID ${obj.id} not found.`);
+        return;
+    }
+
+    // Open the Juice/Journal Dialog (CJDialog) to edit the juice
+    const updateObj = await CityHelpers.itemDialog(juice);
+    if (updateObj) {
+        CityHelpers.modificationLog(owner, "Created", juice, `${juice.system.amount}`);
+    } else {
+        // Delete the juice if the dialog is canceled
+        await owner.deleteJuice(obj.id);
+    }
+
+    // Use the updated render method
+    await this._updateHUDPreservePanel(false);
   }
 
-  // Open the Clue/Journal Dialog (CJDialog) to edit the clue using CityHelpers
-  const updateObj = await CityHelpers.itemDialog(clue); // Replaced CJDialog
-  if (updateObj) {
-      // Log the creation if the user completes the dialog
-      const partialStr = clue.system.partial ? ", partial" : "";
-      CityHelpers.modificationLog(owner, "Created", clue, `${clue.system.amount}${partialStr}`);
-  } else {
-      // Delete the clue if the dialog is canceled
-      await owner.deleteClue(obj.id);
+  async _deleteJuiceFromHUD(event) {
+    event.stopPropagation();
+
+    const juiceId = event.currentTarget.closest("[data-juice-id]")?.dataset.juiceId;
+    const actorId = event.currentTarget.closest("[data-owner-id]")?.dataset.ownerId;
+
+    if (!juiceId || !actorId) {
+        console.error("Missing data attributes for juice deletion:", { juiceId, actorId });
+        return;
+    }
+
+    // Retrieve the actor
+    const owner = game.actors.get(actorId);
+    if (!owner) {
+        console.error(`Actor with ID ${actorId} not found`);
+        return;
+    }
+
+    // Retrieve and delete the juice
+    const juice = owner.getJuice(juiceId);
+    if (!juice) {
+        console.error(`Juice with ID ${juiceId} not found on actor ${actorId}`);
+        return;
+    }
+
+    await owner.deleteJuice(juiceId);
+    CityHelpers.modificationLog(owner, "Removed", juice);
+
+    // Use the updated render method
+    await this._updateHUDPreservePanel(false);
   }
-
-  // Use the updated render method
-  await this._updateHUDPreservePanel(false);
-}
-
-async _deleteClueFromHUD(event) {
-  event.stopPropagation();
-  
-  // Get the clue and actor data from the clicked element
-  const clueId = event.currentTarget.closest("[data-clue-id]")?.dataset.clueId;
-  const actorId = event.currentTarget.closest("[data-owner-id]")?.dataset.ownerId;
-
-  if (!clueId || !actorId) {
-      console.error("Missing data attributes for clue deletion:", { clueId, actorId });
-      return;
-  }
-
-  // Retrieve the actor
-  const owner = game.actors.get(actorId);
-  if (!owner) {
-      console.error(`Actor with ID ${actorId} not found`);
-      return;
-  }
-
-  // Retrieve and delete the clue
-  const clue = owner.getClue(clueId);
-  if (!clue) {
-      console.error(`Clue with ID ${clueId} not found on actor ${actorId}`);
-      return;
-  }
-
-  await owner.deleteClue(clueId);
-
-  // Log the modification
-  CityHelpers.modificationLog(owner, "Removed", clue);
-
-  // Use the updated render method
-  await this._updateHUDPreservePanel(false);
-}
-
-async _createJuiceFromHUD(event) {
-  event.stopPropagation();
-
-  const owner = this.actor;
-  if (!owner) {
-      console.error("Actor not found for juice creation.");
-      return;
-  }
-
-  // Create a new juice item
-  const obj = await owner.createNewJuice("Unnamed Juice");
-  if (!obj) {
-      console.error("Failed to create a new juice.");
-      return;
-  }
-
-  // Retrieve the newly created juice
-  const juice = owner.getJuice(obj.id);
-  if (!juice) {
-      console.error(`Juice with ID ${obj.id} not found.`);
-      return;
-  }
-
-  // Open the Juice/Journal Dialog (CJDialog) to edit the juice
-  const updateObj = await CityHelpers.itemDialog(juice);
-  if (updateObj) {
-      CityHelpers.modificationLog(owner, "Created", juice, `${juice.system.amount}`);
-  } else {
-      // Delete the juice if the dialog is canceled
-      await owner.deleteJuice(obj.id);
-  }
-
-  // Use the updated render method
-  await this._updateHUDPreservePanel(false);
-}
-
-async _deleteJuiceFromHUD(event) {
-  event.stopPropagation();
-
-  const juiceId = event.currentTarget.closest("[data-juice-id]")?.dataset.juiceId;
-  const actorId = event.currentTarget.closest("[data-owner-id]")?.dataset.ownerId;
-
-  if (!juiceId || !actorId) {
-      console.error("Missing data attributes for juice deletion:", { juiceId, actorId });
-      return;
-  }
-
-  // Retrieve the actor
-  const owner = game.actors.get(actorId);
-  if (!owner) {
-      console.error(`Actor with ID ${actorId} not found`);
-      return;
-  }
-
-  // Retrieve and delete the juice
-  const juice = owner.getJuice(juiceId);
-  if (!juice) {
-      console.error(`Juice with ID ${juiceId} not found on actor ${actorId}`);
-      return;
-  }
-
-  await owner.deleteJuice(juiceId);
-  CityHelpers.modificationLog(owner, "Removed", juice);
-
-  // Use the updated render method
-  await this._updateHUDPreservePanel(false);
-}
 
   async _createStatusFromHUD(event) {
     event.stopPropagation();
@@ -1696,116 +1567,6 @@ async _deleteJuiceFromHUD(event) {
     html.prepend(rollBar);
   }  
   
-  // async cleanHUD() {
-  //   try {
-  //     if (!this.actor) {
-  //       console.warn("No actor set for MistHUD. Skipping actor updates.");
-  //       return;
-  //     }
-  
-  
-  //     const tagsToUpdate = this.element.find(
-  //       '.mh-power-tag.toBurn, .mh-weakness-tag.toBurn, .mh-story-tag.toBurn, .mh-loadout-tag.toBurn'
-  //     );    
-             
-  //     for (const element of tagsToUpdate) {
-  //       const $tag = $(element);
-  //       const tagId = $tag.data('id');
-      
-  //       // Determine the correct actor for this tag.
-  //       let tagActor = this.actor; // default to main actor
-  //       if ($tag.hasClass('Crew')) {
-  //         const crewId = $tag.data('actor-id');
-  //         if (crewId) {
-  //           const crewActor = game.actors.get(crewId);
-  //           if (crewActor) {
-  //             tagActor = crewActor;
-  //           }
-  //         }
-  //       }
-      
-  //       // Now update the tag item from the correct actor.
-  //       const tagItem = tagActor.items.get(tagId);
-  //       if (tagItem) {
-  //           await tagItem.update({
-  //               "system.burned": true,
-  //               "system.burn_state": 0
-  //           });
-  //       }
-      
-  //       // Update the DOM classes.
-  //       $tag.removeClass('toBurn mh-crispy').addClass('burned');
-  //       $tag.find('.mh-burn-toggle').removeClass('toBurn').addClass('burned');
-  //     }
-      
-   
-  
-  //     // 2. Delete temporary statuses
-  //     // (Assumes that temporary statuses have a property system.temporary == true)
-  //     const statusesToDelete = this.element.find('.mh-status.selected[data-temporary="true"]');
-  //     for (const element of statusesToDelete) {
-  //       const $status = $(element);
-  //       const statusId = $status.data('status-id');
-  //       if (statusId) {
-  //         await this.actor.deleteEmbeddedDocuments("Item", [statusId]);
-  //       }
-  //     }
-
-     
-  //     // 4. Delete temporary tags (if any exist) after the roll.
-  //     const temporaryTags = this.actor.items.contents.filter(item =>
-  //       item.type === 'tag' && item.system.temporary === true
-  //     );
-  //     for (const tag of temporaryTags) {
-  //       await this.actor.deleteEmbeddedDocuments("Item", [tag.id]);
-        
-  //       // Also update the persisted selected-tags flag, if needed.
-  //       let selectedTags = this.actor.getFlag('mist-hud', 'selected-tags') || [];
-  //       selectedTags = selectedTags.filter(id => id !== tag.id);
-  //       await this.actor.setFlag('mist-hud', 'selected-tags', selectedTags);
-  //     }
- 
-  //     // 5. Preserve statuses selection from saved flags.
-  //     // (Your statuses flag is maintained separately.)
-  //     const savedStates = this.actor.getFlag('mist-hud', 'status-states') || {};
-  //     this.element.find('.mh-status').each((index, element) => {
-  //       const $el = $(element);
-  //       const statusId = $el.data('status-id');
-  //       if (statusId && savedStates[statusId]) {
-  //         const state = savedStates[statusId].state;
-  //         $el.removeClass('neutral positive negative selected').addClass(state);
-  //         if (savedStates[statusId].selected) {
-  //           $el.addClass('selected');
-  //         }
-  //       }
-  //     });
-  
-  //     // 6. IMPORTANT: Do not clear the persistent tag selections.
-  //     // If you want tag selections (for power, weakness, story, loadout tags) to persist between rolls,
-  //     // do not clear the "selected-tags" flag.
-  //     //
-  //     // (If you DO want to clear them after a roll, you could do:
-  //     await this.actor.unsetFlag('mist-hud', 'selected-tags');
-  //     await this.actor.unsetFlag('mist-hud', 'selected-crew-tags');
-  //     // But that would force the user to reselect their tags.)
-  
-  //     // 7. Reset modifier and update its display.
-  //     this.modifier = 0;
-  //     this.updateModifierDisplay();
-  
-  //     // 8. Finally, re-render the HUD so that the getData() method re-applies the correct data,
-  //     // including restoring persistent tag selections.
-  //     await this.render(true);
-  //     // 9. Reapply the panel state if it was open.
-  //     const slidingPanelAfter = document.getElementById('mh-sliding-panel');
-  //       if (panelWasOpen && slidingPanelAfter) {
-  //         slidingPanelAfter.classList.add('open');
-  //       }
-  //     } catch (error) {
-  //       console.error("Error during HUD cleanup:", error);
-  //     }
-  // }
-
   async cleanHUD(tagsData = null) {
     try {
       if (!this.actor) {
@@ -2011,19 +1772,21 @@ Hooks.on('ready', () => {
   attachSceneTagListeners();
 });
 
-//Hook to control the HUD based on token selection
 Hooks.on('controlToken', (token, controlled) => {
   if (controlled && token.actor && token.actor.type === 'character') {
-    MistHUD.getInstance().setActor(token.actor);
-  } else if (!controlled && MistHUD.instance) {
-    MistHUD.getInstance().close();
+    // Instead of: MistHUD.getInstance().setActor(token.actor);
+    MistHUD.getOrCreateHudForActor(token.actor);
+  } else if (!controlled) {
+    // Close only this specific HUD if it exists
+    const hud = playerHudRegistry.get(token.actor?.id);
+    if (hud) hud.close();
   }
 });
 
-// Hook to update HUD when actor data changes
 Hooks.on('updateActor', (actor, data, options, userId) => {
-  if (MistHUD.instance && MistHUD.instance.actor?.id === actor.id) {
-    MistHUD.getInstance().render(true);
+  const hud = playerHudRegistry.get(actor.id);
+  if (hud) {
+    hud.render(true);
   }
 });
 
