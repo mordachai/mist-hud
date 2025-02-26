@@ -55,5 +55,3 @@ export function hideTooltip(tooltip) {
 // export function hideTooltip(tooltip) {
 //   tooltip.remove();
 // }
-
-

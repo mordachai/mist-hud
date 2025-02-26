@@ -12,7 +12,7 @@ import { MistHUD } from "./mist-hud.js";
  * @param {Object} move - The move config object (from moveConfig) being rolled.
  * @returns {boolean} - Returns true if dynamite should be enabled.
  */
-export function checkRolls(actor, move) {
+export function checkRolls(actor, move, hud) {
   if (!actor || !move) return false;
 
   const moveAbbr = move.abbreviation;
@@ -27,7 +27,7 @@ export function checkRolls(actor, move) {
   const allImprovements = [...actorImprovements, ...crewImprovements];
 
   // Retrieve selected roll data from the MistHUD
-  const hud = MistHUD.getInstance();
+  // const hud = MistHUD.getInstance();
   const rollData = hud.getSelectedRollData();
 
   // Combine power, crew power, and loadout tags

@@ -38,9 +38,29 @@ async function rollDice() {
 }
 
 
+
 //Main Roll function
-async function rollMove(moveName, hasDynamite) {
-  const hud = MistHUD.getInstance();
+async function rollMove(moveName) {
+  //const hud = MistHUD.getInstance();
+
+  const activeToken = canvas.tokens.controlled[0];
+  if (!activeToken || !activeToken.actor) {
+    ui.notifications.warn("Please select a token first");
+    return;
+  }
+  
+  const hud = globalThis.playerHudRegistry.get(activeToken.actor.id);
+  if (!hud) {
+    ui.notifications.warn("No HUD found for this actor");
+    return;
+  }
+
+  // Verify the HUD has the needed method
+  if (typeof hud.getSelectedRollData !== 'function') {
+    ui.notifications.error("Invalid HUD instance. Try selecting your token again.");
+    return;
+  }
+  
   const activeSystem = game.settings.get("city-of-mist", "system");
   const tagsData = hud.getSelectedRollData();
 
@@ -67,7 +87,7 @@ async function rollMove(moveName, hasDynamite) {
   const weaknessTags = tagsData.weaknessTags || [];
   const crewWeaknessTags = tagsData.crewWeaknessTags || [];
   
-  const totalWeakness = calculateWeaknessTags();
+  const totalWeakness = calculateWeaknessTags(hud);
     if (weaknessTags.length > 0) {
       await trackWeaknessAttention(actor, weaknessTags);
     }
@@ -75,13 +95,13 @@ async function rollMove(moveName, hasDynamite) {
       await trackWeaknessAttentionCrew(actor, crewWeaknessTags);
     }
 
-  const calculatedPower = calculatePowerTags();
-  const totalStoryTags = calculateStoryTags();
-  const totalLoadoutTags = calculateLoadoutTags();
-  const totalCharStatuses = calculateCharacterStatuses();
-  const totalSceneStatuses = calculateSceneStatuses();
-  const totalScnTags = calculateScnTags();
-  const modifier = getRollModifier() || 0;
+  const calculatedPower = calculatePowerTags(hud);
+  const totalStoryTags = calculateStoryTags(hud);
+  const totalLoadoutTags = calculateLoadoutTags(hud);
+  const totalCharStatuses = calculateCharacterStatuses(hud);
+  const totalSceneStatuses = calculateSceneStatuses(hud);
+  const totalScnTags = calculateScnTags(hud);
+  const modifier = getRollModifier(hud) || 0;
 
   // Retrieve the bonuses from the actor flag immediately
   const receivedBonuses = actor.getFlag('mist-hud', 'received-bonuses') || {};
@@ -117,8 +137,8 @@ async function rollMove(moveName, hasDynamite) {
       .reduce((sum, bonus) => sum + bonus.amount, 0);
   const totalBonus = helpBonuses - hurtBonuses;
 
-  const totalCrewPowerTags = calculateCrewPowerTags();
-  const totalCrewWeaknessTags = calculateCrewWeaknessTags();
+  const totalCrewPowerTags = calculateCrewPowerTags(hud);
+  const totalCrewWeaknessTags = calculateCrewWeaknessTags(hud);
 
   const totalPower = 
     calculatedPower +
@@ -163,7 +183,7 @@ async function rollMove(moveName, hasDynamite) {
   const storedDynamiteEnabled = storedDynamiteMoves.includes(moveName);
 
   // Determine if the move should roll as Dynamite via improvements, tags, stored flag, or toggle.
-  let dynamiteEnabled = rollIsDynamiteForced || storedDynamiteEnabled || checkRolls(actor, move);
+  let dynamiteEnabled = rollIsDynamiteForced || storedDynamiteEnabled || checkRolls(actor, move, hud);
 
   let outcome;
   let moveEffects = [];
@@ -266,8 +286,8 @@ async function rollMove(moveName, hasDynamite) {
   hud.cleanHUD(chatData.tagsData);
 }
 
-async function rollBurnForHitCityOfMist(moveName) {
-  const hud = MistHUD.getInstance();
+async function rollBurnForHitCityOfMist(moveName, hud) {
+   
   if (!hud || !hud.actor) {
     ui.notifications.warn("MistHUD is not ready. Please select an actor.");
     return;
@@ -319,10 +339,10 @@ async function rollBurnForHitCityOfMist(moveName) {
   const fixedRoll = 7;
 
   // Get status adjustments.
-  const totalCharStatuses = calculateCharacterStatuses();
-  const totalSceneStatuses = calculateSceneStatuses();
-  const totalScnTags = calculateScnTags();
-  const modifier = getRollModifier() || 0;
+  const totalCharStatuses = calculateCharacterStatuses(hud);
+  const totalSceneStatuses = calculateSceneStatuses(hud);
+  const totalScnTags = calculateScnTags(hud);
+  const modifier = getRollModifier(hud) || 0;
 
   // Calculate final total.
   const finalTotal = burnBasePower + fixedRoll + totalCharStatuses + totalSceneStatuses + totalScnTags + totalBonus + modifier;
@@ -334,7 +354,7 @@ const rollIsDynamiteForced = game.settings.get("mist-hud", "rollIsDynamite");
 const storedDynamiteEnabled = (await actor.getFlag("mist-hud", "dynamiteMoves") || []).includes(moveName);
 
 // Check for improvements/tags
-const improvementDynamite = checkRolls(actor, move);
+const improvementDynamite = checkRolls(actor, move, hud);
 
 // Combine all conditions
 const dynamiteEnabled = rollIsDynamiteForced || storedDynamiteEnabled || improvementDynamite;
@@ -419,7 +439,7 @@ const dynamiteEnabled = rollIsDynamiteForced || storedDynamiteEnabled || improve
 }
 
 async function burnCrispyTags(tagsArray) {
-  const hud = MistHUD.getInstance();
+  //const hud = MistHUD.getInstance();
   if (!hud || !hud.actor) return;
 
   const mainActor = hud.actor;
@@ -553,8 +573,7 @@ async function trackWeaknessAttentionCrew(actor, weaknessTags) {
   }
 }
 
-function calculatePowerTags() {
-  const hud = MistHUD.getInstance();
+function calculatePowerTags(hud) {
   const rollData = hud.getSelectedRollData();
 
   // Exclude Crew Power Tags from Regular Power Tag Calculation
@@ -573,8 +592,7 @@ function calculatePowerTags() {
   return powerTagsTotal + invertedWeaknessTotal;
 }
 
-function calculateCrewPowerTags() {
-  const hud = MistHUD.getInstance();
+function calculateCrewPowerTags(hud) {
   const rollData = hud.getSelectedRollData();
 
   return rollData.crewPowerTags.reduce((total, tag) => {
@@ -582,8 +600,7 @@ function calculateCrewPowerTags() {
   }, 0);
 }
 
-function calculateWeaknessTags() {
-  const hud = MistHUD.getInstance();
+function calculateWeaknessTags(hud) {
   const rollData = hud.getSelectedRollData();
 
   const crewWeaknessIds = new Set((rollData.crewWeaknessTags || []).map(tag => tag.id)); // ✅ Ensure Crew Weakness Tags are always excluded
@@ -595,8 +612,7 @@ function calculateWeaknessTags() {
       }, 0);
 }
 
-function calculateCrewWeaknessTags() {
-  const hud = MistHUD.getInstance();
+function calculateCrewWeaknessTags(hud) {
   const rollData = hud.getSelectedRollData();
 
   return rollData.crewWeaknessTags.reduce((total, tag) => {
@@ -604,8 +620,7 @@ function calculateCrewWeaknessTags() {
   }, 0);
 }
 
-function calculateLoadoutTags() {
-  const hud = MistHUD.getInstance();
+function calculateLoadoutTags(hud) {
   const loadoutTags = hud.getSelectedRollData().loadoutTags;
 
   return loadoutTags.reduce((total, tag) => {
@@ -613,8 +628,7 @@ function calculateLoadoutTags() {
   }, 0);
 }
 
-function calculateStoryTags() {
-  const hud = MistHUD.getInstance();
+function calculateStoryTags(hud) {
   const storyTags = hud.getSelectedRollData().storyTags;
 
   return storyTags.reduce((total, tag) => {
@@ -628,8 +642,7 @@ function calculateStoryTags() {
   }, 0);
 }
 
-function calculateCharacterStatuses() {
-  const hud = MistHUD.getInstance();
+function calculateCharacterStatuses(hud) {
   const rollData = hud.getSelectedRollData();
 
   const characterStatusTotal = rollData.statuses.reduce((total, status) => {
@@ -640,8 +653,7 @@ function calculateCharacterStatuses() {
   return characterStatusTotal;
 }
 
-function calculateSceneStatuses() {
-  const hud = MistHUD.getInstance();
+function calculateSceneStatuses(hud) {
   const rollData = hud.getSelectedRollData();
 
   // Use sceneStatuses to calculate scene status contributions
@@ -652,8 +664,7 @@ function calculateSceneStatuses() {
   return sceneStatusTotal;
 }
 
-function calculateScnTags() {
-  const hud = MistHUD.getInstance();
+function calculateScnTags(hud) {
   const scnTags = hud.getSelectedRollData().scnTags;
 
   return scnTags.reduce((total, tag) => {
@@ -661,8 +672,7 @@ function calculateScnTags() {
   }, 0);
 }
 
-function getRollModifier() {
-  const hud = MistHUD.getInstance();
+function getRollModifier(hud) {
   return hud.modifier !== 0 ? hud.modifier : null;
 }
 
@@ -679,7 +689,6 @@ function substituteText(text, totalPower) {
   
   return text;
 }
-
 // Function to count themebook types
 function countThemebookTypes(character) {
   const counts = {
@@ -728,14 +737,13 @@ function countThemebookTypes(character) {
   return counts;
 }
 
-export async function rollSpecialMoves(moveName) {
+export async function rollSpecialMoves(moveName, hud) {
   const move = moveConfig[moveName];
   if (!move) {
     console.error(`Move not found: ${moveName}`);
     return;
   }
 
-  const hud = MistHUD.getInstance();
   const actor = hud.actor;
   if (!actor) {
     ui.notifications.warn("Please select an actor before attempting this special move.");
@@ -764,16 +772,16 @@ export async function rollSpecialMoves(moveName) {
   // Calculate additional values
   // const totalWeakness = calculateWeaknessTags();
   const weaknessTags = hud.getSelectedRollData().weaknessTags || [];
-  const totalWeakness = calculateWeaknessTags();  
+  const totalWeakness = calculateWeaknessTags(hud);  
     if (weaknessTags.length > 0) {
         await trackWeaknessAttention(actor, weaknessTags);
     }
-  const totalStoryTags = calculateStoryTags();
-  const totalLoadoutTags = calculateLoadoutTags();
-  const totalCharStatuses = calculateCharacterStatuses();
-  const totalSceneStatuses = calculateSceneStatuses();
-  const totalScnTags = calculateScnTags();
-  const modifier = getRollModifier() || 0;
+  const totalStoryTags = calculateStoryTags(hud);
+  const totalLoadoutTags = calculateLoadoutTags(hud);
+  const totalCharStatuses = calculateCharacterStatuses(hud);
+  const totalSceneStatuses = calculateSceneStatuses(hud);
+  const totalScnTags = calculateScnTags(hud);
+  const modifier = getRollModifier(hud) || 0;
 
   // Aggregate total power for the roll calculation
   const totalPower = themeCount + totalWeakness + totalStoryTags + totalLoadoutTags +
@@ -875,14 +883,13 @@ if (isDoubleOnes) {
   hud.cleanHUD();
 }
 
-async function rollCinematicMove(moveName) {
+async function rollCinematicMove(moveName, hud) {
   const move = moveConfig[moveName];
   if (!move) {
     console.error(`Move not found: ${moveName}`);
     return;
   }
 
-  const hud = MistHUD.getInstance();
   const actor = hud.actor;
   if (!actor) {
     ui.notifications.warn("Please select an actor before attempting this cinematic move.");
@@ -926,13 +933,52 @@ function executeMove(moveName) {
     return;
   }
 
-  // Check for special move roll triggers
+  const activeToken = canvas.tokens.controlled[0];
+  if (!activeToken || !activeToken.actor) {
+    ui.notifications.warn("Select a token to make this move");
+    return;
+  }
+  
+  console.log("Token for roll:", activeToken);
+  console.log("Token actor:", activeToken.actor);
+  
+  const activeHud = globalThis.playerHudRegistry.get(activeToken.actor.id);
+  console.log("HUD from registry:", activeHud);
+  
+  if (!activeHud) {
+    // If we reach here, the HUD isn't being registered properly
+    console.warn("No HUD found in registry for actor:", activeToken.actor.id);
+    
+    // Create a HUD on-demand if one doesn't exist
+    const newHud = new MistHUD();
+    newHud.setActor(activeToken.actor);
+    console.log("Created new HUD:", newHud);
+    
+    // Try again with this new HUD
+    const retryHud = globalThis.playerHudRegistry.get(activeToken.actor.id);
+    if (retryHud) {
+      // Now we have a HUD, so continue with it
+      if (move.rollMythos || move.rollLogos || move.rollMythosOS || move.rollSelf || move.rollNoise) {
+        rollSpecialMoves(moveName, retryHud);
+      } else if (move.moveType === "cinematic") {
+        rollCinematicMove(moveName, retryHud);
+      } else {
+        rollMove(moveName, retryHud);
+      }
+      return;
+    }
+    
+    ui.notifications.warn("No HUD found for the selected character");
+    return;
+  }
+
+  // Call roll functions
   if (move.rollMythos || move.rollLogos || move.rollMythosOS || move.rollSelf || move.rollNoise) {
-    rollSpecialMoves(moveName);
+    rollSpecialMoves(moveName, activeHud);
   } else if (move.moveType === "cinematic") {
-    rollCinematicMove(moveName);
+    rollCinematicMove(moveName, activeHud);
   } else {
-    rollMove(moveName);
+    rollMove(moveName, activeHud);
   }
 }
 

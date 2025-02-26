@@ -36,7 +36,7 @@ Handlebars.registerHelper("times", function(n, block) {
   return output;
 });
 
-async function handleTagClick(event, tagType) {
+async function handleTagClick(event, tagType, hudInstance) {
   event.stopPropagation();
   event.preventDefault();
   const tagElement = $(event.currentTarget);
@@ -51,7 +51,7 @@ async function handleTagClick(event, tagType) {
   }
 
   // Get the current actor from the MistHUD instance.
-  const actor = MistHUD.getInstance().actor;
+  const actor = hudInstance.actor;
   if (!actor) return;
 
   // Check if the clicked tag is from a crew theme.
@@ -121,22 +121,19 @@ async function handleTagClick(event, tagType) {
   }
 
   // Recalculate total power.
-  MistHUD.getInstance().calculateTotalPower();
+  hudInstance.calculateTotalPower();
 }
 
-function toggleInversion(tagElement, inversionIconConfig) {
+function toggleInversion(tagElement, inversionIconConfig, hudInstance) {
   tagElement.toggleClass('inverted');
   const isInverted = tagElement.hasClass('inverted');
   const inversionIcon = isInverted ? inversionIconConfig.active : inversionIconConfig.default;
   tagElement.find(inversionIconConfig.selector).html(inversionIcon);
-  MistHUD.getInstance().calculateTotalPower();
+  hudInstance.calculateTotalPower();
 }
-
 
 Hooks.on("socketlib.ready", () => {
   game.socket.on("module.mist-hud", async data => {
-    //console.log("Received socket data:", data);
-    
     if (data.type === "notify-bonus") {
       const targetActor = game.actors.get(data.targetId);
       if (targetActor && targetActor.isOwner) {
@@ -147,7 +144,12 @@ Hooks.on("socketlib.ready", () => {
           delete currentBonuses[data.giverId];
         }
         await targetActor.setFlag('mist-hud', 'received-bonuses', currentBonuses);
-        MistHUD.getInstance().render(true);
+        
+        // Find the HUD for this actor from the registry
+        const targetHud = playerHudRegistry.get(targetActor.id);
+        if (targetHud) {
+          targetHud.render(true);
+        }
       } else {
         console.warn("Not the owner of the target actor; skipping flag update.");
       }
@@ -176,7 +178,7 @@ Hooks.on("socketlib.ready", () => {
   });
 });
 
-const playerHudRegistry = new Map();
+globalThis.playerHudRegistry = new Map();
 
 export class MistHUD extends Application {
   static instance = null;
@@ -255,6 +257,16 @@ export class MistHUD extends Application {
     }
     return super.close(options);
   }
+
+  static setActiveHud(hudInstance) {
+    MistHUD.activeHud = hudInstance;
+  }
+  
+  static getActiveHud() {
+    return MistHUD.activeHud || 
+      (canvas.tokens.controlled[0]?.actor && 
+       playerHudRegistry.get(canvas.tokens.controlled[0].actor.id));
+  }
   
   injectCustomHeader() {
     
@@ -310,6 +322,8 @@ export class MistHUD extends Application {
     this.addModifierListeners(html);
     this.addTooltipListeners(html);
 
+    const hudInstance = this;
+
     const slidingPanel = html.find('.mh-sliding-panel')[0];  // Use class instead of ID
     const panelEar = html.find('.mh-panel-ear')[0];          // Use class instead of ID
   
@@ -329,13 +343,14 @@ export class MistHUD extends Application {
   // Inject the custom header without passing any parameters
   this.injectCustomHeader();
     
-  html.find('.mh-power-tag').on('click', (event) => handleTagClick(event, 'power'));
-  html.find('.mh-weakness-tag').on('click', (event) => handleTagClick(event, 'weakness'));
-  html.find('.mh-story-tag').on('click', (event) => handleTagClick(event, 'story'));
-  html.find('.mh-loadout-tag').on('click', (event) => handleTagClick(event, 'loadout'));
+  html.find('.mh-power-tag').on('click', (event) => handleTagClick(event, 'power', hudInstance));
+  html.find('.mh-weakness-tag').on('click', (event) => handleTagClick(event, 'weakness', hudInstance));
+  html.find('.mh-story-tag').on('click', (event) => handleTagClick(event, 'story', hudInstance));
+  html.find('.mh-loadout-tag').on('click', (event) => handleTagClick(event, 'loadout', hudInstance));
+  
 
-  html.find('.mh-pwrcrew-tag').on('click', (event) => { handleTagClick(event, 'power'); });
-  html.find('.mh-wkcrew-tag').on('click', (event) => { handleTagClick(event, 'weakness'); });
+  html.find('.mh-pwrcrew-tag').on('click', (event) => { handleTagClick(event, 'power', hudInstance); });
+  html.find('.mh-wkcrew-tag').on('click', (event) => { handleTagClick(event, 'weakness', hudInstance); });
   
 
     html.find('.mh-story-toggle').on('click', (event) => {
@@ -348,7 +363,7 @@ export class MistHUD extends Application {
         active: '<i class="fa-light fa-angles-up"></i>',
         default: '<i class="fa-light fa-angles-down"></i>',
         selector: '.mh-story-toggle'
-      });
+      }, hudInstance);
     });  
 
     html.find('.mh-weakness-toggle').on('click', (event) => {
@@ -360,7 +375,7 @@ export class MistHUD extends Application {
         active: '<i class="fa-regular fa-angles-up"></i>',
         default: '<i class="fa-light fa-angles-down"></i>',
         selector: '.mh-weakness-toggle'
-      });
+      }, hudInstance);
     });
 
     html.find('.mh-burn-toggle').on('click', async (event) => {
@@ -372,9 +387,7 @@ export class MistHUD extends Application {
       const tagId = tagElement.data('id');
       if (!tagId) return;
     
-      // Determine which actor owns this tag.
-      // Default to the main actor from MistHUD.
-      let tagActor = MistHUD.getInstance().actor;
+      let tagActor = hudInstance.actor;
     
       // If this tag is a crew tag, get the crew actor using the data attribute.
       if (tagElement.hasClass('Crew')) {
@@ -413,13 +426,13 @@ export class MistHUD extends Application {
         if (!selectedTags.includes(tagId)) {
           selectedTags.push(tagId);
         }
-        await tagActor.setFlag('mist-hud', 'selected-tags', selectedTags);
+        await hudInstance.actor.setFlag('mist-hud', 'selected-tags', selectedTags);
       } else if (newState === "burned") {
         // When burned, deselect the tag.
         tagElement.removeClass('selected');
         let selectedTags = tagActor.getFlag('mist-hud', 'selected-tags') || [];
         selectedTags = selectedTags.filter(id => id !== tagId);
-        await tagActor.setFlag('mist-hud', 'selected-tags', selectedTags);
+        await hudInstance.actor.setFlag('mist-hud', 'selected-tags', selectedTags);
       }
       // (If newState is "unburned", leave the selection as is.)
     
@@ -434,7 +447,7 @@ export class MistHUD extends Application {
       }
     
       // Recalculate total power.
-      MistHUD.getInstance().calculateTotalPower();
+      hudInstance.calculateTotalPower();
     });       
     
     html.find('.mh-status').on('click', async (event) => {
@@ -485,50 +498,34 @@ export class MistHUD extends Application {
     html.find('.help-toggle, .hurt-toggle').on('change', async (event) => {
       const toggle = event.currentTarget;
       const isChecked = toggle.checked;
-      const targetActorId = toggle.dataset.targetId; // ID do jogador que recebe o bônus
-      const bonusType = toggle.classList.contains('help-toggle') ? 'help' : 'hurt'; // Tipo de bônus
-      const amount = Number(toggle.dataset.amount); // Valor do bônus
-  
-      // Busca alternativa para encontrar o personagem do jogador
-      let actor = game.user.character; // Primeiro, tenta pegar diretamente o personagem vinculado
-  
+      const targetActorId = toggle.dataset.targetId;
+      const bonusType = toggle.classList.contains('help-toggle') ? 'help' : 'hurt';
+      const amount = Number(toggle.dataset.amount);
+    
+      // Get the actor for the current player
+      let actor = game.user.character;
       if (!actor) {
-          // Se game.user.character for undefined, busca um personagem manualmente
-          const ownedCharacters = game.actors.filter(a => a.isOwner && a.type === "character");
-          //console.log("Owned Characters:", ownedCharacters);
-          actor = ownedCharacters.length > 0 ? ownedCharacters[0] : null;
+        const ownedCharacters = game.actors.filter(a => a.isOwner && a.type === "character");
+        actor = ownedCharacters.length > 0 ? ownedCharacters[0] : null;
       }
-  
       const actorId = actor?.id;
-  
-      //console.log("Checking available actors for user:", game.actors.filter(a => a.isOwner));
-  
+    
       if (!actorId) {
-          console.warn(`[Help/Hurt Debug] No actor linked to the giving player.`);
-          return;
+        console.warn(`[Help/Hurt Debug] No actor linked to the giving player.`);
+        return;
       }
-      console.warn("Sending socket")
-      // Emit socket event to update all clients
+    
+      // Include the SENDER's HUD ID so the recipient knows where to send updates
       game.socket.emit('module.mist-hud', {
-          type: 'update-bonus',
-          actorId, // Quem está concedendo o bônus
-          targetId: targetActorId, // Quem está recebendo o bônus
-          bonusType,
-          active: isChecked,
-          amount,
+        type: 'notify-bonus',
+        targetId: targetActorId,
+        giverId: actorId,
+        bonusType,
+        amount,
+        active: isChecked,
+        hudId: this.id
       });
-  
-      // Evento separado para notificação
-      game.socket.emit('module.mist-hud', {
-          type: 'notify-bonus',
-          targetId: targetActorId,
-          giverId: actorId,
-          bonusType,
-          amount,
-          active: isChecked,
-          actor: actor
-      });
-  });
+    });
   
 
     // Add listener for clue creation and deletion deletion
@@ -540,25 +537,25 @@ export class MistHUD extends Application {
     html.find('.create-juice').on("click", this._createJuiceFromHUD.bind(this));
 
     // Reset button functionality
-    html.on("click", ".toggle-expended", async (event) => {
-        event.preventDefault();
-        const button = $(event.currentTarget);
-        const itemId = button.data("itemId");
-        const actorId = button.data("actorId");
-        const actor = game.actors.get(actorId);
+    // html.on("click", ".toggle-expended", async (event) => {
+    //     event.preventDefault();
+    //     const button = $(event.currentTarget);
+    //     const itemId = button.data("itemId");
+    //     const actorId = button.data("actorId");
+    //     const actor = game.actors.get(actorId);
 
-        if (actor) {
-            const item = actor.items.get(itemId);
-            if (item) {
-                const max = item.system.uses?.max || 0;
-                if (max > 0) {
-                    await item.update({ "system.uses.current": max });
-                    ui.notifications.info(`Reset uses of "${item.name}" to ${max}.`);
-                    this.render(); // Re-render the HUD to reflect changes
-                }
-            }
-        }
-    });
+    //     if (actor) {
+    //         const item = actor.items.get(itemId);
+    //         if (item) {
+    //             const max = item.system.uses?.max || 0;
+    //             if (max > 0) {
+    //                 await item.update({ "system.uses.current": max });
+    //                 ui.notifications.info(`Reset uses of "${item.name}" to ${max}.`);
+    //                 hudInstance.render(); // Re-render the HUD to reflect changes
+    //             }
+    //         }
+    //     }
+    // });
     
     html.find('.create-story-tag').on("click", this._createStoryTagFromHUD.bind(this));
 
@@ -1552,7 +1549,7 @@ export class MistHUD extends Application {
       `);
       
       button.on("click", () => {
-        CityOfMistRolls.executeMove(moveName);
+        (globalThis.CityOfMistRolls || CityOfMistRolls).executeMove(moveName);
       });
       
       if (moveData.slot >= 1 && moveData.slot <= 10) {
@@ -1820,12 +1817,15 @@ Hooks.on('ready', () => {
 });
 
 Hooks.on('controlToken', (token, controlled) => {
+  console.log("Token control changed:", token, controlled);
+  
   if (controlled && token.actor && token.actor.type === 'character') {
-    // Instead of: MistHUD.getInstance().setActor(token.actor);
-    MistHUD.getOrCreateHudForActor(token.actor);
+    console.log("Creating/getting HUD for actor:", token.actor.id);
+    const hud = MistHUD.getOrCreateHudForActor(token.actor);
+    console.log("HUD result:", hud);
+    console.log("Registry after:", globalThis.playerHudRegistry);
   } else if (!controlled) {
-    // Close only this specific HUD if it exists
-    const hud = playerHudRegistry.get(token.actor?.id);
+    const hud = globalThis.playerHudRegistry.get(token.actor?.id);
     if (hud) hud.close();
   }
 });
