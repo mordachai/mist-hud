@@ -369,8 +369,8 @@ color: var(--mythosOS-verylight-color);
 }
 
 
-.create-story-tag i,
-.create-status i {
+.mh-create-story-tag i,
+.mh-create-status i {
   position: relative;
   top: -3px;
   right: -2px;
@@ -529,17 +529,21 @@ color: var(--mythosOS-verylight-color);
 .section.otherscape {
   border-radius: 8px;
   margin: 15px 0;
-  color: whitesmoke; /* Default text color */
+  color: whitesmoke;
 }
 
 .mh-essence-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
   font-family: var(--font-family-move), sans-serif;
-  font-size: 1.4rem;
-  display: block;
+  font-size: 1.3rem;
   margin: 4px 2px;
   padding: 2px;
   font-style: italic;
-  text-align: center;
+  white-space: nowrap;
 }
 
 .mh-essence-subheader {
@@ -556,7 +560,7 @@ color: var(--mythosOS-verylight-color);
 
 .mh-essence-text {
   font-family: var(--font-family-main1);
-  font-size: 0.90rem;
+  font-size: 0.80rem;
   text-transform: uppercase;
   line-height: 1.2rem;
   text-align: justify;
@@ -608,9 +612,13 @@ color: var(--mythosOS-verylight-color);
 }
 
 .mh-essence-chart{
-  max-width: 100%;
+  /* max-width: 100%;
   height: fit-content;
-  margin: 10px 0;
+  margin: 10px 0; */
+  float: left;
+  width: 75px;
+  height: 75px;
+  margin: 0 5px 5px 0;
 }
 
 .mh-essence-chart img{

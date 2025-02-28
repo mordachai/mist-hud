@@ -38,7 +38,6 @@ async function rollDice() {
 }
 
 
-
 //Main Roll function
 async function rollMove(moveName) {
   //const hud = MistHUD.getInstance();
@@ -60,6 +59,10 @@ async function rollMove(moveName) {
     ui.notifications.error("Invalid HUD instance. Try selecting your token again.");
     return;
   }
+
+  console.log("Token for roll:", activeToken);
+  console.log("Token actor:", activeToken.actor);
+  console.log("HUD from registry:", hud);
   
   const activeSystem = game.settings.get("city-of-mist", "system");
   const tagsData = hud.getSelectedRollData();
@@ -117,18 +120,7 @@ async function rollMove(moveName) {
       giverName: giverActor ? giverActor.name : "Unknown"
     });
   }
-
-  // Notify each bonus giver that their bonus was used
-  for (const giverId in receivedBonuses) {
-    const bonusData = receivedBonuses[giverId];
-    game.socket.emit('module.mist-hud', {
-      type: 'notify-use',
-      actorId: giverId,
-      targetId: actor.id,
-      bonusType: bonusData.type,
-      amount: bonusData.amount
-    });
-  }
+  
   // Calculate totalBonus as before
   const activeBonuses = Object.values(receivedBonuses);
   const helpBonuses = activeBonuses.filter(bonus => bonus.type === 'help')
@@ -139,6 +131,19 @@ async function rollMove(moveName) {
 
   const totalCrewPowerTags = calculateCrewPowerTags(hud);
   const totalCrewWeaknessTags = calculateCrewWeaknessTags(hud);
+
+  // Get NPC influence data with enhanced debugging
+  console.log("Retrieving NPC influences for roll...");
+  const npcInfluences = getNpcInfluences();
+  const totalNpcInfluence = calculateNpcInfluenceTotal(npcInfluences);
+  
+  // Create influence messages for chat display
+  const influenceMessages = npcInfluences.map(infl => ({
+      npcName: infl.npcName || "Unknown NPC",
+      totalInfluence: Number(infl.totalInfluence) || 0,
+      tagInfluence: Number(infl.tagInfluence) || 0,
+      statusInfluence: Number(infl.statusInfluence) || 0
+  }));
 
   const totalPower = 
     calculatedPower +
@@ -168,8 +173,20 @@ async function rollMove(moveName) {
     console.error("Error minimizing HUD before roll:", error);
   }
   
+  // When calculating roll total, include NPC influence
   const rollResults = await rollDice();
-  const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower + totalBonus;
+  const diceTotal = rollResults.reduce((acc, value) => acc + value, 0);
+  
+  // Log all components of the final roll
+  console.log("Roll components:");
+  console.log(`- Dice total: ${diceTotal}`);
+  console.log(`- Total power: ${totalPower}`);
+  console.log(`- Total bonus: ${totalBonus}`);
+  console.log(`- Total NPC influence: ${totalNpcInfluence}`);
+  
+  // Add NPC influence to roll total
+  const rollTotal = diceTotal + totalPower + totalBonus + totalNpcInfluence;
+  console.log(`Final roll total: ${rollTotal}`);
 
   // Only check the "Roll is Dynamite!" toggle if the active system is City of Mist
   let rollIsDynamiteForced = false;
@@ -265,7 +282,10 @@ async function rollMove(moveName) {
     trackedEffects: move.trackedEffects || null,
     diceClass,
     outcomeClass,
-    helpHurtMessages: bonusMessages
+    helpHurtMessages: bonusMessages,
+    totalNpcInfluence,
+    npcInfluences: influenceMessages,
+    hasNpcInfluence: influenceMessages.length > 0,
   };
 
   const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
@@ -284,6 +304,57 @@ async function rollMove(moveName) {
   await burnCrispyTags(crewPowerTags);
   await burnCrispyTags(loadoutTags);
   hud.cleanHUD(chatData.tagsData);
+}
+
+function debugNpcInfluences() {
+  const influences = globalThis.activeNpcInfluences || {};
+  const influencesArray = Object.values(influences);
+  
+  console.log("===== ACTIVE NPC INFLUENCES =====");
+  console.log(`Found ${influencesArray.length} influences in global cache`);
+  
+  influencesArray.forEach(infl => {
+      console.log(`${infl.npcName}: ${infl.totalInfluence} (Tags: ${infl.tagInfluence}, Statuses: ${infl.statusInfluence})`);
+  });
+  
+  const total = calculateNpcInfluenceTotal(influencesArray);
+  console.log(`Total influence that would be applied to a roll: ${total}`);
+  console.log("===== END DEBUG =====");
+  
+  return { influences: influencesArray, total };
+}
+// Expose the debug function globally
+globalThis.debugNpcInfluences = debugNpcInfluences;
+
+function getNpcInfluences() {
+  // Access the global cache
+  const influences = globalThis.activeNpcInfluences || {};
+  
+  // Convert to array and filter out any nulls or empty values
+  const influencesArray = Object.values(influences).filter(infl => 
+      infl && typeof infl.totalInfluence !== 'undefined'
+  );
+  
+  console.log(`Found ${influencesArray.length} active NPC influences:`, influencesArray);
+  return influencesArray;
+}
+
+// Calculate total from all influences
+function calculateNpcInfluenceTotal(influences) {
+  if (!influences || influences.length === 0) {
+      console.log("No NPC influences found, returning 0");
+      return 0;
+  }
+  
+  // Sum up all total influences, ensuring we have valid numbers
+  const total = influences.reduce((sum, infl) => {
+      const value = Number(infl.totalInfluence) || 0;
+      console.log(`Adding ${value} from ${infl.npcName}`);
+      return sum + value;
+  }, 0);
+  
+  console.log(`Total NPC influence calculated: ${total}`);
+  return total;
 }
 
 async function rollBurnForHitCityOfMist(moveName, hud) {

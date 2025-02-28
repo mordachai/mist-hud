@@ -744,8 +744,8 @@ hr {
   padding-right: 2rem;
 }
 
-.create-status:hover,
-.create-story-tag:hover{
+.mh-create-status:hover,
+.mh-create-story-tag:hover{
 	text-shadow: -1px -1px 4px yellow, 1px 1px 4px gold;
 }
 

@@ -78,7 +78,99 @@
             {{/each}}
           </ul>
         </div>
-      {{/each}}
+      {{/each}}    
+
+      <!-- LOADOUT Section -->
+      {{#if isOtherscape}}
+        <div class="theme-container">
+          <div class="mh-theme-header neutral loadout mh-title-container">
+            <span class="mh-theme-name mh-theme-name-neutral">{{localize "Otherscape.terms.loadoutTheme.name"}}</span>
+            <span class="mh-theme-icon-notip loadout"></span>
+          </div>
+          <ul class="mh-tags">
+            {{#each loadoutTags}}
+              <li class="mh-loadout-tag {{this.cssClass}} {{#if selected}}selected{{/if}}"
+                  data-id="{{this.id}}"
+                  data-theme-id="{{this.themeId}}"
+                  data-actor-id="{{actorId}}">
+                <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
+                <span class="mh-tag-text">{{this.tagName}}</span>
+                {{#if subtags}}
+                  <ul class="mh-subtag">
+                    {{#each subtags}}
+                      <li class="subtag-item {{cssClass}}">
+                        <span class="subtag-burn">{{{burnIcon}}}</span>
+                        <span class="subtag-name">{{tagName}}</span>
+                      </li>
+                    {{/each}}
+                  </ul>
+                {{/if}}
+              </li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/if}}
+
+      <!-- Story Tags Section -->
+      <div class="mh-story-tags-container">
+        <div class="mh-theme-header neutral extras mh-title-container">
+          <div class="mh-title-container">
+            <span class="mh-theme-icon-notip storytag"></span>
+            <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.storyTags"}}{{#if isOtherscape}} / Relationships{{/if}}</span>
+          </div>
+          <a class="mh-create-story-tag" data-owner-id="{{actor.id}}" data-token-id="{{token.id}}" data-scene-id="{{scene.id}}" title="Create Tag">
+            <i class="fa-regular fa-circle-plus"></i>
+          </a>
+        </div>
+        <ul class="mh-tags">
+          {{#each storyTags}}
+            <li class="mh-story-tag {{this.cssClass}} {{#if temporary}}temporary{{/if}} {{#if selected}}selected{{/if}}"
+                data-id="{{this.id}}"
+                data-theme-id="{{this.themeId}}"
+                data-actor-id="{{actorId}}"
+                data-temporary="{{this.temporary}}" 
+                data-permanent="{{this.permanent}}">
+              <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
+              <span class="mh-tag-text {{#if temporary}}temporary{{/if}}">
+                {{this.tagName}}
+                {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
+                {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
+              </span>
+              <span class="mhr-mls mh-story-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
+                {{{this.inversionIcon}}}
+              </span>
+            </li>
+          {{/each}}
+        </ul>
+      </div>
+
+      <!-- Statuses Section -->
+      <div class="mh-statuses-container">
+        <div class="mh-theme-header neutral extras mh-title-container">
+          <div class="mh-title-container">
+            <span class="mh-theme-icon-notip statuses"></span>
+            <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.statuses"}}</span>
+          </div>
+          <a class="mh-create-status" title="Create Status">
+            <i class="fa-regular fa-circle-plus"></i>
+          </a>
+        </div>
+        <div class="mh-statuses-list">
+          {{#each statuses as |status|}}
+            <div class="mh-status {{statusType}} {{#if selected}}selected{{/if}} {{#if temporary}}temporary{{/if}}" 
+                 data-status-name="{{status.name}}" 
+                 data-status-id="{{status.id}}" 
+                 data-owner-id="{{actor.id}}" 
+                 data-tier="{{status.tier}}" 
+                 data-temporary="{{temporary}}" 
+                 data-permanent="{{permanent}}">
+              {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
+              {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
+              {{name}}-{{status.tier}}
+            </div>
+          {{/each}}
+        </div>
+      </div>
 
       <!-- Crew Theme Section -->
       {{#if hasCrewThemes}}
@@ -150,97 +242,6 @@
         {{/each}}
       {{/if}}
 
-      <!-- LOADOUT Section -->
-      {{#if isOtherscape}}
-        <div class="theme-container">
-          <div class="mh-theme-header neutral loadout mh-title-container">
-            <span class="mh-theme-name mh-theme-name-neutral">{{localize "Otherscape.terms.loadoutTheme.name"}}</span>
-            <span class="mh-theme-icon-notip loadout"></span>
-          </div>
-          <ul class="mh-tags">
-            {{#each loadoutTags}}
-              <li class="mh-loadout-tag {{this.cssClass}} {{#if selected}}selected{{/if}}"
-                  data-id="{{this.id}}"
-                  data-theme-id="{{this.themeId}}"
-                  data-actor-id="{{actorId}}">
-                <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
-                <span class="mh-tag-text">{{this.tagName}}</span>
-                {{#if subtags}}
-                  <ul class="mh-subtag">
-                    {{#each subtags}}
-                      <li class="subtag-item {{cssClass}}">
-                        <span class="subtag-burn">{{{burnIcon}}}</span>
-                        <span class="subtag-name">{{tagName}}</span>
-                      </li>
-                    {{/each}}
-                  </ul>
-                {{/if}}
-              </li>
-            {{/each}}
-          </ul>
-        </div>
-      {{/if}}
-
-      <!-- Story Tags Section -->
-      <div class="mh-story-tags-container">
-        <div class="mh-theme-header neutral extras mh-title-container">
-          <div class="mh-title-container">
-            <span class="mh-theme-icon-notip storytag"></span>
-            <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.storyTags"}}{{#if isOtherscape}} / Relationships{{/if}}</span>
-          </div>
-          <a class="create-story-tag" data-owner-id="{{actor.id}}" data-token-id="{{token.id}}" data-scene-id="{{scene.id}}" title="Create Tag">
-            <i class="fa-regular fa-circle-plus"></i>
-          </a>
-        </div>
-        <ul class="mh-tags">
-          {{#each storyTags}}
-            <li class="mh-story-tag {{this.cssClass}} {{#if temporary}}temporary{{/if}} {{#if selected}}selected{{/if}}"
-                data-id="{{this.id}}"
-                data-theme-id="{{this.themeId}}"
-                data-actor-id="{{actorId}}"
-                data-temporary="{{this.temporary}}" 
-                data-permanent="{{this.permanent}}">
-              <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
-              <span class="mh-tag-text {{#if temporary}}temporary{{/if}}">
-                {{this.tagName}}
-                {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
-                {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
-              </span>
-              <span class="mhr-mls mh-story-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
-                {{{this.inversionIcon}}}
-              </span>
-            </li>
-          {{/each}}
-        </ul>
-      </div>
-
-      <!-- Statuses Section -->
-      <div class="mh-statuses-container">
-        <div class="mh-theme-header neutral extras mh-title-container">
-          <div class="mh-title-container">
-            <span class="mh-theme-icon-notip statuses"></span>
-            <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.statuses"}}</span>
-          </div>
-          <a class="create-status" title="Create Status">
-            <i class="fa-regular fa-circle-plus"></i>
-          </a>
-        </div>
-        <div class="mh-statuses-list">
-          {{#each statuses as |status|}}
-            <div class="mh-status {{statusType}} {{#if selected}}selected{{/if}} {{#if temporary}}temporary{{/if}}" 
-                 data-status-name="{{status.name}}" 
-                 data-status-id="{{status.id}}" 
-                 data-owner-id="{{actor.id}}" 
-                 data-tier="{{status.tier}}" 
-                 data-temporary="{{temporary}}" 
-                 data-permanent="{{permanent}}">
-              {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
-              {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
-              {{name}}-{{status.tier}}
-            </div>
-          {{/each}}
-        </div>
-      </div>
     </div>
   </div>
 
@@ -416,11 +417,13 @@
       {{#if isOtherscape}}
         <!-- Otherscape Content -->
         <div class="section otherscape">
-          <div class="mh-theme-name mh-theme-name-neutral mh-essence-title">Essence</div>
+          <div class="mh-theme-name mh-theme-name-neutral mh-essence-title">
+            <div>Essence: </div>
+            <div class="mh-essence-title {{essenceClass}}">{{essence}}</div>
+          </div>
           <div class="mh-essence-chart {{essenceClass}}">
             <img src="modules/mist-hud/ui/essences/{{essenceImage}}" alt="{{essence}}" />
           </div>
-          <div class="mh-essence-title {{essenceClass}}">{{essence}}</div>
           {{{essenceText}}}
         </div>
       {{/if}}

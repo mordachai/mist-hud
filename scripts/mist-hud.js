@@ -132,8 +132,13 @@ function toggleInversion(tagElement, inversionIconConfig, hudInstance) {
   hudInstance.calculateTotalPower();
 }
 
-Hooks.on("socketlib.ready", () => {
+Hooks.once('ready', () => {
+  // Initialize global cache for NPC influences
+  globalThis.activeNpcInfluences = {};
+  
+  // Set up socket listener (only once)
   game.socket.on("module.mist-hud", async data => {
+    // Handle help/hurt bonuses
     if (data.type === "notify-bonus") {
       const targetActor = game.actors.get(data.targetId);
       if (targetActor && targetActor.isOwner) {
@@ -153,18 +158,9 @@ Hooks.on("socketlib.ready", () => {
       } else {
         console.warn("Not the owner of the target actor; skipping flag update.");
       }
-      
-      // Emit notify-use so the giver's HUD can update.
-      game.socket.emit('module.mist-hud', {
-        type: 'notify-use',
-        actorId: data.actorId,       // Giver's actor ID
-        targetId: data.targetId,     // Receiver's actor ID
-        bonusType: data.bonusType,
-        active: data.active,
-        amount: data.amount
-      });
-      
-    } else if (data.type === "notify-use") {
+    } 
+    // Handle bonus use notification
+    else if (data.type === "notify-use") {
       // Check if the current client controls the giver's actor.
       const giverActor = game.actors.get(data.actorId);
       if (giverActor && giverActor.isOwner) {
@@ -174,8 +170,20 @@ Hooks.on("socketlib.ready", () => {
           checkbox.checked = false;
         });
       }
+    } 
+    // Handle NPC influence data
+    else if (data.type === "npcInfluence") {
+      const influenceData = data.data;
+      
+      // Store in the global cache with the NPC ID as the key
+      globalThis.activeNpcInfluences[influenceData.npcId] = influenceData;
+      
+      console.log(`Received NPC influence: ${influenceData.npcName} (${influenceData.npcId}) = ${influenceData.totalInfluence}`);
+      console.log(`Current active NPC influences:`, Object.values(globalThis.activeNpcInfluences));
     }
   });
+  
+  console.log("Mist HUD socket listeners initialized");
 });
 
 globalThis.playerHudRegistry = new Map();
@@ -557,7 +565,7 @@ export class MistHUD extends Application {
     //     }
     // });
     
-    html.find('.create-story-tag').on("click", this._createStoryTagFromHUD.bind(this));
+    html.find('.mh-create-story-tag').on("click", this._createStoryTagFromHUD.bind(this));
 
     // Right-click to delete story tags
     html.find('.mh-story-tag').on('contextmenu', async (event) => {
@@ -602,7 +610,7 @@ export class MistHUD extends Application {
       this.render(false); // Refresh the HUD
     });
 
-    html.find('.create-status').on("click", this._createStatusFromHUD.bind(this));
+    html.find('.mh-create-status').on("click", this._createStatusFromHUD.bind(this));
 
     // Right-click to delete statuses
     html.find('.mh-status').on('contextmenu', async (event) => {
@@ -648,7 +656,7 @@ export class MistHUD extends Application {
     });
 
     // Make each .mh-status element draggable
-    html.find('.mh-status').each((i, el) => {
+    html.find('.mh-status, .mh-status-moves').each((i, el) => {
       el.setAttribute('draggable', 'true');
 
       el.addEventListener('dragstart', (ev) => {
@@ -1724,7 +1732,6 @@ export class MistHUD extends Application {
       console.error("Error during HUD cleanup:", error);
     }
   }
-
 }
 
 // Function to attach click listeners to each scene tag for dynamic updates

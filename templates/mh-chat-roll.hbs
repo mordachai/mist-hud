@@ -54,6 +54,9 @@
       {{#if totalBonus}}
         <span><i class="fa-solid fa-life-ring"></i> {{totalBonus}}</span>
       {{/if}}
+      {{#if (neq this.totalNpcInfluence 0)}}
+        <span class="npc-influence"><i class="fa-solid fa-skull"></i> {{totalNpcInfluence}}</span>
+      {{/if}}
       {{#if modifier}}
         <span><i class="fa-regular fa-hexagon-plus"></i> {{modifier}}</span>
       {{/if}}
@@ -98,6 +101,17 @@
                 {{name}}-{{tier}}
           </span>
         {{/each}}
+        {{#if (neq modifier 0)}}
+          <span class="mhr-modifier {{#if (gt modifier 0)}}positive{{else}}negative{{/if}}">
+            <i class="fa-regular fa-hexagon-plus"></i> {{#if (gt totalNpcInfluence 0)}}+{{modifier}}{{else}}-{{modifier}}{{/if}}
+          </span>
+        {{/if}}
+        {{#if (neq this.totalNpcInfluence 0)}}
+          <span class="mhr-npc-influence-tag {{#if (gt totalNpcInfluence 0)}}positive{{else}}negative{{/if}}">
+            <i class="fa-solid fa-skull"></i> 
+            {{#if (gt totalNpcInfluence 0)}}+{{totalNpcInfluence}}{{else}}-{{totalNpcInfluence}}{{/if}}
+          </span>
+        {{/if}}
         {{#each helpHurtMessages}}
           <span class="mhr-help-hurt-tag {{#if (eq this.type "help")}}positive{{else}}negative{{/if}}">
             {{#if (eq this.type "help")}}

@@ -1,7 +1,9 @@
 <div class="npc-hud {{#if isCollapsed}}collapsed{{/if}}">
     {{#unless isCollapsed}}
     <div class="npc-content">
-
+        {{!-- {{#if (neq this.totalInfluence 0)}}
+        <span class="mh-npc-influence"><i class="fa-solid fa-skull"></i> = {{totalInfluence}}</span>
+        {{/if}} --}}
         {{#if hasDescriptionBiography}}
         <div class="npc-description-biography accordion-container">
             <div class="npc-subtitle-container-c accordion-header active">
@@ -39,8 +41,8 @@
             <div class="create-npc-tag"><i class="fa-solid fa-plus" style="font-size: small;"></i> <i class="fa-duotone fa-regular fa-tags"></i></div>
             <div class="npc-subtitle-text">Tags & Statuses</div>
             <div class="create-npc-status"><i class="fa-duotone fa-light fa-suitcase-medical"></i> <i class="fa-solid fa-plus" style="font-size: small;"></i></div>
-        </div>
-
+        </div>  
+        
         <div class="npc-tags-statuses-container">
             <ul class="npc-storytags-list">
                 {{#each storyTags}}
@@ -65,6 +67,15 @@
                 {{/each}}
             </ul>
         </div>
+
+        <div class="npc-subtitle-container-r">
+            <div class="mh-npc-influence">
+        {{#if (neq this.totalInfluence 0)}}
+        <i class="fa-solid fa-skull"></i>
+        {{else}}<i class="fa-regular fa-skull"></i>
+        {{/if}}: {{totalInfluence}}
+            </div>
+        </div>  
 
         <div class="npc-moves-section">
         {{#if (eq activeSystem "otherscape")}}

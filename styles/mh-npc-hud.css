@@ -10,7 +10,6 @@
     max-height: 85vh;
     background-color: var(--npc-hud-bg-prime);
 }
-
   
 #npc-hud .window-app,
 #npc-hud.minimized .window-app {
@@ -228,7 +227,7 @@ margin: 5px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    border-top: 1px solid var(--divider-color1);
+    /* border-top: 1px solid var(--divider-color1); */
     padding-top: 20px;
 }
 
@@ -309,6 +308,7 @@ margin: 5px;
 
 .npc-subtitle-container-r {
     display: flex;
+    flex: auto;
     align-items: center;
     justify-content: flex-end;
     gap: 8px; 
@@ -320,7 +320,7 @@ margin: 5px;
 .npc-subtitle-container-r::before {
     content: '';
     flex: 1;
-    height: 1px;
+    height: 2px;
     background-color: var(--text-hud-subtitles-color);
 }
 
@@ -338,11 +338,12 @@ margin: 5px;
 .npc-subtitle-container-l::after {
     content: '';
     flex: 1;
-    height: 1px;
+    height: 2px;
     background-color:  var(--text-hud-subtitles-color);
 }
 
 .npc-subtitle-container-c {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content:center;
@@ -352,6 +353,22 @@ margin: 5px;
     color: var(--text-hud-subtitles-color);
     font-weight: bold;
     font-size: large;
+    flex: auto;
+}
+
+.mh-npc-influence {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 3px;
+    margin: 5px;
+    color: var(--spectrum-color);
+    font-size: 1rem;
+    z-index: 10;
+    width: fit-content;
+    white-space: nowrap;
+    font-weight: bold;
 }
 
 .npc-subtitle-container-c::before {
@@ -480,7 +497,8 @@ margin: 5px;
 }
 
 .npc-status,
-.npc-status.neutral {
+.npc-status.neutral,
+.npc-status-moves {
     font-family: var(--font-family-npcmoves);
     background-color: var(--status-color);
     text-transform: lowercase;
@@ -491,7 +509,8 @@ margin: 5px;
     display: inline-block;
 }
 
-.npc-status:hover {
+.npc-status:hover,
+.npc-status-moves:hover {
     text-shadow: 0 0 2px #fff;
 }
 
@@ -532,6 +551,16 @@ margin: 5px;
     padding: 3px;
     max-width: 100%;
     overflow: visible; 
+}
+
+.mh-npc-influence.positive {
+    color: #4caf50;
+    border-color: #4caf50;
+}
+
+.mh-npc-influence.negative {
+    color: #f44336;
+    border-color: #f44336;
 }
 
 /* Tags & Statuses Items */

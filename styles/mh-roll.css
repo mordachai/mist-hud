@@ -194,7 +194,9 @@
   .mhr-modifier .mhr-modifier-value,
   .mhr-permanent-status, .scene-tag-item,
   .mhr-scene-status-tag,
-  .mhr-help-hurt-tag {
+  .mhr-modifier,
+  .mhr-help-hurt-tag,
+  .mhr-npc-influence-tag {
     display: inline-block;
     padding: 1px 2px;
     font-family: var(--font-family-tags), sans-serif;
@@ -206,14 +208,14 @@
    
   .mhr-power-tag, .mhr-story-tag, .mhr-weakness-tag.inverted,
   .mhr-status-tag.positive, .mhr-status-tag.scene-positive, .scene-tag-item.scene-positive,
-  .mhr-scene-status-tag.scene-positive, .mhr-help-hurt-tag.positive {
+  .mhr-scene-status-tag.scene-positive,.mhr-modifier.positive, .mhr-help-hurt-tag.positive, .mhr-npc-influence-tag.positive {
     color: var(--text-tag-color);
     background-color: var(--positive-tag-borderColor);
   }
 
   .mhr-status-tag.negative, .mhr-weakness-tag,  .mhr-story-tag.inverted,
   .mhr-status-tag.scene-negative, .scene-tag-item.scene-negative,
-  .mhr-scene-status-tag.scene-negative, .mhr-help-hurt-tag.negative {
+  .mhr-scene-status-tag.scene-negative,.mhr-modifier.negative, .mhr-help-hurt-tag.negative, .mhr-npc-influence-tag.negative {
     color: var(--text-tag-color);
     background-color: var(--negative-tag-borderColor);
   }

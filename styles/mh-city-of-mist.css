@@ -66,8 +66,8 @@
   background-position: center;
 }
 
-.create-story-tag i,
-.create-status i {
+.mh-create-story-tag i,
+.mh-create-status i {
   position: relative;
   top: -3px;
   right: -2px;

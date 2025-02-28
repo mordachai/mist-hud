@@ -349,53 +349,6 @@ export function getThemebooks(actor) {
   }).filter(Boolean);
 }  
 
-// export function getImprovements(actor) {
-//   if (!actor) return [];
-//   const items = actor.items.contents;
-//   const themes = items.filter(item => item.type === "theme").reduce((acc, theme) => {
-//     let realThemebook = theme.themebook;
-//     if (realThemebook?.isThemeKit && realThemebook.isThemeKit()) {
-//       realThemebook = realThemebook.themebook;
-//     }
-//     if (!realThemebook) {
-//       console.warn(`No themebook found for theme: ${theme.name}`);
-//       return acc;
-//     }
-//     acc[theme._id] = {
-//       id: theme._id,
-//       name: theme.name || "Unnamed Theme",
-//       themebookName: realThemebook.name || "Unnamed Themebook",
-//       themeType: realThemebook.system.subtype || "Unknown Type",
-//     };
-//     return acc;
-//   }, {});
-
-//   const improvementsGrouped = items.filter(item =>
-//     item.type === "improvement" && themes[item.system.theme_id]
-//   ).reduce((acc, item) => {
-//     const theme = themes[item.system.theme_id];
-//     const themebookName = theme.themebookName;
-//     if (!acc[themebookName]) {
-//       acc[themebookName] = {
-//         themebookName,
-//         themeType: theme.themeType,
-//         improvements: [],
-//       };
-//     }
-//     acc[themebookName].improvements.push({
-//       id: item.id,
-//       name: item.name,
-//       description: item.system.description || "No description provided.",
-//       effect_class: item.system.effect_class || null,
-//       theme_id: item.system.theme_id || null,
-//       choiceItem: item.system.choice_item || null,
-//       uses: item.system.uses || { max: 0, current: 0, expended: false },
-//     });
-//     return acc;
-//   }, {});
-//   return Object.values(improvementsGrouped);
-// }
-
 export function getImprovements(actor) {
   if (!actor) return [];
   const items = actor.items.contents;
@@ -528,79 +481,6 @@ export function getCrewImprovements(actor) {
   return Object.values(improvementsGrouped);
 }
 
-// export function getCrewImprovements(actor) {
-//   if (!actor) return [];
-  
-//   // Get non-GM users that the actor owns
-//   const nonGMOwners = game.users.filter(user =>
-//     !user.isGM && actor.testUserPermission(user, "OWNER")
-//   );
-  
-//   // Filter crew actors that this actor has permission for
-//   const ownedCrews = game.actors.contents.filter(a =>
-//     a.type === "crew" &&
-//     nonGMOwners.some(user => a.testUserPermission(user, "OWNER"))
-//   );
-  
-//   // Create an object to group improvements by themebook name
-//   const improvementsGrouped = {};
-  
-//   // Loop through each crew actor
-//   for (const crew of ownedCrews) {
-//     const items = crew.items.contents;
-    
-//     // Build a lookup of crew theme items
-//     const themes = items.filter(item => item.type === "theme").reduce((acc, theme) => {
-//       let realThemebook = theme.themebook;
-//       if (realThemebook?.isThemeKit && realThemebook.isThemeKit()) {
-//         realThemebook = realThemebook.themebook;
-//       }
-//       if (!realThemebook) {
-//         console.warn(`No themebook found for crew theme: ${theme.name}`);
-//         return acc;
-//       }
-//       acc[theme._id] = {
-//         id: theme._id,
-//         themeName: theme.name || "Unnamed Theme",
-//         themebookName: realThemebook.name || "Unnamed Themebook",
-//         themeType: realThemebook.system.subtype || "Unknown Type",
-//         unspent_upgrades: theme.system.unspent_upgrades || 0
-//       };
-//       return acc;
-//     }, {});
-    
-//     // Now get improvement items that belong to a crew theme (i.e. matching theme_id)
-//     const improvements = items.filter(item =>
-//       item.type === "improvement" && themes[item.system.theme_id]
-//     );
-    
-//     // Group improvements by the themebook name from the matching crew theme
-//     for (const item of improvements) {
-//       const theme = themes[item.system.theme_id];
-//       const themebookName = theme.themebookName;
-//       if (!improvementsGrouped[themebookName]) {
-//         improvementsGrouped[themebookName] = {
-//           themebookName: themebookName,
-//           themeType: theme.themeType,
-//           improvements: []
-//         };
-//       }
-//       improvementsGrouped[themebookName].improvements.push({
-//         id: item.id,
-//         name: item.name,
-//         description: item.system.description || "No description provided.",
-//         effect_class: item.system.effect_class || null,
-//         theme_id: item.system.theme_id || null,
-//         choiceItem: item.system.choice_item || null,
-//         uses: item.system.uses || { max: 0, current: 0, expended: false }
-//       });
-//     }
-//   }
-  
-//   // Return an array of grouped improvements
-//   return Object.values(improvementsGrouped);
-// } 
-
 export function getActorStatuses(actor) {
   if (!actor) return [];
   const actorId = actor.id;
@@ -722,75 +602,6 @@ export function getJuiceAndClues(actor) {
     juiceItems,
   };
 }
-
-// export function getEssence(themes) {
-//   // Initialize counters for each category
-//   const categoryCounts = {
-//       Self: 0,
-//       Noise: 0,
-//       Logos: 0,
-//       Mythos: 0,
-//       Mist: 0,
-//   };
-
-//   // Loop through each theme and try to get the themebook's category
-//   for (const theme of themes) {
-//       let realThemebook;
-//       const themebook = theme.themebook;
-//       if (themebook?.isThemeKit && themebook.isThemeKit()) {
-//       realThemebook = themebook.themebook;
-//       } else {
-//       realThemebook = themebook;
-//       }
-//       if (!realThemebook) {
-//       console.warn(`No themebook found for theme: ${theme.name}`);
-//       continue;
-//       }
-//       const category = realThemebook.system.subtype;
-//       if (category && categoryCounts.hasOwnProperty(category)) {
-//       categoryCounts[category]++;
-//       } else {
-//       console.warn(`Unknown or missing category for theme: ${theme.name}`);
-//       }
-//   }
-
-//   // Destructure some of the counts for easier access
-//   const { Self, Noise, Mythos, Logos, Mist } = categoryCounts;
-//   const totalCount = Self + Noise + Mythos;
-
-//   // Determine an imageName based on counts (you can change this logic as needed)
-//   let imageName = "blank.svg"; // default image
-//   if (totalCount === 4) {
-//       const segments = [];
-//       if (Self > 0) segments.push(`${Self}S`);
-//       if (Mythos > 0) segments.push(`${Mythos}M`);
-//       if (Noise > 0) segments.push(`${Noise}N`);
-//       imageName = segments.join("") + ".svg";
-//   } else if (Logos > 0 || Mist > 0 || Mythos > 0) {
-//       imageName = "com.webp";
-//   }
-
-//   // Determine essence using your system's rules.
-//   // (These rules are just an example; adjust them to match your system.)
-//   let essenceData = { essence: "Undefined", className: "undefined", imageName };
-//   if (Self > 0 && Noise > 0 && Mythos > 0) {
-//       essenceData = { essence: "Nexus", className: "nexus", imageName };
-//   } else if (Self > 0 && Mythos > 0 && Noise === 0) {
-//       essenceData = { essence: "Spiritualist", className: "spiritualist", imageName };
-//   } else if (Self > 0 && Noise > 0 && Mythos === 0) {
-//       essenceData = { essence: "Cyborg", className: "cyborg", imageName };
-//   } else if (Mythos > 0 && Noise > 0 && Self === 0) {
-//       essenceData = { essence: "Transhuman", className: "transhuman", imageName };
-//   } else if (Self > 0 && Noise === 0 && Mythos === 0) {
-//       essenceData = { essence: "Real", className: "real", imageName };
-//   } else if (Mythos > 0 && Self === 0 && Noise === 0) {
-//       essenceData = { essence: "Avatar/Conduit", className: "avatar-conduit", imageName };
-//   } else if (Noise > 0 && Self === 0 && Mythos === 0) {
-//       essenceData = { essence: "Singularity", className: "singularity", imageName };
-//   }
-
-//   return essenceData;
-// }   
 
 export function getEssence(themes) {
   // Initialize counters for each category
