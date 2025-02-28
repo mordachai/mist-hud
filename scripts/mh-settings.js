@@ -11,17 +11,23 @@ const SYSTEM_CSS_MAP = {
 
 function applySystemCSS(system) {
     const cssPath = SYSTEM_CSS_MAP[system];
+    const existingLink = document.querySelector('link[data-system-theme]');
+    
+    // If the same stylesheet is already loaded, do nothing
+    if (existingLink && existingLink.href.includes(cssPath)) return;
+    
     // Remove existing theme stylesheets
     document.querySelectorAll('link[data-system-theme]').forEach(link => link.remove());
 
     if (cssPath) {
-        // Create a new link element for the stylesheet
         const link = document.createElement('link');
         link.rel = 'stylesheet';
         link.href = cssPath;
         link.type = 'text/css';
-        link.dataset.systemTheme = 'true'; // Custom attribute to track this stylesheet
+        link.dataset.systemTheme = 'true';
         document.head.appendChild(link);
+    } else {
+        console.warn(`No CSS defined for system "${system}".`);
     }
 }
 
@@ -51,7 +57,6 @@ export async function detectActiveSystem() {
             return null;
     }
 }
-
 
 // Hook to run when the game is ready
 Hooks.once("ready", async () => {

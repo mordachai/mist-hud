@@ -110,6 +110,22 @@ export class NpcHUD extends Application {
         const tagInfluence = this.calculateNpcTagInfluence();
         const statusInfluence = this.calculateNpcStatusInfluence();
         const totalInfluence = tagInfluence + statusInfluence;
+
+        const collective = this.getCollectiveSize();
+        data.collectiveSize = collective.value;
+      
+        // Create an array for the collective bar (values 1 to 6)
+        data.collectiveBar = [];
+        for (let i = 1; i <= collective.max; i++) {
+          data.collectiveBar.push({
+            value: i,
+            active: i <= collective.value  // Mark as active if i is less than or equal to the current value
+          });
+        }
+
+        data.collectiveLabel = (data.activeSystem === "otherscape")
+        ? game.i18n.localize("Otherscape.terms.collective")
+        : game.i18n.localize("CityOfMist.terms.colllective");
         
         // Add influence data to template
         data.tagInfluence = tagInfluence;
@@ -254,31 +270,78 @@ export class NpcHUD extends Application {
         data.statuses = this.getActorStatuses();
     }
      
+    // getActorStatuses() {
+    //     if (!this.actor) return [];
+    
+    //     const statusMap = new Map();
+    
+    //     this.actor.items
+    //         .filter((item) => item.type === 'status')
+    //         .forEach((status) => {
+    //             // Get the current type from the flag; if missing, fall back to system.specialType or default to "neutral"
+    //             const statusType = status.getFlag('mist-hud', 'statusType') || status.system.specialType || 'neutral';
+    //             const key = `${status.name}-${status.system.tier}`;
+    //             if (!statusMap.has(key)) {
+    //                 statusMap.set(key, {
+    //                     id: status.id,
+    //                     statusName: status.name,
+    //                     statusTier: status.system.tier,
+    //                     statusType,
+    //                     temporary: !!status.system.temporary,
+    //                     permanent: !!status.system.permanent
+    //                 });
+    //             }
+    //         });
+    
+    //     return Array.from(statusMap.values());
+    // }    
+    
+    getCollectiveSize() {
+        if (!this.actor || !this.actor.system) {
+          return { value: 0, min: 1, max: 6, cssClasses: "npc-status npc-status-move" };
+        }
+        const value = Number(this.actor.system.collectiveSize ?? 0);
+        return {
+          value,
+          min: 1,
+          max: 6,
+          cssClasses: "npc-status npc-status-move",
+          onBarClick: (newValue) => {
+            const clampedValue = Math.max(1, Math.min(newValue, 6));
+            this.actor.update({ "system.collectiveSize": clampedValue });
+          },
+          onLabelClick: () => this.actor.update({ "system.collectiveSize": 0 })
+        };
+    }
+      
     getActorStatuses() {
         if (!this.actor) return [];
-    
+        const collectiveSize = Number(this.actor.system.collectiveSize || 0);
         const statusMap = new Map();
-    
+      
         this.actor.items
-            .filter((item) => item.type === 'status')
-            .forEach((status) => {
-                // Get the current type from the flag; if missing, fall back to system.specialType or default to "neutral"
-                const statusType = status.getFlag('mist-hud', 'statusType') || status.system.specialType || 'neutral';
-                const key = `${status.name}-${status.system.tier}`;
-                if (!statusMap.has(key)) {
-                    statusMap.set(key, {
-                        id: status.id,
-                        statusName: status.name,
-                        statusTier: status.system.tier,
-                        statusType,
-                        temporary: !!status.system.temporary,
-                        permanent: !!status.system.permanent
-                    });
-                }
-            });
-    
+          .filter((item) => item.type === 'status')
+          .forEach((status) => {
+            // Determine the status type (flag or system default)
+            const statusType = status.getFlag('mist-hud', 'statusType') || status.system.specialType || 'neutral';
+            const key = `${status.name}-${status.system.tier}`;
+            if (!statusMap.has(key)) {
+              const baseTier = Number(status.system.tier) || 1;
+              // Add collectiveSize to the base tier
+              const modifiedTier = baseTier + collectiveSize;
+              statusMap.set(key, {
+                id: status.id,
+                statusName: status.name,
+                statusTier: modifiedTier,
+                statusType,
+                temporary: !!status.system.temporary,
+                permanent: !!status.system.permanent
+              });
+            }
+          });
+          
         return Array.from(statusMap.values());
-    }    
+    }      
     
     applyBurnState(actor, tagId, tagType) {
         const tagItem = actor.items.get(tagId);
@@ -729,6 +792,17 @@ export class NpcHUD extends Application {
                 this.emitNpcInfluence();
                 ui.notifications.info(`NPC influence from ${this.actor.name} updated and emitted to players.`);
             });
+
+            // Clicking a segment sets the collective size
+            html.find('.npc-collective-bar .collective-segment').click((event) => {
+                const newValue = Number($(event.currentTarget).data('value'));
+                this.getCollectiveSize().onBarClick(newValue);
+            });
+    
+            // Clicking on the label resets the collective size
+            html.find('.npc-collective-label').click((event) => {
+                this.getCollectiveSize().onLabelClick();
+            });
                 
             // Prevent context menu actions
             this.element.on('contextmenu', (event) => {
@@ -1149,31 +1223,66 @@ Hooks.once("init", () => {
         return maxTier === 999 ? "-" : maxTier;
     });
 
-    Handlebars.registerHelper("parseStatus", function (description) {
+    Handlebars.registerHelper("parseStatus", function (description, options) {
+        // Retrieve collectiveSize from the root data context (provided by getData)
+        const collectiveSize = Number(options.data.root.collectiveSize || 0);
         return new Handlebars.SafeString(
-            description
-              .replace(/\[([^\]]+)\]/g, (match, content) => {
-                const trimmedContent = content.trim();
-                // Capture groups: 1 - name, 2 - tier
-                const statusRegex = /^([a-zA-Z]+(?:[-\s][a-zA-Z]+)*)-(\d+)$/;
-                if (statusRegex.test(trimmedContent)) {
-                  const randomId = generateRandomId();
-                  const matches = trimmedContent.match(statusRegex);
-                  const statusName = matches[1];
-                  const tier = matches[2];
-                  return `<span class="npc-status-moves" data-status-name="${statusName}" data-tier="${tier}" data-status-id="${randomId}" data-temporary="false" data-permanent="false" draggable="true">${trimmedContent}</span>`;
-                }
-                if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
-                  return `<span class="npc-limit">${trimmedContent}</span>`;
-                }
-                return `<span class="npc-story-tag">${trimmedContent}</span>`;
-              })
-              .replace(/\s*$/gm, '')
-              .replace(/\n+/g, '</p><p>')
-              .replace(/^<\/p><p>/, '')
-              .replace(/<p><\/p>/g, '')
-          );
-    });
+          description
+            .replace(/\[([^\]]+)\]/g, (match, content) => {
+              const trimmedContent = content.trim();
+              const statusRegex = /^([a-zA-Z]+(?:[-\s][a-zA-Z]+)*)-(\d+)$/;
+              if (statusRegex.test(trimmedContent)) {
+                const randomId = generateRandomId();
+                const matches = trimmedContent.match(statusRegex);
+                const statusName = matches[1];
+                const baseTier = Number(matches[2]);
+                // Calculate the modified tier by adding collectiveSize
+                const newTier = baseTier + collectiveSize;
+                return `<span class="npc-status-moves" data-status-name="${statusName}" data-tier="${newTier}" data-status-id="${randomId}" data-temporary="false" data-permanent="false">${statusName}-${newTier}</span>`;
+              }
+              if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
+                return `<span class="npc-limit">${trimmedContent}</span>`;
+              }
+              return `<span class="npc-story-tag">${trimmedContent}</span>`;
+            })
+            .replace(/\s*$/gm, '')
+            .replace(/\n+/g, '</p><p>')
+            .replace(/^<\/p><p>/, '')
+            .replace(/<p><\/p>/g, '')
+        );
+      });
+      
+
+
+
+
+    // Handlebars.registerHelper("parseStatus", function (description) {
+    //     return new Handlebars.SafeString(
+    //         description
+    //         .replace(/\[([^\]]+)\]/g, (match, content) => {
+    //           const trimmedContent = content.trim();
+    //           // Expect statuses formatted as "Name-Number"
+    //           const statusRegex = /^([a-zA-Z]+(?:[-\s][a-zA-Z]+)*)-(\d+)$/;
+    //           if (statusRegex.test(trimmedContent)) {
+    //             const randomId = generateRandomId();
+    //             const matches = trimmedContent.match(statusRegex);
+    //             const statusName = matches[1];
+    //             const baseTier = Number(matches[2]);
+    //             // Calculate new tier by adding collectiveSize
+    //             const newTier = baseTier + collectiveSize;
+    //             return `<span class="npc-status-moves" data-status-name="${statusName}" data-tier="${newTier}" data-status-id="${randomId}" data-temporary="false" data-permanent="false">${statusName}-${newTier}</span>`;
+    //           }
+    //             if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
+    //               return `<span class="npc-limit">${trimmedContent}</span>`;
+    //             }
+    //             return `<span class="npc-story-tag">${trimmedContent}</span>`;
+    //           })
+    //           .replace(/\s*$/gm, '')
+    //           .replace(/\n+/g, '</p><p>')
+    //           .replace(/^<\/p><p>/, '')
+    //           .replace(/<p><\/p>/g, '')
+    //       );
+    // });
 });
 
 // Keep the original hook registration format

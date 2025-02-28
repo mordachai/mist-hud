@@ -146,7 +146,7 @@ border: none;
 /* Character name */
 #mist-hud .mh-char-name {
   font-size: 1.4rem;
-  font-family: var(--font-family-move), sans-serif;
+  font-family: var(--font-family-move);
   filter: drop-shadow(1px 2px 3px var(--mythos-dark-color));
   align-self: flex-start;
   margin-left: 30px;
@@ -243,12 +243,12 @@ hr {
 
 /* Theme Section */
 .mh-theme {
-  font-family: var(--font-family-main2), cursive;
+  font-family: var(--font-family-main2);
 }
 
 
 .mh-themebook-name {
-  font-family: var(--font-family-main2), cursive;
+  font-family: var(--font-family-main2);
   font-style: italic;
   white-space: nowrap;
   font-size: 1.0em;
@@ -256,7 +256,7 @@ hr {
 
 /* Tags */
 .mh-tags {
-  font-family: var(--font-family-tags), sans-serif;
+  font-family: var(--font-family-tags);
   padding-left: 2px;
   padding-right: 2px;
   margin-right: 10px;
@@ -278,7 +278,7 @@ hr {
 }
 
 .mh-story-tags-title{
-  font-family: var(--font-family-move), sans-serif;
+  font-family: var(--font-family-move);
   font-size: 1.2em;
   color: whitesmoke;
   text-shadow: 1px 1px 1px var(--mythos-dark-color);
@@ -335,7 +335,7 @@ hr {
 }
 
 .mh-statuses-title {
-  font-family: var(--font-family-move), sans-serif;
+  font-family: var(--font-family-move);
   font-size: 1.2em;
   text-shadow: 1px 1px 1px var(--mythos-dark-color);
   padding-left: 5px;
@@ -362,7 +362,7 @@ hr {
   border-radius: 2px;
   font-size: 1.1em;
   cursor: pointer;
-  font-family: var(--font-family-tags), sans-serif;
+  font-family: var(--font-family-tags);
   align-content: center;
   line-height: 15px;
   text-transform: lowercase;
@@ -981,7 +981,7 @@ li.tag-or-status {
 .statuses-screen-title {
   flex: 4;
   font-size: 1.6rem;
-  font-family: var(--font-family-main1), sans-serif;
+  font-family: var(--font-family-main1);
   font-weight: bold;
   text-shadow: 1px 1px 1px var(--mythos-dark-color);
   padding-left: 5px;

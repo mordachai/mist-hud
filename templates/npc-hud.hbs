@@ -1,9 +1,6 @@
 <div class="npc-hud {{#if isCollapsed}}collapsed{{/if}}">
     {{#unless isCollapsed}}
     <div class="npc-content">
-        {{!-- {{#if (neq this.totalInfluence 0)}}
-        <span class="mh-npc-influence"><i class="fa-solid fa-skull"></i> = {{totalInfluence}}</span>
-        {{/if}} --}}
         {{#if hasDescriptionBiography}}
         <div class="npc-description-biography accordion-container">
             <div class="npc-subtitle-container-c accordion-header active">
@@ -68,14 +65,41 @@
             </ul>
         </div>
 
-        <div class="npc-subtitle-container-r">
-            <div class="mh-npc-influence">
-        {{#if (neq this.totalInfluence 0)}}
-        <i class="fa-solid fa-skull"></i>
-        {{else}}<i class="fa-regular fa-skull"></i>
-        {{/if}}: {{totalInfluence}}
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+
+            <div class="npc-collective-container">
+                <span class="npc-collective-label">{{collectiveLabel}}</span>
+                <div class="npc-collective-bar">
+                    {{#each collectiveBar}}
+                    <span class="collective-segment" data-value="{{value}}">
+                        {{#if (eq ../activeSystem "otherscape")}}
+                        {{#if active}}
+                            <i class="fa-solid fa-square-user"></i>
+                        {{else}}
+                            <i class="fa-regular fa-square"></i>
+                        {{/if}}
+                        {{else}}
+                        {{#if active}}
+                            <i class="fa-solid fa-circle"></i>
+                        {{else}}
+                            <i class="fa-regular fa-circle"></i>
+                        {{/if}}
+                        {{/if}}
+                    </span>
+                    {{/each}}
+                </div>
             </div>
-        </div>  
+
+            <div class="npc-subtitle-container-r">
+                <div class="mh-npc-influence">
+            {{#if (neq this.totalInfluence 0)}}
+            <i class="fa-solid fa-skull"></i>
+            {{else}}<i class="fa-regular fa-skull"></i>
+            {{/if}}: {{totalInfluence}}
+                </div>
+            </div>  
+
+        </div>
 
         <div class="npc-moves-section">
         {{#if (eq activeSystem "otherscape")}}

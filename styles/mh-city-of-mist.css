@@ -266,7 +266,7 @@
 }
 
 .mh-theme-name {
-  font-family: var(--font-family-move), sans-serif;
+  font-family: var(--font-family-move);
   font-size: 1.2em;
   margin: 4px 2px;
   font-style: italic;

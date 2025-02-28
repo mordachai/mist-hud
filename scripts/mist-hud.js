@@ -1962,3 +1962,69 @@ Hooks.on("getSceneControlButtons", (controls) => {
 
 });
 
+
+// Add this code to your module for debugging DSN integration
+// You can add this to a separate file or to one of your existing files
+
+/**
+ * Debug helper for Dice So Nice integration
+ * This will dump all relevant DSN information to the console
+ */
+export function debugDSN() {
+  console.log("============ DICE SO NICE DEBUG INFO ============");
+  
+  // Check if DSN is available
+  if (!game.dice3d) {
+      console.log("DSN not available - module not enabled or loaded");
+      return;
+  }
+  
+  // Get DSN version
+  const dsnModule = game.modules.get("dice-so-nice");
+  console.log(`DSN Version: ${dsnModule?.version || "unknown"}`);
+  
+  // Check available settings
+  console.log("DSN Settings:");
+  game.settings.settings.forEach((setting, key) => {
+      if (key.startsWith("dice-so-nice")) {
+          console.log(`- ${key}: ${setting.default}`);
+          try {
+              const value = game.settings.get(key.split('.')[0], key.split('.')[1]);
+              console.log(`  Current value: ${JSON.stringify(value)}`);
+          } catch (e) {
+              console.log(`  Cannot get current value: ${e.message}`);
+          }
+      }
+  });
+  
+  // Check dice3d object structure
+  console.log("DSN API Structure:");
+  console.log("- game.dice3d properties:", Object.keys(game.dice3d));
+  
+  // Check systems
+  console.log("DSN Systems:");
+  if (game.dice3d.DiceFactory && game.dice3d.DiceFactory.systems) {
+      Object.keys(game.dice3d.DiceFactory.systems).forEach(system => {
+          console.log(`- ${system}`);
+      });
+  } else {
+      console.log("No DiceFactory.systems found");
+  }
+  
+  // Check current system
+  console.log(`Current System: ${game.dice3d.currentSystem || "unknown"}`);
+  
+  console.log("===============================================");
+}
+
+// You can call this function from the browser console with:
+// game.modules.get("mist-hud").api.debugDSN()
+
+// Add this to your module API registration
+Hooks.once('ready', () => {
+  // Add to existing API object
+  if (game.modules.get('mist-hud').api) {
+      game.modules.get('mist-hud').api.debugDSN = debugDSN;
+  }
+});
+

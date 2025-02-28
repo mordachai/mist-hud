@@ -3,7 +3,6 @@
     <div class="influence-info">
       <h2>Current Scene: <span class="scene-name">{{currentSceneName}}</span></h2>
       <h3>Total Scene Influence: <span class="influence-value {{#if totalInfluence}}{{#if (lt totalInfluence 0)}}negative{{else}}positive{{/if}}{{/if}}">{{totalInfluence}}</span></h3>
-      <p class="influence-note">Only NPCs in the current scene affect player rolls</p>
     </div>
     <div class="controls">
       <button class="sync-all-npcs"><i class="fas fa-sync"></i> Sync Scene</button>
@@ -11,6 +10,7 @@
       <button class="clear-all-influences"><i class="fas fa-trash"></i> Clear All</button>
     </div>
   </header>
+        <p class="influence-note">Only NPCs in the current scene affect player rolls</p>
   
   <nav class="tabs">
     <a class="item" data-tab="scene"><i class="fas fa-map"></i> Current Scene ({{sceneNpcs.length}})</a>

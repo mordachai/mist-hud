@@ -97,6 +97,7 @@
 .npc-influence-manager .controls {
   display: flex;
   gap: 5px;
+  flex: 2;
 }
 
 .npc-influence-manager .controls button {
@@ -188,9 +189,18 @@
   margin-top: 3px;
 }
 
+.npc-influence-manager .influence-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+
 .npc-influence-manager .npc-controls {
   display: flex;
   gap: 5px;
+  flex: 2;
 }
 
 .npc-influence-manager .npc-controls button {

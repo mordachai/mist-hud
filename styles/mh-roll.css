@@ -10,7 +10,7 @@
 
 .mist-hud-roll .message-sender {
   font-size: 1.0em!important;
-  font-family: var(--font-family-main1), sans-serif !important;
+  font-family: var(--font-family-main1) !important;
   font-weight: bolder;
   text-shadow: 1px 1px 1px var(--self-light-color);
   color: var(--text-main-color) !important;
@@ -110,7 +110,7 @@
   }
 
   .mhr-outcome{
-    font-family: var(--font-family-outcome), sans-serif;
+    font-family: var(--font-family-outcome);
     font-size: 1.1em;
     font-weight: 700;
     color: var(--outcome-text-color);
@@ -121,7 +121,7 @@
   }
 
   .mhr-move-list{
-    font-family: var(--font-family-effects), Courier, monospace;
+    font-family: var(--font-family-effects);
     color: var(--effects-color2);
     font-size: 1.0em;
     list-style: none;
@@ -148,7 +148,7 @@
   .mhr-roll-result {
     font-size: 2.5em;
     text-align: center;
-    font-family: var(--font-family-roll), sans-serif;
+    font-family: var(--font-family-roll);
     text-shadow: -1px 1px 2px var(--roll-shadow-color);
     color: var(--outcome-text-color);
     font-stretch: extra-condensed;
@@ -199,7 +199,7 @@
   .mhr-npc-influence-tag {
     display: inline-block;
     padding: 1px 2px;
-    font-family: var(--font-family-tags), sans-serif;
+    font-family: var(--font-family-tags);
     font-size: 0.9rem;
     line-height: 1rem;
     border-radius: 3px;
@@ -309,7 +309,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-family-main1), sans-serif;
+  font-family: var(--font-family-main1);
   font-size: 20px;
   text-shadow: 0px 0px 3px rgb(243, 26, 113);
   margin-top: 5px;
@@ -369,7 +369,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 6px;
-  font-family: var(--font-family-tags), sans-serif;
+  font-family: var(--font-family-tags);
   color: var(--noise-verylight-color);
   text-align: center;
 }
@@ -414,12 +414,12 @@
   height: 40px;
   gap: 0px 2px;
   margin: 5px 0;
-  font-family: var(--font-family-effects), Courier, monospace;
+  font-family: var(--font-family-effects);
 }
 
 .mh-os-trackedfx-cost {
   text-align: center;
-  font-family: var(--font-family-tags), sans-serif;
+  font-family: var(--font-family-tags);
   font-size: 0.9em;
   padding-top: 3px;
 }
