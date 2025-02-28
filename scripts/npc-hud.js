@@ -3,6 +3,33 @@ import { detectActiveSystem } from './mh-settings.js';
 import { StoryTagDisplayContainer } from "/systems/city-of-mist/module/story-tag-window.js";
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
 
+globalThis.activeNpcInfluences = globalThis.activeNpcInfluences || {};
+
+// Add hooks to handle NPC and item lifecycle events
+Hooks.on('deleteActor', (actor, options, userId) => {
+// Only GMs should broadcast deletions
+if (!game.user.isGM) return;
+
+// Check if this is an NPC that might have influence
+if (actor.type === 'threat') {
+    // If this NPC had influence in the global cache, remove it
+    if (globalThis.activeNpcInfluences[actor.id]) {
+    // Emit deletion message
+    game.socket.emit('module.mist-hud', {
+        type: 'npcInfluence',
+        action: 'delete',
+        npcId: actor.id,
+        npcName: actor.name
+    });
+    
+    // Remove from local cache too
+    delete globalThis.activeNpcInfluences[actor.id];
+    
+    logger.debug(`NPC ${actor.name} deleted, removed influence`);
+    }
+}
+});
+
 // Global registry to store NPC HUD instances by actor ID
 const npcHudRegistry = new Map();
 
@@ -777,6 +804,7 @@ export class NpcHUD extends Application {
         const tagInfluence = this.calculateNpcTagInfluence();
         const statusInfluence = this.calculateNpcStatusInfluence();
         
+        console.log(`Tag Influence: ${tagInfluence}, Status Influence: ${statusInfluence}`);
         return tagInfluence + statusInfluence;
     }
 
@@ -793,10 +821,14 @@ export class NpcHUD extends Application {
         const npcId = this.actor.id;
         const npcName = this.actor.name;
         
-        // Create influence data object
+        // Create influence data object with token awareness
         const influenceData = {
             npcId,
             npcName,
+            // If this HUD is associated with a token, add token data
+            tokenId: this.token ? this.token.id : null,
+            tokenName: this.token ? this.token.name : null,
+            actorLink: this.token ? this.token.document.actorLink : true,
             tagInfluence,
             statusInfluence,
             totalInfluence,
@@ -807,18 +839,32 @@ export class NpcHUD extends Application {
         
         // Store the current influence value in the actor's flags (for GM reference)
         this.actor.setFlag('mist-hud', 'npcInfluence', influenceData)
-            .then(() => {
-                console.log(`NPC influence updated for ${npcName}: ${totalInfluence} (Tags: ${tagInfluence}, Statuses: ${statusInfluence})`);
-                
-                // Emit via socket to all connected players
-                game.socket.emit('module.mist-hud', {
-                    type: 'npcInfluence',
-                    data: influenceData
-                });
-            })
-            .catch(error => {
-                console.error("Error updating NPC influence flag:", error);
+        .then(() => {
+          console.log(`NPC influence updated for ${npcName}: ${totalInfluence}`);
+          
+          // Update global cache
+          if (this.token && !this.token.document.actorLink) {
+            globalThis.activeNpcInfluences[this.token.id] = influenceData;
+          } else {
+            globalThis.activeNpcInfluences[npcId] = influenceData;
+          }
+          
+          // Emit via socket to all connected players
+          game.socket.emit('module.mist-hud', {
+            type: 'npcInfluence',
+            data: influenceData
+          });
+          
+          // Notify clients of change (only if GM)
+          if (game.user.isGM) {
+            game.socket.emit('module.mist-hud', {
+              type: 'npcInfluenceUpdated'
             });
+          }
+        })
+        .catch(error => {
+          console.error("Error updating NPC influence flag:", error);
+        });
     }
 
     async render(force = false, options = {}) {
@@ -1023,10 +1069,79 @@ export class NpcHUD extends Application {
         } catch (error) {
             console.error("Error in _createStoryTagFromHUD:", error);
         }
-    }      
-
-
+    }
 }
+
+// Synchronize all NPC influences when a scene loads
+Hooks.on('canvasReady', async () => {
+    // Only GM should recalculate and broadcast all influences
+    if (game.user.isGM) {
+        // Find all threat-type NPCs in the current scene
+        const sceneTokenIds = canvas.tokens.placeables
+            .filter(t => t.actor && t.actor.type === 'threat')
+            .map(t => t.id);
+            
+        // Find all corresponding HUDs
+        for (const tokenId of sceneTokenIds) {
+            const token = canvas.tokens.get(tokenId);
+            if (!token || !token.actor) continue;
+            
+            // Get or create HUD instance
+            let npcHud = npcHudRegistry.get(tokenId) || npcHudRegistry.get(token.actor.id);
+            
+            // If no HUD exists, create one
+            if (!npcHud) {
+                npcHud = new NpcHUD();
+                npcHud.setActor(token.actor, token);
+            }
+            
+            // Calculate and emit influence
+            npcHud.emitNpcInfluence();
+            
+            // Add a small delay to prevent socket congestion
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        logger.debug(`Synchronized influences for ${sceneTokenIds.length} NPCs in scene`);
+    }
+});
+
+// Add a method to sync all influences (can be called manually if needed)
+export async function syncAllNpcInfluences() {
+    if (!game.user.isGM) {
+        ui.notifications.warn("Only the GM can synchronize all NPC influences");
+        return;
+    }
+    
+    // Find all NPC-type actors
+    const npcActors = game.actors.filter(a => a.type === 'threat');
+    
+    let counter = 0;
+    
+    // Process each actor
+    for (const actor of npcActors) {
+        // Find existing HUD or create new one
+        let npcHud = npcHudRegistry.get(actor.id);
+        
+        if (!npcHud) {
+            npcHud = new NpcHUD();
+            npcHud.setActor(actor);
+        }
+        
+        // Emit influence data
+        npcHud.emitNpcInfluence();
+        counter++;
+        
+        // Add a small delay to prevent socket congestion
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    ui.notifications.info(`Synchronized influences for ${counter} NPCs`);
+    return counter;
+}
+
+// Add a command that can be run from the console
+globalThis.syncAllNpcInfluences = syncAllNpcInfluences;
 
 // Re-register the original hooks in the original way
 Hooks.once("init", () => {
@@ -1126,4 +1241,78 @@ Hooks.on('canvasReady', () => {
     }
 });
 
+// Add these hooks at the end of npc-hud.js before the export statement
+
+// Handle tag/status creation
+Hooks.on('createItem', (item, options, userId) => {
+    // Only process if this is a tag or status on an NPC
+    if (!item.parent || item.parent.type !== 'threat') return;
+    if (!['tag', 'status'].includes(item.type)) return;
+    
+    // Get the parent NPC
+    const npc = item.parent;
+    
+    // Find the matching HUD instance
+    const npcHud = npcHudRegistry.get(npc.id);
+    if (npcHud) {
+        // Recalculate and emit the new influence values
+        npcHud.emitNpcInfluence();
+    }
+});
+
+// Handle tag/status deletion
+Hooks.on('deleteItem', (item, options, userId) => {
+    // Only process if this is a tag or status on an NPC
+    if (!item.parent || item.parent.type !== 'threat') return;
+    if (!['tag', 'status'].includes(item.type)) return;
+    
+    // Get the parent NPC
+    const npc = item.parent;
+    
+    // Find the matching HUD instance
+    const npcHud = npcHudRegistry.get(npc.id);
+    if (npcHud) {
+        // Recalculate and emit the new influence values
+        npcHud.emitNpcInfluence();
+    }
+});
+
+// Handle modifications to tag/status properties
+Hooks.on('updateItem', (item, changes, options, userId) => {
+    // Only process if this is a tag or status on an NPC
+    if (!item.parent || item.parent.type !== 'threat') return;
+    if (!['tag', 'status'].includes(item.type)) return;
+    
+    // Get the parent NPC
+    const npc = item.parent;
+    
+    // Check if any relevant fields were changed
+    const relevantChanges = [
+        'system.burn_state', 
+        'system.burned', 
+        'system.tier', 
+        'system.specialType'
+    ];
+    
+    // Check for flag changes
+    const hasFlagChanges = options.flags && 
+        (options.flags['mist-hud']?.tagState || 
+         options.flags['mist-hud']?.statusType);
+         
+    // Check if any system changes affect influence
+    const hasSystemChanges = Object.keys(changes.system || {})
+        .some(key => relevantChanges.includes(`system.${key}`));
+    
+    // Only emit if relevant changes were made
+    if (hasFlagChanges || hasSystemChanges) {
+        // Find the matching HUD instance
+        const npcHud = npcHudRegistry.get(npc.id);
+        if (npcHud) {
+            // Recalculate and emit the new influence values
+            npcHud.emitNpcInfluence();
+        }
+    }
+});
+
 export default NpcHUD;
+//export { NpcHUD };

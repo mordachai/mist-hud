@@ -1,0 +1,149 @@
+<div class="npc-influence-manager">
+  <header class="influence-summary">
+    <div class="influence-info">
+      <h2>Current Scene: <span class="scene-name">{{currentSceneName}}</span></h2>
+      <h3>Total Scene Influence: <span class="influence-value {{#if totalInfluence}}{{#if (lt totalInfluence 0)}}negative{{else}}positive{{/if}}{{/if}}">{{totalInfluence}}</span></h3>
+      <p class="influence-note">Only NPCs in the current scene affect player rolls</p>
+    </div>
+    <div class="controls">
+      <button class="sync-all-npcs"><i class="fas fa-sync"></i> Sync Scene</button>
+      <button class="refresh-ui"><i class="fas fa-redo"></i> Refresh</button>
+      <button class="clear-all-influences"><i class="fas fa-trash"></i> Clear All</button>
+    </div>
+  </header>
+  
+  <nav class="tabs">
+    <a class="item" data-tab="scene"><i class="fas fa-map"></i> Current Scene ({{sceneNpcs.length}})</a>
+    <a class="item" data-tab="active-scene"><i class="fas fa-bolt"></i> Active in Scene ({{activeSceneNpcs.length}})</a>
+    <a class="item" data-tab="active"><i class="fas fa-list"></i> All Active ({{activeNpcs.length}})</a>
+    <a class="item" data-tab="all"><i class="fas fa-users"></i> All NPCs ({{allNpcs.length}})</a>
+  </nav>
+  
+  <section class="content">
+    <div class="tab" data-tab="scene">
+      {{#if hasSceneNpcs}}
+        <ul class="npc-list">
+          {{#each sceneNpcs}}
+            <li class="npc-item {{#if isInCurrentScene}}in-scene{{/if}} {{#if isLinked}}linked{{else}}unlinked{{/if}}" data-npc-id="{{id}}" data-token-id="{{tokenId}}">
+              <img class="npc-image" src="{{img}}" alt="{{name}}">
+              <div class="npc-info">
+                <h3 class="npc-name">{{name}} {{#unless isLinked}}<span class="token-badge">Token</span>{{/unless}}</h3>
+                {{#if hasInfluence}}
+                  <div class="npc-influence {{#if influence}}{{#if (lt influence 0)}}negative{{else}}positive{{/if}}{{/if}}">
+                    Influence: {{influence}} (Tags: {{tagInfluence}}, Statuses: {{statusInfluence}})
+                  </div>
+                {{else}}
+                  <div class="npc-influence neutral">No active influence</div>
+                {{/if}}
+              </div>
+              <div class="npc-controls">
+                {{#if hasDetails}}
+                  <button class="view-details" data-actor-id="{{id}}" data-token-id="{{tokenId}}"><i class="fas fa-eye"></i></button>
+                {{/if}}
+                <button class="toggle-influence" data-actor-id="{{id}}" data-token-id="{{tokenId}}" data-is-linked="{{isLinked}}" data-has-influence="{{hasInfluence}}">
+                  <i class="fas fa-toggle-{{#if hasInfluence}}on{{else}}off{{/if}}"></i>
+                </button>
+              </div>
+            </li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <p class="empty-state">No NPCs found in the current scene.</p>
+      {{/if}}
+    </div>
+    
+    <div class="tab" data-tab="active-scene">
+      {{#if hasActiveSceneNpcs}}
+        <ul class="npc-list">
+          {{#each activeSceneNpcs}}
+            <li class="npc-item in-scene {{#if isLinked}}linked{{else}}unlinked{{/if}}" data-npc-id="{{id}}" data-token-id="{{tokenId}}">
+              <img class="npc-image" src="{{img}}" alt="{{name}}">
+              <div class="npc-info">
+                <h3 class="npc-name">{{name}} {{#unless isLinked}}<span class="token-badge">Token</span>{{/unless}}</h3>
+                <div class="npc-influence {{#if influence}}{{#if (lt influence 0)}}negative{{else}}positive{{/if}}{{/if}}">
+                  Influence: {{influence}} (Tags: {{tagInfluence}}, Statuses: {{statusInfluence}})
+                </div>
+              </div>
+              <div class="npc-controls">
+                {{#if hasDetails}}
+                  <button class="view-details" data-actor-id="{{id}}" data-token-id="{{tokenId}}"><i class="fas fa-eye"></i></button>
+                {{/if}}
+                <button class="toggle-influence" data-actor-id="{{id}}" data-token-id="{{tokenId}}" data-is-linked="{{isLinked}}" data-has-influence="true">
+                  <i class="fas fa-toggle-on"></i>
+                </button>
+              </div>
+            </li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <p class="empty-state">No active NPC influences in the current scene. Use the "Current Scene" tab to add influences.</p>
+      {{/if}}
+    </div>
+    
+    <div class="tab" data-tab="active">
+      {{#if hasActiveNpcs}}
+        <ul class="npc-list">
+          {{#each activeNpcs}}
+            <li class="npc-item {{#if isInCurrentScene}}in-scene{{else}}not-in-scene{{/if}} {{#if isLinked}}linked{{else}}unlinked{{/if}}" data-npc-id="{{id}}" data-token-id="{{tokenId}}">
+              <img class="npc-image" src="{{img}}" alt="{{name}}">
+              <div class="npc-info">
+                <h3 class="npc-name">{{name}} {{#unless isLinked}}<span class="token-badge">Token</span>{{/unless}}</h3>
+                <div class="npc-influence {{#if influence}}{{#if (lt influence 0)}}negative{{else}}positive{{/if}}{{/if}}">
+                  Influence: {{influence}} (Tags: {{tagInfluence}}, Statuses: {{statusInfluence}})
+                </div>
+                {{#unless isInCurrentScene}}
+                <div class="scene-status">Not in current scene - influence not applied</div>
+                {{/unless}}
+              </div>
+              <div class="npc-controls">
+                {{#if hasDetails}}
+                  <button class="view-details" data-actor-id="{{id}}" data-token-id="{{tokenId}}"><i class="fas fa-eye"></i></button>
+                {{/if}}
+                <button class="toggle-influence" data-actor-id="{{id}}" data-token-id="{{tokenId}}" data-is-linked="{{isLinked}}" data-has-influence="true">
+                  <i class="fas fa-toggle-on"></i>
+                </button>
+              </div>
+            </li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <p class="empty-state">No active NPC influences. Use the "Scene" or "All NPCs" tab to add influences.</p>
+      {{/if}}
+    </div>
+    
+    <div class="tab" data-tab="all">
+      {{#if hasAllNpcs}}
+        <ul class="npc-list">
+          {{#each allNpcs}}
+            <li class="npc-item {{#if isInCurrentScene}}in-scene{{else}}not-in-scene{{/if}} {{#if isLinked}}linked{{else}}unlinked{{/if}}" data-npc-id="{{id}}" data-token-id="{{tokenId}}">
+              <img class="npc-image" src="{{img}}" alt="{{name}}">
+              <div class="npc-info">
+                <h3 class="npc-name">{{name}} {{#unless isLinked}}<span class="token-badge">Token</span>{{/unless}}</h3>
+                {{#if hasInfluence}}
+                  <div class="npc-influence {{#if influence}}{{#if (lt influence 0)}}negative{{else}}positive{{/if}}{{/if}}">
+                    Influence: {{influence}} (Tags: {{tagInfluence}}, Statuses: {{statusInfluence}})
+                  </div>
+                  {{#unless isInCurrentScene}}
+                  <div class="scene-status">Not in current scene - influence not applied</div>
+                  {{/unless}}
+                {{else}}
+                  <div class="npc-influence neutral">No active influence</div>
+                {{/if}}
+              </div>
+              <div class="npc-controls">
+                {{#if hasDetails}}
+                  <button class="view-details" data-actor-id="{{id}}" data-token-id="{{tokenId}}"><i class="fas fa-eye"></i></button>
+                {{/if}}
+                <button class="toggle-influence" data-actor-id="{{id}}" data-token-id="{{tokenId}}" data-is-linked="{{isLinked}}" data-has-influence="{{hasInfluence}}">
+                  <i class="fas fa-toggle-{{#if hasInfluence}}on{{else}}off{{/if}}"></i>
+                </button>
+              </div>
+            </li>
+          {{/each}}
+        </ul>
+      {{else}}
+        <p class="empty-state">No NPCs found in the game.</p>
+      {{/if}}
+    </div>
+  </section>
+</div>

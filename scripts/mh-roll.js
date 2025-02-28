@@ -6,7 +6,6 @@ import { initializeAccordions } from './accordion-handler.js';
 import { detectActiveSystem } from './mh-settings.js';
 import { checkRolls } from "./bonus-utils.js";
 
-
 // Debug mode setting
 let debug = false;
 
@@ -23,7 +22,6 @@ Hooks.once("init", () => {
   debug = game.settings.get("mist-hud", "debugMode");
 });
 
-
 let toBurnTags = $('.mh-power-tag.toBurn, .mh-power-tag.crew.toBurn').toArray().map(tag => $(tag).data('id'));
 
 async function rollDice() {
@@ -36,7 +34,6 @@ async function rollDice() {
 
   return roll.dice[0].results.map(die => die.result);
 }
-
 
 //Main Roll function
 async function rollMove(moveName) {
@@ -79,6 +76,17 @@ async function rollMove(moveName) {
   if (!hud || !hud.actor) {
     ui.notifications.warn("MistHUD is not ready. Please select an actor.");
     return;
+  }
+
+  if (!game.user.isGM) {
+    // Request latest influences
+    game.socket.emit('module.mist-hud', {
+      type: 'requestNpcInfluences',
+      userId: game.user.id
+    });
+    
+    // Brief delay to allow response to come back
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
 
   const actor = hud.actor;
@@ -131,15 +139,23 @@ async function rollMove(moveName) {
 
   const totalCrewPowerTags = calculateCrewPowerTags(hud);
   const totalCrewWeaknessTags = calculateCrewWeaknessTags(hud);
-
+  
   // Get NPC influence data with enhanced debugging
   console.log("Retrieving NPC influences for roll...");
   const npcInfluences = getNpcInfluences();
+
+  // Log each influence individually for debugging
+  console.log("NPC influences for this roll:");
+  npcInfluences.forEach(infl => {
+    console.log(` - ${infl.tokenName || infl.npcName}: ${infl.totalInfluence} (Tags: ${infl.tagInfluence}, Statuses: ${infl.statusInfluence})`);
+  });
+
   const totalNpcInfluence = calculateNpcInfluenceTotal(npcInfluences);
-  
+  console.log(`Total NPC influence for roll: ${totalNpcInfluence}`);
+
   // Create influence messages for chat display
   const influenceMessages = npcInfluences.map(infl => ({
-      npcName: infl.npcName || "Unknown NPC",
+      npcName: infl.tokenName || infl.npcName || "Unknown NPC",
       totalInfluence: Number(infl.totalInfluence) || 0,
       tagInfluence: Number(infl.tagInfluence) || 0,
       statusInfluence: Number(infl.statusInfluence) || 0
@@ -306,54 +322,142 @@ async function rollMove(moveName) {
   hud.cleanHUD(chatData.tagsData);
 }
 
-function debugNpcInfluences() {
-  const influences = globalThis.activeNpcInfluences || {};
-  const influencesArray = Object.values(influences);
-  
-  console.log("===== ACTIVE NPC INFLUENCES =====");
-  console.log(`Found ${influencesArray.length} influences in global cache`);
-  
-  influencesArray.forEach(infl => {
-      console.log(`${infl.npcName}: ${infl.totalInfluence} (Tags: ${infl.tagInfluence}, Statuses: ${infl.statusInfluence})`);
-  });
-  
-  const total = calculateNpcInfluenceTotal(influencesArray);
-  console.log(`Total influence that would be applied to a roll: ${total}`);
-  console.log("===== END DEBUG =====");
-  
-  return { influences: influencesArray, total };
-}
-// Expose the debug function globally
-globalThis.debugNpcInfluences = debugNpcInfluences;
-
 function getNpcInfluences() {
   // Access the global cache
   const influences = globalThis.activeNpcInfluences || {};
   
-  // Convert to array and filter out any nulls or empty values
-  const influencesArray = Object.values(influences).filter(infl => 
-      infl && typeof infl.totalInfluence !== 'undefined'
+  // Debug log the full influence cache
+  console.log("Full influence cache:", influences);
+  
+  // Get all tokens in the current scene
+  const currentSceneTokens = canvas.tokens.placeables
+    .filter(t => t.actor && t.actor.type === 'threat');
+  
+  // Create a collection of valid influences
+  const validInfluences = [];
+  
+  // Use a Set to track processed tokens specifically
+  const processedTokenIds = new Set();
+  
+  // Process each token in the scene INDIVIDUALLY
+  for (const token of currentSceneTokens) {
+    // Skip if we've already processed this specific token
+    if (processedTokenIds.has(token.id)) {
+      continue;
+    }
+    
+    let influence = null;
+    
+    // For unlinked tokens, look for influence by token ID first
+    if (!token.document.actorLink && influences[token.id]) {
+      influence = influences[token.id];
+      processedTokenIds.add(token.id);
+    } 
+    // For linked tokens, handle differently to avoid skipping tokens with same actor
+    else if (token.document.actorLink && influences[token.actor.id]) {
+      influence = influences[token.actor.id];
+      
+      // For linked actors, we only process each individual token once
+      // but we don't mark all tokens of this actor as processed
+      processedTokenIds.add(token.id);
+    }
+    
+    if (influence) {
+      // Make a deep copy of the influence to prevent reference issues
+      const influenceCopy = JSON.parse(JSON.stringify(influence));
+      
+      // Add extra identification for debugging
+      influenceCopy._tokenId = token.id;
+      influenceCopy._tokenName = token.name;
+      
+      validInfluences.push(influenceCopy);
+    }
+  }
+  
+  // Debug logs
+  console.log(`Found ${validInfluences.length} active NPC influences in current scene`);
+  console.log(`Scene NPC influences for calculation:`, validInfluences);
+  
+  return validInfluences;
+}
+
+// Debug function should also be scene-aware
+function debugNpcInfluences() {
+  const influences = globalThis.activeNpcInfluences || {};
+  
+  // Get all token IDs from the current scene
+  const currentSceneTokens = canvas.tokens.placeables
+    .filter(t => t.actor && t.actor.type === 'threat')
+    .map(t => t.actor.id);
+  
+  // Filter to scene-specific NPCs
+  const sceneInfluences = Object.values(influences).filter(infl => 
+    infl && currentSceneTokens.includes(infl.npcId)
   );
   
-  console.log(`Found ${influencesArray.length} active NPC influences:`, influencesArray);
-  return influencesArray;
+  // Get all influences for comparison
+  const allInfluences = Object.values(influences);
+  
+  console.log("===== ACTIVE NPC INFLUENCES =====");
+  console.log(`Current Scene: ${canvas.scene.name}`);
+  console.log(`Found ${sceneInfluences.length} influences in current scene (${allInfluences.length} total in cache)`);
+  
+  console.log("--- CURRENT SCENE INFLUENCES ---");
+  sceneInfluences.forEach(infl => {
+    console.log(`${infl.npcName}: ${infl.totalInfluence} (Tags: ${infl.tagInfluence}, Statuses: ${infl.statusInfluence})`);
+  });
+  
+  if (allInfluences.length > sceneInfluences.length) {
+    console.log("--- OTHER SCENES INFLUENCES (NOT APPLIED) ---");
+    const otherSceneInfluences = allInfluences.filter(infl => !currentSceneTokens.includes(infl.npcId));
+    otherSceneInfluences.forEach(infl => {
+      console.log(`${infl.npcName}: ${infl.totalInfluence} (not in current scene)`);
+    });
+  }
+  
+  const total = calculateNpcInfluenceTotal(sceneInfluences);
+  console.log(`Total influence applied to rolls in current scene: ${total}`);
+  console.log("===== END DEBUG =====");
+  
+  return { 
+    sceneInfluences, 
+    allInfluences,
+    total,
+    sceneName: canvas.scene.name
+  };
 }
+// Expose the debug function globally
+globalThis.debugNpcInfluences = debugNpcInfluences;
 
 // Calculate total from all influences
 function calculateNpcInfluenceTotal(influences) {
   if (!influences || influences.length === 0) {
-      console.log("No NPC influences found, returning 0");
-      return 0;
+    console.log("No NPC influences found, returning 0");
+    return 0;
   }
   
-  // Sum up all total influences, ensuring we have valid numbers
-  const total = influences.reduce((sum, infl) => {
-      const value = Number(infl.totalInfluence) || 0;
-      console.log(`Adding ${value} from ${infl.npcName}`);
-      return sum + value;
-  }, 0);
+  // Create a Map to track token-specific influences
+  const tokenInfluences = new Map();
   
-  console.log(`Total NPC influence calculated: ${total}`);
+  // Process each influence by token
+  influences.forEach(infl => {
+    const key = infl._tokenId || infl.tokenId || infl.npcId;
+    const name = infl._tokenName || infl.tokenName || infl.npcName || "Unknown";
+    const value = Number(infl.totalInfluence) || 0;
+    
+    tokenInfluences.set(key, { name, value });
+  });
+  
+  // Calculate total from all token influences
+  let total = 0;
+  console.log("DETAILED INFLUENCE BREAKDOWN:");
+  
+  tokenInfluences.forEach((data, key) => {
+    console.log(`${data.name} (${key}): ${data.value}`);
+    total += data.value;
+  });
+  
+  console.log(`TOTAL NPC INFLUENCE: ${total}`);
   return total;
 }
 
@@ -1075,9 +1179,6 @@ const CityOfMistRolls = {
   getRollModifier
 };
 
-// Export CityOfMistRolls for potential external usage
-export default CityOfMistRolls;
-
 Hooks.once('ready', () => {
   globalThis.CityOfMistRolls = globalThis.CityOfMistRolls || {};
   globalThis.CityOfMistRolls = CityOfMistRolls;
@@ -1118,3 +1219,5 @@ Hooks.once("ready", () => {
   };
 });
 
+// Export CityOfMistRolls for potential external usage
+export default CityOfMistRolls;

@@ -294,3 +294,29 @@ Hooks.on("renderChatMessage", (message, html) => {
     }
 });
 
+// This makes the NpcHUD class available through a standard API
+Hooks.once('ready', () => {
+    // Wait until the document is ready and all modules are loaded
+    
+    // Create a module API to expose functionality
+    const moduleApi = {
+      // Method to get the NpcHUD class
+      getNpcHUD: () => {
+        return globalThis.NpcHUD;
+      },
+      
+      // Reference to the NpcHUD class itself
+      NpcHUD: globalThis.NpcHUD,
+      
+      // Additional utility functions
+      syncAllNpcInfluences: globalThis.syncAllNpcInfluences,
+      openNPCInfluenceManager: globalThis.openNPCInfluenceManager,
+      debugNpcInfluences: globalThis.debugNpcInfluences
+    };
+    
+    // Register the API with the module system
+    game.modules.get('mist-hud').api = moduleApi;
+    
+    console.log("Mist HUD API registered");
+  });
+

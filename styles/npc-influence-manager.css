@@ -1,0 +1,317 @@
+/* NPC Influence Manager Styles */
+
+.npc-influence-manager {
+  font-family: var(--font-primary);
+  color: var(--color-text-dark-primary);
+}
+
+/* Header styling */
+.npc-influence-manager .influence-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--color-border-dark-tertiary);
+  padding-bottom: 10px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.npc-influence-manager .influence-summary h2 {
+  border: none;
+  margin: 0;
+  font-size: 1.3em;
+}
+
+.npc-influence-manager .influence-summary h3 {
+  margin: 5px 0;
+  font-size: 1.1em;
+}
+
+.npc-influence-manager .influence-value {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.npc-influence-manager .influence-value.positive {
+  color: #2ecc71;
+  text-shadow: 0 0 5px rgba(46, 204, 113, 0.3);
+}
+
+.npc-influence-manager .influence-value.negative {
+  color: #e74c3c;
+  text-shadow: 0 0 5px rgba(231, 76, 60, 0.3);
+}
+
+.npc-influence-manager .influence-note {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+/* Tab styling */
+.npc-influence-manager .tabs {
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.npc-influence-manager .tabs .item {
+  padding: 5px 10px;
+  margin-right: 5px;
+  border-radius: 5px 5px 0 0;
+  border: 1px solid transparent;
+  border-bottom: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.npc-influence-manager .tabs .item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.npc-influence-manager .tabs .item.active {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-color: #ddd;
+  position: relative;
+  bottom: -1px;
+  font-weight: bold;
+}
+
+.npc-influence-manager .tabs .item i {
+  margin-right: 5px;
+}
+
+.npc-influence-manager .tab {
+  display: none;
+}
+
+.npc-influence-manager .tab.active {
+  display: block;
+}
+
+/* Button controls */
+.npc-influence-manager .controls {
+  display: flex;
+  gap: 5px;
+}
+
+.npc-influence-manager .controls button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.npc-influence-manager .controls button i {
+  margin-right: 5px;
+}
+
+/* NPC list styling */
+.npc-influence-manager .npc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.npc-influence-manager .npc-item {
+  display: flex;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+  transition: background-color 0.2s;
+  border-radius: 3px;
+  margin-bottom: 4px;
+}
+
+.npc-influence-manager .npc-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.npc-influence-manager .npc-item.in-scene {
+  background-color: rgba(102, 187, 106, 0.1);
+}
+
+.npc-influence-manager .npc-item.not-in-scene {
+  background-color: rgba(250, 250, 250, 0.5);
+  opacity: 0.7;
+}
+
+.npc-influence-manager .npc-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.npc-influence-manager .npc-info {
+  flex: 1;
+}
+
+.npc-influence-manager .npc-name {
+  margin: 0 0 5px 0;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.npc-influence-manager .npc-influence {
+  font-size: 0.9em;
+}
+
+.npc-influence-manager .npc-influence.positive {
+  color: #2ecc71;
+}
+
+.npc-influence-manager .npc-influence.negative {
+  color: #e74c3c;
+}
+
+.npc-influence-manager .npc-influence.neutral {
+  color: #666;
+  font-style: italic;
+}
+
+.npc-influence-manager .scene-status {
+  font-size: 0.8em;
+  color: #e67e22;
+  font-style: italic;
+  margin-top: 3px;
+}
+
+.npc-influence-manager .npc-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.npc-influence-manager .npc-controls button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  line-height: 1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.npc-influence-manager .toggle-influence i.fa-toggle-on {
+  color: #2ecc71;
+}
+
+.npc-influence-manager .toggle-influence i.fa-toggle-off {
+  color: #7f8c8d;
+}
+
+.npc-influence-manager .empty-state {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 20px;
+}
+
+/* Details Dialog */
+.npc-influence-details h2 {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.npc-influence-details h3 {
+  margin: 15px 0 5px 0;
+  font-size: 1.1em;
+}
+
+.npc-influence-details ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.npc-influence-details li {
+  margin-bottom: 3px;
+}
+
+/* Toast notification when values change */
+.influence-update-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 5px;
+  z-index: 1000;
+  animation: fadeInOut 3s forwards;
+}
+
+/* Add these styles to npc-influence-manager.css */
+
+/* Token badge styles */
+.npc-influence-manager .token-badge {
+  font-size: 0.7em;
+  font-weight: normal;
+  background-color: #7950f2;
+  color: white;
+  padding: 2px 5px;
+  border-radius: 3px;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+/* Distinguish linked vs unlinked tokens */
+.npc-influence-manager .npc-item.unlinked {
+  border-left: 3px solid #7950f2;
+}
+
+.npc-influence-manager .npc-item.linked {
+  border-left: 3px solid transparent;
+}
+
+/* Add clearer distinction for unlinked tokens in the list */
+.npc-influence-manager .npc-item.unlinked .npc-name {
+  color: #7950f2;
+}
+
+/* Hover state tooltip */
+.npc-influence-manager .npc-item.unlinked::before {
+  content: "Unlinked token - has independent data";
+  position: absolute;
+  background-color: #343a40;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 0.8em;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 10;
+  left: 300px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.npc-influence-manager .npc-item.unlinked:hover::before {
+  opacity: 1;
+}
+
+/* Adjust positioning */
+.npc-influence-manager .npc-item {
+  position: relative;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(20px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-20px); }
+}

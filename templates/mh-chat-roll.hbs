@@ -75,29 +75,29 @@
         {{/each}}
         {{#each tagsData.storyTags}}
           <span class="mhr-story-tag {{stateClass}} {{#if temporary}}mhr-temporary-tag{{/if}}">
-            {{#if temporary}}⏱️ {{/if}}
-            {{#if permanent}}💎 {{/if}}
+            {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i> {{/if}}
+            {{#if permanent}}<i class="fa-solid fa-gem"></i> {{/if}}
             {{tagName}}
           </span>
         {{/each}}
         {{#each tagsData.statuses}}
           <span class="mhr-status-tag {{typeClass}} {{#if temporary}}mhr-temporary-status{{/if}} {{#if permanent}}mhr-permanent-status{{/if}}">
-            {{#if temporary}}⏱️ {{/if}}
-            {{#if permanent}}💎 {{/if}}
+            {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i> {{/if}}
+            {{#if permanent}}<i class="fa-solid fa-gem"></i> {{/if}}
             {{name}}-{{tier}}
           </span>
         {{/each}}
         {{#each tagsData.scnTags}}   
         <span class="scene-tag-item {{#if (eq this.type "positive")}}scene-positive{{else}}scene-negative{{/if}}">
-          {{#if this.temporary}}⏳ {{/if}}
-          {{#if this.permanent}}💎 {{/if}}
+          {{#if this.temporary}}<i class="fa-regular fa-hourglass-half"></i>  {{/if}}
+          {{#if this.permanent}}<i class="fa-solid fa-gem"></i> {{/if}}
           {{this.name}}
         </span>
         {{/each}}
         {{#each tagsData.sceneStatuses}}
           <span class="mhr-scene-status-tag {{typeClass}}">
-                {{#if temporary}}⏳{{/if}}
-                {{#if permanent}}💎{{/if}}
+                {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i> {{/if}}
+                {{#if permanent}}<i class="fa-solid fa-gem"></i> {{/if}}
                 {{name}}-{{tier}}
           </span>
         {{/each}}
