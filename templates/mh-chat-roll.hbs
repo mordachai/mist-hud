@@ -11,8 +11,7 @@
   {{#if rollResults}}
   <div class="mh-dice-rolls">
       {{#each rollResults}}
-        <div class="mh-die-d6">{{this}}
-        </div>
+        <div class="{{this.mainDiceClass}}">{{this.value}}</div>
       {{/each}}
   </div>
   <div class="{{diceClass}}"></div>
@@ -75,30 +74,32 @@
         {{/each}}
         {{#each tagsData.storyTags}}
           <span class="mhr-story-tag {{stateClass}} {{#if temporary}}mhr-temporary-tag{{/if}}">
-            {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i> {{/if}}
-            {{#if permanent}}<i class="fa-solid fa-gem"></i> {{/if}}
             {{tagName}}
+            {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
+            {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
           </span>
         {{/each}}
         {{#each tagsData.statuses}}
           <span class="mhr-status-tag {{typeClass}} {{#if temporary}}mhr-temporary-status{{/if}} {{#if permanent}}mhr-permanent-status{{/if}}">
-            {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i> {{/if}}
-            {{#if permanent}}<i class="fa-solid fa-gem"></i> {{/if}}
+            <i class="fa-light fa-suitcase-medical"></i> 
             {{name}}-{{tier}}
+            {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
+            {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
           </span>
         {{/each}}
         {{#each tagsData.scnTags}}   
         <span class="scene-tag-item {{#if (eq this.type "positive")}}scene-positive{{else}}scene-negative{{/if}}">
-          {{#if this.temporary}}<i class="fa-regular fa-hourglass-half"></i>  {{/if}}
-          {{#if this.permanent}}<i class="fa-solid fa-gem"></i> {{/if}}
           {{this.name}}
+          {{#if this.temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
+          {{#if this.permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
         </span>
         {{/each}}
         {{#each tagsData.sceneStatuses}}
           <span class="mhr-scene-status-tag {{typeClass}}">
-                {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i> {{/if}}
-                {{#if permanent}}<i class="fa-solid fa-gem"></i> {{/if}}
-                {{name}}-{{tier}}
+            <i class="fa-solid fa-suitcase-medical"></i> 
+            {{name}}-{{tier}}
+            {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
+            {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
           </span>
         {{/each}}
         {{#if (neq modifier 0)}}
@@ -109,15 +110,15 @@
         {{#if (neq this.totalNpcInfluence 0)}}
           <span class="mhr-npc-influence-tag {{#if (gt totalNpcInfluence 0)}}positive{{else}}negative{{/if}}">
             <i class="fa-solid fa-skull"></i> 
-            {{#if (gt totalNpcInfluence 0)}}+{{totalNpcInfluence}}{{else}}-{{totalNpcInfluence}}{{/if}}
+            {{#if (gt totalNpcInfluence 0)}}+{{totalNpcInfluence}}{{else}}{{totalNpcInfluence}}{{/if}}
           </span>
         {{/if}}
         {{#each helpHurtMessages}}
           <span class="mhr-help-hurt-tag {{#if (eq this.type "help")}}positive{{else}}negative{{/if}}">
             {{#if (eq this.type "help")}}
-              {{this.giverName}} +{{this.amount}}
+            <i class="fa-solid fa-life-ring"></i> {{this.giverName}} +{{this.amount}}
             {{else}}
-              {{this.giverName}} -{{this.amount}}
+            <i class="fa-solid fa-life-ring"></i> {{this.giverName}} -{{this.amount}}
             {{/if}}
           </span>
         {{/each}}

@@ -203,20 +203,20 @@
     font-size: 0.9rem;
     line-height: 1rem;
     border-radius: 3px;
-    color: black;
+    color: var(--text-tag-color) !important;
   }
    
   .mhr-power-tag, .mhr-story-tag, .mhr-weakness-tag.inverted,
   .mhr-status-tag.positive, .mhr-status-tag.scene-positive, .scene-tag-item.scene-positive,
   .mhr-scene-status-tag.scene-positive,.mhr-modifier.positive, .mhr-help-hurt-tag.positive, .mhr-npc-influence-tag.positive {
-    color: var(--text-tag-color);
+    color: var(--text-tag-color) !important;
     background-color: var(--positive-tag-borderColor);
   }
 
   .mhr-status-tag.negative, .mhr-weakness-tag,  .mhr-story-tag.inverted,
   .mhr-status-tag.scene-negative, .scene-tag-item.scene-negative,
   .mhr-scene-status-tag.scene-negative,.mhr-modifier.negative, .mhr-help-hurt-tag.negative, .mhr-npc-influence-tag.negative {
-    color: var(--text-tag-color);
+    color: var(--text-tag-color) !important;
     background-color: var(--negative-tag-borderColor);
   }
 
@@ -296,7 +296,7 @@
   }
   
   /* Adjust the dice appearance */
-.mh-die-d6 {
+.default-d6 {
   background-image: url('../ui/d12.svg');
   background-repeat: no-repeat;
   background-position: center; 
@@ -314,6 +314,26 @@
   text-shadow: 0px 0px 3px rgb(243, 26, 113);
   margin-top: 5px;
   filter: drop-shadow(0 0 3px #010108);
+}
+
+.burn-d6 {
+  background-image: url('../ui/d12-burn.svg');
+  background-repeat: no-repeat;
+  background-position: center; 
+  background-size: contain;
+  color: white;
+  font-weight: bold;
+  width: 33px;
+  height: 35px;
+  padding-bottom: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-main1);
+  font-size: 20px;
+  text-shadow: 0px 0px 3px rgb(243, 26, 113);
+  margin-top: 5px;
+  filter: drop-shadow(0 0 3px #71021a);
 }
 
 /*DYNAMITE PANEL*/

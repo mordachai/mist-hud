@@ -101,7 +101,6 @@ Hooks.once('init', () => {
         type: String,
         choices: {
             'allExpanded': 'All expanded',
-            'onlyMovesExpanded': 'Only Moves expanded',
             'allClosed': 'All closed'
         },
         default: 'allClosed',
@@ -171,7 +170,7 @@ Hooks.once('init', () => {
 
     game.settings.register("mist-hud", "useHotbarForRolls", {
         name: "Roll Moves using Hotbar",
-        hint: "If enabled, roll buttons will be placed in the hotbar instead of the HUD.",
+        hint: "If enabled, roll buttons will be placed in the hotbar instead on the left side of HUD.",
         scope: "world",
         config: true,
         type: Boolean,
@@ -193,7 +192,7 @@ Hooks.once('init', () => {
     
     game.settings.register("mist-hud", "useTextButtons", {
         name: "Use Text for Roll Buttons",
-        hint: "If enabled, roll buttons will use text instead of images.",
+        hint: "If enabled, roll buttons will use text abbreviations instead of images.",
         scope: "client",
         config: true,
         type: Boolean,

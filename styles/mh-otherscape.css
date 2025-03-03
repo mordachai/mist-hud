@@ -6,6 +6,7 @@
   --text-tag-color: #0b0643;
   --text-hud-main-color: #d7e5f5; 
   --text-hud-subtitles-color: #b4b9c0;
+  --text-status-color: #ecf5f4;
   --outcome-text-color: rgb(245,245,245) ;
   --effects-color1:#84c600;
   --effects-color2:rgb(245,245,245);
@@ -48,7 +49,7 @@
   align-items: center;
   justify-content: space-between; 
   margin: -3px -0px 1px -0px;
-  height: 28px;
+  height: 30px;
   padding: 0 10px;
   background-repeat: no-repeat;
   background-size: cover;
@@ -61,7 +62,7 @@
   align-items: center;
   justify-content: space-between; 
   margin: -3px -0px 1px -0px;
-  height: 28px;
+  height: 30px;
   padding: 0 10px;
   background-repeat: no-repeat;
   background-size: cover;
@@ -127,15 +128,10 @@
   text-shadow: whitesmoke 1px 0 3px;
 }
 
-
-
-
 .mh-theme-name {
   display: flex;
   align-items: center; /* Align text and stars */
   gap: 5px;
-
-
   font-family: var(--font-family-move);
   font-size: 1.3em;
   display: block;
@@ -161,7 +157,8 @@
   /* text-shadow: var(--noise-dark-color) 1px 1px 3px; */
 }
 
-.mh-theme-name-com-Crew {
+.mh-theme-name-com-Crew,
+.mh-theme-name-com-Extra{
   color: rgb(236, 244, 237);
   font-family: var(--font-family-main1);
   /* text-shadow: var(--noise-dark-color) 1px 1px 3px; */
@@ -612,9 +609,6 @@ color: var(--mythosOS-verylight-color);
 }
 
 .mh-essence-chart{
-  /* max-width: 100%;
-  height: fit-content;
-  margin: 10px 0; */
   float: left;
   width: 75px;
   height: 75px;

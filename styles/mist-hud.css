@@ -348,7 +348,7 @@ hr {
   flex-wrap: wrap;
   margin-top: 10px;
   align-items: center;
-  padding: 0;
+  padding: 3px;
 }
 
 .mh-statuses-list ul {

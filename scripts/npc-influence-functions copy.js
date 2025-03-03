@@ -8,6 +8,29 @@ const logger = {
   error: (...args) => console.error("NPC-Influence |", ...args)
 };
 
+// Add this near the top of the file, outside any function
+window.openNPCInfluenceManager = function() {
+  if (!game || !game.user || !game.user.isGM) {
+    ui.notifications.warn("Only the GM can manage NPC influences");
+    return;
+  }
+  
+  // Initialize the global influence cache if it doesn't exist
+  globalThis.activeNpcInfluences = globalThis.activeNpcInfluences || {};
+  
+  // Dynamically import the manager to avoid circular dependencies
+  import('./npc-influence-manager.js').then(module => {
+    const NPCInfluenceManager = module.NPCInfluenceManager;
+    new NPCInfluenceManager().render(true);
+  }).catch(error => {
+    console.error("Failed to load NPC Influence Manager:", error);
+    ui.notifications.error("Failed to load NPC Influence Manager");
+  });
+};
+
+// Also add it to globalThis for maximum compatibility
+globalThis.openNPCInfluenceManager = window.openNPCInfluenceManager;
+
 /**
 * Initialize the global NPC influence cache with improved socket handling
 * @function
@@ -160,12 +183,7 @@ export function initializeNpcInfluenceCache() {
         icon: "fas fa-balance-scale",
         button: true,
         onClick: () => {
-          // Use the global function from main module
-          if (typeof globalThis.openNPCInfluenceManager === 'function') {
-            globalThis.openNPCInfluenceManager();
-          } else {
-            ui.notifications.error("NPC Influence Manager function not available");
-          }
+          window.openNPCInfluenceManager();
         }
       });
     });
@@ -405,9 +423,6 @@ async function syncTokenInfluences() {
       }
     }
     
-    // Track if we created a temporary instance
-    let isTemporary = false;
-    
     if (!npcHud) {
       try {
         // Try to find the NpcHUD class
@@ -434,12 +449,8 @@ async function syncTokenInfluences() {
         // Create a temporary instance if we found the class - BUT DON'T RENDER IT
         if (NpcHUD) {
           npcHud = new NpcHUD();
-          isTemporary = true;
-          
           // Just set the actor without rendering
           if (typeof npcHud.setActor === 'function') {
-            // IMPORTANT: Set a flag to prevent auto-rendering
-            npcHud._doNotRender = true;
             npcHud.setActor(token.actor, token);
           }
         } else {
@@ -464,23 +475,14 @@ async function syncTokenInfluences() {
       logger.warn(`NPC HUD for ${token.actor.name} doesn't have emitNpcInfluence method`);
     }
     
-    // Clean up temporary instance 
-    if (isTemporary && npcHud) {
+    // Clean up temporary instance if it wasn't from the registry
+    if (npcHud && !globalThis.npcHudRegistry?.has(token.id) && !globalThis.npcHudRegistry?.has(token.actor.id)) {
       // If it's a temporary instance, make sure it's properly closed/cleaned up
       if (typeof npcHud.close === 'function') {
         try {
-          // Set flag to prevent rendering during close
-          npcHud._doNotRender = true;
-          npcHud._isClosed = true;
           await npcHud.close();
-          
-          // Remove any references that might have been created
-          if (npcHud.appId && ui.windows[npcHud.appId]) {
-            delete ui.windows[npcHud.appId];
-          }
         } catch (e) {
           // Ignore errors from closing
-          logger.warn("Error closing temporary NPC HUD:", e);
         }
       }
     }
@@ -784,8 +786,9 @@ globalThis.checkAndFixNpcInfluences = function() {
   return true;
 };
 
-// Initialize on ready
+// Initialize on ready - IMPORTANT FIXES HERE
 Hooks.once('ready', () => {
+ 
   // Initialize the cache
   initializeNpcInfluenceCache();
   

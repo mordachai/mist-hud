@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 286.02 300">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke-linejoin: round;
+      }
+
+      .cls-1, .cls-2 {
+        fill: none;
+        stroke: #ededee;
+        stroke-width: 10px;
+      }
+
+      .cls-3 {
+        fill: url(#radial-gradient);
+      }
+
+      .cls-3, .cls-4 {
+        stroke-width: 0px;
+      }
+
+      .cls-4 {
+        fill: #ededee;
+      }
+
+      .cls-2 {
+        stroke-linejoin: bevel;
+      }
+    </style>
+    <radialGradient id="radial-gradient" cx="143" cy="150.06" fx="143" fy="150.06" r="141.57" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f58322"/>
+      <stop offset=".08" stop-color="#d85a1c"/>
+      <stop offset=".19" stop-color="#ba3016"/>
+      <stop offset=".27" stop-color="#a71512"/>
+      <stop offset=".31" stop-color="#a10c11"/>
+      <stop offset=".56" stop-color="#88070a"/>
+      <stop offset=".89" stop-color="#620000"/>
+    </radialGradient>
+  </defs>
+  <g id="Layer_2-2" data-name="Layer 2">
+    <g id="Layer_2-2" data-name="Layer 2-2">
+      <g>
+        <path class="cls-3" d="M143,295c-.51,0-1.02-.1-1.53-.2l-82.31-26.73c-1.02-.31-1.84-.92-2.45-1.84L5.81,196.22c-.61-.82-.92-1.84-.92-2.86v-86.63c0-1.02.31-2.04.92-2.86L56.71,33.88c.61-.82,1.43-1.43,2.45-1.84L141.47,5.31c.51-.2,1.02-.2,1.53-.2s1.02.1,1.53.2l82.31,26.73c1.02.31,1.84.92,2.45,1.84l50.9,70c.61.82.92,1.84.92,2.86v86.63c0,1.02-.31,2.04-.92,2.86l-50.9,70c-.61.82-1.43,1.43-2.45,1.84l-82.31,26.73c-.51.2-1.02.2-1.53.2h0Z"/>
+        <path class="cls-4" d="M143,14.9l79.35,25.82,49.06,67.55v83.47l-49.06,67.55-79.35,25.82-79.35-25.82L14.59,191.73v-83.47L63.65,40.71l79.35-25.82M143,0c-1.02,0-2.04.2-3.06.51L57.73,27.24c-1.94.61-3.67,1.94-4.9,3.57L1.84,100.92c-1.22,1.73-1.84,3.67-1.84,5.82v86.63c0,2.04.61,4.08,1.84,5.82l50.9,70c1.22,1.73,2.96,2.96,4.9,3.57l82.31,26.73c1.02.31,2.04.51,3.06.51s2.04-.2,3.06-.51l82.31-26.73c1.94-.61,3.67-1.94,4.9-3.57l50.9-70c1.22-1.73,1.84-3.67,1.84-5.82v-86.63c0-2.04-.61-4.08-1.84-5.82l-50.9-70c-1.22-1.73-2.96-2.96-4.9-3.57L146.06.51c-.92-.31-2.04-.51-3.06-.51h0Z"/>
+        <polygon class="cls-2" points="143 47.14 45.8 117.86 82.92 232.24 203.18 232.24 240.31 117.86 143 47.14"/>
+        <line class="cls-1" x1="240.31" y1="117.86" x2="276.21" y2="106.73"/>
+        <line class="cls-1" x1="203.18" y1="232.24" x2="225.31" y2="263.37"/>
+        <line class="cls-1" x1="82.92" y1="232.24" x2="60.69" y2="263.37"/>
+        <line class="cls-1" x1="45.8" y1="117.86" x2="9.89" y2="106.73"/>
+        <line class="cls-1" x1="143" y1="47.14" x2="143" y2="9.9"/>
+      </g>
+    </g>
+  </g>
+</svg>

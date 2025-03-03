@@ -22,7 +22,12 @@ Hooks.once("init", () => {
   debug = game.settings.get("mist-hud", "debugMode");
 });
 
-let toBurnTags = $('.mh-power-tag.toBurn, .mh-power-tag.crew.toBurn').toArray().map(tag => $(tag).data('id'));
+//let toBurnTags = $('.mh-power-tag.toBurn, .mh-power-tag.crew.toBurn').toArray().map(tag => $(tag).data('id'));
+
+
+// ====================
+// ROLL FUNCTIONS
+// ====================
 
 async function rollDice() {
   const roll = new Roll("2d6");
@@ -35,7 +40,6 @@ async function rollDice() {
   return roll.dice[0].results.map(die => die.result);
 }
 
-//Main Roll function
 async function rollMove(moveName) {
   //const hud = MistHUD.getInstance();
 
@@ -221,6 +225,7 @@ async function rollMove(moveName) {
   let outcome;
   let moveEffects = [];
   let diceClass = "default-dice";
+  let mainDiceClass = "default-d6";
   let outcomeClass = "default-outcome";
   const isDoubleOnes = rollResults.every(r => r === 1);
   const isDoubleSixes = rollResults.every(r => r === 6);
@@ -253,15 +258,20 @@ async function rollMove(moveName) {
     if (dynamiteEnabled && rollTotal >= 12) {
       outcome = "dynamite";
       moveEffects = move.dynamiteEffects || [];
+      diceClass = "double-sixes"; // For dynamite rolls
+      outcomeClass = "outcome-success-double-sixes";
     } else if (rollTotal >= 10) {
       outcome = "success";
       moveEffects = move.successEffects || [];
+      outcomeClass = "outcome-success";
     } else if (rollTotal >= 7) {
       outcome = "partial";
       moveEffects = move.partialEffects || [];
+      outcomeClass = "outcome-partial";
     } else {
       outcome = "fail";
       moveEffects = move.failEffects || [];
+      outcomeClass = "outcome-fail";
     }
   } else {
     console.error(`Unknown system: ${activeSystem}`);
@@ -273,11 +283,17 @@ async function rollMove(moveName) {
   const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
   const displayRollTotal = (dynamiteEnabled && rollTotal >= 12) ? `<span>${rollTotal}</span><span class="firecracker-emoji">🧨</span>` : rollTotal;
 
+  // Create an array of roll results objects with the appropriate class
+  const formattedRollResults = rollResults.map(value => ({
+    value: value,
+    mainDiceClass: mainDiceClass
+  }));
+
   const chatData = {
     moveName: move.name,
     actorName: actor.name,
     subtitle: move.subtitle || "",
-    rollResults,
+    rollResults: formattedRollResults, // Use the new format with diceClass included with each die
     outcomeMessage,
     calculatedPower,
     totalCrewPowerTags,
@@ -296,7 +312,7 @@ async function rollMove(moveName) {
     storyTags: tagsData.storyTags,
     statuses: tagsData.statuses,
     trackedEffects: move.trackedEffects || null,
-    diceClass,
+    diceClass, // Keep for backward compatibility
     outcomeClass,
     helpHurtMessages: bonusMessages,
     totalNpcInfluence,
@@ -321,6 +337,425 @@ async function rollMove(moveName) {
   await burnCrispyTags(loadoutTags);
   hud.cleanHUD(chatData.tagsData);
 }
+
+async function rollBurnForHitCityOfMist(moveName) {
+  // Note: This function uses a fixed roll of 7 instead of rolling dice
+  
+  const activeToken = canvas.tokens.controlled[0];
+  if (!activeToken || !activeToken.actor) {
+    ui.notifications.warn("Please select a token first");
+    return;
+  }
+  
+  const hud = globalThis.playerHudRegistry.get(activeToken.actor.id);
+  if (!hud) {
+    ui.notifications.warn("No HUD found for this actor");
+    return;
+  }
+
+  const actor = hud.actor;
+  const move = moveConfig[moveName];
+  const activeSystem = game.settings.get("city-of-mist", "system");
+
+  // Retrieve the bonuses from the actor flag immediately
+  const receivedBonuses = actor.getFlag('mist-hud', 'received-bonuses') || {};
+
+  // Build bonus messages for the chat roll
+  const bonusMessages = [];
+  for (const giverId in receivedBonuses) {
+    const bonus = receivedBonuses[giverId];
+    const giverActor = game.actors.get(giverId);
+    bonusMessages.push({
+      type: bonus.type,
+      amount: bonus.amount,
+      giverName: giverActor ? giverActor.name : "Unknown"
+    });
+  }
+
+  // Calculate totalBonus as before
+  const activeBonuses = Object.values(receivedBonuses);
+  const helpBonuses = activeBonuses.filter(bonus => bonus.type === 'help')
+      .reduce((sum, bonus) => sum + bonus.amount, 0);
+  const hurtBonuses = activeBonuses.filter(bonus => bonus.type === 'hurt')
+      .reduce((sum, bonus) => sum + bonus.amount, 0);
+  const totalBonus = helpBonuses - hurtBonuses;
+
+  // Get NPC influence data
+  console.log("Retrieving NPC influences for burn-for-hit roll...");
+  const npcInfluences = getNpcInfluences();
+  const totalNpcInfluence = calculateNpcInfluenceTotal(npcInfluences);
+  console.log(`Total NPC influence for burn-for-hit roll: ${totalNpcInfluence}`);
+
+  // Create influence messages for chat display
+  const influenceMessages = npcInfluences.map(infl => ({
+    npcName: infl.tokenName || infl.npcName || "Unknown NPC",
+    totalInfluence: Number(infl.totalInfluence) || 0,
+    tagInfluence: Number(infl.tagInfluence) || 0,
+    statusInfluence: Number(infl.statusInfluence) || 0
+  }));
+
+  // Instead of a fixed bonus of 3, we want to use +1 if a crew tag is marked to burn.
+  // Look up in the HUD's DOM: if any crew power tag has the "toBurn" class, then use 1.
+  const crewBurnTagExists = hud.element.find('.mh-power-tag.Crew.toBurn').length > 0;
+  const burnBasePower = crewBurnTagExists ? 1 : 3;
+  const fixedRoll = 7;
+
+  // Get status adjustments.
+  const totalCharStatuses = calculateCharacterStatuses(hud);
+  const totalSceneStatuses = calculateSceneStatuses(hud);
+  const totalScnTags = calculateScnTags(hud);
+  const modifier = getRollModifier(hud) || 0;
+
+  // Calculate final total with NPC influence included
+  const finalTotal = burnBasePower + fixedRoll + totalCharStatuses + totalSceneStatuses + totalScnTags + totalBonus + modifier + totalNpcInfluence;
+
+  // Check if the "Roll is Dynamite!" toggle is ON
+  let rollIsDynamiteForced = false;
+  if (activeSystem === "city-of-mist" && game.settings.settings.has("mist-hud.rollIsDynamite")) {
+    rollIsDynamiteForced = game.settings.get("mist-hud", "rollIsDynamite");
+    await game.settings.set("mist-hud", "rollIsDynamite", false);
+  }
+
+  // Retrieve stored dynamite move flag (for always-dynamite moves)
+  const storedDynamiteMoves = (await actor.getFlag("mist-hud", "dynamiteMoves")) || [];
+  const storedDynamiteEnabled = storedDynamiteMoves.includes(moveName);
+
+  // Determine if the move should roll as Dynamite via improvements, tags, stored flag, or toggle.
+  // We use the same checkRolls function that's used in the main rollMove function
+  const dynamiteEnabled = rollIsDynamiteForced || storedDynamiteEnabled || checkRolls(actor, move, hud);
+
+  let mainDiceClass = "burn-d6";
+  let diceClass = "default-dice";
+
+  let outcome, moveEffects, outcomeClass;
+  if (dynamiteEnabled && finalTotal >= 12) {
+    outcome = "dynamite";
+    moveEffects = move.dynamiteEffects || [];
+    outcomeClass = "outcome-success-double-sixes";
+  } else if (finalTotal >= 10) {
+    outcome = "success";
+    moveEffects = move.successEffects || [];
+    outcomeClass = "outcome-success";
+  } else if (finalTotal >= 7) {
+    outcome = "partial";
+    moveEffects = move.partialEffects || [];
+    outcomeClass = "outcome-partial";
+  } else {
+    outcome = "fail";
+    moveEffects = move.failEffects || [];
+    outcomeClass = "outcome-fail";
+  }
+  
+  // Prepare display total.
+  const displayRollTotal = (dynamiteEnabled && finalTotal >= 12) ? `<span>${finalTotal}</span><span class="firecracker-emoji">🧨</span>`: finalTotal;
+
+  let outcomeMessage = game.i18n.localize(move[outcome]);
+  outcomeMessage = substituteText(outcomeMessage, burnBasePower);
+
+  const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
+
+  // Create an array with a single element for the fixed roll
+  const formattedRollResults = [{
+    value: fixedRoll,
+    mainDiceClass: mainDiceClass
+  }];
+
+  const chatData = {
+    moveName: move.name,
+    actorName: actor.name,
+    subtitle: move.subtitle || "",
+    rollResults: formattedRollResults, // Use the new property name 'rollResults' to match
+    outcomeMessage,
+    calculatedPower: burnBasePower,
+    totalCrewPowerTags: 0,
+    totalCrewWeaknessTags: 0,
+    totalLoadoutTags: 0,
+    totalWeakness: 0,
+    totalStoryTags: 0,
+    totalScnTags: totalScnTags,
+    totalCharStatuses: totalCharStatuses,
+    totalSceneStatuses: totalSceneStatuses,
+    modifier: modifier,
+    rollTotal: displayRollTotal,
+    localizedMoveEffects,
+    totalBonus,
+    helpHurtMessages: bonusMessages,
+    tagsData: hud.getSelectedRollData(),
+    statuses: hud.getSelectedRollData().statuses,
+    trackedEffects: (outcome !== "fail" && Array.isArray(move.trackedEffects) && move.trackedEffects.length > 0)
+                    ? move.trackedEffects
+                    : null,
+    diceClass: diceClass, // Keep for backward compatibility
+    outcomeClass: outcomeClass,
+    totalNpcInfluence,
+    npcInfluences: influenceMessages,
+    hasNpcInfluence: influenceMessages.length > 0
+  };
+
+  const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
+  ChatMessage.create({
+    content: chatContent,
+    speaker: { alias: actor.name },
+    flags: {
+      "mist-hud": { isCustomRoll: true }
+    }
+  });
+
+  await actor.unsetFlag('mist-hud', 'received-bonuses');
+  hud.render(true);
+
+  // Burn the used tags.
+  const rollData = hud.getSelectedRollData();
+  await burnCrispyTags(rollData.powerTags);
+  await burnCrispyTags(rollData.crewPowerTags);
+  await burnCrispyTags(rollData.loadoutTags);
+
+  // Clean up the HUD.
+  hud.cleanHUD(rollData);
+}
+
+export async function rollSpecialMoves(moveName, hud) {
+  const move = moveConfig[moveName];
+  if (!move) {
+    console.error(`Move not found: ${moveName}`);
+    return;
+  }
+
+  const actor = hud.actor;
+  if (!actor) {
+    ui.notifications.warn("Please select an actor before attempting this special move.");
+    return;
+  }
+
+  // Detect the active system
+  const activeSystem = await detectActiveSystem();
+
+  // Get theme counts for special move rolls
+  const { SelfAmount, NoiseAmount, LogosAmount, MythosAmount, MistAmount } = countThemebookTypes(actor);
+
+  // Mapping roll flags to theme counts and types
+  const rollMappings = {
+    rollLogos: { amount: LogosAmount, type: "Logos" },
+    rollMythos: { amount: MythosAmount, type: "Mythos" },
+    rollMist: { amount: MistAmount, type: "Mist" },
+    rollSelf: { amount: SelfAmount, type: "Self" },
+    rollNoise: { amount: NoiseAmount, type: "Noise" }
+  };
+
+  // Determine active roll based on move configuration
+  const activeRoll = Object.entries(rollMappings).find(([flag]) => move[flag]) || [];
+  const { amount: themeCount = 0, type: themeType = null } = activeRoll[1] || {};
+
+  // Calculate additional values
+  const weaknessTags = hud.getSelectedRollData().weaknessTags || [];
+  const totalWeakness = calculateWeaknessTags(hud);  
+  if (weaknessTags.length > 0) {
+    await trackWeaknessAttention(actor, weaknessTags);
+  }
+  const totalStoryTags = calculateStoryTags(hud);
+  const totalLoadoutTags = calculateLoadoutTags(hud);
+  const totalCharStatuses = calculateCharacterStatuses(hud);
+  const totalSceneStatuses = calculateSceneStatuses(hud);
+  const totalScnTags = calculateScnTags(hud);
+  const modifier = getRollModifier(hud) || 0;
+
+  // Get NPC influence data
+  console.log("Retrieving NPC influences for special move roll...");
+  const npcInfluences = getNpcInfluences();
+  const totalNpcInfluence = calculateNpcInfluenceTotal(npcInfluences);
+  console.log(`Total NPC influence for special move roll: ${totalNpcInfluence}`);
+
+  // Create influence messages for chat display
+  const influenceMessages = npcInfluences.map(infl => ({
+    npcName: infl.tokenName || infl.npcName || "Unknown NPC",
+    totalInfluence: Number(infl.totalInfluence) || 0,
+    tagInfluence: Number(infl.tagInfluence) || 0,
+    statusInfluence: Number(infl.statusInfluence) || 0
+  }));
+
+  // Aggregate total power for the roll calculation (including NPC influence)
+  const totalPower = themeCount + totalWeakness + totalStoryTags + totalLoadoutTags +
+    totalCharStatuses + totalSceneStatuses + totalScnTags + modifier + totalNpcInfluence;
+
+  // Roll dice
+  const rollResults = await rollDice();
+  const diceTotal = rollResults.reduce((acc, value) => acc + value, 0);
+  const rollTotal = diceTotal + totalPower;
+
+  // Special outcome flags
+  const isDoubleOnes = rollResults.every(r => r === 1);
+  const isDoubleSixes = rollResults.every(r => r === 6);
+
+  let outcome;
+  let moveEffects = [];
+  let diceClass = "default-dice";
+  let mainDiceClass = "default-d6";
+  let outcomeClass = "default-outcome";
+
+  // Check for dynamite conditions
+  let dynamiteEnabled = false;
+  if (activeSystem === "city-of-mist") {
+    // Check if the "Roll is Dynamite!" toggle is ON
+    let rollIsDynamiteForced = false;
+    if (game.settings.settings.has("mist-hud.rollIsDynamite")) {
+      rollIsDynamiteForced = game.settings.get("mist-hud", "rollIsDynamite");
+      await game.settings.set("mist-hud", "rollIsDynamite", false);
+    }
+
+    // Retrieve stored dynamite move flag
+    const storedDynamiteMoves = (await actor.getFlag("mist-hud", "dynamiteMoves")) || [];
+    const storedDynamiteEnabled = storedDynamiteMoves.includes(moveName);
+
+    // Use checkRolls to detect specific tag/move combinations
+    dynamiteEnabled = rollIsDynamiteForced || storedDynamiteEnabled || checkRolls(actor, move, hud);
+  }
+
+  // Determine outcome
+  if (isDoubleOnes) {
+    outcome = "snakeEyes";
+    moveEffects = move.snakeEyesEffects || [];
+    diceClass = "double-ones";
+    outcomeClass = "outcome-snake-eyes";
+  } else if (isDoubleSixes) {
+    outcome = "boxcars";
+    moveEffects = move.boxcarsEffects || [];
+    diceClass = "double-sixes";
+    outcomeClass = "outcome-boxcars";
+  } else if (activeSystem === "city-of-mist" && rollTotal >= 12 && dynamiteEnabled) {
+    // Dynamite with proper conditions
+    outcome = "dynamite";
+    moveEffects = move.dynamiteEffects || [];
+    diceClass = "double-sixes"; // For dynamite, use double-sixes class
+    outcomeClass = "outcome-dynamite";
+  } else if (rollTotal >= 10) {
+    outcome = "success";
+    moveEffects = move.successEffects || [];
+    outcomeClass = "outcome-success";
+  } else if (rollTotal >= 7) {
+    outcome = "partial";
+    moveEffects = move.partialEffects || [];
+    outcomeClass = "outcome-partial";
+  } else {
+    outcome = "fail";
+    moveEffects = move.failEffects || [];
+    outcomeClass = "outcome-fail";
+  }
+
+  // Generate chat output
+  let outcomeMessage = move[outcome] ? game.i18n.localize(move[outcome]) : "";
+  outcomeMessage = substituteText(outcomeMessage, totalPower);
+
+  const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
+  // Add dynamite emoji to display if appropriate
+  const displayRollTotal = (dynamiteEnabled && rollTotal >= 12) ? `<span>${rollTotal}</span><span class="firecracker-emoji">🧨</span>` : rollTotal;
+
+  // Format roll results with the appropriate dice class
+  const formattedRollResults = rollResults.map(value => ({
+    value: value,
+    mainDiceClass: mainDiceClass
+  }));
+
+  // Prepare chat data for rendering
+  const chatData = {
+    moveName: move.name,
+    themeCategory: move.themeCategory,
+    subtitle: move.subtitle || "",
+    subtitleImg: move.subtitleImg || "",
+    actorName: actor.name,
+    rollResults: formattedRollResults,
+    diceClass, // Keep for backward compatibility
+    outcomeMessage,
+    themeCount,
+    themeType,
+    rollTotal: displayRollTotal,
+    localizedMoveEffects,
+    tagsData: hud.getSelectedRollData(),
+    totalWeakness,
+    totalStoryTags,
+    totalLoadoutTags,
+    totalCharStatuses,
+    totalSceneStatuses,
+    totalScnTags,
+    modifier,
+    outcomeClass,
+    totalNpcInfluence,
+    npcInfluences: influenceMessages,
+    hasNpcInfluence: influenceMessages.length > 0
+  };
+
+  // Render and send chat message
+  const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
+  ChatMessage.create({
+    content: chatContent,
+    speaker: { alias: actor.name },
+    flags: {
+      "mist-hud": { isCustomRoll: true }
+    }
+  });
+
+  hud.cleanHUD();
+}
+
+async function rollCinematicMove(moveName, hud) {
+  const move = moveConfig[moveName];
+  if (!move) {
+    console.error(`Move not found: ${moveName}`);
+    return;
+  }
+
+  const actor = hud.actor;
+  if (!actor) {
+    ui.notifications.warn("Please select an actor before attempting this cinematic move.");
+    return;
+  }
+  
+  // Get NPC influence data for display consistency
+  console.log("Retrieving NPC influences for cinematic move...");
+  const npcInfluences = getNpcInfluences();
+  const totalNpcInfluence = calculateNpcInfluenceTotal(npcInfluences);
+  console.log(`Total NPC influence for cinematic move: ${totalNpcInfluence}`);
+
+  // Create influence messages for chat display
+  const influenceMessages = npcInfluences.map(infl => ({
+    npcName: infl.tokenName || infl.npcName || "Unknown NPC",
+    totalInfluence: Number(infl.totalInfluence) || 0,
+    tagInfluence: Number(infl.tagInfluence) || 0,
+    statusInfluence: Number(infl.statusInfluence) || 0
+  }));
+  
+  // Gather effects if they exist for cinematic moves
+  const moveEffects = move.successEffects || move.partialEffects || move.failEffects || [];
+  const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
+
+  // Prepare chat data
+  const chatData = {
+    moveName: move.name,
+    actorName: actor.name,
+    outcomeMessage: game.i18n.localize(move.success), // Text for the cinematic move
+    localizedMoveEffects,  // Include localized effects in the chat message
+    tagsData: hud.getSelectedRollData(),
+    totalNpcInfluence,
+    npcInfluences: influenceMessages,
+    hasNpcInfluence: influenceMessages.length > 0
+  };
+
+  // Render the chat template with effects included
+  const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
+
+  ChatMessage.create({
+    content: chatContent,
+    speaker: { alias: actor.name },
+    flags: {
+      "mist-hud": { isCustomRoll: true }
+    }
+  });
+
+  hud.cleanHUD();
+}
+
+// ====================
+// CALCULATE FUNCTIONS
+// ====================
 
 function getNpcInfluences() {
   // Access the global cache
@@ -461,160 +896,161 @@ function calculateNpcInfluenceTotal(influences) {
   return total;
 }
 
-async function rollBurnForHitCityOfMist(moveName, hud) {
-   
-  if (!hud || !hud.actor) {
-    ui.notifications.warn("MistHUD is not ready. Please select an actor.");
-    return;
-  }
-  const actor = hud.actor;
-  const move = moveConfig[moveName];
-  const activeSystem = game.settings.get("city-of-mist", "system");
+function calculatePowerTags(hud) {
+  const rollData = hud.getSelectedRollData();
 
-  // Retrieve the bonuses from the actor flag immediately
-  const receivedBonuses = actor.getFlag('mist-hud', 'received-bonuses') || {};
+  // Exclude Crew Power Tags from Regular Power Tag Calculation
+  const powerTagsTotal = rollData.powerTags
+      .filter(tag => !rollData.crewPowerTags.some(crewTag => crewTag.id === tag.id)) // ✅ Ensure Crew Tags are separate
+      .reduce((total, tag) => {
+          return total + (tag.stateClass === "to-burn" ? 3 : 1); // ✅ Regular Power Tags burn for +3
+      }, 0);
 
-  // Build bonus messages for the chat roll
-  const bonusMessages = [];
-  for (const giverId in receivedBonuses) {
-    const bonus = receivedBonuses[giverId];
-    const giverActor = game.actors.get(giverId);
-    bonusMessages.push({
-      type: bonus.type,
-      amount: bonus.amount,
-      giverName: giverActor ? giverActor.name : "Unknown"
-    });
-  }
+  const invertedWeaknessTotal = rollData.weaknessTags
+      .filter(tag => !rollData.crewWeaknessTags.some(crewTag => crewTag.id === tag.id)) // ✅ Ensure Crew Weakness Tags are separate
+      .reduce((total, tag) => {
+          return total + (tag.stateClass === "inverted" ? 1 : 0); // ✅ Inverted Weakness Tags add +1
+      }, 0);
 
-  // Notify each bonus giver that their bonus was used
-  for (const giverId in receivedBonuses) {
-    const bonusData = receivedBonuses[giverId];
-    game.socket.emit('module.mist-hud', {
-      type: 'notify-use',
-      actorId: giverId,
-      targetId: actor.id,
-      bonusType: bonusData.type,
-      amount: bonusData.amount
-    });
-  }
-  // Calculate totalBonus as before
-  const activeBonuses = Object.values(receivedBonuses);
-  const helpBonuses = activeBonuses.filter(bonus => bonus.type === 'help')
-      .reduce((sum, bonus) => sum + bonus.amount, 0);
-  const hurtBonuses = activeBonuses.filter(bonus => bonus.type === 'hurt')
-      .reduce((sum, bonus) => sum + bonus.amount, 0);
-  const totalBonus = helpBonuses - hurtBonuses;
+  return powerTagsTotal + invertedWeaknessTotal;
+}
 
+function calculateCrewPowerTags(hud) {
+  const rollData = hud.getSelectedRollData();
 
+  return rollData.crewPowerTags.reduce((total, tag) => {
+      return total + 1; //Crew Power Tags always contribute +1, even if burned
+  }, 0);
+}
 
-  // Instead of a fixed bonus of 3, we want to use +1 if a crew tag is marked to burn.
-  // Look up in the HUD's DOM: if any crew power tag has the "toBurn" class, then use 1.
-  const crewBurnTagExists = hud.element.find('.mh-power-tag.Crew.toBurn').length > 0;
-  const burnBasePower = crewBurnTagExists ? 1 : 3;
-  const fixedRoll = 7;
+function calculateWeaknessTags(hud) {
+  const rollData = hud.getSelectedRollData();
 
-  // Get status adjustments.
-  const totalCharStatuses = calculateCharacterStatuses(hud);
-  const totalSceneStatuses = calculateSceneStatuses(hud);
-  const totalScnTags = calculateScnTags(hud);
-  const modifier = getRollModifier(hud) || 0;
+  const crewWeaknessIds = new Set((rollData.crewWeaknessTags || []).map(tag => tag.id)); // ✅ Ensure Crew Weakness Tags are always excluded
 
-  // Calculate final total.
-  const finalTotal = burnBasePower + fixedRoll + totalCharStatuses + totalSceneStatuses + totalScnTags + totalBonus + modifier;
+  return rollData.weaknessTags
+      .filter(tag => !crewWeaknessIds.has(tag.id))  // ✅ Exclude Crew Weakness Tags Safely
+      .reduce((total, tag) => {
+          return total + (tag.stateClass === "normal" ? -1 : 0);
+      }, 0);
+}
 
-// Check if the "Roll is Dynamite!" toggle is ON
-const rollIsDynamiteForced = game.settings.get("mist-hud", "rollIsDynamite");
+function calculateCrewWeaknessTags(hud) {
+  const rollData = hud.getSelectedRollData();
 
-// Retrieve stored dynamite move flag (for always-dynamite moves)
-const storedDynamiteEnabled = (await actor.getFlag("mist-hud", "dynamiteMoves") || []).includes(moveName);
+  return rollData.crewWeaknessTags.reduce((total, tag) => {
+      return total + (tag.stateClass === "normal" ? -1 : 0); // ✅ Crew Weakness Tags subtract -1 if "normal"
+  }, 0);
+}
 
-// Check for improvements/tags
-const improvementDynamite = checkRolls(actor, move, hud);
+function calculateLoadoutTags(hud) {
+  const loadoutTags = hud.getSelectedRollData().loadoutTags;
 
-// Combine all conditions
-const dynamiteEnabled = rollIsDynamiteForced || storedDynamiteEnabled || improvementDynamite;
+  return loadoutTags.reduce((total, tag) => {
+    return total + (tag.stateClass === "to-burn" ? 3 : 1); // +3 if toBurn, +1 if selected
+  }, 0);
+}
 
+function calculateStoryTags(hud) {
+  const storyTags = hud.getSelectedRollData().storyTags;
 
-  let outcome, moveEffects, outcomeClass;
-  if (dynamiteEnabled && finalTotal >= 12) {
-    outcome = "dynamite";
-    moveEffects = move.dynamiteEffects || [];
-    outcomeClass = "outcome-success-double-sixes";
-  } else if (finalTotal >= 10) {
-    outcome = "success";
-    moveEffects = move.successEffects || [];
-    outcomeClass = "outcome-success";
-  } else if (finalTotal >= 7) {
-    outcome = "partial";
-    moveEffects = move.partialEffects || [];
-    outcomeClass = "outcome-partial";
-  } else {
-    outcome = "fail";
-    moveEffects = move.failEffects || [];
-    outcomeClass = "outcome-fail";
-  }
-  
-  // Prepare display total.
-  const displayRollTotal = (dynamiteEnabled && finalTotal >= 12) ? `<span>${finalTotal}</span><span class="firecracker-emoji">🧨</span>`: finalTotal;
+  return storyTags.reduce((total, tag) => {
+    if (tag.stateClass === "to-burn") {
+      return total + 3; // +3 if toBurn is active and not inverted
+    } else if (tag.stateClass === "inverted") {
+      return total - 1; // -1 if inverted
+    } else {
+      return total + 1; // +1 if simply selected
+    }
+  }, 0);
+}
 
-  let outcomeMessage = game.i18n.localize(move[outcome]);
-  outcomeMessage = substituteText(outcomeMessage, burnBasePower);
+function calculateCharacterStatuses(hud) {
+  const rollData = hud.getSelectedRollData();
 
-  const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
+  const characterStatusTotal = rollData.statuses.reduce((total, status) => {
+        const contribution = status.typeClass === "positive" ? status.tier : -status.tier;
+        return total + contribution;
+  }, 0);
 
-  const chatData = {
-    moveName: move.name,
-    actorName: actor.name,
-    subtitle: move.subtitle || "",
-    rollResults: [fixedRoll],
-    outcomeMessage,
-    calculatedPower: burnBasePower,
-    totalCrewPowerTags: 0,
-    totalCrewWeaknessTags: 0,
-    totalLoadoutTags: 0,
-    totalWeakness: 0,
-    totalStoryTags: 0,
-    totalScnTags: totalScnTags,
-    totalCharStatuses: totalCharStatuses,
-    totalSceneStatuses: totalSceneStatuses,
-    modifier: modifier,
-    rollTotal: displayRollTotal,
-    localizedMoveEffects,
-    totalBonus,
-    helpHurtMessages: bonusMessages,
-    tagsData: hud.getSelectedRollData(),
-    statuses: hud.getSelectedRollData().statuses,
-    trackedEffects: (outcome !== "fail" && Array.isArray(move.trackedEffects) && move.trackedEffects.length > 0)
-                    ? move.trackedEffects
-                    : null,
-    diceClass: "default-dice",
-    outcomeClass: outcomeClass
+  return characterStatusTotal;
+}
+
+function calculateSceneStatuses(hud) {
+  const rollData = hud.getSelectedRollData();
+
+  // Use sceneStatuses to calculate scene status contributions
+  const sceneStatusTotal = rollData.sceneStatuses.reduce((total, sceneStatus) => {
+    return total + (sceneStatus.typeClass === "scene-positive" ? sceneStatus.tier : -sceneStatus.tier);
+  }, 0);
+
+  return sceneStatusTotal;
+}
+
+function calculateScnTags(hud) {
+  const scnTags = hud.getSelectedRollData().scnTags;
+
+  return scnTags.reduce((total, tag) => {
+      return total + (tag.type === "positive" ? 1 : -1);  // +1 for positive, -1 for negative
+  }, 0);
+}
+// Function to count themebook types
+function countThemebookTypes(character) {
+  const counts = {
+    LogosAmount: 0,
+    MythosAmount: 0,
+    MistAmount: 0,
+    SelfAmount: 0,
+    NoiseAmount: 0,
+    // Add LoadoutAmount to the object if you want to count it
+    LoadoutAmount: 0
   };
 
-  const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
-  ChatMessage.create({
-    content: chatContent,
-    speaker: { alias: actor.name },
-    flags: {
-      "mist-hud": { isCustomRoll: true }
+  // Filter out the __LOADOUT__ theme before processing
+  const themes = character.items.filter(item => 
+    item.type === "theme" && item.name !== "__LOADOUT__"
+  );
+
+  themes.forEach(theme => {
+    let realThemebook;
+    const themebook = theme.themebook;
+
+    if (themebook?.isThemeKit && themebook.isThemeKit()) {
+      realThemebook = themebook.themebook;
+    } else {
+      realThemebook = themebook;
+    }
+
+    if (!realThemebook) {
+      console.warn(`Themebook is null for theme: ${theme.name}`);
+      return;
+    }
+
+    const category = realThemebook.system.subtype;
+
+    if (category) {
+      const key = `${category}Amount`;
+      if (counts[key] !== undefined) {
+        counts[key]++;
+      } else {
+        // Instead of warning, we can log at a lower level since we're filtering __LOADOUT__
+        console.debug(`Category "${category}" not counted for themebook ID: ${realThemebook._id}`);
+      }
     }
   });
 
-  await actor.unsetFlag('mist-hud', 'received-bonuses');
-  hud.render(true);
-
-  // Burn the used tags.
-  const rollData = hud.getSelectedRollData();
-  await burnCrispyTags(rollData.powerTags);
-  await burnCrispyTags(rollData.crewPowerTags);
-  await burnCrispyTags(rollData.loadoutTags);
-
-  // Clean up the HUD.
-  hud.cleanHUD(rollData);
+  return counts;
 }
 
+// ====================
+// HELPER FUNCTIONS
+// ====================
+
 async function burnCrispyTags(tagsArray) {
-  //const hud = MistHUD.getInstance();
+  const activeToken = canvas.tokens.controlled[0];
+  if (!activeToken || !activeToken.actor) return;
+  
+  const hud = globalThis.playerHudRegistry.get(activeToken.actor.id);
   if (!hud || !hud.actor) return;
 
   const mainActor = hud.actor;
@@ -748,105 +1184,6 @@ async function trackWeaknessAttentionCrew(actor, weaknessTags) {
   }
 }
 
-function calculatePowerTags(hud) {
-  const rollData = hud.getSelectedRollData();
-
-  // Exclude Crew Power Tags from Regular Power Tag Calculation
-  const powerTagsTotal = rollData.powerTags
-      .filter(tag => !rollData.crewPowerTags.some(crewTag => crewTag.id === tag.id)) // ✅ Ensure Crew Tags are separate
-      .reduce((total, tag) => {
-          return total + (tag.stateClass === "to-burn" ? 3 : 1); // ✅ Regular Power Tags burn for +3
-      }, 0);
-
-  const invertedWeaknessTotal = rollData.weaknessTags
-      .filter(tag => !rollData.crewWeaknessTags.some(crewTag => crewTag.id === tag.id)) // ✅ Ensure Crew Weakness Tags are separate
-      .reduce((total, tag) => {
-          return total + (tag.stateClass === "inverted" ? 1 : 0); // ✅ Inverted Weakness Tags add +1
-      }, 0);
-
-  return powerTagsTotal + invertedWeaknessTotal;
-}
-
-function calculateCrewPowerTags(hud) {
-  const rollData = hud.getSelectedRollData();
-
-  return rollData.crewPowerTags.reduce((total, tag) => {
-      return total + 1; //Crew Power Tags always contribute +1, even if burned
-  }, 0);
-}
-
-function calculateWeaknessTags(hud) {
-  const rollData = hud.getSelectedRollData();
-
-  const crewWeaknessIds = new Set((rollData.crewWeaknessTags || []).map(tag => tag.id)); // ✅ Ensure Crew Weakness Tags are always excluded
-
-  return rollData.weaknessTags
-      .filter(tag => !crewWeaknessIds.has(tag.id))  // ✅ Exclude Crew Weakness Tags Safely
-      .reduce((total, tag) => {
-          return total + (tag.stateClass === "normal" ? -1 : 0);
-      }, 0);
-}
-
-function calculateCrewWeaknessTags(hud) {
-  const rollData = hud.getSelectedRollData();
-
-  return rollData.crewWeaknessTags.reduce((total, tag) => {
-      return total + (tag.stateClass === "normal" ? -1 : 0); // ✅ Crew Weakness Tags subtract -1 if "normal"
-  }, 0);
-}
-
-function calculateLoadoutTags(hud) {
-  const loadoutTags = hud.getSelectedRollData().loadoutTags;
-
-  return loadoutTags.reduce((total, tag) => {
-    return total + (tag.stateClass === "to-burn" ? 3 : 1); // +3 if toBurn, +1 if selected
-  }, 0);
-}
-
-function calculateStoryTags(hud) {
-  const storyTags = hud.getSelectedRollData().storyTags;
-
-  return storyTags.reduce((total, tag) => {
-    if (tag.stateClass === "to-burn") {
-      return total + 3; // +3 if toBurn is active and not inverted
-    } else if (tag.stateClass === "inverted") {
-      return total - 1; // -1 if inverted
-    } else {
-      return total + 1; // +1 if simply selected
-    }
-  }, 0);
-}
-
-function calculateCharacterStatuses(hud) {
-  const rollData = hud.getSelectedRollData();
-
-  const characterStatusTotal = rollData.statuses.reduce((total, status) => {
-        const contribution = status.typeClass === "positive" ? status.tier : -status.tier;
-        return total + contribution;
-  }, 0);
-
-  return characterStatusTotal;
-}
-
-function calculateSceneStatuses(hud) {
-  const rollData = hud.getSelectedRollData();
-
-  // Use sceneStatuses to calculate scene status contributions
-  const sceneStatusTotal = rollData.sceneStatuses.reduce((total, sceneStatus) => {
-    return total + (sceneStatus.typeClass === "scene-positive" ? sceneStatus.tier : -sceneStatus.tier);
-  }, 0);
-
-  return sceneStatusTotal;
-}
-
-function calculateScnTags(hud) {
-  const scnTags = hud.getSelectedRollData().scnTags;
-
-  return scnTags.reduce((total, tag) => {
-      return total + (tag.type === "positive" ? 1 : -1);  // +1 for positive, -1 for negative
-  }, 0);
-}
-
 function getRollModifier(hud) {
   return hud.modifier !== 0 ? hud.modifier : null;
 }
@@ -863,241 +1200,6 @@ function substituteText(text, totalPower) {
   text = text.replace("PWR", String(Math.max(1, totalPower)));
   
   return text;
-}
-// Function to count themebook types
-function countThemebookTypes(character) {
-  const counts = {
-    LogosAmount: 0,
-    MythosAmount: 0,
-    MistAmount: 0,
-    SelfAmount: 0,
-    NoiseAmount: 0,
-    // Add LoadoutAmount to the object if you want to count it
-    LoadoutAmount: 0
-  };
-
-  // Filter out the __LOADOUT__ theme before processing
-  const themes = character.items.filter(item => 
-    item.type === "theme" && item.name !== "__LOADOUT__"
-  );
-
-  themes.forEach(theme => {
-    let realThemebook;
-    const themebook = theme.themebook;
-
-    if (themebook?.isThemeKit && themebook.isThemeKit()) {
-      realThemebook = themebook.themebook;
-    } else {
-      realThemebook = themebook;
-    }
-
-    if (!realThemebook) {
-      console.warn(`Themebook is null for theme: ${theme.name}`);
-      return;
-    }
-
-    const category = realThemebook.system.subtype;
-
-    if (category) {
-      const key = `${category}Amount`;
-      if (counts[key] !== undefined) {
-        counts[key]++;
-      } else {
-        // Instead of warning, we can log at a lower level since we're filtering __LOADOUT__
-        console.debug(`Category "${category}" not counted for themebook ID: ${realThemebook._id}`);
-      }
-    }
-  });
-
-  return counts;
-}
-
-export async function rollSpecialMoves(moveName, hud) {
-  const move = moveConfig[moveName];
-  if (!move) {
-    console.error(`Move not found: ${moveName}`);
-    return;
-  }
-
-  const actor = hud.actor;
-  if (!actor) {
-    ui.notifications.warn("Please select an actor before attempting this special move.");
-    return;
-  }
-
-  // Detect the active system
-  const activeSystem = await detectActiveSystem();
-
-  // Get theme counts for special move rolls
-  const { SelfAmount, NoiseAmount, LogosAmount, MythosAmount, MistAmount } = countThemebookTypes(actor);
-
-  // Mapping roll flags to theme counts and types
-  const rollMappings = {
-    rollLogos: { amount: LogosAmount, type: "Logos" },
-    rollMythos: { amount: MythosAmount, type: "Mythos" },
-    rollMist: { amount: MistAmount, type: "Mist" },
-    rollSelf: { amount: SelfAmount, type: "Self" },
-    rollNoise: { amount: NoiseAmount, type: "Noise" }
-  };
-
-  // Determine active roll based on move configuration
-  const activeRoll = Object.entries(rollMappings).find(([flag]) => move[flag]) || [];
-  const { amount: themeCount = 0, type: themeType = null } = activeRoll[1] || {};
-
-  // Calculate additional values
-  // const totalWeakness = calculateWeaknessTags();
-  const weaknessTags = hud.getSelectedRollData().weaknessTags || [];
-  const totalWeakness = calculateWeaknessTags(hud);  
-    if (weaknessTags.length > 0) {
-        await trackWeaknessAttention(actor, weaknessTags);
-    }
-  const totalStoryTags = calculateStoryTags(hud);
-  const totalLoadoutTags = calculateLoadoutTags(hud);
-  const totalCharStatuses = calculateCharacterStatuses(hud);
-  const totalSceneStatuses = calculateSceneStatuses(hud);
-  const totalScnTags = calculateScnTags(hud);
-  const modifier = getRollModifier(hud) || 0;
-
-  // Aggregate total power for the roll calculation
-  const totalPower = themeCount + totalWeakness + totalStoryTags + totalLoadoutTags +
-    totalCharStatuses + totalSceneStatuses + totalScnTags + modifier;
-
-  // Roll dice
-  const rollResults = await rollDice();
-  const rollTotal = rollResults.reduce((acc, value) => acc + value, 0) + totalPower;
-
-  // Special outcome flags
-  const isDoubleOnes = rollResults.every(r => r === 1);
-  const isDoubleSixes = rollResults.every(r => r === 6);
-
-  let outcome;
-  let moveEffects = [];
-  let diceClass = "default-dice";
-  let outcomeClass = "default-outcome";
-
-
-// Determine outcome
-if (isDoubleOnes) {
-  outcome = "snakeEyes";
-  moveEffects = move.snakeEyesEffects || [];
-  diceClass = "double-ones";
-  outcomeClass = "outcome-snake-eyes";
-} else if (isDoubleSixes) {
-  outcome = "boxcars";
-  moveEffects = move.boxcarsEffects || [];
-  diceClass = "double-sixes";
-  outcomeClass = "outcome-boxcars";
-} else if (activeSystem === "city-of-mist" && rollTotal >= 12) {
-  // Dynamite is optional
-  if (move.dynamite) {
-      outcome = "dynamite";
-      moveEffects = move.dynamiteEffects || [];
-      outcomeClass = "outcome-dynamite";
-  } else {
-      outcome = "success"; // Fallback to success if dynamite isn't defined
-      moveEffects = move.successEffects || [];
-      outcomeClass = "outcome-success";
-  }
-} else if (rollTotal >= 10) {
-  outcome = "success";
-  moveEffects = move.successEffects || [];
-  outcomeClass = "outcome-success";
-} else if (rollTotal >= 7) {
-  outcome = "partial";
-  moveEffects = move.partialEffects || [];
-  outcomeClass = "outcome-partial";
-} else {
-  outcome = "fail";
-  moveEffects = move.failEffects || [];
-  outcomeClass = "outcome-fail";
-}
-
-
-  // Generate chat output
-  let outcomeMessage = move[outcome] ? game.i18n.localize(move[outcome]) : "";
-  outcomeMessage = substituteText(outcomeMessage, totalPower);
-
-  const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
-  const displayRollTotal = rollTotal;
-
-  // Prepare chat data for rendering
-  const chatData = {
-    moveName: move.name,
-    themeCategory: move.themeCategory,
-    subtitle: move.subtitle || "",
-    subtitleImg: move.subtitleImg || "",
-    actorName: actor.name,
-    rollResults,
-    outcomeMessage,
-    themeCount,
-    themeType,
-    rollTotal: displayRollTotal,
-    localizedMoveEffects,
-    tagsData: hud.getSelectedRollData(),
-    totalWeakness,
-    totalStoryTags,
-    totalLoadoutTags,
-    totalCharStatuses,
-    totalSceneStatuses,
-    totalScnTags,
-    modifier,
-    diceClass,
-    outcomeClass
-  };
-
-  // Render and send chat message
-  const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
-  ChatMessage.create({
-    content: chatContent,
-    speaker: { alias: actor.name },
-    flags: {
-      "mist-hud": { isCustomRoll: true } // Add this flag
-    }
-  });
-
-  hud.cleanHUD();
-}
-
-async function rollCinematicMove(moveName, hud) {
-  const move = moveConfig[moveName];
-  if (!move) {
-    console.error(`Move not found: ${moveName}`);
-    return;
-  }
-
-  const actor = hud.actor;
-  if (!actor) {
-    ui.notifications.warn("Please select an actor before attempting this cinematic move.");
-    return;
-  }
-  
-  // Gather effects if they exist for cinematic moves
-  const moveEffects = move.successEffects || move.partialEffects || move.failEffects || [];
-  const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
-
-  // Prepare chat data
-  const chatData = {
-    moveName: move.name,
-    actorName: actor.name,
-    outcomeMessage: game.i18n.localize(move.success), // Text for the cinematic move
-    localizedMoveEffects,  // Include localized effects in the chat message
-    tagsData: hud.getSelectedRollData()
-    
-  };
-
-  // Render the chat template with effects included
-  
-  const chatContent = await renderTemplate("modules/mist-hud/templates/mh-chat-roll.hbs", chatData);
-
-  ChatMessage.create({
-    content: chatContent,
-    speaker: { alias: actor.name },
-    flags: {
-      "mist-hud": { isCustomRoll: true } // Add this flag
-    }
-  });
-
-  hud.cleanHUD();
 }
 
 // Wrapper function to determine which roll function to use

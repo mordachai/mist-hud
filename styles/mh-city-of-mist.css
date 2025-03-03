@@ -2,10 +2,11 @@
 
 :root {
   --dark-color: #161616;
-  --text-main-color: #1b190e;
-  --text-tag-color: #28211d;
+  --text-main-color: #352a1d;
+  --text-tag-color: #322924;
   --text-hud-main-color: #d7e5f5; 
   --text-hud-subtitles-color: #ffa900;
+  --text-status-color: #ecf5f4;
   --outcome-text-color: #3d2911;
   --effects-color1:#1b190e;
   --effects-color2:rgb(245,245,245);
@@ -49,7 +50,7 @@
   height: fit-content;
   padding: 0 10px;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 100% 100%;
   background-position: center;
 }
 
@@ -62,15 +63,33 @@
   height: 28px;
   padding: 0 10px;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 100% 100%;
   background-position: center;
+}
+
+.mh-theme-header.Mythos {
+  background-image: url('../ui/header-mythos.webp');
+}
+
+.mh-theme-header.Logos {
+  background-image: url('../ui/header-logos.webp');
+}
+
+.mh-theme-header.Mist {
+  background-image: url('../ui/header-mist.webp');
+}
+
+.mh-theme-header.neutral,
+.mh-theme-header.Crew,
+.mh-theme-header.Extra {
+  background-image: url('../ui/header-neutral-com.webp');
 }
 
 .mh-create-story-tag i,
 .mh-create-status i {
   position: relative;
-  top: -3px;
-  right: -2px;
+  top: 2px;
+  right: 6px;
   font-size: 0.85rem;
   color: whitesmoke;
 }
@@ -131,6 +150,7 @@
   padding-left: 2px;
   padding-right: 0px;
   cursor: pointer;
+  margin-right: 4px;
 }
 
 /* Mythos Themebook Name Styling */
@@ -173,8 +193,10 @@
 }
 
 .mh-theme-icon.Mist {
+  position: relative;
   align-self: inherit;
   justify-self: center;
+  top: -3px;
   width: 18px;
   height: 18px;
   background-image: url('../ui/icons/mist_icn.svg');
@@ -183,6 +205,8 @@
 
 .mh-theme-icon.Crew,
 .mh-theme-icon.Extra {
+  position: relative;
+  top: -3px;
   align-self: inherit;
   justify-self: center;
   width: 18px;
@@ -290,7 +314,8 @@
   text-shadow: var(--mist-dark-color) 1px 1px;
 }
 
-.mh-theme-name-com-Crew {
+.mh-theme-name-com-Crew,
+.mh-theme-name-com-Extra {
   color: whitesmoke;
   text-shadow: var(--mist-dark-color) 1px 1px;
 }
@@ -304,11 +329,12 @@
   display: inline-block; /* Keep the inline-block for the background image behavior */
   width: 17px;
   height: 15px;
-  background-size: contain;
+  background-size: 100% 100%;
   background-repeat: no-repeat;
   background-position: center;
   align-self: center;
   vertical-align: middle;
+  margin-right: 3px;
 }
 
 /* Unburned state */
@@ -331,6 +357,7 @@
 .mh-loadout-tag.burned  {
   text-decoration: line-through;
   color: #ffa742;
+  text-decoration-thickness: 2px;
 }
 
 .mh-dropshadow-Mythos{
@@ -456,39 +483,6 @@
   font-family: var(--font-family-tags);
   align-self: center;
 }
-
-/* .help-toggle, .hurt-toggle {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  border: 2px solid whitesmoke;
-  border-radius: 4px;
-  background-color: none;
-  cursor: pointer;
-  align-self: flex-end;
-  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-}
-
-.help-toggle:checked {
-  background-color: var(--positive-color, #4caf50); 
-}
-
-.hurt-toggle:checked {
-  background-color: var(--negative-color, #cf2f0b); 
-}
-
-.help-toggle:checked::after, 
-.hurt-toggle:checked::after {
-  content: '✔';
-  display: block;
-  text-align: center;
-  color: white;
-  font-size: 16px;
-  line-height: 18px;
-} */
-
 
 input[type="checkbox"].help-toggle,
 input[type="checkbox"].hurt-toggle {

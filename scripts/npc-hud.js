@@ -33,6 +33,8 @@ if (actor.type === 'threat') {
 // Global registry to store NPC HUD instances by actor ID
 const npcHudRegistry = new Map();
 
+
+
 // Simple logging helper - won't break existing code
 const logger = {
   debug: (...args) => console.debug("NPC-HUD |", ...args),
@@ -76,19 +78,28 @@ export class NpcHUD extends Application {
 
     setActor(actor, token = null) {
         if (!actor || actor.type !== 'threat') { 
-            logger.warn("Attempted to set an invalid actor.");
-            return;
+          logger.warn("Attempted to set an invalid actor.");
+          return;
         }
         this.actor = actor;
-        this.token = token; // Save the token reference if provided
-        this.isCollapsed = actor.getFlag('mist-hud', 'isCollapsed') ?? false; // Ensure boolean default
+        this.token = token;
+        this.isCollapsed = actor.getFlag('mist-hud', 'isCollapsed') ?? false;
         
         // Store in registry
-        if (actor.id) npcHudRegistry.set(actor.id, this);
-        if (token?.id) npcHudRegistry.set(token.id, this);
+        if (actor.id) {
+          npcHudRegistry.set(actor.id, this);
+          logger.debug(`Registered NPC HUD by actor ID: ${actor.id}, Name: ${actor.name}`);
+        }
+        if (token?.id) {
+          npcHudRegistry.set(token.id, this);
+          logger.debug(`Registered NPC HUD by token ID: ${token.id}`);
+        }
+        
+        // Log registry size
+        logger.debug(`Registry size now: ${npcHudRegistry.size}`);
         
         this.render(true);
-    }  
+      }
     
     // Break down getData into smaller, more manageable functions
     async getData() {
@@ -125,7 +136,7 @@ export class NpcHUD extends Application {
 
         data.collectiveLabel = (data.activeSystem === "otherscape")
         ? game.i18n.localize("Otherscape.terms.collective")
-        : game.i18n.localize("CityOfMist.terms.colllective");
+        : game.i18n.localize("CityOfMist.terms.collectiveSize");
         
         // Add influence data to template
         data.tagInfluence = tagInfluence;
@@ -168,7 +179,7 @@ export class NpcHUD extends Application {
         if (system === "otherscape" || system === "legend") {
             data.spectrumLabel = "Limits";
         } else {
-            data.spectrumLabel = "Spectrums";
+            data.spectrumLabel = game.i18n.localize("CityOfMist.terms.spectrums");
         }
     
         data.spectrums = this.actor.items.filter(i => i.type === 'spectrum');
@@ -268,33 +279,7 @@ export class NpcHUD extends Application {
     
         // Retrieve Statuses
         data.statuses = this.getActorStatuses();
-    }
-     
-    // getActorStatuses() {
-    //     if (!this.actor) return [];
-    
-    //     const statusMap = new Map();
-    
-    //     this.actor.items
-    //         .filter((item) => item.type === 'status')
-    //         .forEach((status) => {
-    //             // Get the current type from the flag; if missing, fall back to system.specialType or default to "neutral"
-    //             const statusType = status.getFlag('mist-hud', 'statusType') || status.system.specialType || 'neutral';
-    //             const key = `${status.name}-${status.system.tier}`;
-    //             if (!statusMap.has(key)) {
-    //                 statusMap.set(key, {
-    //                     id: status.id,
-    //                     statusName: status.name,
-    //                     statusTier: status.system.tier,
-    //                     statusType,
-    //                     temporary: !!status.system.temporary,
-    //                     permanent: !!status.system.permanent
-    //                 });
-    //             }
-    //         });
-    
-    //     return Array.from(statusMap.values());
-    // }    
+    }    
     
     getCollectiveSize() {
         if (!this.actor || !this.actor.system) {
@@ -957,21 +942,30 @@ export class NpcHUD extends Application {
 
     async close(options) {
         try {
-            // Remove references from registry
-            if (this.actor?.id) npcHudRegistry.delete(this.actor.id);
-            if (this.token?.id) npcHudRegistry.delete(this.token.id);
-            
-            // Clean up event handlers
-            if (this.element) {
-                this.element.off('contextmenu');
-            }
-            
-            return await super.close(options);
+          // Remove references from registry
+          if (this.actor?.id) {
+            npcHudRegistry.delete(this.actor.id);
+            logger.debug(`Removed NPC HUD from registry for actor ID: ${this.actor.id}`);
+          }
+          if (this.token?.id) {
+            npcHudRegistry.delete(this.token.id);
+            logger.debug(`Removed NPC HUD from registry for token ID: ${this.token.id}`);
+          }
+          
+          // Log registry size
+          logger.debug(`Registry size now: ${npcHudRegistry.size}`);
+          
+          // Clean up event handlers
+          if (this.element) {
+            this.element.off('contextmenu');
+          }
+          
+          return await super.close(options);
         } catch (err) {
-            logger.error("Error closing NPC HUD:", err);
-            return false;
+          logger.error("Error closing NPC HUD:", err);
+          return false;
         }
-    }
+      }
 
     injectCustomHeader() {
         // Use this.element to access the entire application window
@@ -1144,7 +1138,67 @@ export class NpcHUD extends Application {
             console.error("Error in _createStoryTagFromHUD:", error);
         }
     }
+
 }
+
+async function runFullNpcHudRegistryTest() {
+    console.group("NPC HUD Registry Test Suite");
+    
+    // Test 1: Basic Registry State
+    console.log("Test 1: Current Registry State");
+    const initial = testNpcHudRegistry();
+    
+    // Test 2: Actor Select Test
+    console.log("\nTest 2: Actor Selection Test");
+    const testActor = game.actors.find(a => a.type === 'threat');
+    if (testActor) {
+      console.log(`Testing with actor: ${testActor.name}`);
+      const hud = new NpcHUD();
+      hud.setActor(testActor);
+      await new Promise(r => setTimeout(r, 100)); // Give time to render
+      
+      const afterOpen = testNpcHudRegistry();
+      console.log(`Registry size change: ${initial.size} → ${afterOpen.size}`);
+      
+      // Check if properly registered
+      const hasEntry = npcHudRegistry.has(testActor.id);
+      console.log(`Actor properly registered: ${hasEntry}`);
+      
+      // Test 3: Closing Test
+      console.log("\nTest 3: HUD Closing Test");
+      await hud.close();
+      await new Promise(r => setTimeout(r, 100)); // Give time to close
+      
+      const afterClose = testNpcHudRegistry();
+      console.log(`Registry size change: ${afterOpen.size} → ${afterClose.size}`);
+      
+      // Check if properly removed
+      const stillHasEntry = npcHudRegistry.has(testActor.id);
+      console.log(`Actor properly removed: ${!stillHasEntry}`);
+    } else {
+      console.warn("No threat actors found for testing");
+    }
+    
+    // Test 4: Registry-Instance Relationship Test
+    console.log("\nTest 4: Registry-Instance Relationship Test");
+    const mismatchedEntries = [];
+    for (const [id, instance] of npcHudRegistry.entries()) {
+      if (instance.actor && instance.actor.id !== id && !id.startsWith("Token.")) {
+        mismatchedEntries.push({
+          registryId: id,
+          actorId: instance.actor.id
+        });
+      }
+    }
+    
+    if (mismatchedEntries.length > 0) {
+      console.warn("Mismatched registry entries found:", mismatchedEntries);
+    } else {
+      console.log("All registry entries match their instances correctly");
+    }
+    
+    console.groupEnd();
+  }
 
 // Synchronize all NPC influences when a scene loads
 Hooks.on('canvasReady', async () => {
@@ -1350,8 +1404,6 @@ Hooks.on('canvasReady', () => {
     }
 });
 
-// Add these hooks at the end of npc-hud.js before the export statement
-
 // Handle tag/status creation
 Hooks.on('createItem', (item, options, userId) => {
     // Only process if this is a tag or status on an NPC
@@ -1422,6 +1474,8 @@ Hooks.on('updateItem', (item, changes, options, userId) => {
         }
     }
 });
-
+globalThis.npcHudRegistry = npcHudRegistry;
 export default NpcHUD;
 //export { NpcHUD };
+
+
