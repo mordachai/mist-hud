@@ -154,20 +154,23 @@ export function initializeNpcInfluenceCache() {
       });
       
       // Add the NPC Influence Manager button
-      controls.find(c => c.name === "token")?.tools.push({
-        name: "npcInfluenceManager",
-        title: "NPC Influence Manager",
-        icon: "fas fa-balance-scale",
-        button: true,
-        onClick: () => {
-          // Use the global function from main module
-          if (typeof globalThis.openNPCInfluenceManager === 'function') {
-            globalThis.openNPCInfluenceManager();
-          } else {
-            ui.notifications.error("NPC Influence Manager function not available");
-          }
-        }
-      });
+      // controls.find(c => c.name === "token")?.tools.push({
+      //   name: "npcInfluenceManager",
+      //   title: "NPC Influence Viewer",
+      //   icon: "fas fa-balance-scale",
+      //   button: true,
+      //   onClick: () => {
+      //     // Use the global function from main module
+      //     if (typeof globalThis.openNPCInfluenceManager === 'function') {
+      //       globalThis.openNPCInfluenceManager();
+      //   } else if (game.mistHud && typeof game.mistHud.openNPCInfluenceManager === 'function') {
+      //       game.mistHud.openNPCInfluenceManager();
+      //   } else {
+      //       ui.notifications.error("NPC Influence Viewer function not available");
+      //   }
+      //   }
+      // });
+
     });
   }
 }

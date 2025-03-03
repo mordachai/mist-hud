@@ -25,6 +25,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Bangers';
+  src: url('../ui/fonts/bangers-regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   /* Global Colors */
   --mythos-dark-color:#b90ded;
@@ -1143,7 +1150,6 @@ li.tag-or-status {
   overflow: visible !important;
 }
 
-
 .mh-content-container {
   flex: 1 1 auto;
   overflow-y: auto;
@@ -1162,4 +1168,31 @@ li.tag-or-status {
   width: 100%;
   text-align: center;
   max-height: 30px;
+}
+
+.scrolling-text {
+  font-weight: bold !important;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7), 
+               -1px -1px 3px rgba(0, 0, 0, 0.7),
+               1px -1px 3px rgba(0, 0, 0, 0.7),
+               -1px 1px 3px rgba(0, 0, 0, 0.7) !important;
+}
+
+.scrolling-text[style*="rgb(0, 255, 0)"],
+.scrolling-text[style*="#00FF00"] {
+  /* Additional styles for positive status notifications */
+  font-weight: bold !important;
+}
+
+.scrolling-text[style*="rgb(255, 0, 0)"],
+.scrolling-text[style*="#FF0000"] {
+  /* Additional styles for negative status notifications */
+  font-weight: bold !important;
+}
+
+.mh-status-notification {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7), 
+               -1px -1px 3px rgba(0, 0, 0, 0.7),
+               1px -1px 3px rgba(0, 0, 0, 0.7),
+               -1px 1px 3px rgba(0, 0, 0, 0.7) !important;
 }

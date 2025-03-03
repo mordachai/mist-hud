@@ -168,6 +168,15 @@ Hooks.once('init', () => {
         default: ""
     });
 
+    game.settings.register(MODULE_ID, "enableStatusNotifications", {
+        name: "Status Drop Notifications",
+        hint: "When enabled, displays an animated notification above tokens when statuses are dropped on them.",
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: true
+    });
+
     game.settings.register("mist-hud", "useHotbarForRolls", {
         name: "Roll Moves using Hotbar",
         hint: "If enabled, roll buttons will be placed in the hotbar instead on the left side of HUD.",

@@ -6,19 +6,18 @@ import { CityHelpers } from "/systems/city-of-mist/module/city-helpers.js";
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
 import { moveConfig } from "./mh-theme-config.js";
 import statusScreenApp from "./statusScreenApp.js";
+import { TokenStatusNotification } from './token-status-notification.js';
 import { showTooltip, hideTooltip } from './tooltip.js';
 import { 
   getMysteryFromTheme,
   getCrewThemes,
   getThemesAndTags, 
-  getThemebooks, 
   getImprovements,
   getCrewImprovements,
   getActorStatuses, 
   getJuiceAndClues, 
   getEssence, 
   getLoadoutTags,
-  applyBurnState
 } from './mh-getters.js';
 import { getReceivedBonuses } from "./bonus-utils.js";
 import { NPCInfluenceManager, openNPCInfluenceManager } from './npc-influence-manager.js';
@@ -352,27 +351,15 @@ export class MistHUD extends Application {
   
   // Inject the custom header without passing any parameters
   this.injectCustomHeader();
-    
-  // html.find('.mh-power-tag').on('click', (event) => handleTagClick(event, 'power', hudInstance));
-  // html.find('.mh-weakness-tag').on('click', (event) => handleTagClick(event, 'weakness', hudInstance));
-  // html.find('.mh-story-tag').on('click', (event) => handleTagClick(event, 'story', hudInstance));
-  // html.find('.mh-loadout-tag').on('click', (event) => handleTagClick(event, 'loadout', hudInstance));
   
-
-  // html.find('.mh-pwrcrew-tag').on('click', (event) => { handleTagClick(event, 'power', hudInstance); });
-  // html.find('.mh-wkcrew-tag').on('click', (event) => { handleTagClick(event, 'weakness', hudInstance); });
     html.find('.mh-power-tag').on('click', (event) => handleTagClick(event, 'power', this));
     html.find('.mh-weakness-tag').on('click', (event) => handleTagClick(event, 'weakness', this));
     html.find('.mh-story-tag').on('click', (event) => handleTagClick(event, 'story', this));
     html.find('.mh-loadout-tag').on('click', (event) => handleTagClick(event, 'loadout', this));
     
-
     html.find('.mh-pwrcrew-tag').on('click', (event) => { handleTagClick(event, 'power', this); });
     html.find('.mh-wkcrew-tag').on('click', (event) => { handleTagClick(event, 'weakness', this); });
   
-
-
-
     html.find('.mh-story-toggle').on('click', (event) => {
       event.stopPropagation();
       event.preventDefault();
@@ -396,79 +383,7 @@ export class MistHUD extends Application {
         default: '<i class="fa-light fa-angles-down"></i>',
         selector: '.mh-weakness-toggle'
       }, hudInstance);
-    });
-
-    // html.find('.mh-burn-toggle').on('click', async (event) => {
-    //   event.stopPropagation();
-    //   event.preventDefault();
-    
-    //   const burnElement = $(event.currentTarget);
-    //   const tagElement = burnElement.closest('.mh-power-tag, .mh-story-tag, .mh-loadout-tag');
-    //   const tagId = tagElement.data('id');
-    //   if (!tagId) return;
-    
-    //   let tagActor = hudInstance.actor;
-    
-    //   // If this tag is a crew tag, get the crew actor using the data attribute.
-    //   if (tagElement.hasClass('Crew')) {
-    //     const crewId = tagElement.data('actor-id');
-    //     if (crewId) {
-    //       const found = game.actors.get(crewId);
-    //       if (found) tagActor = found;
-    //     }
-    //   }
-    
-    //   if (!tagActor) return;
-    
-    //   // Determine current state from the DOM.
-    //   const currentState = burnElement.hasClass('burned')
-    //     ? "burned"
-    //     : burnElement.hasClass('toBurn')
-    //       ? "toBurn"
-    //       : "unburned";
-    
-    //   // Cycle states: unburned -> toBurn -> burned -> unburned
-    //   const newState = currentState === "unburned"
-    //     ? "toBurn"
-    //     : currentState === "toBurn"
-    //       ? "burned"
-    //       : "unburned";
-    
-    //   // Update the DOM classes for both the burn toggle and the tag element.
-    //   burnElement.removeClass('unburned toBurn burned').addClass(newState);
-    //   tagElement.removeClass('unburned toBurn burned').addClass(newState);
-    
-    //   // Update selection flags based on new state.
-    //   if (newState === "toBurn") {
-    //     // Force selection if set to "toBurn"
-    //     tagElement.addClass('selected');
-    //     let selectedTags = tagActor.getFlag('mist-hud', 'selected-tags') || [];
-    //     if (!selectedTags.includes(tagId)) {
-    //       selectedTags.push(tagId);
-    //     }
-    //     await hudInstance.actor.setFlag('mist-hud', 'selected-tags', selectedTags);
-    //   } else if (newState === "burned") {
-    //     // When burned, deselect the tag.
-    //     tagElement.removeClass('selected');
-    //     let selectedTags = tagActor.getFlag('mist-hud', 'selected-tags') || [];
-    //     selectedTags = selectedTags.filter(id => id !== tagId);
-    //     await hudInstance.actor.setFlag('mist-hud', 'selected-tags', selectedTags);
-    //   }
-    //   // (If newState is "unburned", leave the selection as is.)
-    
-    //   // Now update the tag’s embedded document on the correct actor.
-    //   const tagItem = tagActor.items.get(tagId);
-    //   if (tagItem) {
-    //     const updatedState = newState === "burned"; // true if burned, false otherwise.
-    //     const burnState = newState === "toBurn" ? 1 : 0; // numeric burn state.
-    //     await tagItem.update({ "system.burned": updatedState, "system.burn_state": burnState });
-    //   } else {
-    //     console.warn(`[Burn Debug] Tag item not found on actor '${tagActor.name}' for tag ID: ${tagId}`);
-    //   }
-    
-    //   // Recalculate total power.
-    //   hudInstance.calculateTotalPower();
-    // });       
+    });       
     
     html.find('.mh-burn-toggle').on('click', async (event) => {
       event.stopPropagation();
@@ -989,8 +904,6 @@ export class MistHUD extends Application {
   }
 
     data.helpHurtMessages = bonusMessages.length ? bonusMessages : null;
-
-
   
     // Regular improvements getter
     const improvements = getImprovements(this.actor);
@@ -1875,37 +1788,6 @@ Hooks.on('ready', () => {
   attachSceneTagListeners();
 });
 
-// Hooks.on('controlToken', (token, controlled) => {
-//   console.log("Token control changed:", token, controlled);
-  
-//   if (controlled && token.actor && token.actor.type === 'character') {
-//     // First, close any HUDs that don't belong to this actor
-//     for (const [actorId, hud] of playerHudRegistry.entries()) {
-//       if (actorId !== token.actor.id) {
-//         hud.close();
-//       }
-//     }
-    
-//     // Then create or get the HUD for this actor
-//     const hud = MistHUD.getOrCreateHudForActor(token.actor);
-    
-//     // Make sure it's rendered
-//     if (hud && !hud.rendered) {
-//       hud.render(true);
-//     }
-    
-//     console.log("HUD result:", hud);
-//   } else if (!controlled) {
-//     // Only close the HUD for the token being deselected
-//     const hud = playerHudRegistry.get(token.actor?.id);
-//     if (hud) hud.close();
-//   }
-// });
-
-
-// Keep track of the currently displayed HUD
-
-
 Hooks.on('controlToken', (token, controlled) => {
   console.log("Token control changed:", token, controlled);
   
@@ -1948,28 +1830,12 @@ Hooks.on('controlToken', (token, controlled) => {
   }
 });
 
-// Add this hook to handle clicking an already selected token
-// Hooks.on('clickToken', (token) => {
-//   // Check if the clicked token is already controlled and has a character actor
-//   if (token.isControlled && token.actor && token.actor.type === 'character') {
-//     // Find or create the HUD
-//     const hud = MistHUD.getOrCreateHudForActor(token.actor);
-    
-//     // Ensure it's visible
-//     if (hud && !hud.rendered) {
-//       hud.render(true);
-//     }
-//   }
-// });
-
-
 Hooks.on('updateActor', (actor, data, options, userId) => {
   const hud = playerHudRegistry.get(actor.id);
   if (hud) {
     hud.render(true);
   }
 });
-
 // In your module or main script file, register these once during init or ready:
 Hooks.on('createItem', (item, options, userId) => {
   // Only for items embedded in an Actor:
@@ -2008,9 +1874,126 @@ Hooks.on('deleteItem', (item, options, userId) => {
   }
 });
 
+// Hooks.on("dropCanvasData", async (canvas, dropData) => {
+//   if (dropData?.type !== "status") return;
+
+
+//   const { name = "Unnamed Status", tier = 1 } = dropData;
+  
+//   const { x, y } = dropData;
+//   const token = canvas.tokens.placeables.find(t => t.bounds?.contains(x, y));
+//   if (!token) {
+//     console.warn("No token found under drop location.");
+//     return;
+//   }
+
+//   const actor = token.actor;
+//   if (!actor) {
+//     console.warn("No actor found on target token.");
+//     return;
+//   }
+
+//   const itemData = {
+//     name,
+//     type: "status",
+//     system: {
+//       pips: 0,
+//       tier,
+//       description: "",
+//       locked: false,
+//       version: "1",
+//       free_content: false,
+//       hidden: false,
+//       temporary: false,
+//       permanent: false,
+//       sceneId: null,
+//       showcased: false,
+//       specialType: ""
+//     },
+
+//     img: "icons/svg/item-bag.svg"
+//   };
+
+
+//   try {
+//     const [newStatus] = await actor.createEmbeddedDocuments("Item", [itemData]);
+//     ui.notifications.info(`Gave ${actor.name} status: ${newStatus.name}-${newStatus.system.tier}`);
+//   } catch (err) {
+//     console.error("Error creating status on actor:", err);
+//   }
+// });
+
+Hooks.once("init", async function () {
+
+  game.settings.register("mist-hud", "importedStatusCollection", {
+      name: "Imported Statuses",
+      hint: "Stores the imported status collections from JSON.",
+      scope: "world",
+      config: false,
+      type: Object,
+      default: []
+  });
+
+  game.mistHUD = game.mistHUD || {}; // Ensure the object exists
+
+  Hooks.once("ready", () => {
+      game.mistHUD.statusScreen = new statusScreenApp();
+  });
+});
+
+Hooks.on("getSceneControlButtons", (controls) => {
+  console.log("mist-hud: Adding control buttons");
+  
+  // Find the token control section
+  const tokenControls = controls.find((c) => c.name === "token");
+  if (!tokenControls) {
+    console.log("mist-hud: No token controls found");
+    return;
+  }
+
+  // Add the Status Screen button
+  tokenControls.tools.push({
+    name: "statusScreen",
+    title: "Statuses MC Screen",
+    icon: "fa-solid fa-list",
+    button: true,
+    visible: game.user.isGM || game.user.isPlayer,
+    onClick: () => {
+      if (!game.mistHUD?.statusScreen) {
+        ui.notifications.warn("MistHUD: Status Screen not found!");
+        return;
+      }
+      game.mistHUD.statusScreen.render(true);
+    }
+  });
+
+  // Only add the NPC Influence Manager button for GMs
+  if (game.user.isGM) {
+    // Add the NPC Influence Viewer button with skull icon
+    tokenControls.tools.push({
+      name: "npcInfluenceManager",
+      title: "NPC Influence Viewer",
+      icon: "fas fa-skull", // Using skull icon as requested
+      button: true,
+      visible: true,
+      onClick: () => {
+        console.log("mist-hud: NPC Influence button clicked");
+        // Try both global references
+        if (typeof globalThis.openNPCInfluenceManager === 'function') {
+          globalThis.openNPCInfluenceManager();
+        } else if (game.mistHud && typeof game.mistHud.openNPCInfluenceManager === 'function') {
+          game.mistHud.openNPCInfluenceManager();
+        } else {
+          ui.notifications.error("NPC Influence Viewer function not available");
+        }
+      }
+    });
+  }
+});
+
+// Then replace your existing dropCanvasData hook with this updated version:
 Hooks.on("dropCanvasData", async (canvas, dropData) => {
   if (dropData?.type !== "status") return;
-
 
   const { name = "Unnamed Status", tier = 1 } = dropData;
   
@@ -2044,169 +2027,20 @@ Hooks.on("dropCanvasData", async (canvas, dropData) => {
       showcased: false,
       specialType: ""
     },
-
     img: "icons/svg/item-bag.svg"
   };
 
-
   try {
     const [newStatus] = await actor.createEmbeddedDocuments("Item", [itemData]);
-    ui.notifications.info(`Gave ${actor.name} status: ${newStatus.name}-${newStatus.system.tier}`);
+    
+    // Always show the standard notification
+    //ui.notifications.info(`Gave ${actor.name} status: ${newStatus.name}-${newStatus.system.tier}`);
+    
+    // Show the animated notification over the token
+    // This will only display if the "enableStatusNotifications" setting is true
+    TokenStatusNotification.show(token, newStatus.name, newStatus.system.tier);
+    
   } catch (err) {
     console.error("Error creating status on actor:", err);
-  }
-});
-
-Hooks.once("init", async function () {
-
-  game.settings.register("mist-hud", "importedStatusCollection", {
-      name: "Imported Statuses",
-      hint: "Stores the imported status collections from JSON.",
-      scope: "world",
-      config: false,
-      type: Object,
-      default: []
-  });
-
-  game.mistHUD = game.mistHUD || {}; // Ensure the object exists
-
-  Hooks.once("ready", () => {
-      game.mistHUD.statusScreen = new statusScreenApp();
-  });
-});
-
-Hooks.on("getSceneControlButtons", (controls) => {
-  // Find the token control section
-  const tokenControls = controls.find((c) => c.name === "token");
-  if (!tokenControls) return;
-
-  // Add the new button
-  tokenControls.tools.push({
-      name: "statusScreen",
-      title: "Statuses MC Screen",
-      icon: "fa-solid fa-list", // You can replace this with a custom icon
-      button: true,
-      visible: game.user.isGM || game.user.isPlayer,
-      onClick: () => {
-          if (!game.mistHUD?.statusScreen) {
-              ui.notifications.warn("MistHUD: Status Screen not found!");
-              return;
-          }
-          game.mistHUD.statusScreen.render(true);
-      }
-  });
-
-});
-
-// ==============================
-//NPC INFLUENCE MANAGER HOOKS
-// ==============================
-
-
-
-// Add this code to your module for debugging DSN integration
-// You can add this to a separate file or to one of your existing files
-
-/**
- * Debug helper for Dice So Nice integration
- * This will dump all relevant DSN information to the console
- */
-export function debugDSN() {
-  console.log("============ DICE SO NICE DEBUG INFO ============");
-  
-  // Check if DSN is available
-  if (!game.dice3d) {
-      console.log("DSN not available - module not enabled or loaded");
-      return;
-  }
-  
-  // Get DSN version
-  const dsnModule = game.modules.get("dice-so-nice");
-  console.log(`DSN Version: ${dsnModule?.version || "unknown"}`);
-  
-  // Check available settings
-  console.log("DSN Settings:");
-  game.settings.settings.forEach((setting, key) => {
-      if (key.startsWith("dice-so-nice")) {
-          console.log(`- ${key}: ${setting.default}`);
-          try {
-              const value = game.settings.get(key.split('.')[0], key.split('.')[1]);
-              console.log(`  Current value: ${JSON.stringify(value)}`);
-          } catch (e) {
-              console.log(`  Cannot get current value: ${e.message}`);
-          }
-      }
-  });
-  
-  // Check dice3d object structure
-  console.log("DSN API Structure:");
-  console.log("- game.dice3d properties:", Object.keys(game.dice3d));
-  
-  // Check systems
-  console.log("DSN Systems:");
-  if (game.dice3d.DiceFactory && game.dice3d.DiceFactory.systems) {
-      Object.keys(game.dice3d.DiceFactory.systems).forEach(system => {
-          console.log(`- ${system}`);
-      });
-  } else {
-      console.log("No DiceFactory.systems found");
-  }
-  
-  // Check current system
-  console.log(`Current System: ${game.dice3d.currentSystem || "unknown"}`);
-  
-  console.log("===============================================");
-}
-
-// You can call this function from the browser console with:
-// game.modules.get("mist-hud").api.debugDSN()
-
-// Add this to your module API registration
-Hooks.once('ready', () => {
-
-    // Set up global accessor function (using the imported one)
-    game.mistHud = game.mistHud || {};
-    game.mistHud.openNPCInfluenceManager = openNPCInfluenceManager;
-    
-    // Add a token control button for easy access
-    if (game.user.isGM) {
-      Hooks.on('getSceneControlButtons', (controls) => {
-        controls.find(c => c.name === "token")?.tools.push({
-          name: "npcInfluenceManager",
-          title: "NPC Influence Manager",
-          icon: "fas fa-balance-scale",
-          button: true,
-          onClick: () => {
-            game.mistHud.openNPCInfluenceManager();
-          }
-        });
-      });
-    }
-    
-    // You can also add a macro for easier access
-    if (game.user.isGM) {
-      // Check if the macro already exists
-      const existingMacro = game.macros.find(m => 
-        m.name === "Open NPC Influence Manager" && 
-        m.author.id === game.user.id
-      );
-      
-      if (!existingMacro) {
-        // Create a new macro
-        Macro.create({
-          name: "Open NPC Influence Manager",
-          type: "script",
-          img: "icons/svg/binoculars.svg",
-          command: "game.mistHud.openNPCInfluenceManager();",
-          scope: "global",
-          author: game.user.id
-        }).then(macro => {
-          console.log("Created NPC Influence Manager macro");
-        });
-      }
-    }
-  // Add to existing API object
-  if (game.modules.get('mist-hud').api) {
-      game.modules.get('mist-hud').api.debugDSN = debugDSN;
   }
 });
