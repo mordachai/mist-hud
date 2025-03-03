@@ -4,7 +4,7 @@
 }
 
 .npc-influence-manager .window-content{  
-  background: linear-gradient(var(--hud-bg-color), var(--hud-bg-color2));
+  background: linear-gradient(rgba(9, 13, 14, 0.629), rgba(5, 19, 17, 0.81));
   color: whitesmoke;
 }
 
@@ -24,11 +24,26 @@
   line-height: 1.5;
 }
 
+.npc-influence-manager  h2,
+.npc-influence-manager  h3 {
+  margin: 0;
+  line-height: 1.5;
+  border-color: #4ef7b6;
+}
+
 .npc-influence-manager .controls {
   display: flex;
   gap: 8px;
   white-space: nowrap;
 }
+
+.npc-influence-manager .controls button {
+color: #bc8383;
+}
+
+.npc-influence-manager .controls button:hover {
+  color: #ffffff;
+  }
 
 .npc-influence-manager .influence-note {
   font-style: italic;
@@ -38,7 +53,7 @@
 
 .npc-influence-manager .tabs {
   display: flex;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #b6b6b6;
   margin-bottom: 10px;
 }
 
@@ -51,14 +66,15 @@
   border-radius: 3px 3px 0 0;
   margin-right: 5px;
   background: rgba(0, 0, 0, 0.05);
-  color: #666;
+  color: #969696;
 }
 
 .npc-influence-manager .npc-tags,
 .npc-influence-manager .npc-statuses {
-  gap: 5px;
+  gap: 6px 8px;
   display: flex;
-  margin: 2px;
+  margin-top: 8px;
+  flex-wrap: wrap;
 }
 
 .npc-influence-manager .tabs .item.active {
@@ -106,17 +122,24 @@
 }
 
 .npc-influence-manager .npc-image {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 3px;
   object-fit: cover;
   margin-right: 2px;
-  border: 1px solid #cccccc44;
+  border: none;
   cursor: pointer;
 }
 
+.npc-items-container{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-direction: row;
+}
+
 .npc-item .npc-image > img{
-  border: red;
+  border: red !important;
   box-shadow: none;
 }
 
@@ -127,13 +150,13 @@
 
 .npc-influence-manager .npc-name {
   margin: 0 0 5px 0;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
 }
 
 .npc-influence-manager .token-badge {
   display: inline-block;
-  font-size: 10px;
+  font-size: 11px;
   background: #8B4513;
   color: white;
   padding: 1px 5px;
@@ -145,8 +168,8 @@
 
 .npc-influence-manager .scale-badge {
   display: inline-block;
-  font-size: 10px;
-  background: #4682B4;
+  font-size: 11px;
+  background: #984697;
   color: white;
   padding: 1px 5px;
   border-radius: 3px;
@@ -160,7 +183,7 @@
   font-weight: bold;
   width: 30px;
   text-align: right;
-  margin-right: 8px;
+  padding-right: 6px;
 }
 
 .npc-influence-manager .influence-value.total-influence {

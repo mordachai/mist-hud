@@ -779,7 +779,7 @@ export class NpcHUD extends Application {
             });
 
             // Clicking a segment sets the collective size
-            html.find('.npc-collective-bar .collective-segment').click((event) => {
+            html.find('.npc-collective-bar .npc-collective-segment').click((event) => {
                 const newValue = Number($(event.currentTarget).data('value'));
                 this.getCollectiveSize().onBarClick(newValue);
             });

@@ -1879,57 +1879,88 @@ Hooks.on('ready', () => {
 //   console.log("Token control changed:", token, controlled);
   
 //   if (controlled && token.actor && token.actor.type === 'character') {
-//     console.log("Creating/getting HUD for actor:", token.actor.id);
+//     // First, close any HUDs that don't belong to this actor
+//     for (const [actorId, hud] of playerHudRegistry.entries()) {
+//       if (actorId !== token.actor.id) {
+//         hud.close();
+//       }
+//     }
+    
+//     // Then create or get the HUD for this actor
 //     const hud = MistHUD.getOrCreateHudForActor(token.actor);
+    
+//     // Make sure it's rendered
+//     if (hud && !hud.rendered) {
+//       hud.render(true);
+//     }
+    
 //     console.log("HUD result:", hud);
-//     console.log("Registry after:", globalThis.playerHudRegistry);
 //   } else if (!controlled) {
-//     const hud = globalThis.playerHudRegistry.get(token.actor?.id);
+//     // Only close the HUD for the token being deselected
+//     const hud = playerHudRegistry.get(token.actor?.id);
 //     if (hud) hud.close();
 //   }
 // });
 
+
+// Keep track of the currently displayed HUD
+
+
 Hooks.on('controlToken', (token, controlled) => {
   console.log("Token control changed:", token, controlled);
   
+  // Only handle when a token is selected
   if (controlled && token.actor && token.actor.type === 'character') {
-    // First, close any HUDs that don't belong to this actor
-    for (const [actorId, hud] of playerHudRegistry.entries()) {
-      if (actorId !== token.actor.id) {
-        hud.close();
+    // Check if the user has ownership of the token
+    if (!token.isOwner) {
+      console.log("User doesn't have ownership of the selected token");
+      return; // Do nothing if the user doesn't own the token
+    }
+    
+    // Get all currently selected tokens
+    const selectedTokens = canvas.tokens.controlled;
+    
+    // If we have exactly one token selected, show its HUD
+    if (selectedTokens.length === 1) {
+      // Close any existing HUDs first
+      for (const [actorId, hud] of playerHudRegistry.entries()) {
+        if (actorId !== token.actor.id) {
+          hud.close();
+        }
       }
+      
+      // Create or get the HUD for this actor
+      const hud = MistHUD.getOrCreateHudForActor(token.actor);
+      
+      // Make sure it's rendered
+      if (hud && !hud.rendered) {
+        hud.render(true);
+      }
+      
+      console.log("HUD result:", hud);
     }
-    
-    // Then create or get the HUD for this actor
-    const hud = MistHUD.getOrCreateHudForActor(token.actor);
-    
-    // Make sure it's rendered
-    if (hud && !hud.rendered) {
-      hud.render(true);
-    }
-    
-    console.log("HUD result:", hud);
   } else if (!controlled) {
-    // Only close the HUD for the token being deselected
-    const hud = playerHudRegistry.get(token.actor?.id);
-    if (hud) hud.close();
+    // Only close if no tokens are selected
+    if (canvas.tokens.controlled.length === 0) {
+      const hud = playerHudRegistry.get(token.actor?.id);
+      if (hud) hud.close();
+    }
   }
 });
 
 // Add this hook to handle clicking an already selected token
-Hooks.on('clickToken', (token) => {
-  // Check if the clicked token is already controlled and has a character actor
-  if (token.isControlled && token.actor && token.actor.type === 'character') {
-    // Find or create the HUD
-    const hud = MistHUD.getOrCreateHudForActor(token.actor);
+// Hooks.on('clickToken', (token) => {
+//   // Check if the clicked token is already controlled and has a character actor
+//   if (token.isControlled && token.actor && token.actor.type === 'character') {
+//     // Find or create the HUD
+//     const hud = MistHUD.getOrCreateHudForActor(token.actor);
     
-    // Ensure it's visible
-    if (hud && !hud.rendered) {
-      hud.render(true);
-    }
-  }
-});
-
+//     // Ensure it's visible
+//     if (hud && !hud.rendered) {
+//       hud.render(true);
+//     }
+//   }
+// });
 
 
 Hooks.on('updateActor', (actor, data, options, userId) => {
