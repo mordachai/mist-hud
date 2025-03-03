@@ -1297,7 +1297,7 @@ Hooks.once("init", () => {
               if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
                 return `<span class="npc-limit">${trimmedContent}</span>`;
               }
-              return `<span class="npc-story-tag">${trimmedContent}</span>`;
+              return `<span class="npc-story-tag not-clickable">${trimmedContent}</span>`;
             })
             .replace(/\s*$/gm, '')
             .replace(/\n+/g, '</p><p>')

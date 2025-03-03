@@ -231,12 +231,12 @@ export class NPCInfluenceManager extends Application {
       id: NPCInfluenceManager.WINDOW_ID,
       title: 'NPC Influence Viewer',
       template: 'modules/mist-hud/templates/npc-influence-manager.hbs',
-      width: 550,
+      width: 450,
       height: 'auto',
       resizable: true,
       minimizable: true,
       classes: ['mist-hud', 'npc-influence-manager'],
-      tabs: [{ navSelector: '.tabs', contentSelector: '.content', initial: 'all' }]
+      tabs: [{ navSelector: '.tabs', contentSelector: '.content', initial: 'active' }]
     });
   }
 

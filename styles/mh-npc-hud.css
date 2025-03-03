@@ -510,6 +510,13 @@ margin: 5px;
     color: var(--text-status-color);
 }
 
+
+.npc-status:active,
+.npc-status.neutral:active,
+.npc-status-moves:active {
+    cursor: grabbing;
+}
+
 .npc-status:hover,
 .npc-status-moves:hover {
     text-shadow: 0 0 2px #fff;
@@ -636,6 +643,10 @@ margin: 5px;
     font-size: 0.85rem;
 }
 
+.npc-collective-segment{
+    cursor: pointer;
+}
+
 .npc-collective-container::after {
     content: '';
     flex: 1;
@@ -647,6 +658,7 @@ margin: 5px;
     font-family: var(--font-family-main1);
     font-weight: bold;
     text-transform: uppercase;
+    cursor: pointer;
 }
 
 

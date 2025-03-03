@@ -1,6 +1,13 @@
 .npc-influence-manager {
   padding: 10px;
+  max-height: calc(75vh);
 }
+
+.npc-influence-manager .window-content{  
+  background: linear-gradient(var(--hud-bg-color), var(--hud-bg-color2));
+  color: whitesmoke;
+}
+
 
 .npc-influence-manager .influence-summary {
   display: flex;
@@ -17,21 +24,9 @@
   line-height: 1.5;
 }
 
-.npc-influence-manager .influence-value {
-  font-weight: bold;
-}
-
-.npc-influence-manager .influence-value.positive {
-  color: #4682B4;
-}
-
-.npc-influence-manager .influence-value.negative {
-  color: #8B4513;
-}
-
 .npc-influence-manager .controls {
   display: flex;
-  gap: 5px;
+  gap: 8px;
   white-space: nowrap;
 }
 
@@ -81,6 +76,7 @@
 
 .npc-influence-manager .content .tab.active {
   display: block;
+  overflow-x: auto;
 }
 
 .npc-influence-manager .npc-list {
@@ -93,7 +89,7 @@
   display: flex;
   align-items: center;
   padding: 8px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #868686b2 !important;
   position: relative;
 }
 
@@ -114,8 +110,14 @@
   height: 40px;
   border-radius: 3px;
   object-fit: cover;
-  margin-right: 5px;
-  border: 1px solid #ccc;
+  margin-right: 2px;
+  border: 1px solid #cccccc44;
+  cursor: pointer;
+}
+
+.npc-item .npc-image > img{
+  border: red;
+  box-shadow: none;
 }
 
 .npc-influence-manager .npc-info {
@@ -154,39 +156,27 @@
 }
 
 .npc-influence-manager .influence-value {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
   width: 30px;
   text-align: right;
   margin-right: 8px;
 }
 
+.npc-influence-manager .influence-value.total-influence {
+  font-size: 22px;
+}
+
 .npc-influence-manager .influence-value.positive {
-  color: #4682B4;
+  color: #4ef7b6;
 }
 
 .npc-influence-manager .influence-value.negative {
-  color: #8B4513;
+  color: #ef2f2f;
 }
 
 .npc-influence-manager .npc-controls {
   margin-left: 10px;
-}
-
-.npc-influence-manager .npc-controls button {
-  width: 30px;
-  height: 30px;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.1);
-  border: none;
-  color: #444;
-  cursor: pointer;
-  padding: 0;
-  margin-left: 5px;
-}
-
-.npc-influence-manager .npc-controls button:hover {
-  background: rgba(0, 0, 0, 0.2);
 }
 
 .npc-influence-manager .empty-state {
@@ -194,4 +184,8 @@
   text-align: center;
   color: #666;
   font-style: italic;
+}
+
+.not-clickable{
+  cursor: default;
 }

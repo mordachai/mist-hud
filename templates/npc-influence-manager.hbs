@@ -2,7 +2,7 @@
   <header class="influence-summary">
     <div class="influence-info">
       <h4>Scene: <span class="scene-name">{{currentSceneName}}</span></h4>
-      <h2>Total Influence: <span class="influence-value {{#if totalInfluence}}{{#if (lt totalInfluence 0)}}negative{{else}}positive{{/if}}{{/if}}">{{totalInfluence}}</span></h2>
+      <h2>Total: <span class="influence-value total-influence {{#if totalInfluence}}{{#if (lt totalInfluence 0)}}negative{{else}}positive{{/if}}{{/if}}"><i class="fa-solid fa-skull"></i> {{totalInfluence}}</span></h2>
     </div>
     <div class="controls">
       <button class="sync-all-npcs" title="Synchronize all NPCs in the current scene"><i class="fas fa-sync"></i> Sync Scene</button>
@@ -28,21 +28,22 @@
               <div class="npc-info">
                 <h3 class="npc-name">
                   {{name}} 
-                  {{#unless isLinked}}<span class="token-badge">Token</span>{{/unless}}
+                  {{!-- uncomment line below if you want to inform that the npc is not linked --}}
+                  {{!-- {{#unless isLinked}}<span class="token-badge">Token</span>{{/unless}} --}}
                   {{#if hasCollectiveSize}}<span class="scale-badge">Scale: {{collectiveSize}}</span>{{/if}}
                 </h3>
                 <div class="npc-items-container">
                   {{#if hasTags}}
                     <div class="npc-tags">
                       {{#each tags}}
-                        <span class="npc-story-tag {{state}} {{#if isBurned}}burned{{/if}}">{{name}}</span>
+                        <span class="npc-story-tag {{state}} not-clickable {{#if isBurned}}burned{{/if}}">{{name}}</span>
                       {{/each}}
                     </div>
                   {{/if}}
                   {{#if hasStatuses}}
                     <div class="npc-statuses">
                       {{#each statuses}}
-                        <span class="npc-status {{state}}">{{name}}-{{tier}}</span>
+                        <span class="npc-status {{state}} not-clickable">{{name}}-{{tier}}</span>
                       {{/each}}
                     </div>
                   {{/if}}
@@ -75,14 +76,14 @@
                   {{#if hasTags}}
                     <div class="npc-tags">
                       {{#each tags}}
-                        <span class="npc-story-tag {{state}} {{#if isBurned}}burned{{/if}}">{{name}}</span>
+                        <span class="npc-story-tag {{state}} not-clickable {{#if isBurned}}burned{{/if}}">{{name}}</span>
                       {{/each}}
                     </div>
                   {{/if}}
                   {{#if hasStatuses}}
                     <div class="npc-statuses">
                       {{#each statuses}}
-                        <span class="npc-status {{state}}">{{name}}-{{tier}}</span>
+                        <span class="npc-status {{state}} not-clickable">{{name}}-{{tier}}</span>
                       {{/each}}
                     </div>
                   {{/if}}
