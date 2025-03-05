@@ -170,8 +170,9 @@ margin: 5px;
     font-size: 0.9rem;
     display: flex;
     flex-direction: column;
-    height: 100%; /* Take full height */
+    height: 100%;
     color: whitesmoke;
+    background: linear-gradient(var(--hud-bg-color), var(--hud-bg-color2));
 }
 
 .accordion-content {
@@ -228,7 +229,7 @@ margin: 5px;
     flex-direction: column;
     overflow-y: auto;
     /* border-top: 1px solid var(--divider-color1); */
-    padding-top: 20px;
+    padding-top: 5px;
 }
 
 /* Optional scrollbar styling */
@@ -571,6 +572,7 @@ margin: 5px;
     border-color: #f44336;
 }
 
+
 /* Tags & Statuses Items */
 .npc-storytags-list,
 .npc-statuses-list {
@@ -590,7 +592,7 @@ margin: 5px;
     text-align: center;
 }
 
-/* Scrollbar Styling (Optional for Overflow Cases) */
+/* Scrollbar Styling for Tags & Statuses */
 .npc-tags-statuses-container::-webkit-scrollbar {
     height: 6px;
 }
@@ -604,25 +606,72 @@ margin: 5px;
     background: transparent;
 }
 
+/* Arrow Marker Styling */
 .npc-tc-marker {
     color: var(--spectrum-color);
     font-size: 1.6rem;
     font-weight: 400;
-    position: relative;
-    top: 2px;
     line-height: 1rem;
 }
 
-.npc-threat{
+/* Threat Container Styling */
+.npc-threat {
     font-family: var(--font-family-npcmoves);
     color: white;
     font-size: 1.0rem;
     font-style: italic;
     margin-bottom: 1px;
     line-height: 1.2rem;
+    display: block;
+    position: relative;
+    padding-left: 0.65em; 
 }
 
-.npc-consequence{
+/* Position the single arrow marker */
+.npc-threat > .npc-tc-marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* Threat description formatting */
+.npc-threat-description p {
+    margin-top: 0;
+    margin-bottom: 0.5em;
+    display: inline;
+}
+
+/* List formatting within threats */
+.npc-threat ul {
+    margin-left: 0.5em;
+}
+
+/* List item layout within threats */
+.npc-threat ul li {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 0.3em;
+}
+
+/* Double arrow markers in list items */
+.npc-threat ul li .npc-tc-marker {
+    flex-shrink: 0;
+    margin-right: 0.3em;
+}
+
+/* Move description in list items */
+.npc-threat ul li .npc-move-description {
+    flex: 1;
+}
+
+/* Remove margins from paragraphs in move descriptions */
+.npc-move-description p {
+    margin: 0;
+    padding: 0;
+}
+
+/* Consequence styling */
+.npc-consequence {
     font-family: var(--font-family-npcmoves);
     color: whitesmoke;
     font-size: 1.0rem;
@@ -631,6 +680,7 @@ margin: 5px;
     margin-bottom: 1px;
     line-height: 1.2rem;
 }
+
 
 .npc-collective-container {
     display: flex;

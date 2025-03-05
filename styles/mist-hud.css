@@ -934,11 +934,13 @@ li.tag-or-status {
 
 #status-screen {
   background: none !important;
+  display: flex !important;
+  flex-direction: column;
   border: none;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
   min-width: 300px !important;
   min-height: 300px;
-  max-width: 45vw;
+  max-width: 75vw;
   max-height: 80vh;
   overflow: hidden;
   border: #374e5c 2px solid;
@@ -948,8 +950,6 @@ li.tag-or-status {
 #status-screen .window-content {
   background: none !important;
   padding: 3px;
-  min-width: fit-content;
-  max-height: fit-content;
   border: 1px solid var(--mist-border-color);
 }
 
@@ -962,8 +962,8 @@ li.tag-or-status {
   font-size: 1rem;
   overflow-wrap: break-word;
   background: rgba(0, 0, 0, 0.8) !important;
-  min-width: fit-content;
-  max-height: fit-content;
+  /* min-width: fit-content;
+  max-height: fit-content; */
 }
 
 .status-tab-content {
@@ -976,7 +976,7 @@ li.tag-or-status {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  flex: 1;
+  width: 100%;
   align-items: center;
   font-size: 1.2rem;
   padding: 5px;
@@ -985,8 +985,18 @@ li.tag-or-status {
   border-bottom: 2px solid #444;
 }
 
+.status-screen-buttons{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 5px;
+  align-items: center;
+  flex: 1;
+  width: 100%;
+}
+
 .statuses-screen-title {
-  flex: 4;
+  flex: 1;
   font-size: 1.6rem;
   font-family: var(--font-family-main1);
   font-weight: bold;
@@ -999,9 +1009,8 @@ li.tag-or-status {
   cursor: pointer;
   color: rgb(199, 199, 199);
   margin: auto;
-  flex: 1;
-  padding-top: 8px;
   white-space: nowrap;
+  max-width: 120px;
 }
 
 .status-tab.active {
@@ -1195,4 +1204,39 @@ li.tag-or-status {
                -1px -1px 3px rgba(0, 0, 0, 0.7),
                1px -1px 3px rgba(0, 0, 0, 0.7),
                -1px 1px 3px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Style for move lines with arrow symbols */
+.move-line {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  margin-bottom: 0.5em;
+}
+
+.scene-tag {
+  border: 2px dashed rgb(251, 238, 153);
+}
+
+/* Make sure arrow symbols stay with their text */
+.move-line > :first-child {
+  margin-right: 0.25em;
+}
+
+/* Status styles */
+.npc-status-moves {
+  display: inline-block;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  margin: 0 2px;
+}
+
+.gm-only-text {
+  color: #ffdb10;
+  font-style: italic;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 0 4px;
+  border-radius: 3px;
 }

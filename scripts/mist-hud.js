@@ -125,12 +125,40 @@ async function handleTagClick(event, tagType, hudInstance) {
   hudInstance.calculateTotalPower();
 }
 
+// function toggleInversion(tagElement, inversionIconConfig, hudInstance) {
+//   tagElement.toggleClass('inverted');
+//   const isInverted = tagElement.hasClass('inverted');
+//   const inversionIcon = isInverted ? inversionIconConfig.active : inversionIconConfig.default;
+//   tagElement.find(inversionIconConfig.selector).html(inversionIcon);
+//   hudInstance.calculateTotalPower();
+// }
+
 function toggleInversion(tagElement, inversionIconConfig, hudInstance) {
+  // Toggle the 'inverted' class on the tag element
   tagElement.toggleClass('inverted');
+  
+  // Get the current state AFTER toggling
   const isInverted = tagElement.hasClass('inverted');
-  const inversionIcon = isInverted ? inversionIconConfig.active : inversionIconConfig.default;
+  
+  // Set the appropriate icon based on the current state
+  const inversionIcon = isInverted 
+    ? inversionIconConfig.inverted  // Show down arrow when inverted (negative)
+    : inversionIconConfig.default;  // Show up arrow when not inverted (positive)
+  
   tagElement.find(inversionIconConfig.selector).html(inversionIcon);
+  
+  // Recalculate power after the state change
   hudInstance.calculateTotalPower();
+  
+  // If we need to update the backend item, we should do it here
+  // This depends on your implementation of how tag data is stored
+  const tagId = tagElement.data('id');
+  if (tagId) {
+    const tag = hudInstance.actor.items.get(tagId);
+    if (tag) {
+      tag.update({ 'system.isInverted': isInverted });
+    }
+  }
 }
 
 Hooks.once('ready', () => {
@@ -359,19 +387,36 @@ export class MistHUD extends Application {
     
     html.find('.mh-pwrcrew-tag').on('click', (event) => { handleTagClick(event, 'power', this); });
     html.find('.mh-wkcrew-tag').on('click', (event) => { handleTagClick(event, 'weakness', this); });
-  
+
+    // After setting up your event listeners, add this initialization logic
+    html.find('.mh-story-tag').each((index, element) => {
+      const $tagElement = $(element);
+      const isInverted = $tagElement.hasClass('inverted');
+      const $toggleIcon = $tagElement.find('.mh-story-toggle');
+      
+      // Set initial icon based on the current inversion state
+      if (isInverted) {
+        $toggleIcon.html('<i class="fa-light fa-angles-down"></i>'); // Down for inverted/negative
+      } else {
+        $toggleIcon.html('<i class="fa-light fa-angles-up"></i>'); // Up for default/positive
+      }
+    });
+
     html.find('.mh-story-toggle').on('click', (event) => {
       event.stopPropagation();
       event.preventDefault();
       const invertElement = $(event.currentTarget);
       const tagElement = invertElement.closest('.mh-story-tag');
+      
+      // Don't toggle if burned
       if (tagElement.hasClass('burned')) return;
+      
       toggleInversion(tagElement, {
-        active: '<i class="fa-light fa-angles-up"></i>',
-        default: '<i class="fa-light fa-angles-down"></i>',
+        inverted: '<i class="fa-light fa-angles-down"></i>', // Down arrow for inverted/negative
+        default: '<i class="fa-light fa-angles-up"></i>',    // Up arrow for default/positive
         selector: '.mh-story-toggle'
       }, hudInstance);
-    });  
+    });
 
     html.find('.mh-weakness-toggle').on('click', (event) => {
       event.stopPropagation();
@@ -833,10 +878,14 @@ export class MistHUD extends Application {
     
   
     // Update story tags to include the selected property:
-    themesAndTags.storyTags = themesAndTags.storyTags.map(tag => ({
-      ...tag,
-      selected: selectedTags.includes(tag.id)
-    }));
+    themesAndTags.storyTags = themesAndTags.storyTags.map(tag => {
+      const isInverted = tag.system && tag.system.isInverted;
+      return {
+        ...tag,
+        selected: selectedTags.includes(tag.id),
+        inverted: isInverted
+      };
+    });
   
     // Get and update loadout tags:
     const loadoutTags = getLoadoutTags(this.actor).map(tag => ({

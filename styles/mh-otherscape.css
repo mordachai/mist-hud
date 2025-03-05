@@ -36,9 +36,9 @@
   --font-family-effects: Courier New;
   --font-family-npcmoves: Barlow Condensed;
   --hud-background1: url('../ui/os_hud_BG.webp');
-  --hud-bg-color: #2d42536e;
-  --hud-bg-color2: #1a28356c;
-  --npc-hud-bg-prime: #384d5e51;
+  --hud-bg-color: #222f3f50;
+  --hud-bg-color2: #27384750;
+  --npc-hud-bg-prime: #56779432;
   --marker-positiveTag-color: #96f5ff;
   --marker-negativeTag-color: #ffd4a8;
 }

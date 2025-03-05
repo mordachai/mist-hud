@@ -43,15 +43,6 @@ const logger = {
   error: (...args) => console.error("NPC-HUD |", ...args)
 };
 
-function generateRandomId() {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < 16; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-}
-
 export class NpcHUD extends Application {
 
     static get defaultOptions() {
@@ -619,8 +610,26 @@ export class NpcHUD extends Application {
                 event.stopPropagation();
                 this.close();
             });
+
+
+            //SCENE TAGS LISTENER WILL NOT USE FOR NOW
+            // html.find('.npc-status-moves[data-scene-tag="true"], .npc-story-tag[data-scene-tag="true"]').on('click', async (event) => {
+            //     event.stopPropagation();
+            //     event.preventDefault();
+                
+            //     if (game.user.isGM) {
+            //     try {
+            //         await handleSceneTag($(event.currentTarget));
+            //         ui.notifications.info("Added to scene tags/statuses");
+            //     } catch (error) {
+            //         console.error("Error adding to scene:", error);
+            //         ui.notifications.error("Failed to add to scene");
+            //     }
+            //     }
+            // });
     
-            // For NPC Story Tags
+            //For NPC Story Tags
+            
             html.find('.npc-story-tag')
             .on('click', (event) => {
                 event.stopPropagation();
@@ -649,8 +658,8 @@ export class NpcHUD extends Application {
                 this.render(false);
                 this.emitNpcInfluence();
             });
-    
-            // For NPC Statuses
+
+            //For NPC Statuses
             html.find('.npc-status')
             .on('click', (event) => {
                 event.stopPropagation();
@@ -678,30 +687,69 @@ export class NpcHUD extends Application {
                 }
                 this.render(false);
                 this.emitNpcInfluence();
-            });       
+            });      
     
+            
             // Setup drag-and-drop for statuses
+            // html.find('.npc-status, .npc-status-moves').each((i, el) => {
+            //     el.setAttribute('draggable', 'true');
+            //     el.addEventListener('dragstart', (ev) => {
+            //       const text = el.textContent.trim();
+            //       let name = text;
+            //       let tier = 1;
+            
+            //       const match = text.match(/^(.*?)-(\d+)$/);
+            //       if (match) {
+            //         name = match[1];
+            //         tier = parseInt(match[2], 10);
+            //       }
+            
+            //       const statusData = {
+            //         type: "status",
+            //         name,
+            //         tier,
+            //         actorId: this.actor?.id || null
+            //       };
+            
+            //       ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
+            //     });
+            // });
+
+
+            //Current Drag And Drop of statuses
+            
+            
             html.find('.npc-status, .npc-status-moves').each((i, el) => {
                 el.setAttribute('draggable', 'true');
                 el.addEventListener('dragstart', (ev) => {
-                  const text = el.textContent.trim();
-                  let name = text;
-                  let tier = 1;
-            
-                  const match = text.match(/^(.*?)-(\d+)$/);
-                  if (match) {
+                const text = el.textContent.trim();
+                let name = text;
+                let tier = 1;
+
+                const match = text.match(/^(.*?)-(\d+)$/);
+                if (match) {
                     name = match[1];
                     tier = parseInt(match[2], 10);
-                  }
-            
-                  const statusData = {
+                }
+
+                // Get temp/perm flags directly from the element
+                const element = $(el);
+                const isTemporary = element.attr('data-temporary') === 'true';
+                const isPermanent = element.attr('data-permanent') === 'true';
+
+                // Only add these properties if they are true
+                const statusData = {
                     type: "status",
                     name,
                     tier,
                     actorId: this.actor?.id || null
-                  };
-            
-                  ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
+                };
+                
+                // Add temp/perm only if they're true
+                if (isTemporary) statusData.temporary = true;
+                if (isPermanent) statusData.permanent = true;
+
+                ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
                 });
             });
     
@@ -1198,7 +1246,7 @@ async function runFullNpcHudRegistryTest() {
     }
     
     console.groupEnd();
-  }
+}
 
 // Synchronize all NPC influences when a scene loads
 Hooks.on('canvasReady', async () => {
@@ -1268,6 +1316,77 @@ export async function syncAllNpcInfluences() {
     return counter;
 }
 
+// Add a method to handle scene tags (can be integrated into your NpcHUD class)
+async function handleSceneTag(tagElement) {
+    console.log("handleSceneTag called for element:", tagElement);
+    console.log("Scene tag attribute:", tagElement.attr('data-scene-tag'));
+    
+    // Only process tags marked as scene tags - use attr() instead of data()
+    if (tagElement.attr('data-scene-tag') !== 'true') {
+      console.log("Not a scene tag, returning");
+      return;
+    }
+    
+    // Determine if it's a status or a story tag
+    const isStatus = tagElement.hasClass('npc-status-moves');
+    
+    try {
+      if (isStatus) {
+        // Handle status scene tag
+        const statusName = tagElement.attr('data-status-name');
+        const tier = parseInt(tagElement.attr('data-tier'), 10);
+        const isTemporary = tagElement.attr('data-temporary') === 'true';
+        const isPermanent = tagElement.attr('data-permanent') === 'true';
+        
+        console.log(`Creating scene status: ${statusName}-${tier}, temp: ${isTemporary}, perm: ${isPermanent}`);
+        
+        // Use the system's createSceneStatus function
+        if (game.user.isGM) {
+          // Pass optional parameters for temporary/permanent
+          const options = {
+            temporary: isTemporary,
+            permanent: isPermanent
+          };
+          
+          // Call the system function to create the scene status
+          const createdStatus = await CityOfMist.createSceneStatus(statusName, tier, 0, options);
+          
+          if (createdStatus) {
+            ui.notifications.info(`Added status "${statusName}-${tier}" to scene.`);
+            return createdStatus;
+          }
+        }
+      } else {
+        // Handle story tag
+        const tagName = tagElement.text().trim();
+        const isTemporary = tagElement.attr('data-temporary') === 'true';
+        const isPermanent = tagElement.attr('data-permanent') === 'true';
+        
+        console.log(`Creating scene tag: ${tagName}, temp: ${isTemporary}, perm: ${isPermanent}`);
+        
+        // Use the system's createSceneTag function
+        if (game.user.isGM) {
+          // The system expects parameters in this order (name, options)
+          const options = {
+            temporary: isTemporary,
+            permanent: isPermanent
+          };
+          
+          // Call the system function to create the scene tag
+          const createdTag = await CityOfMist.createSceneTag(tagName, options);
+          
+          if (createdTag) {
+            ui.notifications.info(`Added tag "${tagName}" to scene.`);
+            return createdTag;
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error adding to scene tags/statuses:", error);
+      ui.notifications.error("Failed to add to scene. See console for details.");
+    }
+}
+
 // Add a command that can be run from the console
 globalThis.syncAllNpcInfluences = syncAllNpcInfluences;
 
@@ -1277,66 +1396,142 @@ Hooks.once("init", () => {
         return maxTier === 999 ? "-" : maxTier;
     });
 
-    Handlebars.registerHelper("parseStatus", function (description, options) {
-        // Retrieve collectiveSize from the root data context (provided by getData)
-        const collectiveSize = Number(options.data.root.collectiveSize || 0);
-        return new Handlebars.SafeString(
-          description
-            .replace(/\[([^\]]+)\]/g, (match, content) => {
-              const trimmedContent = content.trim();
-              const statusRegex = /^([a-zA-Z]+(?:[-\s][a-zA-Z]+)*)-(\d+)$/;
-              if (statusRegex.test(trimmedContent)) {
-                const randomId = generateRandomId();
-                const matches = trimmedContent.match(statusRegex);
-                const statusName = matches[1];
-                const baseTier = Number(matches[2]);
-                // Calculate the modified tier by adding collectiveSize
-                const newTier = baseTier + collectiveSize;
-                return `<span class="npc-status-moves" data-status-name="${statusName}" data-tier="${newTier}" data-status-id="${randomId}" data-temporary="false" data-permanent="false">${statusName}-${newTier}</span>`;
-              }
-              if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
-                return `<span class="npc-limit">${trimmedContent}</span>`;
-              }
-              return `<span class="npc-story-tag not-clickable">${trimmedContent}</span>`;
-            })
-            .replace(/\s*$/gm, '')
-            .replace(/\n+/g, '</p><p>')
-            .replace(/^<\/p><p>/, '')
-            .replace(/<p><\/p>/g, '')
-        );
-      });
+// Enhanced parseStatus Handlebars helper with temp/perm flags and $name replacement
+Handlebars.registerHelper("parseStatus", function (description, options) {
+    // Retrieve collectiveSize and character name from the root data context
+    const collectiveSize = Number(options.data.root.collectiveSize || 0);
+    const characterName = options.data.root.name || "Character"; // Get the character's name
+    
+    // First, replace all instances of $name with the character's name
+    let processedDesc = description.replace(/\$name/g, characterName);
+    
+    // Process status patterns in the format "text (gain status-n)"
+    processedDesc = processedDesc.replace(/([^(]+)\(gain ([^)]+)\)/g, (match, beforeParen, statusText) => {
+      const actionText = beforeParen.trim();
       
+      // Check if this is already a properly formatted status 
+      if (statusText.includes('class="npc-status-moves"')) {
+        return match; // Already processed, return as is
+      }
+      
+      // Try to parse the status information
+      const statusMatches = statusText.trim().match(/^([a-zA-Z-\s]+)-(\d+)$/);
+      if (statusMatches) {
+        const statusName = statusMatches[1].trim();
+        const baseTier = parseInt(statusMatches[2], 10);
+        const statusId = generateRandomId();
+        const finalTier = baseTier + collectiveSize;
+        
+        return `${actionText} (gain <span class="npc-status-moves" data-status-name="${statusName}" data-tier="${finalTier}" data-status-id="${statusId}" data-temporary="false" data-permanent="false" data-scene-tag="false">${statusName}-${finalTier}</span>)`;
+      }
+      
+      // If we can't parse it as a status, just return the original
+      return match;
+    });
+    
+    // Process status patterns with data attributes directly in the text
+    processedDesc = processedDesc.replace(/([^(]+)\(([^)]*data-status-[^)]+)\)/g, (match, beforeParen, insideParen) => {
+      const actionText = beforeParen.trim();
+      
+      // Extract status data from inside parentheses
+      const statusName = (insideParen.match(/data-status-name="([^"]+)"/i) || [])[1];
+      const tier = parseInt((insideParen.match(/data-tier="([^"]+)"/i) || [])[1] || "1");
+      const statusId = (insideParen.match(/data-status-id="([^"]+)"/i) || [])[1] || generateRandomId();
+      const temporary = (insideParen.match(/data-temporary="([^"]+)"/i) || [])[1] === "true";
+      const permanent = (insideParen.match(/data-permanent="([^"]+)"/i) || [])[1] === "true";
+      const sceneTag = (insideParen.match(/data-scene-tag="([^"]+)"/i) || [])[1] === "true";
+      
+      if (!statusName) {
+        return match; // If no status name found, return original text
+      }
+      
+      // Calculate the final tier
+      const finalTier = tier + (sceneTag ? 0 : collectiveSize);
+      
+      // Create the HTML for the move with properly embedded status
+      return `${actionText} (<span class="npc-status-moves" data-status-name="${statusName}" data-tier="${finalTier}" data-status-id="${statusId}" data-temporary="${temporary}" data-permanent="${permanent}" data-scene-tag="${sceneTag}">${statusName}-${finalTier}</span>)`;
+    });
+    
+    // Process bracket syntax [tag] or [status-1] with enhanced modifiers
+    processedDesc = processedDesc.replace(/\[([^\]]+)\]/g, (match, content) => {
+      const trimmedContent = content.trim();
+      
+      // Initialize flags
+      let isIgnoreCollective = false;
+      let isSceneTag = false;
+      let isTemporary = false;
+      let isPermanent = false;
+      
+      // Check for modifiers (i:, s:, t:, p:, etc.)
+      let modifiedContent = trimmedContent;
+      const modifierRegex = /^([a-z,]+):/i;
+      const modifierMatch = trimmedContent.match(modifierRegex);
+      
+      if (modifierMatch) {
+        const modifiers = modifierMatch[1].toLowerCase().split(',');
+        modifiers.forEach(mod => {
+          switch (mod.trim()) {
+            case 'i': isIgnoreCollective = true; break;
+            case 's': isSceneTag = true; break;
+            case 't': isTemporary = true; break;
+            case 'p': isPermanent = true; break;
+            // Exclude 'a' (auto-apply) if requested
+          }
+        });
+        
+        // Remove the modifier prefix
+        modifiedContent = trimmedContent.substring(modifierMatch[0].length).trim();
+      }
+      
+      // Status format: "Name-Number"
+      const statusRegex = /^([a-zA-Z]+(?:[-\s][a-zA-Z]+)*)-(\d+)$/;
+      if (statusRegex.test(modifiedContent)) {
+        const matches = modifiedContent.match(statusRegex);
+        const statusName = matches[1];
+        const baseTier = parseInt(matches[2], 10);
+        const statusId = generateRandomId();
+        
+        // Apply collective size unless ignored
+        const finalTier = isIgnoreCollective ? baseTier : baseTier + collectiveSize;
+        
+        return `<span class="npc-status-moves${isSceneTag ? ' scene-tag' : ''}" data-status-name="${statusName}" data-tier="${finalTier}" data-status-id="${statusId}" data-temporary="${isTemporary}" data-permanent="${isPermanent}" data-scene-tag="${isSceneTag}">${statusName}-${finalTier}</span>`;
+      }
+      
+      // Limit format: "Name:Number"
+      if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(modifiedContent)) {
+        return `<span class="npc-limit">${modifiedContent}</span>`;
+      }
+      
+      // Default: treat as a story tag
+      return `<span class="npc-story-tag not-clickable${isSceneTag ? ' scene-tag' : ''}" data-temporary="${isTemporary}" data-permanent="${isPermanent}" data-scene-tag="${isSceneTag}">${modifiedContent}</span>`;
+    });
+    
+    // Process GM-only text (within {} brackets)
+    processedDesc = processedDesc.replace(/\{([^}]+)\}/g, (match, content) => {
+      if (game.user.isGM) {
+        return `<span class="gm-only-text">${content}</span>`;
+      } else {
+        return ''; // Hide from non-GM users
+      }
+    });
+    
+    // Preserve the existing paragraphs
+    if (!processedDesc.startsWith('<p>')) {
+      processedDesc = `<p>${processedDesc}</p>`;
+    }
+    
+    return new Handlebars.SafeString(processedDesc);
+  });
 
-
-
-
-    // Handlebars.registerHelper("parseStatus", function (description) {
-    //     return new Handlebars.SafeString(
-    //         description
-    //         .replace(/\[([^\]]+)\]/g, (match, content) => {
-    //           const trimmedContent = content.trim();
-    //           // Expect statuses formatted as "Name-Number"
-    //           const statusRegex = /^([a-zA-Z]+(?:[-\s][a-zA-Z]+)*)-(\d+)$/;
-    //           if (statusRegex.test(trimmedContent)) {
-    //             const randomId = generateRandomId();
-    //             const matches = trimmedContent.match(statusRegex);
-    //             const statusName = matches[1];
-    //             const baseTier = Number(matches[2]);
-    //             // Calculate new tier by adding collectiveSize
-    //             const newTier = baseTier + collectiveSize;
-    //             return `<span class="npc-status-moves" data-status-name="${statusName}" data-tier="${newTier}" data-status-id="${randomId}" data-temporary="false" data-permanent="false">${statusName}-${newTier}</span>`;
-    //           }
-    //             if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(trimmedContent)) {
-    //               return `<span class="npc-limit">${trimmedContent}</span>`;
-    //             }
-    //             return `<span class="npc-story-tag">${trimmedContent}</span>`;
-    //           })
-    //           .replace(/\s*$/gm, '')
-    //           .replace(/\n+/g, '</p><p>')
-    //           .replace(/^<\/p><p>/, '')
-    //           .replace(/<p><\/p>/g, '')
-    //       );
-    // });
+    // Helper to generate random IDs for statuses
+    function generateRandomId() {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let result = "";
+        for (let i = 0; i < 16; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }    
 });
 
 // Keep the original hook registration format
