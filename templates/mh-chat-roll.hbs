@@ -74,30 +74,28 @@
         {{/each}}
         {{#each tagsData.storyTags}}
           <span class="mhr-story-tag {{stateClass}} {{#if temporary}}mhr-temporary-tag{{/if}}">
-            {{tagName}}
+            <i class="fa-light fa-tag" style="transform: scaleX(-1);"></i> {{tagName}} 
             {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
             {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
           </span>
         {{/each}}
         {{#each tagsData.statuses}}
           <span class="mhr-status-tag {{typeClass}} {{#if temporary}}mhr-temporary-status{{/if}} {{#if permanent}}mhr-permanent-status{{/if}}">
-            <i class="fa-light fa-suitcase-medical"></i> 
-            {{name}}-{{tier}}
+            <i class="fa-light fa-suitcase-medical"></i> {{name}}-{{tier}}
             {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
             {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
           </span>
         {{/each}}
         {{#each tagsData.scnTags}}   
         <span class="scene-tag-item {{#if (eq this.type "positive")}}scene-positive{{else}}scene-negative{{/if}}">
-          {{this.name}}
+          <i class="fa-solid fa-tag"></i> {{this.name}}
           {{#if this.temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
           {{#if this.permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
         </span>
         {{/each}}
         {{#each tagsData.sceneStatuses}}
           <span class="mhr-scene-status-tag {{typeClass}}">
-            <i class="fa-solid fa-suitcase-medical"></i> 
-            {{name}}-{{tier}}
+            <i class="fa-solid fa-suitcase-medical"></i> {{name}}-{{tier}}
             {{#if temporary}}<i class="fa-regular fa-hourglass-half"></i>{{/if}}
             {{#if permanent}}<i class="fa-solid fa-gem"></i>{{/if}}
           </span>
