@@ -642,8 +642,8 @@ margin: 5px;
 }
 
 /* List formatting within threats */
-.npc-threat ul {
-    margin-left: 0.5em;
+#npc-hud .npc-threat ul {
+    margin-left: -3px;
 }
 
 /* List item layout within threats */
