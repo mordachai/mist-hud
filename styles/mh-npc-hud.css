@@ -651,12 +651,13 @@ margin: 5px;
     display: flex;
     align-items: flex-start;
     margin-bottom: 0.3em;
+    margin-left: -4px;
 }
 
 /* Double arrow markers in list items */
 .npc-threat ul li .npc-tc-marker {
     flex-shrink: 0;
-    margin-right: 0.3em;
+    margin-right: 2px;
 }
 
 /* Move description in list items */
