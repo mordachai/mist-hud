@@ -126,11 +126,31 @@ async function handleTagClick(event, tagType, hudInstance) {
 }
 
 // function toggleInversion(tagElement, inversionIconConfig, hudInstance) {
+//   // Toggle the 'inverted' class on the tag element
 //   tagElement.toggleClass('inverted');
+  
+//   // Get the current state AFTER toggling
 //   const isInverted = tagElement.hasClass('inverted');
-//   const inversionIcon = isInverted ? inversionIconConfig.active : inversionIconConfig.default;
+  
+//   // Set the appropriate icon based on the current state
+//   const inversionIcon = isInverted 
+//     ? inversionIconConfig.inverted  // Show down arrow when inverted (negative)
+//     : inversionIconConfig.default;  // Show up arrow when not inverted (positive)
+  
 //   tagElement.find(inversionIconConfig.selector).html(inversionIcon);
+  
+//   // Recalculate power after the state change
 //   hudInstance.calculateTotalPower();
+  
+//   // If we need to update the backend item, we should do it here
+//   // This depends on your implementation of how tag data is stored
+//   const tagId = tagElement.data('id');
+//   if (tagId) {
+//     const tag = hudInstance.actor.items.get(tagId);
+//     if (tag) {
+//       tag.update({ 'system.isInverted': isInverted });
+//     }
+//   }
 // }
 
 function toggleInversion(tagElement, inversionIconConfig, hudInstance) {
@@ -142,22 +162,30 @@ function toggleInversion(tagElement, inversionIconConfig, hudInstance) {
   
   // Set the appropriate icon based on the current state
   const inversionIcon = isInverted 
-    ? inversionIconConfig.inverted  // Show down arrow when inverted (negative)
-    : inversionIconConfig.default;  // Show up arrow when not inverted (positive)
+    ? inversionIconConfig.inverted 
+    : inversionIconConfig.default;
   
   tagElement.find(inversionIconConfig.selector).html(inversionIcon);
   
   // Recalculate power after the state change
   hudInstance.calculateTotalPower();
   
-  // If we need to update the backend item, we should do it here
-  // This depends on your implementation of how tag data is stored
+  // Store the inverted state in actor flags
   const tagId = tagElement.data('id');
-  if (tagId) {
-    const tag = hudInstance.actor.items.get(tagId);
-    if (tag) {
-      tag.update({ 'system.isInverted': isInverted });
+  if (tagId && hudInstance.actor) {
+    // Get current inverted tags flag or initialize with empty object
+    const invertedTags = hudInstance.actor.getFlag('mist-hud', 'inverted-tags') || {};
+    
+    if (isInverted) {
+      // Add to inverted tags
+      invertedTags[tagId] = true;
+    } else {
+      // Remove from inverted tags
+      delete invertedTags[tagId];
     }
+    
+    // Save updated flags
+    hudInstance.actor.setFlag('mist-hud', 'inverted-tags', invertedTags);
   }
 }
 
@@ -381,14 +409,34 @@ export class MistHUD extends Application {
   this.injectCustomHeader();
   
     html.find('.mh-power-tag').on('click', (event) => handleTagClick(event, 'power', this));
-    html.find('.mh-weakness-tag').on('click', (event) => handleTagClick(event, 'weakness', this));
     html.find('.mh-story-tag').on('click', (event) => handleTagClick(event, 'story', this));
     html.find('.mh-loadout-tag').on('click', (event) => handleTagClick(event, 'loadout', this));
-    
     html.find('.mh-pwrcrew-tag').on('click', (event) => { handleTagClick(event, 'power', this); });
     html.find('.mh-wkcrew-tag').on('click', (event) => { handleTagClick(event, 'weakness', this); });
 
-    // After setting up your event listeners, add this initialization logic
+    html.find('.mh-weakness-toggle').on('click', (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      const invertElement = $(event.currentTarget);
+      const tagElement = invertElement.closest('.mh-weakness-tag');
+      
+      // Don't toggle if burned
+      if (tagElement.hasClass('burned')) return;
+      
+      toggleInversion(tagElement, {
+        inverted: '<i class="fa-light fa-angles-up"></i>', // Up for inverted
+        default: '<i class="fa-light fa-angles-down"></i>', // Down for default
+        selector: '.mh-weakness-toggle'
+      }, hudInstance);
+    });
+
+    html.find('.mh-weakness-tag').on('click', (event) => {
+      // Only handle clicks on the tag itself, not on child elements like the toggle
+      if (event.target === event.currentTarget || !$(event.target).closest('.mh-weakness-toggle').length) {
+        handleTagClick(event, 'weakness', hudInstance);
+      }
+    });
+
     html.find('.mh-story-tag').each((index, element) => {
       const $tagElement = $(element);
       const isInverted = $tagElement.hasClass('inverted');
@@ -418,17 +466,6 @@ export class MistHUD extends Application {
       }, hudInstance);
     });
 
-    html.find('.mh-weakness-toggle').on('click', (event) => {
-      event.stopPropagation();
-      event.preventDefault();
-      const invertElement = $(event.currentTarget);
-      const tagElement = invertElement.closest('.mh-weakness-tag');
-      toggleInversion(tagElement, {
-        active: '<i class="fa-regular fa-angles-up"></i>',
-        default: '<i class="fa-light fa-angles-down"></i>',
-        selector: '.mh-weakness-toggle'
-      }, hudInstance);
-    });       
     
     html.find('.mh-burn-toggle').on('click', async (event) => {
       event.stopPropagation();
@@ -841,7 +878,6 @@ export class MistHUD extends Application {
     // Use the imported getters:
     const themesAndTags = getThemesAndTags(this.actor);
   
-    // Update themes' power and weakness tags to include the selected property:
     themesAndTags.themes = themesAndTags.themes.map(theme => {
       if (theme.powerTags && Array.isArray(theme.powerTags)) {
         theme.powerTags = theme.powerTags.map(tag => ({
@@ -850,10 +886,16 @@ export class MistHUD extends Application {
         }));
       }
       if (theme.weaknessTags && Array.isArray(theme.weaknessTags)) {
-        theme.weaknessTags = theme.weaknessTags.map(tag => ({
-          ...tag,
-          selected: selectedTags.includes(tag.id)
-        }));
+        // Get the current inverted tags from flags
+        const invertedTags = this.actor.getFlag('mist-hud', 'inverted-tags') || {};
+        
+        theme.weaknessTags = theme.weaknessTags.map(tag => {
+          return {
+            ...tag,
+            selected: selectedTags.includes(tag.id),
+            inverted: !!invertedTags[tag.id] // Use the flag to determine inverted state
+          };
+        });
       }
       return theme;
     });
@@ -1725,6 +1767,7 @@ export class MistHUD extends Application {
       // do not clear the "selected-tags" flag.
       //
       // (If you DO want to clear them after a roll, you could do:
+      await this.actor.unsetFlag('mist-hud', 'inverted-tags');
       await this.actor.unsetFlag('mist-hud', 'selected-tags');
       await this.actor.unsetFlag('mist-hud', 'selected-crew-tags');
       // But that would force the user to reselect their tags.)
