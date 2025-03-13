@@ -62,7 +62,7 @@ export class TokenTagNotification {
     }, options);
     
     // Format the display text with an indicator for inverted tags
-    const prefix = isInverted ? "↑ " : "";
+    const prefix = isInverted ? "↓ " : "";
     const displayText = `${prefix}${tagName}`;
     
     // Get the token position - center horizontally, top of token vertically
