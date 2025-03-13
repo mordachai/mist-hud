@@ -381,14 +381,34 @@ export class MistHUD extends Application {
   this.injectCustomHeader();
   
     html.find('.mh-power-tag').on('click', (event) => handleTagClick(event, 'power', this));
-    html.find('.mh-weakness-tag').on('click', (event) => handleTagClick(event, 'weakness', this));
     html.find('.mh-story-tag').on('click', (event) => handleTagClick(event, 'story', this));
     html.find('.mh-loadout-tag').on('click', (event) => handleTagClick(event, 'loadout', this));
-    
     html.find('.mh-pwrcrew-tag').on('click', (event) => { handleTagClick(event, 'power', this); });
     html.find('.mh-wkcrew-tag').on('click', (event) => { handleTagClick(event, 'weakness', this); });
 
-    // After setting up your event listeners, add this initialization logic
+    html.find('.mh-weakness-toggle').on('click', (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      const invertElement = $(event.currentTarget);
+      const tagElement = invertElement.closest('.mh-weakness-tag');
+      
+      // Don't toggle if burned
+      if (tagElement.hasClass('burned')) return;
+      
+      toggleInversion(tagElement, {
+        inverted: '<i class="fa-light fa-angles-up"></i>', // Up for inverted
+        default: '<i class="fa-light fa-angles-down"></i>', // Down for default
+        selector: '.mh-weakness-toggle'
+      }, hudInstance);
+    });
+
+    html.find('.mh-weakness-tag').on('click', (event) => {
+      // Only handle clicks on the tag itself, not on child elements like the toggle
+      if (event.target === event.currentTarget || !$(event.target).closest('.mh-weakness-toggle').length) {
+        handleTagClick(event, 'weakness', hudInstance);
+      }
+    });
+
     html.find('.mh-story-tag').each((index, element) => {
       const $tagElement = $(element);
       const isInverted = $tagElement.hasClass('inverted');
@@ -418,17 +438,6 @@ export class MistHUD extends Application {
       }, hudInstance);
     });
 
-    html.find('.mh-weakness-toggle').on('click', (event) => {
-      event.stopPropagation();
-      event.preventDefault();
-      const invertElement = $(event.currentTarget);
-      const tagElement = invertElement.closest('.mh-weakness-tag');
-      toggleInversion(tagElement, {
-        active: '<i class="fa-regular fa-angles-up"></i>',
-        default: '<i class="fa-light fa-angles-down"></i>',
-        selector: '.mh-weakness-toggle'
-      }, hudInstance);
-    });       
     
     html.find('.mh-burn-toggle').on('click', async (event) => {
       event.stopPropagation();
