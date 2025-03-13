@@ -60,6 +60,23 @@ Once installed and activated, the HUD will automatically appear when a character
 
 ![image](https://github.com/user-attachments/assets/df4d8706-5794-45bd-ac39-d0c8a7258e47)
 
+# Roll Tag Icons Explanation
+
+| Icon | Name | Description |
+|------|------|-------------|
+| <i class="fa-light fa-bolt"></i> | Power | Displays the calculated power value for the current roll. |
+| <i class="fa-solid fa-users"></i> | Crew Power | Shows the total number of power tags contributed by your crew members. |
+| <i class="fa-regular fa-gear"></i> | Loadout | Indicates the total number of equipment and loadout tags affecting the roll. |
+| <i class="fa-light fa-angles-down mhr-mls"></i> | Weakness | Displays the total weakness value that may penalize the current roll. |
+| <i class="fa-solid fa-users-slash"></i> | Crew Weakness | Shows the total number of weakness tags coming from crew members. |
+| <i class="fa-light fa-tag mhr-mls" style="transform: scaleX(-1);"></i> | Story Tags | Represents the number of story-related tags influencing the current roll. |
+| <i class="fa-light fa-suitcase-medical"></i> | Character Status | Indicates the number of status effects currently applied to your character. |
+| <i class="fa-solid fa-tag mhr-mls"></i> | Scene Tags | Shows the number of scene-specific tags affecting the roll. |
+| <i class="fa-solid fa-suitcase-medical"></i> | Scene Status | Displays the number of status effects currently active in the scene. |
+| <i class="fa-solid fa-life-ring"></i> | Bonus | Indicates any bonus modifiers applied to the roll. |
+| <i class="fa-solid fa-skull"></i> | NPC Influence | Shows the total influence value that NPCs have on the current roll. |
+| <i class="fa-regular fa-hexagon-plus"></i> | Modifier | Displays any additional modifiers affecting the roll. |
+
 Roll results, outcomes, and move effects will be displayed on the chat. Clicking on the modifiers below the roll results shows the tags and statuses that were used.
 Clicking on the Tracked Outcomes (Otherscape) displays suggested tags.
 
