@@ -630,7 +630,7 @@ export class NpcHUD extends Application {
     
             //For NPC Story Tags
             
-            html.find('.npc-story-tag')
+            html.find('.npc-story-tag:not(.not-clickable)')
             .on('click', (event) => {
                 event.stopPropagation();
                 event.preventDefault();
@@ -761,7 +761,7 @@ export class NpcHUD extends Application {
             });
     
             // Right-click (contextmenu) to delete an NPC Story Tag
-            html.find('.npc-story-tag').on('contextmenu', async (event) => {
+            html.find('.npc-story-tag:not(.not-clickable)').on('contextmenu', async (event) => {
                 event.preventDefault();
                 const tagId = $(event.currentTarget).data('id');
                 
