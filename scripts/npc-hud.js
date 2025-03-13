@@ -627,9 +627,9 @@ export class NpcHUD extends Application {
             //     }
             //     }
             // });
-    
-            //For NPC Story Tags
             
+            
+            //For NPC Story Tags            
             html.find('.npc-story-tag:not(.not-clickable)')
             .on('click', (event) => {
                 event.stopPropagation();
@@ -687,37 +687,9 @@ export class NpcHUD extends Application {
                 }
                 this.render(false);
                 this.emitNpcInfluence();
-            });      
-    
+            }); 
             
-            // Setup drag-and-drop for statuses
-            // html.find('.npc-status, .npc-status-moves').each((i, el) => {
-            //     el.setAttribute('draggable', 'true');
-            //     el.addEventListener('dragstart', (ev) => {
-            //       const text = el.textContent.trim();
-            //       let name = text;
-            //       let tier = 1;
-            
-            //       const match = text.match(/^(.*?)-(\d+)$/);
-            //       if (match) {
-            //         name = match[1];
-            //         tier = parseInt(match[2], 10);
-            //       }
-            
-            //       const statusData = {
-            //         type: "status",
-            //         name,
-            //         tier,
-            //         actorId: this.actor?.id || null
-            //       };
-            
-            //       ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
-            //     });
-            // });
-
-
-            //Current Drag And Drop of statuses
-            
+            // STATUSES AND STORY TAGS DRAGGABLE    
             
             html.find('.npc-status, .npc-status-moves').each((i, el) => {
                 el.setAttribute('draggable', 'true');
@@ -752,6 +724,37 @@ export class NpcHUD extends Application {
                 ev.dataTransfer.setData("text/plain", JSON.stringify(statusData));
                 });
             });
+
+            html.find('.npc-story-tag:not(.not-clickable), .npc-story-tag-moves:not(.not-clickable)').each((i, el) => {
+                el.setAttribute('draggable', 'true');
+                el.addEventListener('dragstart', (ev) => {
+                  // Get tag data
+                  const tagElement = $(el);
+                  const name = tagElement.text().trim();
+                  const tagId = tagElement.data('id');
+                  const isInverted = tagElement.hasClass('inverted');
+                  const cssClass = tagElement.hasClass('positive') ? 'positive' : 
+                                  tagElement.hasClass('negative') ? 'negative' : '';
+                  const actorId = this.actor?.id || null;
+                  const temporary = tagElement.data('temporary') || false;
+                  const permanent = tagElement.data('permanent') || false;
+                  
+                  // Build a data object
+                  const tagData = {
+                    type: "story-tag",
+                    name,
+                    isInverted,
+                    actorId,
+                    cssClass,
+                    temporary,
+                    permanent
+                  };
+                  
+                  // Store it in the dataTransfer
+                  ev.dataTransfer.setData("text/plain", JSON.stringify(tagData));
+                });
+            });
+
     
             // Create NPC Story Tag
             html.find('.create-npc-tag').on("click", async (event) => {
@@ -1396,132 +1399,138 @@ Hooks.once("init", () => {
         return maxTier === 999 ? "-" : maxTier;
     });
 
-// Enhanced parseStatus Handlebars helper with temp/perm flags and $name replacement
-Handlebars.registerHelper("parseStatus", function (description, options) {
-    // Retrieve collectiveSize and character name from the root data context
-    const collectiveSize = Number(options.data.root.collectiveSize || 0);
-    const characterName = options.data.root.name || "Character"; // Get the character's name
+    // Enhanced parseStatus Handlebars helper with temp/perm flags and $name replacement
+    Handlebars.registerHelper("parseStatus", function (description, options) {
+        // Retrieve collectiveSize and character name from the root data context
+        const collectiveSize = Number(options.data.root.collectiveSize || 0);
+        const characterName = options.data.root.name || "Character"; // Get the character's name
     
-    // First, replace all instances of $name with the character's name
-    let processedDesc = description.replace(/\$name/g, characterName);
+        // First, replace all instances of $name with the character's name
+        let processedDesc = description.replace(/\$name/g, characterName);
     
-    // Process status patterns in the format "text (gain status-n)"
-    processedDesc = processedDesc.replace(/([^(]+)\(gain ([^)]+)\)/g, (match, beforeParen, statusText) => {
-      const actionText = beforeParen.trim();
-      
-      // Check if this is already a properly formatted status 
-      if (statusText.includes('class="npc-status-moves"')) {
-        return match; // Already processed, return as is
-      }
-      
-      // Try to parse the status information
-      const statusMatches = statusText.trim().match(/^([a-zA-Z-\s]+)-(\d+)$/);
-      if (statusMatches) {
-        const statusName = statusMatches[1].trim();
-        const baseTier = parseInt(statusMatches[2], 10);
-        const statusId = generateRandomId();
-        const finalTier = baseTier + collectiveSize;
+        // Process status patterns in the format "text (gain status-n)"
+        processedDesc = processedDesc.replace(/([^(]+)\(gain ([^)]+)\)/g, (match, beforeParen, statusText) => {
+          const actionText = beforeParen.trim();
+          
+          // Check if this is already a properly formatted status 
+          if (statusText.includes('class="npc-status-moves"')) {
+            return match; // Already processed, return as is
+          }
+          
+          // Try to parse the status information
+          const statusMatches = statusText.trim().match(/^([a-zA-Z-\s]+)-(\d+)$/);
+          if (statusMatches) {
+            const statusName = statusMatches[1].trim();
+            const baseTier = parseInt(statusMatches[2], 10);
+            const statusId = generateRandomId();
+            const finalTier = baseTier + collectiveSize;
+            
+            return `${actionText} (gain <span class="npc-status-moves" data-status-name="${statusName}" data-tier="${finalTier}" data-status-id="${statusId}" data-temporary="false" data-permanent="false" data-scene-tag="false">${statusName}-${finalTier}</span>)`;
+          }
+          
+          // If we can't parse it as a status, just return the original
+          return match;
+        });
         
-        return `${actionText} (gain <span class="npc-status-moves" data-status-name="${statusName}" data-tier="${finalTier}" data-status-id="${statusId}" data-temporary="false" data-permanent="false" data-scene-tag="false">${statusName}-${finalTier}</span>)`;
-      }
-      
-      // If we can't parse it as a status, just return the original
-      return match;
-    });
-    
-    // Process status patterns with data attributes directly in the text
-    processedDesc = processedDesc.replace(/([^(]+)\(([^)]*data-status-[^)]+)\)/g, (match, beforeParen, insideParen) => {
-      const actionText = beforeParen.trim();
-      
-      // Extract status data from inside parentheses
-      const statusName = (insideParen.match(/data-status-name="([^"]+)"/i) || [])[1];
-      const tier = parseInt((insideParen.match(/data-tier="([^"]+)"/i) || [])[1] || "1");
-      const statusId = (insideParen.match(/data-status-id="([^"]+)"/i) || [])[1] || generateRandomId();
-      const temporary = (insideParen.match(/data-temporary="([^"]+)"/i) || [])[1] === "true";
-      const permanent = (insideParen.match(/data-permanent="([^"]+)"/i) || [])[1] === "true";
-      const sceneTag = (insideParen.match(/data-scene-tag="([^"]+)"/i) || [])[1] === "true";
-      
-      if (!statusName) {
-        return match; // If no status name found, return original text
-      }
-      
-      // Calculate the final tier
-      const finalTier = tier + (sceneTag ? 0 : collectiveSize);
-      
-      // Create the HTML for the move with properly embedded status
-      return `${actionText} (<span class="npc-status-moves" data-status-name="${statusName}" data-tier="${finalTier}" data-status-id="${statusId}" data-temporary="${temporary}" data-permanent="${permanent}" data-scene-tag="${sceneTag}">${statusName}-${finalTier}</span>)`;
-    });
-    
-    // Process bracket syntax [tag] or [status-1] with enhanced modifiers
-    processedDesc = processedDesc.replace(/\[([^\]]+)\]/g, (match, content) => {
-      const trimmedContent = content.trim();
-      
-      // Initialize flags
-      let isIgnoreCollective = false;
-      let isSceneTag = false;
-      let isTemporary = false;
-      let isPermanent = false;
-      
-      // Check for modifiers (i:, s:, t:, p:, etc.)
-      let modifiedContent = trimmedContent;
-      const modifierRegex = /^([a-z,]+):/i;
-      const modifierMatch = trimmedContent.match(modifierRegex);
-      
-      if (modifierMatch) {
-        const modifiers = modifierMatch[1].toLowerCase().split(',');
-        modifiers.forEach(mod => {
-          switch (mod.trim()) {
-            case 'i': isIgnoreCollective = true; break;
-            case 's': isSceneTag = true; break;
-            case 't': isTemporary = true; break;
-            case 'p': isPermanent = true; break;
-            // Exclude 'a' (auto-apply) if requested
+        // Process status patterns with data attributes directly in the text
+        processedDesc = processedDesc.replace(/([^(]+)\(([^)]*data-status-[^)]+)\)/g, (match, beforeParen, insideParen) => {
+          const actionText = beforeParen.trim();
+          
+          // Extract status data from inside parentheses
+          const statusName = (insideParen.match(/data-status-name="([^"]+)"/i) || [])[1];
+          const tier = parseInt((insideParen.match(/data-tier="([^"]+)"/i) || [])[1] || "1");
+          const statusId = (insideParen.match(/data-status-id="([^"]+)"/i) || [])[1] || generateRandomId();
+          const temporary = (insideParen.match(/data-temporary="([^"]+)"/i) || [])[1] === "true";
+          const permanent = (insideParen.match(/data-permanent="([^"]+)"/i) || [])[1] === "true";
+          const sceneTag = (insideParen.match(/data-scene-tag="([^"]+)"/i) || [])[1] === "true";
+          
+          if (!statusName) {
+            return match; // If no status name found, return original text
+          }
+          
+          // Calculate the final tier
+          const finalTier = tier + (sceneTag ? 0 : collectiveSize);
+          
+          // Create the HTML for the move with properly embedded status
+          return `${actionText} (<span class="npc-status-moves" data-status-name="${statusName}" data-tier="${finalTier}" data-status-id="${statusId}" data-temporary="${temporary}" data-permanent="${permanent}" data-scene-tag="${sceneTag}">${statusName}-${finalTier}</span>)`;
+        });
+        
+        // Process bracket syntax [tag] or [status-1] or [limit:n] with enhanced modifiers
+        processedDesc = processedDesc.replace(/\[([^\]]+)\]/g, (match, content) => {
+          const trimmedContent = content.trim();
+          
+          // Initialize flags
+          let isIgnoreCollective = false;
+          let isSceneTag = false;
+          let isTemporary = false;
+          let isPermanent = false;
+          
+          // Check for modifiers (i:, s:, t:, p:, etc.)
+          let modifiedContent = trimmedContent;
+          const modifierRegex = /^([a-z,]+):/i;
+          const modifierMatch = trimmedContent.match(modifierRegex);
+          
+          if (modifierMatch) {
+            const modifiers = modifierMatch[1].toLowerCase().split(',');
+            modifiers.forEach(mod => {
+              switch (mod.trim()) {
+                case 'i': isIgnoreCollective = true; break;
+                case 's': isSceneTag = true; break;
+                case 't': isTemporary = true; break;
+                case 'p': isPermanent = true; break;
+                // Exclude 'a' (auto-apply) if requested
+              }
+            });
+            
+            // Remove the modifier prefix
+            modifiedContent = trimmedContent.substring(modifierMatch[0].length).trim();
+          }
+          
+          // THREE CLEAR CASES:
+          // 1. If it contains ":" - it's a LIMIT
+          if (modifiedContent.includes(':')) {
+            // Ensure a space after the colon
+            modifiedContent = modifiedContent.replace(/:\s*/g, ': ');
+            return `<span class="npc-limit-moves">${modifiedContent}</span>`;
+          }
+          
+          // 2. If it contains "-" followed by a number - it's a STATUS
+          const statusRegex = /^([a-zA-Z][-a-zA-Z\s]*)-(\d+)$/;
+          if (statusRegex.test(modifiedContent)) {
+            const matches = modifiedContent.match(statusRegex);
+            const statusName = matches[1];
+            const baseTier = parseInt(matches[2], 10);
+            const statusId = generateRandomId();
+            
+            // Apply collective size unless ignored
+            const finalTier = isIgnoreCollective ? baseTier : baseTier + collectiveSize;
+            
+            return `<span class="npc-status-moves${isSceneTag ? ' scene-tag' : ''}" data-status-name="${statusName}" data-tier="${finalTier}" data-status-id="${statusId}" data-temporary="${isTemporary}" data-permanent="${isPermanent}" data-scene-tag="${isSceneTag}">${statusName}-${finalTier}</span>`;
+          }
+          
+          // 3. Otherwise - it's a STORY TAG (not clickable in move text)
+          return `<span class="npc-story-tag-moves ${isSceneTag ? ' scene-tag' : ''}" data-temporary="${isTemporary}" data-permanent="${isPermanent}" data-scene-tag="${isSceneTag}">${modifiedContent}</span>`;
+        });
+        
+        // Process GM-only text (within {} brackets)
+        processedDesc = processedDesc.replace(/\{([^}]+)\}/g, (match, content) => {
+          if (game.user.isGM) {
+            return `<span class="gm-only-text">${content}</span>`;
+          } else {
+            return ''; // Hide from non-GM users
           }
         });
         
-        // Remove the modifier prefix
-        modifiedContent = trimmedContent.substring(modifierMatch[0].length).trim();
-      }
-      
-      // Status format: "Name-Number"
-      const statusRegex = /^([a-zA-Z]+(?:[-\s][a-zA-Z]+)*)-(\d+)$/;
-      if (statusRegex.test(modifiedContent)) {
-        const matches = modifiedContent.match(statusRegex);
-        const statusName = matches[1];
-        const baseTier = parseInt(matches[2], 10);
-        const statusId = generateRandomId();
-        
-        // Apply collective size unless ignored
-        const finalTier = isIgnoreCollective ? baseTier : baseTier + collectiveSize;
-        
-        return `<span class="npc-status-moves${isSceneTag ? ' scene-tag' : ''}" data-status-name="${statusName}" data-tier="${finalTier}" data-status-id="${statusId}" data-temporary="${isTemporary}" data-permanent="${isPermanent}" data-scene-tag="${isSceneTag}">${statusName}-${finalTier}</span>`;
-      }
-      
-      // Limit format: "Name:Number"
-      if (/^[a-zA-Z]+(?:\s[a-zA-Z]+)*:\d+$/.test(modifiedContent)) {
-        return `<span class="npc-limit">${modifiedContent}</span>`;
-      }
-      
-      // Default: treat as a story tag
-      return `<span class="npc-story-tag not-clickable${isSceneTag ? ' scene-tag' : ''}" data-temporary="${isTemporary}" data-permanent="${isPermanent}" data-scene-tag="${isSceneTag}">${modifiedContent}</span>`;
-    });
-    
-    // Process GM-only text (within {} brackets)
-    processedDesc = processedDesc.replace(/\{([^}]+)\}/g, (match, content) => {
-      if (game.user.isGM) {
-        return `<span class="gm-only-text">${content}</span>`;
-      } else {
-        return ''; // Hide from non-GM users
-      }
-    });
-    
-    // Preserve the existing paragraphs
-    if (!processedDesc.startsWith('<p>')) {
-      processedDesc = `<p>${processedDesc}</p>`;
-    }
-    
-    return new Handlebars.SafeString(processedDesc);
-  });
+        // Replace newlines with <br>
+        processedDesc = processedDesc.replace(/\n/g, '<br>');
+
+        // If you still want to ensure there's at least one <p> wrapper
+        if (!processedDesc.startsWith('<p>')) {
+        processedDesc = `<p>${processedDesc}</p>`;
+        }
+
+        return new Handlebars.SafeString(processedDesc);
+    });    
 
     // Helper to generate random IDs for statuses
     function generateRandomId() {

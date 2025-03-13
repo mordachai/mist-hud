@@ -7,6 +7,7 @@ import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
 import { moveConfig } from "./mh-theme-config.js";
 import statusScreenApp from "./statusScreenApp.js";
 import { TokenStatusNotification } from './token-status-notification.js';
+import { TokenTagNotification } from './token-tag-notification.js';
 import { showTooltip, hideTooltip } from './tooltip.js';
 import { 
   getMysteryFromTheme,
@@ -736,7 +737,9 @@ export class MistHUD extends Application {
         this.render(false); // Refresh the HUD
     });
 
-    // Make each .mh-status element draggable
+
+    // STATUSES AND STORY TAGS DRAGGABLE
+
     html.find('.mh-status, .mh-status-moves').each((i, el) => {
       el.setAttribute('draggable', 'true');
 
@@ -759,101 +762,129 @@ export class MistHUD extends Application {
       });
     });
 
-  // ==============================
-  // Double-click to edit Clues
-  // ==============================
-  html.find('.clue-container').on('dblclick', async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+    html.find('.mh-story-tag').each((i, el) => {
+      el.setAttribute('draggable', 'true');
+    
+      el.addEventListener('dragstart', (ev) => {
+        // Get tag data
+        const tagElement = $(el);
+        const name = tagElement.text().trim();
+        const isInverted = tagElement.hasClass('inverted');
+        const actorId = tagElement.data('actor-id') || this.actor?.id || null;
+        const temporary = tagElement.data('temporary') || false;
+        const permanent = tagElement.data('permanent') || false;
+        
+        // Build a data object
+        const tagData = {
+          type: "story-tag", // Use "story-tag" to differentiate from statuses
+          name,
+          isInverted,
+          actorId,
+          temporary,
+          permanent
+        };
+        
+        // Store it in the dataTransfer
+        ev.dataTransfer.setData("text/plain", JSON.stringify(tagData));
+      });
+    });
 
-    // 1) Grab Clue and Actor IDs from data attributes
-    const clueId = $(event.currentTarget).data('clue-id');
-    // Some templates store actor ID in data-owner-id or fallback to this.actor.id
-    const actorId = $(event.currentTarget).data('owner-id') || this.actor?.id;
 
-    if (!clueId || !actorId) {
-      console.error("Missing clueId or actorId for clue editing.", { clueId, actorId });
-      return;
-    }
+    // ==============================
+    // Double-click to edit Clues
+    // ==============================
+    html.find('.clue-container').on('dblclick', async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-    // 2) Retrieve the Actor
-    const actor = game.actors.get(actorId);
-    if (!actor) {
-      console.error(`Actor with ID ${actorId} not found.`);
-      return;
-    }
+      // 1) Grab Clue and Actor IDs from data attributes
+      const clueId = $(event.currentTarget).data('clue-id');
+      // Some templates store actor ID in data-owner-id or fallback to this.actor.id
+      const actorId = $(event.currentTarget).data('owner-id') || this.actor?.id;
 
-    // 3) Retrieve the Clue item
-    const clue = actor.getClue(clueId);
-    if (!clue) {
-      console.error(`Clue with ID ${clueId} not found on actor ${actorId}.`);
-      return;
-    }
+      if (!clueId || !actorId) {
+        console.error("Missing clueId or actorId for clue editing.", { clueId, actorId });
+        return;
+      }
 
-    // 4) Open the dialog to edit this Clue
-    //    (CityDialogs.itemEditDialog calls the same form as a typical sheet edit)
-    await CityDialogs.itemEditDialog(clue);
+      // 2) Retrieve the Actor
+      const actor = game.actors.get(actorId);
+      if (!actor) {
+        console.error(`Actor with ID ${actorId} not found.`);
+        return;
+      }
 
-    // 5) Re-render the HUD so it shows any updated data
-    this.render(false);
-  });
+      // 3) Retrieve the Clue item
+      const clue = actor.getClue(clueId);
+      if (!clue) {
+        console.error(`Clue with ID ${clueId} not found on actor ${actorId}.`);
+        return;
+      }
 
-  html.find('.juice-container').on('dblclick', async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-  
-    // 1) Get the Juice ID and Actor ID from data attributes
-    const juiceId = $(event.currentTarget).data('juice-id');
-    const actorId = $(event.currentTarget).data('owner-id') || this.actor?.id;
-  
-    if (!juiceId || !actorId) {
-      console.error("Missing juiceId or actorId for juice editing.", { juiceId, actorId });
-      return;
-    }
-  
-    // 2) Retrieve the actor
-    const actor = game.actors.get(actorId);
-    if (!actor) {
-      console.error(`Actor with ID ${actorId} not found.`);
-      return;
-    }
-  
-    // 3) Retrieve the juice item
-    const juice = actor.getJuice(juiceId);
-    if (!juice) {
-      console.error(`Juice with ID ${juiceId} not found on actor ${actorId}.`);
-      return;
-    }
-  
-    // 4) Store the old name/amount for logging
-    const oldname = juice.name;
-    const oldamount = juice.system.amount;
-  
-    // 5) Use the same dialog the system uses
-    //    (this is basically what _juiceEdit does internally)
-    const updateObj = await CityDialogs.itemEditDialog(juice);
-  
-    // 6) If user saved changes, log them
-    if (updateObj) {
-      CityHelpers.modificationLog(
-        actor,
-        "Edited",
-        juice,
-        `${oldname} (${oldamount}) edited --> ${updateObj.name} (${updateObj.system.amount})`
-      );
-    }
-  
-    // 7) Re-render HUD so it shows the updated juice
-    this.render(false);
-  });
-      
-  this.element.on('contextmenu', (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-  });
+      // 4) Open the dialog to edit this Clue
+      //    (CityDialogs.itemEditDialog calls the same form as a typical sheet edit)
+      await CityDialogs.itemEditDialog(clue);
 
-  // Re-inject the roll bar so it shows up after every render
-  this.injectRollBar(html);
+      // 5) Re-render the HUD so it shows any updated data
+      this.render(false);
+    });
+
+    html.find('.juice-container').on('dblclick', async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    
+      // 1) Get the Juice ID and Actor ID from data attributes
+      const juiceId = $(event.currentTarget).data('juice-id');
+      const actorId = $(event.currentTarget).data('owner-id') || this.actor?.id;
+    
+      if (!juiceId || !actorId) {
+        console.error("Missing juiceId or actorId for juice editing.", { juiceId, actorId });
+        return;
+      }
+    
+      // 2) Retrieve the actor
+      const actor = game.actors.get(actorId);
+      if (!actor) {
+        console.error(`Actor with ID ${actorId} not found.`);
+        return;
+      }
+    
+      // 3) Retrieve the juice item
+      const juice = actor.getJuice(juiceId);
+      if (!juice) {
+        console.error(`Juice with ID ${juiceId} not found on actor ${actorId}.`);
+        return;
+      }
+    
+      // 4) Store the old name/amount for logging
+      const oldname = juice.name;
+      const oldamount = juice.system.amount;
+    
+      // 5) Use the same dialog the system uses
+      //    (this is basically what _juiceEdit does internally)
+      const updateObj = await CityDialogs.itemEditDialog(juice);
+    
+      // 6) If user saved changes, log them
+      if (updateObj) {
+        CityHelpers.modificationLog(
+          actor,
+          "Edited",
+          juice,
+          `${oldname} (${oldamount}) edited --> ${updateObj.name} (${updateObj.system.amount})`
+        );
+      }
+    
+      // 7) Re-render HUD so it shows the updated juice
+      this.render(false);
+    });
+        
+    this.element.on('contextmenu', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    });
+
+    // Re-inject the roll bar so it shows up after every render
+    this.injectRollBar(html);
   
   }
   
@@ -1966,55 +1997,6 @@ Hooks.on('deleteItem', (item, options, userId) => {
   }
 });
 
-// Hooks.on("dropCanvasData", async (canvas, dropData) => {
-//   if (dropData?.type !== "status") return;
-
-
-//   const { name = "Unnamed Status", tier = 1 } = dropData;
-  
-//   const { x, y } = dropData;
-//   const token = canvas.tokens.placeables.find(t => t.bounds?.contains(x, y));
-//   if (!token) {
-//     console.warn("No token found under drop location.");
-//     return;
-//   }
-
-//   const actor = token.actor;
-//   if (!actor) {
-//     console.warn("No actor found on target token.");
-//     return;
-//   }
-
-//   const itemData = {
-//     name,
-//     type: "status",
-//     system: {
-//       pips: 0,
-//       tier,
-//       description: "",
-//       locked: false,
-//       version: "1",
-//       free_content: false,
-//       hidden: false,
-//       temporary: false,
-//       permanent: false,
-//       sceneId: null,
-//       showcased: false,
-//       specialType: ""
-//     },
-
-//     img: "icons/svg/item-bag.svg"
-//   };
-
-
-//   try {
-//     const [newStatus] = await actor.createEmbeddedDocuments("Item", [itemData]);
-//     ui.notifications.info(`Gave ${actor.name} status: ${newStatus.name}-${newStatus.system.tier}`);
-//   } catch (err) {
-//     console.error("Error creating status on actor:", err);
-//   }
-// });
-
 Hooks.once("init", async function () {
 
   game.settings.register("mist-hud", "importedStatusCollection", {
@@ -2024,6 +2006,15 @@ Hooks.once("init", async function () {
       config: false,
       type: Object,
       default: []
+  });
+
+  game.settings.register("mist-hud", "enableTagNotifications", {
+    name: "Enable Tag Assignment Notifications",
+    hint: "When enabled, visual notifications will appear when story tags are assigned to tokens via drag and drop.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
   });
 
   game.mistHUD = game.mistHUD || {}; // Ensure the object exists
@@ -2083,56 +2074,113 @@ Hooks.on("getSceneControlButtons", (controls) => {
   }
 });
 
-// Then replace your existing dropCanvasData hook with this updated version:
 Hooks.on("dropCanvasData", async (canvas, dropData) => {
-  if (dropData?.type !== "status") return;
+  // Process statuses (existing code)
+  if (dropData?.type === "status") {
+    const { name = "Unnamed Status", tier = 1, temporary = false, permanent = false } = dropData;
+    
+    const { x, y } = dropData;
+    const token = canvas.tokens.placeables.find(t => t.bounds?.contains(x, y));
+    if (!token) {
+      console.warn("No token found under drop location.");
+      return;
+    }
 
-  const { name = "Unnamed Status", tier = 1 } = dropData;
-  
-  const { x, y } = dropData;
-  const token = canvas.tokens.placeables.find(t => t.bounds?.contains(x, y));
-  if (!token) {
-    console.warn("No token found under drop location.");
-    return;
+    const actor = token.actor;
+    if (!actor) {
+      console.warn("No actor found on target token.");
+      return;
+    }
+
+    const itemData = {
+      name,
+      type: "status",
+      system: {
+        pips: 0,
+        tier,
+        description: "",
+        locked: false,
+        version: "1",
+        free_content: false,
+        hidden: false,
+        temporary: temporary,
+        permanent: permanent,
+        sceneId: null,
+        showcased: false,
+        specialType: ""
+      },
+      img: "icons/svg/item-bag.svg"
+    };
+
+    try {
+      const [newStatus] = await actor.createEmbeddedDocuments("Item", [itemData]);
+      
+      // Show the animated notification over the token
+      TokenStatusNotification.show(token, newStatus.name, newStatus.system.tier);
+      
+    } catch (err) {
+      console.error("Error creating status on actor:", err);
+    }
   }
-
-  const actor = token.actor;
-  if (!actor) {
-    console.warn("No actor found on target token.");
-    return;
-  }
-
-  const itemData = {
-    name,
-    type: "status",
-    system: {
-      pips: 0,
-      tier,
-      description: "",
-      locked: false,
-      version: "1",
-      free_content: false,
-      hidden: false,
-      temporary: false,
-      permanent: false,
-      sceneId: null,
-      showcased: false,
-      specialType: ""
-    },
-    img: "icons/svg/item-bag.svg"
-  };
-
-  try {
-    const [newStatus] = await actor.createEmbeddedDocuments("Item", [itemData]);
+  // Process story tags (new code)
+  else if (dropData?.type === "story-tag") {
+    const { 
+      name = "Unnamed Tag", 
+      isInverted = false, 
+      temporary = false, 
+      permanent = false,
+      cssClass = ''
+    } = dropData;
     
-    // Always show the standard notification
-    //ui.notifications.info(`Gave ${actor.name} status: ${newStatus.name}-${newStatus.system.tier}`);
-    
-    // Show the animated notification over the token
-    // This will only display if the "enableStatusNotifications" setting is true
-    TokenStatusNotification.show(token, newStatus.name, newStatus.system.tier);
-    
-  } catch (err) {
-    console.error("Error creating status on actor:", err);
+    const { x, y } = dropData;
+    const token = canvas.tokens.placeables.find(t => t.bounds?.contains(x, y));
+    if (!token) {
+      console.warn("No token found under drop location.");
+      return;
+    }
+
+    const actor = token.actor;
+    if (!actor) {
+      console.warn("No actor found on target token.");
+      return;
+    }
+
+    // Create the tag data structure
+    const itemData = {
+      name,
+      type: "tag",
+      system: {
+        description: "",
+        subtype: "story",
+        isInverted: isInverted,
+        inverted: isInverted,  // Include both for compatibility
+        temporary: temporary,
+        permanent: permanent,
+        locked: false,
+        version: "1",
+        free_content: false,
+        hidden: false,
+        burn_state: 0,
+        burned: false,
+        specialType: ""
+      },
+      img: "icons/svg/item-bag.svg"
+    };
+
+    try {
+      // Create the tag on the actor
+      const [newTag] = await actor.createEmbeddedDocuments("Item", [itemData]);
+      
+      // Set additional flags if needed (like positive/negative state)
+      if (cssClass && (cssClass === 'positive' || cssClass === 'negative')) {
+        await newTag.setFlag('mist-hud', 'tagState', cssClass);
+      }
+      
+      // Show visual notification using the same style as status notifications
+      TokenTagNotification.show(token, name, isInverted, cssClass);
+      
+    } catch (err) {
+      console.error("Error creating story tag on actor:", err);
+    }
   }
 });

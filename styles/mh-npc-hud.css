@@ -475,7 +475,7 @@ margin: 5px;
     padding: 4px 0px;
 }
 
-.npc-limit {
+.npc-limit-moves {
     font-family: var(--font-family-npcmoves);
     background-color: var(--spectrum-color);
     color: black;
@@ -485,7 +485,8 @@ margin: 5px;
     font-weight: bold;
 }
 
-.npc-story-tag {
+.npc-story-tag,
+.npc-story-tag-moves {
     font-family: var(--font-family-npcmoves);
     background-color: var(--storytag-color);
     color: whitesmoke;
@@ -495,6 +496,17 @@ margin: 5px;
     cursor: pointer;
     white-space: nowrap;
     display: inline-block; 
+}
+
+.npc-story-tag:active,
+.npc-story-tag.neutral:active,
+.npc-story-tag-moves:active {
+    cursor: grabbing;
+}
+
+.npc-status-moves:hover,
+.npc-story-tag-moves:hover {
+    cursor: grab;
 }
 
 .npc-status,
@@ -510,7 +522,6 @@ margin: 5px;
     display: inline-block;
     color: var(--text-status-color);
 }
-
 
 .npc-status:active,
 .npc-status.neutral:active,
@@ -651,12 +662,13 @@ margin: 5px;
     display: flex;
     align-items: flex-start;
     margin-bottom: 0.3em;
+    margin-left: -4px;
 }
 
 /* Double arrow markers in list items */
 .npc-threat ul li .npc-tc-marker {
     flex-shrink: 0;
-    margin-right: 0.3em;
+    margin-right: 2px;
 }
 
 /* Move description in list items */
