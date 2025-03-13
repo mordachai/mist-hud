@@ -66,15 +66,19 @@
           <!-- Weakness Tags -->
           <ul class="mh-tags">
             {{#each weaknessTags}}
-              <li class="mh-weakness-tag {{this.cssClass}} {{#if selected}}selected{{/if}}"
-                  data-id="{{this.id}}"
-                  data-theme-id="{{this.themeId}}"
-                  data-actor-id="{{actorId}}">
-                <span class="mh-weakness-toggle clickable {{#if this.isInverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
-                  {{{this.inversionIcon}}}
-                </span>
-                <span class="mh-tag-text">{{this.tagName}}</span>
-              </li>
+            <li class="mh-weakness-tag {{this.cssClass}} {{#if inverted}}inverted{{/if}} {{#if selected}}selected{{/if}}"
+                data-id="{{this.id}}"
+                data-theme-id="{{this.themeId}}"
+                data-actor-id="{{actorId}}">
+              <span class="mh-weakness-toggle clickable" data-id="{{this.id}}">
+                {{#if inverted}}
+                  <i class="fa-light fa-angles-up"></i>
+                {{else}}
+                  <i class="fa-light fa-angles-down"></i>
+                {{/if}}
+              </span>
+              <span class="mh-tag-text">{{this.tagName}}</span>
+            </li>
             {{/each}}
           </ul>
         </div>
