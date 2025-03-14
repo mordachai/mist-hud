@@ -105,6 +105,7 @@
   padding: 2px 0px;
   cursor: pointer;
   text-align: left;
+  background: none;
 }
 
 .mh-power-tag span,
@@ -115,32 +116,39 @@
   align-items: center;
 }
 
-.mh-power-tag.selected,
-.mh-story-tag.selected,
-.mh-loadout-tag.selected,
-.mh-weakness-tag.inverted.selected {
-  color: white;
-  background: linear-gradient(0.25turn, var(--positive-tag-color), rgba(6, 95, 150, 0));
-  background-size: 90% 90%;
+.mh-power-tag.Mythos.selected,
+.mh-story-tag.Mythos.selected,
+.mh-loadout-tag.Mythos.selected,
+.mh-weakness-tag.Mythos.inverted.selected {
+  background: url('../ui/select-bar-com-Mythos.webp');
+  background-size: 90% 95%;
   background-repeat: no-repeat;
-  background-position: center left;
-  border-top-left-radius: 50px 50px;
-  border-bottom-left-radius: 50px 50px;
-  border-left: 6px solid var(--positive-tag-borderColor);
-  margin-left: -1px;
+  background-position: center left 14px;
+  color: white;
+  text-shadow: 0 0 1px #ffe8fc;
+}
+
+.mh-power-tag.Logos.selected,
+.mh-story-tag.Logos.selected,
+.mh-loadout-tag.Logos.selected,
+.mh-weakness-tag.Logos.inverted.selected {
+  background: url('../ui/select-bar-com-Logos.webp');
+  background-size: 90% 95%;
+  background-repeat: no-repeat;
+  background-position: center left 14px;
+  color: white;
+  text-shadow: 0 0 1px #3a1f0e;
 }
 
 .mh-weakness-tag.selected,
 .mh-story-tag.inverted.selected {
   color: white;
-  background: linear-gradient(0.25turn, var(--negative-tag-color), rgba(6, 95, 150, 0));
-  background-size: 90% 90%;
+  /* background: linear-gradient(0.25turn, var(--negative-tag-color), rgba(6, 95, 150, 0)); */
+  background: url('../ui/select-bar-com-weakness.webp');
+  background-size: 90% 95%;
   background-repeat: no-repeat;
-  background-position: center left;
-  border-top-left-radius: 50px 50px;
-  border-bottom-left-radius: 50px 50px;
-  border-left: 6px solid var(--negative-tag-borderColor);
-  margin-left: -1px;
+  background-position: center left 14px;
+  text-shadow: 0 0 1px #fedcd7;
 }
 
 /* Burn Toggle Icon */
