@@ -522,8 +522,7 @@ export class MistHUD extends Application {
       this.calculateTotalPower();
     });      
 
-
-    html.find('.help-toggle, .hurt-toggle').on('change', async (event) => {
+    html.find('.help-toggle, .hurt-toggle').on('change', function(event) {
       const toggle = event.currentTarget;
       const isChecked = toggle.checked;
       const targetActorId = toggle.dataset.targetId;
@@ -542,7 +541,7 @@ export class MistHUD extends Application {
       }
 
       // Use BonusManager to handle the bonus change
-      await BonusManager.applyBonus(giverActorId, targetActorId, bonusType, amount, isChecked);
+      BonusManager.applyBonus(giverActorId, targetActorId, bonusType, amount, isChecked);
     });
 
     // Add listener for clue creation and deletion deletion

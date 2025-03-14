@@ -55,6 +55,7 @@ export function checkRolls(actor, move, hud) {
   return false;
 }
 
+
 /**
  * BonusManager handles character-to-character help/hurt bonuses
  * Using a GM-mediated approach for permission control
@@ -62,6 +63,7 @@ export function checkRolls(actor, move, hud) {
 export class BonusManager {
   static SOCKET_NAME = "module.mist-hud";
   static initialized = false;
+  static DEBUG = true;
 
   /**
    * Initialize the BonusManager
@@ -89,6 +91,11 @@ export class BonusManager {
     });
     
     this.initialized = true;
+    
+    // Initialize checkbox state tracking
+    if (!globalThis.mistHudCheckboxStates) {
+      globalThis.mistHudCheckboxStates = new Map();
+    }
   }
 
   /**
@@ -98,11 +105,13 @@ export class BonusManager {
     if (!globalThis.mistHudSocketRegistered) {
       game.socket.on(this.SOCKET_NAME, (data) => {
         if (data && data.type === "bonusAction") {
+          if (this.DEBUG) console.log(`%c[BonusManager] Socket received:`, "color: #6699ff", data);
           this.handleBonusSocketMessage(data);
         }
       });
       
       globalThis.mistHudSocketRegistered = true;
+      if (this.DEBUG) console.log(`%c[BonusManager] Socket listener registered for ${this.SOCKET_NAME}`, "color: #33cc33");
     }
   }
   
@@ -110,50 +119,100 @@ export class BonusManager {
    * Handle socket messages for bonuses
    */
   static async handleBonusSocketMessage(data) {
-    if (!data || !data.action) return;
+    if (!data || !data.action) {
+      if (this.DEBUG) console.log(`%c[BonusManager] Invalid socket message received`, "color: #ff6666", data);
+      return;
+    }
     
     // Only GMs perform the actual actor updates
     const isGM = game.user.isGM;
+    const username = game.user.name;
+    
+    if (this.DEBUG) console.log(`%c[BonusManager] Processing ${data.action} by ${username} (GM: ${isGM})`, "color: #cc99ff");
     
     switch (data.action) {
       case "applyBonus":
         if (isGM) {
+          if (this.DEBUG) console.log(`%c[BonusManager] GM applying bonus from ${data.giverId} to ${data.targetId}: ${data.bonusType} ${data.amount}`, "color: #33cc33");
           await this.updateActorBonuses(data.targetId, data.giverId, data.bonusType, data.amount, true);
+          
           // Notify all clients to update UI
-          game.socket.emit(this.SOCKET_NAME, {
+          const syncData = {
             type: "bonusAction",
             action: "syncUI",
             targetId: data.targetId,
             giverId: data.giverId,
             bonusType: data.bonusType,
             active: true
-          });
+          };
+          
+          if (this.DEBUG) console.log(`%c[BonusManager] GM emitting syncUI to all clients`, "color: #33cc33", syncData);
+          game.socket.emit(this.SOCKET_NAME, syncData);
+          
+          // Send direct message to target actor's owner to update their HUD
+          this.notifyTargetActorOwner(data.targetId, true);
+        } else {
+          if (this.DEBUG) console.log(`%c[BonusManager] Non-GM user received applyBonus message, ignoring`, "color: #ffcc00");
         }
         break;
         
       case "removeBonus":
         if (isGM) {
+          if (this.DEBUG) console.log(`%c[BonusManager] GM removing bonus from ${data.giverId} to ${data.targetId}: ${data.bonusType}`, "color: #ff9900");
           await this.updateActorBonuses(data.targetId, data.giverId, data.bonusType, data.amount, false);
+          
           // Notify all clients to update UI
-          game.socket.emit(this.SOCKET_NAME, {
+          const syncData = {
             type: "bonusAction",
             action: "syncUI",
             targetId: data.targetId,
             giverId: data.giverId,
             bonusType: data.bonusType,
             active: false
-          });
+          };
+          
+          if (this.DEBUG) console.log(`%c[BonusManager] GM emitting syncUI to all clients`, "color: #33cc33", syncData);
+          game.socket.emit(this.SOCKET_NAME, syncData);
+          
+          // Send direct message to target actor's owner to update their HUD
+          this.notifyTargetActorOwner(data.targetId, false);
+        } else {
+          if (this.DEBUG) console.log(`%c[BonusManager] Non-GM user received removeBonus message, ignoring`, "color: #ffcc00");
         }
         break;
         
       case "syncUI":
-        // Update checkbox state and refresh HUDs
-        this.updateCheckboxState(data.giverId, data.targetId, data.bonusType, data.active);
-        this.refreshTargetHUD(data.targetId);
+        if (this.DEBUG) console.log(`%c[BonusManager] SyncUI received: ${data.giverId} → ${data.targetId}, ${data.bonusType}, active: ${data.active}`, "color: #6699ff");
+
+        // Update checkbox state only if this client owns the giver actor
+        const giverActor = game.actors.get(data.giverId);
+        if (giverActor?.isOwner) {
+          this.updateCheckboxState(data.giverId, data.targetId, data.bonusType, data.active);
+        }
+        break;
+        
+      case "updateTargetHUD":
+        if (this.DEBUG) console.log(`%c[BonusManager] Received updateTargetHUD for actor ${data.targetId}`, "color: #6699ff");
+        
+        // Check if current user owns this actor
+        const targetActor = game.actors.get(data.targetId);
+        if (targetActor && targetActor.isOwner) {
+          if (this.DEBUG) console.log(`%c[BonusManager] User owns target actor ${targetActor.name}, refreshing HUD`, "color: #33cc33");
+          
+          // Get HUD from registry
+          const targetHud = globalThis.playerHudRegistry?.get(data.targetId);
+          if (targetHud) {
+            if (this.DEBUG) console.log(`%c[BonusManager] Found HUD for ${targetActor.name}, rendering`, "color: #33cc33");
+            targetHud.render(true);
+          } else {
+            if (this.DEBUG) console.log(`%c[BonusManager] No HUD found for ${targetActor.name}`, "color: #ff9900");
+          }
+        }
         break;
         
       case "clearAllBonuses":
         if (isGM) {
+          if (this.DEBUG) console.log(`%c[BonusManager] GM clearing all bonuses for ${data.actorId}`, "color: #ff6666");
           await this.clearActorBonuses(data.actorId);
           game.socket.emit(this.SOCKET_NAME, {
             type: "bonusAction",
@@ -163,23 +222,50 @@ export class BonusManager {
         break;
         
       case "refreshHUDs":
+        if (this.DEBUG) console.log(`%c[BonusManager] Refreshing all HUDs for current user`, "color: #33cc33");
         this.refreshAllHUDs();
         break;
     }
   }
   
   /**
+   * Send a message to the owner of the target actor to update their HUD
+   */
+  static notifyTargetActorOwner(targetActorId, isAddingBonus) {
+    const targetActor = game.actors.get(targetActorId);
+    if (!targetActor) return;
+    
+    if (this.DEBUG) console.log(`%c[BonusManager] Sending notification to owner of ${targetActor.name}`, "color: #33cc33");
+    
+    // Emit a socket message for the target actor owner to update their HUD
+    game.socket.emit(this.SOCKET_NAME, {
+      type: "bonusAction",
+      action: "updateTargetHUD",
+      targetId: targetActorId,
+      bonusUpdate: isAddingBonus
+    });
+  }
+  
+  /**
    * Update actor bonuses (GM only)
    */
   static async updateActorBonuses(targetId, giverId, bonusType, amount, active) {
-    if (!game.user.isGM) return;
+    if (!game.user.isGM) {
+      if (this.DEBUG) console.log(`%c[BonusManager] Non-GM attempted to update actor bonuses, aborted`, "color: #ff6666");
+      return;
+    }
     
     const targetActor = game.actors.get(targetId);
-    if (!targetActor) return;
+    if (!targetActor) {
+      if (this.DEBUG) console.log(`%c[BonusManager] Target actor ${targetId} not found`, "color: #ff6666");
+      return;
+    }
     
     // Get current bonuses
     const currentBonuses = targetActor.getFlag("mist-hud", "received-bonuses") || {};
     const updatedBonuses = foundry.utils.deepClone(currentBonuses);
+    
+    if (this.DEBUG) console.log(`%c[BonusManager] Current bonuses for ${targetActor.name}:`, "color: #33cc33", currentBonuses);
     
     if (active) {
       // Add or update bonus
@@ -189,36 +275,78 @@ export class BonusManager {
         timestamp: Date.now(),
         sceneId: game.scenes.current?.id || "unknown"
       };
+      if (this.DEBUG) console.log(`%c[BonusManager] Adding bonus to ${targetActor.name} from ${giverId}: ${bonusType} ${amount}`, "color: #33cc33");
     } else {
       // Remove bonus
-      delete updatedBonuses[giverId];
+      if (updatedBonuses[giverId]) {
+        if (this.DEBUG) console.log(`%c[BonusManager] Removing bonus from ${targetActor.name} given by ${giverId}`, "color: #ff9900");
+        delete updatedBonuses[giverId];
+      } else {
+        if (this.DEBUG) console.log(`%c[BonusManager] No bonus found to remove from ${targetActor.name} given by ${giverId}`, "color: #ff6666");
+      }
     }
     
     // Update the actor flag
-    await targetActor.setFlag("mist-hud", "received-bonuses", updatedBonuses);
+    if (Object.keys(updatedBonuses).length === 0) {
+      if (this.DEBUG) console.log(`%c[BonusManager] No bonuses left, clearing flag for ${targetActor.name}`, "color: #ff9900");
+      await targetActor.unsetFlag("mist-hud", "received-bonuses");
+    } else {
+      if (this.DEBUG) console.log(`%c[BonusManager] Updating actor flags for ${targetActor.name}:`, "color: #33cc33", updatedBonuses);
+      await targetActor.setFlag("mist-hud", "received-bonuses", updatedBonuses);
+    }
   }
   
   /**
    * Apply a bonus between characters (main entry point for players)
    */
   static async applyBonus(giverId, targetId, bonusType, amount, active) {
-    if (!giverId || !targetId) return;
+    if (!giverId || !targetId) {
+      if (this.DEBUG) console.log(`%c[BonusManager] Missing required IDs: giverId=${giverId}, targetId=${targetId}`, "color: #ff6666");
+      return;
+    }
+    
+    if (this.DEBUG) {
+      console.log(`%c[BonusManager] ${game.user.name} triggering ${active ? 'apply' : 'remove'} bonus:`, "color: #6699ff", {
+        giverId, 
+        targetId, 
+        bonusType, 
+        amount, 
+        active,
+        isGM: game.user.isGM
+      });
+    }
+    
+    // Store the checkbox state locally for consistency
+    const checkboxKey = `${giverId}-${targetId}-${bonusType}`;
+    globalThis.mistHudCheckboxStates.set(checkboxKey, active);
+    
+    if (this.DEBUG) console.log(`%c[BonusManager] Stored checkbox state: ${checkboxKey}=${active}`, "color: #33cc33");
     
     // Send socket message to GM
-    game.socket.emit(this.SOCKET_NAME, {
+    const socketData = {
       type: "bonusAction",
       action: active ? "applyBonus" : "removeBonus",
       giverId,
       targetId,
       bonusType,
       amount
-    });
+    };
+    
+    if (this.DEBUG) console.log(`%c[BonusManager] Emitting socket message:`, "color: #33cc33", socketData);
+    game.socket.emit(this.SOCKET_NAME, socketData);
     
     // If GM, process directly
     if (game.user.isGM) {
+      if (this.DEBUG) console.log(`%c[BonusManager] User is GM, processing bonus update directly`, "color: #33cc33");
       await this.updateActorBonuses(targetId, giverId, bonusType, amount, active);
-      this.updateCheckboxState(giverId, targetId, bonusType, active);
-      this.refreshTargetHUD(targetId);
+      
+      // GM should also update the target actor's HUD if they own it
+      const targetActor = game.actors.get(targetId);
+      if (targetActor && targetActor.isOwner) {
+        await this.refreshTargetHUD(targetId);
+      }
+    } else {
+      if (this.DEBUG) console.log(`%c[BonusManager] User is not GM, waiting for GM to process`, "color: #ffcc00");
     }
   }
   
@@ -229,34 +357,80 @@ export class BonusManager {
     const checkboxClass = bonusType === "help" ? ".help-toggle" : ".hurt-toggle";
     const selector = `${checkboxClass}[data-actor-id="${giverId}"][data-target-id="${targetId}"]`;
     
-    document.querySelectorAll(selector).forEach(element => {
-      element.checked = checked;
-    });
+    // Get locally tracked state (if any)
+    const checkboxKey = `${giverId}-${targetId}-${bonusType}`;
+    const localState = globalThis.mistHudCheckboxStates.get(checkboxKey);
+    
+    // Only update if we don't have a local state or it matches the incoming state
+    if (localState === undefined || localState === checked) {
+      if (this.DEBUG) console.log(`%c[BonusManager] Updating checkboxes with selector: ${selector}, value: ${checked}`, "color: #6699ff");
+      
+      const elements = document.querySelectorAll(selector);
+      if (elements.length === 0) {
+        if (this.DEBUG) console.log(`%c[BonusManager] No checkboxes found matching selector: ${selector}`, "color: #ff9900");
+      } else {
+        if (this.DEBUG) console.log(`%c[BonusManager] Found ${elements.length} checkboxes to update`, "color: #33cc33");
+        
+        elements.forEach(element => {
+          element.checked = checked;
+          if (this.DEBUG) console.log(`%c[BonusManager] Updated checkbox:`, "color: #33cc33", element);
+        });
+      }
+    } else {
+      if (this.DEBUG) console.log(`%c[BonusManager] Skipping checkbox update: local state=${localState}, incoming state=${checked}`, "color: #ff9900");
+    }
   }
   
   /**
    * Refresh a specific actor's HUD
    */
   static refreshTargetHUD(actorId) {
-    const targetHud = globalThis.playerHudRegistry?.get(actorId);
-    const actor = game.actors.get(actorId);
+    if (this.DEBUG) console.log(`%c[BonusManager] Refreshing HUD for actor ${actorId}`, "color: #6699ff");
     
-    if (actor && actor.isOwner && targetHud) {
-      targetHud.render(true);
+    const actor = game.actors.get(actorId);
+    if (!actor) {
+      if (this.DEBUG) console.log(`%c[BonusManager] Actor ${actorId} not found`, "color: #ff6666");
+      return;
     }
+
+    // Only refresh HUD if the actor is owned by current user
+    if (!actor.isOwner) {
+      if (this.DEBUG) console.log(`%c[BonusManager] Current user is not owner of ${actor.name}, skipping HUD refresh`, "color: #ff9900");
+      return;
+    }
+
+    // Get HUD from registry
+    const targetHud = globalThis.playerHudRegistry?.get(actorId);
+    
+    if (!targetHud) {
+      if (this.DEBUG) console.log(`%c[BonusManager] No HUD found for actor ${actor.name}`, "color: #ff9900");
+      return;
+    }
+    
+    if (this.DEBUG) console.log(`%c[BonusManager] Rendering HUD for ${actor.name}`, "color: #33cc33");
+    targetHud.render(true);
   }
   
   /**
    * Refresh all HUDs for actors owned by the current user
    */
   static refreshAllHUDs() {
+    if (this.DEBUG) console.log(`%c[BonusManager] Refreshing all HUDs for current user`, "color: #33cc33");
+    
+    // Only refresh HUDs from registry
     if (globalThis.playerHudRegistry) {
+      const registryCount = globalThis.playerHudRegistry.size;
+      if (this.DEBUG) console.log(`%c[BonusManager] Found ${registryCount} HUDs in registry`, "color: #6699ff");
+      
       for (const [actorId, hud] of globalThis.playerHudRegistry.entries()) {
         const actor = game.actors.get(actorId);
         if (actor && actor.isOwner) {
+          if (this.DEBUG) console.log(`%c[BonusManager] Rendering HUD for ${actor.name} from registry`, "color: #33cc33");
           hud.render(true);
         }
       }
+    } else {
+      if (this.DEBUG) console.log(`%c[BonusManager] No HUD registry found`, "color: #ff9900");
     }
   }
   
@@ -264,12 +438,16 @@ export class BonusManager {
    * Clear all bonuses for an actor (GM only)
    */
   static async clearActorBonuses(actorId) {
-    if (!game.user.isGM) return;
+    if (!game.user.isGM) {
+      if (this.DEBUG) console.log(`%c[BonusManager] Non-GM attempted to clear bonuses, aborted`, "color: #ff6666");
+      return;
+    }
     
     const actor = game.actors.get(actorId);
     if (!actor) return;
     
     await actor.unsetFlag("mist-hud", "received-bonuses");
+    if (this.DEBUG) console.log(`%c[BonusManager] Cleared all bonuses for ${actor.name}`, "color: #33cc33");
   }
   
   /**
@@ -372,11 +550,16 @@ export class BonusManager {
    */
   static calculateTotalBonus(actorId) {
     const actor = game.actors.get(actorId);
-    if (!actor) return 0;
+    if (!actor) {
+      if (this.DEBUG) console.log(`%c[BonusManager] Cannot calculate total bonus: actor ${actorId} not found`, "color: #ff6666");
+      return 0;
+    }
     
     const bonuses = actor.getFlag("mist-hud", "received-bonuses") || {};
     let helpTotal = 0;
     let hurtTotal = 0;
+    
+    if (this.DEBUG) console.log(`%c[BonusManager] Calculating total bonus for ${actor.name}:`, "color: #6699ff", bonuses);
     
     Object.values(bonuses).forEach(bonus => {
       if (bonus.type === "help") {
@@ -386,7 +569,10 @@ export class BonusManager {
       }
     });
     
-    return helpTotal - hurtTotal;
+    const total = helpTotal - hurtTotal;
+    if (this.DEBUG) console.log(`%c[BonusManager] Total bonus for ${actor.name}: Help=${helpTotal}, Hurt=${hurtTotal}, Net=${total}`, "color: #33cc33");
+    
+    return total;
   }
 }
 
