@@ -6,24 +6,24 @@ Cyber & Tech,Drone & Robotics,jammed-1,slowed-2,glitched-3,malfunctioning-4,hija
 Cyber & Tech,Hacking,probing-1,breached-2,inside-3,deep-access-4,root-control-5,system-owned-6
 Cyber & Tech,Network Infiltration,pinging-1,listening-2,intercept-3,package-manipulation-4,traffic-control-5,override-6
 
-Elemental,Acid,irritated-skin-1,blistering-2,corroded-3,severe-burns-4,dissolving-5,melted-6
-Elemental,Chemical,mild-exposure-1,dizzy-2,nauseated-3,internal-damage-4,system-failure-5,dead-6
-Elemental,Compression,crushed-1,internal-strain-2,ruptured-organs-3,crushed-bones-4,flattened-5,pulverized-6
-Elemental,Earth,pebbled-1,bruised-by-rocks-2,battered-3,crushed-4,buried-5,obliterated-6
-Elemental,Electric,shocked-1,jolted-2,violent-spasms-3,electrical-burns-4,heart-stopped-5,fried-6
-Elemental,Fire,singed-1,burn-blister-2,charred-skin-3,severe-burns-4,burn-shock-5,burned-to-ashes-6
-Elemental,Fumes,coughing-1,short-of-breath-2,choking-3,asphyxiating-4,blacked-out-5,dead-6
+Elemental,Acid,stung-1,blistering-2,corroded-3,severe-burns-4,dissolving-5,liquefied-6
+Elemental,Chemical,exposed-1,dizzy-2,nauseated-3,internal-damage-4,system-failure-5,dead-6
+Elemental,Compression,squeezed-1,strained-2,ruptured-3,crushed-4,flattened-5,smashed-6
+Elemental,Earth,pelted-1,bruised-2,battered-3,crushed-4,buried-5,obliterated-6
+Elemental,Electric,shocked-1,jolted-2,spasming-3,scorched-4,lights-out-5,fried-6
+Elemental,Fire,singed-1,blisters-2,charred-3,severe-burns-4,roasted-5,burned-to-ashes-6
+Elemental,Fumes,coughing-1,wheezing-2,choking-3,asphyxiating-4,blacked-out-5,dead-6
 Elemental,Ice,frostbitten-1,numb-2,frozen-limbs-3,hypothermia-4,frozen-solid-5,shattered-6
-Elemental,Laser,scorched-1,burned-2,blasted-3,melting-4,severed-5,disintegrated-6
-Elemental,Suffocation,short-of-breath-1,air-starved-2,choking-3,blacking-out-4,asphyxiated-5,dead-6
+Elemental,Laser,burned-1,scorched-2,blasted-3,melting-4,severed-5,disintegrated-6
+Elemental,Suffocation,breathless-1,starved-2,choking-3,fading-4,passed-out-5,dead-6
 Elemental,Water,soaked-1,struggling-2,flailing-3,water-in-lungs-4,drowning-5,drowned-6
 
-Health,Contamination,exposure-1,itchy-skin-2,nausea-3,feverish-4,organ-failure-5,dead-6
-Health,Disease,cough-1,infected-2,sick-3,bedridden-4,system-shock-5,dead-6
-Health,Food Poisoning,sick-1,cramps-2,vomiting-3,wasted-4,passed-out-5,dead-6
-Health,Mental (also intoxication),scattered-1,dazed-2,confused-3,bewildered-4,psychotic-5,
-Health,Poison,rash-1,spreading-venom-2,paralyzed-3,spasms-4,system-shock-5,dead-6
-Health,Radiation,exposure-1,radiation-burns-2,coughing-blood-3,organ-failure-4,radiation-sickness-5,dead-6
+Harzards,Contamination,exposure-1,itchy-skin-2,nausea-3,feverish-4,organ-failure-5,dead-6
+Harzards,Disease,cough-1,infected-2,sick-3,bedridden-4,system-shock-5,dead-6
+Harzards,Food Poisoning,sick-1,cramps-2,vomiting-3,wasted-4,passed-out-5,dead-6
+Harzards,Mental (inc. intoxication),scattered-1,dazed-2,confused-3,bewildered-4,psychotic-5,
+Harzards,Poison,rash-1,spreading-venom-2,paralyzed-3,spasms-4,system-shock-5,dead-6
+Harzards,Radiation,exposure-1,radiation-burns-2,coughing-blood-3,organ-failure-4,radiation-sickness-5,dead-6
 
 Combat,Cover (-),exposed-1,bad-cover-2,plain-view-3,compromised-4,,
 Combat,Cover (+),lite-cover-1,good-cover-2,full-cover-3,bunkered-4,,
@@ -70,29 +70,29 @@ Sensory,Vision (-),obstructed-1,clouded-2,disoriented-3,can-hardly-see-4,blinded
 Sensory,Investigation (+),observant-1, analytical-2, insightful-3, elementar-4,,
 Sensory,Investigation (-),distracted-1, careless-2, misled-3, clueless-4,,
 
-Society,Financial,strained-budget-1,overspending-2,financial-risk-3,indebted-4,bankrupt-5,
-Society,Legal,warning-1,watched-2,warrant-for-arrest-3,wanted-4,most-wanted-5,
-Society,Society (-),embarrassed-1,on-the-spot-2,humiliated-3,laughing-stock-4,ostracized-5,
-Society,Society (+),attention-1,interesting-2,admired-3,life-of-the-party-4,media-craze-5,
-Society,Seduction,interested-1,beguiled-2,charmed-3,mesmerized-4,controlled-5,enslaved-6
-Society,Leadership (+),confident-1, respected-2, rallying-3, strategic-4, inspiring-leader-5, legendary-commander-6
-Society,Leadership (-),uncertain-1, overlooked-2, untrusted-3, divisive-4, mutinous-5, disgraced-6
-Society,Social (+),charismatic-1, persuasive-2, inspiring-3, trusted-4, idolized-5, legendary-6
-Society,Social (-),awkward-1, unconvincing-2, misunderstood-3, distrusted-4, outcast-5, infamous-6
-Society,Negotiation (+),reasonable-1, promising-deal-2, advantageous-offer-3, leverage-4, deal-closer-5,
-Society,Negotiation (-),hesitant-1, pressured-2, unprepared-3, outmaneuvered-4, ruined-bargain-5,
-Society,Deception (+),convincing-lie-1, believable-story-2, expertly-fabricated-3, flawless-disguise-4, untraceable-5,
-Society,Deception (-),obvious-lie-1, poorly-spun-2, suspicious-3, exposed-4, condemned-5,
-Society,Intimidation (+),unnerving-1, assertive-2, commanding-3, fearsome-4, terrifying-5,
-Society,Intimidation (-),hesitant-1, weak-threat-2, unimposing-3, ridiculed-4, humiliated-5,
-Society,Charm (+),pleasant-1, likable-2, enchanting-3, magnetic-4, irresistible-5,
-Society,Charm (-),bland-1, unappealing-2, off-putting-3, abrasive-4, repulsive-5,
-Society,Teamwork (+),cooperative-1, supportive-2, well-coordinated-3, cohesive-4, seamless-synergy-5,
-Society,Teamwork (-),uncooperative-1, self-centered-2, argumentative-3, disruptive-4, sabotaging-5,
+Relations,Financial,strained-budget-1,overspending-2,financial-risk-3,indebted-4,bankrupt-5,
+Relations,Legal,warning-1,watched-2,warrant-for-arrest-3,wanted-4,most-wanted-5,
+Relations,Seduction,interested-1,beguiled-2,charmed-3,mesmerized-4,controlled-5,enslaved-6
+Relations,Society (+),attention-1,interesting-2,admired-3,life-of-the-party-4,media-craze-5,
+Relations,Society (-),embarrassed-1,on-the-spot-2,humiliated-3,laughing-stock-4,ostracized-5,
+Relations,Leadership (+),confident-1, respected-2, rallying-3, strategic-4, inspiring-leader-5, legendary-commander-6
+Relations,Leadership (-),uncertain-1, overlooked-2, untrusted-3, divisive-4, mutinous-5, disgraced-6
+Relations,Social (+),charismatic-1, persuasive-2, inspiring-3, trusted-4, idolized-5, legendary-6
+Relations,Social (-),awkward-1, unconvincing-2, misunderstood-3, distrusted-4, outcast-5, infamous-6
+Relations,Negotiation (+),reasonable-1, promising-deal-2, advantageous-offer-3, leverage-4, deal-closer-5,
+Relations,Negotiation (-),hesitant-1, pressured-2, unprepared-3, outmaneuvered-4, ruined-bargain-5,
+Relations,Deception (+),convincing-lie-1, believable-story-2, expertly-fabricated-3, flawless-disguise-4, untraceable-5,
+Relations,Deception (-),obvious-lie-1, poorly-spun-2, suspicious-3, exposed-4, condemned-5,
+Relations,Intimidation (+),unnerving-1, assertive-2, commanding-3, fearsome-4, terrifying-5,
+Relations,Intimidation (-),hesitant-1, weak-threat-2, unimposing-3, ridiculed-4, humiliated-5,
+Relations,Charm (+),pleasant-1, likable-2, enchanting-3, magnetic-4, irresistible-5,
+Relations,Charm (-),bland-1, unappealing-2, off-putting-3, abrasive-4, repulsive-5,
+Relations,Teamwork (+),cooperative-1, supportive-2, well-coordinated-3, cohesive-4, seamless-synergy-5,
+Relations,Teamwork (-),uncooperative-1, self-centered-2, argumentative-3, disruptive-4, sabotaging-5,
 
-Supernatural,Demonic,marked-1,tainted-2,corrupted-3,demonic-influence-4,possessed-5,devoured-6
+Supernatural,Demonic,marked-1,tainted-2,branded-3,corrupted-4,possessed-5,damned-6
 Supernatural,Divine,touched-1,blessed-2,empowered-3,holy-radiance-4,ascended-5,transcended-6
-Supernatural,Fey,enlightened-1,bewitched-2,glamoured-3,trapped-in-dreams-4,fey-touched-5,lost-to-feywild-6
-Supernatural,Magical,sparked-1,arcane-residue-2,hexed-3,cursed-4,warped-5,unmade-6
+Supernatural,Fey,delighted-1,bewitched-2,glamoured-3,enthralled-4,fey-touched-5,lost-to-feywild-6
+Supernatural,Magical,sparked-1,stricken-2,hexed-3,cursed-4,warped-5,unmade-6
 Supernatural,The Mist,vague-details-1,memory-lapse-2,memory-loss-3,amnesia-4,oblivious-5,
-Supernatural,Undead,haunted-1,drained-2,undead-3,possessed-4,unmade-5,devoured-6
+Supernatural,Undead,haunted-1,drained-2,undead-3,possessed-4,withered-5,unmade-6

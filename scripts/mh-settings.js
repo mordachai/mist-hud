@@ -77,22 +77,7 @@ Hooks.once('init', () => {
         type: Boolean,
         default: false
       });
-
-    // Register the game setting
-    // game.settings.register(MODULE_ID, "preferredDice", {
-    //     name: "Preferred Dice",
-    //     hint: "Select your preferred dice set for rolls.",
-    //     scope: "world",
-    //     config: true,
-    //     type: String,
-    //     choices: getDiceChoices(activeSystem),
-    //     default: getDefaultDice(activeSystem),
-    //     onChange: value => {
-    //         console.log(`Preferred dice set changed to: ${value}`);
-    //         applyPreferredDice(value); // Apply the selected dice
-    //     },
-    // });  
-    
+   
     game.settings.register(MODULE_ID, 'npcAccordionState', {
         name: 'NPC Accordions Initial State',
         hint: 'Set the initial state for NPC accordions: all expanded, only a specific one expanded, or all closed.',
@@ -124,41 +109,7 @@ Hooks.once('init', () => {
                 default: 'no'
             }).render(true);
         }
-    });
-    
-    game.settings.register(MODULE_ID, 'onlyOneOpen', {
-        name: 'Keep only one tab open',
-        hint: 'When enabled, only one accordion will remain open at a time. Disable to allow multiple open accordions.',
-        scope: 'world',
-        config: true,
-        type: Boolean,
-        default: false,
-        onChange: value => {
-            // Notify the user that a refresh is required
-            ui.notifications.info("The setting change requires a refresh to take effect.");
-
-            // Provide a dialog prompt to refresh the page
-            new Dialog({
-                title: 'Refresh Required',
-                content: '<p>Would you like to refresh the page now to apply the changes?</p>',
-                buttons: {
-                    yes: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Yes',
-                        callback: () => {
-                            // Using Foundry's built-in API for reloading
-                            foundry.utils.debounce(() => window.location.reload(), 100)();
-                        }
-                    },
-                    no: {
-                        icon: '<i class="fas fa-times"></i>',
-                        label: 'No'
-                    }
-                },
-                default: 'no'
-            }).render(true);
-        }
-    });
+    });   
 
     game.settings.register("mist-hud", "lastSelectedTab", {
         name: "Last Selected Tab",
@@ -171,7 +122,16 @@ Hooks.once('init', () => {
     game.settings.register(MODULE_ID, "enableStatusNotifications", {
         name: "Status Drop Notifications",
         hint: "When enabled, displays an animated notification above tokens when statuses are dropped on them.",
-        scope: "client",
+        scope: "world",
+        config: true,
+        type: Boolean,
+        default: true
+    });
+
+    game.settings.register("mist-hud", "enableTagNotifications", {
+        name: "Tags Drop Notifications",
+        hint: "When enabled, visual notifications will appear when story tags are assigned to tokens via drag and drop.",
+        scope: "world",
         config: true,
         type: Boolean,
         default: true
@@ -212,9 +172,9 @@ Hooks.once('init', () => {
     }); 
 
     game.settings.register("mist-hud", "enableStatusTabs", {
-        name: "Use Status Tabs",
+        name: "Tabs for Status List",
         hint: "Enable to organize statuses into tabs based on category.",
-        scope: "client",
+        scope: "world",
         config: true,
         type: Boolean,
         default: true,
@@ -226,47 +186,6 @@ Hooks.once('init', () => {
         
 });
 
-// Function to get dice choices based on the active system
-function getDiceChoices(system) {
-    if (system === "city-of-mist") {
-        return {
-            "city-of-mist": "City of Mist Dice",
-        };
-    } else if (system === "otherscape") {
-        return {
-            "otherscape-noise": "Noise Dice",
-            "otherscape-mythos": "MythosOS Dice",
-            "otherscape-self": "Self Dice",
-        };
-    } else {
-        return {}; // No choices for unsupported systems
-    }
-}
-
-// Function to get the default dice based on the active system
-function getDefaultDice(system) {
-    if (system === "city-of-mist") {
-        return "city-of-mist"; // Default dice for City of Mist
-    } else if (system === "otherscape") {
-        return "otherscape-noise"; // Default dice for Otherscape
-    }
-    return null;
-}
-
-// Function to apply the selected dice to Dice So Nice
-function applyPreferredDice(diceSet) {
-    const dice3d = game.dice3d;
-    if (!dice3d) {
-        console.error("Dice So Nice is not available.");
-        return;
-    }
-
-    // Set the preferred dice system
-    dice3d.setSystem(diceSet);
-
-    //console.log(`Applied preferred dice set: ${diceSet}`);
-}
-
 // Registrar as configurações (settings) do módulo
 export function registerSettings() {
 
@@ -274,10 +193,10 @@ export function registerSettings() {
     game.settings.register(MODULE_ID, "debugMode", {
         name: "Debug Mode",
         hint: "Enable or disable debug mode to show information in the console.",
-        scope: "client",  // Configuração de cliente, individual para cada usuário
+        scope: "world",
         config: true,
         type: Boolean,
-        default: false,  // Desativado por padrão
+        default: false,
         onChange: value => {
             if (value) {
                 console.log("Debug Mode enabled.");
@@ -329,7 +248,6 @@ Hooks.once('ready', () => {
     
     // Register the API with the module system
     game.modules.get('mist-hud').api = moduleApi;
-    
-    console.log("Mist HUD API registered");
+
   });
 
