@@ -2008,15 +2008,6 @@ Hooks.once("init", async function () {
       default: []
   });
 
-  game.settings.register("mist-hud", "enableTagNotifications", {
-    name: "Enable Tag Assignment Notifications",
-    hint: "When enabled, visual notifications will appear when story tags are assigned to tokens via drag and drop.",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: true
-  });
-
   game.mistHUD = game.mistHUD || {}; // Ensure the object exists
 
   Hooks.once("ready", () => {

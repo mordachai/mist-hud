@@ -7,20 +7,20 @@ import { detectActiveSystem } from './mh-settings.js';
 import { checkRolls } from "./bonus-utils.js";
 
 // Debug mode setting
-let debug = false;
+//let debug = false;
 
-Hooks.once("init", () => {
-  game.settings.register("mist-hud", "debugMode", {
-    name: "Enable Debug Mode",
-    hint: "Toggle debug logging for Mist HUD rolls.",
-    scope: "client",
-    config: true,
-    type: Boolean,
-    default: false,
-    onChange: value => debug = value
-  });
-  debug = game.settings.get("mist-hud", "debugMode");
-});
+// Hooks.once("init", () => {
+//   game.settings.register("mist-hud", "debugMode", {
+//     name: "Enable Debug Mode",
+//     hint: "Toggle debug logging for Mist HUD rolls.",
+//     scope: "client",
+//     config: true,
+//     type: Boolean,
+//     default: false,
+//     onChange: value => debug = value
+//   });
+//   debug = game.settings.get("mist-hud", "debugMode");
+// });
 
 //let toBurnTags = $('.mh-power-tag.toBurn, .mh-power-tag.crew.toBurn').toArray().map(tag => $(tag).data('id'));
 
