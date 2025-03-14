@@ -4,7 +4,7 @@ import { MistHUD } from './mist-hud.js';
 import { moveConfig } from './mh-theme-config.js';
 import { initializeAccordions } from './accordion-handler.js';
 import { detectActiveSystem } from './mh-settings.js';
-import { checkRolls } from "./bonus-utils.js";
+import { checkRolls, BonusManager, getReceivedBonuses  } from "./bonus-utils.js";
 
 // Debug mode setting
 //let debug = false;
@@ -97,28 +97,11 @@ async function rollMove(moveName) {
     await trackWeaknessAttentionCrew(actor, tagsData.crewWeaknessTags.filter(tag => tag.stateClass === "normal"));
   }
 
-  // Calculate bonuses
-  const receivedBonuses = actor.getFlag('mist-hud', 'received-bonuses') || {};
-  const bonusMessages = [];
+  // Calculate bonuses using BonusManager
+  const bonusMessages = getReceivedBonuses(actor);
   
-  for (const giverId in receivedBonuses) {
-    const bonus = receivedBonuses[giverId];
-    const giverActor = game.actors.get(giverId);
-    if (giverActor) {
-      bonusMessages.push({
-        type: bonus.type,
-        amount: bonus.amount,
-        giverName: giverActor.name
-      });
-    }
-  }
-  
-  const activeBonuses = Object.values(receivedBonuses);
-  const helpBonuses = activeBonuses.filter(bonus => bonus.type === 'help')
-      .reduce((sum, bonus) => sum + bonus.amount, 0);
-  const hurtBonuses = activeBonuses.filter(bonus => bonus.type === 'hurt')
-      .reduce((sum, bonus) => sum + bonus.amount, 0);
-  const totalBonus = helpBonuses - hurtBonuses;
+  // Get the help and hurt totals
+  const totalBonus = BonusManager.calculateTotalBonus(actor.id);
   
   // Calculate NPC influences
   const npcInfluences = getNpcInfluences();
@@ -307,8 +290,8 @@ async function rollMove(moveName) {
     }
   });
 
-  // Clean up
-  await actor.unsetFlag('mist-hud', 'received-bonuses');
+  // Clean up bonuses
+  await BonusManager.clearAllBonuses(actor.id);
   hud.render(true);
   
   // Use tagsData for burning crispy tags
@@ -344,28 +327,20 @@ async function rollBurnForHitCityOfMist(moveName) {
   // IMPORTANT: Get all the roll data ONCE at the beginning
   const tagsData = hud.getSelectedRollData();
 
-  // Calculate bonuses
-  const receivedBonuses = actor.getFlag('mist-hud', 'received-bonuses') || {};
-  const bonusMessages = [];
+
   
-  for (const giverId in receivedBonuses) {
-    const bonus = receivedBonuses[giverId];
-    const giverActor = game.actors.get(giverId);
-    if (giverActor) {
-      bonusMessages.push({
-        type: bonus.type,
-        amount: bonus.amount,
-        giverName: giverActor.name
-      });
-    }
-  }
-  
-  const activeBonuses = Object.values(receivedBonuses);
-  const helpBonuses = activeBonuses.filter(bonus => bonus.type === 'help')
-      .reduce((sum, bonus) => sum + bonus.amount, 0);
-  const hurtBonuses = activeBonuses.filter(bonus => bonus.type === 'hurt')
-      .reduce((sum, bonus) => sum + bonus.amount, 0);
-  const totalBonus = helpBonuses - hurtBonuses;
+  // const activeBonuses = Object.values(receivedBonuses);
+  // const helpBonuses = activeBonuses.filter(bonus => bonus.type === 'help')
+  //     .reduce((sum, bonus) => sum + bonus.amount, 0);
+  // const hurtBonuses = activeBonuses.filter(bonus => bonus.type === 'hurt')
+  //     .reduce((sum, bonus) => sum + bonus.amount, 0);
+  // const totalBonus = helpBonuses - hurtBonuses;
+
+  // Calculate bonuses using BonusManager
+  const bonusMessages = getReceivedBonuses(actor);
+
+  // Get the help and hurt totals
+  const totalBonus = BonusManager.calculateTotalBonus(actor.id);
 
   // Calculate NPC influences
   const npcInfluences = getNpcInfluences();
@@ -412,15 +387,7 @@ async function rollBurnForHitCityOfMist(moveName) {
   }
   
   // Detailed logging
-  console.log("Burn-for-hit roll components:");
-  console.log(`- Fixed roll: ${fixedRoll}`);
-  console.log(`- Burn base power: ${burnBasePower}`);
-  console.log(`- Character statuses: ${totalCharStatuses}`);
-  console.log(`- Scene statuses: ${totalSceneStatuses}`);
-  console.log(`- Scene tags: ${totalScnTags}`);
   console.log(`- Bonus: ${totalBonus}`);
-  console.log(`- Modifier: ${modifier}`);
-  console.log(`- Total NPC influence: ${totalNpcInfluence}`);
   console.log(`Final roll total: ${finalTotal}`);
 
   // Check for dynamite conditions
@@ -518,8 +485,8 @@ async function rollBurnForHitCityOfMist(moveName) {
     }
   });
 
-  // Clean up
-  await actor.unsetFlag('mist-hud', 'received-bonuses');
+  // Clean up bonuses
+  await BonusManager.clearAllBonuses(actor.id);
   hud.render(true);
   
   // Use tagsData for burning crispy tags
@@ -752,6 +719,8 @@ export async function rollSpecialMoves(moveName, hud) {
     }
   });
 
+  await BonusManager.clearAllBonuses(actor.id);
+
   // Clean up
   await burnCrispyTags(tagsData.powerTags);
   await burnCrispyTags(tagsData.crewPowerTags);
@@ -845,6 +814,7 @@ async function rollCinematicMove(moveName, hud) {
     }
   });
 
+  await BonusManager.clearAllBonuses(actor.id);
   hud.cleanHUD(tagsData);
 }
 
