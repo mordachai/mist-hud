@@ -522,28 +522,26 @@ export class MistHUD extends Application {
       this.calculateTotalPower();
     });      
 
+
     html.find('.help-toggle, .hurt-toggle').on('change', async (event) => {
       const toggle = event.currentTarget;
       const isChecked = toggle.checked;
       const targetActorId = toggle.dataset.targetId;
       const bonusType = toggle.classList.contains('help-toggle') ? 'help' : 'hurt';
       const amount = Number(toggle.dataset.amount);
-    
-      // Use the explicit actor ID from the element if available, otherwise use the HUD's actor
+
+      // Get the actor giving the bonus
       const giverActorId = toggle.dataset.actorId || this.actor?.id;
-      if (!giverActorId) {
-        ui.notifications.warn("Cannot determine which character is giving the bonus");
-        toggle.checked = !isChecked; // Revert toggle state
+      
+      if (!giverActorId || !targetActorId) {
+        // If we're missing required IDs, revert the toggle and show a warning
+        if (!giverActorId) ui.notifications.warn("Cannot determine which character is giving the bonus");
+        if (!targetActorId) ui.notifications.warn("Cannot determine which character should receive the bonus");
+        toggle.checked = !isChecked;
         return;
       }
-    
-      if (!targetActorId) {
-        ui.notifications.warn("Cannot determine which character should receive the bonus");
-        toggle.checked = !isChecked; // Revert toggle state
-        return;
-      }
-    
-      // Use BonusManager to apply the bonus
+
+      // Use BonusManager to handle the bonus change
       await BonusManager.applyBonus(giverActorId, targetActorId, bonusType, amount, isChecked);
     });
 
