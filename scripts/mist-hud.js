@@ -20,6 +20,7 @@ import {
   getEssence, 
   getLoadoutTags,
 } from './mh-getters.js';
+import { BonusManager } from "./bonus-utils.js";
 import { getReceivedBonuses } from "./bonus-utils.js";
 import { NPCInfluenceManager, openNPCInfluenceManager } from './npc-influence-manager.js';
 
@@ -126,34 +127,6 @@ async function handleTagClick(event, tagType, hudInstance) {
   hudInstance.calculateTotalPower();
 }
 
-// function toggleInversion(tagElement, inversionIconConfig, hudInstance) {
-//   // Toggle the 'inverted' class on the tag element
-//   tagElement.toggleClass('inverted');
-  
-//   // Get the current state AFTER toggling
-//   const isInverted = tagElement.hasClass('inverted');
-  
-//   // Set the appropriate icon based on the current state
-//   const inversionIcon = isInverted 
-//     ? inversionIconConfig.inverted  // Show down arrow when inverted (negative)
-//     : inversionIconConfig.default;  // Show up arrow when not inverted (positive)
-  
-//   tagElement.find(inversionIconConfig.selector).html(inversionIcon);
-  
-//   // Recalculate power after the state change
-//   hudInstance.calculateTotalPower();
-  
-//   // If we need to update the backend item, we should do it here
-//   // This depends on your implementation of how tag data is stored
-//   const tagId = tagElement.data('id');
-//   if (tagId) {
-//     const tag = hudInstance.actor.items.get(tagId);
-//     if (tag) {
-//       tag.update({ 'system.isInverted': isInverted });
-//     }
-//   }
-// }
-
 function toggleInversion(tagElement, inversionIconConfig, hudInstance) {
   // Toggle the 'inverted' class on the tag element
   tagElement.toggleClass('inverted');
@@ -194,43 +167,10 @@ Hooks.once('ready', () => {
   // Initialize global cache for NPC influences
   globalThis.activeNpcInfluences = {};
   
-  // Set up socket listener (only once)
+  // Set up socket listener for NPC influence only (bonuses are now handled by BonusManager)
   game.socket.on("module.mist-hud", async data => {
-    // Handle help/hurt bonuses
-    if (data.type === "notify-bonus") {
-      const targetActor = game.actors.get(data.targetId);
-      if (targetActor && targetActor.isOwner) {
-        const currentBonuses = targetActor.getFlag('mist-hud', 'received-bonuses') || {};
-        if (data.active) {
-          currentBonuses[data.giverId] = { type: data.bonusType, amount: data.amount };
-        } else {
-          delete currentBonuses[data.giverId];
-        }
-        await targetActor.setFlag('mist-hud', 'received-bonuses', currentBonuses);
-        
-        // Find the HUD for this actor from the registry
-        const targetHud = playerHudRegistry.get(targetActor.id);
-        if (targetHud) {
-          targetHud.render(true);
-        }
-      } else {
-        console.warn("Not the owner of the target actor; skipping flag update.");
-      }
-    } 
-    // Handle bonus use notification
-    else if (data.type === "notify-use") {
-      // Check if the current client controls the giver's actor.
-      const giverActor = game.actors.get(data.actorId);
-      if (giverActor && giverActor.isOwner) {
-        const checkboxClass = data.bonusType === "help" ? ".help-toggle" : ".hurt-toggle";
-        const checkboxSelector = `${checkboxClass}[data-actor-id="${data.actorId}"][data-target-id="${data.targetId}"]`;
-        document.querySelectorAll(checkboxSelector).forEach(checkbox => {
-          checkbox.checked = false;
-        });
-      }
-    } 
     // Handle NPC influence data
-    else if (data.type === "npcInfluence") {
+    if (data.type === "npcInfluence") {
       const influenceData = data.data;
       
       // Store in the global cache with the NPC ID as the key
@@ -243,9 +183,6 @@ Hooks.once('ready', () => {
   
   console.log("Mist HUD socket listeners initialized");
 });
-
-
-
 export class MistHUD extends Application {
   static instance = null;
 
@@ -585,38 +522,27 @@ export class MistHUD extends Application {
       this.calculateTotalPower();
     });      
 
-    html.find('.help-toggle, .hurt-toggle').on('change', async (event) => {
+    html.find('.help-toggle, .hurt-toggle').on('change', function(event) {
       const toggle = event.currentTarget;
       const isChecked = toggle.checked;
       const targetActorId = toggle.dataset.targetId;
       const bonusType = toggle.classList.contains('help-toggle') ? 'help' : 'hurt';
       const amount = Number(toggle.dataset.amount);
-    
-      // Get the actor for the current player
-      let actor = game.user.character;
-      if (!actor) {
-        const ownedCharacters = game.actors.filter(a => a.isOwner && a.type === "character");
-        actor = ownedCharacters.length > 0 ? ownedCharacters[0] : null;
-      }
-      const actorId = actor?.id;
-    
-      if (!actorId) {
-        console.warn(`[Help/Hurt Debug] No actor linked to the giving player.`);
+
+      // Get the actor giving the bonus
+      const giverActorId = toggle.dataset.actorId || this.actor?.id;
+      
+      if (!giverActorId || !targetActorId) {
+        // If we're missing required IDs, revert the toggle and show a warning
+        if (!giverActorId) ui.notifications.warn("Cannot determine which character is giving the bonus");
+        if (!targetActorId) ui.notifications.warn("Cannot determine which character should receive the bonus");
+        toggle.checked = !isChecked;
         return;
       }
-    
-      // Include the SENDER's HUD ID so the recipient knows where to send updates
-      game.socket.emit('module.mist-hud', {
-        type: 'notify-bonus',
-        targetId: targetActorId,
-        giverId: actorId,
-        bonusType,
-        amount,
-        active: isChecked,
-        hudId: this.id
-      });
+
+      // Use BonusManager to handle the bonus change
+      BonusManager.applyBonus(giverActorId, targetActorId, bonusType, amount, isChecked);
     });
-  
 
     // Add listener for clue creation and deletion deletion
     html.find('.clue-delete').on("click", this._deleteClueFromHUD.bind(this));

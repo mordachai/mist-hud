@@ -59,7 +59,17 @@ Clicking on the Tracked Outcomes (Otherscape) displays suggested tags.
 
 ### Help & Hurt (City of Mist only)
 
-WIP
+On the side panel use the **Help & Hurt** section to provide the bonus modifier to your crew members. The arrow direction helps to remind if its a positive (help) or negative (hurt) modifier. You must create the item on the character sheet.
+
+When one of your companions is giving you the bonus it appears on the bottom of the HUD, hover over the image to see the name.
+
+_In Otherscape: Relationships of the crew members are done with **Story Tags**, you need to inform the player and he/she can apply the appropriate modifier using the +/- buttons at the bottom of the HUD._
+
+### Improvements and Automatic Attention/Upgrades
+
+When you roll using a weakness tag it automatcally register one point of attention/upgrade. Mouse over the themebook icon to check your current points (only informative).
+
+When you gain a improvement a start appears on the themebook title, open the character sheet to update your Rift (flip the themebook to locate it).
 
 ### NPC's HUD: Easy Control for the MC
 

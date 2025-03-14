@@ -116,10 +116,7 @@
   align-items: center;
 }
 
-.mh-power-tag.Mythos.selected,
-.mh-story-tag.Mythos.selected,
-.mh-loadout-tag.Mythos.selected,
-.mh-weakness-tag.Mythos.inverted.selected {
+.mh-power-tag.Mythos.selected {
   background: url('../ui/select-bar-com-Mythos.webp');
   background-size: 90% 95%;
   background-repeat: no-repeat;
@@ -128,16 +125,34 @@
   text-shadow: 0 0 1px #ffe8fc;
 }
 
-.mh-power-tag.Logos.selected,
-.mh-story-tag.Logos.selected,
-.mh-loadout-tag.Logos.selected,
-.mh-weakness-tag.Logos.inverted.selected {
+.mh-power-tag.Logos.selected {
   background: url('../ui/select-bar-com-Logos.webp');
   background-size: 90% 95%;
   background-repeat: no-repeat;
   background-position: center left 14px;
   color: white;
   text-shadow: 0 0 1px #3a1f0e;
+}
+
+.mh-power-tag.Mist.selected {
+  background: url('../ui/select-bar-com-Mist.webp');
+  background-size: 90% 95%;
+  background-repeat: no-repeat;
+  background-position: center left 14px;
+  color: white;
+  text-shadow: 0 0 1px #ffe8fc;
+}
+
+.mh-power-tag.Crew.selected,
+.mh-story-tag.selected,
+.mh-loadout-tag.selected,
+.mh-weakness-tag.inverted.selected  {
+  background: url('../ui/select-bar-com-Crew.webp');
+  background-size: 90% 95%;
+  background-repeat: no-repeat;
+  background-position: center left 14px;
+  color: white;
+  text-shadow: 0 0 1px #bdbcbc;
 }
 
 .mh-weakness-tag.selected,
