@@ -58,6 +58,10 @@ OR
 
 Once installed and activated, the HUD will automatically appear when a character token is selected **(right-click for NPCs)**.
 
+Choose your game in the City of Mist game settings: _City of Mist_ or _Otherscape_. Legends in the Mist is not supported by the HUD (yet).
+
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/selectSystem.png)
+
 ### Character's HUD: Tags! Statuses! Roll!
 
 1. Select your character token.
@@ -80,6 +84,19 @@ Roll results, outcomes, and move effects will be displayed on the chat. Clicking
 Clicking on the Tracked Outcomes (Otherscape) displays suggested tags.
 
 ![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/rollAccordion.png)
+
+### Burning Tags
+
+You can select tags to burn before you roll. Click on the burn icon, select other tags or statuses if needed and roll. The roll message in the chat will display the tags that were burned and the HUD will update the tags to the burned state.
+
+City of Mist: Burn to Hit >> only one "to burn" tag is counted
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/rollAccordion.png)
+
+Otherscape: Burn for Power >> multiple "to burn" tags are counted
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/rollAccordion.png)
+
+Click on the burn icon to toggle between the states: unburned, to burn and burned. A burned tag cannot be selected until you restore the state to unburned.
+
 
 ### Help & Hurt (City of Mist only)
 
