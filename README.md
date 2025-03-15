@@ -62,7 +62,7 @@ Choose your game in the City of Mist game settings: _City of Mist_ or _Otherscap
 
 ![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/selectSystem.png)
 
-### Character's HUD: Tags! Statuses! Roll!
+## Character's HUD: Tags! Statuses! Roll!
 
 1. Select your character token.
 2. Choose TAGS (Power, Weakness, Story, Loadout) from the HUD. SCENE story tags and statuses can be used, select them normally.
