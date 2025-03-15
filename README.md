@@ -116,7 +116,7 @@ When you roll using a weakness tag the hud automatically registers one point of 
 
 When you gain an improvement a star appears on the themebook title. Open the character sheet to update your Rift (flip the themebook to locate it).
 
-### NPC's HUD: Easy Control for the MC
+## NPC's HUD: Easy Control for the MC
 
 **RIGHT-CLICK** on any Danger/Threat token to bring their HUD up.
 
