@@ -122,6 +122,8 @@ When you gain an improvement a star appears on the themebook title. Open the cha
 
 If there is any  Description / Biography for your Danger you can click the title to reveal the text. If there isn't, this title section is hidden to save space.
 
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/npcHUDs.png)
+
 The plus signs on the Tags & Statuses section create new items for each one.
 Tags have 4 states: neutral, negative, positive, burned
 Statuses have 3 states: neutral, negative, and positive
@@ -131,6 +133,12 @@ Clicking on them toggle their states. **Positive and negative states affect the 
 **Delete any tag or status by Right Click** on them. There is no confirmation dialog or undo option, create a new one to replace wrongfully deleted ones. (Hey, fast paced has a price...)
 
 **Edit any tag or status by Double Click** on them.
+
+### Collective Size / Scale
+
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/scale.png)
+
+Click on the bar to set the Collective Size / Scale of the Dangers/Threats. Clicking on the label to zero it. The value will be added automatically to all statuses inflicted by this npc.
 
 ### Otherscape Threat Moves How to:
 
