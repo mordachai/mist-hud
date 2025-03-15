@@ -79,7 +79,7 @@ Roll results, outcomes, and move effects will be displayed on the chat. Clicking
 
 Clicking on the Tracked Outcomes (Otherscape) displays suggested tags.
 
-![image](https://github.com/user-attachments/assets/6d5bfdec-84f9-4320-b73c-6196ff38c30b)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/rollAccordion.png)
 
 ### Help & Hurt (City of Mist only)
 
