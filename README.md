@@ -2,7 +2,7 @@
 
 # Mist Engine HUD
 
-**Mist Engine HUD:** is a simple always-open, never-in-the-way HUD for _City of Mist_ and _Otherscape_ game systems made [by Taragnor for Foundry](https://foundryvtt.com/packages/city-of-mist). It allows players to quickly select tags and statuses and do the Moves rolls, with no questions or menus to answer. Just select what you need and roll using the Moves in the Hotbar. Fast and streamlined like any _action-packed game_ should be! ([this module completely replaces the CoM Character HUD](https://github.com/mordachai/com-hud)).
+**Mist Engine HUD:** is a simple always-open, never-in-the-way HUD for _City of Mist_ and _Otherscape_ game systems made [by Taragnor for Foundry](https://foundryvtt.com/packages/city-of-mist). It allows players to quickly select tags and statuses and do the Moves rolls, with no questions or menus to answer. Just select what you need and roll using the Moves in the Hotbar. Fast and streamlined like any _action-packed game_ should be! (this module completely replaces the CoM Character HUD, you can uninstall it).
 
 ![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/pcsHUDs.png)
 
@@ -58,7 +58,11 @@ OR
 
 Once installed and activated, the HUD will automatically appear when a character token is selected **(right-click for NPCs)**.
 
-### Character's HUD: Tags! Statuses! Roll!
+Choose your game in the City of Mist game settings: _City of Mist_ or _Otherscape_. Legends in the Mist is not supported by the HUD (yet).
+
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/selectSystem.png)
+
+## Character's HUD: Tags! Statuses! Roll!
 
 1. Select your character token.
 2. Choose TAGS (Power, Weakness, Story, Loadout) from the HUD. SCENE story tags and statuses can be used, select them normally.
@@ -81,6 +85,19 @@ Clicking on the Tracked Outcomes (Otherscape) displays suggested tags.
 
 ![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/rollAccordion.png)
 
+### Burning Tags
+
+You can select tags to burn before you roll. Click on the burn icon, select other tags or statuses if needed and roll. The roll message in the chat will display the tags that were burned and the HUD will update the tags to the burned state.
+
+City of Mist: Burn to Hit >> only one "to burn" tag is counted
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/burnCoM.png)
+
+Otherscape: Burn for Power >> multiple "to burn" tags are counted
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/burnOS.png)
+
+Click on the burn icon to toggle between the states: unburned, to burn and burned. A burned tag cannot be selected until you restore the state to unburned.
+
+
 ### Help & Hurt (City of Mist only)
 
 On the side panel, use the **Help & Hurt** section to give the bonus modifier to your crew members. The arrow direction helps you remember if it's a positive (help) or negative (hurt) modifier. You must create the item on the character sheet.
@@ -99,11 +116,13 @@ When you roll using a weakness tag the hud automatically registers one point of 
 
 When you gain an improvement a star appears on the themebook title. Open the character sheet to update your Rift (flip the themebook to locate it).
 
-### NPC's HUD: Easy Control for the MC
+## NPC's HUD: Easy Control for the MC
 
 **RIGHT-CLICK** on any Danger/Threat token to bring their HUD up.
 
 If there is any  Description / Biography for your Danger you can click the title to reveal the text. If there isn't, this title section is hidden to save space.
+
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/npcHUDs.png)
 
 The plus signs on the Tags & Statuses section create new items for each one.
 Tags have 4 states: neutral, negative, positive, burned
@@ -114,6 +133,12 @@ Clicking on them toggle their states. **Positive and negative states affect the 
 **Delete any tag or status by Right Click** on them. There is no confirmation dialog or undo option, create a new one to replace wrongfully deleted ones. (Hey, fast paced has a price...)
 
 **Edit any tag or status by Double Click** on them.
+
+### Collective Size / Scale
+
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/scale.png)
+
+Click on the bar to set the Collective Size / Scale of the Dangers/Threats. Clicking on the label to zero it. The value will be added automatically to all statuses inflicted by this npc.
 
 ### Otherscape Threat Moves How to:
 
@@ -162,6 +187,7 @@ In the Mist HUD settings, you can:
 
 - set the initial state of accordion menus (open or closed)
 - activate game-like notifications of dropped tags/statuses
+- Choose between using hotbar macros or side buttons for rolls
 - Choose between using hotbar macros or side buttons for rolls
 - choose if the moves roll buttons should be displayed as text (good if you're using other language than English)
 - determine if your Statuses List displays as divided categories or all in one page
