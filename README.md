@@ -4,33 +4,33 @@
 
 **Mist Engine HUD:** is a simple always-open, never-in-the-way HUD for _City of Mist_ and _Otherscape_ game systems made [by Taragnor for Foundry](https://foundryvtt.com/packages/city-of-mist). It allows players to quickly select tags and statuses and do the Moves rolls, with no questions or menus to answer. Just select what you need and roll using the Moves in the Hotbar. Fast and streamlined like any _action-packed game_ should be! ([this module completely replaces the CoM Character HUD](https://github.com/mordachai/com-hud)).
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/pcsHUDs.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/pcsHUDs.png)
 
 ## Features
 
 **Always-visible HUD**: Provides quick access to theme tags and statuses. You only have to select a PC token
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/OSScreen.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/OSScreen.png)
 
 **Danger/Threats HUD**: Keep the enemies close and at hand. Right-click on any Danger/Threat token to call the HUD
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/npcHUDs.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/npcHUDs.png)
 
 **Statuses and Tags Dragn'Drop**: you can drag statuses and story tags over the tokens to assign them.
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/droppedStatus.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/droppedStatus.png)
 
 **Four Awesome Dice Sets**: the characteristic modified D6 to a D12 with faces from one to six. One set for _City of Mist_ and three sets for _Otherscape_: Noise, Mythos, and Self
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/dice.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/dice.png)
 
 **Quick Roll**: Roll by selecting tags and clicking on the moves button. No questions asked!
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/CoMScreen.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/CoMScreen.png)
 
 **Draggable**: Drag it around, see your game while playing it! Double-click the header to minimize it.
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/minimized.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/minimized.png)
 
 ### Other features (see pics along the text below)
 
@@ -71,21 +71,21 @@ Once installed and activated, the HUD will automatically appear when a character
 
 4. Click the corresponding move button on the left side of the HUD. There are moves for City of Mist and Otherscape available, depending on the selected system in the City of Mist game settings.
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/osTags.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/osTags.png)
 
 Roll results, outcomes, and move effects will be displayed on the chat. Clicking on the modifiers below the dice results shows the tags and statuses that were used. Each icon represents a type of modifier:
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/rollSubtitles.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/rollSubtitles.png)
 
 Clicking on the Tracked Outcomes (Otherscape) displays suggested tags.
 
-![image](https://github.com/user-attachments/assets/6d5bfdec-84f9-4320-b73c-6196ff38c30b)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/rollAccordion.png)
 
 ### Help & Hurt (City of Mist only)
 
 On the side panel, use the **Help & Hurt** section to give the bonus modifier to your crew members. The arrow direction helps you remember if it's a positive (help) or negative (hurt) modifier. You must create the item on the character sheet.
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/helpHurt.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/helpHurt.png)
 
 When one of your companions gives you the bonus it appears on the bottom of the HUD, hover over the image to see the name.
 
@@ -95,7 +95,7 @@ _In Otherscape: Relationships of the crew members are done with **Story Tags**, 
 
 When you roll using a weakness tag the hud automatically registers one point of Attention/Upgrade. Mouse over the themebook icon to check your current points (only informative).
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/improvements.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/improvements.png)
 
 When you gain an improvement a star appears on the themebook title. Open the character sheet to update your Rift (flip the themebook to locate it).
 
@@ -119,14 +119,14 @@ Clicking on them toggle their states. **Positive and negative states affect the 
 
 Choosing the right type of moves in your Danger sheet will present them with the correct format when the active system is Otherscape. Check below:
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/osMovesSystem.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/osMovesSystem.png)
 
 - **Limits:** Intrusions >> the battery icon will be added automatically
 - **Specials:** Hard Moves >> don't forget the move name
 - **Threats:** Soft Moves >> Hide Move Name, Move Header = Symbols
 - **Consequences:** Soft Move submove (click on the + inside the parent Soft Move/Threat) >> Hide Move Name, Move Header = Symbols
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/OsMoves.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/OsMoves.png)
 
 _City of Mist Dangers doesn't require any special formatting._
 
@@ -134,7 +134,7 @@ _City of Mist Dangers doesn't require any special formatting._
 
 There is a list statuses organized by categories. Click on the List button on the Token Controls to activate it. You can drag and drop the statuses from the list on any token to assign it to it.
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/statusList.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/statusList.png)
 
 If you want to create your own list of statuses, you can click on the **Get Sample** button to export an example CSV (Comma Separated Values). Fill it with your own data, save it, and import the CSV using the **Import CSV button**, this will replace the default list. Remember that you need to keep the first line, or header, as is: 
 
@@ -146,7 +146,7 @@ If you want to go back to the default list use the **Reset** button.
 
 Clicking on the skull icon in the Token Controls displays the NPC Influence Viewer. It displays the total value of the current influence of your Dangers/Threats over the PCs rolls. There are two tabs: one displays only NPCs influencing the scene and the other displays all the NPCs on the scene.
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/npcInfluence.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/npcInfluence.png)
 
 - Token tag: means the NPC is not sharing data with the other instances (Link Actor Data is off)
 - Scale tag: shows the current Collective size / Scale of the threat.
@@ -156,19 +156,19 @@ If for any reason the player's rolls are not using the correct value click on **
 
 ## Settings
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/settings.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/settings.png)
 
 In the Mist HUD settings, you can:
 
 - set the initial state of accordion menus (open or closed)
 - activate game-like notifications of dropped tags/statuses
-- choose between use hotbar macros instead of side buttons for rolls
+- Choose between using hotbar macros or side buttons for rolls
 - choose if the moves roll buttons should be displayed as text (good if you're using other language than English)
 - determine if your Statuses List displays as divided categories or all in one page
 
 ## Compendiums
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/compendium.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/compendium.png)
 
 Drag and drop them on your hotbar if you want or just execute them from the compendiums. The _Load Moves for All_ and _Set Macros Ownership_ allow the MC to fast assign the macros to the players if you opt to roll using the hotbar instead of the side buttons in the module settings. 
  
@@ -178,7 +178,7 @@ If your next roll can be Dynamite, click first on the _Is Dynamite!_ button then
 
 Now, if one of the Rifts movements is always Dynamite the MC can toggle this by using the **Dynamite Move Control Panel** macro in the compendiums.
 
-![](https://github.com/mordachai/mist-hud/raw/dev/external_files/dynamitePanel.png)
+![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/dynamitePanel.png)
 
 ## Known Issues
 
