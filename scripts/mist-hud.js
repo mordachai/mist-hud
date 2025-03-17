@@ -832,49 +832,47 @@ export class MistHUD extends Application {
     const selectedTags = this.actor.getFlag('mist-hud', 'selected-tags') || [];
     const selectedCrewTags = this.actor.getFlag('mist-hud', 'selected-crew-tags') || [];
   
-    // Use the imported getters:
     const themesAndTags = getThemesAndTags(this.actor);
-  
+
     themesAndTags.themes = themesAndTags.themes.map(theme => {
-      if (theme.powerTags && Array.isArray(theme.powerTags)) {
-        theme.powerTags = theme.powerTags.map(tag => ({
+      // Make sure nascent property is passed to the template
+      const nascent = theme.system?.nascent || false;
+      
+      return {
+        ...theme,
+        nascent: nascent,  // Add this property explicitly for the template
+        powerTags: theme.powerTags?.map(tag => ({
           ...tag,
           selected: selectedTags.includes(tag.id)
-        }));
-      }
-      if (theme.weaknessTags && Array.isArray(theme.weaknessTags)) {
-        // Get the current inverted tags from flags
-        const invertedTags = this.actor.getFlag('mist-hud', 'inverted-tags') || {};
-        
-        theme.weaknessTags = theme.weaknessTags.map(tag => {
+        })),
+        weaknessTags: theme.weaknessTags?.map(tag => {
+          const invertedTags = this.actor.getFlag('mist-hud', 'inverted-tags') || {};
           return {
             ...tag,
             selected: selectedTags.includes(tag.id),
-            inverted: !!invertedTags[tag.id] // Use the flag to determine inverted state
+            inverted: !!invertedTags[tag.id]
           };
-        });
-      }
-      return theme;
+        })
+      };
     });
-
-    // Apply the selected state to the crew themes separately
+  
     data.crewThemes = themesAndTags.crewThemes.map(crewTheme => {
-      if (crewTheme.powerTags) {
-          crewTheme.powerTags = crewTheme.powerTags.map(tag => ({
-              ...tag,
-              selected: selectedCrewTags.some(ct => ct.id === tag.id),
-              crispy: tag.crispy
-          }));
-      }
-      if (crewTheme.weaknessTags) {
-          crewTheme.weaknessTags = crewTheme.weaknessTags.map(tag => ({
-              ...tag,
-              selected: selectedCrewTags.some(ct => ct.id === tag.id)
-          }));
-      }
-      return crewTheme;
-    });
-    
+      const nascent = crewTheme.system?.nascent || false;
+      
+      return {
+        ...crewTheme,
+        nascent: nascent,  // Add the nascent property here too
+        powerTags: crewTheme.powerTags?.map(tag => ({
+          ...tag,
+          selected: selectedCrewTags.some(ct => ct.id === tag.id),
+          crispy: tag.crispy
+        })),
+        weaknessTags: crewTheme.weaknessTags?.map(tag => ({
+          ...tag,
+          selected: selectedCrewTags.some(ct => ct.id === tag.id)
+        }))
+      };
+    });    
   
     // Update story tags to include the selected property:
     themesAndTags.storyTags = themesAndTags.storyTags.map(tag => {
