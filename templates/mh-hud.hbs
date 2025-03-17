@@ -14,30 +14,40 @@
 
       {{!-- Themes, Tags, Crew Themes, Loadout, Story Tags, Statuses, etc. --}}
       {{#each themes}}
-        <div class="theme-container-{{category}}">
-          <div class="mh-theme-header {{category}}">
-            <span class="{{iconClass}}" data-theme-id="{{id}}"></span>
-            {{#if (eq ../activeSystem "city-of-mist")}}
-            <span class="mh-theme-name mh-theme-name-com-{{category}}">{{themeName}}</span>
-            {{#if unspent_upgrades}}
-            <span class="mh-improvement-marker {{category}}">
-            {{#times unspent_upgrades}}<i class="fa-light fa-star"></i>{{/times}}
+      <div class="theme-container-{{category}}">
+        
+        <div class="mh-theme-header {{category}}">
+          <span class="{{iconClass}}" data-theme-id="{{id}}" data-theme-type="{{category}}"></span>
+          {{#if (eq ../activeSystem "city-of-mist")}}
+          <span class="mh-theme-name mh-theme-name-com-{{category}}">{{themeName}}</span>
+          {{#if unspent_upgrades}}
+          <span class="mh-improvement-marker {{category}}">
+            {{#if nascent}}
+              <i class="fa-solid fa-bolt nascent-upgrade-indicator" title="Nascent theme with available power tag!"></i>
+            {{else}}
+              {{#times unspent_upgrades}}<i class="fa-light fa-star"></i>{{/times}}
             {{/if}}
-            </span>
-            {{/if}}
+          </span>
+          {{/if}}
+          {{/if}}
 
-            {{#if (eq ../activeSystem "otherscape")}}
-              <span class="mh-theme-name mh-theme-name-com-{{category}}">
-                {{localizedThemebookName}}{{themeInfo.locale_name}}{{#if unspent_upgrades}}
-                  <span class="mh-improvement-marker {{category}}">
+          {{#if (eq ../activeSystem "otherscape")}}
+            <span class="mh-theme-name mh-theme-name-com-{{category}}">
+              {{localizedThemebookName}}{{themeInfo.locale_name}}
+              {{#if unspent_upgrades}}
+                <span class="mh-improvement-marker {{category}}">
+                  {{#if nascent}}
+                    <i class="fa-solid fa-bolt nascent-upgrade-indicator" title="Nascent theme with available power tag!"></i>
+                  {{else}}
                     {{#times unspent_upgrades}}
                       <i class="fa-light fa-star"></i>
                     {{/times}}
-                  </span>
-                {{/if}}
-              </span>
-            {{/if}}
-          </div>
+                  {{/if}}
+                </span>
+              {{/if}}
+            </span>
+          {{/if}}
+        </div>
 
           <!-- Power Tags -->
           <ul class="mh-tags">
@@ -81,7 +91,7 @@
             </li>
             {{/each}}
           </ul>
-        </div>
+      </div>
       {{/each}}    
 
       <!-- LOADOUT Section -->

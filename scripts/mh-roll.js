@@ -1202,44 +1202,75 @@ async function trackWeaknessAttention(actor, weaknessTags) {
   const allWeaknessTags = actor.items.filter(item => item.type === "tag" && item.system.subtype === "weakness");
 
   for (const theme of themes) {
+    // Find weakness tags that belong to this theme
+    const themeWeaknessTags = allWeaknessTags.filter(tag => tag.system.theme_id === theme._id);
 
-      // Find weakness tags that belong to this theme
-      const themeWeaknessTags = allWeaknessTags.filter(tag => tag.system.theme_id === theme._id);
-
-      for (const weaknessTag of weaknessTags) {
-
-          if (themeWeaknessTags.some(tag => tag.name === weaknessTag.tagName) && weaknessTag.stateClass !== "inverted") {
-              let attention = Array.isArray(theme.system.attention) ? [...theme.system.attention] : [0, 0, 0];
-              let unspentUpgrades = theme.system.unspent_upgrades || 0;
-
-              let updated = false;
-
-              // ✅ Find the first empty attention slot (0) and set it to 1
-              for (let i = 0; i < attention.length; i++) {
-                  if (attention[i] === 0) {
-                      attention[i] = 1;
-                      updated = true;
-                      break;
-                  }
-              }
-
-              // ✅ If all slots are filled, reset attention and increase `unspent_upgrades`
-              if (attention.every(a => a === 1)) {
-                  attention = [0, 0, 0]; // Reset attention
-                  unspentUpgrades += 1;
-              }
-
-              // ✅ Force Foundry to recognize the update
-              await theme.update({
-                  [`system.attention`]: attention,
-                  [`system.unspent_upgrades`]: unspentUpgrades
-              });
-
-              const updatedTheme = theme.toObject();
-
-              return;
+    for (const weaknessTag of weaknessTags) {
+      if (themeWeaknessTags.some(tag => tag.name === weaknessTag.tagName) && weaknessTag.stateClass !== "inverted") {
+        let attention = Array.isArray(theme.system.attention) ? [...theme.system.attention] : [0, 0, 0];
+        let unspentUpgrades = theme.system.unspent_upgrades || 0;
+        let nascent = theme.system.nascent || false;
+        let updated = false;
+        
+        // Check if this is the first time marking attention on a nascent theme
+        const wasFirstAttention = nascent && attention[0] === 0;
+        
+        // Save the old attention state to check if we completed the track
+        const oldAttention = [...attention];
+        
+        // Find the first empty attention slot (0) and set it to 1
+        for (let i = 0; i < attention.length; i++) {
+          if (attention[i] === 0) {
+            attention[i] = 1;
+            updated = true;
+            break;
           }
+        }
+        
+        // Check if we just completed the attention track
+        const wasAttentionCompleted = attention.every(a => a === 1) && 
+                                     !oldAttention.every(a => a === 1);
+        
+        // Different handling based on what happened:
+        
+        // Case 1: First time marking attention on a nascent theme
+        if (wasFirstAttention) {
+          // Add one power tag (as per the rule)
+          unspentUpgrades += 1;
+          ui.notifications.info(`${theme.name}: First attention granted a new power tag!`);
+        }
+        
+        // Case 2: Completed attention track on a nascent theme
+        if (wasAttentionCompleted && nascent) {
+          // Theme is no longer nascent
+          nascent = false;
+          // Add one power tag (as per the rule)
+          unspentUpgrades += 1;
+          // Reset attention track
+          attention = [0, 0, 0];
+          ui.notifications.info(`${theme.name}: Attention track completed! Gained a power tag and converted to standard theme.`);
+        }
+        // Case 3: Completed attention track on a standard theme
+        else if (wasAttentionCompleted && !nascent) {
+          // Reset attention track and add an upgrade
+          attention = [0, 0, 0];
+          unspentUpgrades += 1;
+          ui.notifications.info(`${theme.name}: Attention track completed! Gained an upgrade.`);
+        }
+
+        // Update the theme with the new values
+        await theme.update({
+          system: {
+            attention: attention,
+            unspent_upgrades: unspentUpgrades,
+            nascent: nascent
+          }
+        });
+
+        // Only process one valid weakness tag per theme to avoid multiple updates
+        break;
       }
+    }
   }
 }
 
@@ -1259,11 +1290,11 @@ async function trackWeaknessAttentionCrew(actor, weaknessTags) {
   for (const crewActor of ownedCrews) {
     // Get all theme items on this crew actor
     const themes = crewActor.items.filter(item => item.type === "theme");
-    // Get all weakness tags from this crew actor (assuming they have the same structure)
+    // Get all weakness tags from this crew actor
     const allWeaknessTags = crewActor.items.filter(item => item.type === "tag" && item.system.subtype === "weakness");
     
     for (const theme of themes) {
-      // Find weakness tags that belong to this theme (assuming the theme ID is stored in tag.system.theme_id)
+      // Find weakness tags that belong to this theme
       const themeWeaknessTags = allWeaknessTags.filter(tag => tag.system.theme_id === theme._id);
       
       // Iterate over the provided weaknessTags (from your roll, for example)
@@ -1273,9 +1304,16 @@ async function trackWeaknessAttentionCrew(actor, weaknessTags) {
           // Prepare a copy of the theme's attention array (or default to three slots)
           let attention = Array.isArray(theme.system.attention) ? [...theme.system.attention] : [0, 0, 0];
           let unspentUpgrades = theme.system.unspent_upgrades || 0;
-          let updated = false;
+          let nascent = theme.system.nascent || false;
+          
+          // Check if this is the first time marking attention on a nascent theme
+          const wasFirstAttention = nascent && attention[0] === 0;
+          
+          // Save the old attention state to check if we completed the track
+          const oldAttention = [...attention];
           
           // Find the first empty slot (0) and mark it as filled (1)
+          let updated = false;
           for (let i = 0; i < attention.length; i++) {
             if (attention[i] === 0) {
               attention[i] = 1;
@@ -1284,19 +1322,48 @@ async function trackWeaknessAttentionCrew(actor, weaknessTags) {
             }
           }
           
-          // If all attention slots are already filled, reset and add one upgrade point
-          if (attention.every(a => a === 1)) {
+          // Check if we just completed the attention track
+          const wasAttentionCompleted = attention.every(a => a === 1) && 
+                                       !oldAttention.every(a => a === 1);
+          
+          // Different handling based on what happened:
+          
+          // Case 1: First time marking attention on a nascent theme
+          if (wasFirstAttention) {
+            // Add one power tag (as per the rule)
+            unspentUpgrades += 1;
+            ui.notifications.info(`Crew ${theme.name}: First attention granted a new power tag!`);
+          }
+          
+          // Case 2: Completed attention track on a nascent theme
+          if (wasAttentionCompleted && nascent) {
+            // Theme is no longer nascent
+            nascent = false;
+            // Add one power tag (as per the rule)
+            unspentUpgrades += 1;
+            // Reset attention track
+            attention = [0, 0, 0];
+            ui.notifications.info(`Crew ${theme.name}: Attention track completed! Gained a power tag and converted to standard theme.`);
+          }
+          // Case 3: Completed attention track on a standard theme
+          else if (wasAttentionCompleted && !nascent) {
+            // Reset attention track and add an upgrade
             attention = [0, 0, 0];
             unspentUpgrades += 1;
+            ui.notifications.info(`Crew ${theme.name}: Attention track completed! Gained an upgrade.`);
           }
           
           // Update the theme on the crew actor
           await theme.update({
-            "system.attention": attention,
-            "system.unspent_upgrades": unspentUpgrades
+            system: {
+              attention: attention,
+              unspent_upgrades: unspentUpgrades,
+              nascent: nascent
+            }
           });
           
-          return;
+          // Only process one valid weakness tag per theme
+          break;
         }
       }
     }

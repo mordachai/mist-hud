@@ -832,49 +832,54 @@ export class MistHUD extends Application {
     const selectedTags = this.actor.getFlag('mist-hud', 'selected-tags') || [];
     const selectedCrewTags = this.actor.getFlag('mist-hud', 'selected-crew-tags') || [];
   
-    // Use the imported getters:
     const themesAndTags = getThemesAndTags(this.actor);
-  
+
     themesAndTags.themes = themesAndTags.themes.map(theme => {
-      if (theme.powerTags && Array.isArray(theme.powerTags)) {
-        theme.powerTags = theme.powerTags.map(tag => ({
+      // Get the actual theme item by ID to ensure we have the correct nascent property
+      const themeItem = this.actor.items.get(theme.id);
+      const isNascent = themeItem ? themeItem.system.nascent === true : false;
+      
+      return {
+        ...theme,
+        nascent: isNascent, // Add the nascent property directly to the theme object
+        unspent_upgrades: themeItem?.system?.unspent_upgrades || 0, // Make sure this is also correct
+        powerTags: theme.powerTags?.map(tag => ({
           ...tag,
           selected: selectedTags.includes(tag.id)
-        }));
-      }
-      if (theme.weaknessTags && Array.isArray(theme.weaknessTags)) {
-        // Get the current inverted tags from flags
-        const invertedTags = this.actor.getFlag('mist-hud', 'inverted-tags') || {};
-        
-        theme.weaknessTags = theme.weaknessTags.map(tag => {
+        })),
+        weaknessTags: theme.weaknessTags?.map(tag => {
+          const invertedTags = this.actor.getFlag('mist-hud', 'inverted-tags') || {};
           return {
             ...tag,
             selected: selectedTags.includes(tag.id),
-            inverted: !!invertedTags[tag.id] // Use the flag to determine inverted state
+            inverted: !!invertedTags[tag.id]
           };
-        });
-      }
-      return theme;
+        })
+      };
     });
-
-    // Apply the selected state to the crew themes separately
+  
+    // Do the same for crew themes
     data.crewThemes = themesAndTags.crewThemes.map(crewTheme => {
-      if (crewTheme.powerTags) {
-          crewTheme.powerTags = crewTheme.powerTags.map(tag => ({
-              ...tag,
-              selected: selectedCrewTags.some(ct => ct.id === tag.id),
-              crispy: tag.crispy
-          }));
-      }
-      if (crewTheme.weaknessTags) {
-          crewTheme.weaknessTags = crewTheme.weaknessTags.map(tag => ({
-              ...tag,
-              selected: selectedCrewTags.some(ct => ct.id === tag.id)
-          }));
-      }
-      return crewTheme;
-    });
-    
+      // Get the actual crew theme item
+      const crewActor = game.actors.get(crewTheme.actorId);
+      const crewThemeItem = crewActor ? crewActor.items.get(crewTheme.id) : null;
+      const isNascent = crewThemeItem ? crewThemeItem.system.nascent === true : false;
+      
+      return {
+        ...crewTheme,
+        nascent: isNascent, // Add the nascent property
+        unspent_upgrades: crewThemeItem?.system?.unspent_upgrades || 0, // Make sure unspent_upgrades is also correct
+        powerTags: crewTheme.powerTags?.map(tag => ({
+          ...tag,
+          selected: selectedCrewTags.some(ct => ct.id === tag.id),
+          crispy: tag.crispy
+        })),
+        weaknessTags: crewTheme.weaknessTags?.map(tag => ({
+          ...tag,
+          selected: selectedCrewTags.some(ct => ct.id === tag.id)
+        }))
+      };
+    });   
   
     // Update story tags to include the selected property:
     themesAndTags.storyTags = themesAndTags.storyTags.map(tag => {

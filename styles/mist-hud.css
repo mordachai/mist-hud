@@ -734,6 +734,23 @@ hr {
   color: whitesmoke;
 }
 
+.nascent-upgrade-indicator {
+  margin-right: 5px;
+  animation: glow 1s infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 4px #ffcc00;
+  }
+  to {
+    text-shadow: 0 0 0px #fff;
+  }
+}
+
+
+
+
 /*Change Numbers in Hotbar*/
 .bm-dialog-body {color: black;}
 .bm-primary-nav__element.svelte-hpna8u {color: rgb(231, 209, 177);}
