@@ -835,12 +835,14 @@ export class MistHUD extends Application {
     const themesAndTags = getThemesAndTags(this.actor);
 
     themesAndTags.themes = themesAndTags.themes.map(theme => {
-      // Make sure nascent property is passed to the template
-      const nascent = theme.system?.nascent || false;
+      // Get the actual theme item by ID to ensure we have the correct nascent property
+      const themeItem = this.actor.items.get(theme.id);
+      const isNascent = themeItem ? themeItem.system.nascent === true : false;
       
       return {
         ...theme,
-        nascent: nascent,  // Add this property explicitly for the template
+        nascent: isNascent, // Add the nascent property directly to the theme object
+        unspent_upgrades: themeItem?.system?.unspent_upgrades || 0, // Make sure this is also correct
         powerTags: theme.powerTags?.map(tag => ({
           ...tag,
           selected: selectedTags.includes(tag.id)
@@ -856,12 +858,17 @@ export class MistHUD extends Application {
       };
     });
   
+    // Do the same for crew themes
     data.crewThemes = themesAndTags.crewThemes.map(crewTheme => {
-      const nascent = crewTheme.system?.nascent || false;
+      // Get the actual crew theme item
+      const crewActor = game.actors.get(crewTheme.actorId);
+      const crewThemeItem = crewActor ? crewActor.items.get(crewTheme.id) : null;
+      const isNascent = crewThemeItem ? crewThemeItem.system.nascent === true : false;
       
       return {
         ...crewTheme,
-        nascent: nascent,  // Add the nascent property here too
+        nascent: isNascent, // Add the nascent property
+        unspent_upgrades: crewThemeItem?.system?.unspent_upgrades || 0, // Make sure unspent_upgrades is also correct
         powerTags: crewTheme.powerTags?.map(tag => ({
           ...tag,
           selected: selectedCrewTags.some(ct => ct.id === tag.id),
@@ -872,7 +879,7 @@ export class MistHUD extends Application {
           selected: selectedCrewTags.some(ct => ct.id === tag.id)
         }))
       };
-    });    
+    });   
   
     // Update story tags to include the selected property:
     themesAndTags.storyTags = themesAndTags.storyTags.map(tag => {
