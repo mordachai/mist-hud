@@ -207,9 +207,10 @@ export class MistHUD extends Application {
       resizable: false,
       popOut: true,
       minimizable: true,
-      // width: 250,
       height: 'auto',
       dragDrop: [{ dragSelector: '.window-header' }],
+      left: 200,
+      top: 120
     });
   }
   
