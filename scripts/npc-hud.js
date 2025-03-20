@@ -4,6 +4,18 @@ import { StoryTagDisplayContainer } from "/systems/city-of-mist/module/story-tag
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
 
 globalThis.activeNpcInfluences = globalThis.activeNpcInfluences || {};
+let gameJustLoaded = true;
+
+Hooks.once('ready', () => {
+    // Mark the game as just loaded
+    gameJustLoaded = true;
+    
+    // Reset the flag after a small delay to allow the game to fully initialize
+    setTimeout(() => {
+      gameJustLoaded = false;
+      console.log("Game load period ended, NPC HUDs will now function normally");
+    }, 2000); // 2 second delay
+  });
 
 // Add hooks to handle NPC and item lifecycle events
 Hooks.on('deleteActor', (actor, options, userId) => {
@@ -92,53 +104,70 @@ export class NpcHUD extends Application {
         logger.debug(`Registry size now: ${npcHudRegistry.size}`);
         
         this.render(true);
-      }
+    }
     
-    // Break down getData into smaller, more manageable functions
     async getData() {
         const data = super.getData();
         if (!this.actor) return data;
     
-        // Basic data preparation
-        this._prepareBasicData(data);
-        
-        // System-specific data preparation
-        await this._prepareSystemData(data);
-        
-        // Prepare moves data
-        this._prepareMovesData(data);
-        
-        // Prepare additional data (story tags, statuses)
-        this._prepareAdditionalData(data);
-
-        const tagInfluence = this.calculateNpcTagInfluence();
-        const statusInfluence = this.calculateNpcStatusInfluence();
-        const totalInfluence = tagInfluence + statusInfluence;
-
-        const collective = this.getCollectiveSize();
-        data.collectiveSize = collective.value;
-      
-        // Create an array for the collective bar (values 1 to 6)
-        data.collectiveBar = [];
-        for (let i = 1; i <= collective.max; i++) {
-          data.collectiveBar.push({
-            value: i,
-            active: i <= collective.value  // Mark as active if i is less than or equal to the current value
-          });
+        // Make sure the actor is fully loaded
+        if (!this.actor.id || !this.actor.items) {
+          console.warn("NpcHUD: Actor not fully loaded yet");
+          return data; // Return early with minimal data
         }
-
-        data.collectiveLabel = (data.activeSystem === "otherscape")
-        ? game.i18n.localize("Otherscape.terms.collective")
-        : game.i18n.localize("CityOfMist.terms.collectiveSize");
-        
-        // Add influence data to template
-        data.tagInfluence = tagInfluence;
-        data.statusInfluence = statusInfluence;
-        data.totalInfluence = totalInfluence;
-        data.influentialTags = this.influentialTags || [];
-        data.influentialStatuses = this.influentialStatuses || [];
-        
-        return data;
+    
+        try {
+            // Basic data preparation
+            this._prepareBasicData(data);
+            
+            // System-specific data preparation
+            await this._prepareSystemData(data);
+            
+            // Prepare moves data
+            this._prepareMovesData(data);
+            
+            // Prepare additional data (story tags, statuses)
+            this._prepareAdditionalData(data);
+    
+            const tagInfluence = this.calculateNpcTagInfluence();
+            const statusInfluence = this.calculateNpcStatusInfluence();
+            const totalInfluence = tagInfluence + statusInfluence;
+    
+            const collective = this.getCollectiveSize();
+            data.collectiveSize = collective.value;
+          
+            // Create an array for the collective bar (values 1 to 6)
+            data.collectiveBar = [];
+            for (let i = 1; i <= collective.max; i++) {
+              data.collectiveBar.push({
+                value: i,
+                active: i <= collective.value  // Mark as active if i is less than or equal to the current value
+              });
+            }
+    
+            data.collectiveLabel = (data.activeSystem === "otherscape")
+            ? game.i18n.localize("Otherscape.terms.collective")
+            : game.i18n.localize("CityOfMist.terms.collectiveSize");
+            
+            // Add influence data to template
+            data.tagInfluence = tagInfluence;
+            data.statusInfluence = statusInfluence;
+            data.totalInfluence = totalInfluence;
+            data.influentialTags = this.influentialTags || [];
+            data.influentialStatuses = this.influentialStatuses || [];
+            
+            return data;
+        } catch (error) {
+            console.error("Error in NpcHUD getData:", error);
+            // Return minimal data that won't cause template errors
+            data.spectrums = [];
+            data.moveGroups = {};
+            data.storyTags = [];
+            data.hasStoryTags = false;
+            data.statuses = [];
+            data.collectiveBar = [];
+            return data;
+        }
     }
    
     _prepareBasicData(data) {
@@ -1194,66 +1223,6 @@ export class NpcHUD extends Application {
 
 }
 
-async function runFullNpcHudRegistryTest() {
-    console.group("NPC HUD Registry Test Suite");
-    
-    // Test 1: Basic Registry State
-    console.log("Test 1: Current Registry State");
-    const initial = testNpcHudRegistry();
-    
-    // Test 2: Actor Select Test
-    console.log("\nTest 2: Actor Selection Test");
-    const testActor = game.actors.find(a => a.type === 'threat');
-    if (testActor) {
-      console.log(`Testing with actor: ${testActor.name}`);
-      const hud = new NpcHUD();
-      hud.setActor(testActor);
-      await new Promise(r => setTimeout(r, 100)); // Give time to render
-      
-      const afterOpen = testNpcHudRegistry();
-      console.log(`Registry size change: ${initial.size} → ${afterOpen.size}`);
-      
-      // Check if properly registered
-      const hasEntry = npcHudRegistry.has(testActor.id);
-      console.log(`Actor properly registered: ${hasEntry}`);
-      
-      // Test 3: Closing Test
-      console.log("\nTest 3: HUD Closing Test");
-      await hud.close();
-      await new Promise(r => setTimeout(r, 100)); // Give time to close
-      
-      const afterClose = testNpcHudRegistry();
-      console.log(`Registry size change: ${afterOpen.size} → ${afterClose.size}`);
-      
-      // Check if properly removed
-      const stillHasEntry = npcHudRegistry.has(testActor.id);
-      console.log(`Actor properly removed: ${!stillHasEntry}`);
-    } else {
-      console.warn("No threat actors found for testing");
-    }
-    
-    // Test 4: Registry-Instance Relationship Test
-    console.log("\nTest 4: Registry-Instance Relationship Test");
-    const mismatchedEntries = [];
-    for (const [id, instance] of npcHudRegistry.entries()) {
-      if (instance.actor && instance.actor.id !== id && !id.startsWith("Token.")) {
-        mismatchedEntries.push({
-          registryId: id,
-          actorId: instance.actor.id
-        });
-      }
-    }
-    
-    if (mismatchedEntries.length > 0) {
-      console.warn("Mismatched registry entries found:", mismatchedEntries);
-    } else {
-      console.log("All registry entries match their instances correctly");
-    }
-    
-    console.groupEnd();
-}
-
-// Synchronize all NPC influences when a scene loads
 Hooks.on('canvasReady', async () => {
     // Only GM should recalculate and broadcast all influences
     if (game.user.isGM) {
@@ -1545,9 +1514,57 @@ Hooks.once("init", () => {
     }    
 });
 
-// Keep the original hook registration format
+// Hooks.on('controlToken', (token, controlled) => {
+//     // If game just loaded, don't open HUDs
+//     if (gameJustLoaded) {
+//       console.log("Game just loaded - skipping HUD open");
+//       return;
+//     }
+  
+//     console.log("Token control changed:", token, controlled);
+    
+//     // Original hook behavior continues from here
+//     if (controlled && token.actor && token.actor.type === 'character') {
+//       // Check if the user has ownership of the token
+//       if (!token.isOwner) {
+//         console.log("User doesn't have ownership of the selected token");
+//         return; // Do nothing if the user doesn't own the token
+//       }
+      
+//       // Get all currently selected tokens
+//       const selectedTokens = canvas.tokens.controlled;
+      
+//       // If we have exactly one token selected, show its HUD
+//       if (selectedTokens.length === 1) {
+//         // Close any existing HUDs first
+//         for (const [actorId, hud] of playerHudRegistry.entries()) {
+//           if (actorId !== token.actor.id) {
+//             hud.close();
+//           }
+//         }
+        
+//         // Create or get the HUD for this actor
+//         const hud = MistHUD.getOrCreateHudForActor(token.actor);
+        
+//         // Make sure it's rendered
+//         if (hud && !hud.rendered) {
+//           hud.render(true);
+//         }
+        
+//         console.log("HUD result:", hud);
+//       }
+//     } else if (!controlled) {
+//       // Only close if no tokens are selected
+//       if (canvas.tokens.controlled.length === 0) {
+//         const hud = playerHudRegistry.get(token.actor?.id);
+//         if (hud) hud.close();
+//       }
+//     }
+//   });
+
 Hooks.on('renderTokenHUD', (app, html, data) => {
-    if (!game.user.isGM) return;
+    // Skip if game just loaded or user is not GM
+    if (gameJustLoaded || !game.user.isGM) return;
 
     // Get the token instance from the HUD rendering context
     const token = app.object;
