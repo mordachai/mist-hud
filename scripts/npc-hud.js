@@ -57,6 +57,8 @@ export class NpcHUD extends Application {
           width: 310,
           height: 'auto',
           dragDrop: [{ dragSelector: '.window-header' }],
+          left: 950,
+          top: 120
         });
     }
 
