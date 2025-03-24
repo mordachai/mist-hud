@@ -1421,7 +1421,7 @@ function executeMove(moveName) {
     const retryHud = globalThis.playerHudRegistry.get(activeToken.actor.id);
     if (retryHud) {
       // Now we have a HUD, so continue with it
-      if (move.rollMythos || move.rollLogos || move.rollMythosOS || move.rollSelf || move.rollNoise) {
+      if (move.rollMythos || move.rollLogos || move.rollMist || move.rollMythosOS || move.rollSelf || move.rollNoise) {
         rollSpecialMoves(moveName, retryHud);
       } else if (move.moveType === "cinematic") {
         rollCinematicMove(moveName, retryHud);
@@ -1436,7 +1436,7 @@ function executeMove(moveName) {
   }
 
   // Call roll functions
-  if (move.rollMythos || move.rollLogos || move.rollMythosOS || move.rollSelf || move.rollNoise) {
+  if (move.rollMythos || move.rollLogos || move.rollMist || move.rollMythosOS || move.rollSelf || move.rollNoise) {
     rollSpecialMoves(moveName, activeHud);
   } else if (move.moveType === "cinematic") {
     rollCinematicMove(moveName, activeHud);

@@ -26,6 +26,8 @@ import { NPCInfluenceManager, openNPCInfluenceManager } from './npc-influence-ma
 
 globalThis.playerHudRegistry = new Map();
 
+let gameJustLoaded = true;
+
 // Register Handlebars helper for localizeTheme
 Handlebars.registerHelper('localizeTheme', function(themebookName) {
   return localizeTheme(themebookName);
@@ -182,7 +184,17 @@ Hooks.once('ready', () => {
   });
   
   console.log("Mist HUD socket listeners initialized");
+  
+  // Mark the game as just loaded 
+  gameJustLoaded = true;
+  
+  // Reset the flag after a small delay to allow the game to fully initialize
+  setTimeout(() => {
+    gameJustLoaded = false;
+    console.log("Game load period ended, HUDs will now function normally");
+  }, 2000); // 2 second delay
 });
+
 export class MistHUD extends Application {
   static instance = null;
 
@@ -819,6 +831,14 @@ export class MistHUD extends Application {
     const data = super.getData(options);
     if (!this.actor) return data;
   
+    // Make sure the actor is fully loaded
+    if (!this.actor.id || !this.actor.items) {
+      console.warn("MistHUD: Actor not fully loaded yet");
+      return data; // Return early with minimal data
+    }
+
+    try {
+  
     data.actor = this.actor;
     data.token = canvas.tokens.controlled[0] || null;
     data.scene = game.scenes.current || null;
@@ -970,7 +990,19 @@ export class MistHUD extends Application {
     data.hasCrewImprovements = crewImprovements.length > 0;
   
     return data;
-  }  
+  } catch (error) {
+    console.error("Error in MistHUD getData:", error);
+    // Return minimal data that won't cause template errors
+    data.themes = [];
+    data.storyTags = [];
+    data.hasStoryTags = false;
+    data.loadoutTags = [];
+    data.crewThemes = [];
+    data.hasCrewThemes = false;
+    data.statuses = [];
+    return data;
+  }
+}  
 
   async _updateHUDPreservePanel(force = false) {
     // Check if the panel is open before render
@@ -1844,9 +1876,15 @@ Hooks.on('ready', () => {
 });
 
 Hooks.on('controlToken', (token, controlled) => {
+  // If game just loaded, don't open HUDs
+  if (gameJustLoaded) {
+    console.log("Game just loaded - skipping HUD open");
+    return;
+  }
+
   console.log("Token control changed:", token, controlled);
   
-  // Only handle when a token is selected
+  // The rest of the original hook stays the same
   if (controlled && token.actor && token.actor.type === 'character') {
     // Check if the user has ownership of the token
     if (!token.isOwner) {

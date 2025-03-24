@@ -178,6 +178,7 @@ export const moveConfig = {
         ],
         hasDynamite: true,
         rollMythos: true,
+        // rollMist: true,
         system: "city-of-mist",
         slot: 7,
         image: "Look Beyond the Mist.webp",
