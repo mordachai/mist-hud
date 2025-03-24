@@ -323,7 +323,6 @@ export class NpcHUD extends Application {
       
     getActorStatuses() {
         if (!this.actor) return [];
-        const collectiveSize = Number(this.actor.system.collectiveSize || 0);
         const statusMap = new Map();
       
         this.actor.items
@@ -334,12 +333,12 @@ export class NpcHUD extends Application {
             const key = `${status.name}-${status.system.tier}`;
             if (!statusMap.has(key)) {
               const baseTier = Number(status.system.tier) || 1;
-              // Add collectiveSize to the base tier
-              const modifiedTier = baseTier + collectiveSize;
+              
+              // Don't add collectiveSize to any statuses in the NPC HUD status list
               statusMap.set(key, {
                 id: status.id,
                 statusName: status.name,
-                statusTier: modifiedTier,
+                statusTier: baseTier, // Use baseTier directly without adding collectiveSize
                 statusType,
                 temporary: !!status.system.temporary,
                 permanent: !!status.system.permanent
@@ -348,7 +347,7 @@ export class NpcHUD extends Application {
           });
           
         return Array.from(statusMap.values());
-    }      
+    } 
     
     applyBurnState(actor, tagId, tagType) {
         const tagItem = actor.items.get(tagId);
