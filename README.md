@@ -1,4 +1,6 @@
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W01A1ZN1)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W01A1ZN1)  ![Static Badge](https://img.shields.io/badge/latest_release-v_2.31.3-blue)
+  ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/mordachai/mist-hud/mist-hud.zip)
+
 
 # Mist Engine HUD
 
