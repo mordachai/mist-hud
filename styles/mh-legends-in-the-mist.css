@@ -1,35 +1,715 @@
 /* legends-in-the-mist.css */
 
 :root {
-  --dark-color: #c6bdb6;
-  --text-main-color: #1b190e;
-  --text-hud-main-color: #d7e5f5; 
-  --text-hud-subtitles-color: #d7e5f5;
-  --outcome-text-color: #1b190e;
-  --effects-color1:#1b190e;
-  --effects-color2:rgb(245,245,245);
-  --effects-color3: #d3f265;
-  --toBurn-text-color: #85662b;
+  /* Base Colors */
+  --dark-color: #3c2414;
+  --text-main-color: #3c2414;
+  --text-tag-color: #f5f1e8;
+  --text-hud-main-color: #3c2414; 
+  --text-hud-subtitles-color: #6b5b4d;
+  --text-status-color: #3c2414;
+  --outcome-text-color: #3c2414;
+  
+  /* Origin Theme (Green) */
+  --origin-primary-color: #2d5016;
+  --origin-light-color: #6b8e23;
+  --origin-verylight-color: #9acd32;
+  --origin-dark-color: #1a2f0b;
+  
+  /* Adventure Theme (Red) */
+  --adventure-primary-color: #8b2635;
+  --adventure-light-color: #cd5c5c;
+  --adventure-verylight-color: #f08080;
+  --adventure-dark-color: #4a1319;
+  
+  /* Greatness Theme (Blue) */
+  --greatness-primary-color: #1e3a8a;
+  --greatness-light-color: #3b82f6;
+  --greatness-verylight-color: #93c5fd;
+  --greatness-dark-color: #0f172a;
+  
+  /* Effects and UI */
+  --effects-color1: #6b8e23;
+  --effects-color2: #f5f1e8;
+  --effects-color3: #d4af37;
+  --toBurn-text-color: #d4af37;
+  
+  /* Tags */
   --positive-tag-color: #f6e86a;
   --positive-tag-borderColor: #faf3ae;
   --negative-tag-color: #c1806c;
   --negative-tag-borderColor: #f9af98;
-  --destroyed-tag-color: rgba(255, 40, 40, 0.825);
-  --spectrum-color:#dc9c67;
-  --status-color: rgb(0, 93, 93);
-  --storytag-color: rgb(199, 69, 33);
-  --divider-roll-color: rgba(255, 255, 255, 0.3);
-  --divider-color1: rgba(255, 255, 255, 0.3);
-  --roll-shadow-color:#d542b7;
-  --blur-shadow-color: #d542b7;
-  --divider-roll-color: #1b190e;
-  --font-family-main1: Rift;
-  --font-family-main2: Averia Serif Libre;
-  --font-family-move: Rift Bold;
-  --font-family-roll: Averia Serif Libre;
-  --font-family-tags: Roboto Condensed;
-  --font-family-outcome: Averia Serif Libre;
-  --font-family-hud: Roboto Condensed;
-  --font-family-effects: Times New Roman;
-  --hud-background1: url('../ui/com_hud_BG.webp');
+  --destroyed-tag-color: rgba(139, 38, 53, 0.825);
+  
+  /* Misc */
+  --spectrum-color: #d4af37;
+  --status-color: #2d5016;
+  --storytag-color: #8b4513;
+  --limit-color: #8b2635;
+  --divider-roll-color: rgba(60, 36, 20, 0.3);
+  --divider-color1: rgba(60, 36, 20, 0.3);
+  --roll-shadow-color: #d4af37;
+  --blur-shadow-color: #d4af37;
+  
+  /* Fonts */
+  --font-family-main1: "Oldrichium", serif;
+  --font-family-main2: "Crimson Text", serif;
+  --font-family-move: "Oldrichium", serif;
+  --font-family-roll: "Oldrichium", serif;
+  --font-family-tags: "Cinzel", serif;
+  --font-family-outcome: "Crimson Text", serif;
+  --font-family-hud: "Cinzel", serif;
+  --font-family-effects: "Crimson Text", serif;
+  --font-family-npcmoves: "Cinzel", serif;
+  
+  /* HUD */
+  --hud-background1: url('../ui/litm_hud_BG.webp');
+  --hud-bg-color: rgba(245, 241, 232, 0.8);
+  --hud-bg-color2: rgba(245, 241, 232, 0.9);
+  --npc-hud-bg-prime: rgba(107, 139, 35, 0.2);
+  
+  /* Markers */
+  --marker-positiveTag-color: #f6e86a;
+  --marker-negativeTag-color: #c1806c;
+}
+
+.mh-theme-header {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: space-between; 
+  margin: -3px -0px 1px -0px;
+  height: 30px;
+  padding: 0 10px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.mh-theme-header.extras {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between; 
+  margin: -3px -0px 1px -0px;
+  height: 30px;
+  padding: 0 10px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.mh-theme-header.backpack {
+  justify-content: flex-end; 
+}
+
+.mh-theme-header.Adventure {
+  background-image: url('../ui/header-adventure.webp');
+}
+
+.mh-theme-header.Greatness {
+  background-image: url('../ui/header-greatness.webp');
+  padding-top: 2px;
+}
+
+.mh-theme-header.Origin {
+  background-image: url('../ui/header-origin.webp');
+  padding-top: 2px;
+}
+
+.mh-theme-header.neutral {
+  background-image: url('../ui/header-neutral.webp');
+  margin-top: 2px;
+}
+
+.mh-theme-header.Crew {
+  background-image: url('../ui/header-crew.webp');
+  margin-top: 3px;
+}
+
+.mh-theme-header.spaced {
+  background-image: url('../ui/header-neutral.webp');
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.theme-type.Adventure {
+  color: var(--adventure-verylight-color);
+  text-shadow: var(--adventure-dark-color) 1px 0 3px;
+}
+
+.theme-type.Greatness {
+  color: var(--greatness-verylight-color);
+  text-shadow: var(--greatness-dark-color) 1px 0 3px;
+}
+
+.theme-type.Origin{
+  color: var(--origin-verylight-color);
+  text-shadow: var(--origin-dark-color) 1px 0 3px;
+}
+
+.theme-type.Crew{
+  color: var(--text-main-color);
+  text-shadow: var(--text-main-color) 1px 0 3px;
+}
+
+.mh-theme-name {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-family-move);
+  font-size: 1.3em;
+  display: block;
+  margin: 4px 2px;
+  font-style: italic;
+}
+
+.mh-theme-name-com-Origin {
+  color: var(--origin-verylight-color);
+  font-family: var(--font-family-main1);
+}
+
+.mh-theme-name-com-Adventure {
+  color: var(--adventure-verylight-color);
+  font-family: var(--font-family-move);
+}
+
+.mh-theme-name-com-Greatness {
+  color: var(--greatness-verylight-color);
+  font-family: var(--font-family-move);
+}
+
+.mh-theme-name-com-Crew,
+.mh-theme-name-com-Extra{
+  color: var(--text-main-color);
+  font-family: var(--font-family-main1);
+}
+
+.mh-theme-name-neutral {
+  color: var(--text-main-color);
+}
+
+.mh-theme-icon.Origin {
+  position: relative;
+  right: -10px;
+  top: -11px;
+  width: 28px;
+  height: 24px;
+  background-image: url('../ui/icons/origin_litm_icn.svg');
+  filter: drop-shadow(1px 0 4px var(--origin-dark-color));
+}
+
+.mh-theme-icon.Adventure {
+  position: relative;
+  right: -6px;
+  top: -5px;
+  width: 24px;
+  height: 24px;
+  background-image: url('../ui/icons/adventure_litm_icn.svg');
+  filter: drop-shadow(1px 0 4px var(--adventure-light-color));
+}
+
+.mh-theme-icon.Greatness {
+  position: relative;
+  right: -7px;
+  top: -9px;
+  width: 24px;
+  height: 24px;
+  background-image: url('../ui/icons/greatness_litm_icn.svg');
+  filter: drop-shadow(1px 0 4px var(--greatness-dark-color));
+}
+
+.mh-theme-icon.Crew {
+  position: relative;
+  right: -8px;
+  top: -5px;
+  width: 24px;
+  height: 21px;
+  background-image: url('../ui/icons/crew_litm_icn.svg');
+  filter: drop-shadow(1px 0 4px var(--effects-color1));
+}
+
+.mh-theme-icon-notip.backpack {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  top: -5px;
+  background-image: url('../ui/icons/backpack_icn.svg');
+  filter: drop-shadow(1px 0 4px var(--text-main-color));
+}
+
+.mh-theme-icon-notip.storytag {
+  position: relative;
+  top: -5px;
+  width: 15px;
+  height: 18px;
+  background-image: url('../ui/icons/storytag_icn.svg');
+  transform: scaleX(-1);
+  filter: drop-shadow(1px 0 4px var(--text-main-color));
+}
+
+.mh-theme-icon-notip.statuses {
+  position: relative;
+  top: -5px;
+  width: 18px;
+  height: 16px;
+  background-image: url('../ui/icons/statuses_icn.svg');
+  filter: drop-shadow(1px 0 4px var(--text-main-color));
+}
+
+.mh-power-tag,
+.mh-weakness-tag,
+.mh-backpack-tag,
+.mh-story-tag {
+  display: grid;
+  flex-direction: row;
+  grid-template-columns: 25px auto auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 1px 1px;
+  padding: 2px 0px;
+  cursor: pointer;
+  text-align: left;
+  height: fit-content;
+  font-family: var(--font-family-main1);
+  text-transform: uppercase;
+  list-style: none;
+  color: var(--text-main-color);
+  font-style: italic;
+}
+
+.mh-weakness-tag i {
+  padding-left: 12px;
+}
+
+.mh-power-tag.Adventure {
+color: var(--adventure-verylight-color);
+}
+
+.mh-power-tag.Greatness {
+  color: var(--greatness-verylight-color);
+}
+
+.mh-power-tag.Origin {
+  color: var(--origin-verylight-color);
+}
+
+.mh-power-tag.selected {
+  align-items: center;
+  color: var(--text-tag-color);
+  font-family: var(--font-family-main1);
+  text-transform: uppercase;
+  background-size: 100% 96%;
+  background-repeat: no-repeat;
+  background-position: left center;
+  height: fit-content;
+}
+
+.mh-power-tag.selected.Adventure {
+  background-image: url('../ui/select-bar-adventure.webp');
+}
+
+.mh-power-tag.selected.Greatness {
+  background-image: url('../ui/select-bar-greatness.webp');
+}
+
+.mh-power-tag.selected.Origin {
+  background-image: url('../ui/select-bar-origin.webp');
+}
+
+.mh-power-tag.selected.toBurn.Adventure {
+  background-image: url('../ui/select-bar-adventure-toburn.webp');
+}
+
+.mh-power-tag.selected.toBurn.Greatness {
+  background-image: url('../ui/select-bar-greatness-toburn.webp');
+}
+
+.mh-power-tag.selected.toBurn.Origin {
+  background-image: url('../ui/select-bar-origin-toburn.webp');
+}
+
+.mh-story-tag.selected,
+.mh-backpack-tag.selected,
+.mh-power-tag.Crew.selected,
+.mh-weakness-tag.inverted.selected {
+  align-items: center;
+  color: var(--text-tag-color);
+  background-image: url('../ui/select-bar-neutral2.webp');
+  font-style: italic;
+  font-family: var(--font-family-main1);
+  text-transform: uppercase;
+  background-size: 100% 95%;
+  background-repeat: no-repeat;
+  background-position: left center;
+  height: fit-content;
+}
+
+.mh-story-tag.selected.toBurn,
+.mh-backpack-tag.selected.toBurn,
+.mh-power-tag.Crew.selected.toBurn {
+  background-image: url('../ui/select-bar-neutral2-toburn.webp');
+}
+
+.mh-weakness-tag.selected,
+.mh-story-tag.inverted.selected {
+  align-items: center;
+  color: var(--text-tag-color);
+  background-image: url('../ui/select-bar-weakness.webp');
+  font-style: italic;
+  font-family: var(--font-family-main1);
+  text-transform: uppercase;
+  background-size: 100% 95%;
+  background-repeat: no-repeat;
+  background-position: left center;
+  height: fit-content;
+}
+
+.mh-burn-toggle,
+.mh-tag-text {
+  align-items: center;
+}
+
+.mh-tag-text {
+  margin-left: 10px;
+}
+
+.mh-create-story-tag i,
+.mh-create-status i {
+  position: relative;
+  top: -3px;
+  right: -2px;
+  font-size: 0.85rem;
+  color: var(--text-main-color);
+}
+
+.mh-story-toggle i{
+  position: relative;
+  top: 0;
+  right: -1px;
+  font-size: 0.90rem;
+}
+
+.burn-icon {
+  width: 22px;
+  height: 16px;
+  margin-left: 6px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  align-self: center;
+  vertical-align: middle;
+}
+
+.burn-icon.burned {
+  width: 15px;
+  height: 15px;
+  margin-left: 13px;
+}
+
+.mh-power-tag.Adventure .burn-icon.unburned  {
+  background-image: url("../ui/icons/burn_adventure_empty.svg");
+}
+
+.mh-power-tag.Adventure .burn-icon.toBurn  {
+  background-image: url("../ui/icons/burn_adventure_toburn.svg");
+  filter: drop-shadow(0 0 3px var(--toBurn-text-color));
+}
+
+.mh-power-tag.Adventure .burn-icon.burned {
+  background-image: url("../ui/icons/burn_adventure_burned.svg");
+}
+
+.mh-power-tag.Origin .burn-icon.unburned  {
+  background-image: url("../ui/icons/burn_origin_empty.svg");
+}
+
+.mh-power-tag.Origin .burn-icon.toBurn {
+  background-image: url("../ui/icons/burn_origin_toburn.svg");
+  filter: drop-shadow(0 0 3px var(--toBurn-text-color));
+}
+
+.mh-power-tag.Origin .burn-icon.burned  {
+  background-image: url("../ui/icons/burn_origin_burned.svg");
+}
+
+.mh-power-tag.Greatness .burn-icon.unburned {
+  background-image: url("../ui/icons/burn_greatness_empty.svg");
+}
+
+.mh-power-tag.Greatness .burn-icon.toBurn  {
+  background-image: url("../ui/icons/burn_greatness_toburn.svg");
+  filter: drop-shadow(0 0 3px var(--toBurn-text-color));
+}
+
+.mh-power-tag.Greatness .burn-icon.burned  {
+  background-image: url("../ui/icons/burn_greatness_burned.svg");
+}
+
+.mh-backpack-tag .burn-icon.unburned,
+.mh-story-tag .burn-icon.unburned,
+.mh-power-tag.Crew .burn-icon.unburned{
+  background-image: url("../ui/icons/burn_neutral_empty.svg");
+}
+
+.mh-backpack-tag .burn-icon.toBurn,
+.mh-story-tag .burn-icon.toBurn,
+.mh-power-tag.Crew .burn-icon.toBurn {
+  background-image: url("../ui/icons/burn_neutral_toburn.svg");
+  filter: drop-shadow(0 0 2px var(--effects-color1));
+}
+
+.mh-backpack-tag .burn-icon.burned,
+.mh-story-tag .burn-icon.burned,
+.mh-power-tag.Crew .burn-icon.burned {
+  background-image: url("../ui/icons/burn_neutral_burned.svg");
+}
+
+.mh-power-tag.burned,
+.mh-story-tag.burned,
+.mh-backpack-tag.burned  {
+  text-decoration-line: line-through;
+  text-decoration-color: var(--text-main-color);
+  text-decoration-thickness: 2px;
+  color: #8b8680;
+}
+
+.double-ones::after {
+  content: "Snake Eyes!";
+  display: block;
+  font-size: 1.1rem;
+  width: 100%;
+  text-align: center;
+  color: var(--text-main-color);
+  font-weight: bold;
+  font-family: var(--font-family-main1);
+  text-shadow: var(--destroyed-tag-color) 1px 1px 6px;
+}
+
+.double-sixes::after {
+  content: "Boxcars!";
+  display: block;
+  font-size: 1.1rem;
+  width: 100%;
+  text-align: center;
+  color: var(--text-main-color);
+  font-weight: bold;
+  font-family: var(--font-family-main1);
+  text-shadow: var(--effects-color1) 1px 1px 6px;
+}
+
+.outcome-fail-double-ones {
+  text-shadow: var(--destroyed-tag-color) -3px 3px 15px;
+}
+
+.outcome-success-double-sixes {
+  text-shadow: var(--effects-color1) -3px 3px 15px;
+}
+
+.mystery-type.Origin {
+  color: var(--origin-verylight-color);
+  text-shadow: var(--origin-dark-color) 1px 1px 1px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin: auto;
+}
+
+.mystery-type.Adventure {
+  color: var(--adventure-verylight-color);
+  text-shadow: var(--adventure-dark-color) 1px 1px 1px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin: auto;
+}
+
+.mystery-type.Greatness {
+  color: var(--greatness-verylight-color);
+  text-shadow: var(--greatness-dark-color) 1px 1px 1px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin: auto;
+}
+
+/* General styling for the essence section */
+.section.legends {
+  border-radius: 8px;
+  margin: 15px 0;
+  color: var(--text-main-color);
+}
+
+.mh-essence-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  font-family: var(--font-family-move);
+  font-size: 1.3rem;
+  margin: 4px 2px;
+  padding: 2px;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.mh-essence-subheader {
+  font-family: var(--font-family-main1);
+  font-weight: bold;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.mh-essence-subheader span {
+  font-weight: normal;
+  font-size: 0.85rem;
+}
+
+.mh-essence-text {
+  font-family: var(--font-family-main1);
+  font-size: 0.80rem;
+  text-transform: uppercase;
+  line-height: 1.2rem;
+  text-align: justify;
+  font-style: italic;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+}
+
+/* Essence-specific styles for LITM */
+.mh-essence-title.village-healer {
+  color: var(--origin-primary-color);
+  text-shadow: var(--origin-dark-color) 1px 1px 7px;
+}
+
+.mh-essence-title.sword-of-thunder {
+  color: var(--adventure-primary-color);
+  text-shadow: var(--adventure-dark-color) 1px 1px 7px;
+}
+
+.mh-essence-title.dragon {
+  color: var(--greatness-primary-color);
+  text-shadow: var(--greatness-dark-color) 1px 1px 7px;
+}
+
+.mh-essence-title.runescribing {
+  color: var(--origin-primary-color);
+  text-shadow: var(--origin-dark-color) 2px 2px 6px;
+}
+
+.mh-essence-title.blazing-invoker {
+  color: var(--adventure-primary-color);
+  text-shadow: var(--adventure-dark-color) 2px 2px 6px;
+}
+
+.mh-essence-title.rune-sage {
+  color: var(--greatness-primary-color);
+  text-shadow: var(--greatness-dark-color) 2px 2px 6px;
+}
+
+.mh-essence-title.legends-in-the-mist {
+  background-color: rgba(60, 36, 20, 0.2);
+  padding: 4px 2px;
+}
+
+.mh-essence-chart{
+  float: left;
+  width: 75px;
+  height: 75px;
+  margin: 0 5px 5px 0;
+}
+
+.mh-essence-chart img{
+  border: none;
+}
+
+/*Roll icons*/
+.mhr-icon.Origin {
+  background-image: url('../ui/icons/origin_litm_icn.svg');
+  width: 20px;
+  height: 20px;
+}
+
+.mhr-icon.Adventure {
+  background-image: url('../ui/icons/adventure_litm_icn.svg');
+  width: 20px;
+  height: 20px;
+}
+
+.mhr-icon.Greatness {
+  background-image: url('../ui/icons/greatness_litm_icn.svg');
+  width: 20px;
+  height: 20px;
+}
+
+.mh-dropshadow-Origin{
+  filter: drop-shadow(2px 2px var(--origin-dark-color));
+}
+
+.mh-dropshadow-Greatness{
+  filter: drop-shadow(1px 1px var(--greatness-dark-color));
+}
+
+.mh-dropshadow-Adventure{
+  filter: drop-shadow(2px 2px var(--adventure-dark-color));
+}
+
+/* Hover effect for the entire row in the Screen Status list */
+.status-group-container:hover {
+  background: rgba(45, 80, 22, 0.204);
+  border: var(--origin-light-color) 1px solid;
+}
+
+/* Layout the resource bars side by side */
+.mh-resource-bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+
+/* Basic box style */
+.mh-box {
+  background-image: url('../ui/icons/track-litm-empty.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+/* "Filled" or "active" state */
+.mh-box.active {
+  background-image: url('../ui/icons/track-litm-full.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+/* Label under the boxes */
+.mh-resource-label {
+  font-family: var(--font-family-main1);
+  text-transform: uppercase;
+  margin-top: 3px;
+  font-size: 0.8em;
+  text-align: center;
+  color: var(--effects-color3);
+}
+
+.mh-improvement-marker {
+  display: flex;
+  align-items: center;
+  text-align: right;
+  color: var(--text-main-color);
+  font-weight: bold;
+  margin-left: 5px; 
+  display: inline-block;
+}
+
+.mh-improvement-marker i {
+  vertical-align: middle;
+  align-self: center;
+  font-size: 0.70rem;
+  line-height: 1; 
+  transform: translateY(0px);
+}
+
+.mh-improvement-marker.Origin i {
+  transform: translateY(-3px);
 }

@@ -32,6 +32,20 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Oldrichium';
+  src: url('../ui/fonts/oldrichium-regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'CCDreamland';
+  src: url('../ui/fonts/ccdreamland-regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   /* Global Colors */
   --mythos-dark-color:#b90ded;
