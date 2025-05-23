@@ -47,6 +47,24 @@
               {{/if}}
             </span>
           {{/if}}
+
+          {{#if (eq ../activeSystem "legend")}}
+            <span class="mh-theme-name mh-theme-name-com-{{category}}">
+              {{localizedThemebookName}}{{themeInfo.locale_name}}
+              {{#if unspent_upgrades}}
+                <span class="mh-improvement-marker {{category}}">
+                  {{#if nascent}}
+                    <i class="fa-solid fa-bolt nascent-upgrade-indicator" title="Nascent theme with available power tag!"></i>
+                  {{else}}
+                    {{#times unspent_upgrades}}
+                      <i class="fa-light fa-star"></i>
+                    {{/times}}
+                  {{/if}}
+                </span>
+              {{/if}}
+            </span>
+          {{/if}}
+
         </div>
 
           <!-- Power Tags -->
@@ -130,7 +148,7 @@
         <div class="mh-theme-header neutral extras mh-title-container">
           <div class="mh-title-container">
             <span class="mh-theme-icon-notip storytag"></span>
-            <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.storyTags"}}{{#if isOtherscape}} / Relationships{{/if}}</span>
+            <span class="mh-theme-name mh-theme-name-neutral">{{localize "CityOfMist.terms.storyTags"}}{{#if isOtherscape}} / Relationships{{/if}} {{#if isLegend}} / Fellowship{{/if}}</span>
           </div>
           <a class="mh-create-story-tag" data-owner-id="{{actor.id}}" data-token-id="{{token.id}}" data-scene-id="{{scene.id}}" title="Create Tag">
             <i class="fa-regular fa-circle-plus"></i>
@@ -444,7 +462,7 @@
 
 
       {{!-- Add a default or fallback block if needed --}}
-      {{#unless (or isCityOfMist isOtherscape)}}
+      {{#unless (or isCityOfMist isOtherscape isLegend)}}
         <div class="section fallback">
           <div class="mh-theme-name"><i class="fa-solid fa-exclamation-triangle"></i> No Content Available</div>
         </div>

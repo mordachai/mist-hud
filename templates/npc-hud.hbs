@@ -72,7 +72,7 @@
                 <div class="npc-collective-bar">
                     {{#each collectiveBar}}
                     <span class="npc-collective-segment" data-value="{{value}}">
-                        {{#if (eq ../activeSystem "otherscape")}}
+                        {{#if (neq ../activeSystem "otherscape")}}
                         {{#if active}}
                             <i class="fa-solid fa-square-user"></i>
                         {{else}}

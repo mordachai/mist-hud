@@ -1,5 +1,48 @@
 /* legends-in-the-mist.css */
 
+@font-face {
+  font-family: 'Oldrichium';
+  src: url('../ui/fonts/oldrichium-regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'CCDreamland';
+  src: url('../ui/fonts/ccdreamland-regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Labrada';
+  src: url('../ui/fonts/labrada-regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'CCTreasure';
+  src: url('../ui/fonts/cctreasure-regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Manuscript Antiqua';
+  src: url('../ui/fonts/manuskript-antiqua.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Caveat';
+  src: url('../ui/fonts/caveat-regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
 :root {
   /* Base Colors */
   --dark-color: #3c2414;
@@ -43,9 +86,9 @@
   
   /* Misc */
   --spectrum-color: #d4af37;
-  --status-color: #2d5016;
-  --storytag-color: #8b4513;
-  --limit-color: #8b2635;
+  --status-color: #BCCDB0;
+  --storytag-color: #ecd68f;
+  --limit-color: #bb4355;
   --divider-roll-color: rgba(60, 36, 20, 0.3);
   --divider-color1: rgba(60, 36, 20, 0.3);
   --roll-shadow-color: #d4af37;
@@ -53,18 +96,18 @@
   
   /* Fonts */
   --font-family-main1: "Oldrichium", serif;
-  --font-family-main2: "Crimson Text", serif;
-  --font-family-move: "Oldrichium", serif;
-  --font-family-roll: "Oldrichium", serif;
-  --font-family-tags: "Cinzel", serif;
-  --font-family-outcome: "Crimson Text", serif;
-  --font-family-hud: "Cinzel", serif;
-  --font-family-effects: "Crimson Text", serif;
-  --font-family-npcmoves: "Cinzel", serif;
+  --font-family-main2: "Manuscript Antiqua", serif;
+  --font-family-move: "CCDreamland", serif;
+  --font-family-roll: "Labrada", serif;
+  --font-family-tags: "CCTreasure", serif;
+  --font-family-outcome: "Manuscript Antiqua", serif;
+  --font-family-hud: "CCTreasure", serif;
+  --font-family-effects: "Caveat", serif;
+  --font-family-npcmoves: "Labrada", serif;
   
   /* HUD */
   --hud-background1: url('../ui/litm_hud_BG.webp');
-  --hud-bg-color: rgba(245, 241, 232, 0.8);
+  --hud-bg-color: url('../ui/litm_hud_BG.webp'); /*rgba(245, 241, 232, 0.8); */
   --hud-bg-color2: rgba(245, 241, 232, 0.9);
   --npc-hud-bg-prime: rgba(107, 139, 35, 0.2);
   
@@ -392,8 +435,8 @@ color: var(--adventure-verylight-color);
 }
 
 .burn-icon {
-  width: 22px;
-  height: 16px;
+  width: 20px;
+  height: 25px;
   margin-left: 6px;
   background-size: contain;
   background-repeat: no-repeat;
@@ -403,67 +446,48 @@ color: var(--adventure-verylight-color);
 }
 
 .burn-icon.burned {
-  width: 15px;
-  height: 15px;
-  margin-left: 13px;
+  width: 20px;
+  height: 25px;
+  margin-left: 6px;
 }
 
-.mh-power-tag.Adventure .burn-icon.unburned  {
-  background-image: url("../ui/icons/burn_adventure_empty.svg");
+.mh-power-tag.Adventure .burn-icon.unburned,
+.mh-power-tag.Origin .burn-icon.unburned,
+.mh-power-tag.Greatness .burn-icon.unburned
+  {
+  background-image: url("../ui/icons/burn_scratch_empty.svg");
 }
 
-.mh-power-tag.Adventure .burn-icon.toBurn  {
-  background-image: url("../ui/icons/burn_adventure_toburn.svg");
+.mh-power-tag.Adventure .burn-icon.toBurn,
+.mh-power-tag.Origin .burn-icon.toBurn,
+.mh-power-tag.Greatness .burn-icon.toBurn{
+  background-image: url("../ui/icons/burn_scratch_toburn.svg");
   filter: drop-shadow(0 0 3px var(--toBurn-text-color));
 }
 
-.mh-power-tag.Adventure .burn-icon.burned {
-  background-image: url("../ui/icons/burn_adventure_burned.svg");
-}
-
-.mh-power-tag.Origin .burn-icon.unburned  {
-  background-image: url("../ui/icons/burn_origin_empty.svg");
-}
-
-.mh-power-tag.Origin .burn-icon.toBurn {
-  background-image: url("../ui/icons/burn_origin_toburn.svg");
-  filter: drop-shadow(0 0 3px var(--toBurn-text-color));
-}
-
-.mh-power-tag.Origin .burn-icon.burned  {
-  background-image: url("../ui/icons/burn_origin_burned.svg");
-}
-
-.mh-power-tag.Greatness .burn-icon.unburned {
-  background-image: url("../ui/icons/burn_greatness_empty.svg");
-}
-
-.mh-power-tag.Greatness .burn-icon.toBurn  {
-  background-image: url("../ui/icons/burn_greatness_toburn.svg");
-  filter: drop-shadow(0 0 3px var(--toBurn-text-color));
-}
-
-.mh-power-tag.Greatness .burn-icon.burned  {
-  background-image: url("../ui/icons/burn_greatness_burned.svg");
+.mh-power-tag.Adventure .burn-icon.burned,
+.mh-power-tag.Origin .burn-icon.burned,
+.mh-power-tag.Greatness .burn-icon.burned {
+  background-image: url("../ui/icons/burn_scratch_burned.svg");
 }
 
 .mh-backpack-tag .burn-icon.unburned,
 .mh-story-tag .burn-icon.unburned,
 .mh-power-tag.Crew .burn-icon.unburned{
-  background-image: url("../ui/icons/burn_neutral_empty.svg");
+  background-image: url("../ui/icons/burn_scratch_empty.svg");
 }
 
 .mh-backpack-tag .burn-icon.toBurn,
 .mh-story-tag .burn-icon.toBurn,
 .mh-power-tag.Crew .burn-icon.toBurn {
-  background-image: url("../ui/icons/burn_neutral_toburn.svg");
+  background-image: url("../ui/icons/burn_scratch_toburn.svg");
   filter: drop-shadow(0 0 2px var(--effects-color1));
 }
 
 .mh-backpack-tag .burn-icon.burned,
 .mh-story-tag .burn-icon.burned,
 .mh-power-tag.Crew .burn-icon.burned {
-  background-image: url("../ui/icons/burn_neutral_burned.svg");
+  background-image: url("../ui/icons/burn_scratch_burned.svg");
 }
 
 .mh-power-tag.burned,

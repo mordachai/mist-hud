@@ -3,7 +3,7 @@
 "Legends.moves.quickOutcome.name" : "Quick Outcome",
 "Legends.moves.quickOutcome.fail" : "The Narrator decides on a narrative development detrimental to the Hero, and can give or remove a tag or status in a way that hinders the Hero.",
 "Legends.moves.quickOutcome.partial" : "The action unfolds as expected, or better, achieving its intended goal or overcoming an obstacle. The Narrator can also give you a useful tag or status.\nThe Narrator decides on a narrative development detrimental to the Hero, and can give or remove a tag or status in a way that hinders the Hero.",
-"Legends.moves.quickOutcome.success" : "The action unfolds as expected, or better, achieving its intended goal or overcoming an obstacle. The Narrator can also give you a useful tag or status.\nYou can Push your Luck:\nAccept Consequences for Great Success (Quick) or for +1 Power to spend (Detailed).",
+"Legends.moves.quickOutcome.success" : "The action unfolds as expected, or better, achieving its intended goal or overcoming an obstacle. The Narrator can also give you a useful tag or status.\nYou can Push your Luck:\n\nAccept Consequences for Great Success (Quick) or for +1 Power to spend (Detailed).",
 "Legends.moves.trackedOutcome.name" : "Detailed Outcome"
 
 }
