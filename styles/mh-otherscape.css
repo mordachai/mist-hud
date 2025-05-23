@@ -466,6 +466,32 @@ color: var(--mythosOS-verylight-color);
   color: #b1c7ca;
 }
 
+/*Chat Card Styles*/
+
+.mhr-roll-title {
+  font-size: 2em;
+  text-align: center;
+  font-family: var(--font-family-move);
+  /* text-shadow: 1px 1px 2px var(--roll-shadow-color); */
+  color: var(--outcome-text-color);
+  justify-content: center;
+  margin-top: 12px;
+  line-height: 1em;
+  text-transform: uppercase;
+  font-style: italic;
+}
+
+.mhr-outcome{
+  font-family: var(--font-family-outcome);
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--outcome-text-color);
+  /* text-shadow: 1px 1px 4px var(--blur-shadow-color); */
+  text-align: center;
+  justify-content: baseline;
+  padding: 5px 0px 20px 0px;
+}
+
 .double-ones::after {
   content: "Snake Eyes!";
   display: block; /* Ensures it appears as its own line */

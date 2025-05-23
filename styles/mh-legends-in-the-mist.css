@@ -97,10 +97,10 @@
   /* Fonts */
   --font-family-main1: "Oldrichium", serif;
   --font-family-main2: "Manuscript Antiqua", serif;
-  --font-family-move: "CCDreamland", serif;
+  --font-family-move: "Manuscript Antiqua", serif;
   --font-family-roll: "Labrada", serif;
   --font-family-tags: "CCTreasure", serif;
-  --font-family-outcome: "Manuscript Antiqua", serif;
+  --font-family-outcome: "Labrada", serif;
   --font-family-hud: "CCTreasure", serif;
   --font-family-effects: "Caveat", serif;
   --font-family-npcmoves: "Labrada", serif;
@@ -645,6 +645,31 @@ color: var(--adventure-verylight-color);
 
 .mh-essence-chart img{
   border: none;
+}
+
+/*Chat Card Styles*/
+
+.mhr-roll-title {
+  font-size: 2em;
+  text-align: center;
+  font-family: var(--font-family-move);
+  /* text-shadow: 1px 1px 2px var(--roll-shadow-color); */
+  color: var(--outcome-text-color);
+  justify-content: center;
+  margin-top: 12px;
+  line-height: 1em;
+  font-style: italic;
+}
+
+.mhr-outcome{
+  font-family: var(--font-family-outcome);
+  font-size: 1.1em;
+  font-weight: 400;
+  color: var(--outcome-text-color);
+  /* text-shadow: 1px 1px 4px var(--blur-shadow-color); */
+  text-align: center;
+  justify-content: baseline;
+  padding: 5px 0px 20px 0px;
 }
 
 /*Roll icons*/

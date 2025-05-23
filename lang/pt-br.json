@@ -3,6 +3,10 @@
     "Legends.moves.quickOutcome.fail" : "O Narrador decide um desenvolvimento narrativo prejudicial ao Herói, e pode dar ou remover uma tag ou status de forma que prejudique o Herói.",
     "Legends.moves.quickOutcome.partial" : "A ação se desenrola como esperado, ou melhor, atingindo seu objetivo pretendido ou superando um obstáculo. O Narrador também pode te dar uma tag ou status útil.\nO Narrador decide um desenvolvimento narrativo prejudicial ao Herói, e pode dar ou remover uma tag ou status de forma que prejudique o Herói.",
     "Legends.moves.quickOutcome.success" : "A ação se desenrola como esperado, ou melhor, atingindo seu objetivo pretendido ou superando um obstáculo. O Narrador também pode te dar uma tag ou status útil.\nVocê pode Tentar a Sorte:\nAceite Consequências para Grande Sucesso (Rápido) ou para +1 Poder para gastar (Detalhado).",
-    "Legends.moves.trackedOutcome.name" : "Resultado Detalhado"
+    "Legends.moves.trackedOutcome.name" : "Resultado Detalhado",
+    "Legends.moves.mitigate.name" : "Reação",
+    "Legends.moves.mitigate.fail" : "Você sofre as Consequências.",
+    "Legends.moves.mitigate.partial" : "Você tem sucesso e pode gastar PWR Poder apenas para reduzir as Consequências.",
+    "Legends.moves.mitigate.success" : "Você tem sucesso e pode gastar PWR+1 Poder em qualquer Efeito."
 
 }

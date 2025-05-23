@@ -673,6 +673,18 @@ export const moveConfig = {
 
     // Legends in the Mist moves
 
+    "Reaction - LITM ": {
+        configKey: "Reaction",
+        name: "Legends.moves.mitigate.name",
+        fail: "Legends.moves.mitigate.fail",
+        partial: "Legends.moves.mitigate.partial",
+        success: "Legends.moves.mitigate.success",
+        system: "legend",
+        slot: 1,
+        image: "Reaction.webp",
+        abbreviation: "Rc",
+    },
+
     "Quick Outcome - LITM": {
         configKey: "Quick Outcome",
         name: "Legends.moves.quickOutcome.name",
@@ -680,7 +692,7 @@ export const moveConfig = {
         partial: "Legends.moves.quickOutcome.partial",
         success: "Legends.moves.quickOutcome.success",
         system: "legend",
-        slot: 1,
+        slot: 2,
         image: "Quick Way.webp",
         abbreviation: "QK",
     },
@@ -693,7 +705,7 @@ export const moveConfig = {
         partial: "Legends.moves.quickOutcome.partial",
         success: "Legends.moves.quickOutcome.success",
         system: "legend",
-        slot: 2,
+        slot: 3,
         image: "Detailed Way - Attack.webp",
         abbreviation: "DtAtk",
         trackedEffects: [
@@ -735,7 +747,7 @@ export const moveConfig = {
     partial: "Legends.moves.quickOutcome.partial",
     success: "Legends.moves.quickOutcome.success",
     system: "legend",
-    slot: 3,
+    slot: 4,
     image: "Detailed Way - Empower.webp",
     abbreviation: "DtEmp",
     trackedEffects: [
@@ -777,7 +789,7 @@ export const moveConfig = {
     partial: "Legends.moves.quickOutcome.partial",
     success: "Legends.moves.quickOutcome.success",
     system: "legend",
-    slot: 4,
+    slot: 5,
     image: "Detailed Way - Extras.webp",
     abbreviation: "DtExt",
     trackedEffects: [
