@@ -211,16 +211,13 @@ export class NpcHUD extends Application {
     }
     
     _prepareMovesData(data) {
-        // Retrieve and group Moves by subtype
-        const moves = this.actor.items.filter(i => i.type === 'gmmove');
-
-        // Treat Legends exactly like Otherscape
-        if (data.activeSystem === 'otherscape' || data.activeSystem === 'legend') {
-            this._prepareOtherscapeMoves(data, moves);
-        } else {
-            // Everything else uses the default City of Mist grouping
-            this._prepareDefaultMoves(data, moves);
-        }
+    const moves = this.actor.items.filter(i => i.type === 'gmmove');
+    if (data.activeSystem === 'otherscape' || data.activeSystem === 'legend') {
+        this._prepareOtherscapeMoves(data, moves);
+    } else {
+        this._prepareDefaultMoves(data, moves);
+    }
+    this._prepareLegendCustomMoves(data);
     }
 
     _prepareOtherscapeMoves(data, moves) {
@@ -296,6 +293,39 @@ export class NpcHUD extends Application {
             groups[subtype].push(move);
             return groups;
         }, {});
+    }
+
+    _prepareLegendCustomMoves(data) {
+        if (data.activeSystem !== "legend") return;
+
+        // Map from marker → CSS class
+        const ICON_MAP = {
+            G: "mighty-greatness-icn",
+            O: "mighty-origin-icn",
+            A: "mighty-adventure-icn"
+        };
+
+        // Regex to match --G--, --O-- or --A-- at the start
+        const RE = /^--([GOA])--\s*(.*)$/;
+
+        // Walk each group in moveGroups
+        for (const key of Object.keys(data.moveGroups)) {
+            data.moveGroups[key] = data.moveGroups[key].map(move => {
+            if (move.system.subtype === "custom") {
+                const desc = move.system.description || "";
+                const m = desc.match(RE);
+                if (m) {
+                const tag = m[1];
+                const rest = m[2];
+                move.legendCustom = {
+                    iconClass: ICON_MAP[tag],
+                    description: rest
+                };
+                }
+            }
+            return move;
+            });
+        }
     }
     
     _prepareAdditionalData(data) {

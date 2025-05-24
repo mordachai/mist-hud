@@ -24,7 +24,7 @@
             </li>
         {{/each}}
         </ul>
-        {{#if (eq activeSystem "otherscape")}}
+        {{#if (or (eq activeSystem "otherscape") (eq activeSystem "legend"))}}
         <!-- Limits -->
         <ul class="npc-list limit">
         {{#each moveGroups.Limits}}
@@ -104,6 +104,48 @@
         </div>
 
         <div class="npc-moves-section">
+        {{#each moveGroups.Custom}}
+        <li>
+            {{#ifEquals ../activeSystem "legend"}}
+            <span class="mighty-icon {{legendCustom.iconClass}}"></span>
+            <span class="mighty-description">{{legendCustom.description}}</span>
+            {{else}}
+            <span class="npc-move-description">{{parseStatus system.description}}</span>
+            {{/ifEquals}}
+        </li>
+        {{/each}}
+
+
+        {{#if (eq activeSystem "cityofmist")}}
+            <!-- Moves -->
+            <div class="npc-subtitle-container-l">
+            <div class="npc-subtitle-text">Moves</div>
+            </div>
+            <ul class="npc-list">
+            {{#each moveGroups.Moves}}
+                <li class="">
+                <span class="npc-move-name">{{name}}</span> 
+                <span class="npc-move-description">{{parseStatus system.description}}</span>
+                </li>
+            {{/each}}
+            </ul>
+        {{/if}}
+
+        {{#if (eq activeSystem "otherscape")}}
+            <!-- Otherscape Moves -->
+            <div class="npc-subtitle-container-l">
+            <div class="npc-subtitle-text">Otherscape Moves</div>
+            </div>
+            <ul class="npc-list">
+            {{#each moveGroups.OtherscapeMoves}}
+                <li class="">
+                <span class="npc-move-name">{{name}}</span> 
+                <span class="npc-move-description">{{parseStatus system.description}}</span>
+                </li>
+            {{/each}}
+            </ul>
+        {{/if}}
+
         {{#if (or (eq activeSystem "otherscape") (eq activeSystem "legend"))}}
             <!-- Specials -->
             {{#if moveGroups.Specials.length}}

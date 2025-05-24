@@ -959,6 +959,36 @@ color: var(--adventure-verylight-color);
   color: var(--text-main-color);
 }
 
+.npc-move-name.limit:before {
+    content: '';
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url("../ui/icons/limit-arrow.svg");
+}
+
+.mighty-icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+  background-size: contain;
+  display: inline-block;
+  margin-right: 0.25em;
+}
+/* You’ll need to point these to your actual SVGs: */
+.mighty-greatness-icn  { background-image: url('../ui/icons/greatness_litm_icn.svg'); }
+.mighty-origin-icn     { background-image: url('../ui/icons/origin_litm_icn.svg'); }
+.mighty-adventure-icn  { background-image: url('../ui/icons/adventure_litm_icn.svg'); }
+
+.mighty-description {
+  font-size: 1rem;      /* adjust as needed */
+  font-family: inherit;
+  vertical-align: middle;
+}
+
+
 .npc-subtitle-text {
     text-transform: uppercase;
     font-family: var(--font-family-tags);
