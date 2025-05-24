@@ -135,6 +135,9 @@ export class NpcHUD extends Application {
     
             const collective = this.getCollectiveSize();
             data.collectiveSize = collective.value;
+
+            const activeSystem = data.activeSystem || "cityofmist";
+            data.activeSystem = activeSystem;
           
             // Create an array for the collective bar (values 1 to 6)
             data.collectiveBar = [];
@@ -210,15 +213,16 @@ export class NpcHUD extends Application {
     _prepareMovesData(data) {
         // Retrieve and group Moves by subtype
         const moves = this.actor.items.filter(i => i.type === 'gmmove');
-    
-        if (data.activeSystem === 'otherscape') {
+
+        // Treat Legends exactly like Otherscape
+        if (data.activeSystem === 'otherscape' || data.activeSystem === 'legend') {
             this._prepareOtherscapeMoves(data, moves);
         } else {
-            // Default grouping for City of Mist
+            // Everything else uses the default City of Mist grouping
             this._prepareDefaultMoves(data, moves);
         }
     }
-    
+
     _prepareOtherscapeMoves(data, moves) {
         // Group moves specifically for Otherscape
         const limits = [];
@@ -1365,6 +1369,11 @@ globalThis.syncAllNpcInfluences = syncAllNpcInfluences;
 
 // Re-register the original hooks in the original way
 Hooks.once("init", () => {
+    Handlebars.registerHelper('ifEquals', (a, b, options) => {
+    console.log('ifEquals:', a, '===', b, '?', a === b);
+    return a === b ? options.fn(this) : options.inverse(this);
+    });
+
     Handlebars.registerHelper("parseMaxTier", function (maxTier) {
         return maxTier === 999 ? "-" : maxTier;
     });

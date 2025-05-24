@@ -18,9 +18,11 @@
             <div class="npc-subtitle-text">{{spectrumLabel}}</div>
         </div>
         <ul class="npc-spectrum-list">
-            {{#each spectrums}}
-            <li><span class="npc-spectrum">{{name}}: <span class="npc-spectrum-tier">{{parseMaxTier system.maxTier}}</span></span></li>
-            {{/each}}
+        {{#each spectrums}}
+            <li class="npc-spectrum {{activeSystem}}">
+            {{name}}: <span class="npc-spectrum-tier">{{parseMaxTier system.maxTier}}</span>
+            </li>
+        {{/each}}
         </ul>
         {{#if (eq activeSystem "otherscape")}}
         <!-- Limits -->
@@ -102,7 +104,7 @@
         </div>
 
         <div class="npc-moves-section">
-        {{#if (eq activeSystem "otherscape")}}
+        {{#if (or (eq activeSystem "otherscape") (eq activeSystem "legend"))}}
             <!-- Specials -->
             {{#if moveGroups.Specials.length}}
             <div class="npc-subtitle-container-l">
@@ -111,7 +113,7 @@
             <ul class="npc-list">
             {{#each moveGroups.Specials}}
                 <li class="">
-                <span class="npc-move-name">{{name}}</span> - 
+                <span class="npc-move-name">{{name}}</span> 
                 <span class="npc-move-description">{{parseStatus system.description}}</span>
                 </li>
             {{/each}}
@@ -124,19 +126,30 @@
             </div>
             {{#each moveGroups.Threats}}
             <div class="npc-threat">
-                {{!-- <div class="npc-threat-name">{{name}}</div> --}}
+                {{#if (eq ../activeSystem "legend")}}
+                <span class="npc-threat-name">{{name}}</span>
+                {{/if}}
+                {{#if (eq ../activeSystem "otherscape")}}
                 <span class="npc-tc-marker">›</span>
+                {{/if}}
                 <span class="npc-threat-description">{{parseStatus system.description}}</span>
-                <ul>
-                {{#each consequences}}
-                    <li>
-                    {{!-- <span class="npc-move-name">{{name}}</span> -  --}}
-                    <span class="npc-tc-marker">»</span>
-                    <span class="npc-move-description">{{parseStatus system.description}}</span>
-                    </li>
-                {{/each}}
-                </ul>
-                <hr class="npc-hr">
+            <ul>
+            {{#each consequences}}
+                <li>
+                <span class="npc-tc-marker">
+                    {{#ifEquals ../../activeSystem "legend"}}
+                    <object data="modules/mist-hud/ui/icons/litm_fail_icn.svg" type="image/svg+xml"></object>
+                    {{else}}
+                    »
+                    {{/ifEquals}}
+                </span>
+                <span class="npc-move-description">
+                    {{parseStatus system.description}}
+                </span>
+                </li>
+            {{/each}}
+            </ul>
+            <hr class="npc-hr">
             </div>
             {{/each}}
         {{else}}

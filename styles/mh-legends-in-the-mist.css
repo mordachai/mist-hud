@@ -85,10 +85,12 @@
   --destroyed-tag-color: rgba(139, 38, 53, 0.825);
   
   /* Misc */
-  --spectrum-color: #d4af37;
+  --spectrum-color: #e4a5a5;
   --status-color: #BCCDB0;
   --storytag-color: #ecd68f;
-  --limit-color: #bb4355;
+  --storytag-text-color: #3c2414;
+  --limit-color: #caa6ab;
+  --limit-tier-color: #ffe5e5;
   --divider-roll-color: rgba(60, 36, 20, 0.3);
   --divider-color1: rgba(60, 36, 20, 0.3);
   --roll-shadow-color: #d4af37;
@@ -104,6 +106,7 @@
   --font-family-hud: "CCTreasure", serif;
   --font-family-effects: "Caveat", serif;
   --font-family-npcmoves: "Labrada", serif;
+  --font-family-titles: "CCTreasure", serif;
   
   /* HUD */
   --hud-background1: url('../ui/litm_hud_BG.webp');
@@ -132,6 +135,38 @@
 
 #mist-hud .window-header {
   border: none;
+  background: none;
+}
+
+#npc-hud .window-content {
+    background: url('../ui/litm_hud2_BG.webp');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    border: none;
+}
+
+#npc-hud .window-header {
+    background: var(--hud-bg-color);
+    display: flex;
+    flex-direction: row;
+    flex-basis: min-content;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgb(206, 206, 206);
+    cursor: grab;
+    padding-left: 40px;
+    transition: padding-left 0.5s;
+}
+
+.npc-content {
+  color: var(--text-hud-main-color);
+}
+
+/* Token image */
+.mh-token-image {
+  border: none;
+  border-radius: 0;
 }
 
 .mh-theme-header {
@@ -884,4 +919,80 @@ color: var(--adventure-verylight-color);
 
 .mh-improvement-marker.Origin i {
   transform: translateY(-3px);
+}
+
+/*NPC STYLES*/
+
+.npc-spectrum {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    color: black;
+    font-family: var(--font-family-main1);
+    font-weight: bold;
+    font-size: 0.9rem;
+    clip-path: none;
+}
+
+.npc-spectrum-tier {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    padding: 0;
+    width: 1.2em;
+    height: auto;
+    text-align: center;
+    font-size: 1.2rem;
+    background-image: url('../ui/icons/litm-limit-shield.svg');
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-position: center;
+    color: var(--limit-tier-color);
+}
+
+.npc-collective-container,
+.mh-npc-influence{
+  color: var(--text-main-color);
+}
+
+.npc-subtitle-text {
+    text-transform: uppercase;
+    font-family: var(--font-family-tags);
+    color: var(--effects-color3);
+    font-size: 0.9rem;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.npc-tc-marker object {
+  width: 0.85rem;
+  height: 0.85rem;
+  display: inline-block;
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.7));
+}
+
+.npc-threat {
+  font-style: normal;
+  color: var(--text-main-color);
+}
+
+.npc-threat-name {
+  font-family: var(--font-family-hud);
+  color: var(--text-main-color);
+  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: bold;
+  border: 6px solid transparent;
+  border-image-source: url('/modules/mist-hud/ui/litm-threat-name-bg.svg');
+  border-image-slice: 0 6 0 6 fill;
+  border-image-width: 6px;
+  border-image-repeat: stretch;
+}
+
+.npc-threat-description p {
+  font-family: var(--font-family-hud);
 }

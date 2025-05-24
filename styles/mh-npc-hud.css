@@ -489,7 +489,7 @@ margin: 5px;
 .npc-story-tag-moves {
     font-family: var(--font-family-npcmoves);
     background-color: var(--storytag-color);
-    color: whitesmoke;
+    color: var(--storytag-text-color);
     text-transform: lowercase;
     font-style: oblique;
     padding: 0px 2px;

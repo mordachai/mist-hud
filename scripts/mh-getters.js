@@ -77,6 +77,11 @@ export function getCrewThemes(actor) {
     attentionKey = "Otherscape.terms.upgrade";
     crackKey = "Otherscape.terms.decay";
     prefix = `${game.i18n.localize("Otherscape.terms.ritual")}/${game.i18n.localize("CityOfMist.terms.identity")}/${game.i18n.localize("Otherscape.terms.itch")}`;
+  
+  } else if (system === "legend") {
+    attentionKey = "Legend.terms.improve";
+    crackKey = "Legend.terms.abandon";
+    prefix = `${game.i18n.localize("Legend.terms.quest")}`;
   }
   
   const attentionLabel = attentionKey ? game.i18n.localize(attentionKey) : "Attention";

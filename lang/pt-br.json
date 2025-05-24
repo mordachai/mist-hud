@@ -1,12 +1,37 @@
 {
-    "Legends.moves.quickOutcome.name" : "Resultado Rápido",
-    "Legends.moves.quickOutcome.fail" : "O Narrador decide um desenvolvimento narrativo prejudicial ao Herói, e pode dar ou remover uma tag ou status de forma que prejudique o Herói.",
-    "Legends.moves.quickOutcome.partial" : "A ação se desenrola como esperado, ou melhor, atingindo seu objetivo pretendido ou superando um obstáculo. O Narrador também pode te dar uma tag ou status útil.\nO Narrador decide um desenvolvimento narrativo prejudicial ao Herói, e pode dar ou remover uma tag ou status de forma que prejudique o Herói.",
-    "Legends.moves.quickOutcome.success" : "A ação se desenrola como esperado, ou melhor, atingindo seu objetivo pretendido ou superando um obstáculo. O Narrador também pode te dar uma tag ou status útil.\nVocê pode Tentar a Sorte:\nAceite Consequências para Grande Sucesso (Rápido) ou para +1 Poder para gastar (Detalhado).",
-    "Legends.moves.trackedOutcome.name" : "Resultado Detalhado",
-    "Legends.moves.mitigate.name" : "Reação",
-    "Legends.moves.mitigate.fail" : "Você sofre as Consequências.",
-    "Legends.moves.mitigate.partial" : "Você tem sucesso e pode gastar PWR Poder apenas para reduzir as Consequências.",
-    "Legends.moves.mitigate.success" : "Você tem sucesso e pode gastar PWR+1 Poder em qualquer Efeito."
+
+"Legend.terms.upgrade": "Melhorar",
+"Legend.terms.decay": "Abandonar",
+"Legend.terms.quest": "Missão",
+"Legend.terms.milestone": "Marco",
+
+"Legends.moves.outcome.fail": "O Narrador decide um desenvolvimento narrativo prejudicial ao Herói, e pode dar ou remover uma tag ou status de forma que atrapalhe o Herói.",
+"Legends.moves.outcome.partial": "A ação se desenrola como esperado, ou melhor, alcançando seu objetivo pretendido ou superando um obstáculo. O Narrador também pode te dar uma tag ou status útil.\nO Narrador decide um desenvolvimento narrativo prejudicial ao Herói, e pode dar ou remover uma tag ou status de forma que atrapalhe o Herói.",
+"Legends.moves.outcome.success": "A ação se desenrola como esperado, ou melhor, alcançando seu objetivo pretendido ou superando um obstáculo. O Narrador também pode te dar uma tag ou status útil.\nVocê pode Forçar sua Sorte:\n\nAceite Consequências para um Grande Sucesso (Rápido) ou para +1 de Poder para gastar (Detalhado).",
+
+"Legends.moves.reaction.name": "Reação",
+"Legends.moves.quickOutcome.name": "Resultado Rápido",
+"Legends.moves.detailedOutcome.name": "Resultado Detalhado",
+
+"Legends.moves.reaction.fail": "Você sofre as Consequências como estão",
+"Legends.moves.reaction.partial": "Você tem sucesso e pode gastar PWR Poder apenas para diminuir as Consequências.",
+"Legends.moves.reaction.success": "Você tem sucesso e pode gastar PWR+1 Poder em qualquer Efeito.",
+
+"Legends.moves.sacrifice.fail" : "Foi em Vão...\nVocê paga integralmente a Consequência do seu Sacrifício, mas nada resulta disso, ou as coisas dão terrivelmente errado. O Narrador pode adicionar mais Consequências (especialmente Maus Presságios).",
+"Legends.moves.sacrifice.partial" : "É o Destino!\nVocê tem Sucesso mas paga integralmente as Consequências do seu Sacrifício.",
+"Legends.moves.sacrifice.success" : "É um Milagre!\nVocê tem Sucesso e seu Sacrifício é reduzido em um nível.",
+
+"Legends.moves.sacrifice.painful.name" : "Sacrifício (Doloroso)",
+"Legends.moves.sacrifice.painful.consequences" : "Risque todas as tags em um tema relevante (apenas uma tag se reduzido)",
+"Legends.moves.sacrifice.painful.successful" : "Alcance algo improvável ou que normalmente levaria muito mais tempo ou recursos\nIguale o Poder de um Desafio um nível acima ou abaixo do que você tem nesta situação pela duração de uma cena.",
+
+"Legends.moves.sacrifice.scarring.name" : "Sacrifício (Marcante)",
+"Legends.moves.sacrifice.scarring.consequences" : "Substitua um tema relevante",
+"Legends.moves.sacrifice.scarring.successful" : "Alcance algo extraordinário.\nIguale o Poder de um Desafio dois níveis acima ou abaixo do que você tem nesta situação pela duração de uma cena.",
+
+"Legends.moves.sacrifice.grave.name" : "Sacrifício (Grave)",
+"Legends.moves.sacrifice.grave.consequences" : "Receba um status nível-6 sem redução",
+"Legends.moves.sacrifice.grave.successful" : "Alcance algo impossível.\nSalve alguém da morte certa ou traga-os de volta dos mortos (se o momento permitir)."
+
 
 }
