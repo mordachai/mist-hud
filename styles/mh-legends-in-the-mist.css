@@ -23,7 +23,7 @@
 
 @font-face {
   font-family: 'CCTreasure';
-  src: url('../ui/fonts/cctreasure-regular.ttf') format('truetype');
+  src: url('../ui/fonts/cctreasure-trove.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -47,7 +47,7 @@
   /* Base Colors */
   --dark-color: #3c2414;
   --text-main-color: #3c2414;
-  --text-tag-color: #f5f1e8;
+  --text-tag-color: #151515;
   --text-hud-main-color: #3c2414; 
   --text-hud-subtitles-color: #6b5b4d;
   --text-status-color: #3c2414;
@@ -72,9 +72,9 @@
   --greatness-dark-color: #0f172a;
   
   /* Effects and UI */
-  --effects-color1: #6b8e23;
-  --effects-color2: #f5f1e8;
-  --effects-color3: #d4af37;
+  --effects-color1: #724a32;
+  --effects-color2: #4f311d;
+  --effects-color3: #752b2b;
   --toBurn-text-color: #d4af37;
   
   /* Tags */
@@ -95,11 +95,11 @@
   --blur-shadow-color: #d4af37;
   
   /* Fonts */
-  --font-family-main1: "Oldrichium", serif;
+  --font-family-main1: "Labrada";
   --font-family-main2: "Manuscript Antiqua", serif;
   --font-family-move: "Manuscript Antiqua", serif;
-  --font-family-roll: "Labrada", serif;
-  --font-family-tags: "CCTreasure", serif;
+  --font-family-roll: "Manuscript Antiqua", serif;
+  --font-family-tags: "Labrada", serif;
   --font-family-outcome: "Labrada", serif;
   --font-family-hud: "CCTreasure", serif;
   --font-family-effects: "Caveat", serif;
@@ -114,6 +114,24 @@
   /* Markers */
   --marker-positiveTag-color: #f6e86a;
   --marker-negativeTag-color: #c1806c;
+}
+
+#mist-hud .window-content {
+  padding: 0;
+  margin: 0;
+  margin-top: 3px;
+  list-style: none;
+  color: #00000000;
+  background: var('../ui/litm_hud_BG.webp');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center center;
+  border: none;
+  border-radius: 8px;
+}
+
+#mist-hud .window-header {
+  border: none;
 }
 
 .mh-theme-header {
@@ -142,7 +160,7 @@
   background-position: center;
 }
 
-.mh-theme-header.backpack {
+.mh-theme-header.loadout {
   justify-content: flex-end; 
 }
 
@@ -161,33 +179,40 @@
 }
 
 .mh-theme-header.neutral {
-  background-image: url('../ui/header-neutral.webp');
+  background-image: url('../ui/header-backpack.webp');
   margin-top: 2px;
 }
 
 .mh-theme-header.Crew {
-  background-image: url('../ui/header-crew.webp');
+  background-image: url('../ui/header-backpack.webp');
   margin-top: 3px;
 }
 
 .mh-theme-header.spaced {
-  background-image: url('../ui/header-neutral.webp');
+  background-image: url('../ui/header-backpack.webp');
   justify-content: space-between;
   margin-top: 2px;
 }
 
+/* .theme-container-Origin {
+  background-image: url('../ui/bg-origin.webp');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center;
+} */
+
 .theme-type.Adventure {
-  color: var(--adventure-verylight-color);
+  color: var(--text-main-color);
   text-shadow: var(--adventure-dark-color) 1px 0 3px;
 }
 
 .theme-type.Greatness {
-  color: var(--greatness-verylight-color);
+  color: var(--text-main-color);
   text-shadow: var(--greatness-dark-color) 1px 0 3px;
 }
 
 .theme-type.Origin{
-  color: var(--origin-verylight-color);
+  color: var(--text-main-color);
   text-shadow: var(--origin-dark-color) 1px 0 3px;
 }
 
@@ -201,15 +226,16 @@
   align-items: center;
   gap: 5px;
   font-family: var(--font-family-move);
-  font-size: 1.3em;
+  font-size: 1.2em;
   display: block;
   margin: 4px 2px;
   font-style: italic;
+  color: whitesmoke;
 }
 
-.mh-theme-name-com-Origin {
+/* .mh-theme-name-com-Origin {
   color: var(--origin-verylight-color);
-  font-family: var(--font-family-main1);
+  font-family: var(--font-family-move);
 }
 
 .mh-theme-name-com-Adventure {
@@ -220,9 +246,9 @@
 .mh-theme-name-com-Greatness {
   color: var(--greatness-verylight-color);
   font-family: var(--font-family-move);
-}
+} */
 
-.mh-theme-name-com-Crew,
+/* .mh-theme-name-com-Crew,
 .mh-theme-name-com-Extra{
   color: var(--text-main-color);
   font-family: var(--font-family-main1);
@@ -230,12 +256,12 @@
 
 .mh-theme-name-neutral {
   color: var(--text-main-color);
-}
+} */
 
 .mh-theme-icon.Origin {
   position: relative;
   right: -10px;
-  top: -11px;
+  top: -8px;
   width: 28px;
   height: 24px;
   background-image: url('../ui/icons/origin_litm_icn.svg');
@@ -268,11 +294,11 @@
   top: -5px;
   width: 24px;
   height: 21px;
-  background-image: url('../ui/icons/crew_litm_icn.svg');
+  background-image: url('../ui/icons/fellowship_icn.svg');
   filter: drop-shadow(1px 0 4px var(--effects-color1));
 }
 
-.mh-theme-icon-notip.backpack {
+.mh-theme-icon-notip.loadout {
   position: relative;
   width: 18px;
   height: 18px;
@@ -284,49 +310,48 @@
 .mh-theme-icon-notip.storytag {
   position: relative;
   top: -5px;
-  width: 15px;
-  height: 18px;
-  background-image: url('../ui/icons/storytag_icn.svg');
-  transform: scaleX(-1);
+  width: 25px;
+  height: 22px;
+  background-image: url('../ui/icons/fellowship_icn.svg');
   filter: drop-shadow(1px 0 4px var(--text-main-color));
 }
 
 .mh-theme-icon-notip.statuses {
   position: relative;
   top: -5px;
-  width: 18px;
-  height: 16px;
-  background-image: url('../ui/icons/statuses_icn.svg');
+  width: 25px;
+  height: 19px;
+  background-image: url('../ui/icons/status-leaf.svg');
   filter: drop-shadow(1px 0 4px var(--text-main-color));
 }
 
 .mh-power-tag,
 .mh-weakness-tag,
-.mh-backpack-tag,
+.mh-loadout-tag,
 .mh-story-tag {
   display: grid;
   flex-direction: row;
   grid-template-columns: 25px auto auto;
   flex-wrap: nowrap;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   margin: 1px 1px;
   padding: 2px 0px;
   cursor: pointer;
   text-align: left;
   height: fit-content;
   font-family: var(--font-family-main1);
-  text-transform: uppercase;
   list-style: none;
-  color: var(--text-main-color);
+  color: var(--text-tag-color);
   font-style: italic;
+  font-size: 1rem;
 }
 
 .mh-weakness-tag i {
   padding-left: 12px;
 }
 
-.mh-power-tag.Adventure {
+/* .mh-power-tag.Adventure {
 color: var(--adventure-verylight-color);
 }
 
@@ -336,20 +361,29 @@ color: var(--adventure-verylight-color);
 
 .mh-power-tag.Origin {
   color: var(--origin-verylight-color);
-}
+} */
 
 .mh-power-tag.selected {
   align-items: center;
   color: var(--text-tag-color);
   font-family: var(--font-family-main1);
-  text-transform: uppercase;
-  background-size: 100% 96%;
-  background-repeat: no-repeat;
-  background-position: left center;
   height: fit-content;
+  background-image: url('../ui/select-bar-litm-normal.svg');
+  background-position: right;
+  background-repeat: no-repeat;
+  background-size: 80% 95%;
 }
 
-.mh-power-tag.selected.Adventure {
+.mh-power-tag.selected.toBurn {
+  background-image: url('../ui/select-bar-litm-toburn.svg');
+  background-position: right;
+  background-repeat: no-repeat;
+  background-size: 80% 95%;
+}
+
+
+
+/* .mh-power-tag.selected.Adventure {
   background-image: url('../ui/select-bar-adventure.webp');
 }
 
@@ -359,9 +393,9 @@ color: var(--adventure-verylight-color);
 
 .mh-power-tag.selected.Origin {
   background-image: url('../ui/select-bar-origin.webp');
-}
+} */
 
-.mh-power-tag.selected.toBurn.Adventure {
+/* .mh-power-tag.selected.toBurn.Adventure {
   background-image: url('../ui/select-bar-adventure-toburn.webp');
 }
 
@@ -371,41 +405,39 @@ color: var(--adventure-verylight-color);
 
 .mh-power-tag.selected.toBurn.Origin {
   background-image: url('../ui/select-bar-origin-toburn.webp');
-}
+} */
 
 .mh-story-tag.selected,
-.mh-backpack-tag.selected,
+.mh-loadout-tag.selected,
 .mh-power-tag.Crew.selected,
 .mh-weakness-tag.inverted.selected {
   align-items: center;
   color: var(--text-tag-color);
-  background-image: url('../ui/select-bar-neutral2.webp');
+  background-image: url('../ui/select-bar-litm-normal.svg');
   font-style: italic;
   font-family: var(--font-family-main1);
-  text-transform: uppercase;
-  background-size: 100% 95%;
+  background-position: right;
   background-repeat: no-repeat;
-  background-position: left center;
+  background-size: 80% 95%;
   height: fit-content;
 }
 
 .mh-story-tag.selected.toBurn,
-.mh-backpack-tag.selected.toBurn,
+.mh-loadout-tag.selected.toBurn,
 .mh-power-tag.Crew.selected.toBurn {
-  background-image: url('../ui/select-bar-neutral2-toburn.webp');
+  background-image: url('../ui/select-bar-litm-toburn.svg');
 }
 
 .mh-weakness-tag.selected,
 .mh-story-tag.inverted.selected {
   align-items: center;
   color: var(--text-tag-color);
-  background-image: url('../ui/select-bar-weakness.webp');
+  background-image: url('../ui/select-bar-litm-weakness.svg');
   font-style: italic;
   font-family: var(--font-family-main1);
-  text-transform: uppercase;
-  background-size: 100% 95%;
+  background-position: right;
   background-repeat: no-repeat;
-  background-position: left center;
+  background-size: 80% 95%;
   height: fit-content;
 }
 
@@ -435,9 +467,9 @@ color: var(--adventure-verylight-color);
 }
 
 .burn-icon {
-  width: 20px;
-  height: 25px;
-  margin-left: 6px;
+  width: 21px;
+  height: 24px;
+  margin-left: 10px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -446,9 +478,9 @@ color: var(--adventure-verylight-color);
 }
 
 .burn-icon.burned {
-  width: 20px;
-  height: 25px;
-  margin-left: 6px;
+  width: 21px;
+  height: 24px;
+  margin-left: 10px;
 }
 
 .mh-power-tag.Adventure .burn-icon.unburned,
@@ -471,20 +503,20 @@ color: var(--adventure-verylight-color);
   background-image: url("../ui/icons/burn_scratch_burned.svg");
 }
 
-.mh-backpack-tag .burn-icon.unburned,
+.mh-loadout-tag .burn-icon.unburned,
 .mh-story-tag .burn-icon.unburned,
 .mh-power-tag.Crew .burn-icon.unburned{
   background-image: url("../ui/icons/burn_scratch_empty.svg");
 }
 
-.mh-backpack-tag .burn-icon.toBurn,
+.mh-loadout-tag .burn-icon.toBurn,
 .mh-story-tag .burn-icon.toBurn,
 .mh-power-tag.Crew .burn-icon.toBurn {
   background-image: url("../ui/icons/burn_scratch_toburn.svg");
   filter: drop-shadow(0 0 2px var(--effects-color1));
 }
 
-.mh-backpack-tag .burn-icon.burned,
+.mh-loadout-tag .burn-icon.burned,
 .mh-story-tag .burn-icon.burned,
 .mh-power-tag.Crew .burn-icon.burned {
   background-image: url("../ui/icons/burn_scratch_burned.svg");
@@ -492,7 +524,7 @@ color: var(--adventure-verylight-color);
 
 .mh-power-tag.burned,
 .mh-story-tag.burned,
-.mh-backpack-tag.burned  {
+.mh-loadout-tag.burned  {
   text-decoration-line: line-through;
   text-decoration-color: var(--text-main-color);
   text-decoration-thickness: 2px;
@@ -649,6 +681,13 @@ color: var(--adventure-verylight-color);
 
 /*Chat Card Styles*/
 
+.mist-hud-roll {
+  background-image: var(--hud-background1);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  width: 100%;
+}
+
 .mhr-roll-title {
   font-size: 2em;
   text-align: center;
@@ -661,6 +700,17 @@ color: var(--adventure-verylight-color);
   font-style: italic;
 }
 
+.mhr-roll-subtitle {
+  font-size: 1.8em;
+  font-weight: normal;
+  margin-bottom: 5px;
+  text-align: center;
+  font-family: var(--font-family-move);
+  color: var(--effects-color3);
+  margin-top: 8px;
+  font-style: italic;
+}
+
 .mhr-outcome{
   font-family: var(--font-family-outcome);
   font-size: 1.1em;
@@ -670,6 +720,79 @@ color: var(--adventure-verylight-color);
   text-align: center;
   justify-content: baseline;
   padding: 5px 0px 20px 0px;
+}
+
+/* Tracked Effects */
+
+.mh-trackedfx-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  font-family: var(--font-family-tags);
+  color: var(--noise-verylight-color);
+  text-align: center;
+  margin: 5px;
+}
+
+.mh-trackedfx-item {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 5px;
+  background-image: url('../ui/bg1-litm.webp');
+  background-size: 100% 100%;
+  background-position: center center;
+  filter: drop-shadow(2px 3px 4px rgba(0, 0, 0, 0.5));
+}
+
+.mh-trackedfx-name {
+  font-weight: 900;
+  font-style: oblique;
+  /* text-shadow: var(--effects-color1) 0px 0px 5px; */
+  font-size: 1.1em;
+  color: var(--effects-color1);
+}
+
+.mh-trackedfx-description {
+  font-weight: 400;
+  color: var(--effects-color2);
+  font-style: oblique;
+  /* text-shadow: var(--effects-color1) 0px 0px 5px; */
+  font-size: 1.0em;
+}
+
+.mh-trackedfx-tags {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 1.0rem;
+  font-style: italic;
+  color: var(--effects-color2);
+  width: 100%;
+  background-color: #dcc586a9;
+  border-bottom: 1px solid var(--outcome-text-color);
+  height: 40px;
+  gap: 0px 2px;
+  margin: 5px 0;
+  font-family: var(--font-family-tags);
+}
+
+.mh-trackedfx-cost {
+  text-align: center;
+  font-family: var(--font-family-outcome);
+  font-size: 1rem;
+  font-weight: 700;
+  padding-top: 3px;
+  color: var(--effects-color3);
+}
+
+.mh-trackedfx-row-break {
+  display: none;
+}
+
+.mh-trackedfx-container {
+  display: flex;
+  flex-wrap: wrap;
 }
 
 /*Roll icons*/

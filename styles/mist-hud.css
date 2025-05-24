@@ -276,9 +276,9 @@ hr {
 }
 
 .mh-tags li {
-  /* height: 1.4rem; */
+  height: 1.4rem;
   /* padding: 5px; */
-  color: whitesmoke;
+  color: var(--text-hud-main-color);
 }
 
 .mh-tags li:hover {

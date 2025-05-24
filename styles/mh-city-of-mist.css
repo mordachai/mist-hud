@@ -290,6 +290,17 @@
   margin: auto;
 }
 
+/*Chat Card Styles*/
+
+.mist-hud-roll {
+  background-image: var(--hud-background1);
+  background-repeat: no-repeat;
+  background-size: cover;
+  border: var(--positive-tag-color) 2px solid;
+  width: 96%;
+  border-radius: 10px;
+}
+
 .mhr-roll-title {
   font-size: 2em;
   text-align: center;
@@ -300,6 +311,18 @@
   margin-top: 12px;
   line-height: 1em;
   text-transform: uppercase;
+  font-style: italic;
+}
+
+.mhr-roll-subtitle {
+  font-size: 1.8em;
+  font-weight: normal;
+  margin-bottom: 5px;
+  text-align: center;
+  font-family: var(--font-family-move);
+  /* text-shadow: 1px 1px 1px var(--noise-dark-color); */
+  color: var(--noise-verylight-color);
+  margin-top: 8px;
   font-style: italic;
 }
 

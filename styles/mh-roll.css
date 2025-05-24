@@ -1,13 +1,4 @@
 /* Style specific to Mist HUD rolls */
-.mist-hud-roll {
-  background-image: var(--hud-background1);
-  background-repeat: no-repeat;
-  background-size: cover;
-  border: var(--positive-tag-color) 2px solid;
-  width: 96%;
-  border-radius: 10px;
-}
-
 .mist-hud-roll .message-sender {
   font-size: 1.0em!important;
   font-family: var(--font-family-main1) !important;
@@ -45,18 +36,6 @@
     color: var(--text-main-color);
   }
   
-  .mhr-roll-subtitle {
-    font-size: 1.8em;
-    font-weight: normal;
-    margin-bottom: 5px;
-    text-align: center;
-    font-family: var(--font-family-move);
-    /* text-shadow: 1px 1px 1px var(--noise-dark-color); */
-    color: var(--noise-verylight-color);
-    margin-top: 8px;
-    font-style: italic;
-  }
-
   .firecracker-emoji{
     font-size: 1.5rem;
     align-self: center;
@@ -358,79 +337,3 @@
   text-align: center;
   border-bottom: 1px solid #ddd;
 }
-
-/* Tracked Effects */
-
-.mh-os-trackedfx-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-  font-family: var(--font-family-tags);
-  color: var(--noise-verylight-color);
-  text-align: center;
-}
-
-.mh-os-trackedfx-item {
-  border: 2px solid #afafaf;
-  padding: 5px;
-  border-radius: 6px;
-  background-color: #0a314b;
-}
-
-.mh-os-trackedfx-name {
-  font-weight: 900;
-  font-style: oblique;
-  /* text-shadow: var(--effects-color1) 0px 0px 5px; */
-  font-size: 1.1em;
-  text-transform: uppercase;
-  color: var(--effects-color1)
-}
-
-.mh-os-trackedfx-description {
-  font-weight: 400;
-  color: var(--noise-verylight-color);
-  font-style: oblique;
-  /* text-shadow: var(--effects-color1) 0px 0px 5px; */
-  font-size: 1.0em;
-  text-transform: uppercase;
-}
-
-.mh-os-trackedfx-tags {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  font-size: 0.85rem;
-  font-style: italic;
-  color: var(--effects-color3);
-  width: 100%;
-  background-color: #7e98b3a9;
-  border-top: 1px solid var(--outcome-text-color);
-  border-bottom: 1px solid var(--outcome-text-color);
-  height: 40px;
-  gap: 0px 2px;
-  margin: 5px 0;
-  font-family: var(--font-family-effects);
-}
-
-.mh-os-trackedfx-cost {
-  text-align: center;
-  font-family: var(--font-family-tags);
-  font-size: 0.9em;
-  padding-top: 3px;
-}
-
-.mh-os-trackedfx-row-break {
-  display: none;
-}
-
-.mh-os-trackedfx-container {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.mh-os-trackedfx-item {
-  width: 100%;
-  box-sizing: border-box;
-}
-  

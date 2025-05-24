@@ -148,14 +148,14 @@
 
 
 {{#if trackedEffects.length}}
-<div class="mh-os-trackedfx-container accordion-container">
+<div class="mh-trackedfx-container accordion-container">
     {{#each trackedEffects}}
-    <div class="mh-os-trackedfx-item">
-        <div class="accordion-header clickable"><span class="mh-os-trackedfx-name">{{name}}: </span><span class="mh-os-trackedfx-description">{{description}}</span></div>
-        <div class="mh-os-trackedfx-tags accordion-content">
-        {{#each tags}}<span class="mh-os-trackedfx-tag">{{this}}</span>{{#unless @last}}, {{/unless}}{{/each}}
+    <div class="mh-trackedfx-item">
+        <div class="accordion-header clickable"><span class="mh-trackedfx-name">{{name}}: </span><span class="mh-trackedfx-description">{{description}}</span></div>
+        <div class="mh-trackedfx-tags accordion-content">
+        {{#each tags}}<span class="mh-trackedfx-tag">{{this}}</span>{{#unless @last}}, {{/unless}}{{/each}}
         </div>
-        <div class="mh-os-trackedfx-cost">{{{cost}}}</div>
+        <div class="mh-trackedfx-cost">{{{cost}}}</div>
     </div>
     {{/each}}
 </div>
