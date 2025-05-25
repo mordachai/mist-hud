@@ -138,6 +138,11 @@
   background: none;
 }
 
+#npc-hud{
+  background: var(--effects-color2);
+  border: 1px solid var(--effects-color1);
+}
+
 #npc-hud .window-content {
     background: url('../ui/litm_hud2_BG.webp');
     background-position: center center;
@@ -157,6 +162,30 @@
     cursor: grab;
     padding-left: 40px;
     transition: padding-left 0.5s;
+}
+
+#npc-hud .mh-char-name {
+    position: relative;
+    font-size: 1.1rem;
+    flex: 4;
+    font-family: var(--font-family-hud);
+    filter: drop-shadow(2px 2px 2px rgba(210, 210, 210, 0.7));
+    align-self: flex-start;
+    color: var(--effects-color2);
+    white-space: nowrap;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    top: 3px;
+}
+
+#npc-hud ul{
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  color: var(--text-main-color);
+  font-family: var(--font-family-main1);
 }
 
 .npc-content {
@@ -934,6 +963,16 @@ color: var(--adventure-verylight-color);
     font-weight: bold;
     font-size: 0.9rem;
     clip-path: none;
+    padding: 0;
+    text-transform: uppercase;
+}
+
+.npc-spectrum-list {
+    display: flex;
+    justify-content: space-around;
+    gap: 2px 2px;
+    flex-wrap: wrap;
+    margin-bottom: 0 !important;
 }
 
 .npc-spectrum-tier {
@@ -962,40 +1001,42 @@ color: var(--adventure-verylight-color);
 .npc-move-name.limit:before {
     content: '';
     display: inline-block;
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
     background-repeat: no-repeat;
     background-position: center;
     background-image: url("../ui/icons/limit-arrow.svg");
 }
 
 .mighty-icon {
-  width: 1em;
-  height: 1em;
+  width: 0.95rem;
+  height: 0.95rem;
   vertical-align: middle;
-  background-size: contain;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
   display: inline-block;
   margin-right: 0.25em;
 }
 /* You’ll need to point these to your actual SVGs: */
-.mighty-greatness-icn  { background-image: url('../ui/icons/greatness_litm_icn.svg'); }
-.mighty-origin-icn     { background-image: url('../ui/icons/origin_litm_icn.svg'); }
-.mighty-adventure-icn  { background-image: url('../ui/icons/adventure_litm_icn.svg'); }
+.mighty-greatness-icn  { background-image: url('../ui/icons/greatness-color_litm_icn.svg'); }
+.mighty-origin-icn     { background-image: url('../ui/icons/origin-color_litm_icn.svg'); }
+.mighty-adventure-icn  { background-image: url('../ui/icons/adventure-color_litm_icn.svg'); }
 
 .mighty-description {
-  font-size: 1rem;      /* adjust as needed */
-  font-family: inherit;
+  font-size: 0.95rem;
+  font-family: var(--font-family-npcmoves);
   vertical-align: middle;
 }
 
-
 .npc-subtitle-text {
     text-transform: uppercase;
-    font-family: var(--font-family-tags);
+    font-family: var(--font-family-hud);
     color: var(--effects-color3);
-    font-size: 0.9rem;
-    font-weight: 900;
+    font-size: 0.8rem;
+    font-weight: 700;
     white-space: nowrap;
+    margin: 5px 2px 3px 2px;
 }
 
 .npc-tc-marker object {
@@ -1014,7 +1055,7 @@ color: var(--adventure-verylight-color);
   font-family: var(--font-family-hud);
   color: var(--text-main-color);
   text-transform: uppercase;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
   border: 6px solid transparent;
   border-image-source: url('/modules/mist-hud/ui/litm-threat-name-bg.svg');
@@ -1025,4 +1066,5 @@ color: var(--adventure-verylight-color);
 
 .npc-threat-description p {
   font-family: var(--font-family-hud);
+  font-size: 13px;
 }

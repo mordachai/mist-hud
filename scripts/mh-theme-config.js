@@ -699,7 +699,7 @@ export const moveConfig = {
 
     "Detailed Outcome - Attack - LITM": {
         configKey: "Detailed Outcome - Attack",
-        name: "Legends.moves.trackedOutcome.name",
+        name: "Legends.moves.detailedOutcome.name",
         subtitle: "Attack",
         fail: "Legends.moves.outcome.fail",
         partial: "Legends.moves.outcome.partial",
@@ -741,7 +741,7 @@ export const moveConfig = {
 
     "Detailed Outcome - Empower - LITM": {
     configKey: "Detailed Outcome - Empower",
-    name: "Legends.moves.trackedOutcome.name",
+    name: "Legends.moves.detailedOutcome.name",
     subtitle: "Empower",
     fail: "Legends.moves.outcome.fail",
     partial: "Legends.moves.outcome.partial",
@@ -783,7 +783,7 @@ export const moveConfig = {
 
     "Detailed Outcome - Extras - LITM": {
     configKey: "Detailed Outcome - Extras",
-    name: "Legends.moves.trackedOutcome.name",
+    name: "Legends.moves.detailedOutcome.name",
     subtitle: "Extras",
     fail: "Legends.moves.outcome.fail",
     partial: "Legends.moves.outcome.partial",
