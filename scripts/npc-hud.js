@@ -1595,9 +1595,9 @@ Hooks.once("init", () => {
         processedDesc = processedDesc.replace(/\n/g, '<br>');
 
         // If you still want to ensure there's at least one <p> wrapper
-        if (!processedDesc.startsWith('<p>')) {
-        processedDesc = `<p>${processedDesc}</p>`;
-        }
+        // if (!processedDesc.startsWith('<p>')) {
+        // processedDesc = `<p>${processedDesc}</p>`;
+        // }
 
         return new Handlebars.SafeString(processedDesc);
     });    

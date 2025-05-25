@@ -68,7 +68,7 @@
 
         {{!-- Custom Section for Legend special formatting --}}
         {{#if (and moveGroups.Custom.length (eq activeSystem "legend"))}}
-        <ul class="npc-list">
+        <ul class="custom-move-list">
             {{#each moveGroups.Custom}}
             <li>
                 {{{legendCustom.processedDescription}}}
@@ -192,7 +192,7 @@
                     </li>
                 {{/each}}
                 </ul>
-                <hr class="npc-hr">
+                {{!-- <hr class="npc-hr"> --}}
             </div>
             {{/each}}
         {{/if}}
@@ -206,8 +206,7 @@
             <ul class="npc-list">
             {{#each moveGroups.Specials}}
                 <li class="">
-                <span class="npc-move-name">{{name}}</span> - 
-                <span class="npc-move-description">{{parseStatus system.description}}</span>
+                <span class="npc-move-name">{{name}}</span> - <span class="npc-move-description">{{parseStatus system.description}}</span>
                 </li>
             {{/each}}
             </ul>
@@ -231,7 +230,7 @@
                     </li>
                 {{/each}}
                 </ul>
-                <hr class="npc-hr">
+                {{!-- <hr class="npc-hr"> --}}
             </div>
             {{/each}}
         {{/if}}

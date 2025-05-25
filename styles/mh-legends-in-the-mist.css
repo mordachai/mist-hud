@@ -1,29 +1,10 @@
 /* legends-in-the-mist.css */
 
-@font-face {
-  font-family: 'Oldrichium';
-  src: url('../ui/fonts/oldrichium-regular.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'CCDreamland';
-  src: url('../ui/fonts/ccdreamland-regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Labrada:ital,wght@0,100..900;1,100..900&display=swap');
 
 @font-face {
   font-family: 'Labrada';
-  src: url('../ui/fonts/labrada-regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'CCTreasure';
-  src: url('../ui/fonts/cctreasure-trove.ttf') format('truetype');
+  src: url('../ui/fonts/Labrada-Var.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -37,7 +18,14 @@
 
 @font-face {
   font-family: 'Caveat';
-  src: url('../ui/fonts/caveat-regular.ttf') format('truetype');
+  src: url('../ui/fonts/Caveat-Var.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'CCTreasure';
+  src: url('../ui/fonts/cctreasure-trove.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -79,16 +67,17 @@
   
   /* Tags */
   --positive-tag-color: #f6e86a;
-  --positive-tag-borderColor: #faf3ae;
+  --positive-tag-borderColor: #03930c;
   --negative-tag-color: #c1806c;
-  --negative-tag-borderColor: #f9af98;
+  --negative-tag-borderColor: #7a0000;
   --destroyed-tag-color: rgba(139, 38, 53, 0.825);
+  --burned-text-color: #d6d2d0;
   
   /* Misc */
   --spectrum-color: #e4a5a5;
   --status-color: #BCCDB0;
   --storytag-color: #ecd68f;
-  --storytag-text-color: #3c2414;
+  --storytag-text-color: #19100a;
   --limit-color: #caa6ab;
   --limit-tier-color: #ffe5e5;
   --divider-roll-color: rgba(60, 36, 20, 0.3);
@@ -98,18 +87,12 @@
   
   /* Fonts */
   --font-family-main1: "Labrada";
-  --font-family-main2: "Manuscript Antiqua", serif;
-  --font-family-move: "Manuscript Antiqua", serif;
-  --font-family-roll: "Manuscript Antiqua", serif;
-  --font-family-tags: "Labrada", serif;
-  --font-family-outcome: "Labrada", serif;
-  --font-family-hud: "CCTreasure", serif;
-  --font-family-effects: "Caveat", serif;
-  --font-family-npcmoves: "Labrada", serif;
-  --font-family-titles: "CCTreasure", serif;
+  --font-family-main2: "Manuscript Antiqua";
+  --font-family-cursive: "Caveat";
+  --font-family-titles: "CCTreasure";
   
   /* HUD */
-  --hud-background1: url('../ui/litm_hud_BG.webp');
+  --hud-background1: url('../ui/litm_hud2_BG.webp');
   --hud-bg-color: url('../ui/litm_hud_BG.webp'); /*rgba(245, 241, 232, 0.8); */
   --hud-bg-color2: rgba(245, 241, 232, 0.9);
   --npc-hud-bg-prime: rgba(107, 139, 35, 0.2);
@@ -149,6 +132,7 @@
     background-repeat: no-repeat;
     background-size: 100% 100%;
     border: none;
+    font-family: var(--font-family-main1);
 }
 
 #npc-hud .window-header {
@@ -168,7 +152,7 @@
     position: relative;
     font-size: 1.1rem;
     flex: 4;
-    font-family: var(--font-family-hud);
+    font-family: var(--font-family-titles);
     filter: drop-shadow(2px 2px 2px rgba(210, 210, 210, 0.7));
     align-self: flex-start;
     color: var(--effects-color2);
@@ -289,27 +273,29 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-family: var(--font-family-move);
+  font-family: var(--font-family-titles);
   font-size: 1.2em;
   display: block;
   margin: 4px 2px;
   font-style: italic;
-  color: whitesmoke;
+  color: rgb(236, 236, 236);
+  text-shadow: -1px -1px 1px rgba(29, 29, 29, 0.8);
+
 }
 
 /* .mh-theme-name-com-Origin {
   color: var(--origin-verylight-color);
-  font-family: var(--font-family-move);
+  font-family: var(--font-family-main1);
 }
 
 .mh-theme-name-com-Adventure {
   color: var(--adventure-verylight-color);
-  font-family: var(--font-family-move);
+  font-family: var(--font-family-main1);
 }
 
 .mh-theme-name-com-Greatness {
   color: var(--greatness-verylight-color);
-  font-family: var(--font-family-move);
+  font-family: var(--font-family-main1);
 } */
 
 /* .mh-theme-name-com-Crew,
@@ -404,11 +390,10 @@
   cursor: pointer;
   text-align: left;
   height: fit-content;
-  font-family: var(--font-family-main1);
+  font-family: var(--font-family-cursive);
   list-style: none;
   color: var(--text-tag-color);
-  font-style: italic;
-  font-size: 1rem;
+  font-size: 1.5rem;
 }
 
 .mh-weakness-tag i {
@@ -658,91 +643,6 @@ color: var(--adventure-verylight-color);
   color: var(--text-main-color);
 }
 
-.mh-essence-title {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  flex-wrap: nowrap;
-  font-family: var(--font-family-move);
-  font-size: 1.3rem;
-  margin: 4px 2px;
-  padding: 2px;
-  font-style: italic;
-  white-space: nowrap;
-}
-
-.mh-essence-subheader {
-  font-family: var(--font-family-main1);
-  font-weight: bold;
-  font-size: 0.95rem;
-  text-align: center;
-}
-
-.mh-essence-subheader span {
-  font-weight: normal;
-  font-size: 0.85rem;
-}
-
-.mh-essence-text {
-  font-family: var(--font-family-main1);
-  font-size: 0.80rem;
-  text-transform: uppercase;
-  line-height: 1.2rem;
-  text-align: justify;
-  font-style: italic;
-  word-wrap: break-word !important;
-  overflow-wrap: break-word !important;
-  hyphens: auto !important;
-}
-
-/* Essence-specific styles for LITM */
-.mh-essence-title.village-healer {
-  color: var(--origin-primary-color);
-  text-shadow: var(--origin-dark-color) 1px 1px 7px;
-}
-
-.mh-essence-title.sword-of-thunder {
-  color: var(--adventure-primary-color);
-  text-shadow: var(--adventure-dark-color) 1px 1px 7px;
-}
-
-.mh-essence-title.dragon {
-  color: var(--greatness-primary-color);
-  text-shadow: var(--greatness-dark-color) 1px 1px 7px;
-}
-
-.mh-essence-title.runescribing {
-  color: var(--origin-primary-color);
-  text-shadow: var(--origin-dark-color) 2px 2px 6px;
-}
-
-.mh-essence-title.blazing-invoker {
-  color: var(--adventure-primary-color);
-  text-shadow: var(--adventure-dark-color) 2px 2px 6px;
-}
-
-.mh-essence-title.rune-sage {
-  color: var(--greatness-primary-color);
-  text-shadow: var(--greatness-dark-color) 2px 2px 6px;
-}
-
-.mh-essence-title.legends-in-the-mist {
-  background-color: rgba(60, 36, 20, 0.2);
-  padding: 4px 2px;
-}
-
-.mh-essence-chart{
-  float: left;
-  width: 75px;
-  height: 75px;
-  margin: 0 5px 5px 0;
-}
-
-.mh-essence-chart img{
-  border: none;
-}
-
 /*Chat Card Styles*/
 
 .mist-hud-roll {
@@ -752,11 +652,42 @@ color: var(--adventure-verylight-color);
   width: 100%;
 }
 
+.mhr-outcome.outcome-fail-double-ones,
+.mhr-outcome.outcome-fail {
+  background-image: url('../ui/outcome-bg-litm-f.webp');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center center;
+  filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.5));
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+.mhr-outcome.outcome-fail-double-ones,
+.mhr-outcome.outcome-success {
+  background-image: url('../ui/outcome-bg-litm-s.webp');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center center;
+  filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.5));
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+.mhr-outcome.outcome-partial {
+  background-image: url('../ui/outcome-bg-litm-p.webp');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center center;
+  filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.5));
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
 .mhr-roll-title {
   font-size: 2em;
   text-align: center;
-  font-family: var(--font-family-move);
-  /* text-shadow: 1px 1px 2px var(--roll-shadow-color); */
+  font-family: var(--font-family-main2);
   color: var(--outcome-text-color);
   justify-content: center;
   margin-top: 12px;
@@ -769,14 +700,14 @@ color: var(--adventure-verylight-color);
   font-weight: normal;
   margin-bottom: 5px;
   text-align: center;
-  font-family: var(--font-family-move);
+  font-family: var(--font-family-main1);
   color: var(--effects-color3);
   margin-top: 8px;
   font-style: italic;
 }
 
 .mhr-outcome{
-  font-family: var(--font-family-outcome);
+  font-family: var(--font-family-main1);
   font-size: 1.1em;
   font-weight: 400;
   color: var(--outcome-text-color);
@@ -792,7 +723,7 @@ color: var(--adventure-verylight-color);
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 6px;
-  font-family: var(--font-family-tags);
+  font-family: var(--font-family-main1);
   color: var(--noise-verylight-color);
   text-align: center;
   margin: 5px;
@@ -809,18 +740,16 @@ color: var(--adventure-verylight-color);
 }
 
 .mh-trackedfx-name {
-  font-weight: 900;
-  font-style: oblique;
+  font-weight: 600;
+  font-style: normal;
   /* text-shadow: var(--effects-color1) 0px 0px 5px; */
-  font-size: 1.1em;
+  font-size: 0.95em;
+  font-family: var(--font-family-titles);
   color: var(--effects-color1);
 }
 
 .mh-trackedfx-description {
-  font-weight: 400;
   color: var(--effects-color2);
-  font-style: oblique;
-  /* text-shadow: var(--effects-color1) 0px 0px 5px; */
   font-size: 1.0em;
 }
 
@@ -838,12 +767,12 @@ color: var(--adventure-verylight-color);
   height: 40px;
   gap: 0px 2px;
   margin: 5px 0;
-  font-family: var(--font-family-tags);
+  font-family: var(--font-family-main1);
 }
 
 .mh-trackedfx-cost {
   text-align: center;
-  font-family: var(--font-family-outcome);
+  font-family: var(--font-family-main1);
   font-size: 1rem;
   font-weight: 700;
   padding-top: 3px;
@@ -998,6 +927,17 @@ color: var(--adventure-verylight-color);
   color: var(--text-main-color);
 }
 
+.npc-subtitle-container-r::before,
+.npc-subtitle-container-l::after,
+.npc-subtitle-container-c::before,
+.npc-subtitle-container-c::after {
+    background-color:  var(--effects-color3);
+}
+
+.custom-move-list {
+  text-align: center;
+}
+
 .npc-move-name.limit:before {
     content: '';
     display: inline-block;
@@ -1024,47 +964,58 @@ color: var(--adventure-verylight-color);
 .mighty-adventure-icn  { background-image: url('../ui/icons/adventure-color_litm_icn.svg'); }
 
 .mighty-description {
-  font-size: 0.95rem;
-  font-family: var(--font-family-npcmoves);
+  font-size: 1.0rem;
+  font-family: var(--font-family-main1);
   vertical-align: middle;
 }
 
 .npc-subtitle-text {
     text-transform: uppercase;
-    font-family: var(--font-family-hud);
-    color: var(--effects-color3);
+    font-family: var(--font-family-main1);
+    color: var(--effects-color1);
     font-size: 0.8rem;
-    font-weight: 700;
+    font-weight: 800;
     white-space: nowrap;
-    margin: 5px 2px 3px 2px;
+    margin: 3px 2px 3px 2px;
+    text-shadow: 1px 1px 2px rgb(255, 249, 249);
 }
 
 .npc-tc-marker object {
-  width: 0.85rem;
-  height: 0.85rem;
+  width: 0.9rem;
+  height: 0.9rem;
   display: inline-block;
-  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.7));
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.7));
 }
 
 .npc-threat {
   font-style: normal;
   color: var(--text-main-color);
+  background-image: url('/modules/mist-hud/ui/bg2-litm.webp');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center center;
+  padding: 15px;
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
+  margin: 0px 2px 5px 0px;
 }
 
 .npc-threat-name {
-  font-family: var(--font-family-hud);
+  font-family: var(--font-family-main1);
   color: var(--text-main-color);
   text-transform: uppercase;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: bold;
   border: 6px solid transparent;
   border-image-source: url('/modules/mist-hud/ui/litm-threat-name-bg.svg');
   border-image-slice: 0 6 0 6 fill;
   border-image-width: 6px;
   border-image-repeat: stretch;
+  margin-left: -5px;
+  filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.7));
 }
 
-.npc-threat-description p {
-  font-family: var(--font-family-hud);
-  font-size: 13px;
+.npc-threat-description {
+  font-family: var(--font-family-main1);
+  font-size: large;
+  font-weight: 600;
 }
