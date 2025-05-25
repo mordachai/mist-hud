@@ -210,56 +210,6 @@ export class NpcHUD extends Application {
         data.spectrums = this.actor.items.filter(i => i.type === 'spectrum');
     }
     
-    _prepareMovesData(data) {
-    const moves = this.actor.items.filter(i => i.type === 'gmmove');
-    if (data.activeSystem === 'otherscape' || data.activeSystem === 'legend') {
-        this._prepareOtherscapeMoves(data, moves);
-    } else {
-        this._prepareDefaultMoves(data, moves);
-    }
-    this._prepareLegendCustomMoves(data);
-    }
-
-    _prepareOtherscapeMoves(data, moves) {
-        // Group moves specifically for Otherscape
-        const limits = [];
-        const specials = [];
-        const threats = [];
-
-        // Collect soft moves and classify hard moves
-        const softMoves = new Map();
-        moves.forEach(move => {
-            const subtype = move.system.subtype;
-            if (subtype === "intrusion") {
-                limits.push(move);
-            } else if (subtype === "hard" && !move.system.superMoveId) {
-                specials.push(move);
-            } else if (subtype === "soft") {
-                softMoves.set(move._id, { ...move, consequences: [] });
-            }
-        });
-
-        // Link hard moves to their corresponding soft move
-        moves.forEach(move => {
-            if (move.system.subtype === "hard" && move.system.superMoveId) {
-                const parentId = move.system.superMoveId;
-                if (softMoves.has(parentId)) {
-                    softMoves.get(parentId).consequences.push(move);
-                }
-            }
-        });
-
-        // Add soft moves with consequences to threats
-        threats.push(...Array.from(softMoves.values()));
-
-        // Assign grouped moves for Otherscape
-        data.moveGroups = {
-            Limits: limits,
-            Specials: specials,
-            Threats: threats,
-        };
-    }
-    
     _prepareDefaultMoves(data, moves) {
         data.moveGroups = moves.reduce((groups, move) => {
             let subtype = move.system.subtype || 'default';
@@ -295,38 +245,155 @@ export class NpcHUD extends Application {
         }, {});
     }
 
-    _prepareLegendCustomMoves(data) {
-        if (data.activeSystem !== "legend") return;
 
-        // Map from marker → CSS class
-        const ICON_MAP = {
-            G: "mighty-greatness-icn",
-            O: "mighty-origin-icn",
-            A: "mighty-adventure-icn"
-        };
-
-        // Regex to match --G--, --O-- or --A-- at the start
-        const RE = /^--([GOA])--\s*(.*)$/;
-
-        // Walk each group in moveGroups
-        for (const key of Object.keys(data.moveGroups)) {
-            data.moveGroups[key] = data.moveGroups[key].map(move => {
-            if (move.system.subtype === "custom") {
-                const desc = move.system.description || "";
-                const m = desc.match(RE);
-                if (m) {
-                const tag = m[1];
-                const rest = m[2];
-                move.legendCustom = {
-                    iconClass: ICON_MAP[tag],
-                    description: rest
-                };
-                }
-            }
-            return move;
-            });
-        }
+_prepareMovesData(data) {
+    const moves = this.actor.items.filter(i => i.type === 'gmmove');
+    console.log("_prepareMovesData called");
+    console.log("Active system:", data.activeSystem);
+    console.log("Total moves found:", moves.length);
+    console.log("Moves:", moves.map(m => ({ name: m.name, subtype: m.system.subtype })));
+    
+    if (data.activeSystem === 'otherscape') {
+        this._prepareOtherscapeMoves(data, moves);
+    } else if (data.activeSystem === 'legend') {
+        console.log("About to call _prepareLegendMoves");
+        this._prepareLegendMoves(data, moves);
+        console.log("About to call _prepareLegendCustomMoves");
+        // Apply legend custom formatting AFTER grouping
+        this._prepareLegendCustomMoves(data);
+        console.log("Finished calling _prepareLegendCustomMoves");
+    } else {
+        this._prepareDefaultMoves(data, moves);
     }
+    
+    console.log("Final moveGroups:", data.moveGroups);
+}
+
+_prepareOtherscapeMoves(data, moves) {
+    // Group moves specifically for Otherscape
+    const limits = [];
+    const specials = [];
+    const threats = [];
+    const custom = [];
+
+    // Collect soft moves and classify hard moves
+    const softMoves = new Map();
+    moves.forEach(move => {
+        const subtype = move.system.subtype;
+        if (subtype === "intrusion") {
+            limits.push(move);
+        } else if (subtype === "hard" && !move.system.superMoveId) {
+            specials.push(move);
+        } else if (subtype === "custom") {
+            custom.push(move);
+        } else if (subtype === "soft") {
+            softMoves.set(move._id, { ...move, consequences: [] });
+        }
+    });
+
+    // Link hard moves to their corresponding soft move
+    moves.forEach(move => {
+        if (move.system.subtype === "hard" && move.system.superMoveId) {
+            const parentId = move.system.superMoveId;
+            if (softMoves.has(parentId)) {
+                softMoves.get(parentId).consequences.push(move);
+            }
+        }
+    });
+
+    // Add soft moves with consequences to threats
+    threats.push(...Array.from(softMoves.values()));
+
+    // Assign grouped moves for Otherscape
+    data.moveGroups = {
+        Limits: limits,
+        Specials: specials,
+        Threats: threats,
+        Custom: custom,
+    };
+}
+
+_prepareLegendMoves(data, moves) {
+    // Group moves specifically for Legends in the Mist
+    const limits = [];
+    const specials = [];
+    const threats = [];
+    const custom = [];
+
+    // Collect soft moves and classify other moves
+    const softMoves = new Map();
+    moves.forEach(move => {
+        const subtype = move.system.subtype;
+        if (subtype === "intrusion") {
+            limits.push(move);
+        } else if (subtype === "hard" && !move.system.superMoveId) {
+            specials.push(move);
+        } else if (subtype === "custom") {
+            custom.push(move);
+        } else if (subtype === "soft") {
+            softMoves.set(move._id, { ...move, consequences: [] });
+        }
+    });
+
+    // Link hard moves to their corresponding soft move
+    moves.forEach(move => {
+        if (move.system.subtype === "hard" && move.system.superMoveId) {
+            const parentId = move.system.superMoveId;
+            if (softMoves.has(parentId)) {
+                softMoves.get(parentId).consequences.push(move);
+            }
+        }
+    });
+
+    // Add soft moves with consequences to threats
+    threats.push(...Array.from(softMoves.values()));
+
+    // Assign grouped moves for Legend
+    data.moveGroups = {
+        Limits: limits,
+        Specials: specials,
+        Threats: threats,
+        Custom: custom,
+    };
+}
+
+_prepareLegendCustomMoves(data) {
+    // Only process if we're in legend system and have custom moves
+    if (data.activeSystem !== "legend" || !data.moveGroups.Custom?.length) return;
+
+    // Map from marker → CSS class
+    const ICON_MAP = {
+        G: "mighty-greatness-icn",
+        O: "mighty-origin-icn", 
+        A: "mighty-adventure-icn"
+    };
+
+    // Process each custom move for Legend system
+    data.moveGroups.Custom = data.moveGroups.Custom.map(move => {
+        const desc = move.system.description || "";
+        
+        // For Legend system, always process the description 
+        // Replace -X- or --X-- patterns with proper HTML, or use original description
+        const processedDesc = desc.replace(/-{1,2}([GOA])-{1,2}\s*([^,\n]+)/g, (match, tag, text) => {
+            const iconClass = ICON_MAP[tag];
+            return `<span class="mighty-icon ${iconClass}"></span><span class="mighty-description">${text.trim()}</span>`;
+        });
+        
+        // Create plain object with processed description
+        return {
+            _id: move._id,
+            name: move.name,
+            type: move.type,
+            system: move.system,
+            img: move.img,
+            legendCustom: {
+                processedDescription: processedDesc
+            }
+        };
+    });
+}
+
+
     
     _prepareAdditionalData(data) {
         // Retrieve Story Tags
@@ -1410,6 +1477,13 @@ Hooks.once("init", () => {
 
     // Enhanced parseStatus Handlebars helper with temp/perm flags and $name replacement
     Handlebars.registerHelper("parseStatus", function (description, options) {
+
+    if (!description) {
+        console.warn("parseStatus called with undefined description, options:", options);
+        return new Handlebars.SafeString('');
+    }
+
+
         // Retrieve collectiveSize and character name from the root data context
         const collectiveSize = Number(options.data.root.collectiveSize || 0);
         const characterName = options.data.root.name || "Character"; // Get the character's name

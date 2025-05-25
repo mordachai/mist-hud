@@ -104,22 +104,27 @@
         </div>
 
         <div class="npc-moves-section">
-        {{#each moveGroups.Custom}}
-        <li>
-            {{#ifEquals ../activeSystem "legend"}}
-            <span class="mighty-icon {{legendCustom.iconClass}}"></span>
-            <span class="mighty-description">{{legendCustom.description}}</span>
-            {{else}}
-            <span class="npc-move-description">{{parseStatus system.description}}</span>
-            {{/ifEquals}}
-        </li>
-        {{/each}}
 
+{{!-- Custom Section for Might in Legends --}}
+{{#if moveGroups.Custom.length}}
+<ul class="npc-list">
+    {{#each moveGroups.Custom}}
+    <li>
+        {{#if (eq ../activeSystem "legend")}}
+            {{{legendCustom.processedDescription}}}
+        {{else}}
+            <span class="npc-move-name">{{name}}</span> - 
+            <span class="npc-move-description">{{parseStatus system.description}}</span>
+        {{/if}}
+    </li>
+    {{/each}}
+</ul>
+{{/if}}
 
         {{#if (eq activeSystem "cityofmist")}}
-            <!-- Moves -->
+            <!-- City of Mist Moves -->
             <div class="npc-subtitle-container-l">
-            <div class="npc-subtitle-text">Moves</div>
+                <div class="npc-subtitle-text">Moves</div>
             </div>
             <ul class="npc-list">
             {{#each moveGroups.Moves}}
@@ -129,12 +134,31 @@
                 </li>
             {{/each}}
             </ul>
+            
+            <!-- Default grouping for City of Mist (other move types) -->
+            {{#each moveGroups as |moves subtype|}}
+                {{#unless (or (eq subtype "Custom") (eq subtype "Moves"))}}
+                <div class="npc-move-type">
+                    <div class="npc-subtitle-container-l npc-subtitle-text">{{subtype}}</div>
+                    <ul class="npc-list">
+                    {{#each moves}}
+                        <li>
+                        {{#unless system.hideName}}
+                            <span class="npc-move-name">{{name}}</span> - 
+                        {{/unless}}
+                        <span class="npc-move-description">{{parseStatus system.description}}</span>
+                        </li>
+                    {{/each}}
+                    </ul>
+                </div>
+                {{/unless}}
+            {{/each}}
         {{/if}}
 
         {{#if (eq activeSystem "otherscape")}}
             <!-- Otherscape Moves -->
             <div class="npc-subtitle-container-l">
-            <div class="npc-subtitle-text">Otherscape Moves</div>
+                <div class="npc-subtitle-text">Otherscape Moves</div>
             </div>
             <ul class="npc-list">
             {{#each moveGroups.OtherscapeMoves}}
@@ -144,13 +168,11 @@
                 </li>
             {{/each}}
             </ul>
-        {{/if}}
-
-        {{#if (or (eq activeSystem "otherscape") (eq activeSystem "legend"))}}
+            
             <!-- Specials -->
             {{#if moveGroups.Specials.length}}
             <div class="npc-subtitle-container-l">
-            <div class="npc-subtitle-text">Specials</div>
+                <div class="npc-subtitle-text">Specials</div>
             </div>
             <ul class="npc-list">
             {{#each moveGroups.Specials}}
@@ -164,57 +186,65 @@
 
             <!-- Threats -->
             <div class="npc-subtitle-container-l">
-            <div class="npc-subtitle-text">›Threats / »Consequences</div>
+                <div class="npc-subtitle-text">›Threats / »Consequences</div>
             </div>
             {{#each moveGroups.Threats}}
             <div class="npc-threat">
-                {{#if (eq ../activeSystem "legend")}}
-                <span class="npc-threat-name">{{name}}</span>
-                {{/if}}
-                {{#if (eq ../activeSystem "otherscape")}}
                 <span class="npc-tc-marker">›</span>
-                {{/if}}
                 <span class="npc-threat-description">{{parseStatus system.description}}</span>
-            <ul>
-            {{#each consequences}}
-                <li>
-                <span class="npc-tc-marker">
-                    {{#ifEquals ../../activeSystem "legend"}}
-                    <object data="modules/mist-hud/ui/icons/litm_fail_icn.svg" type="image/svg+xml"></object>
-                    {{else}}
-                    »
-                    {{/ifEquals}}
-                </span>
-                <span class="npc-move-description">
-                    {{parseStatus system.description}}
-                </span>
-                </li>
-            {{/each}}
-            </ul>
-            <hr class="npc-hr">
-            </div>
-            {{/each}}
-        {{else}}
-            <!-- Default grouping for City of Mist -->
-            {{#each moveGroups as |moves subtype|}}
-            <div class="npc-move-type">
-                <div class="npc-subtitle-container-l npc-subtitle-text">{{subtype}}</div>
-                <ul class="npc-list">
-                {{#each moves}}
+                <ul>
+                {{#each consequences}}
                     <li>
-                    {{#unless system.hideName}}
-                        <span class="npc-move-name">{{name}}</span> - 
-                    {{/unless}}
+                    <span class="npc-tc-marker">»</span>
                     <span class="npc-move-description">{{parseStatus system.description}}</span>
                     </li>
                 {{/each}}
                 </ul>
+                <hr class="npc-hr">
             </div>
             {{/each}}
         {{/if}}
+
+        {{#if (eq activeSystem "legend")}}
+            <!-- Specials -->
+            {{#if moveGroups.Specials.length}}
+            <div class="npc-subtitle-container-l">
+                <div class="npc-subtitle-text">Specials</div>
+            </div>
+            <ul class="npc-list">
+            {{#each moveGroups.Specials}}
+                <li class="">
+                <span class="npc-move-name">{{name}}</span> 
+                <span class="npc-move-description">{{parseStatus system.description}}</span>
+                </li>
+            {{/each}}
+            </ul>
+            {{/if}}
+
+            <!-- Threats -->
+            <div class="npc-subtitle-container-l">
+                <div class="npc-subtitle-text">›Threats / »Consequences</div>
+            </div>
+            {{#each moveGroups.Threats}}
+            <div class="npc-threat">
+                <span class="npc-threat-name">{{name}}</span>
+                <span class="npc-threat-description">{{parseStatus system.description}}</span>
+                <ul>
+                {{#each consequences}}
+                    <li>
+                    <span class="npc-tc-marker">
+                        <object data="modules/mist-hud/ui/icons/litm_fail_icn.svg" type="image/svg+xml"></object>
+                    </span>
+                    <span class="npc-move-description">{{parseStatus system.description}}</span>
+                    </li>
+                {{/each}}
+                </ul>
+                <hr class="npc-hr">
+            </div>
+            {{/each}}
+        {{/if}}
+
         </div>
-
-
 
     </div>
     {{/unless}}
