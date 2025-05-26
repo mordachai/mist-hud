@@ -664,7 +664,7 @@ color: var(--adventure-verylight-color);
   margin-bottom: 10px;
 }
 
-.mhr-outcome.outcome-fail-double-ones,
+.mhr-outcome.outcome-success-double-ones,
 .mhr-outcome-icon.outcome-boxcars,
 .mhr-outcome.outcome-success {
   background-image: url('../ui/outcome-bg-litm-s.webp');
