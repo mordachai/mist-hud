@@ -717,6 +717,84 @@ color: var(--adventure-verylight-color);
   padding: 5px 0px 20px 0px;
 }
 
+/* Layout do outcome com ícone centralizado */
+.roll-total-with-icon {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px;
+}
+
+/* Número da rolagem */
+.roll-number {
+  font-size: 2.5em;
+  font-family: var(--font-family-roll);
+  text-shadow: -1px 1px 2px var(--roll-shadow-color);
+  color: var(--outcome-text-color);
+  font-stretch: extra-condensed;
+  font-style: oblique;
+  font-weight: bolder;
+}
+
+
+/* .outcome-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+} */
+
+/* Ícone do outcome */
+.outcome-icon {
+    position: relative;
+    width: 35px;
+    height: 35px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+    top: -3px;
+}
+
+/* Ícones específicos para cada outcome */
+.outcome-icon.outcome-success,
+.outcome-icon.outcome-success-double-sixes,
+.outcome-icon.outcome-boxcars {
+  background-image: url('../ui/icons/litm_success_icn.svg');
+}
+
+.outcome-icon.outcome-partial {
+  background-image: url('../ui/icons/litm_partial_icn.svg');
+}
+
+.outcome-icon.outcome-fail,
+.outcome-icon.outcome-fail-double-ones,
+.outcome-icon.outcome-snake-eyes {
+  background-image: url('../ui/icons/litm_fail_icn.svg');
+}
+
+/* Texto do outcome */
+.outcome-text {
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Dados inline para Legends in the Mist */
+.mh-dice-inline {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.inline-dice {
+  width: 28px !important;
+  height: 30px !important;
+  font-size: 16px !important;
+  margin: 0 !important;
+}
+
 /* Tracked Effects */
 
 .mh-trackedfx-container {
