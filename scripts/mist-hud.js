@@ -1557,8 +1557,6 @@ export class MistHUD extends Application {
   }
 
   injectRollBar(html) {
-    console.log("Active system:", activeSystem);
-
 
     // Remove any existing roll bar to avoid duplicates
     html.find(".mh-roll-bar").remove();
@@ -1570,6 +1568,8 @@ export class MistHUD extends Application {
     // Get user setting for text or image display
     const useText = game.settings.get("mist-hud", "useTextButtons");
     const activeSystem = game.settings.get("city-of-mist", "system");
+    console.warn("Active system:", activeSystem);
+
 
     // Create roll bar and move containers
     const rollBar = $(`<div class="mh-roll-bar"></div>`);

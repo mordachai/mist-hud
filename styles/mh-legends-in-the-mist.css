@@ -108,7 +108,7 @@
   margin-top: 3px;
   list-style: none;
   color: #00000000;
-  background: var('../ui/litm_hud_BG.webp');
+  /* background: var('--hud-background1'); */
   background-repeat: no-repeat;
   background-size: 100% 100%;
   background-position: center center;
@@ -536,39 +536,39 @@ color: var(--adventure-verylight-color);
 .mh-power-tag.Origin .burn-icon.unburned,
 .mh-power-tag.Greatness .burn-icon.unburned
   {
-  background-image: url("../ui/icons/burn_scratch_empty.svg");
+  background-image: url("../ui/icons/burn_scratch_empty2.svg");
 }
 
 .mh-power-tag.Adventure .burn-icon.toBurn,
 .mh-power-tag.Origin .burn-icon.toBurn,
 .mh-power-tag.Greatness .burn-icon.toBurn{
-  background-image: url("../ui/icons/burn_scratch_toburn.svg");
+  background-image: url("../ui/icons/burn_scratch_toburn2.svg");
   filter: drop-shadow(0 0 3px var(--toBurn-text-color));
 }
 
 .mh-power-tag.Adventure .burn-icon.burned,
 .mh-power-tag.Origin .burn-icon.burned,
 .mh-power-tag.Greatness .burn-icon.burned {
-  background-image: url("../ui/icons/burn_scratch_burned.svg");
+  background-image: url("../ui/icons/burn_scratch_burned2.svg");
 }
 
 .mh-loadout-tag .burn-icon.unburned,
 .mh-story-tag .burn-icon.unburned,
 .mh-power-tag.Crew .burn-icon.unburned{
-  background-image: url("../ui/icons/burn_scratch_empty.svg");
+  background-image: url("../ui/icons/burn_scratch_empty2.svg");
 }
 
 .mh-loadout-tag .burn-icon.toBurn,
 .mh-story-tag .burn-icon.toBurn,
 .mh-power-tag.Crew .burn-icon.toBurn {
-  background-image: url("../ui/icons/burn_scratch_toburn.svg");
+  background-image: url("../ui/icons/burn_scratch_toburn2.svg");
   filter: drop-shadow(0 0 2px var(--effects-color1));
 }
 
 .mh-loadout-tag .burn-icon.burned,
 .mh-story-tag .burn-icon.burned,
 .mh-power-tag.Crew .burn-icon.burned {
-  background-image: url("../ui/icons/burn_scratch_burned.svg");
+  background-image: url("../ui/icons/burn_scratch_burned2.svg");
 }
 
 .mh-power-tag.burned,
