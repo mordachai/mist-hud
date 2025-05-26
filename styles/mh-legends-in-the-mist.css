@@ -375,129 +375,110 @@
   filter: drop-shadow(1px 0 4px var(--text-main-color));
 }
 
+/* STYLE FOR LI*/
+
+.mh-tags ul {
+  /* padding: 3px;
+  margin: 10px; */
+}
+
+.mh-tags li {
+  /* line-height: 1.5rem; */
+}
+
+.mh-tags li:hover {
+  opacity: 0.8 ;
+}
+
 .mh-power-tag,
 .mh-weakness-tag,
 .mh-loadout-tag,
 .mh-story-tag {
   display: grid;
   flex-direction: row;
-  grid-template-columns: 25px auto auto;
+  grid-template-columns: 25px auto 20px;
+  gap: 5px;
   flex-wrap: nowrap;
-  align-items: center;
+  align-items: start;
   justify-content: space-between;
-  margin: 1px 1px;
-  padding: 2px 0px;
   cursor: pointer;
-  text-align: left;
-  height: fit-content;
+  text-align: center;
+  height: auto;
   font-family: var(--font-family-cursive);
   list-style: none;
   color: var(--text-tag-color);
-  font-size: 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  padding: 0px 5px;
 }
 
 .mh-weakness-tag i {
   padding-left: 12px;
+  font-size: 18px;
 }
 
-/* .mh-power-tag.Adventure {
-color: var(--adventure-verylight-color);
+.mh-power-tag .mh-tag-text,
+.mh-weakness-tag .mh-tag-text,
+.mh-loadout-tag .mh-tag-text,
+.mh-story-tag .mh-tag-text {
+  padding: 0px 5px;
 }
 
-.mh-power-tag.Greatness {
-  color: var(--greatness-verylight-color);
-}
 
-.mh-power-tag.Origin {
-  color: var(--origin-verylight-color);
-} */
-
-.mh-power-tag.selected {
-  align-items: center;
+.mh-story-tag.selected .mh-tag-text,
+.mh-loadout-tag.selected .mh-tag-text,
+.mh-power-tag.Crew.selected .mh-tag-text,
+.mh-weakness-tag.inverted.selected .mh-tag-text,
+.mh-power-tag.selected .mh-tag-text {
   color: var(--text-tag-color);
-  font-family: var(--font-family-main1);
-  height: fit-content;
-  background-image: url('../ui/select-bar-litm-normal.svg');
-  background-position: right;
+  background-image: url('../ui/select-bar-litm-normal.webp');
+  background-position: center center;
   background-repeat: no-repeat;
-  background-size: 80% 95%;
+  background-size: 100% 100%;
+  padding: 0px 5px;
 }
 
-.mh-power-tag.selected.toBurn {
-  background-image: url('../ui/select-bar-litm-toburn.svg');
-  background-position: right;
-  background-repeat: no-repeat;
-  background-size: 80% 95%;
-}
-
-
-
-/* .mh-power-tag.selected.Adventure {
-  background-image: url('../ui/select-bar-adventure.webp');
-}
-
-.mh-power-tag.selected.Greatness {
-  background-image: url('../ui/select-bar-greatness.webp');
-}
-
-.mh-power-tag.selected.Origin {
-  background-image: url('../ui/select-bar-origin.webp');
-} */
-
-/* .mh-power-tag.selected.toBurn.Adventure {
-  background-image: url('../ui/select-bar-adventure-toburn.webp');
-}
-
-.mh-power-tag.selected.toBurn.Greatness {
-  background-image: url('../ui/select-bar-greatness-toburn.webp');
-}
-
-.mh-power-tag.selected.toBurn.Origin {
-  background-image: url('../ui/select-bar-origin-toburn.webp');
-} */
-
-.mh-story-tag.selected,
-.mh-loadout-tag.selected,
-.mh-power-tag.Crew.selected,
-.mh-weakness-tag.inverted.selected {
-  align-items: center;
+.mh-story-tag.selected.toBurn .mh-tag-text,
+.mh-loadout-tag.selected.toBurn .mh-tag-text,
+.mh-power-tag.Crew.selected.toBurn .mh-tag-text,
+.mh-power-tag.selected.toBurn .mh-tag-text {
   color: var(--text-tag-color);
-  background-image: url('../ui/select-bar-litm-normal.svg');
-  font-style: italic;
-  font-family: var(--font-family-main1);
-  background-position: right;
+  background-image: url('../ui/select-bar-litm-toburn.webp');
+  background-position: center center;
   background-repeat: no-repeat;
-  background-size: 80% 95%;
-  height: fit-content;
+  background-size: 100% 100%;
+  padding: 0px 5px;
 }
 
-.mh-story-tag.selected.toBurn,
-.mh-loadout-tag.selected.toBurn,
-.mh-power-tag.Crew.selected.toBurn {
-  background-image: url('../ui/select-bar-litm-toburn.svg');
-}
-
-.mh-weakness-tag.selected,
-.mh-story-tag.inverted.selected {
-  align-items: center;
+.mh-story-tag.burned .mh-tag-text,
+.mh-loadout-tag.burned .mh-tag-text,
+.mh-power-tag.Crew.burned .mh-tag-text,
+.mh-power-tag.burned .mh-tag-text {
+  text-decoration-line: line-through;
+  text-decoration-color: var(--text-tag-color);
+  text-decoration-thickness: 1px;
   color: var(--text-tag-color);
-  background-image: url('../ui/select-bar-litm-weakness.svg');
-  font-style: italic;
-  font-family: var(--font-family-main1);
-  background-position: right;
-  background-repeat: no-repeat;
-  background-size: 80% 95%;
-  height: fit-content;
+  padding: 0px 5px;
 }
 
-.mh-burn-toggle,
+.mh-weakness-tag.selected .mh-tag-text,
+.mh-story-tag.inverted.selected .mh-tag-text {
+  color: var(--text-tag-color);
+  background-image: url('../ui/select-bar-litm-weakness.webp');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  padding: 0px 5px;
+}
+
+/* .mh-burn-toggle,
 .mh-tag-text {
   align-items: center;
 }
 
 .mh-tag-text {
   margin-left: 10px;
-}
+} */
 
 .mh-create-story-tag i,
 .mh-create-status i {
@@ -515,16 +496,17 @@ color: var(--adventure-verylight-color);
   font-size: 0.90rem;
 }
 
+
 .burn-icon {
   width: 21px;
   height: 24px;
   margin-left: 10px;
+  margin-top: 5px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  align-self: center;
-  vertical-align: middle;
 }
+
 
 .burn-icon.burned {
   width: 21px;
@@ -543,7 +525,6 @@ color: var(--adventure-verylight-color);
 .mh-power-tag.Origin .burn-icon.toBurn,
 .mh-power-tag.Greatness .burn-icon.toBurn{
   background-image: url("../ui/icons/burn_scratch_toburn2.svg");
-  filter: drop-shadow(0 0 3px var(--toBurn-text-color));
 }
 
 .mh-power-tag.Adventure .burn-icon.burned,
@@ -571,46 +552,7 @@ color: var(--adventure-verylight-color);
   background-image: url("../ui/icons/burn_scratch_burned2.svg");
 }
 
-.mh-power-tag.burned,
-.mh-story-tag.burned,
-.mh-loadout-tag.burned  {
-  text-decoration-line: line-through;
-  text-decoration-color: var(--text-main-color);
-  text-decoration-thickness: 2px;
-  color: #8b8680;
-}
-
-.double-ones::after {
-  content: "Snake Eyes!";
-  display: block;
-  font-size: 1.1rem;
-  width: 100%;
-  text-align: center;
-  color: var(--text-main-color);
-  font-weight: bold;
-  font-family: var(--font-family-main1);
-  text-shadow: var(--destroyed-tag-color) 1px 1px 6px;
-}
-
-.double-sixes::after {
-  content: "Boxcars!";
-  display: block;
-  font-size: 1.1rem;
-  width: 100%;
-  text-align: center;
-  color: var(--text-main-color);
-  font-weight: bold;
-  font-family: var(--font-family-main1);
-  text-shadow: var(--effects-color1) 1px 1px 6px;
-}
-
-.outcome-fail-double-ones {
-  text-shadow: var(--destroyed-tag-color) -3px 3px 15px;
-}
-
-.outcome-success-double-sixes {
-  text-shadow: var(--effects-color1) -3px 3px 15px;
-}
+/*MISTERIES*/
 
 .mystery-type.Origin {
   color: var(--origin-verylight-color);
@@ -684,6 +626,38 @@ color: var(--adventure-verylight-color);
   filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.5));
   padding: 15px;
   margin-bottom: 10px;
+}
+
+.double-ones::after {
+  content: "Snake Eyes!";
+  display: block;
+  font-size: 1.1rem;
+  width: 100%;
+  text-align: center;
+  color: var(--text-main-color);
+  font-weight: bold;
+  font-family: var(--font-family-main1);
+  text-shadow: var(--destroyed-tag-color) 1px 1px 6px;
+}
+
+.double-sixes::after {
+  content: "Boxcars!";
+  display: block;
+  font-size: 1.1rem;
+  width: 100%;
+  text-align: center;
+  color: var(--text-main-color);
+  font-weight: bold;
+  font-family: var(--font-family-main1);
+  text-shadow: var(--effects-color1) 1px 1px 6px;
+}
+
+.outcome-fail-double-ones {
+  text-shadow: var(--destroyed-tag-color) -3px 3px 15px;
+}
+
+.outcome-success-double-sixes {
+  text-shadow: var(--effects-color1) -3px 3px 15px;
 }
 
 .mhr-roll-title {

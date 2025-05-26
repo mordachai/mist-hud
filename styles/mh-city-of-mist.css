@@ -86,6 +86,21 @@
   background-image: url('../ui/header-neutral-com.webp');
 }
 
+.mh-tags ul {
+  padding: 3px;
+  margin: 10px;
+}
+
+.mh-tags li {
+  height: 1.4rem;
+  /* padding: 5px; */
+  color: var(--text-hud-main-color);
+}
+
+.mh-tags li:hover {
+  opacity: 0.85;
+}
+
 .mh-create-story-tag i,
 .mh-create-status i {
   position: relative;

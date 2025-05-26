@@ -238,6 +238,21 @@
   filter: drop-shadow(1px 0 4px rgb(201, 201, 201));
 }
 
+.mh-tags ul {
+  padding: 3px;
+  margin: 10px;
+}
+
+.mh-tags li {
+  height: 1.4rem;
+  /* padding: 5px; */
+  color: var(--text-hud-main-color);
+}
+
+.mh-tags li:hover {
+  opacity: 0.85;
+}
+
 .mh-power-tag,
 .mh-weakness-tag,
 .mh-loadout-tag,
