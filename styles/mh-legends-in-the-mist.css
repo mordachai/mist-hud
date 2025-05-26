@@ -653,6 +653,7 @@ color: var(--adventure-verylight-color);
 }
 
 .mhr-outcome.outcome-fail-double-ones,
+.mhr-outcome-icon.outcome-snake-eyes,
 .mhr-outcome.outcome-fail {
   background-image: url('../ui/outcome-bg-litm-f.webp');
   background-repeat: no-repeat;
@@ -664,6 +665,7 @@ color: var(--adventure-verylight-color);
 }
 
 .mhr-outcome.outcome-fail-double-ones,
+.mhr-outcome-icon.outcome-boxcars,
 .mhr-outcome.outcome-success {
   background-image: url('../ui/outcome-bg-litm-s.webp');
   background-repeat: no-repeat;
