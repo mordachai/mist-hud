@@ -675,10 +675,10 @@ export const moveConfig = {
 
     "Reaction - LITM ": {
         configKey: "Reaction",
-        name: "Legends.moves.reaction.name",
-        fail: "Legends.moves.reaction.fail",
-        partial: "Legends.moves.reaction.partial",
-        success: "Legends.moves.reaction.success",
+        name: "Legend.moves.reaction.name",
+        fail: "Legend.moves.reaction.fail",
+        partial: "Legend.moves.reaction.partial",
+        success: "Legend.moves.reaction.success",
         system: "legend",
         slot: 1,
         image: "Reaction.webp",
@@ -687,10 +687,10 @@ export const moveConfig = {
 
     "Quick Outcome - LITM": {
         configKey: "Quick Outcome",
-        name: "Legends.moves.quickOutcome.name",
-        fail: "Legends.moves.outcome.fail",
-        partial: "Legends.moves.outcome.partial",
-        success: "Legends.moves.outcome.success",
+        name: "Legend.moves.quickOutcome.name",
+        fail: "Legend.moves.outcome.fail",
+        partial: "Legend.moves.outcome.partial",
+        success: "Legend.moves.outcome.success",
         system: "legend",
         slot: 2,
         image: "Quick Way.webp",
@@ -699,11 +699,11 @@ export const moveConfig = {
 
     "Detailed Outcome - Attack - LITM": {
         configKey: "Detailed Outcome - Attack",
-        name: "Legends.moves.detailedOutcome.name",
+        name: "Legend.moves.detailedOutcome.name",
         subtitle: "Attack",
-        fail: "Legends.moves.outcome.fail",
-        partial: "Legends.moves.outcome.partial",
-        success: "Legends.moves.outcome.success",
+        fail: "Legend.moves.outcome.fail",
+        partial: "Legend.moves.outcome.partial",
+        success: "Legend.moves.outcome.success",
         system: "legend",
         slot: 3,
         image: "Detailed Way - Attack.webp",
@@ -741,11 +741,11 @@ export const moveConfig = {
 
     "Detailed Outcome - Empower - LITM": {
     configKey: "Detailed Outcome - Empower",
-    name: "Legends.moves.detailedOutcome.name",
+    name: "Legend.moves.detailedOutcome.name",
     subtitle: "Empower",
-    fail: "Legends.moves.outcome.fail",
-    partial: "Legends.moves.outcome.partial",
-    success: "Legends.moves.outcome.success",
+    fail: "Legend.moves.outcome.fail",
+    partial: "Legend.moves.outcome.partial",
+    success: "Legend.moves.outcome.success",
     system: "legend",
     slot: 4,
     image: "Detailed Way - Empower.webp",
@@ -783,11 +783,11 @@ export const moveConfig = {
 
     "Detailed Outcome - Extras - LITM": {
     configKey: "Detailed Outcome - Extras",
-    name: "Legends.moves.detailedOutcome.name",
+    name: "Legend.moves.detailedOutcome.name",
     subtitle: "Extras",
-    fail: "Legends.moves.outcome.fail",
-    partial: "Legends.moves.outcome.partial",
-    success: "Legends.moves.outcome.success",
+    fail: "Legend.moves.outcome.fail",
+    partial: "Legend.moves.outcome.partial",
+    success: "Legend.moves.outcome.success",
     system: "legend",
     slot: 5,
     image: "Detailed Way - Extras.webp",
@@ -825,10 +825,10 @@ export const moveConfig = {
 
     "Sacrifice (Painful)": {
         configKey: "Sacrifice (Painful)",
-        name: "Legends.moves.sacrifice.painful.name",
-        fail: "Legends.moves.sacrifice.fail",
-        partial: "Legends.moves.sacrifice.partial",
-        success: "Legends.moves.sacrifice.success",
+        name: "Legend.moves.sacrifice.painful.name",
+        fail: "Legend.moves.sacrifice.fail",
+        partial: "Legend.moves.sacrifice.partial",
+        success: "Legend.moves.sacrifice.success",
         system: "legend",
         slot: 11,
         image: "sacrifice-painful.webp",
@@ -837,10 +837,10 @@ export const moveConfig = {
 
     "Sacrifice (Scarring)": {
         configKey: "Sacrifice (Scarring)",
-        name: "Legends.moves.sacrifice.scarring.name",
-        fail: "Legends.moves.sacrifice.fail",
-        partial: "Legends.moves.sacrifice.partial",
-        success: "Legends.moves.sacrifice.success",
+        name: "Legend.moves.sacrifice.scarring.name",
+        fail: "Legend.moves.sacrifice.fail",
+        partial: "Legend.moves.sacrifice.partial",
+        success: "Legend.moves.sacrifice.success",
         system: "legend",
         slot: 12,
         image: "sacrifice-scarring.webp",
@@ -849,10 +849,10 @@ export const moveConfig = {
 
     "Sacrifice (Grave)": {
         configKey: "Sacrifice (Grave)",
-        name: "Legends.moves.sacrifice.grave.name",
-        fail: "Legends.moves.sacrifice.fail",
-        partial: "Legends.moves.sacrifice.partial",
-        success: "Legends.moves.sacrifice.success",
+        name: "Legend.moves.sacrifice.grave.name",
+        fail: "Legend.moves.sacrifice.fail",
+        partial: "Legend.moves.sacrifice.partial",
+        success: "Legend.moves.sacrifice.success",
         system: "legend",
         slot: 13,
         image: "sacrifice-grave.webp",
