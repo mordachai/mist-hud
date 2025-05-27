@@ -2,7 +2,7 @@
   "id": "mist-hud",
   "title": "Mist Engine HUD",
   "description": "A simple always-open, never-in-the-way HUD that allows players to select tags and statuses to be used in rolls. No questions, no menus, just select and roll using the moves in the hotbar.",
-  "version": "2.5.0",
+  "version": "2.40.0",
   "authors": [
     {
       "name": "Gus",
