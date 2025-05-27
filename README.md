@@ -4,9 +4,13 @@
 
 # Mist Engine HUD
 
-**Mist Engine HUD:** is a simple always-open, never-in-the-way HUD for _City of Mist_ and _Otherscape_ game systems made [by Taragnor for Foundry](https://foundryvtt.com/packages/city-of-mist). It allows players to quickly select tags and statuses and do the Moves rolls, with no questions or menus to answer. Just select what you need and roll using the Moves in the Hotbar. Fast and streamlined like any _action-packed game_ should be! (this module completely replaces the CoM Character HUD, you can uninstall it).
+**Mist Engine HUD:** is a simple always-open, never-in-the-way HUD for _City of Mist_, _Otherscape_ AND ***LEGENDS IN THE MIST! [NEW!]*** game systems made [by Taragnor for Foundry](https://foundryvtt.com/packages/city-of-mist). It allows players to quickly select tags and statuses and do the Moves rolls, with no questions or menus to answer. Just select what you need and roll using the Moves in the Hotbar. Fast and streamlined like any _action-packed game_ should be! (this module completely replaces the CoM Character HUD, you can uninstall it).
 
 ![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/pcsHUDs.png)
+
+## NEW ADDITION!: Legends in the Mist HUD
+
+![image](https://github.com/user-attachments/assets/acc9ce0a-770c-4881-97fe-a16b625befcd)
 
 ## Features
 
@@ -152,13 +156,14 @@ Choosing the right type of moves in your Danger sheet will present them with the
 - **Specials:** Hard Moves >> don't forget the move name
 - **Threats:** Soft Moves >> Hide Move Name, Move Header = Symbols
 - **Consequences:** Soft Move submove (click on the + inside the parent Soft Move/Threat) >> Hide Move Name, Move Header = Symbols
-- **Might (__LitM only__):** Custom moves >> check the table below to display the correct icon the description text
+- **Might (_LitM only_):** Custom moves >> check the table below to learn how to display the correct icon and the description text you want
 
 | Input Syntax | Icon Type | Example Input | Rendered Output |
 |--------------|-----------|---------------|-----------------|
-| `--G--` | Greatness | `--G-- Mighty Strike` | [Greatness Icon] Mighty Strike |
-| `--A--` | Adventure | `--A-- Swift Movement` | [Adventure Icon] Swift Movement |
-| `--O--` | Origin | `--O-- Ancient Wisdom` | [Origin Icon] Ancient Wisdom | 
+| `--G--` | Greatness | `--G-- Mighty Strike` | ![greatness-color_litm_icn](https://github.com/user-attachments/assets/aa747c43-35f3-43da-bb02-e30a14805cd0) Mighty Strike |
+| `--A--` | Adventure | `--A-- Swift Movement` | ![adventure-color_litm_icn](https://github.com/user-attachments/assets/2a02c1f1-944f-43df-b4c2-203e464dbe84) Swift Movement |
+| `--O--` | Origin | `--O-- Old Wisdom` | ![origin-color_litm_icn](https://github.com/user-attachments/assets/d27523ca-7574-4ea6-a105-2f992f8a03cd) Old Wisdom | 
+
 
 ![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/OsMoves.png)
 
