@@ -77,7 +77,6 @@ export function getCrewThemes(actor) {
     attentionKey = "Otherscape.terms.upgrade";
     crackKey = "Otherscape.terms.decay";
     prefix = `${game.i18n.localize("Otherscape.terms.ritual")}/${game.i18n.localize("CityOfMist.terms.identity")}/${game.i18n.localize("Otherscape.terms.itch")}`;
-  
   } else if (system === "legend") {
     attentionKey = "Legend.terms.improve";
     crackKey = "Legend.terms.abandon";
@@ -137,7 +136,6 @@ export function getMysteryFromTheme(actor, themeId) {
       crackLabel: "Crack"
     };
   }
-  
 
   const theme = actor.items.contents.find(item => item.type === 'theme' && item.id === themeId);
   if (!theme) {
@@ -179,37 +177,59 @@ export function getMysteryFromTheme(actor, themeId) {
 
   const category = realThemebook.system.subtype || "unknown";
   const system = game.settings.get("city-of-mist", "system");
+  
+  // Check if this is a Legend theme by looking at the motivation field
+  const isLegendTheme = realThemebook.system.motivation === "motivation";
 
   let prefixKey;
-  switch (category) {
-    case "Mythos":
-      prefixKey = (system === "city-of-mist") ? "CityOfMist.terms.mystery"
-                : (system === "otherscape")   ? "Otherscape.terms.ritual"
-                : null;
-      break;
-    case "Logos":
-    case "Self":
-      prefixKey = "CityOfMist.terms.identity";
-      break;
-    case "Noise":
-      prefixKey = "Otherscape.terms.itch";
-      break;
-    case "Mist":
-      prefixKey = "CityOfMist.terms.directive";
-      break;
-    case "Extra":
-      prefixKey = "CityOfMist.terms.extra";
-      break;
-    case "Crew":
-      prefixKey = "CityOfMist.terms.crewTheme";
-      break;
-    case "Loadout":
-      prefixKey = "Otherscape.terms.loadout";
-      break;
-    default:
-      console.warn(`Unknown category: ${category}`);
-      prefixKey = null;
+  
+  // Handle Legend themes first using motivation field
+  if (system === "legend" && isLegendTheme) {
+    prefixKey = "Legend.terms.quest";
+  } else {
+    // Handle other systems and categories normally
+    switch (category) {
+      case "Mythos":
+        prefixKey = (system === "city-of-mist") ? "CityOfMist.terms.mystery"
+                  : (system === "otherscape")   ? "Otherscape.terms.ritual"
+                  : null;
+        break;
+      case "Logos":
+      case "Self":
+        prefixKey = "CityOfMist.terms.identity";
+        break;
+      case "Noise":
+        prefixKey = "Otherscape.terms.itch";
+        break;
+      case "Mist":
+        prefixKey = "CityOfMist.terms.directive";
+        break;
+      case "Extra":
+        prefixKey = "CityOfMist.terms.extra";
+        break;
+      case "Crew":
+        prefixKey = "CityOfMist.terms.crewTheme";
+        break;
+      case "Loadout":
+        prefixKey = "Otherscape.terms.loadout";
+        break;
+      // Add specific Legend categories as backup
+      case "Adventure":
+      case "Origin":
+      case "Greatness":
+        prefixKey = "Legend.terms.quest";
+        break;
+      default:
+        console.warn(`Unknown category: "${category}" for system: "${system}"`);
+        // Default for Legend system
+        if (system === "legend") {
+          prefixKey = "Legend.terms.quest";
+        } else {
+          prefixKey = null;
+        }
+    }
   }
+  
   const prefix = prefixKey ? game.i18n.localize(prefixKey) : "Theme";
 
   let attentionKey, crackKey;
@@ -225,7 +245,11 @@ export function getMysteryFromTheme(actor, themeId) {
   } else if (system === "otherscape") {
     attentionKey = "Otherscape.terms.upgrade";
     crackKey     = "Otherscape.terms.decay";
+  } else if (system === "legend") {
+    attentionKey = "Legend.terms.improve";
+    crackKey = "Legend.terms.abandon";
   }
+  
   const attentionLabel = attentionKey ? game.i18n.localize(attentionKey) : "Attention";
   const crackLabel = crackKey ? game.i18n.localize(crackKey) : "Crack";
 
@@ -408,7 +432,6 @@ export function getImprovements(actor) {
   return Object.values(improvementsGrouped);
   
 }
-
 
 export function getCrewImprovements(actor) {
   if (!actor) return [];
