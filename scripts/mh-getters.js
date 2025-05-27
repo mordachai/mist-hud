@@ -181,6 +181,15 @@ export function getMysteryFromTheme(actor, themeId) {
   // Check if this is a Legend theme by looking at the motivation field
   const isLegendTheme = realThemebook.system.motivation === "motivation";
 
+  // System-specific name display:
+  // City of Mist: show themebook names (e.g., "Divination", "Encantment")
+  // Otherscape: show theme names (e.g., "Mythos", "Self", "Noise") 
+  // Legend: show theme names (e.g., "Origin", "Greatness", "Adventure")
+  const displayName = system === "city-of-mist" ? realThemebook.name 
+                    : system === "otherscape" ? theme.name
+                    : system === "legend" ? theme.name
+                    : realThemebook.name; // fallback to themebook name
+
   let prefixKey;
   
   // Handle Legend themes first using motivation field
@@ -262,7 +271,7 @@ export function getMysteryFromTheme(actor, themeId) {
 
   return {
     themeName: theme.name,
-    themebook_name: realThemebook.name,
+    themebook_name: displayName,  // Now uses system-specific logic
     category,
     prefix,
     mysteryText,
