@@ -2,23 +2,23 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Labrada:ital,wght@0,100..900;1,100..900&display=swap');
 
+/* @font-face {
+  font-family: 'Caveat';
+  src: url('../ui/fonts/Caveat-Var.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 @font-face {
   font-family: 'Labrada';
   src: url('../ui/fonts/Labrada-Var.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
-}
+} */
 
 @font-face {
   font-family: 'Manuscript Antiqua';
   src: url('../ui/fonts/manuskript-antiqua.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Caveat';
-  src: url('../ui/fonts/Caveat-Var.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -71,7 +71,7 @@
   --negative-tag-color: #c1806c;
   --negative-tag-borderColor: #7a0000;
   --destroyed-tag-color: rgba(139, 38, 53, 0.825);
-  --burned-text-color: #d6d2d0;
+  --burned-text-color: #842a27;
   
   /* Misc */
   --spectrum-color: #e4a5a5;
@@ -116,10 +116,21 @@
   border-radius: 8px;
 }
 
-#mist-hud .window-header {
-  border: none;
-  background: none;
+#mist-hud .mh-char-name {
+    font-size: 1.4rem;
+    color: #0f172a;
+    font-family: var(--font-family-titles);
+    filter: drop-shadow(2px 2px 3px rgba(210, 210, 210, 0.7));
+    align-self: flex-start;
+    margin-left: 0px;
+    flex: 2;
+    padding-top: 3px;
 }
+
+#mist-hud .window-header {
+}
+
+/*NPC HUD STYLES*/
 
 #npc-hud{
   background: var(--effects-color2);
@@ -931,6 +942,110 @@
 
 .mh-improvement-marker.Origin i {
   transform: translateY(-3px);
+}
+
+.mh-status {
+  margin: 2px;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-size: 1.1em;
+  cursor: pointer;
+  font-family: var(--font-family-main1);
+  align-content: center;
+  line-height: 15px;
+  text-transform: lowercase;
+  font-style: italic;
+}
+
+.mh-status i{
+  font-size: 0.75em;
+}
+
+/* Status Types */
+.mh-status.neutral {
+  background: none;
+  border: 2px solid rgb(102, 102, 102);
+  color: var(--text-hud-main-color);
+}
+
+.mh-status.negative {
+  background: var(--negative-tag-color);
+  border: 2px solid var(--negative-tag-borderColor);
+  color: black;
+}
+
+.mh-status.positive {
+  background: var(--positive-tag-color);
+  border: 2px solid var(--positive-tag-borderColor);
+  color: black;
+}
+
+  .mhr-power-tag, .mhr-story-tag, .mhr-weakness-tag.inverted,
+  .mhr-status-tag.positive, .mhr-status-tag.scene-positive, .scene-tag-item.scene-positive,
+  .mhr-scene-status-tag.scene-positive,.mhr-modifier.positive, .mhr-help-hurt-tag.positive, .mhr-npc-influence-tag.positive {
+    color: var(--text-tag-color) !important;
+    background-color: var(--positive-tag-color) !important;
+  }
+
+  .mhr-status-tag.negative, .mhr-weakness-tag,  .mhr-story-tag.inverted,
+  .mhr-status-tag.scene-negative, .scene-tag-item.scene-negative,
+  .mhr-scene-status-tag.scene-negative,.mhr-modifier.negative, .mhr-help-hurt-tag.negative, .mhr-npc-influence-tag.negative {
+    color: var(--text-tag-color) !important;
+    background-color: var(--negative-tag-color) !important;
+  }
+
+/* Modifiers */
+.mh-modifiers {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+}
+
+.mh-modifier-bar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  gap: 5px;
+  border-top: 1px solid #ccc;
+  background-color: #222;
+  height: 28px;
+  width: 100%;
+  z-index: 10;
+}
+
+.mh-mod-button,
+#mh-mod-value {
+  height: 25px;
+  flex: 1; /* Makes all elements take equal space */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 16px;
+  color: whitesmoke;
+}
+
+.mh-mod-button {
+  padding: 0;
+  cursor: pointer;
+}
+
+.mh-mod-button:hover {
+  background-color: #e0e0e038;
+}
+
+.mh-mod-button:active {
+  background-color: #d0d0d052;
+}
+
+#mh-mod-value {
+  border: none;
+  color: white;
+  filter: drop-shadow(1px 2px 3px var(--mythosOS-dark-color));
 }
 
 /*NPC STYLES*/

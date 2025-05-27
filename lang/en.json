@@ -5,6 +5,8 @@
 "Legend.terms.quest": "Quest",
 "Legend.terms.milestone": "Milestone",
 
+"Legend.terms.adventure": "Adventure",
+
 "Legend.moves.outcome.fail" : "The Narrator decides on a narrative development detrimental to the Hero, and can give or remove a tag or status in a way that hinders the Hero.",
 "Legend.moves.outcome.partial" : "The action unfolds as expected, or better, achieving its intended goal or overcoming an obstacle. The Narrator can also give you a useful tag or status.\nThe Narrator decides on a narrative development detrimental to the Hero, and can give or remove a tag or status in a way that hinders the Hero.",
 "Legend.moves.outcome.success" : "The action unfolds as expected, or better, achieving its intended goal or overcoming an obstacle. The Narrator can also give you a useful tag or status.\nYou can Push your Luck:\n\nAccept Consequences for Great Success (Quick) or for +1 Power to spend (Detailed).",
