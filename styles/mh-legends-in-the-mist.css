@@ -313,7 +313,8 @@
   padding-top: 2px;
 }
 
-.mh-theme-header.neutral {
+.mh-theme-header.neutral,
+.mh-theme-header.Extra {
   background-image: url('../ui/header-backpack.webp');
   margin-top: 2px;
 }
@@ -351,7 +352,9 @@
   text-shadow: var(--origin-dark-color) 1px 0 3px;
 }
 
-.theme-type.Crew{
+
+.theme-type.Crew,
+.theme-type.Extra {
   color: var(--text-main-color);
   text-shadow: var(--text-main-color) 1px 0 3px;
 }
@@ -432,6 +435,16 @@
   width: 24px;
   height: 21px;
   background-image: url('../ui/icons/fellowship_icn.svg');
+  filter: drop-shadow(1px 0 4px var(--effects-color1));
+}
+
+.mh-theme-icon.Extra {
+  position: relative;
+  right: -8px;
+  top: -5px;
+  width: 24px;
+  height: 21px;
+  background-image: url('../ui/icons/special_icn.svg');
   filter: drop-shadow(1px 0 4px var(--effects-color1));
 }
 
@@ -622,20 +635,23 @@
 
 .mh-loadout-tag .burn-icon.unburned,
 .mh-story-tag .burn-icon.unburned,
-.mh-power-tag.Crew .burn-icon.unburned{
+.mh-power-tag.Crew .burn-icon.unburned,
+.mh-power-tag.Extra .burn-icon.unburned{
   background-image: url("../ui/icons/burn_scratch_empty2.svg");
 }
 
 .mh-loadout-tag .burn-icon.toBurn,
 .mh-story-tag .burn-icon.toBurn,
-.mh-power-tag.Crew .burn-icon.toBurn {
+.mh-power-tag.Crew .burn-icon.toBurn
+.mh-power-tag.Extra .burn-icon.toBurn {
   background-image: url("../ui/icons/burn_scratch_toburn2.svg");
   filter: drop-shadow(0 0 2px var(--effects-color1));
 }
 
 .mh-loadout-tag .burn-icon.burned,
 .mh-story-tag .burn-icon.burned,
-.mh-power-tag.Crew .burn-icon.burned {
+.mh-power-tag.Crew .burn-icon.burned,
+.mh-power-tag.Extra .burn-icon.burned {
   background-image: url("../ui/icons/burn_scratch_burned2.svg");
 }
 
