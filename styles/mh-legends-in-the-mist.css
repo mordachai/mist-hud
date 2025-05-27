@@ -642,7 +642,7 @@
 
 .mh-loadout-tag .burn-icon.toBurn,
 .mh-story-tag .burn-icon.toBurn,
-.mh-power-tag.Crew .burn-icon.toBurn
+.mh-power-tag.Crew .burn-icon.toBurn,
 .mh-power-tag.Extra .burn-icon.toBurn {
   background-image: url("../ui/icons/burn_scratch_toburn2.svg");
   filter: drop-shadow(0 0 2px var(--effects-color1));
