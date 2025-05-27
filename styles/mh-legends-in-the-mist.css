@@ -34,6 +34,7 @@
 :root {
   /* Base Colors */
   --dark-color: #3c2414;
+  --light-color: #ededed;
   --text-main-color: #3c2414;
   --text-tag-color: #151515;
   --text-hud-main-color: #3c2414; 
@@ -899,27 +900,43 @@
 }
 
 /* Basic box style */
-.mh-box {
-  background-image: url('../ui/icons/track-litm-empty.svg');
+.mh-box.attention {
+  width: 18px;
+  height: 18px;
+  background-image: url('../ui/icons/litm-att-empty.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.mh-box.crack {
+  width: 18px;
+  height: 18px;
+  background-image: url('../ui/icons/litm-crk-empty.svg');
   background-repeat: no-repeat;
   background-size: contain;
 }
 
 /* "Filled" or "active" state */
-.mh-box.active {
-  background-image: url('../ui/icons/track-litm-full.svg');
+.mh-box.active.attention {
+  background-image: url('../ui/icons/litm_success_icn.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.mh-box.active.crack {
+  background-image: url('../ui/icons/litm_fail_icn.svg');
   background-repeat: no-repeat;
   background-size: contain;
 }
 
 /* Label under the boxes */
 .mh-resource-label {
-  font-family: var(--font-family-main1);
+  font-family: var(--font-family-titles);
   text-transform: uppercase;
   margin-top: 3px;
-  font-size: 0.8em;
+  font-size: 0.7em;
   text-align: center;
-  color: var(--effects-color3);
+  color: var(--light-color);
 }
 
 .mh-improvement-marker {
