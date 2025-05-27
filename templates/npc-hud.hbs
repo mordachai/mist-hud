@@ -12,17 +12,18 @@
         </div>
         {{/if}}
 
-
         <!-- Spectrums Section -->
         <div class="npc-subtitle-container-c">
             <div class="npc-subtitle-text">{{spectrumLabel}}</div>
         </div>
         <ul class="npc-spectrum-list">
-            {{#each spectrums}}
-            <li><span class="npc-spectrum">{{name}}: <span class="npc-spectrum-tier">{{parseMaxTier system.maxTier}}</span></span></li>
-            {{/each}}
+        {{#each spectrums}}
+            <li class="npc-spectrum {{activeSystem}}">
+            {{name}}: <span class="npc-spectrum-tier">{{parseMaxTier system.maxTier}}</span>
+            </li>
+        {{/each}}
         </ul>
-        {{#if (eq activeSystem "otherscape")}}
+        {{#if (or (eq activeSystem "otherscape") (eq activeSystem "legend"))}}
         <!-- Limits -->
         <ul class="npc-list limit">
         {{#each moveGroups.Limits}}
@@ -65,14 +66,25 @@
             </ul>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        {{!-- Custom Section for Legend special formatting --}}
+        {{#if (and moveGroups.Custom.length (eq activeSystem "legend"))}}
+        <ul class="custom-move-list">
+            {{#each moveGroups.Custom}}
+            <li>
+                {{{legendCustom.processedDescription}}}
+            </li>
+            {{/each}}
+        </ul>
+        {{/if}}
 
+        {{#if (neq activeSystem "legend")}}
+        <div style="display: flex; justify-content: space-between; align-items: center;">
             <div class="npc-collective-container">
                 <span class="npc-collective-label">{{collectiveLabel}}</span>
                 <div class="npc-collective-bar">
                     {{#each collectiveBar}}
                     <span class="npc-collective-segment" data-value="{{value}}">
-                        {{#if (eq ../activeSystem "otherscape")}}
+                        {{#if (neq ../activeSystem "otherscape")}}
                         {{#if active}}
                             <i class="fa-solid fa-square-user"></i>
                         {{else}}
@@ -98,48 +110,23 @@
             {{/if}}: {{totalInfluence}}
                 </div>
             </div>  
-
         </div>
+        {{else}}
+        <div style="display: flex; justify-content: flex-end; align-items: center;">
+            <div class="npc-subtitle-container-r">
+                <div class="mh-npc-influence">
+            {{#if (neq this.totalInfluence 0)}}
+            <i class="fa-solid fa-skull"></i>
+            {{else}}<i class="fa-regular fa-skull"></i>
+            {{/if}}: {{totalInfluence}}
+                </div>
+            </div>  
+        </div>
+        {{/if}}
 
         <div class="npc-moves-section">
-        {{#if (eq activeSystem "otherscape")}}
-            <!-- Specials -->
-            {{#if moveGroups.Specials.length}}
-            <div class="npc-subtitle-container-l">
-            <div class="npc-subtitle-text">Specials</div>
-            </div>
-            <ul class="npc-list">
-            {{#each moveGroups.Specials}}
-                <li class="">
-                <span class="npc-move-name">{{name}}</span> - 
-                <span class="npc-move-description">{{parseStatus system.description}}</span>
-                </li>
-            {{/each}}
-            </ul>
-            {{/if}}
 
-            <!-- Threats -->
-            <div class="npc-subtitle-container-l">
-            <div class="npc-subtitle-text">›Threats / »Consequences</div>
-            </div>
-            {{#each moveGroups.Threats}}
-            <div class="npc-threat">
-                {{!-- <div class="npc-threat-name">{{name}}</div> --}}
-                <span class="npc-tc-marker">›</span>
-                <span class="npc-threat-description">{{parseStatus system.description}}</span>
-                <ul>
-                {{#each consequences}}
-                    <li>
-                    {{!-- <span class="npc-move-name">{{name}}</span> -  --}}
-                    <span class="npc-tc-marker">»</span>
-                    <span class="npc-move-description">{{parseStatus system.description}}</span>
-                    </li>
-                {{/each}}
-                </ul>
-                <hr class="npc-hr">
-            </div>
-            {{/each}}
-        {{else}}
+        {{#if (eq activeSystem "city-of-mist")}}
             <!-- Default grouping for City of Mist -->
             {{#each moveGroups as |moves subtype|}}
             <div class="npc-move-type">
@@ -157,9 +144,98 @@
             </div>
             {{/each}}
         {{/if}}
+
+        {{#if (eq activeSystem "otherscape")}}
+            <!-- Specials -->
+            {{#if moveGroups.Specials.length}}
+            <div class="npc-subtitle-container-l">
+                <div class="npc-subtitle-text">Specials</div>
+            </div>
+            <ul class="npc-list">
+            {{#each moveGroups.Specials}}
+                <li class="">
+                <span class="npc-move-name">{{name}}</span> - 
+                <span class="npc-move-description">{{parseStatus system.description}}</span>
+                </li>
+            {{/each}}
+            </ul>
+            {{/if}}
+
+            <!-- Custom Moves -->
+            {{#if moveGroups.Custom.length}}
+            <div class="npc-subtitle-container-l">
+                <div class="npc-subtitle-text">Custom Moves</div>
+            </div>
+            <ul class="npc-list">
+            {{#each moveGroups.Custom}}
+                <li class="">
+                <span class="npc-move-name">{{name}}</span> - 
+                <span class="npc-move-description">{{parseStatus system.description}}</span>
+                </li>
+            {{/each}}
+            </ul>
+            {{/if}}
+
+            <!-- Threats -->
+            <div class="npc-subtitle-container-l">
+                <div class="npc-subtitle-text">›Threats / »Consequences</div>
+            </div>
+            {{#each moveGroups.Threats}}
+            <div class="npc-threat">
+                <span class="npc-tc-marker">›</span>
+                <span class="npc-threat-description">{{parseStatus system.description}}</span>
+                <ul>
+                {{#each consequences}}
+                    <li>
+                    <span class="npc-tc-marker">»</span>
+                    <span class="npc-move-description">{{parseStatus system.description}}</span>
+                    </li>
+                {{/each}}
+                </ul>
+                {{!-- <hr class="npc-hr"> --}}
+            </div>
+            {{/each}}
+        {{/if}}
+
+        {{#if (eq activeSystem "legend")}}
+            <!-- Specials -->
+            {{#if moveGroups.Specials.length}}
+            <div class="npc-subtitle-container-l">
+                <div class="npc-subtitle-text">Specials</div>
+            </div>
+            <ul class="npc-list">
+            {{#each moveGroups.Specials}}
+                <li class="">
+                <span class="npc-move-name">{{name}}</span> - <span class="npc-move-description">{{parseStatus system.description}}</span>
+                </li>
+            {{/each}}
+            </ul>
+            {{/if}}
+
+            <!-- Threats -->
+            <div class="npc-subtitle-container-l">
+                <div class="npc-subtitle-text">›Threats / »Consequences</div>
+            </div>
+            {{#each moveGroups.Threats}}
+            <div class="npc-threat">
+                <span class="npc-threat-name">{{name}}</span>
+                <span class="npc-threat-description">{{parseStatus system.description}}</span>
+                <ul>
+                {{#each consequences}}
+                    <li>
+                    <span class="npc-tc-marker">
+                        <object data="modules/mist-hud/ui/icons/litm_fail_icn.svg" type="image/svg+xml"></object>
+                    </span>
+                    <span class="npc-move-description">{{parseStatus system.description}}</span>
+                    </li>
+                {{/each}}
+                </ul>
+                {{!-- <hr class="npc-hr"> --}}
+            </div>
+            {{/each}}
+        {{/if}}
+
         </div>
-
-
 
     </div>
     {{/unless}}

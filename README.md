@@ -142,7 +142,7 @@ Clicking on them toggle their states. **Positive and negative states affect the 
 
 Click on the bar to set the Collective Size / Scale of the Dangers/Threats. Clicking on the label to zero it. The value will be added automatically to all statuses inflicted by this npc.
 
-### Otherscape Threat Moves How to:
+### Otherscape and LitM Threat Moves How to:
 
 Choosing the right type of moves in your Danger sheet will present them with the correct format when the active system is Otherscape. Check below:
 
@@ -152,6 +152,13 @@ Choosing the right type of moves in your Danger sheet will present them with the
 - **Specials:** Hard Moves >> don't forget the move name
 - **Threats:** Soft Moves >> Hide Move Name, Move Header = Symbols
 - **Consequences:** Soft Move submove (click on the + inside the parent Soft Move/Threat) >> Hide Move Name, Move Header = Symbols
+- **Might (__LitM only__):** Custom moves >> check the table below to display the correct icon the description text
+
+| Input Syntax | Icon Type | Example Input | Rendered Output |
+|--------------|-----------|---------------|-----------------|
+| `--G--` | Greatness | `--G-- Mighty Strike` | [Greatness Icon] Mighty Strike |
+| `--A--` | Adventure | `--A-- Swift Movement` | [Adventure Icon] Swift Movement |
+| `--O--` | Origin | `--O-- Ancient Wisdom` | [Origin Icon] Ancient Wisdom | 
 
 ![image](https://github.com/mordachai/mist-hud/raw/dev/external_files/OsMoves.png)
 

@@ -252,6 +252,7 @@ async function rollMove(moveName) {
     actorName: actor.name,
     subtitle: move.subtitle || "",
     rollResults: formattedRollResults,
+    activeSystem: activeSystem,
     outcomeMessage,
     calculatedPower,
     normalPowerTags,
@@ -449,6 +450,7 @@ async function rollBurnForHitCityOfMist(moveName) {
     subtitle: move.subtitle || "",
     rollResults: formattedRollResults,
     outcomeMessage,
+    activeSystem: activeSystem,
     calculatedPower: burnBasePower,
     totalCrewPowerTags: 0,
     totalCrewWeaknessTags: 0,
@@ -687,6 +689,7 @@ export async function rollSpecialMoves(moveName, hud) {
     subtitleImg: move.subtitleImg || "",
     actorName: actor.name,
     rollResults: formattedRollResults,
+    activeSystem: activeSystem,
     diceClass, // Keep for backward compatibility
     outcomeMessage,
     themeCount,
@@ -784,6 +787,7 @@ async function rollCinematicMove(moveName, hud) {
     subtitle: move.subtitle || "",
     outcomeMessage: game.i18n.localize(move.success), // Text for the cinematic move
     rollResults: [], // No dice results for cinematic moves
+    activeSystem: activeSystem,
     calculatedPower: 0,
     totalCrewPowerTags: 0,
     totalCrewWeaknessTags: 0,

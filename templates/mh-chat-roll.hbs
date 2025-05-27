@@ -8,6 +8,8 @@
   {{#if subtitleImg}}
     <div class="mhr-subtitleImg mh-dropshadow-{{themeCategory}}" style="display: block;"><img src="{{subtitleImg}}"></div>
   {{/if}}
+  
+  {{!-- Dice rolls - show for all systems --}}
   {{#if rollResults}}
   <div class="mh-dice-rolls">
       {{#each rollResults}}
@@ -17,7 +19,7 @@
   <div class="{{diceClass}}"></div>
   {{/if}}
 
-  {{!-- We need to capture the selected tags and statuses and show in the next section below  --}}
+  {{!-- Tags and modifiers section --}}
   <div class="accordion-container">
     <div class="mhr-roll-mdf accordion-header clickable">
       {{#if themeCount}}
@@ -128,11 +130,26 @@
   <hr class="mhr-roll-divider">
   {{/if}}
 
-  <div class="mhr-roll-result {{outcomeClass}}">{{{rollTotal}}}</div>
+  {{!-- Roll result - ONLY for systems that are NOT "legend" --}}
+  {{#unless (eq activeSystem "legend")}}
+  <div class="mhr-roll-result {{outcomeClass}}">
+    {{{rollTotal}}}
+  </div>
 
   <hr class="mhr-roll-divider">
+  {{/unless}}
 
-  <div class="mhr-outcome {{outcomeClass}}">{{localize outcomeMessage}}</div>
+  {{!-- Outcome section --}}
+  <div class="mhr-outcome {{outcomeClass}}">
+    {{#if (eq activeSystem "legend")}}
+      {{!-- For Legends: number + icon inside the outcome box --}}
+      <div class="roll-total-with-icon">
+        <div class="roll-number">{{{rollTotal}}}</div>
+        <div class="outcome-icon {{outcomeClass}}"></div>
+      </div>
+    {{/if}}
+    {{localize outcomeMessage}}
+  </div>
 
   <!-- Move Effects List -->
   {{#if localizedMoveEffects.length}}
@@ -145,20 +162,16 @@
   {{/if}}
 </div>
 
-
-
 {{#if trackedEffects.length}}
-<div class="mh-os-trackedfx-container accordion-container">
+<div class="mh-trackedfx-container accordion-container">
     {{#each trackedEffects}}
-    <div class="mh-os-trackedfx-item">
-        <div class="accordion-header clickable"><span class="mh-os-trackedfx-name">{{name}}: </span><span class="mh-os-trackedfx-description">{{description}}</span></div>
-        <div class="mh-os-trackedfx-tags accordion-content">
-        {{#each tags}}<span class="mh-os-trackedfx-tag">{{this}}</span>{{#unless @last}}, {{/unless}}{{/each}}
+    <div class="mh-trackedfx-item">
+        <div class="accordion-header clickable"><span class="mh-trackedfx-name">{{name}}: </span><span class="mh-trackedfx-description">{{description}}</span></div>
+        <div class="mh-trackedfx-tags accordion-content">
+        {{#each tags}}<span class="mh-trackedfx-tag">{{this}}</span>{{#unless @last}}, {{/unless}}{{/each}}
         </div>
-        <div class="mh-os-trackedfx-cost">{{{cost}}}</div>
+        <div class="mh-trackedfx-cost">{{{cost}}}</div>
     </div>
     {{/each}}
 </div>
 {{/if}}
-
-

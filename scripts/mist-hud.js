@@ -848,6 +848,7 @@ export class MistHUD extends Application {
     data.activeSystem = activeSystem;
     data.isCityOfMist = activeSystem === "city-of-mist";
     data.isOtherscape = activeSystem === "otherscape";
+    data.isLegend = activeSystem === "legend";
   
     // Get the persisted selected tag IDs (assumed to be stored as an array)
     const selectedTags = this.actor.getFlag('mist-hud', 'selected-tags') || [];
@@ -1556,25 +1557,29 @@ export class MistHUD extends Application {
   }
 
   injectRollBar(html) {
+
     // Remove any existing roll bar to avoid duplicates
     html.find(".mh-roll-bar").remove();
-  
+
     // Check if roll buttons should be in the hotbar instead of the HUD
     const useHotbar = game.settings.get("mist-hud", "useHotbarForRolls");
     if (useHotbar) return; // Skip rendering roll buttons in the HUD
-  
+
     // Get user setting for text or image display
     const useText = game.settings.get("mist-hud", "useTextButtons");
     const activeSystem = game.settings.get("city-of-mist", "system");
-  
+    console.warn("Active system:", activeSystem);
+
+
     // Create roll bar and move containers
     const rollBar = $(`<div class="mh-roll-bar"></div>`);
     const coreMovesContainer = $(`<div class="mh-roll-container core-moves"></div>`);
     const specialMovesContainer = $(`<div class="mh-roll-container special-moves"></div>`);
-  
+
     // Populate moves
     Object.keys(moveConfig).forEach(moveName => {
       const moveData = moveConfig[moveName];
+      // Check if the move is for the current system
       if (!moveData || !moveData.name || moveData.system !== activeSystem) return;
       
       const translatedName = game.i18n.localize(moveData.name);
@@ -1623,7 +1628,7 @@ export class MistHUD extends Application {
     const coreMovesText = game.i18n.localize("CityOfMist.terms.coreMoves");
     const specialMovesText = game.i18n.localize("CityOfMist.terms.specialMoves");
     
-    // Dynamite Toggle Button
+    // Dynamite Toggle Button - only show for city-of-mist
     const rollIsDynamiteButton = $(`
       <button class="mh-roll-button-img mh-dynamite-toggle" title="${game.i18n.localize ("CityOfMist.terms.dynamite")}!" style="display: ${activeSystem === "city-of-mist" ? "flex" : "none"};">
         <img src="modules/mist-hud/ui/Dynamite-OFF.webp" alt="Roll Is Dynamite" class="mh-roll-img">
@@ -1668,7 +1673,7 @@ export class MistHUD extends Application {
     
     rollBar.append(coreMovesContainer, specialMovesContainer, rollIsDynamiteButton, toggleButton);
     html.prepend(rollBar);
-  }  
+  }
   
   async cleanHUD(tagsData = null) {
     try {

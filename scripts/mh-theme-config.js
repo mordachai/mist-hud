@@ -375,7 +375,6 @@ export const moveConfig = {
         abbreviation: "MC",
     },
 
-
     "Quick Outcome": {
         configKey: "Quick Outcome",
         name: "Otherscape.moves.quickOutcome.name",
@@ -672,6 +671,193 @@ export const moveConfig = {
         abbreviation: "SEOS",
     },
 
+    // Legends in the Mist moves
+
+    "Reaction - LITM ": {
+        configKey: "Reaction",
+        name: "Legend.moves.reaction.name",
+        fail: "Legend.moves.reaction.fail",
+        partial: "Legend.moves.reaction.partial",
+        success: "Legend.moves.reaction.success",
+        system: "legend",
+        slot: 1,
+        image: "Reaction.webp",
+        abbreviation: "Rc",
+    },
+
+    "Quick Outcome - LITM": {
+        configKey: "Quick Outcome",
+        name: "Legend.moves.quickOutcome.name",
+        fail: "Legend.moves.outcome.fail",
+        partial: "Legend.moves.outcome.partial",
+        success: "Legend.moves.outcome.success",
+        system: "legend",
+        slot: 2,
+        image: "Quick Way.webp",
+        abbreviation: "QK",
+    },
+
+    "Detailed Outcome - Attack - LITM": {
+        configKey: "Detailed Outcome - Attack",
+        name: "Legend.moves.detailedOutcome.name",
+        subtitle: "Attack",
+        fail: "Legend.moves.outcome.fail",
+        partial: "Legend.moves.outcome.partial",
+        success: "Legend.moves.outcome.success",
+        system: "legend",
+        slot: 3,
+        image: "Detailed Way - Attack.webp",
+        abbreviation: "DtAtk",
+        trackedEffects: [
+        {
+            key: "effect.attack",
+            name: "Attack",
+            tags: ["wounded", "offended", "cursed"],
+            description: "Give your target a harmful status.",
+            cost: "1 Power per Tier"
+        },
+        {
+            key: "effect.disrupt",
+            name: "Disrupt",
+            tags: ["weak spot", "blinded", "tangled"],
+            description: "Give your target a hindering tag or status.",
+            cost: "1 Power per Tier / 2 Power per Tag"
+        },
+        {
+            key: "effect.influence",
+            name: "Influence",
+            tags: ["convinced", "beguiled", "threatened"],
+            description: "Give your target a compelling status.",
+            cost: "1 Power per Tier"
+        },
+        {
+            key: "effect.weaken",
+            name: "Weaken",
+            tags: ["shield", "confident", "enraged"],
+            description: "Remove a target's useful tag or status.",
+            cost: "1 Power per Tier / 2 Power per Tag"
+        }]
+    },
+
+    "Detailed Outcome - Empower - LITM": {
+    configKey: "Detailed Outcome - Empower",
+    name: "Legend.moves.detailedOutcome.name",
+    subtitle: "Empower",
+    fail: "Legend.moves.outcome.fail",
+    partial: "Legend.moves.outcome.partial",
+    success: "Legend.moves.outcome.success",
+    system: "legend",
+    slot: 4,
+    image: "Detailed Way - Empower.webp",
+    abbreviation: "DtEmp",
+    trackedEffects: [
+        {
+            key: "effect.bestow",
+            name: "Bestow",
+            tags: ["sharp senses", "basic spear training", "spell of lightning bolt"],
+            description: "Give yourself or an ally new abilities using tags.",
+            cost: "2 Power per Tag"
+        },
+        {
+            key: "effect.create",
+            name: "Create",
+            tags: ["broom", "find", "potion of valor", "fine cloak", "ethereal guardian"],
+            description: "Create a new object or being using tags.",
+            cost: "2 Power per Tag"
+        },
+        {
+            key: "effect.enhance",
+            name: "Enhance",
+            tags: ["aiming", "hopeful", "warded"],
+            description: "Give yourself or an ally a helpful status.",
+            cost: "1 Power per Tier"
+        },
+        {
+            key: "effect.restore",
+            name: "Restore",
+            tags: ["wounded", "despaired", "coughing affliction", "recover scratched tag"],
+            description: "Reduce a harmful status or recover a burnt power tag.",
+            cost: "1 Power per Tier / 2 Power per Tag"
+        }]
+    },
+
+    "Detailed Outcome - Extras - LITM": {
+    configKey: "Detailed Outcome - Extras",
+    name: "Legend.moves.detailedOutcome.name",
+    subtitle: "Extras",
+    fail: "Legend.moves.outcome.fail",
+    partial: "Legend.moves.outcome.partial",
+    success: "Legend.moves.outcome.success",
+    system: "legend",
+    slot: 5,
+    image: "Detailed Way - Extras.webp",
+    abbreviation: "DtExt",
+    trackedEffects: [
+        {
+            key: "effect.advance",
+            name: "Advance",
+            tags: ["make progress", "get closer", "push forward"],
+            description: "Increase a progress status.",
+            cost: "1 Power per Tier"
+        },
+        {
+            key: "effect.setBack",
+            name: "Set Back",
+            tags: ["delay", "ruin", "sabotage", "reverse", "remove progress status"],
+            description: "Decrease a progress status.",
+            cost: "1 Power per Tier"
+        },
+        {
+            key: "effect.discover",
+            name: "Discover",
+            tags: ["recall information", "research", "converse", "through a magic spell"],
+            description: "Discover a valuable detail.",
+            cost: "1 Power per Detail"
+        },
+        {
+            key: "effect.extraFeat",
+            name: "Extra Feat",
+            tags: ["additional feature", "minor achievement"],
+            description: "1 Power per additional feature or minor achievement included in the action.",
+            cost: ""
+        }]
+    },
+
+    "Sacrifice (Painful)": {
+        configKey: "Sacrifice (Painful)",
+        name: "Legend.moves.sacrifice.painful.name",
+        fail: "Legend.moves.sacrifice.fail",
+        partial: "Legend.moves.sacrifice.partial",
+        success: "Legend.moves.sacrifice.success",
+        system: "legend",
+        slot: 11,
+        image: "sacrifice-painful.webp",
+        abbreviation: "SfPn",
+    },
+
+    "Sacrifice (Scarring)": {
+        configKey: "Sacrifice (Scarring)",
+        name: "Legend.moves.sacrifice.scarring.name",
+        fail: "Legend.moves.sacrifice.fail",
+        partial: "Legend.moves.sacrifice.partial",
+        success: "Legend.moves.sacrifice.success",
+        system: "legend",
+        slot: 12,
+        image: "sacrifice-scarring.webp",
+        abbreviation: "SfSc",
+    },
+
+    "Sacrifice (Grave)": {
+        configKey: "Sacrifice (Grave)",
+        name: "Legend.moves.sacrifice.grave.name",
+        fail: "Legend.moves.sacrifice.fail",
+        partial: "Legend.moves.sacrifice.partial",
+        success: "Legend.moves.sacrifice.success",
+        system: "legend",
+        slot: 13,
+        image: "sacrifice-grave.webp",
+        abbreviation: "ScGr",
+    },
 };
 
 export const essenceDescriptions = {

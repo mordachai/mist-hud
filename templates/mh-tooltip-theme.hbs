@@ -5,15 +5,23 @@
       {{#if (eq activeSystem "city-of-mist")}}
         <div class="mh-theme-name mh-theme-name-com-{{category}}">
           {{themeInfo.locale_name}}
-          {{#if this}} {{crewName}} {{/if}}
+          {{#if crewName}} {{crewName}} {{/if}}
         </div>
       {{/if}}
 
-      {{!-- {{#if (eq activeSystem "otherscape")}}
+      {{#if (eq activeSystem "otherscape")}}
         <div class="mh-theme-name mh-theme-name-com-{{category}}">
-          {{#if this}} {{themeName}} {{/if}}
+          {{category}}
+          {{#if crewName}} {{crewName}} {{/if}}
         </div>
-      {{/if}} --}}
+      {{/if}}
+
+      {{#if (eq activeSystem "legend")}}
+        <div class="mh-theme-name mh-theme-name-com-{{category}}">
+          {{category}}
+          {{#if crewName}} {{crewName}} {{/if}}
+        </div>
+      {{/if}}
 
       <div class="mh-resource-bar">
         <!-- Attention Column -->
@@ -30,7 +38,7 @@
         <div class="mh-resource-group crack-group">
           <div class="boxes">
             {{#each crack}}
-              <span class="mh-box {{#if this}}active{{/if}}"></span>
+              <span class="mh-box crack {{#if this}}active{{/if}}"></span>
             {{/each}}
           </div>
           <div class="mh-resource-label">{{crackLabel}}</div>

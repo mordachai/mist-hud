@@ -21,6 +21,7 @@
   --limit-color: #ae295b;
   --status-color: rgb(102 31 131);
   --storytag-color: rgb(63, 81, 161);
+  --storytag-text-color: whitesmoke;
   --divider-roll-color: rgba(255, 255, 255, 0.3);
   --divider-color1: rgba(255, 255, 255, 0.3);
   --roll-shadow-color:#d542b7;
@@ -83,6 +84,21 @@
 .mh-theme-header.Crew,
 .mh-theme-header.Extra {
   background-image: url('../ui/header-neutral-com.webp');
+}
+
+.mh-tags ul {
+  padding: 3px;
+  margin: 10px;
+}
+
+.mh-tags li {
+  height: 1.4rem;
+  /* padding: 5px; */
+  color: var(--text-hud-main-color);
+}
+
+.mh-tags li:hover {
+  opacity: 0.85;
 }
 
 .mh-create-story-tag i,
@@ -288,6 +304,53 @@
   padding: 1px 2px;
   border-radius: 2px;
   margin: auto;
+}
+
+/*Chat Card Styles*/
+
+.mist-hud-roll {
+  background-image: var(--hud-background1);
+  background-repeat: no-repeat;
+  background-size: cover;
+  border: var(--positive-tag-color) 2px solid;
+  width: 96%;
+  border-radius: 10px;
+}
+
+.mhr-roll-title {
+  font-size: 2em;
+  text-align: center;
+  font-family: var(--font-family-move);
+  /* text-shadow: 1px 1px 2px var(--roll-shadow-color); */
+  color: var(--outcome-text-color);
+  justify-content: center;
+  margin-top: 12px;
+  line-height: 1em;
+  text-transform: uppercase;
+  font-style: italic;
+}
+
+.mhr-roll-subtitle {
+  font-size: 1.8em;
+  font-weight: normal;
+  margin-bottom: 5px;
+  text-align: center;
+  font-family: var(--font-family-move);
+  /* text-shadow: 1px 1px 1px var(--noise-dark-color); */
+  color: var(--noise-verylight-color);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+.mhr-outcome{
+  font-family: var(--font-family-outcome);
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--outcome-text-color);
+  /* text-shadow: 1px 1px 4px var(--blur-shadow-color); */
+  text-align: center;
+  justify-content: baseline;
+  padding: 5px 0px 20px 0px;
 }
 
 /*Roll Icons*/

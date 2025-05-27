@@ -20,6 +20,7 @@
   --spectrum-color:#abff00;
   --status-color: rgb(0, 93, 93);
   --storytag-color: #646800;
+  --storytag-text-color: whitesmoke;
   --limit-color: #ae295b;
   --divider-roll-color: rgba(255, 255, 255, 0.3);
   --divider-color1: rgba(255, 255, 255, 0.3);
@@ -235,6 +236,21 @@
   height: 16px;
   background-image: url('../ui/icons/statuses_icn.svg');
   filter: drop-shadow(1px 0 4px rgb(201, 201, 201));
+}
+
+.mh-tags ul {
+  padding: 3px;
+  margin: 10px;
+}
+
+.mh-tags li {
+  height: 1.4rem;
+  /* padding: 5px; */
+  color: var(--text-hud-main-color);
+}
+
+.mh-tags li:hover {
+  opacity: 0.85;
 }
 
 .mh-power-tag,
@@ -464,6 +480,130 @@ color: var(--mythosOS-verylight-color);
   text-decoration-color: rgb(235, 235, 235);
   text-decoration-thickness: 2px;
   color: #b1c7ca;
+}
+
+
+
+/*Chat Card Styles*/
+
+.mist-hud-roll {
+  background-image: var(--hud-background1);
+  background-repeat: no-repeat;
+  background-size: cover;
+  border: var(--positive-tag-color) 2px solid;
+  width: 96%;
+  border-radius: 10px;
+}
+
+.mhr-roll-title {
+  font-size: 2em;
+  text-align: center;
+  font-family: var(--font-family-move);
+  /* text-shadow: 1px 1px 2px var(--roll-shadow-color); */
+  color: var(--outcome-text-color);
+  justify-content: center;
+  margin-top: 12px;
+  line-height: 1em;
+  text-transform: uppercase;
+  font-style: italic;
+}
+
+.mhr-roll-subtitle {
+  font-size: 1.8em;
+  font-weight: normal;
+  margin-bottom: 5px;
+  text-align: center;
+  font-family: var(--font-family-move);
+  /* text-shadow: 1px 1px 1px var(--noise-dark-color); */
+  color: var(--noise-verylight-color);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+.mhr-outcome{
+  font-family: var(--font-family-outcome);
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--outcome-text-color);
+  /* text-shadow: 1px 1px 4px var(--blur-shadow-color); */
+  text-align: center;
+  justify-content: baseline;
+  padding: 5px 0px 20px 0px;
+}
+
+/* Tracked Effects */
+
+.mh-trackedfx-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  font-family: var(--font-family-tags);
+  color: var(--noise-verylight-color);
+  text-align: center;
+}
+
+.mh-trackedfx-item {
+  border: 2px solid #afafaf;
+  padding: 5px;
+  border-radius: 6px;
+  background-color: #0a314b;
+}
+
+.mh-trackedfx-name {
+  font-weight: 900;
+  font-style: oblique;
+  /* text-shadow: var(--effects-color1) 0px 0px 5px; */
+  font-size: 1.1em;
+  text-transform: uppercase;
+  color: var(--effects-color1)
+}
+
+.mh-trackedfx-description {
+  font-weight: 400;
+  color: var(--noise-verylight-color);
+  font-style: oblique;
+  /* text-shadow: var(--effects-color1) 0px 0px 5px; */
+  font-size: 1.0em;
+  text-transform: uppercase;
+}
+
+.mh-trackedfx-tags {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--effects-color3);
+  width: 100%;
+  background-color: #7e98b3a9;
+  border-top: 1px solid var(--outcome-text-color);
+  border-bottom: 1px solid var(--outcome-text-color);
+  height: 40px;
+  gap: 0px 2px;
+  margin: 5px 0;
+  font-family: var(--font-family-effects);
+}
+
+.mh-trackedfx-cost {
+  text-align: center;
+  font-family: var(--font-family-tags);
+  font-size: 0.9em;
+  padding-top: 3px;
+}
+
+.mh-trackedfx-row-break {
+  display: none;
+}
+
+.mh-trackedfx-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.mh-trackedfx-item {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .double-ones::after {
