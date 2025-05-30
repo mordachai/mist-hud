@@ -9,13 +9,17 @@
 "Legend.terms.greatness": "Grandeza",
 "Legend.terms.origin": "Origem",
 
+"Legend.moves.reaction.name": "Reação",
+"Legend.moves.quickOutcome.name": "Resultado Rápido",
+"Legend.moves.detailedOutcome.name": "Resultado Detalhado",
+
 "Legend.moves.outcome.fail": "O Narrador decide um desenvolvimento narrativo prejudicial ao Herói, e pode dar ou remover uma tag ou status de forma que atrapalhe o Herói.",
 "Legend.moves.outcome.partial": "A ação se desenrola como esperado, ou melhor, alcançando seu objetivo pretendido ou superando um obstáculo. O Narrador também pode te dar uma tag ou status útil.\nO Narrador decide um desenvolvimento narrativo prejudicial ao Herói, e pode dar ou remover uma tag ou status de forma que atrapalhe o Herói.",
 "Legend.moves.outcome.success": "A ação se desenrola como esperado, ou melhor, alcançando seu objetivo pretendido ou superando um obstáculo. O Narrador também pode te dar uma tag ou status útil.\nVocê pode Forçar sua Sorte:\n\nAceite Consequências para um Grande Sucesso (Rápido) ou para +1 de Poder para gastar (Detalhado).",
 
-"Legend.moves.reaction.name": "Reação",
-"Legend.moves.quickOutcome.name": "Resultado Rápido",
-"Legend.moves.detailedOutcome.name": "Resultado Detalhado",
+"Legend.moves.detailedOutcome.fail": "Você sofre as Consequências.",
+"Legend.moves.detailedOutcome.partial": "Gaste PWR Poder com os custos abaixo, mas você ainda sofre as Consequências.",
+"Legend.moves.detailedOutcome.success": "Gaste PWR Poder com os custos abaixo:",
 
 "Legend.moves.reaction.fail": "Você sofre as Consequências como estão",
 "Legend.moves.reaction.partial": "Você tem sucesso e pode gastar PWR Poder apenas para diminuir as Consequências.",
