@@ -184,6 +184,7 @@ async function rollMove(moveName) {
   let outcomeClass = "default-outcome";
   const isDoubleOnes = rollResults.every(r => r === 1);
   const isDoubleSixes = rollResults.every(r => r === 6);
+  const effectivePower = totalPower + totalNpcInfluence;
 
   if (activeSystem === "otherscape" || activeSystem === "legend") {
     if (isDoubleOnes) {
@@ -235,7 +236,7 @@ async function rollMove(moveName) {
 
   // Format output strings
   let outcomeMessage = game.i18n.localize(move[outcome]);
-  outcomeMessage = substituteText(outcomeMessage, totalPower);
+  outcomeMessage = substituteText(outcomeMessage, effectivePower);
   const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
   const displayRollTotal = (dynamiteEnabled && rollTotal >= 12) ? 
     `<span>${rollTotal}</span><span class="firecracker-emoji">🧨</span>` : rollTotal;
@@ -272,7 +273,9 @@ async function rollMove(moveName) {
     tagsData,
     storyTags: tagsData.storyTags,
     statuses: tagsData.statuses,
-    trackedEffects: move.trackedEffects || null,
+    trackedEffects: (outcome !== "fail" && Array.isArray(move.trackedEffects) && move.trackedEffects.length > 0)
+                ? move.trackedEffects
+                : null,
     diceClass,
     outcomeClass,
     helpHurtMessages: bonusMessages,
@@ -327,8 +330,6 @@ async function rollBurnForHitCityOfMist(moveName) {
   
   // IMPORTANT: Get all the roll data ONCE at the beginning
   const tagsData = hud.getSelectedRollData();
-
-
   
   // const activeBonuses = Object.values(receivedBonuses);
   // const helpBonuses = activeBonuses.filter(bonus => bonus.type === 'help')
@@ -402,6 +403,9 @@ async function rollBurnForHitCityOfMist(moveName) {
   const storedDynamiteMoves = (await actor.getFlag("mist-hud", "dynamiteMoves")) || [];
   const storedDynamiteEnabled = storedDynamiteMoves.includes(moveName);
 
+  // Calculate effective power including NPC influence
+  const effectivePower = burnBasePower + totalNpcInfluence;
+
   // Determine if the move should roll as Dynamite
   const dynamiteEnabled = rollIsDynamiteForced || storedDynamiteEnabled || checkRolls(actor, move, hud);
 
@@ -432,7 +436,7 @@ async function rollBurnForHitCityOfMist(moveName) {
   
   // Format output strings
   let outcomeMessage = game.i18n.localize(move[outcome]);
-  outcomeMessage = substituteText(outcomeMessage, burnBasePower);
+  outcomeMessage = substituteText(outcomeMessage, effectivePower);
   const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
   const displayRollTotal = (dynamiteEnabled && finalTotal >= 12) ? 
     `<span>${finalTotal}</span><span class="firecracker-emoji">🧨</span>` : finalTotal;
@@ -564,10 +568,10 @@ export async function rollSpecialMoves(moveName, hud) {
     statusInfluence: Number(infl.statusInfluence) || 0
   }));
 
-  // Aggregate total power for the roll calculation (including NPC influence)
-  const totalPower = themeCount + invertedWeaknessTags + totalWeakness + totalStoryTags + 
-                     totalLoadoutTags + totalCharStatuses + totalSceneStatuses + 
-                     totalScnTags + modifier + totalNpcInfluence;
+  // Calculate effective power including NPC influence
+  const effectivePower = themeCount + invertedWeaknessTags + totalWeakness + totalStoryTags + 
+                      totalLoadoutTags + totalCharStatuses + totalSceneStatuses + 
+                      totalScnTags + modifier + totalNpcInfluence;
   
   // Render/minimize the HUD
   if (hud._state === Application.RENDER_STATES.CLOSED) {
@@ -667,7 +671,7 @@ export async function rollSpecialMoves(moveName, hud) {
 
   // Generate chat output
   let outcomeMessage = move[outcome] ? game.i18n.localize(move[outcome]) : "";
-  outcomeMessage = substituteText(outcomeMessage, totalPower);
+  outcomeMessage = substituteText(outcomeMessage, effectivePower);
 
   const localizedMoveEffects = moveEffects.map(effect => game.i18n.localize(effect));
   
