@@ -18,6 +18,7 @@ Hooks.once('diceSoNiceReady', (dice3d) => {
     dice3d.addSystem({ id: "otherscape-mythos", name: "Otherscape: Mythos", group: "Otherscape" });
     dice3d.addSystem({ id: "otherscape-noise", name: "Otherscape: Noise", group: "Otherscape" });
     dice3d.addSystem({ id: "otherscape-self", name: "Otherscape: Self", group: "Otherscape" });
+    dice3d.addSystem({ id: "legend", name: "Legend in the Mist", group: "Legend in the Mist" });
 
     // Add all dice presets
     dice3d.addDicePreset({
@@ -66,6 +67,16 @@ Hooks.once('diceSoNiceReady', (dice3d) => {
         emissive: 0xffffff,
         emissiveIntensity: 0.5,
         colorset: "otherscape-self",
+    },"d12");
+
+        dice3d.addDicePreset({
+        system: "legend",
+        type: "d6",
+        labels: ['1', '2', '3', '4', '5', '/modules/mist-hud/ui/dice/dice_greatness_color.png',
+            '/modules/mist-hud/ui/dice/dice_raven_color.png', '5', '4', '3', '2', '1'],
+        bumpMaps: [, , , , , '/modules/mist-hud/ui/dice/dice_greatness_bump.png',
+            '/modules/mist-hud/ui/dice/dice_raven_bump.png', , , , , ],
+        colorset: "legend",
     },"d12");
 
     // Add all colorsets
@@ -118,6 +129,20 @@ Hooks.once('diceSoNiceReady', (dice3d) => {
         texture: "fire",
         material: "metal",
         font: "Bruno Ace",
+        visibility: "visible",
+    });
+
+        dice3d.addColorset({
+        name: "legend",
+        description: "Legend in the Mist Default",
+        category: "Legend in the Mist",
+        foreground: ["#000000", "#000000", "#000000", "#000000"],
+        background: ["#e9e1d6", "#828559", "#658686", "#c9ac89"],
+        outline: ["#000000", "#000000", "#000000", "#000000"],
+        edge: ["#f8f3eb", "#b6b694", "#719481", "#e9dcbc"],
+        texture: "wood",
+        material: "stone",
+        font: "Times",
         visibility: "visible",
     });
 });
