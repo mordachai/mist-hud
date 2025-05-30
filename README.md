@@ -10,7 +10,7 @@
 
 ## NEW ADDITION!: Legend in the Mist HUD
 
-[![LitM Setup Tutorial - Maia Wilson](external_files/LitMScreen.png)]([https://i.snap.as/2IxnDguK.png](https://www.loom.com/share/63649a72e05d40fa87f72f73b9bbbd24?sid=0bc5fcdc-3893-44c5-98ff-06dc6b2b8304))
+[![LitM Setup Tutorial - Maia Wilson](external_files/LitMScreen.png)](https://www.loom.com/share/63649a72e05d40fa87f72f73b9bbbd24?sid=e7649bf9-b358-4540-ad70-5a78f297cf46)
 
 Click on the image for an awesome setup tutorial made by McMaia
 
