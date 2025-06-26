@@ -536,8 +536,9 @@ export async function rollSpecialMoves(moveName, hud) {
   };
 
   // Determine active roll based on move configuration
-  const activeRoll = Object.entries(rollMappings).find(([flag]) => move[flag]) || [];
-  const { amount: themeCount = 0, type: themeType = null } = activeRoll[1] || {};
+  const activeRoll = Object.entries(rollMappings).find(([flag]) => move[flag]);
+  const themeCount = activeRoll?.[1]?.amount || 0;
+  const themeType = activeRoll?.[1]?.type || null;
 
   const totalWeakness = calculateWeaknessTags(hud);
   
@@ -568,10 +569,13 @@ export async function rollSpecialMoves(moveName, hud) {
     statusInfluence: Number(infl.statusInfluence) || 0
   }));
 
+  // Calculate total power for the roll (without NPC influence)
+  const totalPower = themeCount + invertedWeaknessTags + totalWeakness + totalStoryTags + 
+                  totalLoadoutTags + totalCharStatuses + totalSceneStatuses + 
+                  totalScnTags + modifier;
+
   // Calculate effective power including NPC influence
-  const effectivePower = themeCount + invertedWeaknessTags + totalWeakness + totalStoryTags + 
-                      totalLoadoutTags + totalCharStatuses + totalSceneStatuses + 
-                      totalScnTags + modifier + totalNpcInfluence;
+  const effectivePower = totalPower + totalNpcInfluence;
   
   // Render/minimize the HUD
   if (hud._state === Application.RENDER_STATES.CLOSED) {
@@ -747,7 +751,10 @@ async function rollCinematicMove(moveName, hud) {
     ui.notifications.warn("Please select an actor before attempting this cinematic move.");
     return;
   }
-  
+
+  // Detect the active system
+  const activeSystem = await detectActiveSystem();
+
   // Get ONCE all the data we need at the beginning
   const tagsData = hud.getSelectedRollData();
   
