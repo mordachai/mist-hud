@@ -1488,7 +1488,7 @@ Hooks.once("init", () => {
           }
           
           // Try to parse the status information
-          const statusMatches = statusText.trim().match(/^([a-zA-Z-\s]+)-(\d+)$/);
+          const statusMatches = statusText.trim().match(/^([A-zÀ-ú-\s]+)-(\d+)$/);
           if (statusMatches) {
             const statusName = statusMatches[1].trim();
             const baseTier = parseInt(statusMatches[2], 10);
@@ -1565,7 +1565,7 @@ Hooks.once("init", () => {
           }
           
           // 2. If it contains "-" followed by a number - it's a STATUS
-          const statusRegex = /^([a-zA-Z][-a-zA-Z\s]*)-(\d+)$/;
+          const statusRegex = /^([A-zÀ-ú][-A-zÀ-ú\s]*)-(\d+)$/;
           if (statusRegex.test(modifiedContent)) {
             const matches = modifiedContent.match(statusRegex);
             const statusName = matches[1];
