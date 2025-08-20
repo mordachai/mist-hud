@@ -67,7 +67,7 @@ Hooks.once("ready", async () => {
 Hooks.once('init', () => {
 
     // Detect the active system
-    const activeSystem = game.settings.get("city-of-mist", "system");
+    // const activeSystem = game.settings.get("city-of-mist", "system");
 
     game.settings.register("mist-hud", "rollIsDynamite", {
         name: "Roll Is Dynamite",

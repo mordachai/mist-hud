@@ -1990,55 +1990,55 @@ Hooks.once("init", async function () {
   });
 });
 
-Hooks.on("getSceneControlButtons", (controls) => {
-  console.log("mist-hud: Adding control buttons");
+// Hooks.on("getSceneControlButtons", (controls) => {
+//   console.log("mist-hud: Adding control buttons");
   
-  // Find the token control section
-  const tokenControls = controls.find((c) => c.name === "token");
-  if (!tokenControls) {
-    console.log("mist-hud: No token controls found");
-    return;
-  }
+//   // Find the token control section
+//   const tokenControls = controls.find((c) => c.name === "token");
+//   if (!tokenControls) {
+//     console.log("mist-hud: No token controls found");
+//     return;
+//   }
 
-  // Add the Status Screen button
-  tokenControls.tools.push({
-    name: "statusScreen",
-    title: "Statuses MC Screen",
-    icon: "fa-solid fa-list",
-    button: true,
-    visible: game.user.isGM || game.user.isPlayer,
-    onClick: () => {
-      if (!game.mistHUD?.statusScreen) {
-        ui.notifications.warn("MistHUD: Status Screen not found!");
-        return;
-      }
-      game.mistHUD.statusScreen.render(true);
-    }
-  });
+//   // Add the Status Screen button
+//   tokenControls.tools.push({
+//     name: "statusScreen",
+//     title: "Statuses MC Screen",
+//     icon: "fa-solid fa-list",
+//     button: true,
+//     visible: game.user.isGM || game.user.isPlayer,
+//     onClick: () => {
+//       if (!game.mistHUD?.statusScreen) {
+//         ui.notifications.warn("MistHUD: Status Screen not found!");
+//         return;
+//       }
+//       game.mistHUD.statusScreen.render(true);
+//     }
+//   });
 
-  // Only add the NPC Influence Manager button for GMs
-  if (game.user.isGM) {
-    // Add the NPC Influence Viewer button with skull icon
-    tokenControls.tools.push({
-      name: "npcInfluenceManager",
-      title: "NPC Influence Viewer",
-      icon: "fas fa-skull", // Using skull icon as requested
-      button: true,
-      visible: true,
-      onClick: () => {
-        console.log("mist-hud: NPC Influence button clicked");
-        // Try both global references
-        if (typeof globalThis.openNPCInfluenceManager === 'function') {
-          globalThis.openNPCInfluenceManager();
-        } else if (game.mistHud && typeof game.mistHud.openNPCInfluenceManager === 'function') {
-          game.mistHud.openNPCInfluenceManager();
-        } else {
-          ui.notifications.error("NPC Influence Viewer function not available");
-        }
-      }
-    });
-  }
-});
+//   // Only add the NPC Influence Manager button for GMs
+//   if (game.user.isGM) {
+//     // Add the NPC Influence Viewer button with skull icon
+//     tokenControls.tools.push({
+//       name: "npcInfluenceManager",
+//       title: "NPC Influence Viewer",
+//       icon: "fas fa-skull", // Using skull icon as requested
+//       button: true,
+//       visible: true,
+//       onClick: () => {
+//         console.log("mist-hud: NPC Influence button clicked");
+//         // Try both global references
+//         if (typeof globalThis.openNPCInfluenceManager === 'function') {
+//           globalThis.openNPCInfluenceManager();
+//         } else if (game.mistHud && typeof game.mistHud.openNPCInfluenceManager === 'function') {
+//           game.mistHud.openNPCInfluenceManager();
+//         } else {
+//           ui.notifications.error("NPC Influence Viewer function not available");
+//         }
+//       }
+//     });
+//   }
+// });
 
 Hooks.on("dropCanvasData", async (canvas, dropData) => {
   // Process statuses (existing code)

@@ -184,8 +184,8 @@ border: none;
   color: #ffffff;
   cursor: pointer;
   margin: auto;
-  flex: 1;
-  padding-top: 8px;
+  flex: 0;
+  padding-top: 0px;
   margin-left: 5px;
 }
 
@@ -1228,4 +1228,8 @@ li.tag-or-status {
   background-color: rgba(0, 0, 0, 0.1);
   padding: 0 4px;
   border-radius: 3px;
+}
+
+.mh-custom-header {
+    flex-direction: row;
 }
