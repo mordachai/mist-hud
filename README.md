@@ -58,7 +58,9 @@ OR
 
 1. Paste the following manifest URL into the bottom Manifest URL field:
 
-    https://github.com/mordachai/mist-hud/raw/main/module.json
+```
+https://github.com/mordachai/mist-hud/releases/latest/download/mist-hud.zip
+```
 
 2. Enable the module in your Game Settings under Manage Modules
 
