@@ -104,7 +104,7 @@ border: none;
   background: var(--hud-bg-color);
   display: flex;
   flex-basis: 35px;
-  flex-direction: column;
+  flex-direction: row;
   justify-content:center;
   align-content: space-between;
   align-items: center;
@@ -1228,8 +1228,4 @@ li.tag-or-status {
   background-color: rgba(0, 0, 0, 0.1);
   padding: 0 4px;
   border-radius: 3px;
-}
-
-.mh-custom-header {
-    flex-direction: row;
 }

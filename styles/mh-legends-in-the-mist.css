@@ -53,6 +53,12 @@
   --adventure-light-color: #cd5c5c;
   --adventure-verylight-color: #f08080;
   --adventure-dark-color: #4a1319;
+
+    /* Variable Theme (Default) */
+  --variable-primary-color: #c6c6c6;
+  --variable-light-color: #a7a7a7;
+  --variable-verylight-color: #dedede;
+  --variable-dark-color: #1b1b1b;
   
   /* Greatness Theme (Blue) */
   --greatness-primary-color: #1e3a8a;
@@ -313,6 +319,11 @@
   padding-top: 2px;
 }
 
+.mh-theme-header.Default {
+  background-image: url('../ui/header-black.webp');
+  padding-top: 2px;
+}
+
 .mh-theme-header.neutral,
 .mh-theme-header.Extra {
   background-image: url('../ui/header-backpack.webp');
@@ -352,6 +363,10 @@
   text-shadow: var(--origin-dark-color) 1px 0 3px;
 }
 
+.theme-type.Default{
+  color: white;
+  text-shadow: darkgrey 1px 0 3px;
+}
 
 .theme-type.Crew,
 .theme-type.Extra {
@@ -426,6 +441,16 @@
   height: 24px;
   background-image: url('../ui/icons/greatness_litm_icn.svg');
   filter: drop-shadow(1px 0 4px var(--greatness-dark-color));
+}
+
+.mh-theme-icon.Default {
+  position: relative;
+  right: -8px;
+  top: -9px;
+  width: 24px;
+  height: 24px;
+  background-image: url('../ui/icons/special_icn.svg');
+  filter: drop-shadow(1px 0 4px var(--effects-color1));
 }
 
 .mh-theme-icon.Crew {
@@ -616,20 +641,23 @@
 
 .mh-power-tag.Adventure .burn-icon.unburned,
 .mh-power-tag.Origin .burn-icon.unburned,
-.mh-power-tag.Greatness .burn-icon.unburned
+.mh-power-tag.Greatness .burn-icon.unburned,
+.mh-power-tag.Default .burn-icon.unburned
   {
   background-image: url("../ui/icons/burn_scratch_empty2.svg");
 }
 
 .mh-power-tag.Adventure .burn-icon.toBurn,
 .mh-power-tag.Origin .burn-icon.toBurn,
-.mh-power-tag.Greatness .burn-icon.toBurn{
+.mh-power-tag.Greatness .burn-icon.toBurn,
+.mh-power-tag.Default .burn-icon.toBurn{
   background-image: url("../ui/icons/burn_scratch_toburn2.svg");
 }
 
 .mh-power-tag.Adventure .burn-icon.burned,
 .mh-power-tag.Origin .burn-icon.burned,
-.mh-power-tag.Greatness .burn-icon.burned {
+.mh-power-tag.Greatness .burn-icon.burned,
+.mh-power-tag.Default .burn-icon.burned {
   background-image: url("../ui/icons/burn_scratch_burned2.svg");
 }
 
@@ -674,6 +702,14 @@
 }
 
 .mystery-type.Greatness {
+  color: var(--greatness-verylight-color);
+  text-shadow: var(--greatness-dark-color) 1px 1px 1px;
+  padding: 1px 2px;
+  border-radius: 2px;
+  margin: auto;
+}
+
+.mystery-type.Default {
   color: var(--greatness-verylight-color);
   text-shadow: var(--greatness-dark-color) 1px 1px 1px;
   padding: 1px 2px;

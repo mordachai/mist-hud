@@ -175,11 +175,15 @@ export function getMysteryFromTheme(actor, themeId) {
     };
   }
 
-  const category = realThemebook.system.subtype || "unknown";
+  // const category = realThemebook.system.subtype || "unknown";
   const system = game.settings.get("city-of-mist", "system");
   
   // Check if this is a Legend theme by looking at the motivation field
   const isLegendTheme = realThemebook.system.motivation === "motivation";
+
+  const category = realThemebook.system.subtype || 
+                  ((system === "legend" || isLegendTheme) ? "Variable" : "unknown");
+  
 
   // System-specific name display:
   // City of Mist: show themebook names (e.g., "Divination", "Encantment")
@@ -226,6 +230,7 @@ export function getMysteryFromTheme(actor, themeId) {
       case "Adventure":
       case "Origin":
       case "Greatness":
+      case "":   
         prefixKey = "Legend.terms.quest";
         break;
       default:
@@ -312,7 +317,7 @@ export function getThemesAndTags(actor) {
       console.warn(`Themebook is missing for theme: ${theme.name}`);
       return null;
     }
-    const themeType = realThemebook.system?.subtype || "default-icon";
+    const themeType = realThemebook.system?.subtype || "Default";
     const powerTags = getPowerTags(themeId, tagItems, subTagsByParent, actor);
     const weaknessTags = getWeaknessTags(themeId, tagItems, subTagsByParent, actor);
     return {
@@ -369,7 +374,7 @@ export function getThemebooks(actor) {
       console.warn(`Themebook is null for theme: ${theme.name}`);
       return null;
     }
-    const themeType = realThemebook.system?.subtype || "default-icon";
+    const themeType = realThemebook.system?.subtype || "Default";
     const themeIcon = `mh-theme-icon ${themeType}`;
     return {
       id: theme._id,
