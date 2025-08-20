@@ -1934,6 +1934,7 @@ Hooks.on('updateActor', (actor, data, options, userId) => {
     hud.render(true);
   }
 });
+
 // In your module or main script file, register these once during init or ready:
 Hooks.on('createItem', (item, options, userId) => {
   // Only for items embedded in an Actor:
@@ -1990,55 +1991,61 @@ Hooks.once("init", async function () {
   });
 });
 
-// Hooks.on("getSceneControlButtons", (controls) => {
-//   console.log("mist-hud: Adding control buttons");
+Hooks.on("getSceneControlButtons", (controls) => {
+  console.log("mist-hud: Adding control buttons");
   
-//   // Find the token control section
-//   const tokenControls = controls.find((c) => c.name === "token");
-//   if (!tokenControls) {
-//     console.log("mist-hud: No token controls found");
-//     return;
-//   }
+  // Use the correct control name: 'tokens' (plural)
+  const tokenControls = controls['tokens'];
+  if (!tokenControls) {
+    console.log("mist-hud: No tokens controls found");
+    return;
+  }
 
-//   // Add the Status Screen button
-//   tokenControls.tools.push({
-//     name: "statusScreen",
-//     title: "Statuses MC Screen",
-//     icon: "fa-solid fa-list",
-//     button: true,
-//     visible: game.user.isGM || game.user.isPlayer,
-//     onClick: () => {
-//       if (!game.mistHUD?.statusScreen) {
-//         ui.notifications.warn("MistHUD: Status Screen not found!");
-//         return;
-//       }
-//       game.mistHUD.statusScreen.render(true);
-//     }
-//   });
+  console.log("mist-hud: Tokens controls found, adding buttons");
 
-//   // Only add the NPC Influence Manager button for GMs
-//   if (game.user.isGM) {
-//     // Add the NPC Influence Viewer button with skull icon
-//     tokenControls.tools.push({
-//       name: "npcInfluenceManager",
-//       title: "NPC Influence Viewer",
-//       icon: "fas fa-skull", // Using skull icon as requested
-//       button: true,
-//       visible: true,
-//       onClick: () => {
-//         console.log("mist-hud: NPC Influence button clicked");
-//         // Try both global references
-//         if (typeof globalThis.openNPCInfluenceManager === 'function') {
-//           globalThis.openNPCInfluenceManager();
-//         } else if (game.mistHud && typeof game.mistHud.openNPCInfluenceManager === 'function') {
-//           game.mistHud.openNPCInfluenceManager();
-//         } else {
-//           ui.notifications.error("NPC Influence Viewer function not available");
-//         }
-//       }
-//     });
-//   }
-// });
+  // Add Status Screen button - tools is an OBJECT, use object assignment
+  tokenControls.tools['statusScreen'] = {
+    name: "statusScreen",
+    title: "Statuses MC Screen",
+    icon: "fas fa-list",
+    button: true,
+    visible: true,
+    onClick: () => {
+      console.log("mist-hud: Status Screen button clicked");
+      if (!game.mistHUD?.statusScreen) {
+        ui.notifications.warn("MistHUD: Status Screen not found!");
+        return;
+      }
+      game.mistHUD.statusScreen.render(true);
+    }
+  };
+
+  // Add NPC Influence Manager button (GM only)  
+  if (game.user.isGM) {
+    tokenControls.tools['npcInfluenceManager'] = {
+      name: "npcInfluenceManager",
+      title: "NPC Influence Viewer", 
+      icon: "fas fa-skull",
+      button: true,
+      visible: true,
+      onClick: () => {
+        console.log("mist-hud: NPC Influence button clicked");
+        // Try both global references
+        if (typeof globalThis.openNPCInfluenceManager === 'function') {
+          globalThis.openNPCInfluenceManager();
+        } else if (game.mistHud && typeof game.mistHud.openNPCInfluenceManager === 'function') {
+          game.mistHud.openNPCInfluenceManager();
+        } else {
+          console.error("mist-hud: NPC Influence Viewer function not available");
+          ui.notifications.error("NPC Influence Viewer function not available");
+        }
+      }
+    };
+    console.log("mist-hud: NPC Influence button added for GM");
+  }
+
+  console.log("mist-hud: Buttons added successfully");
+});
 
 Hooks.on("dropCanvasData", async (canvas, dropData) => {
   // Process statuses (existing code)

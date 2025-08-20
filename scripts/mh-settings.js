@@ -5,8 +5,7 @@ export const MODULE_ID = "mist-hud";
 const SYSTEM_CSS_MAP = {
     "city-of-mist": "/modules/mist-hud/styles/mh-city-of-mist.css",
     "otherscape": "/modules/mist-hud/styles/mh-otherscape.css",
-    "legend": "/modules/mist-hud/styles/mh-legends-in-the-mist.css",
-    "custom": null // Optional: No stylesheet if custom system
+    "legend": "/modules/mist-hud/styles/mh-legends-in-the-mist.css"
 };
 
 function applySystemCSS(system) {
