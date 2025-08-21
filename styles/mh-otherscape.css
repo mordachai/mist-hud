@@ -849,3 +849,36 @@ color: var(--mythosOS-verylight-color);
 .mh-improvement-marker.Self i {
   transform: translateY(-3px);
 }
+
+.scene-tag-window {
+	background: rgba(0,0,0,0.5);
+	color: whitesmoke;
+	font-weight: normal;
+}
+
+.combatant-name{
+	color: black;
+	text-shadow: -1px 1px 3px white, 0px 0px 6px #18faf5;
+	gap: 10px;
+  padding-right: 2rem;
+}
+
+.item-selection-context .status-name:hover,
+.item-selection-context .story-tag:hover {
+	font-weight: normal;
+	text-shadow: 0 0 3px rgb(157, 255, 0);
+  border: 2px solid rgb(255, 255, 255);
+  background-image: none;
+}
+
+.item-selection-context .status .negative-selected,
+.item-selection-context .tag .negative-selected {
+  color: black;
+	background-color: var(--marker-negativeTag-color);
+}
+
+.item-selection-context .status .positive-selected,
+.item-selection-context .tag .positive-selected {
+	color: black;
+	background-color: var(--marker-positiveTag-color);
+}

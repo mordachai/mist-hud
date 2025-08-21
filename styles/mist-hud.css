@@ -727,19 +727,6 @@ hr {
 .bm-primary-nav__element.svelte-hpna8u {color: rgb(231, 209, 177);}
 
 
-.scene-tag-window {
-	background: rgba(0,0,0,0.5);
-	color: whitesmoke;
-	font-weight: normal;
-}
-
-.combatant-name{
-	color: black;
-	text-shadow: -1px 1px 3px white, 0px 0px 6px #18faf5;
-	gap: 10px;
-  padding-right: 2rem;
-}
-
 .mh-create-status:hover,
 .mh-create-story-tag:hover{
 	text-shadow: -1px -1px 4px yellow, 1px 1px 4px gold;
@@ -763,26 +750,6 @@ li.tag-or-status {
   padding: 2px;
 	margin: -2px;
 	border-radius: 0.8em 0.3em;
-}
-
-.item-selection-context .status-name:hover,
-.item-selection-context .story-tag:hover {
-	font-weight: normal;
-	text-shadow: 0 0 3px orange;
-  border: 2px solid rgb(255, 255, 255);
-  background-image: none;
-}
-
-.item-selection-context .status .negative-selected,
-.item-selection-context .tag .negative-selected {
-  color: black;
-	background-image: linear-gradient(to right, rgb(255, 165, 0, 0.85), rgba(255, 187, 105, 0.85));
-}
-
-.item-selection-context .status .positive-selected,
-.item-selection-context .tag .positive-selected {
-	color: black;
-	background-image: linear-gradient(to right, rgb(255, 255, 153, 0.85), rgb(255, 215, 0, 0.85));
 }
 
 /* Roll Bar */

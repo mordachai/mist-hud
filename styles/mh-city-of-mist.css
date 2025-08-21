@@ -619,3 +619,23 @@ input[type="checkbox"].hurt-toggle {
 .hurt-toggle:checked::after {
   content: none;
 }
+
+.item-selection-context .status-name:hover,
+.item-selection-context .story-tag:hover {
+	font-weight: normal;
+	text-shadow: 0 0 3px orange;
+  border: 2px solid rgb(255, 255, 255);
+  background-image: none;
+}
+
+.item-selection-context .status .negative-selected,
+.item-selection-context .tag .negative-selected {
+  color: black;
+	background-image: linear-gradient(to right, rgb(255, 165, 0, 0.85), rgba(255, 187, 105, 0.85));
+}
+
+.item-selection-context .status .positive-selected,
+.item-selection-context .tag .positive-selected {
+	color: black;
+	background-image: linear-gradient(to right, rgb(255, 255, 153, 0.85), rgb(255, 215, 0, 0.85));
+}
