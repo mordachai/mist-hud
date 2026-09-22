@@ -1,7 +1,7 @@
 // mist-hud.js
 
 import { essenceDescriptions } from './mh-theme-config.js';
-import { StoryTagDisplayContainer } from "/systems/city-of-mist/module/story-tag-window.js";
+import { StoryTagWindow } from "/systems/city-of-mist/module/story-tag-application.js";
 import { CityHelpers } from "/systems/city-of-mist/module/city-helpers.js";
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
 import { moveConfig } from "./mh-theme-config.js";
@@ -1203,7 +1203,7 @@ export class MistHUD extends Application {
     event.stopPropagation();
 
     try {
-        const createdTag = await StoryTagDisplayContainer.prototype.createStoryTag(event);
+        const createdTag = await StoryTagWindow.prototype.createStoryTag(event);
         this.render(false);
     } catch (err) {
         console.error("Error creating a story tag:", err);

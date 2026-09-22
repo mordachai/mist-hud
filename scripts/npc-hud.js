@@ -1,6 +1,6 @@
 import { initializeAccordions } from './accordion-handler.js';
 import { detectActiveSystem } from './mh-settings.js';
-import { StoryTagDisplayContainer } from "/systems/city-of-mist/module/story-tag-window.js";
+import { StoryTagWindow } from "/systems/city-of-mist/module/story-tag-application.js";
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
 
 globalThis.activeNpcInfluences = globalThis.activeNpcInfluences || {};
