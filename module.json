@@ -43,23 +43,24 @@
     }
   ],
   "esmodules": [
-    "scripts/mh-settings.js",
-    "scripts/mh-theme-config.js",
-    "scripts/mh-dice.js",
-    "scripts/mist-hud.js",
-    "scripts/statusScreenApp.js",
-    "scripts/mh-roll.js",
-    "scripts/dynamite-panel.js",
-    "scripts/npc-hud.js",
-    "scripts/mh-load-moves.js",
+    "scripts/constants.js",
+    "scripts/settings.js",
+    "scripts/move-layout.js",
+    "scripts/hud-state.js",
+    "scripts/getters.js",
+    "scripts/notifications.js",
+    "scripts/bonus-manager.js",
+    "scripts/npc-helpers.js",
     "scripts/npc-influence-manager.js",
-    "scripts/npc-influence-functions.js",
-    "scripts/token-status-notification.js"
-
+    "scripts/npc-influence.js",
+    "scripts/status-screen.js",
+    "scripts/player-hud.js",
+    "scripts/npc-hud.js",
+    "scripts/mh-dice.js",
+    "scripts/init.js"
   ],
   "styles": [
     "styles/mist-hud.css",
-    "styles/mh-roll.css",
     "styles/mh-npc-hud.css",
     "styles/npc-influence-manager.css"
   ],

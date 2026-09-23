@@ -203,6 +203,7 @@ border: none;
   background: var(--hud-bg-color);
   border: none;
   border-radius: 8px;
+  overflow: visible !important;
 }
 
 #mist-hud .mh-content {

@@ -1,6 +1,5 @@
-import { initializeAccordions } from './accordion-handler.js';
-import { detectActiveSystem } from './mh-settings.js';
-import { StoryTagDisplayContainer } from "/systems/city-of-mist/module/story-tag-window.js";
+import { initializeAccordions, registerNpcHelpers } from './npc-helpers.js';
+import { detectActiveSystem } from './settings.js';
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
 
 globalThis.activeNpcInfluences = globalThis.activeNpcInfluences || {};
@@ -718,7 +717,7 @@ export class NpcHUD extends Application {
             super.activateListeners(html);
         
             // Initialize accordions
-            initializeAccordions();
+            initializeAccordions(html[0]);
         
             // Inject custom header
             this.injectCustomHeader();
@@ -1451,8 +1450,12 @@ async function handleSceneTag(tagElement) {
 // Add a command that can be run from the console
 globalThis.syncAllNpcInfluences = syncAllNpcInfluences;
 
-// Re-register the original hooks in the original way
+// Register Handlebars helpers (once, from npc-helpers.js)
 Hooks.once("init", () => {
+    registerNpcHelpers();
+});
+// (Legacy block replaced — helpers are now in npc-helpers.js)
+Hooks.once("_npc_hud_helpers_legacy_placeholder", () => {
     Handlebars.registerHelper('ifEquals', (a, b, options) => {
     console.log('ifEquals:', a, '===', b, '?', a === b);
     return a === b ? options.fn(this) : options.inverse(this);
