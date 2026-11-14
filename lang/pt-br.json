@@ -61,6 +61,186 @@
 "Legend.themebook.people.name": "Povo",
 "Legend.themebook.personality.name": "Personalidade",
 "Legend.themebook.skillOrTrade.name": "Habilidade ou Ofício",
-"Legend.themebook.trait.name": "Traço"
+"Legend.themebook.trait.name": "Traço",
+
+"MistHUD.settings.rollIsDynamite.name": "Rolagem é Dinamite",
+
+"MistHUD.settings.rollIsDynamite.hint": "Define se a próxima rolagem é garantidamente Dinamite.",
+
+"MistHUD.settings.npcAccordionState.name": "Estado inicial dos acordeões de NPC",
+
+"MistHUD.settings.npcAccordionState.hint": "Define o estado inicial dos acordeões de NPC.",
+
+"MistHUD.settings.npcAccordionState.allExpanded": "Todos expandidos",
+
+"MistHUD.settings.npcAccordionState.allClosed": "Todos fechados",
+
+"MistHUD.settings.lastSelectedTab.name": "Última aba selecionada",
+
+"MistHUD.settings.statusNotifications.name": "Notificações ao soltar Status",
+
+"MistHUD.settings.statusNotifications.hint": "Notificação animada sobre o token quando um status é solto nele.",
+
+"MistHUD.settings.tagNotifications.name": "Notificações ao soltar Tags",
+
+"MistHUD.settings.tagNotifications.hint": "Notificações visuais quando tags de história são atribuídas a tokens por arrastar e soltar.",
+
+"MistHUD.settings.useTextButtons.name": "Usar texto nos botões de rolagem",
+
+"MistHUD.settings.useTextButtons.hint": "Se ativado, os botões de rolagem usam abreviações de texto em vez de imagens.",
+
+"MistHUD.settings.statusTabs.name": "Abas na lista de Status",
+
+"MistHUD.settings.statusTabs.hint": "Organiza os status em abas por categoria.",
+
+"MistHUD.settings.debugMode.name": "Modo de depuração",
+
+"MistHUD.settings.debugMode.hint": "Ativa ou desativa o registro de depuração.",
+
+"MistHUD.settings.layoutMode.name": "Modo de layout do HUD",
+
+"MistHUD.settings.layoutMode.floating": "Flutuante",
+
+"MistHUD.settings.layoutMode.docked": "Acoplado",
+
+"MistHUD.settings.dockSide.name": "Lado do acoplamento",
+
+"MistHUD.settings.dockSide.left": "Esquerda",
+
+"MistHUD.settings.dockSide.right": "Direita",
+
+"MistHUD.settings.importedStatusCollection.name": "Coleção de status importada",
+
+"MistHUD.dialog.refreshTitle": "Atualização necessária",
+
+"MistHUD.dialog.refreshContent": "Atualizar agora para aplicar as mudanças?",
+
+"MistHUD.window.playerHud": "HUD do Jogador",
+
+"MistHUD.window.statusScreen": "Tela de Status do MC",
+
+"MistHUD.window.influenceViewer": "Visualizador de Influência de NPCs",
+
+"MistHUD.notify.accordionRefresh": "Alterar o estado dos acordeões exige atualizar a página.",
+
+"MistHUD.notify.buttonsChanged": "A exibição dos botões mudou. Atualize para aplicar.",
+
+"MistHUD.notify.statusTabsChanged": "As abas da tela de status mudaram. Reabra a tela para aplicar.",
+
+"MistHUD.notify.noGMForDrop": "Nenhum Mestre está online, então o item não pode ser adicionado a um token que não é seu.",
+
+"MistHUD.notify.bonusPartiesUnknown": "Mist HUD: não foi possível determinar quem dá e quem recebe o bônus.",
+
+"MistHUD.notify.systemLoadFailed": "Mist HUD: não foi possível carregar {files} do sistema City of Mist. O HUD não pode rolar nem editar itens até o módulo ser atualizado para esta versão do sistema.",
+
+"MistHUD.notify.rollApiUnavailable": "Mist HUD: a API de rolagem do City of Mist não está disponível, não é possível rolar.",
+
+"MistHUD.notify.rollFailed": "Mist HUD: a rolagem falhou ({error}). Veja o console (F12) para detalhes.",
+
+"MistHUD.notify.csvImported": "CSV importado com sucesso!",
+
+"MistHUD.notify.csvImportFailed": "Falha ao importar o CSV: {error}",
+
+"MistHUD.notify.statusesReset": "Status restaurados ao padrão!",
+
+"MistHUD.notify.resetFailed": "Falha ao restaurar: {error}",
+
+"MistHUD.notify.sampleDownload": "Baixando CSV de exemplo…",
+
+"MistHUD.notify.gmOnlyViewer": "Apenas o Mestre pode abrir o Gerenciador de Influência de NPCs.",
+
+"MistHUD.notify.gmOnlySync": "Apenas o Mestre pode sincronizar as influências dos NPCs.",
+
+"MistHUD.notify.gmOnlySyncAll": "Apenas o Mestre pode sincronizar todas as influências dos NPCs.",
+
+"MistHUD.notify.syncError": "Erro ao sincronizar as influências.",
+
+"MistHUD.notify.gameNotReady": "O jogo não foi inicializado.",
+
+"MistHUD.notify.influenceEmitted": "A influência do NPC {name} foi atualizada e enviada aos jogadores.",
+
+"MistHUD.notify.syncedNpcs": "Influências sincronizadas para {count} NPCs.",
+
+"MistHUD.notify.addedStatusToScene": "Status \"{name}\" adicionado à cena.",
+
+"MistHUD.notify.addedTagToScene": "Tag \"{name}\" adicionada à cena.",
+
+"MistHUD.notify.addToSceneFailed": "Falha ao adicionar à cena. Veja o console para detalhes.",
+
+"MistHUD.hud.specialMoves": "Movimentos Especiais",
+
+"MistHUD.hud.nascentUpgrade": "Tema nascente com tag de poder disponível!",
+
+"MistHUD.hud.nascent": "Tema nascente!",
+
+"MistHUD.hud.createTag": "Criar Tag",
+
+"MistHUD.hud.createStatus": "Criar Status",
+
+"MistHUD.hud.createClue": "Criar Pista",
+
+"MistHUD.hud.deleteClue": "Excluir Pista",
+
+"MistHUD.hud.createJuice": "Criar Suco",
+
+"MistHUD.hud.deleteJuice": "Excluir Suco",
+
+"MistHUD.statusScreen.title": "Lista de Status",
+
+"MistHUD.statusScreen.dragHint": "Arraste e solte status sobre os tokens.",
+
+"MistHUD.statusScreen.sample": "Obter Exemplo",
+
+"MistHUD.statusScreen.sampleHint": "Baixe um CSV de exemplo para criar sua própria lista de status.",
+
+"MistHUD.statusScreen.import": "Importar CSV",
+
+"MistHUD.statusScreen.importHint": "Importe um arquivo CSV para substituir a lista atual.",
+
+"MistHUD.statusScreen.reset": "Restaurar",
+
+"MistHUD.statusScreen.resetHint": "Restaura a lista de status padrão.",
+
+"MistHUD.npcHud.specials": "Especiais",
+
+"MistHUD.npcHud.customMoves": "Movimentos Personalizados",
+
+"MistHUD.influence.scene": "Cena",
+
+"MistHUD.influence.total": "Total",
+
+"MistHUD.influence.syncScene": "Sincronizar Cena",
+
+"MistHUD.influence.syncSceneHint": "Sincroniza todos os NPCs da cena atual",
+
+"MistHUD.influence.refresh": "Atualizar",
+
+"MistHUD.influence.refreshHint": "Atualiza esta exibição",
+
+"MistHUD.influence.tabActive": "NPCs que influenciam",
+
+"MistHUD.influence.tabAll": "Todos na Cena",
+
+"MistHUD.influence.token": "Token",
+
+"MistHUD.influence.emptyActive": "Nenhum NPC está influenciando no momento. Use a aba \"Todos na Cena\" para ver todos os NPCs disponíveis.",
+
+"MistHUD.influence.emptyScene": "Nenhum NPC encontrado na cena atual.",
+
+"MistHUD.essence.nexus": "<p class='mh-essence-text'>Na próxima vez que substituir um tema, se você ainda for um Nexus após a transformação, ele começa como um tema completo, não nascente.</p>",
+
+"MistHUD.essence.spiritualist": "<p class='mh-essence-text'>Uma vez por sessão, você pode usar este vínculo para somar seu Mythos ao Poder de uma ação movida principalmente por temas de Self, ou somar seu Self a uma ação movida principalmente por temas de Mythos, ou, se já estiver rolando com Mythos ou com Self, rolar com ambos (Poder 4).</p>",
+
+"MistHUD.essence.cyborg": "<p class='mh-essence-text'>Você pode somar seu número de Self ou de Noise ao Poder de qualquer ação para resistir ou afastar forças míticas que não se manifestam como efeitos tangíveis ou mensuráveis, como maldições, alucinações ou influências mentais. Pode fazer isso uma vez por sessão com seu Self e uma vez por sessão com seu Noise, ou usar ambos na mesma ação.</p>",
+
+"MistHUD.essence.transhuman": "<p class='mh-essence-text'>Uma vez por cena, ao invocar tags míticas e tecnológicas na mesma ação, não importa a origem, você pode trocar um resultado de falha (6 ou menos) por um sucesso parcial (7-9).</p>",
+
+"MistHUD.essence.real": "<p class='mh-essence-text'>Sempre que agir para defender ou proteger diretamente uma de suas Identidades, você pode rolar com Self em vez de contar as tags positivas.</p>",
+
+"MistHUD.essence.avatar-conduit": "<p class='mh-essence-subheader'>AVATAR <span>(Uma Fonte)</span></p><p class='mh-essence-text'>Suspenda todos os seus Rituais; em vez disso, escolha uma Agenda que, se for ignorada (desafiada uma única vez), faria você substituir instantaneamente todos os seus temas (os novos temas não podem incluir temas de Mythos da Fonte perdida). Enquanto for um Avatar, você pode recuperar instantaneamente tags de poder queimadas.</p><p class='mh-essence-subheader'>CONDUÍTE <span>(Várias Fontes)</span></p><p class='mh-essence-text'>Você pode substituir temas à vontade, desde que o substitua por um tema de Mythos. Qualquer Fonte em sua posse ou mesmo próxima pode se tornar seu novo tema de Mythos e ele começa como um tema completo, não nascente.</p>",
+
+"MistHUD.essence.singularity": "<p class='mh-essence-text'>Efeitos psicológicos e efeitos míticos intangíveis ou imensuráveis não afetam você. Você pode interagir com TODA informação, em qualquer meio, e pode rolar com Noise para pesquisá-la e, se for informação gravada, para manipulá-la.</p>",
+
+"MistHUD.essence.undefined": "<p class='mh-essence-text'>A Essência não está definida para este personagem.</p>"
 
 }

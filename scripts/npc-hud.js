@@ -41,8 +41,56 @@ if (actor.type === 'threat') {
 }
 });
 
-// Global registry to store NPC HUD instances by actor ID
+// Global registry of open NPC HUD windows. Each HUD is stored under two keys:
+// its token id (one HUD per token) and its actor id (points at the most
+// recently opened HUD for that actor; unlinked tokens share the actor id).
 const npcHudRegistry = new Map();
+
+/** Every registered HUD exactly once. */
+function allNpcHuds() {
+  return new Set(npcHudRegistry.values());
+}
+
+/** Open HUDs showing exactly this actor (a synthetic token actor only matches its own token). */
+function hudsForActor(actor) {
+  if (!actor) return [];
+  return [...allNpcHuds()].filter(hud =>
+    hud.actor && (hud.actor === actor || hud.actor.uuid === actor.uuid));
+}
+
+/** Open HUDs whose actor has `templateActor` attached as a challenge template. */
+function hudsUsingTemplate(templateActor) {
+  if (!templateActor) return [];
+  return [...allNpcHuds()].filter(hud => {
+    if (!hud.actor || hud.actor === templateActor) return false;
+    try {
+      return (hud.actor.getAttachedTemplates?.() ?? []).some(t => t?.id === templateActor.id);
+    } catch (e) {
+      return false;
+    }
+  });
+}
+
+/**
+ * Compute and broadcast the influence of one threat without opening a window.
+ * Uses the open HUD for that actor if there is one, otherwise a throwaway
+ * instance that is never rendered or registered.
+ */
+function emitInfluenceFor(actor, token = null) {
+  if (!game.user.isGM) return;
+  if (!actor || actor.type !== 'threat') return;
+
+  const open = hudsForActor(actor);
+  if (open.length) {
+    open[0].emitNpcInfluence();
+    return;
+  }
+
+  const headless = new NpcHUD();
+  headless.actor = actor;
+  headless.token = token ?? actor.token?.object ?? null;
+  headless.emitNpcInfluence();
+}
 
 
 
@@ -58,7 +106,7 @@ export class NpcHUD extends Application {
 
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
-          id: 'npc-hud',  // Keep original ID to maintain compatibility
+          id: 'npc-hud',  // Fallback only: setActor() replaces it with npc-hud-<tokenId>
           template: 'modules/mist-hud/templates/npc-hud.hbs',
           classes: ['npc-hud'],
           header: true,
@@ -80,15 +128,70 @@ export class NpcHUD extends Application {
         return NpcHUD.instance;
     }
 
-    setActor(actor, token = null) {
-        if (!actor || actor.type !== 'threat') { 
+    /**
+     * Open the HUD for a token, or bring the existing one to the front.
+     * There is at most one HUD window per token.
+     */
+    static openForToken(token) {
+        const actor = token?.actor;
+        if (!actor || actor.type !== 'threat') return null;
+
+        const existing = npcHudRegistry.get(token.id);
+        if (existing && existing.token?.id === token.id) {
+          existing.token = token;
+          if (existing.rendered) {
+            if (existing._minimized) existing.maximize();
+            existing.bringToTop();
+          } else {
+            existing.render(true);
+          }
+          return existing;
+        }
+
+        const hud = new NpcHUD();
+        hud.setActor(actor, token);
+        return hud;
+    }
+
+    /**
+     * @param {Actor} actor
+     * @param {Token|null} token
+     * @param {object} [options]
+     * @param {boolean} [options.render=true]  false: only attach the actor (no window, no registry entry)
+     */
+    setActor(actor, token = null, { render = true } = {}) {
+        if (!actor || actor.type !== 'threat') {
           logger.warn("Attempted to set an invalid actor.");
           return;
         }
+
+        // Re-targeting a HUD that is already registered: drop its old keys first
+        this._unregister();
+
         this.actor = actor;
         this.token = token;
         this.isCollapsed = actor.getFlag('mist-hud', 'isCollapsed') ?? false;
-        
+
+        // Headless use (influence calculation only): no window, no registry entry.
+        // `_doNotRender` lets callers attach an actor to a HUD without opening a window.
+        if (!render || this._doNotRender) return;
+
+        if (!this.rendered) {
+          // Unique DOM id per token so several HUDs can be open at once
+          this.options.id = `npc-hud-${token?.id ?? actor.id}`;
+
+          // Cascade new windows so they do not stack exactly on top of each other
+          if (this._cascadeSlot === undefined) {
+            const used = new Set([...allNpcHuds()].map(hud => hud._cascadeSlot));
+            let slot = 0;
+            while (used.has(slot)) slot++;
+            this._cascadeSlot = slot;
+            const offset = 32 * (slot % 10);
+            this.position.left = this.options.left + offset;
+            this.position.top = this.options.top + offset;
+          }
+        }
+
         // Store in registry
         if (actor.id) {
           npcHudRegistry.set(actor.id, this);
@@ -98,11 +201,26 @@ export class NpcHUD extends Application {
           npcHudRegistry.set(token.id, this);
           logger.debug(`Registered NPC HUD by token ID: ${token.id}`);
         }
-        
+
         // Log registry size
         logger.debug(`Registry size now: ${npcHudRegistry.size}`);
-        
+
         this.render(true);
+    }
+
+    /** Remove this HUD's registry keys, leaving other HUDs of the same actor reachable. */
+    _unregister() {
+        const tokenId = this.token?.id;
+        const actorId = this.actor?.id;
+        if (tokenId && npcHudRegistry.get(tokenId) === this) {
+          npcHudRegistry.delete(tokenId);
+        }
+        if (actorId && npcHudRegistry.get(actorId) === this) {
+          npcHudRegistry.delete(actorId);
+          // Another HUD may still be open for the same actor (unlinked tokens)
+          const other = [...allNpcHuds()].find(hud => hud !== this && hud.actor?.id === actorId);
+          if (other) npcHudRegistry.set(actorId, other);
+        }
     }
     
     async getData() {
@@ -206,7 +324,12 @@ export class NpcHUD extends Application {
             data.spectrumLabel = game.i18n.localize("CityOfMist.terms.spectrums");
         }
     
-        data.spectrums = this.actor.items.filter(i => i.type === 'spectrum');
+        // getSpectrums() also returns the limits of attached challenge templates.
+        // (It pushes into the array returned by the `my_spectrums` getter, which is
+        // a fresh filter() result on every call, so nothing accumulates.)
+        data.spectrums = typeof this.actor.getSpectrums === 'function'
+            ? [...this.actor.getSpectrums()]
+            : this.actor.items.filter(i => i.type === 'spectrum');
     }
     
     _prepareDefaultMoves(data, moves) {
@@ -245,8 +368,13 @@ export class NpcHUD extends Application {
     }
 
     _prepareMovesData(data) {
-        const moves = this.actor.items.filter(i => i.type === 'gmmove');
-        
+        // getGMMoves() also returns the moves of attached challenge templates.
+        // The HUD only displays moves (no edit/delete), so template-owned moves,
+        // which belong to another actor, are never written to from here.
+        const moves = typeof this.actor.getGMMoves === 'function'
+            ? this.actor.getGMMoves()
+            : this.actor.items.filter(i => i.type === 'gmmove');
+
         if (data.activeSystem === 'otherscape') {
             this._prepareOtherscapeMoves(data, moves);
         } else if (data.activeSystem === 'legend') {
@@ -943,7 +1071,7 @@ export class NpcHUD extends Application {
             html.find('.npc-refresh-influence').on('click', (event) => {
                 event.preventDefault();
                 this.emitNpcInfluence();
-                ui.notifications.info(`NPC influence from ${this.actor.name} updated and emitted to players.`);
+                ui.notifications.info(game.i18n.format("MistHUD.notify.influenceEmitted", { name: this.actor.name }));
             });
 
             // Clicking a segment sets the collective size
@@ -1110,16 +1238,9 @@ export class NpcHUD extends Application {
 
     async close(options) {
         try {
-          // Remove references from registry
-          if (this.actor?.id) {
-            npcHudRegistry.delete(this.actor.id);
-            logger.debug(`Removed NPC HUD from registry for actor ID: ${this.actor.id}`);
-          }
-          if (this.token?.id) {
-            npcHudRegistry.delete(this.token.id);
-            logger.debug(`Removed NPC HUD from registry for token ID: ${this.token.id}`);
-          }
-          
+          // Remove references from registry (only the ones that point at this HUD)
+          this._unregister();
+
           // Log registry size
           logger.debug(`Registry size now: ${npcHudRegistry.size}`);
           
@@ -1322,18 +1443,9 @@ Hooks.on('canvasReady', async () => {
             const token = canvas.tokens.get(tokenId);
             if (!token || !token.actor) continue;
             
-            // Get or create HUD instance
-            let npcHud = npcHudRegistry.get(tokenId) || npcHudRegistry.get(token.actor.id);
-            
-            // If no HUD exists, create one
-            if (!npcHud) {
-                npcHud = new NpcHUD();
-                npcHud.setActor(token.actor, token);
-            }
-            
-            // Calculate and emit influence
-            npcHud.emitNpcInfluence();
-            
+            // Calculate and emit influence without opening a window
+            emitInfluenceFor(token.actor, token);
+
             // Add a small delay to prevent socket congestion
             await new Promise(resolve => setTimeout(resolve, 100));
         }
@@ -1345,7 +1457,7 @@ Hooks.on('canvasReady', async () => {
 // Add a method to sync all influences (can be called manually if needed)
 export async function syncAllNpcInfluences() {
     if (!game.user.isGM) {
-        ui.notifications.warn("Only the GM can synchronize all NPC influences");
+        ui.notifications.warn(game.i18n.localize("MistHUD.notify.gmOnlySyncAll"));
         return;
     }
     
@@ -1356,23 +1468,15 @@ export async function syncAllNpcInfluences() {
     
     // Process each actor
     for (const actor of npcActors) {
-        // Find existing HUD or create new one
-        let npcHud = npcHudRegistry.get(actor.id);
-        
-        if (!npcHud) {
-            npcHud = new NpcHUD();
-            npcHud.setActor(actor);
-        }
-        
-        // Emit influence data
-        npcHud.emitNpcInfluence();
+        // Emit influence data without opening a window
+        emitInfluenceFor(actor);
         counter++;
         
         // Add a small delay to prevent socket congestion
         await new Promise(resolve => setTimeout(resolve, 100));
     }
     
-    ui.notifications.info(`Synchronized influences for ${counter} NPCs`);
+    ui.notifications.info(game.i18n.format("MistHUD.notify.syncedNpcs", { count: counter }));
     return counter;
 }
 
@@ -1412,7 +1516,7 @@ async function handleSceneTag(tagElement) {
           const createdStatus = await CityOfMist.createSceneStatus(statusName, tier, 0, options);
           
           if (createdStatus) {
-            ui.notifications.info(`Added status "${statusName}-${tier}" to scene.`);
+            ui.notifications.info(game.i18n.format("MistHUD.notify.addedStatusToScene", { name: `${statusName}-${tier}` }));
             return createdStatus;
           }
         }
@@ -1436,184 +1540,40 @@ async function handleSceneTag(tagElement) {
           const createdTag = await CityOfMist.createSceneTag(tagName, options);
           
           if (createdTag) {
-            ui.notifications.info(`Added tag "${tagName}" to scene.`);
+            ui.notifications.info(game.i18n.format("MistHUD.notify.addedTagToScene", { name: tagName }));
             return createdTag;
           }
         }
       }
     } catch (error) {
       console.error("Error adding to scene tags/statuses:", error);
-      ui.notifications.error("Failed to add to scene. See console for details.");
+      ui.notifications.error(game.i18n.localize("MistHUD.notify.addToSceneFailed"));
     }
 }
 
 // Add a command that can be run from the console
 globalThis.syncAllNpcInfluences = syncAllNpcInfluences;
 
+/**
+ * Recompute and broadcast the influence of every threat token on the current
+ * scene, without opening any window. GM only.
+ * @returns {Promise<number>} number of tokens synchronised
+ */
+export async function syncSceneInfluences() {
+    if (!game.user?.isGM || !canvas?.tokens) return 0;
+    let count = 0;
+    for (const token of canvas.tokens.placeables) {
+        if (token.actor?.type !== 'threat') continue;
+        emitInfluenceFor(token.actor, token);
+        count++;
+        await new Promise(resolve => setTimeout(resolve, 50)); // avoid socket congestion
+    }
+    return count;
+}
+
 // Register Handlebars helpers (once, from npc-helpers.js)
 Hooks.once("init", () => {
     registerNpcHelpers();
-});
-// (Legacy block replaced — helpers are now in npc-helpers.js)
-Hooks.once("_npc_hud_helpers_legacy_placeholder", () => {
-    Handlebars.registerHelper('ifEquals', (a, b, options) => {
-    console.log('ifEquals:', a, '===', b, '?', a === b);
-    return a === b ? options.fn(this) : options.inverse(this);
-    });
-
-    Handlebars.registerHelper("parseMaxTier", function (maxTier) {
-        return maxTier === 999 ? "-" : maxTier;
-    });
-
-    // Enhanced parseStatus Handlebars helper with temp/perm flags and $name replacement
-    Handlebars.registerHelper("parseStatus", function (description, options) {
-
-    if (!description) {
-        console.warn("parseStatus called with undefined description, options:", options);
-        return new Handlebars.SafeString('');
-    }
-
-
-        // Retrieve collectiveSize and character name from the root data context
-        const collectiveSize = Number(options.data.root.collectiveSize || 0);
-        const characterName = options.data.root.name || "Character"; // Get the character's name
-    
-        // First, replace all instances of $name with the character's name
-        let processedDesc = description.replace(/\$name/g, characterName);
-    
-        // Process status patterns in the format "text (gain status-n)"
-        processedDesc = processedDesc.replace(/([^(]+)\(gain ([^)]+)\)/g, (match, beforeParen, statusText) => {
-          const actionText = beforeParen.trim();
-          
-          // Check if this is already a properly formatted status 
-          if (statusText.includes('class="npc-status-moves"')) {
-            return match; // Already processed, return as is
-          }
-          
-          // Try to parse the status information
-          const statusMatches = statusText.trim().match(/^([A-zÀ-ú-\s]+)-(\d+)$/);
-          if (statusMatches) {
-            const statusName = statusMatches[1].trim();
-            const baseTier = parseInt(statusMatches[2], 10);
-            const statusId = generateRandomId();
-            const finalTier = baseTier + collectiveSize;
-            
-            return `${actionText} (gain <span class="npc-status-moves" data-status-name="${statusName}" data-tier="${finalTier}" data-status-id="${statusId}" data-temporary="false" data-permanent="false" data-scene-tag="false">${statusName}-${finalTier}</span>)`;
-          }
-          
-          // If we can't parse it as a status, just return the original
-          return match;
-        });
-        
-        // Process status patterns with data attributes directly in the text
-        processedDesc = processedDesc.replace(/([^(]+)\(([^)]*data-status-[^)]+)\)/g, (match, beforeParen, insideParen) => {
-          const actionText = beforeParen.trim();
-          
-          // Extract status data from inside parentheses
-          const statusName = (insideParen.match(/data-status-name="([^"]+)"/i) || [])[1];
-          const tier = parseInt((insideParen.match(/data-tier="([^"]+)"/i) || [])[1] || "1");
-          const statusId = (insideParen.match(/data-status-id="([^"]+)"/i) || [])[1] || generateRandomId();
-          const temporary = (insideParen.match(/data-temporary="([^"]+)"/i) || [])[1] === "true";
-          const permanent = (insideParen.match(/data-permanent="([^"]+)"/i) || [])[1] === "true";
-          const sceneTag = (insideParen.match(/data-scene-tag="([^"]+)"/i) || [])[1] === "true";
-          
-          if (!statusName) {
-            return match; // If no status name found, return original text
-          }
-          
-          // Calculate the final tier
-          const finalTier = tier + (sceneTag ? 0 : collectiveSize);
-          
-          // Create the HTML for the move with properly embedded status
-          return `${actionText} (<span class="npc-status-moves" data-status-name="${statusName}" data-tier="${finalTier}" data-status-id="${statusId}" data-temporary="${temporary}" data-permanent="${permanent}" data-scene-tag="${sceneTag}">${statusName}-${finalTier}</span>)`;
-        });
-        
-        // Process bracket syntax [tag] or [status-1] or [limit:n] with enhanced modifiers
-        processedDesc = processedDesc.replace(/\[([^\]]+)\]/g, (match, content) => {
-          const trimmedContent = content.trim();
-          
-          // Initialize flags
-          let isIgnoreCollective = false;
-          let isSceneTag = false;
-          let isTemporary = false;
-          let isPermanent = false;
-          
-          // Check for modifiers (i:, s:, t:, p:, etc.)
-          let modifiedContent = trimmedContent;
-          const modifierRegex = /^([a-z,]+):/i;
-          const modifierMatch = trimmedContent.match(modifierRegex);
-          
-          if (modifierMatch) {
-            const modifiers = modifierMatch[1].toLowerCase().split(',');
-            modifiers.forEach(mod => {
-              switch (mod.trim()) {
-                case 'i': isIgnoreCollective = true; break;
-                case 's': isSceneTag = true; break;
-                case 't': isTemporary = true; break;
-                case 'p': isPermanent = true; break;
-                // Exclude 'a' (auto-apply) if requested
-              }
-            });
-            
-            // Remove the modifier prefix
-            modifiedContent = trimmedContent.substring(modifierMatch[0].length).trim();
-          }
-          
-          // THREE CLEAR CASES:
-          // 1. If it contains ":" - it's a LIMIT
-          if (modifiedContent.includes(':')) {
-            // Ensure a space after the colon
-            modifiedContent = modifiedContent.replace(/:\s*/g, ': ');
-            return `<span class="npc-limit-moves">${modifiedContent}</span>`;
-          }
-          
-          // 2. If it contains "-" followed by a number - it's a STATUS
-          const statusRegex = /^([A-zÀ-ú][-A-zÀ-ú\s]*)-(\d+)$/;
-          if (statusRegex.test(modifiedContent)) {
-            const matches = modifiedContent.match(statusRegex);
-            const statusName = matches[1];
-            const baseTier = parseInt(matches[2], 10);
-            const statusId = generateRandomId();
-            
-            // Apply collective size unless ignored
-            const finalTier = isIgnoreCollective ? baseTier : baseTier + collectiveSize;
-            
-            return `<span class="npc-status-moves${isSceneTag ? ' scene-tag' : ''}" data-status-name="${statusName}" data-tier="${finalTier}" data-status-id="${statusId}" data-temporary="${isTemporary}" data-permanent="${isPermanent}" data-scene-tag="${isSceneTag}">${statusName}-${finalTier}</span>`;
-          }
-          
-          // 3. Otherwise - it's a STORY TAG (not clickable in move text)
-          return `<span class="npc-story-tag-moves ${isSceneTag ? ' scene-tag' : ''}" data-temporary="${isTemporary}" data-permanent="${isPermanent}" data-scene-tag="${isSceneTag}">${modifiedContent}</span>`;
-        });
-        
-        // Process GM-only text (within {} brackets)
-        processedDesc = processedDesc.replace(/\{([^}]+)\}/g, (match, content) => {
-          if (game.user.isGM) {
-            return `<span class="gm-only-text">${content}</span>`;
-          } else {
-            return ''; // Hide from non-GM users
-          }
-        });
-        
-        // Replace newlines with <br>
-        processedDesc = processedDesc.replace(/\n/g, '<br>');
-
-        // If you still want to ensure there's at least one <p> wrapper
-        // if (!processedDesc.startsWith('<p>')) {
-        // processedDesc = `<p>${processedDesc}</p>`;
-        // }
-
-        return new Handlebars.SafeString(processedDesc);
-    });    
-
-    // Helper to generate random IDs for statuses
-    function generateRandomId() {
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        let result = "";
-        for (let i = 0; i < 16; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
-    }    
 });
 
 // Hooks.on('controlToken', (token, controlled) => {
@@ -1672,59 +1632,57 @@ Hooks.on('renderTokenHUD', (app, html, data) => {
     const token = app.object;
     const actor = token.actor;
     if (actor && actor.type === 'threat') {
-        // Create a new HUD instance for this actor/token and pass both
-        const hud = new NpcHUD();
-        hud.setActor(actor, token);
-        hud.render(true);
-        
-        // Save this instance in the registry (here keyed by the token id)
-        npcHudRegistry.set(token.id, hud);
+        // One HUD per token: opens it, or brings the existing one to the front
+        NpcHUD.openForToken(token);
     }
 });
 
 Hooks.on('updateActor', (actor, data, options, userId) => {
     if (!game.user.isGM) return;
 
-    // Get the HUD instance for this actor (if it exists)
-    const hud = npcHudRegistry.get(actor.id);
-    if (hud) {
-        hud.render(false); // Re-render this specific HUD
+    // Re-render the HUDs of this actor, and of actors using it as a template
+    for (const hud of [...hudsForActor(actor), ...hudsUsingTemplate(actor)]) {
+        hud.render(false);
     }
 });
 
 // Listen for item updates
 Hooks.on('updateItem', (item, data, options, userId) => {
     if (!item.parent) return;
-    
-    const hud = npcHudRegistry.get(item.parent.id);
-    if (hud) {
+
+    for (const hud of hudsForActor(item.parent)) {
         hud.render(false); // Re-render the corresponding HUD
+    }
+    // Moves and limits of a challenge template are shown on the HUDs of the actors using it
+    if (['gmmove', 'spectrum'].includes(item.type)) {
+        for (const hud of hudsUsingTemplate(item.parent)) hud.render(false);
     }
 });
 
 // Optional: Handle actor deletion
 Hooks.on('deleteActor', (actor, options, userId) => {
-    const hud = npcHudRegistry.get(actor.id);
-    if (hud) {
-        hud.close();       // Close the HUD window
-        npcHudRegistry.delete(actor.id);  // Remove it from our registry
+    // Unlinked tokens share the id of their base actor, so match by id here
+    for (const hud of allNpcHuds()) {
+        if (hud.actor?.id === actor.id) hud.close(); // close() also unregisters
     }
 });
 
-// Add scene cleanup
+// Scene cleanup: close HUDs whose token is not on the scene that was just drawn
 Hooks.on('canvasReady', () => {
-    // Optional: Clear HUDs when changing scenes
-    // This helps avoid stale HUDs persisting across scene changes
-    for (const [id, hud] of npcHudRegistry.entries()) {
-        // Check if this is a token ID and the token no longer exists on the current scene
-        const isTokenId = id.startsWith('Token.');
-        if (isTokenId && !canvas.tokens.get(id)) {
-            try {
-                hud.close();
-                npcHudRegistry.delete(id);
-            } catch (e) {
-                console.warn(`Error cleaning up HUD for ${id}:`, e);
-            }
+    for (const hud of allNpcHuds()) {
+        const tokenId = hud.token?.id;
+        if (!tokenId) continue; // actor-only HUD, not tied to a scene
+
+        const current = canvas.tokens?.get(tokenId);
+        if (current) {
+            // Same scene redrawn: the placeable was recreated, keep the reference fresh
+            hud.token = current;
+            continue;
+        }
+        try {
+            hud.close();
+        } catch (e) {
+            console.warn(`Error cleaning up HUD for token ${tokenId}:`, e);
         }
     }
 });
@@ -1739,11 +1697,8 @@ Hooks.on('createItem', (item, options, userId) => {
     const npc = item.parent;
     
     // Find the matching HUD instance
-    const npcHud = npcHudRegistry.get(npc.id);
-    if (npcHud) {
-        // Recalculate and emit the new influence values
-        npcHud.emitNpcInfluence();
-    }
+    // Recalculate and emit the new influence values (works with or without an open HUD)
+    emitInfluenceFor(npc);
 });
 
 // Handle tag/status deletion
@@ -1756,11 +1711,8 @@ Hooks.on('deleteItem', (item, options, userId) => {
     const npc = item.parent;
     
     // Find the matching HUD instance
-    const npcHud = npcHudRegistry.get(npc.id);
-    if (npcHud) {
-        // Recalculate and emit the new influence values
-        npcHud.emitNpcInfluence();
-    }
+    // Recalculate and emit the new influence values (works with or without an open HUD)
+    emitInfluenceFor(npc);
 });
 
 // Handle modifications to tag/status properties
@@ -1781,9 +1733,8 @@ Hooks.on('updateItem', (item, changes, options, userId) => {
     ];
     
     // Check for flag changes
-    const hasFlagChanges = options.flags && 
-        (options.flags['mist-hud']?.tagState || 
-         options.flags['mist-hud']?.statusType);
+    const hasFlagChanges = !!(changes.flags?.['mist-hud']?.tagState
+        || changes.flags?.['mist-hud']?.statusType);
          
     // Check if any system changes affect influence
     const hasSystemChanges = Object.keys(changes.system || {})
@@ -1792,11 +1743,8 @@ Hooks.on('updateItem', (item, changes, options, userId) => {
     // Only emit if relevant changes were made
     if (hasFlagChanges || hasSystemChanges) {
         // Find the matching HUD instance
-        const npcHud = npcHudRegistry.get(npc.id);
-        if (npcHud) {
-            // Recalculate and emit the new influence values
-            npcHud.emitNpcInfluence();
-        }
+        // Recalculate and emit the new influence values (works with or without an open HUD)
+        emitInfluenceFor(npc);
     }
 });
 globalThis.npcHudRegistry = npcHudRegistry;

@@ -26,8 +26,8 @@
     }
   ],
   "compatibility": {
-    "minimum": "13",
-    "verified": "13"
+    "minimum": "14",
+    "verified": "14"
   },
   "packs": [
     {
@@ -69,7 +69,7 @@
   "url": "https://github.com/mordachai/mist-hud",
   "manifest": "https://github.com/mordachai/mist-hud/raw/main/module.json",
   "download": "https://github.com/mordachai/mist-hud/releases/latest/download/mist-hud.zip",
-  "license": "https://raw.githubusercontent.mist/mordachai/mist-hud/refs/heads/main/LICENSE",
+  "license": "https://raw.githubusercontent.com/mordachai/mist-hud/refs/heads/main/LICENSE",
   "relationships": {
     "systems": [
       {

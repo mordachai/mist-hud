@@ -1,18 +1,18 @@
 <div class="npc-influence-manager">
   <header class="influence-summary">
     <div class="influence-info">
-      <h4>Scene: <span class="scene-name">{{currentSceneName}}</span></h4>
-      <h2>Total: <span class="influence-value total-influence {{#if totalInfluence}}{{#if (lt totalInfluence 0)}}negative{{else}}positive{{/if}}{{/if}}"><i class="fa-solid fa-skull"></i> {{totalInfluence}}</span></h2>
+      <h4>{{localize "MistHUD.influence.scene"}}: <span class="scene-name">{{currentSceneName}}</span></h4>
+      <h2>{{localize "MistHUD.influence.total"}}: <span class="influence-value total-influence {{#if totalInfluence}}{{#if (lt totalInfluence 0)}}negative{{else}}positive{{/if}}{{/if}}"><i class="fa-solid fa-skull"></i> {{totalInfluence}}</span></h2>
     </div>
     <div class="controls">
-      <button class="sync-all-npcs" title="Synchronize all NPCs in the current scene"><i class="fas fa-sync"></i> Sync Scene</button>
-      <button class="refresh-ui" title="Refresh this display"><i class="fas fa-redo"></i> Refresh</button>
+      <button class="sync-all-npcs" title="{{localize "MistHUD.influence.syncSceneHint"}}"><i class="fas fa-sync"></i> {{localize "MistHUD.influence.syncScene"}}</button>
+      <button class="refresh-ui" title="{{localize "MistHUD.influence.refreshHint"}}"><i class="fas fa-redo"></i> {{localize "MistHUD.influence.refresh"}}</button>
     </div>
   </header>
   
   <nav class="tabs">
-    <a class="item" data-tab="active"><i class="fas fa-bolt"></i> Influencing NPCs ({{activeSceneNpcs.length}})</a>
-    <a class="item" data-tab="all"><i class="fas fa-users"></i> All in Scene ({{sceneNpcs.length}})</a>
+    <a class="item" data-tab="active"><i class="fas fa-bolt"></i> {{localize "MistHUD.influence.tabActive"}} ({{activeSceneNpcs.length}})</a>
+    <a class="item" data-tab="all"><i class="fas fa-users"></i> {{localize "MistHUD.influence.tabAll"}} ({{sceneNpcs.length}})</a>
   </nav>
   
   <section class="content">
@@ -53,7 +53,7 @@
           {{/each}}
         </ul>
       {{else}}
-        <p class="empty-state">No NPCs are currently providing influence. Use the "All in Scene" tab to see all available NPCs.</p>
+        <p class="empty-state">{{localize "MistHUD.influence.emptyActive"}}</p>
       {{/if}}
     </div>
     
@@ -69,7 +69,7 @@
               <div class="npc-info">
                 <h3 class="npc-name">
                   {{name}} 
-                  {{#unless isLinked}}<span class="token-badge">Token</span>{{/unless}}
+                  {{#unless isLinked}}<span class="token-badge">{{localize "MistHUD.influence.token"}}</span>{{/unless}}
                   {{#if hasCollectiveSize}}<span class="scale-badge">Scale: {{collectiveSize}}</span>{{/if}}
                 </h3>
                 <div class="npc-items-container">
@@ -93,7 +93,7 @@
           {{/each}}
         </ul>
       {{else}}
-        <p class="empty-state">No NPCs found in the current scene.</p>
+        <p class="empty-state">{{localize "MistHUD.influence.emptyScene"}}</p>
       {{/if}}
     </div>
   </section>

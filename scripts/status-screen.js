@@ -8,7 +8,7 @@ export class StatusScreen extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id:      "status-screen",
     classes: ["status-screen"],
-    window:  { title: "Statuses MC Screen", resizable: true, minimizable: true },
+    window:  { title: "MistHUD.window.statusScreen", resizable: true, minimizable: true },
     position: { width: 500, height: "auto" },
   };
 
@@ -77,8 +77,8 @@ export class StatusScreen extends HandlebarsApplicationMixin(ApplicationV2) {
   // ── CSV import ───────────────────────────────────────────────────────────
 
   async importCSV() {
-    new FilePicker({
-      type: "file", current: "/",
+    new foundry.applications.apps.FilePicker.implementation({
+      type: "text", current: "/",
       callback: async (path) => {
         try {
           const res = await fetch(path);
@@ -87,12 +87,11 @@ export class StatusScreen extends HandlebarsApplicationMixin(ApplicationV2) {
           await game.settings.set(MODULE_ID, SETTINGS.IMPORTED_STATUS_COLLECTION, data);
           this.#statuses = data;
           this.render(true);
-          ui.notifications.info("CSV imported successfully!");
+          ui.notifications.info(game.i18n.localize("MistHUD.notify.csvImported"));
         } catch (e) {
-          ui.notifications.error("Failed to import CSV: " + e.message);
+          ui.notifications.error(game.i18n.format("MistHUD.notify.csvImportFailed", { error: e.message }));
         }
       },
-      extensions: [".csv"],
     }).browse();
   }
 
@@ -102,9 +101,9 @@ export class StatusScreen extends HandlebarsApplicationMixin(ApplicationV2) {
       await game.settings.set(MODULE_ID, SETTINGS.IMPORTED_STATUS_COLLECTION, data);
       this.#statuses = data;
       this.render(true);
-      ui.notifications.info("Statuses reset to default!");
+      ui.notifications.info(game.i18n.localize("MistHUD.notify.statusesReset"));
     } catch (e) {
-      ui.notifications.error("Failed to reset: " + e.message);
+      ui.notifications.error(game.i18n.format("MistHUD.notify.resetFailed", { error: e.message }));
     }
   }
 
@@ -115,7 +114,7 @@ export class StatusScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    ui.notifications.info("Downloading sample CSV…");
+    ui.notifications.info(game.i18n.localize("MistHUD.notify.sampleDownload"));
   }
 
   // ── Private helpers ──────────────────────────────────────────────────────

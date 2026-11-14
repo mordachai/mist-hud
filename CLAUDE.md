@@ -41,7 +41,7 @@ Order is critical — settings must initialize before other scripts depend on th
 8. `npc-hud.js` — NPC/threat HUD
 9. `mh-load-moves.js` — hotbar macro loader
 10. `npc-influence-manager.js` — GM NPC influence viewer
-11. `npc-influence-functions.js` — NPC influence helpers
+11. (removed) `npc-influence-functions.js` — superseded by `syncSceneInfluences()` in `npc-hud.js`
 12. `token-status-notification.js` — visual drop notifications
 
 ### Key Patterns

@@ -8,7 +8,6 @@ export const FLAG_KEYS = {
   INVERTED_TAGS:       "inverted-tags",
   STATUS_STATES:       "status-states",
   RECEIVED_BONUSES:    "received-bonuses",
-  DYNAMITE_MOVES:      "dynamiteMoves",
   NPC_INFLUENCE:       "npc-influence",
   IS_COLLAPSED:        "isCollapsed",
 };
@@ -28,3 +27,16 @@ export const SETTINGS = {
 };
 
 export const SOCKET_NAME = "module.mist-hud";
+
+/**
+ * Active City of Mist engine system. The system's own "system" setting flips to
+ * "custom" when related settings (e.g. movesInclude) change, so fall back to the
+ * base system in that case.
+ */
+export function getActiveSystem() {
+  const sys = game.settings.get("city-of-mist", "system");
+  if (sys !== "custom") return sys;
+  return game.settings.get("city-of-mist", "baseSystem")
+      ?? game.settings.get("city-of-mist", "movesInclude")
+      ?? sys;
+}

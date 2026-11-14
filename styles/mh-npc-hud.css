@@ -1,5 +1,11 @@
+/* Each NPC HUD window has its own id (npc-hud-<tokenId>), so the frame is
+   matched by class: .window-app.npc-hud (the inner template div also has
+   .npc-hud, hence the .window-app part). The :is(#npc-hud, ...) form keeps the
+   specificity of the old #npc-hud selectors, so these rules still win over the
+   system's .window-app rules exactly as before. */
+
 /* Main HUD container */
-#npc-hud {
+:is(#npc-hud, .window-app.npc-hud) {
     position: absolute;
     z-index: 105;
     border: 1px solid var(--mist-border-color);
@@ -11,8 +17,8 @@
     background-color: var(--npc-hud-bg-prime);
 }
   
-#npc-hud .window-app,
-#npc-hud.minimized .window-app {
+:is(#npc-hud, .window-app.npc-hud) .window-app,
+:is(#npc-hud, .window-app.npc-hud).minimized .window-app {
   padding: 0;
   margin: 0;
   color: #00000000;
@@ -22,8 +28,8 @@
   width: fit-content;
 }
   
-#npc-hud .app,
-#npc-hud.minimized .app {
+:is(#npc-hud, .window-app.npc-hud) .app,
+:is(#npc-hud, .window-app.npc-hud).minimized .app {
     padding: 0;
     margin: 0;
     list-style: none;
@@ -33,7 +39,7 @@
     width: 100%;
 }
 
-#npc-hud ul {
+:is(#npc-hud, .window-app.npc-hud) ul {
     padding: 3px;
     margin: 0;
     list-style: none;
@@ -41,7 +47,7 @@
     border: none;
 }
   
-#npc-hud .window-header {
+:is(#npc-hud, .window-app.npc-hud) .window-header {
     background: var(--hud-bg-color);
     display: flex;
     flex-direction: row;
@@ -55,7 +61,7 @@
 }
 
   /* Minimized state header */
-  #npc-hud.minimized .window-header {
+  :is(#npc-hud, .window-app.npc-hud).minimized .window-header {
     background: var(--hud-bg-color);
     display: flex;
     flex-direction: row;
@@ -68,7 +74,7 @@
 }
 
 /* Character name */
-#npc-hud .mh-char-name {
+:is(#npc-hud, .window-app.npc-hud) .mh-char-name {
     font-size: 1.1rem;
     flex: 4;
     font-family: 'Rift Bold';
@@ -82,31 +88,31 @@
     width: 100%;
 }
 
-#npc-hud.minimized .mh-char-name {
+:is(#npc-hud, .window-app.npc-hud).minimized .mh-char-name {
     flex: 4;
     width: 100%;
     padding-left: 20px;
 }
 
-#npc-hud.minimized .mh-token-image {
+:is(#npc-hud, .window-app.npc-hud).minimized .mh-token-image {
     top: -13px;
     transition: ease-in, top, 0.2s;
 }
 
 /* Collapse Buttons */
-#npc-hud .mh-collapse-button {
+:is(#npc-hud, .window-app.npc-hud) .mh-collapse-button {
 font-size: 1.2rem;
 color: #ffffff;
 cursor: pointer;
 margin-left: auto;
 }
 
-#npc-hud .mh-collapse-button:hover{
+:is(#npc-hud, .window-app.npc-hud) .mh-collapse-button:hover{
 opacity: 0.8;
 }
 
 /* Close Buttons */
-#npc-hud .mh-close-button {
+:is(#npc-hud, .window-app.npc-hud) .mh-close-button {
 font-size: 1.2rem;
 color: #ffffff;
 cursor: pointer;
@@ -120,12 +126,12 @@ h4.window-title .mh-close-button {
     display: none !important; /* Ensure it's completely hidden */
 }
 
-#npc-hud .mh-close-button:hover {
+:is(#npc-hud, .window-app.npc-hud) .mh-close-button:hover {
 opacity: 0.8;
 }
 
 /* Main Content Area */
-#npc-hud .window-content {
+:is(#npc-hud, .window-app.npc-hud) .window-content {
 padding: 0;
 margin: 0;
 list-style: none;
@@ -137,11 +143,11 @@ overflow-y: hidden;
 margin: 5px;
 }
 
-#npc-hud.minimized .window-content {
+:is(#npc-hud, .window-app.npc-hud).minimized .window-content {
     display: none;
 }
   
-#npc-hud .mh-content {
+:is(#npc-hud, .window-app.npc-hud) .mh-content {
     overflow-y: auto;
     overflow-x: hidden;
     margin-top: 10px;
@@ -654,7 +660,7 @@ margin: 5px;
 }
 
 /* List formatting within threats */
-#npc-hud .npc-threat ul {
+:is(#npc-hud, .window-app.npc-hud) .npc-threat ul {
     margin-left: -3px;
 }
 

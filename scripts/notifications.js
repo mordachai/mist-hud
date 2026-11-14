@@ -1,4 +1,5 @@
 // notifications.js — Token-side animated notifications
+import { getActiveSystem } from "./constants.js";
 // Merged from token-status-notification.js + token-tag-notification.js
 
 const SYSTEM_FONT = {
@@ -8,7 +9,7 @@ const SYSTEM_FONT = {
 };
 
 function _getSystemStyle() {
-  const sys = game.settings.get("city-of-mist", "system");
+  const sys = getActiveSystem();
   return SYSTEM_FONT[sys] ?? { family: "Arial", size: 25, stroke: "#000000" };
 }
 
@@ -48,7 +49,7 @@ export class TokenStatusNotification {
    */
   static show(token, statusName, tier, options = {}) {
     if (!game.settings.get("mist-hud", "enableStatusNotifications")) return null;
-    const sys = game.settings.get("city-of-mist", "system");
+    const sys = getActiveSystem();
     const fill = sys === "otherscape" ? "#ABFF00" : "#E0E0FF";
     return _scroll(token, `${statusName} - ${tier}`, fill, options);
   }

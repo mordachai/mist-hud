@@ -99,6 +99,13 @@ border: none;
 }
 
 
+/* ApplicationV2 clips its frame; the portrait and roll bar float outside it */
+#mist-hud.application,
+#mist-hud .window-header {
+  overflow: visible !important;
+  contain: none !important;
+}
+
 /* Customize the Foundry header */
 #mist-hud .window-header {
   background: var(--hud-bg-color);
@@ -733,25 +740,14 @@ hr {
 	text-shadow: -1px -1px 4px yellow, 1px 1px 4px gold;
 }
 
-li.tag-or-status {
+/* Scoped to this module's own windows (the system's scene-tags window has its own spacing) */
+:is(.mh-hud, #npc-hud, .window-app.npc-hud) li.tag-or-status {
 	margin: 2px 0;
 }
 
-.item-selection-context .status-name,
-.item-selection-context .story-tag,
-.item-selection-context .status-name:hover,
-.item-selection-context .story-tag:hover,
-.item-selection-context .status .positive-selected,
-.item-selection-context .tag .positive-selected,
-.item-selection-context .status .negative-selected,
-.item-selection-context .tag .negative-selected {
-	font-weight: normal;
-  background-image: none;
-  border: 2px solid rgba(0, 0, 0, 0);
-  padding: 2px;
-	margin: -2px;
-	border-radius: 0.8em 0.3em;
-}
+/* The scene-tags window (.story-tag-window / .scene-tag-window) and every
+   .item-selection-context belong to the city-of-mist system, which themes them
+   per game. This module no longer restyles them (issues #33, #35). */
 
 /* Roll Bar */
 

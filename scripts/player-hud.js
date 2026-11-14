@@ -7,8 +7,11 @@
 //
 // The system (CityRoll.execRoll) handles all rolling, power calc, post-roll.
 
-import { MODULE_ID, SETTINGS } from "./constants.js";
-import { getOrCreateState } from "./hud-state.js";
+import { MODULE_ID, SETTINGS, getActiveSystem } from "./constants.js";
+import {
+  getOrCreateState, playerHudRegistry, isOtherscapeBurn, clearSystemSelection,
+  hudKey, isTagBurned, bonusActorFor,
+} from "./hud-state.js";
 import { organizeMoves, getMoveAbbreviation, getMoveImageSrc } from "./move-layout.js";
 import {
   getMysteryFromTheme, getCrewThemes, getThemesAndTags,
@@ -17,16 +20,52 @@ import {
 } from "./getters.js";
 import { BonusManager } from "./bonus-manager.js";
 
-import { CityRoll }    from "/systems/city-of-mist/module/city-roll.js";
-import { CityDB }      from "/systems/city-of-mist/module/city-db.js";
-import { CityHelpers } from "/systems/city-of-mist/module/city-helpers.js";
-import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
-
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-// ── Module-level registry (one PlayerHUD per actorId) ────────────────────────
-/** @type {Map<string, PlayerHUD>} */
-export const playerHudRegistry = new Map();
+// ── System internals (guarded) ───────────────────────────────────────────────
+// These classes are not a public API: the system has renamed/removed such files
+// before, and a static import of a missing file stops this whole module from
+// loading. They are loaded dynamically instead (same URL the system itself is
+// served from, so we get the system's own class instances) and a failure is
+// reported to the user. Nothing here is awaited at load time; `sys` is filled
+// long before the first HUD renders.
+const SYSTEM_FILES = {
+  CityRoll:    "city-roll.js",
+  CityDB:      "city-db.js",
+  CityHelpers: "city-helpers.js",
+  CityDialogs: "city-dialogs.js",
+};
+
+/** @type {{CityRoll?: any, CityDB?: any, CityHelpers?: any, CityDialogs?: any}} */
+const sys = {};
+const _systemFailures = [];
+
+function _reportSystemFailures() {
+  if (!_systemFailures.length) return;
+  ui.notifications.error(
+    game.i18n.format("MistHUD.notify.systemLoadFailed", { files: _systemFailures.join(", ") }),
+    { permanent: true }
+  );
+}
+
+const systemReady = Promise.all(Object.entries(SYSTEM_FILES).map(async ([name, file]) => {
+  try {
+    const mod = await import(foundry.utils.getRoute(`systems/city-of-mist/module/${file}`));
+    if (!mod[name]) throw new Error(`${file} has no export named ${name}`);
+    sys[name] = mod[name];
+  } catch (e) {
+    console.error(`Mist HUD | Failed to load system file ${file}:`, e);
+    _systemFailures.push(file);
+  }
+})).then(() => {
+  if (!_systemFailures.length) return;
+  if (globalThis.game?.ready) _reportSystemFailures();
+  else Hooks.once("ready", _reportSystemFailures);
+});
+
+// ── Module-level registry (one PlayerHUD per hudKey) ─────────────────────────
+// Defined in hud-state.js; re-exported for init.js and other importers.
+export { playerHudRegistry };
 
 // ── Handlebars helpers (registered once at module level) ─────────────────────
 Handlebars.registerHelper("times", function (n, block) {
@@ -41,13 +80,20 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @type {CityActor} */
   actor = null;
 
+  /** Registry key: token id for an unlinked token's actor, else the actor id. */
+  key = null;
+
   /** @type {jQuery|null} */
   _currentTooltip = null;
+
+  /** True while a roll is in flight (ignores double clicks on move buttons). */
+  _rolling = false;
 
   constructor(actor, options = {}) {
     super(options);
     this.actor = actor;
-    playerHudRegistry.set(actor.id, this);
+    this.key   = hudKey(actor);
+    playerHudRegistry.set(this.key, this);
   }
 
   static DEFAULT_OPTIONS = {
@@ -55,7 +101,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     classes: ["player-hud", "mist-hud", "mh-hud"],
     window: {
       frame:       true,
-      title:       "Player HUD",
+      title:       "MistHUD.window.playerHud",
       positioned:  true,
       resizable:   false,
       minimizable: true,
@@ -72,12 +118,12 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   async _prepareContext(_options) {
     if (!this.actor) return {};
 
-    const activeSystem = game.settings.get("city-of-mist", "system");
+    const activeSystem = getActiveSystem();
     const isCityOfMist = activeSystem === "city-of-mist";
     const isOtherscape = activeSystem === "otherscape";
     const isLegend     = activeSystem === "legend";
 
-    const state = getOrCreateState(this.actor.id);
+    const state = getOrCreateState(this.key);
 
     // ── Themes + Tags ─────────────────────────────────────────────────────────
     const themesAndTags = getThemesAndTags(this.actor);
@@ -130,8 +176,11 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         })),
         weaknessTags: (ct.weaknessTags ?? []).map(tag => ({
           ...tag,
-          selected: state.selectedTags.has(tag.id),
-          inverted: state.invertedTags.has(tag.id),
+          selected:      state.selectedTags.has(tag.id),
+          inverted:      state.invertedTags.has(tag.id),
+          inversionIcon: state.invertedTags.has(tag.id)
+            ? '<i class="fa-light fa-angles-up"></i>'
+            : '<i class="fa-light fa-angles-down"></i>',
         })),
       };
     });
@@ -155,12 +204,14 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         essence      = essenceData.essence;
         essenceClass = essenceData.className;
         essenceImage = essenceData.imageName;
-        essenceText  = new Handlebars.SafeString(essenceData.text || "");
+        // Static, module-owned HTML from the lang files (safe to render unescaped).
+        essenceText  = new Handlebars.SafeString(
+          game.i18n.localize(`MistHUD.essence.${essenceData.className}`));
       }
     }
 
     // ── Received bonuses ──────────────────────────────────────────────────────
-    const receivedBonuses = this.actor.getFlag(MODULE_ID, "received-bonuses") || {};
+    const receivedBonuses = bonusActorFor(this.actor)?.getFlag(MODULE_ID, "received-bonuses") || {};
     const helpHurtMessages = Object.entries(receivedBonuses).flatMap(([giverId, bonus]) => {
       const giverActor = game.actors.get(giverId);
       if (!giverActor) return [];
@@ -178,7 +229,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const improvements = getImprovements(this.actor);
 
     // ── Move buttons ──────────────────────────────────────────────────────────
-    const allMoves = CityDB?.movesList ?? [];
+    const allMoves = sys.CityDB?.movesList ?? [];
     const { core, advanced, shb } = organizeMoves(allMoves);
     const useText    = game.settings.get(MODULE_ID, SETTINGS.USE_TEXT_BUTTONS);
     const isDynamite = game.settings.get(MODULE_ID, SETTINGS.ROLL_IS_DYNAMITE);
@@ -186,14 +237,17 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       ? "modules/mist-hud/ui/Dynamite-ON.webp"
       : "modules/mist-hud/ui/Dynamite-OFF.webp";
 
-    const _fmt = m => ({
-      id:      m.id,
-      name:    m.name,
-      abbr:    getMoveAbbreviation(m),
-      imgSrc:  getMoveImageSrc(m),
-      tooltip: m.name,
-      useText,
-    });
+    const _fmt = m => {
+      const imgSrc = getMoveImageSrc(m);
+      return {
+        id:      m.id,
+        name:    m.name,
+        abbr:    getMoveAbbreviation(m),
+        imgSrc,
+        tooltip: m.name,
+        useText: useText || !imgSrc,
+      };
+    };
 
     return {
       actor:           this.actor,
@@ -246,9 +300,13 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     header.find(".window-title").hide();
     header.find(".mh-token-image, .mh-char-name, .mh-close-button").remove();
 
+    // Built with DOM APIs (.attr/.text), never by string-concatenating HTML: the
+    // actor name and image path are user-editable.
     const src      = this.actor?.token?.texture?.src ?? this.actor?.img ?? "";
-    const tokenImg = $(`<div class="mh-token-image"><img src="${src}" alt="${this.actor?.name ?? ""}"></div>`);
-    const charName = $(`<div class="mh-char-name">${this.actor?.name ?? ""}</div>`);
+    const name     = this.actor?.name ?? "";
+    const tokenImg = $('<div class="mh-token-image"></div>')
+      .append($("<img>").attr({ src, alt: name }));
+    const charName = $('<div class="mh-char-name"></div>').text(name);
     const closeBtn = $(`<i class="mh-close-button fa-solid fa-xmark"></i>`);
 
     header.append(tokenImg, charName, closeBtn);
@@ -266,7 +324,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       if (el.classList.contains("burned")) return;
       const id = el.dataset.id;
       if (!id) return;
-      const state = getOrCreateState(this.actor.id);
+      const state = getOrCreateState(this.key);
       state.toggleTag(id);
       el.classList.toggle("selected", state.selectedTags.has(id));
       this._updatePowerDisplay(html);
@@ -280,7 +338,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       if (el.classList.contains("burned")) return;
       const id = el.dataset.id;
       if (!id) return;
-      const state = getOrCreateState(this.actor.id);
+      const state = getOrCreateState(this.key);
       state.toggleTag(id);
       el.classList.toggle("selected", state.selectedTags.has(id));
       this._updatePowerDisplay(html);
@@ -293,7 +351,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!id) return;
       const tagEl = ev.currentTarget.closest(".mh-weakness-tag");
       if (tagEl?.classList.contains("burned")) return;
-      const state = getOrCreateState(this.actor.id);
+      const state = getOrCreateState(this.key);
       state.toggleInverted(id);
       const inv = state.invertedTags.has(id);
       tagEl?.classList.toggle("inverted", inv);
@@ -311,7 +369,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!id) return;
       const tagEl = ev.currentTarget.closest(".mh-story-tag");
       if (tagEl?.classList.contains("burned")) return;
-      const state = getOrCreateState(this.actor.id);
+      const state = getOrCreateState(this.key);
       state.toggleInverted(id);
       const inv = state.invertedTags.has(id);
       tagEl?.classList.toggle("inverted", inv);
@@ -331,7 +389,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       const el = ev.currentTarget;
       const id = el.dataset.statusId;
       if (!id) return;
-      const state    = getOrCreateState(this.actor.id);
+      const state    = getOrCreateState(this.key);
       const newState = state.cycleStatus(id);
       el.classList.remove("neutral", "negative", "positive", "selected");
       el.classList.add(newState);
@@ -349,7 +407,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       ev.preventDefault();
       const id     = ev.currentTarget.dataset.statusId;
       const status = id ? this.actor.getStatus?.(id) : null;
-      if (status) await CityDialogs.itemEditDialog(status);
+      if (status) await sys.CityDialogs.itemEditDialog(status);
     });
   }
 
@@ -385,7 +443,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       tagEl.classList.add(next);
 
       // Auto-select on toBurn, deselect on burned
-      const state = getOrCreateState(this.actor.id);
+      const state = getOrCreateState(this.key);
       if (next === "toBurn") {
         tagEl.classList.add("selected");
         state.selectedTags.add(tagId);
@@ -394,12 +452,14 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         state.selectedTags.delete(tagId);
       }
 
-      // Persist burn state to actor DB
+      // Persist burn state to actor DB. "Burned" must satisfy the system's
+      // CityItem.isBurned() (burned && burn_state != 0); "toBurn" is the HUD's
+      // marker (burned false, burn_state 1) that the roll turns into a real burn.
       const tagItem = tagActor.items.get(tagId);
       if (tagItem) {
         await tagItem.update({
           "system.burned":     next === "burned",
-          "system.burn_state": next === "toBurn" ? 1 : 0,
+          "system.burn_state": next === "unburned" ? 0 : 1,
         });
       }
       this._updatePowerDisplay(html);
@@ -409,7 +469,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   // ── Modifier listeners ────────────────────────────────────────────────────
 
   _bindModifierListeners(html) {
-    const state = getOrCreateState(this.actor.id);
+    const state = getOrCreateState(this.key);
     const input = html.find("#mh-mod-value");
     input.val(state.modifier);
 
@@ -472,50 +532,144 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     });
   }
 
+  /**
+   * Roll a move through the system's CityRoll, without the system's roll dialog.
+   *
+   *  - "standard" moves: `new CityRoll(...).execRoll()` with the HUD selection,
+   *    the system's scene selection, help/hurt and NPC influence.
+   *  - other subtypes (themeclassroll, SHB, noroll): `CityRoll.execMove()`, which
+   *    sets the theme-count / no-roll options itself. It only opens the system
+   *    roll dialog when the move allows statuses (ALLOW_STATUS); those moves are
+   *    prepared here with CityRoll's own public methods instead, so the HUD
+   *    selection is what gets rolled.
+   */
   async _executeMove(moveId) {
-    if (!this.actor || !moveId) return;
-    const state        = getOrCreateState(this.actor.id);
-    const selectedList = state.toActivatedTagFormat(this.actor);
-    const options      = {
-      modifier:        state.modifier,
-      dynamiteAllowed: game.settings.get(MODULE_ID, SETTINGS.ROLL_IS_DYNAMITE),
-    };
+    if (!this.actor || !moveId || this._rolling) return;
+
+    await systemReady;
+    const { CityRoll, CityHelpers, CityDialogs } = sys;
+    if (!CityRoll || !CityHelpers) {
+      ui.notifications.error(game.i18n.localize("MistHUD.notify.rollApiUnavailable"));
+      return;
+    }
+
+    this._rolling = true;
     try {
-      await new CityRoll(moveId, this.actor, selectedList, options).execRoll();
-      await this._postRollCleanup();
+      const move = CityHelpers.getMoves().find(m => m.id === moveId);
+      if (!move) throw new Error(`Move ${moveId} not found`);
+
+      const state    = getOrCreateState(this.key);
+      const subtype  = move.system.subtype;
+      const standard = subtype === "standard";
+
+      // Help/hurt and NPC influence only apply to standard (tag-based) rolls.
+      const { list, burnIds, extraBurn, usedBonuses } =
+        state.buildRollList(this.actor, { modifiers: standard });
+
+      const options = {
+        modifier:        state.modifier,
+        // 0 = roll the dice. The system's roll dialog always sets it, and its chat
+        // template only prints the dice when setRoll === 0 (blank box otherwise).
+        setRoll:         0,
+        dynamiteAllowed: game.settings.get(MODULE_ID, SETTINGS.ROLL_IS_DYNAMITE) || move.isAutoDynamite(),
+      };
+
+      let result;
+      if (standard) {
+        if (burnIds.length) {
+          options.burnTag = burnIds[0];
+          // Classic burn is "burn for a hit": the system's roll dialog fixes the
+          // dice at 7 for it (roll-dialog.js updateModifierPopup).
+          if (!isOtherscapeBurn()) options.setRoll = 7;
+        }
+        result = await new CityRoll(moveId, this.actor, list, options).execRoll();
+      } else {
+        if (subtype === "SHB") {
+          // Same prompts as the system sheet: which theme type / which theme.
+          if (!CityDialogs) throw new Error("System dialogs are not available");
+          if (game.settings.get("city-of-mist", "baseSystem") === "city-of-mist") {
+            const type = await CityDialogs.SHBDialog(this.actor);
+            if (!type) return;
+            options.newtype = type;
+          } else {
+            const theme = await CityDialogs.BlazeDialog(this.actor);
+            if (!theme) return;
+            options.newtype      = theme.getThemeType();
+            options.BlazeThemeId = theme.id;
+          }
+        }
+
+        const known = ["SHB", "themeclassroll", "noroll"].includes(subtype);
+        if (known && move.hasEffectClass("ALLOW_STATUS")) {
+          const roll = new CityRoll(moveId, this.actor, list, options);
+          if (subtype === "noroll") roll.noRoll();
+          else roll.themeClassRoll(options.newtype ?? move.system.theme_class);
+          options.noStatus = false;
+          result = await roll.execRoll();
+        } else {
+          result = await CityRoll.execMove(moveId, this.actor, list, options);
+        }
+      }
+      if (!result) return; // cancelled
+
+      await this._postRollCleanup({
+        list,
+        burnIds,
+        extraBurn:    standard ? extraBurn : [],
+        clearBonuses: standard && usedBonuses,
+      });
     } catch (e) {
       console.error("Mist HUD | Error executing roll:", e);
+      ui.notifications.error(game.i18n.format("MistHUD.notify.rollFailed", { error: e?.message ?? e }));
+    } finally {
+      this._rolling = false;
     }
   }
 
-  async _postRollCleanup() {
-    const state = getOrCreateState(this.actor.id);
-
-    // Burn tags that were marked "toBurn"
-    for (const id of state.selectedTags) {
-      const tag = this._findTag(id);
-      if (tag?.system?.burn_state === 1) {
-        await tag.update({ "system.burned": true, "system.burn_state": 0 });
+  /**
+   * After a roll. The system has already burned the `burnTag`, burned/deleted
+   * temporary tags and statuses per its own settings, and granted attention
+   * for weaknesses; none of that is repeated here.
+   *
+   * @param {object}   [opts]
+   * @param {object[]} [opts.list]         The list that was rolled
+   * @param {string[]} [opts.burnIds]      Every tag that was marked "to burn" for this roll
+   * @param {string[]} [opts.extraBurn]    Tag ids burned beyond CityRoll's single burnTag
+   * @param {boolean}  [opts.clearBonuses] Help/hurt was used and must be cleared
+   */
+  async _postRollCleanup({ list = [], burnIds = [], extraBurn = [], clearBonuses = false } = {}) {
+    for (const tagId of extraBurn) {
+      const row = list.find(x => x.tagId === tagId);
+      if (!row) continue;
+      try {
+        await sys.CityHelpers.getOwner(row.ownerId, row.tokenId)?.burnTag(tagId);
+      } catch (e) {
+        console.warn(`Mist HUD | Could not burn tag ${row.name}:`, e);
       }
     }
 
-    // Delete temporary statuses that were selected
-    for (const [id, stateVal] of state.statusStates) {
-      if (stateVal === "neutral") continue;
-      const status = this.actor.items.get(id);
-      if (status?.system?.temporary) await this.actor.deleteStatus?.(id);
-    }
-
-    // Delete temporary tags
-    const tempTagIds = this.actor.items.contents
-      .filter(i => i.type === "tag" && i.system?.temporary)
-      .map(i => i.id);
-    if (tempTagIds.length) {
-      await this.actor.deleteEmbeddedDocuments("Item", tempTagIds);
+    // Tags still in the "to burn" state were not burned by this roll (classic
+    // burn rules burn only one tag per roll; a non-standard move burns none).
+    // Put them back to unburned so they do not stay half-marked.
+    const state = getOrCreateState(this.key);
+    for (const tagId of burnIds) {
+      try {
+        const tag = state._resolveTag(tagId, this.actor);
+        if (tag && !isTagBurned(tag) && tag.system.burn_state === 1) {
+          await tag.update({ "system.burn_state": 0, "system.burned": false });
+        }
+      } catch (e) {
+        console.warn(`Mist HUD | Could not reset burn state of tag ${tagId}:`, e);
+      }
     }
 
     state.clear();
-    await game.settings.set(MODULE_ID, SETTINGS.ROLL_IS_DYNAMITE, false);
+    clearSystemSelection();
+    if (clearBonuses) BonusManager.clearBonuses(this.actor.id);
+
+    if (game.settings.get(MODULE_ID, SETTINGS.ROLL_IS_DYNAMITE)) {
+      await game.settings.set(MODULE_ID, SETTINGS.ROLL_IS_DYNAMITE, false);
+    }
     this.render({ force: true });
   }
 
@@ -533,7 +687,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     html.find(".mh-story-tag").on("dblclick",       async ev => {
       ev.preventDefault();
       const tag = this.actor.getTag?.(ev.currentTarget.dataset.id);
-      if (tag) await CityDialogs.itemEditDialog(tag);
+      if (tag) await sys.CityDialogs.itemEditDialog(tag);
     });
 
     // Clues
@@ -550,7 +704,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     html.find(".help-toggle, .hurt-toggle").on("change", ev => {
       const t = ev.currentTarget;
       if (!t.dataset.actorId || !t.dataset.targetId) {
-        ui.notifications.warn("Cannot determine bonus parties");
+        ui.notifications.warn(game.i18n.localize("MistHUD.notify.bonusPartiesUnknown"));
         t.checked = !t.checked;
         return;
       }
@@ -568,7 +722,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!id) return;
     const tag = this.actor.items.get(id);
     if (tag) {
-      const updated = await CityHelpers.itemDialog(tag);
+      const updated = await sys.CityHelpers.itemDialog(tag);
       if (!updated) await this.actor.deleteTag(id);
     }
   }
@@ -579,7 +733,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!id) return;
     const status = this.actor.items.get(id);
     if (!status) return;
-    const updated = await CityHelpers.itemDialog(status);
+    const updated = await sys.CityHelpers.itemDialog(status);
     if (!updated) await this.actor.deleteStatus?.(id);
   }
 
@@ -589,8 +743,8 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!id) return;
     const clue = this.actor.getClue?.(id);
     if (!clue) return;
-    const updated = await CityHelpers.itemDialog(clue);
-    if (updated) CityHelpers.modificationLog(this.actor, "Created", clue, `${clue.system.amount}`);
+    const updated = await sys.CityHelpers.itemDialog(clue);
+    if (updated) sys.CityHelpers.modificationLog(this.actor, "Created", clue, `${clue.system.amount}`);
     else await this.actor.deleteClue?.(id);
   }
 
@@ -602,7 +756,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!clueId || !owner) return;
     const clue = owner.getClue?.(clueId);
     await owner.deleteClue?.(clueId);
-    if (clue) CityHelpers.modificationLog(owner, "Removed", clue);
+    if (clue) sys.CityHelpers.modificationLog(owner, "Removed", clue);
   }
 
   async _editClue(ev) {
@@ -610,7 +764,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const ownerId = ev.currentTarget.dataset.ownerId;
     const owner   = ownerId ? game.actors.get(ownerId) : this.actor;
     const clue    = owner?.getClue?.(ev.currentTarget.dataset.clueId);
-    if (clue) await CityDialogs.itemEditDialog(clue);
+    if (clue) await sys.CityDialogs.itemEditDialog(clue);
   }
 
   async _createJuice() {
@@ -619,8 +773,8 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!id) return;
     const juice = this.actor.getJuice?.(id);
     if (!juice) return;
-    const updated = await CityHelpers.itemDialog(juice);
-    if (updated) CityHelpers.modificationLog(this.actor, "Created", juice, `${juice.system.amount}`);
+    const updated = await sys.CityHelpers.itemDialog(juice);
+    if (updated) sys.CityHelpers.modificationLog(this.actor, "Created", juice, `${juice.system.amount}`);
     else await this.actor.deleteJuice?.(id);
   }
 
@@ -632,7 +786,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!juiceId || !owner) return;
     const juice = owner.getJuice?.(juiceId);
     await owner.deleteJuice?.(juiceId);
-    if (juice) CityHelpers.modificationLog(owner, "Removed", juice);
+    if (juice) sys.CityHelpers.modificationLog(owner, "Removed", juice);
   }
 
   async _editJuice(ev) {
@@ -642,8 +796,8 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const juice   = owner?.getJuice?.(ev.currentTarget.dataset.juiceId);
     if (!juice) return;
     const old     = { name: juice.name, amount: juice.system.amount };
-    const updated = await CityDialogs.itemEditDialog(juice);
-    if (updated) CityHelpers.modificationLog(owner, "Edited", juice,
+    const updated = await sys.CityDialogs.itemEditDialog(juice);
+    if (updated) sys.CityHelpers.modificationLog(owner, "Edited", juice,
       `${old.name} (${old.amount}) → ${updated.name} (${updated.system?.amount})`);
   }
 
@@ -672,7 +826,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   async _showTooltip(event, data) {
     $(".mh-tooltip").remove();
-    const content = await renderTemplate("modules/mist-hud/templates/mh-tooltip-theme.hbs", data);
+    const content = await foundry.applications.handlebars.renderTemplate("modules/mist-hud/templates/mh-tooltip-theme.hbs", data);
     const tooltip = $(`<div class="mh-tooltip">${content}</div>`);
     $("body").append(tooltip);
     const ww = $(window).width(), wh = $(window).height();
@@ -717,31 +871,18 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   _updatePowerDisplay(html) {
     if (!html) html = $(this.element);
-    const state = getOrCreateState(this.actor.id);
-    const power = state.previewPower();
+    const state = getOrCreateState(this.key);
+    const power = state.previewPower(this.actor);
     const str   = power > 0 ? `+${power}` : `${power}`;
     html.find(".mh-power-indicator").text(str);
-  }
-
-  // ── Private helpers ───────────────────────────────────────────────────────
-
-  _findTag(id) {
-    const own = this.actor.items.get(id);
-    if (own) return own;
-    for (const a of game.actors) {
-      if (a.type === "crew") {
-        const t = a.items.get(id);
-        if (t) return t;
-      }
-    }
-    return null;
   }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   async close(options) {
     $(".mh-tooltip").remove();
-    if (this.actor?.id) playerHudRegistry.delete(this.actor.id);
+    // Only remove our own entry (a newer HUD may already own the key)
+    if (this.key && playerHudRegistry.get(this.key) === this) playerHudRegistry.delete(this.key);
     return super.close(options);
   }
 }
@@ -755,7 +896,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
  */
 export function getOrCreateHud(actor) {
   if (!actor || actor.type !== "character") return null;
-  const existing = playerHudRegistry.get(actor.id);
+  const existing = playerHudRegistry.get(hudKey(actor));
   if (existing) return existing;
   return new PlayerHUD(actor);
 }

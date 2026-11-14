@@ -137,12 +137,12 @@
 
 /*NPC HUD STYLES*/
 
-#npc-hud{
+:is(#npc-hud, .window-app.npc-hud){
   background: var(--effects-color2);
   border: 1px solid var(--effects-color1);
 }
 
-#npc-hud .window-content {
+:is(#npc-hud, .window-app.npc-hud) .window-content {
     background: url('../ui/litm_hud2_BG.webp');
     background-position: center center;
     background-repeat: no-repeat;
@@ -151,7 +151,7 @@
     font-family: var(--font-family-main1);
 }
 
-#npc-hud .window-header {
+:is(#npc-hud, .window-app.npc-hud) .window-header {
     background: var(--hud-bg-color);
     display: flex;
     flex-direction: row;
@@ -164,7 +164,7 @@
     transition: padding-left 0.5s;
 }
 
-#npc-hud .mh-char-name {
+:is(#npc-hud, .window-app.npc-hud) .mh-char-name {
     position: relative;
     font-size: 1.1rem;
     flex: 4;
@@ -180,7 +180,7 @@
     top: 3px;
 }
 
-#npc-hud ul{
+:is(#npc-hud, .window-app.npc-hud) ul{
   padding: 0;
   margin: 0;
   list-style: none;
@@ -228,7 +228,7 @@
     transition: ease-in, top, 0.2s;
 }
 
-#npc-hud.minimized .mh-token-image {
+:is(#npc-hud, .window-app.npc-hud).minimized .mh-token-image {
     top: -52px;
     left: -55px;
     transition: ease-in, top, 0.2s;
@@ -1331,39 +1331,4 @@
   font-family: var(--font-family-main1);
   font-size: large;
   font-weight: 600;
-}
-
-.scene-tag-window {
-    background: url('/modules/mist-hud/ui/bg2-litm.webp');
-    background-repeat: no-repeat;
-    background-size: cover;
-    font-size: 0.95rem;
-    font-family: 'CCTreasure'; 
-    border: none;
-    border-radius: 12px;
-    line-height: 1.4rem;
-}
-
-.story-tag-window {
-  min-height: fit-content;
-}
-
-.item-selection-context .status-name:hover,
-.item-selection-context .story-tag:hover {
-	font-weight: normal;
-	text-shadow: 0 0 3px orange;
-  border: 2px solid rgb(255, 255, 255);
-  background-image: none;
-}
-
-.item-selection-context .status .negative-selected,
-.item-selection-context .tag .negative-selected {
-  color: black;
-	background-image: linear-gradient(to right, rgb(255, 165, 0, 0.85), rgba(255, 187, 105, 0.85));
-}
-
-.item-selection-context .status .positive-selected,
-.item-selection-context .tag .positive-selected {
-	color: black;
-	background-image: linear-gradient(to right, rgb(255, 255, 153, 0.85), rgb(255, 215, 0, 0.85));
 }

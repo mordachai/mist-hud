@@ -227,9 +227,9 @@ export class NPCInfluenceManager extends Application {
   }
   
   static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions, {
       id: NPCInfluenceManager.WINDOW_ID,
-      title: 'NPC Influence Viewer',
+      title: 'MistHUD.window.influenceViewer',
       template: 'modules/mist-hud/templates/npc-influence-manager.hbs',
       width: 450,
       height: 'auto',
@@ -542,7 +542,7 @@ export class NPCInfluenceManager extends Application {
     if (this._isClosed) return;
     
     if (!game || !game.user) {
-      ui.notifications.warn("Game not initialized");
+      ui.notifications.warn(game.i18n.localize("MistHUD.notify.gameNotReady"));
       return;
     }
     
@@ -620,20 +620,19 @@ export class NPCInfluenceManager extends Application {
     if (this._isClosed) return;
     
     if (!game || !game.user || !game.user.isGM) {
-      ui.notifications.warn("Only the GM can synchronize NPC influences");
+      ui.notifications.warn(game.i18n.localize("MistHUD.notify.gmOnlySync"));
       return;
     }
     
     //ui.notifications.info("Synchronizing NPCs in current scene...");
     
     try {
-      // Try to import from the scripts directory
-      const { syncTokenInfluences } = await import('./npc-influence-functions.js');
-      const syncCount = await syncTokenInfluences();
+      const { syncSceneInfluences } = await import('./npc-hud.js');
+      const syncCount = await syncSceneInfluences();
       //ui.notifications.info(`Synchronized ${syncCount} NPCs in current scene`);
     } catch (error) {
       console.error("Failed to sync influences:", error);
-      ui.notifications.error("Error synchronizing influences");
+      ui.notifications.error(game.i18n.localize("MistHUD.notify.syncError"));
     }
     
     if (!this._isClosed) {
@@ -698,7 +697,7 @@ export class NPCInfluenceManager extends Application {
 // Export the global opener function
 export function openNPCInfluenceManager() {
   if (!game || !game.user || !game.user.isGM) {
-    ui.notifications.warn("Only the GM can open the NPC Influence Manager");
+    ui.notifications.warn(game.i18n.localize("MistHUD.notify.gmOnlyViewer"));
     return;
   }
   

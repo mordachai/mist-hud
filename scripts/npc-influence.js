@@ -10,7 +10,7 @@ export { NPCInfluenceManager } from "./npc-influence-manager.js";
  */
 export function openNPCInfluenceManager() {
   if (!game.user.isGM) {
-    ui.notifications.warn("Only the GM can open the NPC Influence Manager");
+    ui.notifications.warn(game.i18n.localize("MistHUD.notify.gmOnlyViewer"));
     return;
   }
   const id = "npc-influence-manager";

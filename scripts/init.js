@@ -5,6 +5,7 @@
 
 import { MODULE_ID, SOCKET_NAME } from "./constants.js";
 import { playerHudRegistry, getOrCreateHud } from "./player-hud.js";
+import { hudKey } from "./hud-state.js";
 import { BonusManager }              from "./bonus-manager.js";
 import { StatusScreen }              from "./status-screen.js";
 import { openNPCInfluenceManager }   from "./npc-influence.js";
@@ -31,6 +32,8 @@ Hooks.once("ready", () => {
     if (data?.type === "npcInfluence") {
       globalThis.activeNpcInfluences ??= {};
       globalThis.activeNpcInfluences[data.data.npcId] = data.data;
+    } else if (data?.type === "dropAction" && _dropHandlers[data.action]) {
+      _dropHandlers[data.action](data);
     }
   });
 
@@ -45,17 +48,24 @@ Hooks.on("controlToken", (token, controlled) => {
   if (controlled && token.actor?.type === "character" && token.isOwner) {
     // Only open a HUD when exactly one character token is selected
     if (canvas.tokens.controlled.length === 1) {
-      // Close any HUDs that belong to a different actor
-      for (const [actorId, hud] of playerHudRegistry.entries()) {
-        if (actorId !== token.actor.id) hud.close();
+      const key = hudKey(token.actor);
+      // Close any HUDs that belong to a different actor / unlinked token. All HUDs
+      // share the DOM id "mist-hud", so wait for them to be gone before opening
+      // the new one (otherwise the old close can tear down the new window).
+      const closing = [];
+      for (const [k, other] of playerHudRegistry.entries()) {
+        if (k !== key) closing.push(other.close());
       }
-      const hud = getOrCreateHud(token.actor);
-      if (hud && !hud.rendered) hud.render(true);
+      Promise.all(closing).then(() => {
+        if (!token.controlled || canvas.tokens.controlled.length !== 1) return;
+        const hud = getOrCreateHud(token.actor);
+        if (hud && !hud.rendered) hud.render(true);
+      });
     }
   } else if (!controlled) {
     // Close the HUD only when no tokens remain selected
     if (canvas.tokens.controlled.length === 0) {
-      const hud = playerHudRegistry.get(token.actor?.id);
+      const hud = playerHudRegistry.get(hudKey(token.actor));
       if (hud) hud.close();
     }
   }
@@ -72,10 +82,26 @@ function _rerenderAllHUDs() {
 Hooks.once("cityDBLoaded", _rerenderAllHUDs);
 Hooks.once("movesLoaded",  _rerenderAllHUDs);
 
+// ── System selection (scene tags window, sheets) feeds the power preview ─────
+function _refreshPowerPreviews() {
+  for (const hud of playerHudRegistry.values()) {
+    if (hud.rendered) hud._updatePowerDisplay();
+  }
+}
+Hooks.on("TagOrStatusSelected",     _refreshPowerPreviews);
+Hooks.on("TagOrStatusSelectChange", _refreshPowerPreviews);
+
 // ── Actor / Item reactivity ───────────────────────────────────────────────────
 function _rerenderForActor(actor) {
-  const hud = playerHudRegistry.get(actor?.id);
-  if (hud) hud.render({ force: true });
+  if (!actor) return;
+  const direct = playerHudRegistry.get(hudKey(actor));
+  if (direct) direct.render({ force: true });
+  // A world actor's data (received bonuses…) also feeds the HUDs of its unlinked tokens
+  if (!actor.isToken) {
+    for (const hud of playerHudRegistry.values()) {
+      if (hud !== direct && hud.actor?.id === actor.id) hud.render({ force: true });
+    }
+  }
 }
 
 Hooks.on("updateActor", (actor) => _rerenderForActor(actor));
@@ -99,69 +125,125 @@ Hooks.on("getSceneControlButtons", controls => {
 
   tokenControls.tools["statusScreen"] = {
     name:    "statusScreen",
-    title:   "Statuses MC Screen",
+    title:   "MistHUD.window.statusScreen",
     icon:    "fas fa-list",
     button:  true,
     visible: true,
-    onClick: () => StatusScreen.open(),
+    onChange: () => StatusScreen.open(),
   };
 
   if (game.user.isGM) {
     tokenControls.tools["npcInfluenceManager"] = {
       name:    "npcInfluenceManager",
-      title:   "NPC Influence Viewer",
+      title:   "MistHUD.window.influenceViewer",
       icon:    "fas fa-skull",
       button:  true,
       visible: true,
-      onClick: () => openNPCInfluenceManager(),
+      onChange: () => openNPCInfluenceManager(),
     };
   }
 });
 
 // ── Drag-and-drop: status / story-tag onto tokens ─────────────────────────────
+// Players may drop a status or story tag on a token they do not own. Creating
+// the item needs permission on that actor, so those drops are relayed to a GM
+// over the module socket (same idea as the help/hurt "bonusAction" handlers).
+
+const _clampText = (v, fallback) => String(v ?? fallback).slice(0, 200) || fallback;
+
+function _statusItemData(drop) {
+  const tier = Math.min(Math.max(Math.trunc(Number(drop.tier)) || 1, 1), 10);
+  return {
+    name: _clampText(drop.name, "Unnamed Status"), type: "status",
+    img: "icons/svg/item-bag.svg",
+    system: {
+      pips: 0, tier, description: "", locked: false,
+      version: "1", free_content: false, hidden: false,
+      temporary: !!drop.temporary, permanent: !!drop.permanent,
+      sceneId: null, showcased: false, specialType: "",
+    },
+  };
+}
+
+function _storyTagItemData(drop) {
+  const isInverted = !!drop.isInverted;
+  return {
+    name: _clampText(drop.name, "Unnamed Tag"), type: "tag",
+    img: "icons/svg/item-bag.svg",
+    system: {
+      description: "", subtype: "story",
+      isInverted, inverted: isInverted,
+      temporary: !!drop.temporary, permanent: !!drop.permanent,
+      locked: false, version: "1", free_content: false,
+      hidden: false, burn_state: 0, burned: false, specialType: "",
+    },
+  };
+}
+
+/** Create the dropped item on `actor`. Runs on the dropper (owner) or on a GM (relay). */
+async function _createDroppedItem(actor, kind, drop) {
+  if (kind === "status") {
+    const [item] = await actor.createEmbeddedDocuments("Item", [_statusItemData(drop)]);
+    return item;
+  }
+  const [item] = await actor.createEmbeddedDocuments("Item", [_storyTagItemData(drop)]);
+  if (drop.cssClass === "positive" || drop.cssClass === "negative") {
+    await item.setFlag(MODULE_ID, "tagState", drop.cssClass);
+  }
+  return item;
+}
+
+const _dropHandlers = {
+  createDroppedItem: async data => {
+    // Only the active GM handles it, so exactly one client creates the item
+    if (!game.user.isGM || game.user.id !== game.users.activeGM?.id) return;
+    try {
+      if (!["status", "story-tag"].includes(data.kind)) return;
+      const tokenDoc = await fromUuid(String(data.tokenUuid));
+      const actor = tokenDoc?.actor;
+      if (!actor) return;
+      await _createDroppedItem(actor, data.kind, data.drop ?? {});
+    } catch (e) {
+      console.error("Mist HUD | Error creating relayed drop:", e);
+    }
+  },
+};
+
 Hooks.on("dropCanvasData", async (_canvas, dropData) => {
+  if (!["status", "story-tag"].includes(dropData.type)) return;
   const { x, y } = dropData;
   const token = canvas.tokens.placeables.find(t => t.bounds?.contains(x, y));
   if (!token?.actor) return;
   const actor = token.actor;
+  const kind  = dropData.type;
 
-  if (dropData.type === "status") {
-    const { name = "Unnamed Status", tier = 1, temporary = false, permanent = false } = dropData;
-    try {
-      const [newStatus] = await actor.createEmbeddedDocuments("Item", [{
-        name, type: "status",
-        img: "icons/svg/item-bag.svg",
-        system: {
-          pips: 0, tier, description: "", locked: false,
-          version: "1", free_content: false, hidden: false,
-          temporary, permanent, sceneId: null, showcased: false, specialType: "",
+  try {
+    if (actor.isOwner) {
+      await _createDroppedItem(actor, kind, dropData);
+    } else if (game.users.activeGM) {
+      game.socket.emit(SOCKET_NAME, {
+        type: "dropAction", action: "createDroppedItem",
+        kind, tokenUuid: token.document.uuid,
+        drop: {
+          name: dropData.name, tier: dropData.tier, isInverted: dropData.isInverted,
+          temporary: dropData.temporary, permanent: dropData.permanent, cssClass: dropData.cssClass,
         },
-      }]);
-      TokenStatusNotification.show(token, newStatus.name, newStatus.system.tier);
-    } catch (e) {
-      console.error("Mist HUD | Error creating dropped status:", e);
+      });
+    } else {
+      ui.notifications.warn(game.i18n.localize("MistHUD.notify.noGMForDrop"));
+      return;
     }
+  } catch (e) {
+    console.error(`Mist HUD | Error creating dropped ${kind}:`, e);
+    return;
+  }
 
-  } else if (dropData.type === "story-tag") {
-    const { name = "Unnamed Tag", isInverted = false, temporary = false, permanent = false, cssClass = "" } = dropData;
-    try {
-      const [newTag] = await actor.createEmbeddedDocuments("Item", [{
-        name, type: "tag",
-        img: "icons/svg/item-bag.svg",
-        system: {
-          description: "", subtype: "story",
-          isInverted, inverted: isInverted,
-          temporary, permanent,
-          locked: false, version: "1", free_content: false,
-          hidden: false, burn_state: 0, burned: false, specialType: "",
-        },
-      }]);
-      if (cssClass === "positive" || cssClass === "negative") {
-        await newTag.setFlag(MODULE_ID, "tagState", cssClass);
-      }
-      TokenTagNotification.show(token, name, isInverted, cssClass);
-    } catch (e) {
-      console.error("Mist HUD | Error creating dropped story tag:", e);
-    }
+  // The scrolling notification is local to the dropper, so show it here in both cases
+  if (kind === "status") {
+    TokenStatusNotification.show(token, _clampText(dropData.name, "Unnamed Status"),
+      Math.min(Math.max(Math.trunc(Number(dropData.tier)) || 1, 1), 10));
+  } else {
+    TokenTagNotification.show(token, _clampText(dropData.name, "Unnamed Tag"),
+      !!dropData.isInverted, dropData.cssClass ?? "");
   }
 });

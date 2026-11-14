@@ -18,7 +18,7 @@
         </div>
         <ul class="npc-spectrum-list">
         {{#each spectrums}}
-            <li class="npc-spectrum {{activeSystem}}">
+            <li class="npc-spectrum {{../activeSystem}}">
             {{name}}: <span class="npc-spectrum-tier">{{parseMaxTier system.maxTier}}</span>
             </li>
         {{/each}}
@@ -149,7 +149,7 @@
             <!-- Specials -->
             {{#if moveGroups.Specials.length}}
             <div class="npc-subtitle-container-l">
-                <div class="npc-subtitle-text">Specials</div>
+                <div class="npc-subtitle-text">{{localize "MistHUD.npcHud.specials"}}</div>
             </div>
             <ul class="npc-list">
             {{#each moveGroups.Specials}}
@@ -164,7 +164,7 @@
             <!-- Custom Moves -->
             {{#if moveGroups.Custom.length}}
             <div class="npc-subtitle-container-l">
-                <div class="npc-subtitle-text">Custom Moves</div>
+                <div class="npc-subtitle-text">{{localize "MistHUD.npcHud.customMoves"}}</div>
             </div>
             <ul class="npc-list">
             {{#each moveGroups.Custom}}
@@ -201,7 +201,7 @@
             <!-- Specials -->
             {{#if moveGroups.Specials.length}}
             <div class="npc-subtitle-container-l">
-                <div class="npc-subtitle-text">Specials</div>
+                <div class="npc-subtitle-text">{{localize "MistHUD.npcHud.specials"}}</div>
             </div>
             <ul class="npc-list">
             {{#each moveGroups.Specials}}

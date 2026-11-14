@@ -4,6 +4,132 @@
 
 import { MODULE_ID } from "./constants.js";
 
+// ── HUD keys ─────────────────────────────────────────────────────────────────
+// A HUD (and its selection state) belongs to one token's actor. Linked tokens
+// share the world actor, so they share one HUD keyed by actor id. An unlinked
+// token owns a synthetic copy of the actor (actor.isToken), so it is keyed by
+// its token id instead, otherwise all unlinked tokens of one actor would share
+// a single HUD and a single selection.
+
+/** Registry key for an actor: token id for an unlinked token actor, else actor id. */
+export function hudKey(actor) {
+  if (!actor) return undefined;
+  return actor.isToken && actor.token?.id ? actor.token.id : actor.id;
+}
+
+/** Inverse of hudKey(): the actor for a registry key (world actor, or an unlinked token's actor on the viewed scene). */
+export function resolveActorByKey(key) {
+  if (!key) return null;
+  return game.actors.get(key) ?? canvas?.scene?.tokens?.get(key)?.actor ?? null;
+}
+
+// ── Player HUD registry (one PlayerHUD per hudKey) ───────────────────────────
+// Lives here (not in player-hud.js) so bonus-manager.js can reach it without
+// importing player-hud.js, which itself imports bonus-manager.js.
+/** @type {Map<string, object>} */
+export const playerHudRegistry = new Map();
+
+/** Open HUDs showing any token of this world actor (linked, or unlinked copies of it). */
+export function hudsForActorId(actorId) {
+  return [...playerHudRegistry.values()].filter(hud => hud.actor?.id === actorId);
+}
+
+/**
+ * The actor that holds help/hurt bonuses for `actor`. Bonuses are granted to a
+ * character (the system's juice items target world-actor ids, and the GM writes
+ * the flag on the world actor), so an unlinked token reads its base actor.
+ */
+export function bonusActorFor(actor) {
+  return game.actors.get(actor?.id) ?? actor;
+}
+
+// ── System bridges ───────────────────────────────────────────────────────────
+
+/** Same test as the system's CitySettings.isOtherscapeBurn(). */
+export function isOtherscapeBurn() {
+  try {
+    return game.settings.get("city-of-mist", "tagBurn") === "mist-engine";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Tags/statuses the player selected through the system's own UI (scene tags
+ * window, sheets). The system exposes the class as window.SelectedTagsAndStatus.
+ * @returns {object[]} copies, safe to mutate
+ */
+export function getSystemSelection() {
+  try {
+    const rows = globalThis.SelectedTagsAndStatus?.getPlayerActivatedTagsAndStatus?.() ?? [];
+    return rows.map(r => ({ ...r }));
+  } catch (e) {
+    console.warn("Mist HUD | Could not read the system's tag selection:", e);
+    return [];
+  }
+}
+
+export function clearSystemSelection() {
+  try {
+    globalThis.SelectedTagsAndStatus?.clearAllActivatedItems?.();
+  } catch (e) {
+    console.warn("Mist HUD | Could not clear the system's tag selection:", e);
+  }
+}
+
+/**
+ * Same test as the system's CityItem.isBurned(): a tag is burned only when
+ * `burned` is true AND `burn_state` is not 0 (burn_state 1 = "to burn",
+ * 2 = burned, 0 = unburned).
+ */
+export function isTagBurned(tag) {
+  return !!tag?.system?.burned && tag.system.burn_state !== 0;
+}
+
+function _modifierRow(id, name, amount) {
+  return { id, name, amount, ownerId: null, tagId: null, type: "modifier", strikeout: false };
+}
+
+/**
+ * Help/hurt bonuses other players granted to this actor (GM-written flag).
+ * @returns {object[]} "modifier" rows for CityRoll
+ */
+export function getReceivedBonusRows(actor) {
+  const bonuses = bonusActorFor(actor)?.getFlag(MODULE_ID, "received-bonuses") || {};
+  const rows = [];
+  for (const [giverId, bonus] of Object.entries(bonuses)) {
+    const amount = Math.abs(Number(bonus?.amount)) || 0;
+    if (!amount) continue;
+    const hurt  = bonus.type === "hurt";
+    const giver = game.actors.get(giverId)?.name ?? "?";
+    rows.push(_modifierRow(
+      `mist-hud-${hurt ? "hurt" : "help"}-${giverId}`,
+      `${hurt ? "Hurt" : "Help"} (${giver})`,
+      hurt ? -amount : amount,
+    ));
+  }
+  return rows;
+}
+
+/**
+ * NPC influence for the threat tokens on the current scene, read from the
+ * cache the GM broadcasts (globalThis.activeNpcInfluences). One row per token,
+ * unlinked tokens keyed by token id, linked ones by actor id.
+ * @returns {object[]} "modifier" rows for CityRoll
+ */
+export function getNpcInfluenceRows() {
+  const cache = globalThis.activeNpcInfluences || {};
+  const rows  = [];
+  for (const token of canvas?.tokens?.placeables ?? []) {
+    if (token.actor?.type !== "threat") continue;
+    const influence = (!token.document.actorLink && cache[token.id]) || cache[token.actor.id];
+    const amount    = Number(influence?.totalInfluence) || 0;
+    if (!amount) continue;
+    rows.push(_modifierRow(`mist-hud-npc-${token.id}`, token.name || influence.npcName || "NPC", amount));
+  }
+  return rows;
+}
+
 export class HUDState {
   /** @type {Set<string>} tag item IDs selected for the next roll */
   selectedTags   = new Set();
@@ -32,7 +158,7 @@ export class HUDState {
     for (const id of this.selectedTags) {
       const tag = this._resolveTag(id, actor);
       if (!tag) continue;
-      if (tag.system.burned) continue; // skip already-burned tags
+      if (isTagBurned(tag)) continue; // skip already-burned tags
 
       const tagOwner = tag.parent;
       const isInverted = this.invertedTags.has(id);
@@ -82,32 +208,103 @@ export class HUDState {
   }
 
   /**
-   * Find whether any tag in selectedTags is marked for burning (burn_state === 1).
-   * Returns the ID of the first "toBurn" tag, or null.
+   * IDs of every selected tag marked for burning (burn_state === 1, not yet burned).
+   *
+   * @param {CityActor} actor
+   * @returns {string[]}
+   */
+  getBurnTagIds(actor) {
+    const ids = [];
+    for (const id of this.selectedTags) {
+      const tag = this._resolveTag(id, actor);
+      if (tag && tag.system.burn_state === 1 && !isTagBurned(tag)) ids.push(id);
+    }
+    return ids;
+  }
+
+  /**
+   * ID of the first "toBurn" tag, or null. This is CityRoll's `burnTag` option.
    *
    * @param {CityActor} actor
    * @returns {string|null}
    */
   getBurnTagId(actor) {
-    for (const id of this.selectedTags) {
-      const tag = this._resolveTag(id, actor);
-      if (tag && tag.system.burn_state === 1 && !tag.system.burned) return id;
+    return this.getBurnTagIds(actor)[0] ?? null;
+  }
+
+  // ─── Full roll list ───────────────────────────────────────────────────────
+
+  /**
+   * Everything a roll uses, in CityRoll's selectedList format: the HUD
+   * selection, the system's own selection (scene tags etc.) and, when
+   * `modifiers` is true, received help/hurt and NPC influence.
+   *
+   * Burn: the first to-burn tag is CityRoll's `burnTag` (it gives it +3 and
+   * burns it). Under Otherscape/LitM burn rules several tags can be burned at
+   * once; CityRoll only handles one, so the extra ones get amount 3 here and
+   * are returned in `extraBurn` for the caller to burn after the roll.
+   *
+   * @param {CityActor} actor
+   * @param {{modifiers?: boolean}} [opts]
+   * @returns {{list: object[], burnIds: string[], extraBurn: string[], usedBonuses: boolean}}
+   */
+  buildRollList(actor, { modifiers = true } = {}) {
+    const list    = this.toActivatedTagFormat(actor);
+    const burnIds = this.getBurnTagIds(actor);
+    const multi   = isOtherscapeBurn();
+
+    burnIds.forEach((id, i) => {
+      if (i > 0 && !multi) return;
+      const row = list.find(x => x.tagId === id);
+      if (row) row.amount = 3;
+    });
+    const extraBurn = multi ? burnIds.slice(1) : [];
+
+    // System selection, minus anything already picked in the HUD
+    const seen = new Set(list.map(x => `${x.id}|${x.tokenId || ""}`));
+    for (const row of getSystemSelection()) {
+      const key = `${row.id}|${row.tokenId || ""}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      list.push(row);
     }
-    return null;
+
+    let usedBonuses = false;
+    if (modifiers) {
+      const bonusRows = getReceivedBonusRows(actor);
+      usedBonuses = bonusRows.length > 0;
+      list.push(...bonusRows, ...getNpcInfluenceRows());
+    }
+
+    return { list, burnIds, extraBurn, usedBonuses };
   }
 
   // ─── Preview power (informational, not authoritative) ─────────────────────
 
-  previewPower() {
-    let power = this.modifier;
-    // Each selected tag is roughly ±1; statuses add their tier
-    // This is a rough UI indicator only – the real calc is done by CityRoll
-    power += this.selectedTags.size;
-    power -= (this.invertedTags.size * 2); // inverted weaknesses still deduct
-    for (const [, state] of this.statusStates) {
-      if (state !== "neutral") power += (state === "positive" ? 1 : -1);
-    }
-    return power;
+  /**
+   * Power of a standard roll with the current selection, summed the way
+   * CityRoll does it: all tags (only the burnt one under classic burn rules),
+   * the best positive and the worst negative status, every other modifier,
+   * and the flat modifier. Caps and grit mode are applied by CityRoll only.
+   *
+   * @param {CityActor} actor
+   * @returns {number}
+   */
+  previewPower(actor) {
+    if (!actor) return this.modifier;
+    const { list, burnIds } = this.buildRollList(actor);
+
+    let tags = list.filter(x => x.type === "tag");
+    if (burnIds.length && !isOtherscapeBurn()) tags = tags.filter(x => x.tagId === burnIds[0]);
+
+    const statuses = list.filter(x => x.type === "status").map(x => x.amount);
+    const best     = Math.max(0, ...statuses);
+    const worst    = Math.min(0, ...statuses);
+
+    const others = list.filter(x => x.type !== "tag" && x.type !== "status");
+    const sum    = rows => rows.reduce((acc, x) => acc + (Number(x.amount) || 0), 0);
+
+    return sum(tags) + best + worst + sum(others) + this.modifier;
   }
 
   // ─── State management ─────────────────────────────────────────────────────
@@ -201,20 +398,20 @@ export class HUDState {
   }
 }
 
-// ─── Module-level registry (one HUDState per actorId) ─────────────────────────
+// ─── Module-level registry (one HUDState per hudKey) ──────────────────────────
 
 /** @type {Map<string, HUDState>} */
 export const hudStateRegistry = new Map();
 
 /**
- * Get the HUDState for an actor, creating it if necessary.
+ * Get the HUDState for a HUD key (see hudKey()), creating it if necessary.
  *
- * @param {string} actorId
+ * @param {string} key
  * @returns {HUDState}
  */
-export function getOrCreateState(actorId) {
-  if (!hudStateRegistry.has(actorId)) {
-    hudStateRegistry.set(actorId, new HUDState());
+export function getOrCreateState(key) {
+  if (!hudStateRegistry.has(key)) {
+    hudStateRegistry.set(key, new HUDState());
   }
-  return hudStateRegistry.get(actorId);
+  return hudStateRegistry.get(key);
 }

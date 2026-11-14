@@ -1,7 +1,7 @@
 // settings.js — Module settings registration and system CSS injection
 // (accordion logic is now inlined where needed; useHotbarForRolls removed)
 
-import { MODULE_ID, SETTINGS } from "./constants.js";
+import { MODULE_ID, SETTINGS, getActiveSystem } from "./constants.js";
 
 export { MODULE_ID };
 
@@ -13,7 +13,7 @@ const SYSTEM_CSS_MAP = {
   "legend":       "/modules/mist-hud/styles/mh-legends-in-the-mist.css",
 };
 
-function applySystemCSS(system) {
+export function applySystemCSS(system) {
   const cssPath = SYSTEM_CSS_MAP[system];
   const existing = document.querySelector("link[data-system-theme]");
   if (existing && existing.href.includes(cssPath)) return;
@@ -28,7 +28,7 @@ function applySystemCSS(system) {
 }
 
 export async function detectActiveSystem() {
-  const system = game.settings.get("city-of-mist", "system");
+  const system = getActiveSystem();
   applySystemCSS(system ?? null);
   return system ?? null;
 }
@@ -36,93 +36,102 @@ export async function detectActiveSystem() {
 // ── Settings registration ─────────────────────────────────────────────────────
 
 Hooks.once("init", () => {
+  const K = key => `MistHUD.settings.${key}`;
 
   game.settings.register(MODULE_ID, SETTINGS.ROLL_IS_DYNAMITE, {
-    name: "Roll Is Dynamite",
-    hint: "Toggles whether the next roll is guaranteed to be Dynamite.",
+    name: K("rollIsDynamite.name"),
+    hint: K("rollIsDynamite.hint"),
     scope: "client", config: false, type: Boolean, default: false,
   });
 
   game.settings.register(MODULE_ID, SETTINGS.NPC_ACCORDION_STATE, {
-    name: "NPC Accordions Initial State",
-    hint: "Set the initial state for NPC accordions.",
+    name: K("npcAccordionState.name"),
+    hint: K("npcAccordionState.hint"),
     scope: "world", config: true, type: String,
-    choices: { allExpanded: "All expanded", allClosed: "All closed" },
+    choices: {
+      allExpanded: K("npcAccordionState.allExpanded"),
+      allClosed:   K("npcAccordionState.allClosed"),
+    },
     default: "allClosed",
-    onChange: () => {
-      ui.notifications.info("Changing accordion state requires a page refresh.");
-      new Dialog({
-        title: "Refresh Required",
-        content: "<p>Refresh now to apply changes?</p>",
-        buttons: {
-          yes: { icon: '<i class="fas fa-check"></i>', label: "Yes",
-                 callback: () => foundry.utils.debounce(() => window.location.reload(), 100)() },
-          no:  { icon: '<i class="fas fa-times"></i>', label: "No" },
-        },
-        default: "no",
-      }).render(true);
+    onChange: async () => {
+      ui.notifications.info(game.i18n.localize("MistHUD.notify.accordionRefresh"));
+      const refresh = await foundry.applications.api.DialogV2.confirm({
+        window:  { title: game.i18n.localize("MistHUD.dialog.refreshTitle") },
+        content: `<p>${game.i18n.localize("MistHUD.dialog.refreshContent")}</p>`,
+        rejectClose: false,
+      });
+      if (refresh) window.location.reload();
     },
   });
 
   game.settings.register(MODULE_ID, SETTINGS.LAST_SELECTED_TAB, {
-    name: "Last Selected Tab",
+    name: K("lastSelectedTab.name"),
     scope: "client", config: false, type: String, default: "",
   });
 
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_STATUS_NOTIFICATIONS, {
-    name: "Status Drop Notifications",
-    hint: "Animated notification above tokens when statuses are dropped on them.",
+    name: K("statusNotifications.name"),
+    hint: K("statusNotifications.hint"),
     scope: "world", config: true, type: Boolean, default: true,
   });
 
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_TAG_NOTIFICATIONS, {
-    name: "Tags Drop Notifications",
-    hint: "Visual notifications when story tags are assigned to tokens via drag-and-drop.",
+    name: K("tagNotifications.name"),
+    hint: K("tagNotifications.hint"),
     scope: "world", config: true, type: Boolean, default: true,
   });
 
   game.settings.register(MODULE_ID, SETTINGS.USE_TEXT_BUTTONS, {
-    name: "Use Text for Roll Buttons",
-    hint: "If enabled, roll buttons use text abbreviations instead of images.",
+    name: K("useTextButtons.name"),
+    hint: K("useTextButtons.hint"),
     scope: "client", config: true, type: Boolean, default: false,
-    onChange: () => ui.notifications.info("Button display changed. Refresh to apply."),
+    onChange: () => ui.notifications.info(game.i18n.localize("MistHUD.notify.buttonsChanged")),
   });
 
   game.settings.register(MODULE_ID, SETTINGS.ENABLE_STATUS_TABS, {
-    name: "Tabs for Status List",
-    hint: "Organize statuses into tabs by category.",
+    name: K("statusTabs.name"),
+    hint: K("statusTabs.hint"),
     scope: "world", config: true, type: Boolean, default: true,
-    onChange: () => ui.notifications.info("Status screen tabs changed. Reopen the screen to apply."),
+    onChange: () => ui.notifications.info(game.i18n.localize("MistHUD.notify.statusTabsChanged")),
   });
 
   game.settings.register(MODULE_ID, SETTINGS.DEBUG_MODE, {
-    name: "Debug Mode",
-    hint: "Enable or disable debug logging.",
+    name: K("debugMode.name"),
+    hint: K("debugMode.hint"),
     scope: "world", config: true, type: Boolean, default: false,
   });
 
   // Layout settings (client-side, no config UI — set programmatically)
   game.settings.register(MODULE_ID, SETTINGS.LAYOUT_MODE, {
-    name: "HUD Layout Mode",
+    name: K("layoutMode.name"),
     scope: "client", config: false, type: String,
-    choices: { floating: "Floating", docked: "Docked" },
+    choices: { floating: K("layoutMode.floating"), docked: K("layoutMode.docked") },
     default: "floating",
   });
 
   game.settings.register(MODULE_ID, SETTINGS.DOCK_SIDE, {
-    name: "Dock Side",
+    name: K("dockSide.name"),
     scope: "client", config: false, type: String,
-    choices: { left: "Left", right: "Right" },
+    choices: { left: K("dockSide.left"), right: K("dockSide.right") },
     default: "left",
   });
 
   // Status collection storage
   game.settings.register(MODULE_ID, SETTINGS.IMPORTED_STATUS_COLLECTION, {
-    name: "Imported Status Collection",
+    name: K("importedStatusCollection.name"),
     scope: "world", config: false, type: Array, default: [],
   });
 });
 
 Hooks.once("ready", async () => {
   await detectActiveSystem();
+});
+
+// Re-apply CSS and re-render HUDs when the system setting changes at runtime.
+Hooks.on("updateSetting", async setting => {
+  if (!["city-of-mist.system", "city-of-mist.baseSystem"].includes(setting.key)) return;
+  await detectActiveSystem();
+  for (const app of foundry.applications.instances.values()) {
+    if (app.constructor?.name === "PlayerHUD" && app.rendered) app.render({ force: true });
+  }
 });

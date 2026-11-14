@@ -7,7 +7,7 @@
 //   All clients update checkboxes + HUD re-renders via updateActor hook
 
 import { SOCKET_NAME } from "./constants.js";
-import { getImprovements, getCrewImprovements } from "./getters.js";
+import { playerHudRegistry, hudsForActorId } from "./hud-state.js";
 
 /** @type {Map<string, boolean>} key: `${giverId}-${targetId}-${type}` */
 const _checkboxStates = new Map();
@@ -43,7 +43,7 @@ export class BonusManager {
    */
   static async applyBonus(giverId, targetId, bonusType, amount, active) {
     if (!giverId || !targetId) {
-      ui.notifications.warn("Mist HUD: Cannot determine bonus parties");
+      ui.notifications.warn(game.i18n.localize("MistHUD.notify.bonusPartiesUnknown"));
       return;
     }
     _checkboxStates.set(`${giverId}-${targetId}-${bonusType}`, active);
@@ -62,53 +62,23 @@ export class BonusManager {
   }
 
   /**
-   * Determine if a particular move is always Dynamite due to improvements.
+   * Clear every help/hurt bonus an actor has received (after it was used in a
+   * roll). Only a GM may write the flag, so players ask over the socket.
    *
-   * @param {CityActor} actor
-   * @param {{ abbreviation: string, configKey?: string, name?: string }} move
-   * @param {{ getSelectedRollData: Function }} hud
-   * @returns {boolean}
+   * @param {string} actorId
    */
-  static checkRolls(actor, move, hud) {
-    if (!actor || !move) return false;
-
-    const moveAbbr = move.abbreviation;
-    const moveKey  = move.configKey || move.name || "";
-
-    const improvGroups  = getImprovements(actor);
-    const crewGroups    = getCrewImprovements(actor);
-    const allImprovs    = [
-      ...improvGroups.flatMap(g => g.improvements),
-      ...crewGroups.flatMap(g => g.improvements),
-    ];
-
-    const rollData = hud.getSelectedRollData?.() ?? {};
-    const activated = [
-      ...(rollData.powerTags    ?? []),
-      ...(rollData.crewPowerTags ?? []),
-      ...(rollData.loadoutTags  ?? []),
-    ];
-    const hasThemeTag = themeId => activated.some(t => t.themeId === themeId);
-
-    for (const imp of allImprovs) {
-      const fx      = imp.effect_class  ?? imp.system?.effect_class;
-      const themeId = imp.theme_id      ?? imp.system?.theme_id;
-      if (!fx) continue;
-
-      if (fx.startsWith("ALWAYS_DYN_") && fx.endsWith(moveAbbr)) return true;
-      if (themeId && !hasThemeTag(themeId)) continue;
-      if (fx === `THEME_DYN_${moveAbbr}`) return true;
-
-      const choice = imp.choiceItem ?? imp.system?.choice_item ?? "";
-      if (fx === "THEME_DYN_SELECT" && choice === moveKey) return true;
+  static async clearBonuses(actorId) {
+    if (!actorId) return;
+    if (game.user.isGM) {
+      await _handlers.clearAllBonuses({ actorId });
+    } else {
+      game.socket.emit(SOCKET_NAME, { type: "bonusAction", action: "clearAllBonuses", actorId });
     }
-
-    return false;
   }
 
   static refreshAllHUDs() {
-    for (const hud of (globalThis.playerHudRegistry?.values() ?? [])) {
-      hud.render({ force: true });
+    for (const hud of playerHudRegistry.values()) {
+      if (hud.rendered) hud.render({ force: true });
     }
   }
 }
@@ -142,14 +112,22 @@ const _handlers = {
   updateTargetHUD: data => {
     const actor = game.actors.get(data.targetId);
     if (!actor?.isOwner) return;
-    const hud = globalThis.playerHudRegistry?.get(data.targetId);
-    if (hud) hud.render({ force: true });
+    // Unlinked tokens of the target actor have their own HUDs, so refresh all of them
+    for (const hud of hudsForActorId(data.targetId)) {
+      if (hud.rendered) hud.render({ force: true });
+    }
   },
 
   clearAllBonuses: async data => {
     if (!game.user.isGM) return;
     await _clearActorBonuses(data.actorId);
+    // Forget local checkbox intent for this target, then refresh everyone
+    // (socket messages do not come back to the sender, so refresh here too).
+    for (const key of _checkboxStates.keys()) {
+      if (key.split("-")[1] === data.actorId) _checkboxStates.delete(key);
+    }
     game.socket.emit(SOCKET_NAME, { type: "bonusAction", action: "refreshHUDs" });
+    BonusManager.refreshAllHUDs();
   },
 
   refreshHUDs: () => BonusManager.refreshAllHUDs(),

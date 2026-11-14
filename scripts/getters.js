@@ -1,4 +1,6 @@
 // getters.js — Actor data extraction for the player HUD template context
+import { getActiveSystem } from "./constants.js";
+import { isTagBurned } from "./hud-state.js";
 // Kept slim: uses system actor methods where possible.
 
 // ── Tag burn state ────────────────────────────────────────────────────────────
@@ -7,7 +9,12 @@ export function applyBurnState(actor, tagId, tagType = "power") {
   const tag = actor?.items.get(tagId);
   if (!tag?.system) return _unknownTag(tagId, tagType);
 
-  const burnState = tag.system.burned       ? "burned"
+  // Three HUD states, using the system's own definition of "burned"
+  // (burned && burn_state != 0, see CityItem.isBurned):
+  //   burned   → burned:true,  burn_state != 0
+  //   toBurn   → burned:false, burn_state 1   (HUD marker: burn on next roll)
+  //   unburned → burned:false, burn_state 0
+  const burnState = isTagBurned(tag)           ? "burned"
                   : tag.system.burn_state === 1 ? "toBurn"
                   : "unburned";
 
@@ -45,7 +52,7 @@ export function getMysteryFromTheme(actor, themeId) {
   if (realThemebook?.isThemeKit?.()) realThemebook = realThemebook.themebook;
   if (!realThemebook) return _noThemeData(theme.name);
 
-  const system   = game.settings.get("city-of-mist", "system");
+  const system   = getActiveSystem();
   const category = realThemebook.system?.subtype || "unknown";
   const { prefix, attentionLabel, crackLabel } = _systemLabels(system, category);
 
@@ -120,19 +127,25 @@ export function getThemesAndTags(actor) {
   const themes = themeItems.map(theme => {
     let tb = theme.themebook;
     if (tb?.isThemeKit?.()) tb = tb.themebook;
-    if (!tb) { console.warn(`Missing themebook for ${theme.name}`); return null; }
+    // Themebook can be missing (e.g. Legend themes); fall back to theme's own data so tags still show.
+    if (!tb) console.warn(`Missing themebook for ${theme.name}, using theme data`);
+    const category = tb?.system?.subtype || theme.system.subtype || "Default";
 
     return {
       id:                   theme.id,
       themeName:            theme.name,
-      category:             tb.system?.subtype || "Default",
-      iconClass:            `mh-theme-icon ${tb.system?.subtype || "Default"}`,
+      category,
+      iconClass:            `mh-theme-icon ${category}`,
       powerTags:            getPowerTags(theme.id, tagItems, subTagsByParent, actor),
       weaknessTags:         getWeaknessTags(theme.id, tagItems, subTagsByParent, actor),
-      localizedThemebookName: tb.name,
+      localizedThemebookName: tb?.name || theme.system.themebook_name || theme.name,
+      themeInfo: {
+        locale_name: tb?.system?.locale_name
+          ? game.i18n.localize(tb.system.locale_name.replace(/^#/, "")) : "",
+      },
       unspent_upgrades:     theme.system.unspent_upgrades || 0,
     };
-  }).filter(Boolean);
+  });
 
   const storyTags = tagItems
     .filter(t => t.system.subtype === "story")
@@ -161,7 +174,7 @@ export function getCrewThemes(actor) {
   const crews = game.actors.filter(a =>
     a.type === "crew" && nonGMOwners.some(u => a.testUserPermission(u, "OWNER"))
   );
-  const system = game.settings.get("city-of-mist", "system");
+  const system = getActiveSystem();
 
   return crews.flatMap(crew =>
     crew.items.filter(i => i.type === "theme").map(theme => {
@@ -308,7 +321,11 @@ function _groupImprovements(items, themeMap, grouped = {}) {
 export function getJuiceAndClues(actor) {
   if (!actor) return { helpItems: [], hurtItems: [], clueItems: [], juiceItems: [] };
   const items        = actor.items.contents;
-  const activeBonuses = actor.getFlag("mist-hud", "active-bonuses") || {};
+  // A help/hurt checkbox is "on" when the target currently holds a bonus from
+  // this actor. The target's GM-written `received-bonuses` flag is the single
+  // source of truth, so the state survives re-renders and clears with the roll.
+  const givenTo = (targetId, type) =>
+    game.actors.get(targetId)?.getFlag("mist-hud", "received-bonuses")?.[actor.id]?.type === type;
 
   const resolve = (id) => {
     const a = game.actors.get(id);
@@ -321,14 +338,14 @@ export function getJuiceAndClues(actor) {
     .filter(i => i.type === "juice" && i.system?.subtype === "help")
     .map(i => { const t = resolve(i.system.targetCharacterId); return t
       ? { id: i.id, actorId: actor.id, amount: i.system.amount, target: t,
-          active: activeBonuses.help?.[t.id] || false } : null; })
+          active: givenTo(t.id, "help") } : null; })
     .filter(Boolean);
 
   const hurtItems = items
     .filter(i => i.type === "juice" && i.system?.subtype === "hurt")
     .map(i => { const t = resolve(i.system.targetCharacterId); return t
       ? { id: i.id, actorId: actor.id, amount: i.system.amount, target: t,
-          active: activeBonuses.hurt?.[t.id] || false } : null; })
+          active: givenTo(t.id, "hurt") } : null; })
     .filter(Boolean);
 
   const clueItems = items

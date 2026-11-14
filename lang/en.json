@@ -61,6 +61,186 @@
 "Legend.themebook.people.name": "People",
 "Legend.themebook.personality.name": "Personality",
 "Legend.themebook.skillOrTrade.name": "Skill or Trade",
-"Legend.themebook.trait.name": "Trait"
+"Legend.themebook.trait.name": "Trait",
+
+"MistHUD.settings.rollIsDynamite.name": "Roll Is Dynamite",
+
+"MistHUD.settings.rollIsDynamite.hint": "Toggles whether the next roll is guaranteed to be Dynamite.",
+
+"MistHUD.settings.npcAccordionState.name": "NPC Accordions Initial State",
+
+"MistHUD.settings.npcAccordionState.hint": "Set the initial state for NPC accordions.",
+
+"MistHUD.settings.npcAccordionState.allExpanded": "All expanded",
+
+"MistHUD.settings.npcAccordionState.allClosed": "All closed",
+
+"MistHUD.settings.lastSelectedTab.name": "Last Selected Tab",
+
+"MistHUD.settings.statusNotifications.name": "Status Drop Notifications",
+
+"MistHUD.settings.statusNotifications.hint": "Animated notification above tokens when statuses are dropped on them.",
+
+"MistHUD.settings.tagNotifications.name": "Tags Drop Notifications",
+
+"MistHUD.settings.tagNotifications.hint": "Visual notifications when story tags are assigned to tokens via drag-and-drop.",
+
+"MistHUD.settings.useTextButtons.name": "Use Text for Roll Buttons",
+
+"MistHUD.settings.useTextButtons.hint": "If enabled, roll buttons use text abbreviations instead of images.",
+
+"MistHUD.settings.statusTabs.name": "Tabs for Status List",
+
+"MistHUD.settings.statusTabs.hint": "Organize statuses into tabs by category.",
+
+"MistHUD.settings.debugMode.name": "Debug Mode",
+
+"MistHUD.settings.debugMode.hint": "Enable or disable debug logging.",
+
+"MistHUD.settings.layoutMode.name": "HUD Layout Mode",
+
+"MistHUD.settings.layoutMode.floating": "Floating",
+
+"MistHUD.settings.layoutMode.docked": "Docked",
+
+"MistHUD.settings.dockSide.name": "Dock Side",
+
+"MistHUD.settings.dockSide.left": "Left",
+
+"MistHUD.settings.dockSide.right": "Right",
+
+"MistHUD.settings.importedStatusCollection.name": "Imported Status Collection",
+
+"MistHUD.dialog.refreshTitle": "Refresh Required",
+
+"MistHUD.dialog.refreshContent": "Refresh now to apply changes?",
+
+"MistHUD.window.playerHud": "Player HUD",
+
+"MistHUD.window.statusScreen": "Statuses MC Screen",
+
+"MistHUD.window.influenceViewer": "NPC Influence Viewer",
+
+"MistHUD.notify.accordionRefresh": "Changing accordion state requires a page refresh.",
+
+"MistHUD.notify.buttonsChanged": "Button display changed. Refresh to apply.",
+
+"MistHUD.notify.statusTabsChanged": "Status screen tabs changed. Reopen the screen to apply.",
+
+"MistHUD.notify.noGMForDrop": "No GM is online, so the item cannot be added to a token you do not own.",
+
+"MistHUD.notify.bonusPartiesUnknown": "Mist HUD: Cannot determine the bonus parties.",
+
+"MistHUD.notify.systemLoadFailed": "Mist HUD: could not load {files} from the City of Mist system. The HUD cannot roll or edit items until the module is updated for this system version.",
+
+"MistHUD.notify.rollApiUnavailable": "Mist HUD: the City of Mist roll API is not available, cannot roll.",
+
+"MistHUD.notify.rollFailed": "Mist HUD: the roll failed ({error}). See the console (F12) for details.",
+
+"MistHUD.notify.csvImported": "CSV imported successfully!",
+
+"MistHUD.notify.csvImportFailed": "Failed to import CSV: {error}",
+
+"MistHUD.notify.statusesReset": "Statuses reset to default!",
+
+"MistHUD.notify.resetFailed": "Failed to reset: {error}",
+
+"MistHUD.notify.sampleDownload": "Downloading sample CSV…",
+
+"MistHUD.notify.gmOnlyViewer": "Only the GM can open the NPC Influence Manager.",
+
+"MistHUD.notify.gmOnlySync": "Only the GM can synchronize NPC influences.",
+
+"MistHUD.notify.gmOnlySyncAll": "Only the GM can synchronize all NPC influences.",
+
+"MistHUD.notify.syncError": "Error synchronizing influences.",
+
+"MistHUD.notify.gameNotReady": "Game not initialized.",
+
+"MistHUD.notify.influenceEmitted": "NPC influence from {name} updated and emitted to players.",
+
+"MistHUD.notify.syncedNpcs": "Synchronized influences for {count} NPCs.",
+
+"MistHUD.notify.addedStatusToScene": "Added status \"{name}\" to scene.",
+
+"MistHUD.notify.addedTagToScene": "Added tag \"{name}\" to scene.",
+
+"MistHUD.notify.addToSceneFailed": "Failed to add to scene. See console for details.",
+
+"MistHUD.hud.specialMoves": "Special Moves",
+
+"MistHUD.hud.nascentUpgrade": "Nascent theme with available power tag!",
+
+"MistHUD.hud.nascent": "Nascent theme!",
+
+"MistHUD.hud.createTag": "Create Tag",
+
+"MistHUD.hud.createStatus": "Create Status",
+
+"MistHUD.hud.createClue": "Create Clue",
+
+"MistHUD.hud.deleteClue": "Delete Clue",
+
+"MistHUD.hud.createJuice": "Create Juice",
+
+"MistHUD.hud.deleteJuice": "Delete Juice",
+
+"MistHUD.statusScreen.title": "Statuses List",
+
+"MistHUD.statusScreen.dragHint": "Drag and drop statuses onto tokens.",
+
+"MistHUD.statusScreen.sample": "Get Sample",
+
+"MistHUD.statusScreen.sampleHint": "Download a sample CSV to create your own status list.",
+
+"MistHUD.statusScreen.import": "Import CSV",
+
+"MistHUD.statusScreen.importHint": "Import a CSV file to replace the current list.",
+
+"MistHUD.statusScreen.reset": "Reset",
+
+"MistHUD.statusScreen.resetHint": "Reset to the default status list.",
+
+"MistHUD.npcHud.specials": "Specials",
+
+"MistHUD.npcHud.customMoves": "Custom Moves",
+
+"MistHUD.influence.scene": "Scene",
+
+"MistHUD.influence.total": "Total",
+
+"MistHUD.influence.syncScene": "Sync Scene",
+
+"MistHUD.influence.syncSceneHint": "Synchronize all NPCs in the current scene",
+
+"MistHUD.influence.refresh": "Refresh",
+
+"MistHUD.influence.refreshHint": "Refresh this display",
+
+"MistHUD.influence.tabActive": "Influencing NPCs",
+
+"MistHUD.influence.tabAll": "All in Scene",
+
+"MistHUD.influence.token": "Token",
+
+"MistHUD.influence.emptyActive": "No NPCs are currently providing influence. Use the \"All in Scene\" tab to see all available NPCs.",
+
+"MistHUD.influence.emptyScene": "No NPCs found in the current scene.",
+
+"MistHUD.essence.nexus": "<p class='mh-essence-text'>When you next replace a theme, if you’re still a Nexus after the transformation, it starts as a full theme, not a nascent one.</p>",
+
+"MistHUD.essence.spiritualist": "<p class='mh-essence-text'>Once per session, you can tap this bond to add your Mythos to the Power of an action that is primarily powered by Self themes, or add your Self to an action that is primarily powered by Mythos themes, or, if you are already rolling with Mythos or with Self, roll with both (Power of 4).</p>",
+
+"MistHUD.essence.cyborg": "<p class='mh-essence-text'>You can add your number of Self or Noise to the Power of any action to resist or shake off mythical forces that are not manifested as tangible or measurable effects, such as curses, hallucinations, or mental influences. You may do this once per session with your Self and once per session with your Noise, or you may use both in the same action.</p>",
+
+"MistHUD.essence.transhuman": "<p class='mh-essence-text'>Once per scene, when you invoke both mythical and technological tags in the same action, no matter their source, you can trade a miss (6 or less) outcome with a mixed hit (7-9).</p>",
+
+"MistHUD.essence.real": "<p class='mh-essence-text'>Whenever you take action to directly uphold or protect one of your Identities, you may roll with Self instead of counting positive tags.</p>",
+
+"MistHUD.essence.avatar-conduit": "<p class='mh-essence-subheader'>AVATAR <span>(One Source)</span></p><p class='mh-essence-text'>Suspend all your Rituals; instead, choose an Agenda, which, if ever ignored (defied even once), would instantly cause you to replace all of your themes (your new themes may not include Mythos themes of your lost Source). While you are an Avatar, you may instantly recover burned power tags.</p><p class='mh-essence-subheader'>CONDUIT <span>(Multiple Sources)</span></p><p class='mh-essence-text'>You may replace themes at will as long as you replace them with a Mythos theme. Any Source in your possession or even nearby can become your new Mythos theme and it begins as a full theme, not a nascent one.</p>",
+
+"MistHUD.essence.singularity": "<p class='mh-essence-text'>Psychological effects and intangible or unmeasurable mythical effects do not affect you. You can interface with ALL information, regardless of medium, and may roll with Noise to search it and, if it is recorded information, to manipulate it.</p>",
+
+"MistHUD.essence.undefined": "<p class='mh-essence-text'>Essence is not defined for this character.</p>"
 
 }
