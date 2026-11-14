@@ -139,6 +139,11 @@ export function getThemesAndTags(actor) {
       powerTags:            getPowerTags(theme.id, tagItems, subTagsByParent, actor),
       weaknessTags:         getWeaknessTags(theme.id, tagItems, subTagsByParent, actor),
       localizedThemebookName: tb?.name || theme.system.themebook_name || theme.name,
+      // One label: the system's themebook name already equals its locale_name,
+      // so printing both doubled the title (COMPANIONCOMPANION).
+      themebookLabel: (tb?.system?.locale_name
+          ? game.i18n.localize(tb.system.locale_name.replace(/^#/, "")) : "")
+        || tb?.name || theme.system.themebook_name || theme.name,
       themeInfo: {
         locale_name: tb?.system?.locale_name
           ? game.i18n.localize(tb.system.locale_name.replace(/^#/, "")) : "",

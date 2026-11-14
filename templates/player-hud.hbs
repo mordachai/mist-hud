@@ -62,7 +62,7 @@
           {{/if}}
           {{#if (eq ../activeSystem "otherscape")}}
             <span class="mh-theme-name mh-theme-name-com-{{category}}">
-              {{localizedThemebookName}}{{themeInfo.locale_name}}
+              {{themebookLabel}}
               {{#if unspent_upgrades}}
                 <span class="mh-improvement-marker {{category}}">
                   {{#if nascent}}
@@ -76,7 +76,7 @@
           {{/if}}
           {{#if (eq ../activeSystem "legend")}}
             <span class="mh-theme-name mh-theme-name-com-{{category}}">
-              {{localizedThemebookName}}{{themeInfo.locale_name}}
+              {{themebookLabel}}
               {{#if unspent_upgrades}}
                 <span class="mh-improvement-marker {{category}}">
                   {{#if nascent}}

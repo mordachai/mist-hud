@@ -1117,7 +1117,12 @@ hr {
   overflow-y: auto;
   padding-bottom: 35px; /* Garante espaço suficiente para o rodapé */
   position: relative;
-  overflow: visible !important;
+  /* Tags added beyond the window height scroll here. The roll bar and portrait
+     are outside this box, so they are not clipped. */
+  min-height: 0;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin;
 }
 
 .mh-sliding-panel .mh-panel-content {
