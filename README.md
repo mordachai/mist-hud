@@ -153,6 +153,45 @@ Clicking on them toggle their states. **Positive and negative states affect the 
 
 Click on the bar to set the Collective Size / Scale of the Dangers/Threats. Clicking on the label to zero it. The value will be added automatically to all statuses inflicted by this npc.
 
+### Writing Moves: tags, statuses and limits in the text
+
+Write your Danger/Threat moves exactly as the City of Mist system expects them. The HUD reads the same notation as the system's own sheet, so there is nothing extra to learn: what works on the sheet works on the HUD.
+
+| You type | You get |
+|----------|---------|
+| `[broken window]` | A story tag you can drag onto a token |
+| `[burning-3]` or `[burning 3]` | A status you can drag onto a token. Collective Size / Scale is added to the tier |
+| `[on fire 2]` | Spaces in a status name become hyphens: `on-fire-2` |
+| `[doom-X]` | A status with a variable tier (dropped as tier 1, edit it after) |
+| `\|burning-3\|` | A status, with the tier exactly as written (no Collective Size) |
+| `\|\|burning-3\|\|` | Same, flagged as auto-apply |
+| `{only the MC sees this}` | Text hidden from players |
+| `$name` | The Danger's name |
+| `$pr0`, `$pr1`, `$pr2` | The Danger's pronouns, as set on its sheet |
+
+Anything inside brackets that ends in a number (or `X`) is a status; anything else is a story tag.
+
+**Options** go before a colon inside the brackets, and can be combined with commas, like `[t,i:stunned-2]`:
+
+| Option | Meaning |
+|--------|---------|
+| `i` | Ignore Collective Size / Scale for this status |
+| `t` | Temporary |
+| `p` | Permanent |
+| `s` | Scene tag/status |
+| `a` | Auto-apply |
+
+**Move Header.** The HUD follows the header chosen in the system: the _Danger Move starting text_ world setting, or the _Move Header_ option of each individual move.
+
+- **Symbols:** › for soft moves, » for hard moves, and an icon for intrusions, custom, downtime and enter-scene moves.
+- **Text:** the system's phrases, like "As a soft move, _Name_ ...". Write the description so it continues that sentence.
+- **None:** just your text.
+
+**HUD extras** (these work on the HUD only, not on the system sheet):
+
+- `[hurt:4]` shows a limit.
+- `(gain wounded-2)` shows a status with the Collective Size / Scale added.
+
 ### Otherscape and LitM Threat Moves How to:
 
 Choosing the right type of moves in your Danger sheet will present them with the correct format when the active system is Otherscape. Check below:
@@ -161,8 +200,8 @@ Choosing the right type of moves in your Danger sheet will present them with the
 
 - **Limits:** Intrusions >> the battery icon will be added automatically
 - **Specials:** Hard Moves >> don't forget the move name
-- **Threats:** Soft Moves >> Hide Move Name, Move Header = Symbols
-- **Consequences:** Soft Move submove (click on the + inside the parent Soft Move/Threat) >> Hide Move Name, Move Header = Symbols
+- **Threats:** Soft Moves >> the › marker is added automatically
+- **Consequences:** Soft Move submove (click on the + inside the parent Soft Move/Threat) >> the » marker is added automatically
 - **Might (_LitM only_):** Custom moves >> check the table below to learn how to display the correct icon and the description text you want
 
 | Input Syntax | Icon Type | Example Input | Rendered Output |
@@ -174,7 +213,7 @@ Choosing the right type of moves in your Danger sheet will present them with the
 
 ![image](external_files/OsMoves.png)
 
-_City of Mist Dangers doesn't require any special formatting._
+_City of Mist Dangers don't need any of this: moves are grouped by type (Soft Move, Hard Moves, Intrusions...) and follow the Move Header as described above._
 
 ## Statuses MC Screen
 

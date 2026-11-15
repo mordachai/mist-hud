@@ -29,16 +29,16 @@
         {{#each moveGroups.Limits}}
             <li>
             <span class="npc-move-name limit">{{name}}</span> - 
-            <span class="npc-move-description">{{parseStatus system.description}}</span>
+            <span class="npc-move-description">{{parseStatus system.description move=this marked=true}}</span>
             </li>
         {{/each}}
         </ul>
         {{/if}}
 
         <div class="npc-subtitle-container-c">
-            <div class="create-npc-tag" title="{{localize "CityOfMist.tooltip.createStory"}}"><i class="fa-solid fa-plus" style="font-size: small;"></i> <i class="fa-duotone fa-regular fa-tags"></i></div>
+            <div class="create-npc-tag" title="{{localize "CityOfMist.tooltip.createStory"}}"><i class="fa-solid fa-plus" style="font-size: small;"></i> <i class="fa-solid fa-tags"></i></div>
             <div class="npc-subtitle-text">{{localize "CityOfMist.terms.tags"}} & {{localize "CityOfMist.terms.statuses"}}</div>
-            <div class="create-npc-status" title="{{localize "CityOfMist.tooltip.createStatus"}}"><i class="fa-duotone fa-light fa-suitcase-medical"></i> <i class="fa-solid fa-plus" style="font-size: small;"></i></div>
+            <div class="create-npc-status" title="{{localize "CityOfMist.tooltip.createStatus"}}"><i class="fa-solid fa-suitcase-medical"></i> <i class="fa-solid fa-plus" style="font-size: small;"></i></div>
         </div>  
         
         <div class="npc-tags-statuses-container">
@@ -137,7 +137,7 @@
                     {{#unless system.hideName}}
                         <span class="npc-move-name">{{name}}</span> - 
                     {{/unless}}
-                    <span class="npc-move-description">{{parseStatus system.description}}</span>
+                    <span class="npc-move-description">{{parseStatus system.description move=this}}</span>
                     </li>
                 {{/each}}
                 </ul>
@@ -155,7 +155,7 @@
             {{#each moveGroups.Specials}}
                 <li class="">
                 <span class="npc-move-name">{{name}}</span> - 
-                <span class="npc-move-description">{{parseStatus system.description}}</span>
+                <span class="npc-move-description">{{parseStatus system.description move=this}}</span>
                 </li>
             {{/each}}
             </ul>
@@ -170,7 +170,7 @@
             {{#each moveGroups.Custom}}
                 <li class="">
                 <span class="npc-move-name">{{name}}</span> - 
-                <span class="npc-move-description">{{parseStatus system.description}}</span>
+                <span class="npc-move-description">{{parseStatus system.description move=this}}</span>
                 </li>
             {{/each}}
             </ul>
@@ -183,12 +183,12 @@
             {{#each moveGroups.Threats}}
             <div class="npc-threat">
                 <span class="npc-tc-marker">›</span>
-                <span class="npc-threat-description">{{parseStatus system.description}}</span>
+                <span class="npc-threat-description">{{parseStatus system.description move=this marked=true}}</span>
                 <ul>
                 {{#each consequences}}
                     <li>
                     <span class="npc-tc-marker">»</span>
-                    <span class="npc-move-description">{{parseStatus system.description}}</span>
+                    <span class="npc-move-description">{{parseStatus system.description move=this marked=true}}</span>
                     </li>
                 {{/each}}
                 </ul>
@@ -206,7 +206,7 @@
             <ul class="npc-list">
             {{#each moveGroups.Specials}}
                 <li class="">
-                <span class="npc-move-name">{{name}}</span> - <span class="npc-move-description">{{parseStatus system.description}}</span>
+                <span class="npc-move-name">{{name}}</span> - <span class="npc-move-description">{{parseStatus system.description move=this}}</span>
                 </li>
             {{/each}}
             </ul>
@@ -219,14 +219,14 @@
             {{#each moveGroups.Threats}}
             <div class="npc-threat">
                 <span class="npc-threat-name">{{name}}</span>
-                <span class="npc-threat-description">{{parseStatus system.description}}</span>
+                <span class="npc-threat-description">{{parseStatus system.description move=this marked=true}}</span>
                 <ul>
                 {{#each consequences}}
                     <li>
                     <span class="npc-tc-marker">
                         <object data="modules/mist-hud/ui/icons/litm_fail_icn.svg" type="image/svg+xml"></object>
                     </span>
-                    <span class="npc-move-description">{{parseStatus system.description}}</span>
+                    <span class="npc-move-description">{{parseStatus system.description move=this marked=true}}</span>
                     </li>
                 {{/each}}
                 </ul>

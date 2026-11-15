@@ -287,6 +287,7 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     
         data.isCollapsed = this.isCollapsed;
         data.name = this.actor.name;
+        data.pronouns = this.actor.pronouns ?? [];
         data.mythos = this.actor.system.mythos;
         data.tokenImage = (this.token && this.token.texture && this.token.texture.src)
             ? this.token.texture.src
@@ -937,6 +938,11 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
                 if (match) {
                     name = match[1];
                     tier = parseInt(match[2], 10);
+                }
+                // Prefer the data attributes ("name-X" has no numeric tier in its text)
+                if (el.dataset.statusName) {
+                    name = el.dataset.statusName;
+                    tier = parseInt(el.dataset.tier, 10) || 1;
                 }
 
                 // Get temp/perm flags directly from the element
