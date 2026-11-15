@@ -185,7 +185,17 @@
 
 "MistHUD.hud.createTag": "Criar Tag",
 
+"MistHUD.hud.deleteTag": "Excluir Tag",
+"MistHUD.hud.deleteTagConfirm": "Excluir a tag <strong>{tag}</strong>?",
+"MistHUD.hud.relationships.otherscape": "Relacionamentos da Equipe",
+"MistHUD.hud.relationships.legend": "Relacionamentos da Irmandade",
+"MistHUD.hud.createRelationship": "Criar Tag de Relacionamento",
+"MistHUD.hud.addRelationship": "Adicionar relacionamento",
+"MistHUD.hud.newRelationship": "Novo Relacionamento",
+
 "MistHUD.hud.createStatus": "Criar Status",
+"MistHUD.hud.deleteStatus": "Excluir Status",
+"MistHUD.hud.deleteStatusConfirm": "Excluir o status <strong>{status}</strong>?",
 
 "MistHUD.hud.createClue": "Criar Pista",
 

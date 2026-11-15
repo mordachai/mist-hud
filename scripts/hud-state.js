@@ -384,7 +384,7 @@ export class HUDState {
    * Determine the modifier amount for a tag.
    * Power / loadout / story (positive) → +1
    * Weakness (not inverted) → -1; inverted → +1
-   * Story (inverted) → -1
+   * Story / relationship (inverted) → -1
    *
    * @param {CityItem}  tag
    * @param {boolean}   isInverted
@@ -393,7 +393,7 @@ export class HUDState {
   _tagAmount(tag, isInverted) {
     const subtype = tag.system.subtype || "";
     if (subtype === "weakness") return isInverted ? 1 : -1;
-    if (subtype === "story")    return isInverted ? -1 : 1;
+    if (subtype === "story" || subtype === "relationship") return isInverted ? -1 : 1;
     return 1; // power, loadout, crew-power
   }
 }

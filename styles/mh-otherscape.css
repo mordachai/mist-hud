@@ -244,8 +244,9 @@
 }
 
 .mh-tags li {
-  height: 1.4rem;
-  /* padding: 5px; */
+  /* min-height, not height: a tag that wraps to two lines must grow */
+  min-height: 1.4rem;
+  height: auto;
   color: var(--text-hud-main-color);
 }
 

@@ -1,5 +1,5 @@
 // getters.js — Actor data extraction for the player HUD template context
-import { getActiveSystem } from "./constants.js";
+import { getActiveSystem, MODULE_ID, FLAG_KEYS } from "./constants.js";
 import { isTagBurned } from "./hud-state.js";
 // Kept slim: uses system actor methods where possible.
 
@@ -265,6 +265,43 @@ export function getLoadoutTags(actor) {
       const d = applyBurnState(actor, tag.id);
       return { ...d, id: tag.id, tagName: tag.name, actorId: actor.id, themeId: tag.system.theme_id };
     });
+}
+
+// ── Relationship tags (Otherscape crew relationships / Legend fellowship) ────
+// The system's relationship tag (subtype "relationship") has a name only. Who
+// the relationship is with is kept in a module flag on the tag item.
+
+function _portraitOf(actor) {
+  return actor.prototypeToken?.texture?.src ?? actor.img ?? "";
+}
+
+/**
+ * @returns {{tags: object[], openSlots: {id: string, name: string, img: string}[]}}
+ *   tags: the actor's relationship tags; openSlots: the other player characters
+ *   this actor has no relationship tag with yet.
+ */
+export function getRelationshipTags(actor) {
+  if (!actor) return { tags: [], openSlots: [] };
+
+  const tags = actor.items.contents
+    .filter(i => i.type === "tag" && i.system.subtype === "relationship")
+    .map(tag => {
+      const target = game.actors.get(tag.getFlag(MODULE_ID, FLAG_KEYS.RELATIONSHIP_TARGET));
+      return {
+        ...applyBurnState(actor, tag.id, "relationship"),
+        actorId:    actor.id,
+        targetId:   target?.id ?? null,
+        targetName: target?.name ?? "",
+        targetImg:  target ? _portraitOf(target) : "",
+      };
+    });
+
+  const taken = new Set(tags.map(t => t.targetId).filter(Boolean));
+  const openSlots = game.actors
+    .filter(a => a.type === "character" && a.hasPlayerOwner && a.id !== actor.id && !taken.has(a.id))
+    .map(a => ({ id: a.id, name: a.name, img: _portraitOf(a) }));
+
+  return { tags, openSlots };
 }
 
 // ── Statuses ──────────────────────────────────────────────────────────────────

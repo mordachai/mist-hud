@@ -45,7 +45,7 @@
 .mh-theme-header {
   display: grid;
   grid-template-columns: 20px 3fr auto;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-start;
   margin: -3px -0px 1px -0px;
   height: fit-content;
@@ -92,8 +92,10 @@
 }
 
 .mh-tags li {
-  height: 1.4rem;
-  /* padding: 5px; */
+  /* min-height, not height: a tag that wraps to two lines must grow */
+  min-height: 1.4rem;
+  height: auto;
+  line-height: 1.15;
   color: var(--text-hud-main-color);
 }
 
@@ -210,11 +212,16 @@
   text-shadow: var(--mist-dark-color) 1px 0 6px;
 }
 
+/* Icons sit on the title's vertical centre: the header centres its items, so
+   drop the shared 10px top margin and the per-icon nudges that fought it. */
+.mh-theme-header .mh-theme-icon,
+.mh-theme-header .mh-theme-icon-notip {
+  margin-top: 0;
+  align-self: center;
+}
+
 /* Specific icons for Mythos, Logos, and Mist themes */
 .mh-theme-icon.Mythos {
-  position: relative;
-  top: -2px;
-  align-self: inherit;
   justify-self: center;
   width: 12px;
   height: 17px;
@@ -223,7 +230,6 @@
 }
 
 .mh-theme-icon.Logos {
-  align-self: inherit;
   justify-self: center;
   width: 18px;
   height: 12px;
@@ -232,10 +238,7 @@
 }
 
 .mh-theme-icon.Mist {
-  position: relative;
-  align-self: inherit;
   justify-self: center;
-  top: -3px;
   width: 18px;
   height: 18px;
   background-image: url('../ui/icons/mist_icn.svg');
@@ -244,9 +247,6 @@
 
 .mh-theme-icon.Crew,
 .mh-theme-icon.Extra {
-  position: relative;
-  top: -3px;
-  align-self: inherit;
   justify-self: center;
   width: 18px;
   height: 15px;
@@ -255,8 +255,6 @@
 }
 
 .mh-theme-icon-notip.storytag {
-  position: relative;
-  top: -1px;
   width: 15px;
   height: 18px;
   background-image: url('../ui/icons/storytag_icn.svg');
@@ -265,8 +263,6 @@
 }
 
 .mh-theme-icon-notip.statuses {
-  position: relative;
-  top: -4px;
   width: 18px;
   height: 16px;
   background-image: url('../ui/icons/statuses_icn.svg');

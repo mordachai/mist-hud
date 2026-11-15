@@ -10,6 +10,8 @@ export const FLAG_KEYS = {
   RECEIVED_BONUSES:    "received-bonuses",
   NPC_INFLUENCE:       "npc-influence",
   IS_COLLAPSED:        "isCollapsed",
+  // On a relationship tag item: id of the character the relationship is with.
+  RELATIONSHIP_TARGET: "relationship-target",
 };
 
 export const SETTINGS = {

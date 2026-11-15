@@ -163,7 +163,7 @@ border: none;
   font-family: var(--font-family-move);
   filter: drop-shadow(1px 2px 3px var(--mythos-dark-color));
   align-self: flex-start;
-  margin-left: 30px;
+  margin-left: 12px; /* header padding already clears the portrait */
   flex: 2;
   padding-top: 3px;
 }
@@ -586,6 +586,103 @@ hr {
 .mh-sliding-panel.open .mh-panel-ear {
   transform: rotate(180deg); /* Rotate the arrow */
   border-radius: 6px 0 0 6px; /* Rounded edges */
+}
+
+/* Count of relationship tags selected inside the panel, so a selection made
+   there is still visible on the ear once the panel is closed */
+.mh-panel-badge {
+  display: none;
+  position: absolute;
+  top: -6px;
+  right: -36px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background: whitesmoke;
+  color: #111;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 16px;
+  text-align: center;
+  z-index: 21;
+  pointer-events: none;
+}
+
+.mh-panel-badge.visible {
+  display: block;
+}
+
+.mh-sliding-panel.open .mh-panel-badge {
+  display: none;
+}
+
+/* Relationship tags (side panel) */
+.mh-panel-content .mh-relationship-tag {
+  color: whitesmoke; /* the panel is dark in every system */
+  margin-bottom: 4px;
+}
+
+.mh-panel-content .mh-relationship-tag.burned .mh-tag-text {
+  color: #9aa5a8;
+  text-decoration-color: #9aa5a8;
+}
+
+.mh-relationship-tag .mh-tag-text {
+  display: block;
+  min-width: 0;
+  word-wrap: break-word;
+}
+
+/* Who the relationship is with: small portrait + name above the tag text */
+.mh-relationship-who {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-family-main2);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1.3;
+  text-transform: none;
+  text-decoration: none;
+  color: #b4b9c0;
+}
+
+.mh-relationship-who img,
+.mh-relationship-slot img {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+/* A crew member with no relationship tag yet */
+.mh-relationship-slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0;
+  padding: 3px 6px;
+  border: 1px dashed #666;
+  border-radius: 4px;
+  color: #b4b9c0;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.mh-relationship-slot:hover {
+  border-color: whitesmoke;
+  color: whitesmoke;
+}
+
+.mh-relationship-slot img {
+  width: 22px;
+  height: 22px;
+  opacity: 0.7;
 }
 
 /* Ear Hover Effect */

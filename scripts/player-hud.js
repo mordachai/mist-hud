@@ -7,7 +7,7 @@
 //
 // The system (CityRoll.execRoll) handles all rolling, power calc, post-roll.
 
-import { MODULE_ID, SETTINGS, getActiveSystem } from "./constants.js";
+import { MODULE_ID, SETTINGS, FLAG_KEYS, getActiveSystem } from "./constants.js";
 import {
   getOrCreateState, playerHudRegistry, isOtherscapeBurn, clearSystemSelection,
   hudKey, isTagBurned, bonusActorFor,
@@ -16,7 +16,7 @@ import { organizeMoves, getMoveAbbreviation, getMoveImageSrc } from "./move-layo
 import {
   getMysteryFromTheme, getCrewThemes, getThemesAndTags,
   getImprovements, getCrewImprovements, getActorStatuses,
-  getJuiceAndClues, getEssence, getLoadoutTags,
+  getJuiceAndClues, getEssence, getLoadoutTags, getRelationshipTags,
 } from "./getters.js";
 import { BonusManager } from "./bonus-manager.js";
 
@@ -96,6 +96,9 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** True while a roll is in flight (ignores double clicks on move buttons). */
   _rolling = false;
 
+  /** Side panel open/closed; kept here so a re-render does not close it. */
+  _panelOpen = false;
+
   constructor(actor, options = {}) {
     super(options);
     this.actor = actor;
@@ -168,6 +171,19 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const loadoutTags = getLoadoutTags(this.actor).map(tag => ({
       ...tag,
       selected: state.selectedTags.has(tag.id),
+    }));
+
+    // Relationship tags (side panel): crew relationships / fellowship
+    const showRelationships = isOtherscape || isLegend;
+    const relationships = showRelationships
+      ? getRelationshipTags(this.actor) : { tags: [], openSlots: [] };
+    const relationshipTags = relationships.tags.map(tag => ({
+      ...tag,
+      selected:      state.selectedTags.has(tag.id),
+      inverted:      state.invertedTags.has(tag.id),
+      inversionIcon: state.invertedTags.has(tag.id)
+        ? '<i class="fa-light fa-angles-down"></i>'
+        : '<i class="fa-light fa-angles-up"></i>',
     }));
 
     const crewThemes = (themesAndTags.crewThemes ?? []).map(ct => {
@@ -264,6 +280,11 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       activeSystem, isCityOfMist, isOtherscape, isLegend,
       themes, storyTags, loadoutTags, crewThemes,
       hasCrewThemes:   crewThemes.length > 0,
+      showRelationships, relationshipTags,
+      relationshipSlots:  relationships.openSlots,
+      relationshipsLabel: game.i18n.localize(
+        isLegend ? "MistHUD.hud.relationships.legend" : "MistHUD.hud.relationships.otherscape"),
+      panelOpen:       this._panelOpen,
       statuses,
       helpItems, hurtItems, clueItems, juiceItems,
       helpHurtMessages: helpHurtMessages.length ? helpHurtMessages : null,
@@ -411,8 +432,15 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     html.find(".mh-status").on("contextmenu", async ev => {
       ev.preventDefault();
-      const id = ev.currentTarget.dataset.statusId;
-      if (id) await this.actor.deleteStatus(id);
+      const { statusId: id, statusName, tier } = ev.currentTarget.dataset;
+      if (!id) return;
+      // Right-click sits next to click-to-select: confirm before deleting.
+      const label = Handlebars.escapeExpression(`${statusName ?? ""}-${tier ?? ""}`);
+      const ok = await foundry.applications.api.DialogV2.confirm({
+        window: { title: game.i18n.localize("MistHUD.hud.deleteStatus") },
+        content: `<p>${game.i18n.format("MistHUD.hud.deleteStatusConfirm", { status: label })}</p>`,
+      });
+      if (ok) await this.actor.deleteStatus(id);
     });
 
     html.find(".mh-status").on("dblclick", async ev => {
@@ -445,9 +473,14 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       const current = burnEl.classList.contains("burned") ? "burned"
                     : burnEl.classList.contains("toBurn")  ? "toBurn"
                     : "unburned";
-      const next = current === "unburned" ? "toBurn"
-                 : current === "toBurn"   ? "burned"
-                 : "unburned";
+      // Relationship tags are single-use (burned when invoked) and so cannot be
+      // burned for Power (Otherscape p.75/122, Legend p.158): the toggle only
+      // marks them spent or restores them, it never offers "to burn".
+      const noBurnForPower = tagEl.classList.contains("mh-relationship-tag");
+      const next = current === "burned"            ? "unburned"
+                 : current === "toBurn"            ? "burned"
+                 : noBurnForPower                  ? "burned"
+                 : "toBurn";
 
       burnEl.classList.remove("unburned", "toBurn", "burned");
       burnEl.classList.add(next);
@@ -508,7 +541,9 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   _bindSlidingPanelListeners(html) {
     const panel = html.find(".mh-sliding-panel")[0];
     const ear   = html.find(".mh-panel-ear")[0];
-    if (ear && panel) ear.addEventListener("click", () => panel.classList.toggle("open"));
+    if (ear && panel) ear.addEventListener("click", () => {
+      this._panelOpen = panel.classList.toggle("open");
+    });
   }
 
   // ── Roll bar ──────────────────────────────────────────────────────────────
@@ -693,7 +728,21 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     html.find(".mh-story-tag").on("contextmenu",   async ev => {
       ev.preventDefault();
       const id = ev.currentTarget.dataset.id;
-      if (id) await this.actor.deleteTag(id);
+      if (!id) return;
+      // Right-click sits next to click-to-select: confirm before deleting.
+      // Covers story tags and the side panel's relationship tags.
+      const name = Handlebars.escapeExpression(this.actor.getTag?.(id)?.name ?? "");
+      const ok = await foundry.applications.api.DialogV2.confirm({
+        window: { title: game.i18n.localize("MistHUD.hud.deleteTag") },
+        content: `<p>${game.i18n.format("MistHUD.hud.deleteTagConfirm", { tag: name })}</p>`,
+      });
+      if (ok) await this.actor.deleteTag(id);
+    });
+
+    // Relationship tags: header "+" (no character) or an open slot (that character)
+    html.find(".mh-create-relationship").on("click", ev => {
+      ev.stopPropagation();
+      this._createRelationshipTag(ev.currentTarget.dataset.targetId || null);
     });
     html.find(".mh-story-tag").on("dblclick",       async ev => {
       ev.preventDefault();
@@ -736,6 +785,19 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       const updated = await sys.CityHelpers.itemDialog(tag);
       if (!updated) await this.actor.deleteTag(id);
     }
+  }
+
+  /** @param {string|null} targetId  Character the relationship is with, if known */
+  async _createRelationshipTag(targetId) {
+    const result = await this.actor.createRelationshipTag?.(
+      game.i18n.localize("MistHUD.hud.newRelationship"));
+    const id     = Array.isArray(result) ? result[0]?.id : result?.id;
+    if (!id) return;
+    const tag = this.actor.items.get(id);
+    if (!tag) return;
+    if (targetId) await tag.setFlag(MODULE_ID, FLAG_KEYS.RELATIONSHIP_TARGET, targetId);
+    const updated = await sys.CityHelpers.itemDialog(tag);
+    if (!updated) await this.actor.deleteTag(id);
   }
 
   async _createStatus() {
@@ -978,6 +1040,10 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const power = state.previewPower(this.actor);
     const str   = power > 0 ? `+${power}` : `${power}`;
     html.find(".mh-power-indicator").text(str);
+
+    // Panel ear badge: relationship tags selected inside the (maybe closed) panel
+    const picked = html.find(".mh-relationship-tag.selected").length;
+    html.find(".mh-panel-badge").text(picked || "").toggleClass("visible", picked > 0);
   }
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────

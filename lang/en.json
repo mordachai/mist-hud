@@ -185,7 +185,17 @@
 
 "MistHUD.hud.createTag": "Create Tag",
 
+"MistHUD.hud.deleteTag": "Delete Tag",
+"MistHUD.hud.deleteTagConfirm": "Delete the tag <strong>{tag}</strong>?",
+"MistHUD.hud.relationships.otherscape": "Crew Relationships",
+"MistHUD.hud.relationships.legend": "Fellowship Relationships",
+"MistHUD.hud.createRelationship": "Create Relationship Tag",
+"MistHUD.hud.addRelationship": "Add relationship",
+"MistHUD.hud.newRelationship": "New Relationship",
+
 "MistHUD.hud.createStatus": "Create Status",
+"MistHUD.hud.deleteStatus": "Delete Status",
+"MistHUD.hud.deleteStatusConfirm": "Delete the status <strong>{status}</strong>?",
 
 "MistHUD.hud.createClue": "Create Clue",
 

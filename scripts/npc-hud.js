@@ -1063,6 +1063,15 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
                     return;
                 }
                 
+                // Right-click sits next to click-to-select: confirm before deleting.
+                const { statusName, tier } = event.currentTarget.dataset;
+                const label = Handlebars.escapeExpression(`${statusName ?? ""}-${tier ?? ""}`);
+                const ok = await foundry.applications.api.DialogV2.confirm({
+                    window: { title: game.i18n.localize("MistHUD.hud.deleteStatus") },
+                    content: `<p>${game.i18n.format("MistHUD.hud.deleteStatusConfirm", { status: label })}</p>`,
+                });
+                if (!ok) return;
+
                 try {
                     // Delete the status
                     await actor.deleteEmbeddedDocuments("Item", [statusId]);

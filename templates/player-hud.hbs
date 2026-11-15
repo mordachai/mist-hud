@@ -161,7 +161,7 @@
           <div class="mh-title-container">
             <span class="mh-theme-icon-notip storytag"></span>
             <span class="mh-theme-name mh-theme-name-neutral">
-              {{localize "CityOfMist.terms.tags"}}{{#if isOtherscape}}/Relationships{{/if}}{{#if isLegend}}/Fellowship{{/if}}
+              {{localize "CityOfMist.terms.tags"}}
             </span>
           </div>
           <a class="mh-create-story-tag" data-owner-id="{{actorId}}" title="{{localize "MistHUD.hud.createTag"}}">
@@ -318,9 +318,47 @@
   </div>
 
   {{!-- ── Sliding Panel (right) ── --}}
-  <div class="mh-sliding-panel">
+  <div class="mh-sliding-panel {{#if panelOpen}}open{{/if}}">
     <div class="mh-panel-ear">❯</div>
+    <span class="mh-panel-badge"></span>
     <div class="mh-panel-content">
+
+      {{!-- Relationship tags (Otherscape crew relationships / Legend fellowship).
+           Rows are also .mh-story-tag so they share its select / burn / invert /
+           edit / delete behaviour. --}}
+      {{#if showRelationships}}
+        <div class="section mh-relationships">
+          <div class="mh-theme-name title-effect mh-title-container">
+            <div><i class="fa-solid fa-users"></i> {{relationshipsLabel}}</div>
+            <a class="mh-create-relationship" title="{{localize "MistHUD.hud.createRelationship"}}"><i class="fas fa-plus"></i></a>
+          </div>
+          <ul class="mh-tags">
+            {{#each relationshipTags}}
+              <li class="mh-story-tag mh-relationship-tag {{this.cssClass}} {{#if selected}}selected{{/if}} {{#if inverted}}inverted{{/if}}"
+                  data-id="{{this.id}}"
+                  data-actor-id="{{actorId}}">
+                <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
+                <span class="mh-tag-text">
+                  {{#if targetName}}
+                    <span class="mh-relationship-who"><img src="{{targetImg}}" alt="">{{targetName}}</span>
+                  {{/if}}
+                  {{this.tagName}}
+                </span>
+                <span class="mhr-mls mh-story-toggle clickable {{#if inverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
+                  {{{this.inversionIcon}}}
+                </span>
+              </li>
+            {{/each}}
+          </ul>
+          {{#each relationshipSlots}}
+            <a class="mh-relationship-slot mh-create-relationship" data-target-id="{{id}}">
+              <img src="{{img}}" alt="">
+              <span><span class="mh-relationship-who">{{name}}</span>{{localize "MistHUD.hud.addRelationship"}}</span>
+            </a>
+          {{/each}}
+        </div>
+        <hr class="panel-divider" />
+      {{/if}}
 
       {{#if hasImprovements}}
         <div class="section improvements">
