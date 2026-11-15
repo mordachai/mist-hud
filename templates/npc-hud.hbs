@@ -218,13 +218,13 @@
             </div>
             {{#each moveGroups.Threats}}
             <div class="npc-threat">
-                <span class="npc-threat-name">{{name}}</span>
+                {{#unless system.hideName}}<span class="npc-threat-name">{{name}}</span>{{/unless}}
                 <span class="npc-threat-description">{{parseStatus system.description move=this marked=true}}</span>
                 <ul>
                 {{#each consequences}}
                     <li>
-                    <span class="npc-tc-marker">
-                        <object data="modules/mist-hud/ui/icons/litm_fail_icn.svg" type="image/svg+xml"></object>
+                    <span class="npc-tc-marker npc-consequence-marker">
+                        <img src="modules/mist-hud/ui/icons/litm_fail_icn.svg" alt="" draggable="false">
                     </span>
                     <span class="npc-move-description">{{parseStatus system.description move=this marked=true}}</span>
                     </li>

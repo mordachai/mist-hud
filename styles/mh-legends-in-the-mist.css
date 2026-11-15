@@ -1293,11 +1293,21 @@
     text-shadow: 1px 1px 2px rgb(255, 249, 249);
 }
 
-.npc-tc-marker object {
-  width: 0.9rem;
-  height: 0.9rem;
-  display: inline-block;
-  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.7));
+/* Consequence bullet: the book's skull diamond, aligned to the first line */
+.npc-threat ul li .npc-consequence-marker {
+  display: flex;
+  align-items: center;
+  height: 1.3em;
+  line-height: 1;
+  margin-right: 6px;
+}
+
+.npc-consequence-marker img {
+  width: 1.05rem;
+  height: 1.05rem;
+  border: none;
+  flex: 0 0 auto;
+  pointer-events: none;
 }
 
 .npc-threat {
@@ -1330,7 +1340,12 @@
 .npc-threat-description {
   font-family: var(--font-family-main1);
   font-size: large;
-  font-weight: 600;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.npc-threat ul li {
+  line-height: 1.3em;
 }
 
 /* ── Title tag (the theme's first power tag, question "A") ── */

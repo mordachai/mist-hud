@@ -136,13 +136,13 @@
     },
     {
       "_id": "rDtACWcc6bHXcpBY",
-      "name": "Unnamed Move",
+      "name": "Prank",
       "type": "gmmove",
       "img": "icons/svg/item-bag.svg",
       "system": {
         "description": "Sparkly faerie magics can be seen in the air, and a soft chuckle is heard",
         "subtype": "soft",
-        "hideName": true,
+        "hideName": false,
         "header": "symbols",
         "taglist": [],
         "statuslist": []
@@ -220,13 +220,13 @@
     },
     {
       "_id": "sLWbHhGWeG8WWrjQ",
-      "name": "Unnamed Move",
+      "name": "Fight",
       "type": "gmmove",
       "img": "icons/svg/item-bag.svg",
       "system": {
         "description": "Move in close and crack knuckles",
         "subtype": "soft",
-        "hideName": true,
+        "hideName": false,
         "header": "symbols",
         "taglist": [],
         "statuslist": []
