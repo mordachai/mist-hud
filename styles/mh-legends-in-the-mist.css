@@ -82,6 +82,7 @@
   
   /* Misc */
   --spectrum-color: #e4a5a5;
+  --scrollbar-thumb-color: #4f7354;
   --status-color: #BCCDB0;
   --storytag-color: #ecd68f;
   --storytag-text-color: #19100a;
@@ -239,7 +240,9 @@
 .mh-roll-bar {
     position: absolute !important;
     left: -63px !important;
-    top: 36px !important;
+    /* Flush with the header's bottom edge (offset from .window-content, which
+       sits 3px below the header). */
+    top: -3px !important;
     display: flex !important;
     flex-direction: column !important;
     gap: 5px !important;

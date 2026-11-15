@@ -6,6 +6,8 @@
 "MistHUD.tooltip.chooseImprovement": "Escolher melhoria",
 "MistHUD.tooltip.resetCrack": "Resetar rachadura",
 "MistHUD.tooltip.resetCrackConfirm": "Gastar uma melhoria para resetar rachadura/fade em {theme}?",
+"MistHUD.tooltip.noMotivation": "Nada definido ainda.",
+"MistHUD.tooltip.noMotivationTerm": "Nenhum(a) {term} definido(a).",
 
 "MistHUD.notify.noThemePermission": "Você não tem permissão para editar este tema.",
 
@@ -113,6 +115,7 @@
 "MistHUD.settings.layoutMode.docked": "Acoplado",
 
 "MistHUD.settings.dockSide.name": "Lado do acoplamento",
+"MistHUD.settings.wideLayout.name": "Layout largo do HUD do jogador",
 
 "MistHUD.settings.dockSide.left": "Esquerda",
 
@@ -187,6 +190,8 @@
 
 "MistHUD.hud.deleteTag": "Excluir Tag",
 "MistHUD.hud.openSheet": "Abrir Ficha do Personagem",
+"MistHUD.hud.wideLayout": "Layout em duas colunas",
+"MistHUD.hud.narrowLayout": "Layout em uma coluna",
 "MistHUD.hud.deleteTagConfirm": "Excluir a tag <strong>{tag}</strong>?",
 "MistHUD.hud.relationships.otherscape": "Relacionamentos da Equipe",
 "MistHUD.hud.relationships.legend": "Relacionamentos da Irmandade",

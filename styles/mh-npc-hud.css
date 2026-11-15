@@ -225,20 +225,6 @@ margin: 5px;
     overflow-y: auto; /* Enable vertical scrolling if content exceeds max height */
 }
 
-/* Optional scrollbar styling */
-.npc-description-biography::-webkit-scrollbar {
-    width: 6px;
-}
-
-.npc-description-biography::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent scrollbar */
-    border-radius: 3px;
-}
-
-.npc-description-biography::-webkit-scrollbar-track {
-    background: transparent;
-}
-
 /* Main Moves Section */
 .npc-moves-section {
     max-height: calc(80vh - 40vh);
@@ -247,11 +233,6 @@ margin: 5px;
     overflow-y: auto;
     /* border-top: 1px solid var(--divider-color1); */
     padding-top: 5px;
-}
-
-/* Optional scrollbar styling */
-.npc-moves-section::-webkit-scrollbar {
-    width: 6px;
 }
 
 /* Title Styling (Fixed at the top of the section) */
@@ -619,20 +600,6 @@ margin: 5px;
 .npc-tags-statuses-container li {
     flex: 1; 
     text-align: center;
-}
-
-/* Scrollbar Styling for Tags & Statuses */
-.npc-tags-statuses-container::-webkit-scrollbar {
-    height: 6px;
-}
-
-.npc-tags-statuses-container::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 3px;
-}
-
-.npc-tags-statuses-container::-webkit-scrollbar-track {
-    background: transparent;
 }
 
 /* Arrow Marker Styling */

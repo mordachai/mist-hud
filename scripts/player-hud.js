@@ -144,9 +144,30 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     },
     position: { width: "auto", height: "auto", left: 200, top: 120 },
     actions: {
-      openSheet: PlayerHUD.#onOpenSheet,
+      openSheet:  PlayerHUD.#onOpenSheet,
+      toggleWide: PlayerHUD.#onToggleWide,
     },
   };
+
+  /** Header button: switch between the one-column and the two-column layout. */
+  static async #onToggleWide(event) {
+    event.preventDefault();
+    const wide = !game.settings.get(MODULE_ID, SETTINGS.WIDE_LAYOUT);
+    await game.settings.set(MODULE_ID, SETTINGS.WIDE_LAYOUT, wide);
+    this._applyWideLayout($(this.element));
+    // Re-clamp to the viewport: the window doubles in width.
+    this.setPosition();
+  }
+
+  /** Apply the stored layout to the window and its header toggle. */
+  _applyWideLayout(html) {
+    const wide = game.settings.get(MODULE_ID, SETTINGS.WIDE_LAYOUT);
+    this.element.classList.toggle("mh-wide", wide);
+    const label = game.i18n.localize(wide ? "MistHUD.hud.narrowLayout" : "MistHUD.hud.wideLayout");
+    html.find(".mh-wide-toggle")
+      .toggleClass("active", wide)
+      .attr({ "data-tooltip": label, "aria-label": label, "aria-pressed": String(wide) });
+  }
 
   /** Header button: open the actor's sheet and close the HUD. */
   static async #onOpenSheet(event) {
@@ -401,17 +422,22 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!header.length) return;
 
     header.find(".window-title").hide();
-    header.find(".mh-token-image, .mh-char-name, .mh-close-button, .mh-open-sheet").remove();
+    header.find(".mh-token-image, .mh-char-name, .mh-close-button, .mh-open-sheet, .mh-wide-toggle").remove();
 
-    // Open-sheet button, placed before the ⋮ menu (handled by the openSheet action).
+    // Open-sheet button then the layout toggle, placed before the ⋮ menu
+    // (handled by the openSheet / toggleWide actions).
+    const buttons = [];
     if (this.actor?.sheet) {
       const label = game.i18n.localize("MistHUD.hud.openSheet");
-      const btn = $('<button type="button" class="header-control icon fa-solid fa-id-card mh-open-sheet" data-action="openSheet"></button>')
-        .attr({ "data-tooltip": label, "aria-label": label });
-      const firstControl = header.find(".header-control").first();
-      if (firstControl.length) firstControl.before(btn);
-      else header.append(btn);
+      buttons.push($('<button type="button" class="header-control icon fa-solid fa-id-card mh-open-sheet" data-action="openSheet"></button>')
+        .attr({ "data-tooltip": label, "aria-label": label }));
     }
+    // Tooltip / pressed state are set by _applyWideLayout.
+    buttons.push($('<button type="button" class="header-control icon fa-solid fa-table-columns mh-wide-toggle" data-action="toggleWide"></button>'));
+    const firstControl = header.find(".header-control").first();
+    if (firstControl.length) firstControl.before(...buttons);
+    else header.append(...buttons);
+    this._applyWideLayout(html);
 
     // Built with DOM APIs (.attr/.text), never by string-concatenating HTML: the
     // actor name and image path are user-editable.

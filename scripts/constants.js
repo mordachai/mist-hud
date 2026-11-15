@@ -25,6 +25,7 @@ export const SETTINGS = {
   DEBUG_MODE:                  "debugMode",
   LAYOUT_MODE:                 "layoutMode",
   DOCK_SIDE:                   "dockSide",
+  WIDE_LAYOUT:                 "wideLayout",
   IMPORTED_STATUS_COLLECTION:  "importedStatusCollection",
 };
 

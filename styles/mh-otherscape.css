@@ -38,7 +38,7 @@
   --font-family-npcmoves: Barlow Condensed;
   --hud-background1: url('../ui/os_hud_BG.webp');
   --hud-bg-color: #222f3f50;
-  --hud-bg-color2: #27384750;
+  --hud-bg-color2: #1d2d3b;
   --npc-hud-bg-prime: #56779432;
   --marker-positiveTag-color: #96f5ff;
   --marker-negativeTag-color: #ffd4a8;
@@ -140,13 +140,18 @@
   font-style: italic;
 }
 
-/* Text move buttons: Rift is caps-only and too large for the 40px button */
-.mh-roll-button .mh-roll-main {
-  font-family: var(--font-family-npcmoves);
-  font-size: 11px;
-  line-height: 1.05;
-  text-transform: capitalize;
-  overflow-wrap: break-word;
+/* NPC HUD move text (limits, specials, threats, consequences): smaller and
+   in a readable font, mixed case; move names stay uppercase. The system's
+   .style-otherscape sets letter-spacing 0.1em + uppercase on everything. */
+:is(#npc-hud, .application.npc-hud) :is(.npc-move-name, .npc-move-description, .npc-threat, .npc-consequence) {
+  font-family: var(--font-family-hud);
+  font-size: 0.9rem;
+  line-height: 1.15rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+:is(#npc-hud, .application.npc-hud) .npc-move-name {
+  text-transform: uppercase;
 }
 
 .mh-theme-name-com-Self {
@@ -1023,4 +1028,9 @@ color: var(--mythosOS-verylight-color);
 }
 .mh-loadout-popup .mh-loadout-choice .mh-loadout-delete {
   color: whitesmoke;
+}
+
+/* NPC HUD body: dark top fading into the Otherscape blue */
+.npc-content {
+  background: linear-gradient(#000000ba, var(--hud-bg-color2));
 }

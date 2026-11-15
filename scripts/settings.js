@@ -116,6 +116,12 @@ Hooks.once("init", () => {
     default: "left",
   });
 
+  // Player HUD two-column ("wide") layout, toggled from the HUD header
+  game.settings.register(MODULE_ID, SETTINGS.WIDE_LAYOUT, {
+    name: K("wideLayout.name"),
+    scope: "client", config: false, type: Boolean, default: false,
+  });
+
   // Status collection storage
   game.settings.register(MODULE_ID, SETTINGS.IMPORTED_STATUS_COLLECTION, {
     name: K("importedStatusCollection.name"),

@@ -123,7 +123,7 @@
 
       <!-- Loadout (Otherscape / Legend) -->
       {{#if (or isOtherscape isLegend)}}
-        <div class="theme-container">
+        <div class="theme-container mh-loadout-container">
           <div class="mh-theme-header neutral loadout mh-title-container" title="{{localize "MistHUD.hud.manageLoadout" name=loadoutName}}">
             <span class="mh-theme-name mh-theme-name-neutral">{{loadoutName}}</span>
             <span class="mh-theme-icon-notip loadout"></span>
@@ -162,7 +162,8 @@
       {{/if}}
 
       <!-- Story Tags -->
-      <div class="mh-story-tags-container">
+      {{!-- No loadout (City of Mist): the tags take the whole row in the wide layout --}}
+      <div class="mh-story-tags-container {{#unless (or isOtherscape isLegend)}}mh-story-tags-wide{{/unless}}">
         <div class="mh-theme-header neutral extras mh-title-container">
           <div class="mh-title-container">
             <span class="mh-theme-icon-notip storytag"></span>

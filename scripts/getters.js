@@ -61,7 +61,7 @@ export function getMysteryFromTheme(actor, themeId) {
     themebook_name: system === "city-of-mist" ? realThemebook.name : theme.name,
     category,
     prefix,
-    mysteryText:    theme.system.mystery || "No mystery defined.",
+    mysteryText:    theme.system.mystery || _noMotivationText(prefix),
     attention:      theme.system.attention ?? [],
     crack:          theme.system.crack ?? [],
     attentionLabel,
@@ -93,8 +93,15 @@ function _trackExtras(theme) {
 
 function _noThemeData(themeName) {
   return { themeName, themebook_name: "Unknown", category: "unknown",
-           prefix: "Theme", mysteryText: "No mystery defined.",
+           prefix: "Theme", mysteryText: _noMotivationText(),
            attention: [], crack: [], attentionLabel: "Attention", crackLabel: "Crack" };
+}
+
+/** Empty-state text for a theme's motivation, named by the system's own term
+ *  (Mystery / Identity / Ritual / Itch / Quest...). */
+function _noMotivationText(term) {
+  if (!term || term === "Theme") return game.i18n.localize("MistHUD.tooltip.noMotivation");
+  return game.i18n.format("MistHUD.tooltip.noMotivationTerm", { term: term.toLocaleLowerCase() });
 }
 
 function _systemLabels(system, category) {
@@ -219,7 +226,7 @@ export function getCrewThemes(actor) {
         powerTags:            getPowerTags(theme.id, tags, subByParent, crew),
         weaknessTags:         getWeaknessTags(theme.id, tags, subByParent, crew),
         mystery:              theme.system.mystery || "",
-        mysteryText:          theme.system.mystery || "No mystery defined.",
+        mysteryText:          theme.system.mystery || _noMotivationText(prefix),
         attention:            theme.system.attention ?? [],
         crack:                theme.system.crack ?? [],
         category:             "Crew",

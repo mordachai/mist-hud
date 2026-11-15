@@ -6,6 +6,8 @@
 "MistHUD.tooltip.chooseImprovement": "Choose improvement",
 "MistHUD.tooltip.resetCrack": "Reset crack",
 "MistHUD.tooltip.resetCrackConfirm": "Spend an upgrade to reset crack/fade on {theme}?",
+"MistHUD.tooltip.noMotivation": "Nothing defined yet.",
+"MistHUD.tooltip.noMotivationTerm": "No {term} defined.",
 
 "MistHUD.notify.noThemePermission": "You don't have permission to edit this theme.",
 
@@ -113,6 +115,7 @@
 "MistHUD.settings.layoutMode.docked": "Docked",
 
 "MistHUD.settings.dockSide.name": "Dock Side",
+"MistHUD.settings.wideLayout.name": "Wide Player HUD Layout",
 
 "MistHUD.settings.dockSide.left": "Left",
 
@@ -187,6 +190,8 @@
 
 "MistHUD.hud.deleteTag": "Delete Tag",
 "MistHUD.hud.openSheet": "Open Character Sheet",
+"MistHUD.hud.wideLayout": "Two-column layout",
+"MistHUD.hud.narrowLayout": "One-column layout",
 "MistHUD.hud.deleteTagConfirm": "Delete the tag <strong>{tag}</strong>?",
 "MistHUD.hud.relationships.otherscape": "Crew Relationships",
 "MistHUD.hud.relationships.legend": "Fellowship Relationships",

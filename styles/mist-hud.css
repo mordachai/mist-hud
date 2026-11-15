@@ -1,7 +1,7 @@
 /* Import Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400&display=swap');
 @import url('https://fonts.cdnfonts.com/css/rift');
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 @font-face {
   font-family: 'SDGlitch';
@@ -177,6 +177,39 @@ border: none;
 #mist-hud .window-header .header-control,
 #mist-hud .window-header .window-icon { order: 1; flex: 0 0 auto; }
 #mist-hud .window-header .header-control { color: #fff; }
+#mist-hud .window-header .mh-wide-toggle.active { color: var(--color-warm-1, #ff6400); }
+
+/* Wide layout (header toggle, player-hud.js _applyWideLayout): two columns of
+   the normal one-column width — themes in pairs, then loadout | story tags,
+   statuses across both. The grid lives inside .mh-content-container, so there
+   is still a single scrollbar for the whole content. */
+#mist-hud.mh-wide {
+  min-width: 500px;
+  max-width: 600px !important;
+}
+
+#mist-hud.mh-wide .mh-content {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  column-gap: 4px;
+}
+
+#mist-hud.mh-wide .mh-content > .mh-statuses-container {
+  grid-column: 1 / -1;
+}
+
+/* Themes (any count, extra themes included) fill the rows in pairs; the
+   loadout always starts a new row in column 1, so an odd last theme leaves
+   its partner cell empty instead of pushing loadout | tags out of line. */
+#mist-hud.mh-wide .mh-content > .mh-loadout-container {
+  grid-column: 1;
+}
+
+/* No loadout (City of Mist): the story tags take the whole row */
+#mist-hud.mh-wide .mh-content > .mh-story-tags-wide {
+  grid-column: 1 / -1;
+}
 
 /* Collapse Buttons */
 #mist-hud .mh-collapse-button {
@@ -448,19 +481,13 @@ hr {
   filter: drop-shadow(1px 2px 3px var(--mythosOS-dark-color));
 }
 
-/* Scrollbar Styling */
-/* .mh-content::-webkit-scrollbar {
-  width: 8px;
+/* Scrollbars: thumb in the active system's spectrum colour (each system
+   stylesheet sets --spectrum-color), on every module window and popup. */
+:is(.mh-hud, .npc-hud, .status-screen, .npc-influence-manager, .mh-loadout-popup),
+:is(.mh-hud, .npc-hud, .status-screen, .npc-influence-manager, .mh-loadout-popup) * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-color, var(--spectrum-color, #888)) transparent;
 }
-
-.mh-content::-webkit-scrollbar-thumb {
-  background-color: #555;
-  border-radius: 4px;
-}
-
-.mh-content::-webkit-scrollbar-track {
-  background-color: #222;
-} */
 
 /* Text Wrapping */
 .mh-power-tag,
@@ -861,7 +888,9 @@ hr {
 .mh-roll-bar {
   position: absolute !important;
   left: -52px !important;
-  top: 36px !important;
+  /* Flush with the header's bottom edge (offset from .window-content, which
+     sits 3px below the header). */
+  top: -3px !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 5px !important;
@@ -1232,6 +1261,14 @@ hr {
   flex-direction: column;
   max-height: 80vh;
   overflow: visible !important;
+}
+
+/* Fill the window even when the content is shorter than #mist-hud's
+   min-height (e.g. the wide layout), so the tinted background reaches the
+   footer instead of leaving a bare strip. */
+#mist-hud .window-content > .mh-hud {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 #mist-hud,
