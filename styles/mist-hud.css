@@ -172,6 +172,12 @@ border: none;
   margin-left: 0px;
 }
 
+/* Header order: name first, native controls (⋮ / minimize / close) at the right */
+#mist-hud .window-header .mh-char-name { order: 0; }
+#mist-hud .window-header .header-control,
+#mist-hud .window-header .window-icon { order: 1; flex: 0 0 auto; }
+#mist-hud .window-header .header-control { color: #fff; }
+
 /* Collapse Buttons */
 #mist-hud .mh-collapse-button {
   font-size: 1.2rem;
@@ -888,6 +894,7 @@ hr {
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
   min-width: 300px !important;
   min-height: 300px;
+  width: max-content;
   max-width: 75vw;
   max-height: 80vh;
   overflow: hidden;

@@ -307,11 +307,10 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     const tokenImg = $('<div class="mh-token-image"></div>')
       .append($("<img>").attr({ src, alt: name }));
     const charName = $('<div class="mh-char-name"></div>').text(name);
-    const closeBtn = $(`<i class="mh-close-button fa-solid fa-xmark"></i>`);
 
-    header.append(tokenImg, charName, closeBtn);
+    // ApplicationV2 already provides the controls (⋮ menu, minimize, close).
+    header.append(tokenImg, charName);
     header.addClass("mh-custom-header");
-    closeBtn.on("click", () => this.close());
   }
 
   // ── Tag listeners ─────────────────────────────────────────────────────────

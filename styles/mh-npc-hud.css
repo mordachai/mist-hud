@@ -95,6 +95,10 @@
     width: 100%;
 }
 
+/* Header order: name first, native controls (⋮ / minimize / close) at the right */
+:is(#npc-hud, .application.npc-hud) .window-header .mh-char-name { order: 0; }
+:is(#npc-hud, .application.npc-hud) .window-header .header-control { order: 1; flex: 0 0 auto; color: #fff; }
+
 :is(#npc-hud, .application.npc-hud).minimized .mh-char-name {
     flex: 4;
     width: 100%;

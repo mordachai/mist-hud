@@ -1241,11 +1241,10 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         const tokenImg = $('<div class="mh-token-image"></div>')
             .append($('<img>').attr({ src, alt: name }));
         const charName = $('<div class="mh-char-name"></div>').text(name);
-        const closeButton = $('<i class="mh-close-button fa-solid fa-xmark"></i>');
 
-        header.append(tokenImg, charName, closeButton);
+        // ApplicationV2 already provides the controls (⋮ menu, minimize, close).
+        header.append(tokenImg, charName);
         header.addClass('mh-custom-header');
-        closeButton.on('click', () => this.close());
     }
 
     async _createStatusFromHUD(event) {

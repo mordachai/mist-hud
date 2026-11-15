@@ -9,7 +9,7 @@ export class StatusScreen extends HandlebarsApplicationMixin(ApplicationV2) {
     id:      "status-screen",
     classes: ["status-screen"],
     window:  { title: "MistHUD.window.statusScreen", resizable: true, minimizable: true },
-    position: { width: 500, height: "auto" },
+    position: { width: "auto", height: "auto" },
   };
 
   static PARTS = {
@@ -165,7 +165,8 @@ export class StatusScreen extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   #resetWindowSize() {
-    this.setPosition({ height: "auto" });
+    // Fit the window to the widest status row of the visible tab
+    this.setPosition({ width: "auto", height: "auto" });
   }
 }
 
