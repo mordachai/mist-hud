@@ -36,7 +36,7 @@ All in [player-hud.js:478-523](scripts/player-hud.js:478) and [hud-state.js](scr
 - **A4. Help & Hurt is never added to the roll.** The bonus is shown in the footer but not sent to `CityRoll`, and never cleared afterwards.
 - **A5. NPC influence is never added to the roll.** The cache `globalThis.activeNpcInfluences` is maintained but nothing reads it at roll time. The whole Influence Viewer currently has no effect on rolls.
 - **A6. Scene tags and statuses are ignored.** The README promises they can be selected for rolls; the system's `SelectedTagsAndStatus` selection is not merged in.
-- **A7. Improvement-based Dynamite is ignored.** `move.isAutoDynamite()` is not checked; `BonusManager.checkRolls` is dead code calling a method that no longer exists.
+- **A7. Improvement-based Dynamite is ignored.** _(`BonusManager.checkRolls` removed in phase 3.)_ `move.isAutoDynamite()` is not checked; `BonusManager.checkRolls` is dead code calling a method that no longer exists.
 - **A8. Power preview is wrong.** `previewPower()` counts weakness tags as +1, subtracts 2 for any inverted tag even if unselected, and counts statuses as ±1 instead of their tier.
 - **A9. Roll errors are silent.** Failures only go to the console; the player sees nothing and the selection is left as it was.
 
@@ -69,7 +69,7 @@ All in [player-hud.js:478-523](scripts/player-hud.js:478) and [hud-state.js](scr
 
 ### F. Housekeeping
 
-- **F1. Dead code.** `npc-influence-functions.js` is not in `module.json`; it is only pulled in by a dynamic import, which then registers hooks late using the old controls API. Also the `_npc_hud_helpers_legacy_placeholder` block and `FLAG_KEYS.DYNAMITE_MOVES`.
+- **F1. Dead code.** _(Fixed in phase 3: file, placeholder block and `DYNAMITE_MOVES` removed.)_ `npc-influence-functions.js` is not in `module.json`; it is only pulled in by a dynamic import, which then registers hooks late using the old controls API. Also the `_npc_hud_helpers_legacy_placeholder` block and `FLAG_KEYS.DYNAMITE_MOVES`.
 - **F2. Removed features still shipped or documented.** The compendium still holds the Dynamite Moves Panel macro, whose function was removed. The README still describes hotbar macros, the Dynamite panel, "Foundry VTT version 12" and "Legends in the Mist is not supported".
 - **F3. Compendium churn.** `packs/mist-hud-macros` has uncommitted LevelDB changes and a `lost/` folder from a repair. Decide what the pack should contain, rebuild it from Foundry, and ignore `lost/`.
 - **F4. Localisation.** Setting names, window titles and tooltips are hard-coded English; `lang/*.json` only has system-term keys.

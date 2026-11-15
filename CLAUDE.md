@@ -11,14 +11,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **No build step required.** This is a pure Foundry VTT module — JS and CSS are loaded directly by Foundry at runtime.
 
 - CSS is auto-applied by Foundry via the `styles` array in `module.json`. No compilation needed; edits to `.css` files take effect on browser refresh.
-- System-specific CSS (`mh-city-of-mist.css`, `mh-otherscape.css`, `mh-legends-in-the-mist.css`) is injected dynamically at runtime by `mh-settings.js::applySystemCSS()` — these are NOT in `module.json`.
+- System-specific CSS (`mh-city-of-mist.css`, `mh-otherscape.css`, `mh-legends-in-the-mist.css`) is injected dynamically at runtime by `settings.js` (`applySystemCSS`) — these are NOT in `module.json`.
 - Templates (`.hbs`) are loaded at runtime by Foundry. Use `foundry.applications.handlebars.loadTemplates()` (not the deprecated global `loadTemplates()`).
 - To test: install/reload the module in Foundry VTT.
 
 ## Module Structure
 
 ```
-scripts/         ES modules (12 files, load order matters — see module.json esmodules)
+scripts/         ES modules (15 files — see module.json esmodules)
 styles/          CSS files (base + system-specific)
 templates/       Handlebars .hbs templates
 lang/            en.json, pt-br.json
@@ -29,24 +29,24 @@ ui/              Button/icon images
 
 ## Architecture
 
-### Script Load Order (module.json `esmodules`)
-Order is critical — settings must initialize before other scripts depend on them:
-1. `mh-settings.js` — registers all game settings, applies system CSS
-2. `mh-theme-config.js` — move/slot configuration per system
-3. `mh-dice.js` — Dice So Nice integration
-4. `mist-hud.js` — main player HUD (`Application` subclass), global Handlebars helpers
-5. `statusScreenApp.js` — status browser/importer
-6. `mh-roll.js` — roll execution and burn-for-hit logic
-7. `dynamite-panel.js` — dynamite mode toggle panel
-8. `npc-hud.js` — NPC/threat HUD
-9. `mh-load-moves.js` — hotbar macro loader
-10. `npc-influence-manager.js` — GM NPC influence viewer
-11. (removed) `npc-influence-functions.js` — superseded by `syncSceneInfluences()` in `npc-hud.js`
-12. `token-status-notification.js` — visual drop notifications
+### Scripts (module.json `esmodules`, in load order)
+- `constants.js` — `MODULE_ID`, `FLAG_KEYS`
+- `settings.js` — registers game settings, applies system CSS
+- `move-layout.js` — move/slot configuration per system
+- `hud-state.js` — per-HUD state (`HUDState`), `hudKey()`/`resolveActorByKey()`, HUD registry, `isTagBurned()`, builds the `CityRoll` selection
+- `getters.js` — canonical source for extracting actor/item data (themes, tags, statuses, improvements)
+- `notifications.js` — drop/status notifications
+- `bonus-manager.js` — GM-mediated Help/Hurt bonuses
+- `npc-helpers.js`, `npc-influence.js`, `npc-influence-manager.js` — NPC data, influence cache, GM influence viewer
+- `status-screen.js` — status browser/importer
+- `player-hud.js` — player HUD (`PlayerHUD`, ApplicationV2 + Handlebars mixin), `getOrCreateHud(actor)`
+- `npc-hud.js` — NPC/threat HUD, `syncSceneInfluences()`
+- `mh-dice.js` — Dice So Nice integration
+- `init.js` — hooks, sockets, scene controls, canvas drops (loaded last)
 
 ### Key Patterns
 
-**Actor Flag Persistence** — All player selections persist via actor flags:
+**Actor Flag Persistence** — All player selections persist via actor flags (keys in `FLAG_KEYS`):
 ```javascript
 actor.getFlag('mist-hud', 'selected-tags')
 actor.getFlag('mist-hud', 'status-states')
@@ -54,20 +54,20 @@ actor.getFlag('mist-hud', 'inverted-tags')
 actor.getFlag('mist-hud', 'received-bonuses')
 ```
 
-**HUD Registry** — Singleton per actor, stored in `globalThis.playerHudRegistry` (Map). Use `MistHUD.getOrCreateHudForActor(actor)` — never instantiate directly.
+**HUD Registry** — One HUD per `hudKey(actor)` (token id for unlinked tokens, actor id otherwise), kept in `playerHudRegistry` (`hud-state.js`). Use `getOrCreateHud(actor)` from `player-hud.js` — never instantiate directly. Help/Hurt bonuses stay on the world actor (`bonusActorFor`).
 
-**Hook-Based Reactivity** — HUD re-renders on `controlToken`, `updateActor`, `createItem`, `updateItem`, `deleteItem` hooks.
+**Hook-Based Reactivity** — HUDs re-render on `controlToken`, `updateActor`, `createItem`, `updateItem`, `deleteItem` hooks (`init.js`).
 
-**Socket Communication** — GM-mediated bonuses and NPC influences use `game.socket.on("module.mist-hud", ...)` so players can't spoof values.
+**Socket Communication** — GM-mediated bonuses, NPC influences and drops from non-owners use `game.socket.on("module.mist-hud", ...)` so players can't spoof values.
 
-**Multi-System Support** — Three systems (city-of-mist, otherscape, legend) share one codebase. System-specific behavior lives in `mh-theme-config.js` (move config) and `mh-settings.js` (CSS injection). Use `game.system.id` to branch when needed.
+**Multi-System Support** — Three systems (city-of-mist, otherscape, legend) share one codebase. System-specific behavior lives in `move-layout.js` (move config) and `settings.js` (CSS injection). Use `game.system.id` to branch when needed.
 
 **Data Flow on Roll:**
 ```
 User selects tags/statuses in HUD → stored in DOM + flags →
-User clicks move → getSelectedRollData() collects state →
-mh-roll.js executes roll → cleanHUD() burns/deletes temp items →
-HUD re-renders from actor data
+User clicks move → HUDState builds the selected list →
+the system's CityRoll executes the roll →
+post-roll cleanup resets leftover state → HUD re-renders from actor data
 ```
 
 ### Adding Scene Control Buttons
@@ -77,6 +77,6 @@ Scene control tool buttons are registered correctly — refer to existing workin
 ## Important Notes
 
 - The `packs/mist-hud-macros/` directory is a LevelDB database — do not manually edit its files.
-- jQuery is used extensively for DOM event handling in `activateListeners`.
-- The `mh-getters.js` file is the canonical source for extracting actor/item data (themes, tags, statuses, improvements).
+- All windows (Player HUD, NPC HUD, Status Screen, Influence Viewer) are ApplicationV2 with HandlebarsApplicationMixin; jQuery is still used inside `_onRender` for listeners.
+- The `getters.js` file is the canonical source for extracting actor/item data (themes, tags, statuses, improvements).
 - Localization keys live in `lang/en.json`; always add new user-visible strings there.

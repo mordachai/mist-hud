@@ -120,6 +120,7 @@
 "MistHUD.window.statusScreen": "Statuses MC Screen",
 
 "MistHUD.window.influenceViewer": "NPC Influence Viewer",
+"MistHUD.window.npcHud": "NPC HUD",
 
 "MistHUD.notify.accordionRefresh": "Changing accordion state requires a page refresh.",
 
@@ -204,6 +205,11 @@
 "MistHUD.npcHud.specials": "Specials",
 
 "MistHUD.npcHud.customMoves": "Custom Moves",
+"MistHUD.npcHud.unnamedStatus": "Unnamed Status",
+"MistHUD.npcHud.unnamedTag": "Unnamed Tag",
+"MistHUD.npcHud.unknownNpc": "Unknown NPC",
+"MistHUD.npcHud.unknownToken": "Unknown Token",
+"MistHUD.npcHud.noActiveScene": "No Active Scene",
 
 "MistHUD.influence.scene": "Scene",
 

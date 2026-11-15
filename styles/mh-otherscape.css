@@ -849,12 +849,3 @@ color: var(--mythosOS-verylight-color);
 .mh-improvement-marker.Self i {
   transform: translateY(-3px);
 }
-
-/* Scoped to this module's own windows: the system's scene-tags window also uses
-   .combatant-name and must keep its own look. */
-:is(.mh-hud, #npc-hud, .window-app.npc-hud) .combatant-name {
-	color: black;
-	text-shadow: -1px 1px 3px white, 0px 0px 6px #18faf5;
-	gap: 10px;
-  padding-right: 2rem;
-}

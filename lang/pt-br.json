@@ -120,6 +120,7 @@
 "MistHUD.window.statusScreen": "Tela de Status do MC",
 
 "MistHUD.window.influenceViewer": "Visualizador de Influência de NPCs",
+"MistHUD.window.npcHud": "HUD de NPC",
 
 "MistHUD.notify.accordionRefresh": "Alterar o estado dos acordeões exige atualizar a página.",
 
@@ -204,6 +205,11 @@
 "MistHUD.npcHud.specials": "Especiais",
 
 "MistHUD.npcHud.customMoves": "Movimentos Personalizados",
+"MistHUD.npcHud.unnamedStatus": "Status sem nome",
+"MistHUD.npcHud.unnamedTag": "Tag sem nome",
+"MistHUD.npcHud.unknownNpc": "NPC desconhecido",
+"MistHUD.npcHud.unknownToken": "Token desconhecido",
+"MistHUD.npcHud.noActiveScene": "Nenhuma cena ativa",
 
 "MistHUD.influence.scene": "Cena",
 

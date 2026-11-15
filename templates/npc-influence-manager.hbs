@@ -5,23 +5,23 @@
       <h2>{{localize "MistHUD.influence.total"}}: <span class="influence-value total-influence {{#if totalInfluence}}{{#if (lt totalInfluence 0)}}negative{{else}}positive{{/if}}{{/if}}"><i class="fa-solid fa-skull"></i> {{totalInfluence}}</span></h2>
     </div>
     <div class="controls">
-      <button class="sync-all-npcs" title="{{localize "MistHUD.influence.syncSceneHint"}}"><i class="fas fa-sync"></i> {{localize "MistHUD.influence.syncScene"}}</button>
-      <button class="refresh-ui" title="{{localize "MistHUD.influence.refreshHint"}}"><i class="fas fa-redo"></i> {{localize "MistHUD.influence.refresh"}}</button>
+      <button type="button" class="sync-all-npcs" data-action="syncAll" title="{{localize "MistHUD.influence.syncSceneHint"}}"><i class="fas fa-sync"></i> {{localize "MistHUD.influence.syncScene"}}</button>
+      <button type="button" class="refresh-ui" data-action="refresh" title="{{localize "MistHUD.influence.refreshHint"}}"><i class="fas fa-redo"></i> {{localize "MistHUD.influence.refresh"}}</button>
     </div>
   </header>
   
   <nav class="tabs">
-    <a class="item" data-tab="active"><i class="fas fa-bolt"></i> {{localize "MistHUD.influence.tabActive"}} ({{activeSceneNpcs.length}})</a>
-    <a class="item" data-tab="all"><i class="fas fa-users"></i> {{localize "MistHUD.influence.tabAll"}} ({{sceneNpcs.length}})</a>
+    <a class="item {{#if tabActive}}active{{/if}}" data-action="tab" data-tab="active"><i class="fas fa-bolt"></i> {{localize "MistHUD.influence.tabActive"}} ({{activeSceneNpcs.length}})</a>
+    <a class="item {{#if tabAll}}active{{/if}}" data-action="tab" data-tab="all"><i class="fas fa-users"></i> {{localize "MistHUD.influence.tabAll"}} ({{sceneNpcs.length}})</a>
   </nav>
   
   <section class="content">
-    <div class="tab" data-tab="active">
+    <div class="tab {{#if tabActive}}active{{/if}}" data-tab="active">
       {{#if hasActiveSceneNpcs}}
         <ul class="npc-list">
           {{#each activeSceneNpcs}}
             <li class="npc-item in-scene {{#if isLinked}}linked{{else}}unlinked{{/if}}" data-npc-id="{{id}}" data-token-id="{{tokenId}}">
-              <img class="npc-image" src="{{img}}" alt="{{name}}">
+              <img class="npc-image" data-action="focusToken" src="{{img}}" alt="{{name}}">
               <div class="influence-value {{#if influence}}{{#if (lt influence 0)}}negative{{else}}positive{{/if}}{{/if}}">
                 {{influence}}
               </div>
@@ -57,12 +57,12 @@
       {{/if}}
     </div>
     
-    <div class="tab" data-tab="all">
+    <div class="tab {{#if tabAll}}active{{/if}}" data-tab="all">
       {{#if hasSceneNpcs}}
         <ul class="npc-list">
           {{#each sceneNpcs}}
             <li class="npc-item {{#if isInCurrentScene}}in-scene{{/if}} {{#if isLinked}}linked{{else}}unlinked{{/if}}" data-npc-id="{{id}}" data-token-id="{{tokenId}}">
-              <img class="npc-image" src="{{img}}" alt="{{name}}">
+              <img class="npc-image" data-action="focusToken" src="{{img}}" alt="{{name}}">
               <div class="influence-value {{#if influence}}{{#if (lt influence 0)}}negative{{else}}positive{{/if}}{{/if}}">
                 {{#if hasInfluence}}{{influence}}{{else}}&mdash;{{/if}}
               </div>

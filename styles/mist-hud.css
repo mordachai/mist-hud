@@ -740,11 +740,6 @@ hr {
 	text-shadow: -1px -1px 4px yellow, 1px 1px 4px gold;
 }
 
-/* Scoped to this module's own windows (the system's scene-tags window has its own spacing) */
-:is(.mh-hud, #npc-hud, .window-app.npc-hud) li.tag-or-status {
-	margin: 2px 0;
-}
-
 /* The scene-tags window (.story-tag-window / .scene-tag-window) and every
    .item-selection-context belong to the city-of-mist system, which themes them
    per game. This module no longer restyles them (issues #33, #35). */

@@ -1,5 +1,6 @@
 import { initializeAccordions, registerNpcHelpers } from './npc-helpers.js';
 import { detectActiveSystem } from './settings.js';
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
 
 globalThis.activeNpcInfluences = globalThis.activeNpcInfluences || {};
@@ -102,30 +103,32 @@ const logger = {
   error: (...args) => console.error("NPC-HUD |", ...args)
 };
 
-export class NpcHUD extends Application {
+export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
-    static get defaultOptions() {
-        return foundry.utils.mergeObject(super.defaultOptions, {
-          id: 'npc-hud',  // Fallback only: setActor() replaces it with npc-hud-<tokenId>
-          template: 'modules/mist-hud/templates/npc-hud.hbs',
-          classes: ['npc-hud'],
-          header: true,
-          resizable: false,
-          popOut: true,
-          minimizable: true,
-          width: 310,
-          height: 'auto',
-          dragDrop: [{ dragSelector: '.window-header' }],
-          left: 950,
-          top: 120
-        });
-    }
+    /** @type {Actor|null} */
+    actor = null;
+    /** @type {Token|null} */
+    token = null;
 
-    static getInstance() {
-        if (!NpcHUD.instance) {
-          NpcHUD.instance = new NpcHUD();
-        }
-        return NpcHUD.instance;
+    static DEFAULT_OPTIONS = {
+        id: 'npc-hud',  // Overridden per token: openForToken() passes npc-hud-<tokenId>
+        classes: ['npc-hud'],
+        window: {
+            frame: true,
+            positioned: true,
+            resizable: false,
+            minimizable: true,
+            title: "MistHUD.window.npcHud"
+        },
+        position: { width: 310, height: 'auto', left: 950, top: 120 }
+    };
+
+    static PARTS = {
+        app: { template: 'modules/mist-hud/templates/npc-hud.hbs' }
+    };
+
+    get title() {
+        return this.actor?.name || game.i18n.localize("MistHUD.window.npcHud");
     }
 
     /**
@@ -138,17 +141,29 @@ export class NpcHUD extends Application {
 
         const existing = npcHudRegistry.get(token.id);
         if (existing && existing.token?.id === token.id) {
-          existing.token = token;
-          if (existing.rendered) {
-            if (existing._minimized) existing.maximize();
-            existing.bringToTop();
-          } else {
-            existing.render(true);
-          }
-          return existing;
+            existing.token = token;
+            if (existing.rendered) {
+                if (existing.minimized) existing.maximize();
+                existing.bringToFront();
+            } else {
+                existing.render({ force: true });
+            }
+            return existing;
         }
 
-        const hud = new NpcHUD();
+        // Unique DOM id per token so several HUDs can be open at once, and a
+        // cascaded start position so new windows do not stack exactly.
+        const used = new Set([...allNpcHuds()].map(hud => hud._cascadeSlot));
+        let slot = 0;
+        while (used.has(slot)) slot++;
+        const offset = 32 * (slot % 10);
+        const base = NpcHUD.DEFAULT_OPTIONS.position;
+
+        const hud = new NpcHUD({
+            id: `npc-hud-${token.id ?? actor.id}`,
+            position: { left: base.left + offset, top: base.top + offset }
+        });
+        hud._cascadeSlot = slot;
         hud.setActor(actor, token);
         return hud;
     }
@@ -161,8 +176,8 @@ export class NpcHUD extends Application {
      */
     setActor(actor, token = null, { render = true } = {}) {
         if (!actor || actor.type !== 'threat') {
-          logger.warn("Attempted to set an invalid actor.");
-          return;
+            logger.warn("Attempted to set an invalid actor.");
+            return;
         }
 
         // Re-targeting a HUD that is already registered: drop its old keys first
@@ -173,39 +188,12 @@ export class NpcHUD extends Application {
         this.isCollapsed = actor.getFlag('mist-hud', 'isCollapsed') ?? false;
 
         // Headless use (influence calculation only): no window, no registry entry.
-        // `_doNotRender` lets callers attach an actor to a HUD without opening a window.
-        if (!render || this._doNotRender) return;
+        if (!render) return;
 
-        if (!this.rendered) {
-          // Unique DOM id per token so several HUDs can be open at once
-          this.options.id = `npc-hud-${token?.id ?? actor.id}`;
+        if (actor.id) npcHudRegistry.set(actor.id, this);
+        if (token?.id) npcHudRegistry.set(token.id, this);
 
-          // Cascade new windows so they do not stack exactly on top of each other
-          if (this._cascadeSlot === undefined) {
-            const used = new Set([...allNpcHuds()].map(hud => hud._cascadeSlot));
-            let slot = 0;
-            while (used.has(slot)) slot++;
-            this._cascadeSlot = slot;
-            const offset = 32 * (slot % 10);
-            this.position.left = this.options.left + offset;
-            this.position.top = this.options.top + offset;
-          }
-        }
-
-        // Store in registry
-        if (actor.id) {
-          npcHudRegistry.set(actor.id, this);
-          logger.debug(`Registered NPC HUD by actor ID: ${actor.id}, Name: ${actor.name}`);
-        }
-        if (token?.id) {
-          npcHudRegistry.set(token.id, this);
-          logger.debug(`Registered NPC HUD by token ID: ${token.id}`);
-        }
-
-        // Log registry size
-        logger.debug(`Registry size now: ${npcHudRegistry.size}`);
-
-        this.render(true);
+        this.render({ force: true });
     }
 
     /** Remove this HUD's registry keys, leaving other HUDs of the same actor reachable. */
@@ -223,8 +211,8 @@ export class NpcHUD extends Application {
         }
     }
     
-    async getData() {
-        const data = super.getData();
+    async _prepareContext(options) {
+        const data = await super._prepareContext(options);
         if (!this.actor) return data;
     
         // Make sure the actor is fully loaded
@@ -278,7 +266,7 @@ export class NpcHUD extends Application {
             
             return data;
         } catch (error) {
-            console.error("Error in NpcHUD getData:", error);
+            console.error("Error in NpcHUD _prepareContext:", error);
             // Return minimal data that won't cause template errors
             data.spectrums = [];
             data.moveGroups = {};
@@ -686,7 +674,7 @@ export class NpcHUD extends Application {
             }
             
             // Re-render
-            this.render(false);
+            this.render();
         } catch (error) {
             logger.error(`Error updating ${itemType} state:`, error);
         }
@@ -779,7 +767,7 @@ export class NpcHUD extends Application {
         }
         
         // Re-render the HUD to reflect the change.
-        this.render(false);
+        this.render();
     }
 
     // Modified _toggleStatusState to emit influence after status state change
@@ -837,16 +825,18 @@ export class NpcHUD extends Application {
         }
         
         // Re-render the HUD to reflect the change
-        this.render(false);
+        this.render();
     }                
 
-    activateListeners(html) {
+    _onRender(context, options) {
+        super._onRender(context, options);
+        const html = $(this.element);
         try {
-            super.activateListeners(html);
-        
+            this.element.classList.toggle("collapsed", !!this.isCollapsed);
+
             // Initialize accordions
-            initializeAccordions(html[0]);
-        
+            initializeAccordions(this.element);
+
             // Inject custom header
             this.injectCustomHeader();
         
@@ -900,7 +890,7 @@ export class NpcHUD extends Application {
                 } else {
                     tag.sheet.render(true);
                 }
-                this.render(false);
+                this.render();
                 this.emitNpcInfluence();
             });
 
@@ -930,7 +920,7 @@ export class NpcHUD extends Application {
                 } else {
                     status.sheet.render(true);
                 }
-                this.render(false);
+                this.render();
                 this.emitNpcInfluence();
             }); 
             
@@ -1028,7 +1018,7 @@ export class NpcHUD extends Application {
                 try {
                     await actor.deleteEmbeddedDocuments("Item", [tagId]);
                     this.emitNpcInfluence();
-                    this.render(false);
+                    this.render();
                 } catch (error) {
                     console.error("Error deleting tag:", error);
                 }
@@ -1062,7 +1052,7 @@ export class NpcHUD extends Application {
                     // Delete the status
                     await actor.deleteEmbeddedDocuments("Item", [statusId]);
                     this.emitNpcInfluence();
-                    this.render(false);
+                    this.render();
                 } catch (error) {
                     console.error("Error deleting status:", error);
                 }
@@ -1085,13 +1075,16 @@ export class NpcHUD extends Application {
                 this.getCollectiveSize().onLabelClick();
             });
                 
-            // Prevent context menu actions
-            this.element.on('contextmenu', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-            });
+            // Prevent context menu actions (the root element persists across renders: bind once)
+            if (!this._contextMenuBound) {
+                this._contextMenuBound = true;
+                this.element.addEventListener('contextmenu', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                });
+            }
         } catch (error) {
-            console.error("Error in activateListeners:", error);
+            console.error("Error in NpcHUD _onRender:", error);
         }
     }
 
@@ -1222,83 +1215,39 @@ export class NpcHUD extends Application {
         });
     }
 
-    async render(force = false, options = {}) {
-        try {
-          await super.render(force, options);
-          // After rendering, check the isCollapsed flag.
-          if (this.isCollapsed) {
-            this.element.addClass("collapsed");
-          } else {
-            this.element.removeClass("collapsed");
-          }
-        } catch (error) {
-          logger.error("Error during NpcHUD render:", error);
-        }
-    }    
-
-    async close(options) {
-        try {
-          // Remove references from registry (only the ones that point at this HUD)
-          this._unregister();
-
-          // Log registry size
-          logger.debug(`Registry size now: ${npcHudRegistry.size}`);
-          
-          // Clean up event handlers
-          if (this.element) {
-            this.element.off('contextmenu');
-          }
-          
-          return await super.close(options);
-        } catch (err) {
-          logger.error("Error closing NPC HUD:", err);
-          return false;
-        }
-      }
+    _onClose(options) {
+        // Remove references from registry (only the ones that point at this HUD)
+        this._unregister();
+        super._onClose?.(options);
+    }
 
     injectCustomHeader() {
-        // Use this.element to access the entire application window
-        const header = this.element.find('.window-header');
-        const window_title = header.find('.window-title')[0];
-        if (window_title) window_title.style.display = "None";
-        
-        if (header.length === 0) {
-          logger.warn("Header element not found during injection!");
-          return;
+        const header = $(this.element).find('.window-header');
+        if (!header.length) {
+            logger.warn("Header element not found during injection!");
+            return;
         }
-    
-        // Clear existing header content
-        header.empty();
-        // we need to keep window title for compatibility to foundry Application render
-        header.append(window_title);
-      
-        // Create custom header elements
-        const tokenImgSrc = this.actor?.token?.texture.src || this.actor?.img || 'icons/svg/mystery-man.svg';
-    
-        const tokenImg = $(`<div class="mh-token-image"><img src="${tokenImgSrc}" alt="${this.actor?.name || 'Character'} Token"></div>`);
-        const charName = $(`<div class="mh-char-name">${this.actor?.name || 'Character'}</div>`);
-        const closeButton = $(`<i class="mh-close-button fa-solid fa-xmark"></i>`);
-      
-        // Append custom elements to the header
+
+        header.find('.window-title').hide();
+        header.find('.mh-token-image, .mh-char-name, .mh-close-button').remove();
+
+        // Built with DOM APIs (.attr/.text): the actor name and image path are user-editable.
+        const name = this.actor?.name || 'Character';
+        const src = this.token?.document?.texture?.src
+            ?? this.actor?.prototypeToken?.texture?.src
+            ?? this.actor?.img
+            ?? 'icons/svg/mystery-man.svg';
+
+        const tokenImg = $('<div class="mh-token-image"></div>')
+            .append($('<img>').attr({ src, alt: name }));
+        const charName = $('<div class="mh-char-name"></div>').text(name);
+        const closeButton = $('<i class="mh-close-button fa-solid fa-xmark"></i>');
+
         header.append(tokenImg, charName, closeButton);
-
-        // Add event listener to the close button
-        closeButton.on("click", () => this.close());
-   
-        // Add a custom class for additional styling if needed
         header.addClass('mh-custom-header');
-      
-        // Handle minimized state
-        const minimizedState = this.element.find('.window-title');
-        if (minimizedState.length) {
-          minimizedState.empty(); // Clear default content
-          minimizedState.append(tokenImg.clone(), closeButton.clone()); // Add image and close button
-
-          // Rebind close event for the minimized state button
-          minimizedState.find('.mh-close-button').on("click", () => this.close());
-        }
+        closeButton.on('click', () => this.close());
     }
-       
+
     async _createStatusFromHUD(event) {
         event.stopPropagation();
       
@@ -1312,10 +1261,10 @@ export class NpcHUD extends Application {
             // Create a new status with a default name
             let obj;
             if (owner.createNewStatus) {
-                obj = await owner.createNewStatus("Unnamed Status");
+                obj = await owner.createNewStatus(game.i18n.localize("MistHUD.npcHud.unnamedStatus"));
             } else {
                 const createdItems = await owner.createEmbeddedDocuments("Item", [{
-                    name: "Unnamed Status",
+                    name: game.i18n.localize("MistHUD.npcHud.unnamedStatus"),
                     type: "status",
                     system: {
                         tier: 1
@@ -1361,7 +1310,7 @@ export class NpcHUD extends Application {
             }
           
             // Refresh the HUD
-            this.render(false);
+            this.render();
         } catch (error) {
             console.error("Error in _createStatusFromHUD:", error);
         }
@@ -1380,7 +1329,7 @@ export class NpcHUD extends Application {
             // Define default data for a new tag.
             // Adjust the type and system defaults as needed for your system.
             const tagData = {
-              name: "Unnamed Tag",
+              name: game.i18n.localize("MistHUD.npcHud.unnamedTag"),
               type: "tag",  // Use the appropriate type for story tags
               system: {
                 description: "",
@@ -1422,7 +1371,7 @@ export class NpcHUD extends Application {
             }
             
             // Refresh the HUD.
-            this.render(false);
+            this.render();
         } catch (error) {
             console.error("Error in _createStoryTagFromHUD:", error);
         }
@@ -1642,7 +1591,7 @@ Hooks.on('updateActor', (actor, data, options, userId) => {
 
     // Re-render the HUDs of this actor, and of actors using it as a template
     for (const hud of [...hudsForActor(actor), ...hudsUsingTemplate(actor)]) {
-        hud.render(false);
+        hud.render();
     }
 });
 
@@ -1651,11 +1600,11 @@ Hooks.on('updateItem', (item, data, options, userId) => {
     if (!item.parent) return;
 
     for (const hud of hudsForActor(item.parent)) {
-        hud.render(false); // Re-render the corresponding HUD
+        hud.render(); // Re-render the corresponding HUD
     }
     // Moves and limits of a challenge template are shown on the HUDs of the actors using it
     if (['gmmove', 'spectrum'].includes(item.type)) {
-        for (const hud of hudsUsingTemplate(item.parent)) hud.render(false);
+        for (const hud of hudsUsingTemplate(item.parent)) hud.render();
     }
 });
 

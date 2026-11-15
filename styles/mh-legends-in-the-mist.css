@@ -137,12 +137,12 @@
 
 /*NPC HUD STYLES*/
 
-:is(#npc-hud, .window-app.npc-hud){
+:is(#npc-hud, .application.npc-hud){
   background: var(--effects-color2);
   border: 1px solid var(--effects-color1);
 }
 
-:is(#npc-hud, .window-app.npc-hud) .window-content {
+:is(#npc-hud, .application.npc-hud) .window-content {
     background: url('../ui/litm_hud2_BG.webp');
     background-position: center center;
     background-repeat: no-repeat;
@@ -151,7 +151,7 @@
     font-family: var(--font-family-main1);
 }
 
-:is(#npc-hud, .window-app.npc-hud) .window-header {
+:is(#npc-hud, .application.npc-hud) .window-header {
     background: var(--hud-bg-color);
     display: flex;
     flex-direction: row;
@@ -164,7 +164,7 @@
     transition: padding-left 0.5s;
 }
 
-:is(#npc-hud, .window-app.npc-hud) .mh-char-name {
+:is(#npc-hud, .application.npc-hud) .mh-char-name {
     position: relative;
     font-size: 1.1rem;
     flex: 4;
@@ -180,7 +180,7 @@
     top: 3px;
 }
 
-:is(#npc-hud, .window-app.npc-hud) ul{
+:is(#npc-hud, .application.npc-hud) ul{
   padding: 0;
   margin: 0;
   list-style: none;
@@ -228,7 +228,7 @@
     transition: ease-in, top, 0.2s;
 }
 
-:is(#npc-hud, .window-app.npc-hud).minimized .mh-token-image {
+:is(#npc-hud, .application.npc-hud).minimized .mh-token-image {
     top: -52px;
     left: -55px;
     transition: ease-in, top, 0.2s;
