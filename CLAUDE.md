@@ -22,7 +22,6 @@ scripts/         ES modules (15 files — see module.json esmodules)
 styles/          CSS files (base + system-specific)
 templates/       Handlebars .hbs templates
 lang/            en.json, pt-br.json
-packs/           Foundry compendium (LevelDB) for bundled macros
 data/            Status CSV data files
 ui/              Button/icon images
 ```
@@ -76,7 +75,6 @@ Scene control tool buttons are registered correctly — refer to existing workin
 
 ## Important Notes
 
-- The `packs/mist-hud-macros/` directory is a LevelDB database — do not manually edit its files.
 - All windows (Player HUD, NPC HUD, Status Screen, Influence Viewer) are ApplicationV2 with HandlebarsApplicationMixin; jQuery is still used inside `_onRender` for listeners.
 - The `getters.js` file is the canonical source for extracting actor/item data (themes, tags, statuses, improvements).
 - Localization keys live in `lang/en.json`; always add new user-visible strings there.

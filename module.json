@@ -29,19 +29,6 @@
     "minimum": "14",
     "verified": "14"
   },
-  "packs": [
-    {
-      "name": "mist-hud-macros",
-      "label": "Mist HUD Macros",
-      "path": "packs/mist-hud-macros",
-      "type": "Macro",
-      "system": "city-of-mist",
-      "ownership": {
-        "PLAYER": "OBSERVER",
-        "ASSISTANT": "OWNER"
-      }
-    }
-  ],
   "esmodules": [
     "scripts/constants.js",
     "scripts/settings.js",
