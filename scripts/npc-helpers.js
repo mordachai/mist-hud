@@ -22,16 +22,41 @@ export function registerNpcHelpers() {
   // Converts status descriptions with embedded status/tag patterns into
   // clickable HTML spans that can be dragged onto tokens.
   Handlebars.registerHelper("parseStatus", function (description, options) {
-    if (!description) return new Handlebars.SafeString("");
+    const root = options.data.root;
+    return new Handlebars.SafeString(parseMoveText(description, {
+      collectiveSize: root.collectiveSize,
+      name:           root.name,
+      pronouns:       root.pronouns,
+      move:           options.hash?.move,
+      marked:         !!options.hash?.marked,
+    }));
+  });
+}
 
-    const collectiveSize = Number(options.data.root.collectiveSize || 0);
-    const characterName  = options.data.root.name || "Character";
+/**
+ * Convert the move-text notation ([tag], [status-2], |status-2|, {GM only},
+ * $name, ...) into HUD HTML. Shared by the parseStatus helper and the
+ * Legend Might lines.
+ *
+ * @param {string} description
+ * @param {object} [ctx]
+ * @param {number}   [ctx.collectiveSize]  added to bracket status tiers
+ * @param {string}   [ctx.name]            replaces $name
+ * @param {string[]} [ctx.pronouns]        replace $pr0..$pr2
+ * @param {object}   [ctx.move]            GM move, to prefix its header
+ * @param {boolean}  [ctx.marked]          the template already draws a marker
+ * @returns {string} HTML
+ */
+export function parseMoveText(description, ctx = {}) {
+    if (!description) return "";
 
-    const pronouns       = options.data.root.pronouns || [];
+    const collectiveSize = Number(ctx.collectiveSize || 0);
+    const characterName  = ctx.name || "Character";
+    const pronouns       = ctx.pronouns || [];
 
     // Header prefix chosen by the system ("symbols" / "text" / "none"), added
     // before substitution so the "$name" in the text headers is resolved too.
-    const header = moveHeaderPrefix(options.hash?.move, { skipSymbol: !!options.hash?.marked });
+    const header = moveHeaderPrefix(ctx.move, { skipSymbol: !!ctx.marked });
 
     let out = (header + description)
       .replace(/\$name/g, characterName)
@@ -124,8 +149,7 @@ export function registerNpcHelpers() {
 
     out = out.replace(/\n/g, "<br>");
 
-    return new Handlebars.SafeString(out);
-  });
+    return out;
 }
 
 // Header symbols per move subtype. Soft/hard use the book's › and » markers.

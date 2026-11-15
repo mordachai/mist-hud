@@ -210,6 +210,8 @@ Choosing the right type of moves in your Danger sheet will present them with the
 | `--A--` | Adventure | `--A-- Swift Movement` | ![adventure-color_litm_icn](https://github.com/user-attachments/assets/2a02c1f1-944f-43df-b4c2-203e464dbe84) Swift Movement |
 | `--O--` | Origin | `--O-- Old Wisdom` | ![origin-color_litm_icn](https://github.com/user-attachments/assets/d27523ca-7574-4ea6-a105-2f992f8a03cd) Old Wisdom | 
 
+The text of a Might runs until the next comma or line break. Tags, statuses and the rest of the notation above work inside it too, like `--G-- Crushing Blow [stunned-2]`.
+
 
 ![image](external_files/OsMoves.png)
 

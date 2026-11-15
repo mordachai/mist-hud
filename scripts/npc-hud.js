@@ -1,4 +1,4 @@
-import { initializeAccordions, registerNpcHelpers } from './npc-helpers.js';
+import { initializeAccordions, parseMoveText, registerNpcHelpers } from './npc-helpers.js';
 import { detectActiveSystem } from './settings.js';
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
@@ -479,9 +479,18 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
             
             // For Legend system, always process the description 
             // Replace -X- or --X-- patterns with proper HTML, or use original description
-            const processedDesc = desc.replace(/-{1,2}([GOA])-{1,2}\s*([^,\n]+)/g, (match, tag, text) => {
+            // The text runs to the next comma or line break; commas inside [brackets] don't count.
+            const withIcons = desc.replace(/-{1,2}([GOA])-{1,2}\s*((?:\[[^\]]*\]|[^,\n])+)/g, (match, tag, text) => {
                 const iconClass = ICON_MAP[tag];
                 return `<span class="mighty-icon ${iconClass}"></span><span class="mighty-description">${text.trim()}</span>`;
+            });
+
+            // Then the shared move-text notation ([tag], [status-2], $name, ...).
+            // No header: a Might line already carries its own icon.
+            const processedDesc = parseMoveText(withIcons, {
+                collectiveSize: this.actor.system.collectiveSize,
+                name: data.name,
+                pronouns: data.pronouns,
             });
             
             // Create plain object with processed description
