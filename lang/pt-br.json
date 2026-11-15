@@ -116,6 +116,8 @@
 
 "MistHUD.settings.dockSide.name": "Lado do acoplamento",
 "MistHUD.settings.wideLayout.name": "Layout largo do HUD do jogador",
+"MistHUD.settings.autoDiceSet.name": "Conjunto de dados automático no Dice So Nice",
+"MistHUD.settings.autoDiceSet.hint": "Mostra as rolagens de d6 com o conjunto de dados deste módulo para o sistema ativo (City of Mist, Otherscape ou Legend in the Mist). No Otherscape cada dado é sorteado entre Mythos, Noise ou Self. Desative para usar a sua própria aparência do Dice So Nice.",
 
 "MistHUD.settings.dockSide.left": "Esquerda",
 

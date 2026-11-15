@@ -116,6 +116,8 @@
 
 "MistHUD.settings.dockSide.name": "Dock Side",
 "MistHUD.settings.wideLayout.name": "Wide Player HUD Layout",
+"MistHUD.settings.autoDiceSet.name": "Automatic Dice So Nice Dice Set",
+"MistHUD.settings.autoDiceSet.hint": "Show d6 rolls with this module's dice set for the active system (City of Mist, Otherscape or Legend in the Mist). In Otherscape each die is randomly Mythos, Noise or Self. Turn off to use your own Dice So Nice appearance.",
 
 "MistHUD.settings.dockSide.left": "Left",
 

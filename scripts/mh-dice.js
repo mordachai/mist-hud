@@ -1,4 +1,61 @@
+import { MODULE_ID, SETTINGS, getActiveSystem } from "./constants.js";
+
 export const DENOMINATION = "6";
+
+// ── Automatic dice set per active system ─────────────────────────────────────
+// Dice So Nice lets a roll override the viewer's chosen dice set per die via
+// `term.options.appearance.system`. We set it on every d6 term right before DSN
+// animates, so nobody has to pick the set by hand in the DSN config.
+
+const OTHERSCAPE_SETS = ["otherscape-mythos", "otherscape-noise", "otherscape-self"];
+
+const SYSTEM_DICE_SET = {
+  "city-of-mist": "city-of-mist",
+  "legend":       "legend",
+};
+
+let dsnSystemsReady = false;
+
+/** Small deterministic hash so every client picks the same random Otherscape set. */
+function hashString(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/**
+ * One random Otherscape set (Mythos / Noise / Self) for the whole roll. Seeded
+ * from the message and the dice results so every client shows the same set.
+ */
+function pickOtherscapeSet(messageId, roll) {
+  if (!messageId) return OTHERSCAPE_SETS[Math.floor(Math.random() * OTHERSCAPE_SETS.length)];
+  const results = roll.dice.flatMap(d => d.results.map(r => r.result)).join(",");
+  return OTHERSCAPE_SETS[hashString(`${messageId}:${roll.formula}:${results}`) % OTHERSCAPE_SETS.length];
+}
+
+Hooks.on("diceSoNiceRollStart", (messageId, context) => {
+  if (!dsnSystemsReady) return;
+  if (!game.settings.get(MODULE_ID, SETTINGS.AUTO_DICE_SET)) return;
+
+  const roll = context?.dsnRoll ?? context?.roll;
+  if (!roll?.dice?.length) return;
+
+  const system = getActiveSystem();
+  const diceSet = SYSTEM_DICE_SET[system]
+    ?? (system === "otherscape" ? pickOtherscapeSet(messageId, roll) : null);
+  if (!diceSet) return;
+
+  for (const term of roll.dice) {
+    if (term.faces !== 6) continue;
+    term.options ??= {};
+    const appearance = (term.options.appearance ??= {});
+    // Respect an explicit override from another module or the roller.
+    appearance.system ??= diceSet;
+  }
+});
 
 export class D6toD12 extends foundry.dice.terms.Die {
   constructor(termData) {
@@ -78,6 +135,8 @@ Hooks.once('diceSoNiceReady', (dice3d) => {
             '/modules/mist-hud/ui/dice/dice_raven_bump.png', , , , , ],
         colorset: "legend",
     },"d12");
+
+    dsnSystemsReady = true;
 
     // Add all colorsets
     dice3d.addColorset({

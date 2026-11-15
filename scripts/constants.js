@@ -26,6 +26,7 @@ export const SETTINGS = {
   LAYOUT_MODE:                 "layoutMode",
   DOCK_SIDE:                   "dockSide",
   WIDE_LAYOUT:                 "wideLayout",
+  AUTO_DICE_SET:               "autoDiceSet",
   IMPORTED_STATUS_COLLECTION:  "importedStatusCollection",
 };
 

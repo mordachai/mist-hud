@@ -101,6 +101,13 @@ Hooks.once("init", () => {
     scope: "world", config: true, type: Boolean, default: false,
   });
 
+  // Dice So Nice: pick the dice set for the active system automatically
+  game.settings.register(MODULE_ID, SETTINGS.AUTO_DICE_SET, {
+    name: K("autoDiceSet.name"),
+    hint: K("autoDiceSet.hint"),
+    scope: "client", config: true, type: Boolean, default: true,
+  });
+
   // Layout settings (client-side, no config UI — set programmatically)
   game.settings.register(MODULE_ID, SETTINGS.LAYOUT_MODE, {
     name: K("layoutMode.name"),
