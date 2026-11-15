@@ -192,6 +192,11 @@
 "MistHUD.hud.createRelationship": "Criar Tag de Relacionamento",
 "MistHUD.hud.addRelationship": "Adicionar relacionamento",
 "MistHUD.hud.newRelationship": "Novo Relacionamento",
+"MistHUD.hud.manageLoadout": "Gerenciar equipamento",
+"MistHUD.hud.editLoadoutTag": "Editar tag de equipamento (clique duplo)",
+"MistHUD.hud.noLoadoutTags": "Nenhuma tag de equipamento ainda",
+"MistHUD.hud.createLoadoutTag": "Nova tag de equipamento",
+"MistHUD.hud.loadoutCreateFailed": "Não foi possível criar a tag de equipamento. Verifique se existe um tema de Equipamento.",
 
 "MistHUD.hud.createStatus": "Criar Status",
 "MistHUD.hud.deleteStatus": "Excluir Status",

@@ -192,6 +192,11 @@
 "MistHUD.hud.createRelationship": "Create Relationship Tag",
 "MistHUD.hud.addRelationship": "Add relationship",
 "MistHUD.hud.newRelationship": "New Relationship",
+"MistHUD.hud.manageLoadout": "Manage loadout",
+"MistHUD.hud.editLoadoutTag": "Edit loadout tag (double-click)",
+"MistHUD.hud.noLoadoutTags": "No loadout tags yet",
+"MistHUD.hud.createLoadoutTag": "New loadout tag",
+"MistHUD.hud.loadoutCreateFailed": "Could not create a loadout tag. Check that a Loadout theme exists.",
 
 "MistHUD.hud.createStatus": "Create Status",
 "MistHUD.hud.deleteStatus": "Delete Status",

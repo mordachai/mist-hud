@@ -16,7 +16,7 @@ import { organizeMoves, getMoveAbbreviation, getMoveImageSrc } from "./move-layo
 import {
   getMysteryFromTheme, getCrewThemes, getThemesAndTags,
   getImprovements, getCrewImprovements, getActorStatuses,
-  getJuiceAndClues, getEssence, getLoadoutTags, getRelationshipTags,
+  getJuiceAndClues, getEssence, getThemeTypeCounts, getLoadoutTags, getAllLoadoutTags, getRelationshipTags,
 } from "./getters.js";
 import { BonusManager } from "./bonus-manager.js";
 
@@ -82,6 +82,25 @@ Handlebars.registerHelper("times", function (n, block) {
 });
 
 // ── PlayerHUD ─────────────────────────────────────────────────────────────────
+// Very dark versions of the CoM theme colours (Mythos purple, Logos rust,
+// Mist blue) used to tint the HUD background.
+const COM_BG_TONES = {
+  Mythos: [0x24, 0x10, 0x2c],
+  Logos:  [0x2a, 0x1a, 0x10],
+  Mist:   [0x10, 0x1e, 0x2a],
+};
+
+/** Weighted blend of COM_BG_TONES by theme counts, as #rrggbbf2. */
+function blendThemeTone(counts) {
+  const types = Object.keys(COM_BG_TONES);
+  const total = types.reduce((n, t) => n + (counts[t] || 0), 0);
+  const weights = total ? types.map(t => (counts[t] || 0) / total)
+                        : types.map(() => 1 / types.length);
+  const rgb = [0, 1, 2].map(c =>
+    Math.round(types.reduce((sum, t, i) => sum + COM_BG_TONES[t][c] * weights[i], 0)));
+  return "#" + rgb.map(v => v.toString(16).padStart(2, "0")).join("") + "f2";
+}
+
 export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** @type {CityActor} */
@@ -98,6 +117,9 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   /** Side panel open/closed; kept here so a re-render does not close it. */
   _panelOpen = false;
+
+  /** Loadout manager (checklist under the Loadout header) open/closed. */
+  _loadoutOpen = false;
 
   constructor(actor, options = {}) {
     super(options);
@@ -172,6 +194,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       ...tag,
       selected: state.selectedTags.has(tag.id),
     }));
+    const allLoadoutTags = (isOtherscape || isLegend) ? getAllLoadoutTags(this.actor) : [];
 
     // Relationship tags (side panel): crew relationships / fellowship
     const showRelationships = isOtherscape || isLegend;
@@ -217,9 +240,15 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     // ── System-specific data ──────────────────────────────────────────────────
     let helpItems = [], hurtItems = [], clueItems = [], juiceItems = [];
     let essence, essenceClass, essenceImage, essenceText;
+    // CoM: HUD background tone, the Mythos/Logos/Mist theme colours weighted
+    // by how many themes of each the character has (CSS var --mh-tone).
+    let comTone = null;
 
     if (isCityOfMist) {
       ({ helpItems, hurtItems, clueItems, juiceItems } = getJuiceAndClues(this.actor));
+      const counts = getThemeTypeCounts(
+        this.actor.items.contents.filter(i => i.type === "theme"));
+      comTone = blendThemeTone(counts);
     } else if (isOtherscape) {
       const themeItems  = this.actor.items.contents.filter(i => i.type === "theme");
       const essenceData = getEssence(themeItems);
@@ -279,6 +308,8 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       actorId:         this.actor.id,
       activeSystem, isCityOfMist, isOtherscape, isLegend,
       themes, storyTags, loadoutTags, crewThemes,
+      allLoadoutTags,
+      loadoutOpen:     this._loadoutOpen,
       hasCrewThemes:   crewThemes.length > 0,
       showRelationships, relationshipTags,
       relationshipSlots:  relationships.openSlots,
@@ -289,6 +320,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       helpItems, hurtItems, clueItems, juiceItems,
       helpHurtMessages: helpHurtMessages.length ? helpHurtMessages : null,
       essence, essenceClass, essenceImage, essenceText,
+      comTone,
       improvements,
       hasImprovements: improvements.length > 0,
       modifier:        state.modifier,
@@ -317,6 +349,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this._bindSlidingPanelListeners(html);
     this._bindRollBarListeners(html);
     this._bindCreateDeleteListeners(html);
+    this._bindLoadoutManagerListeners(html);
     this._bindTooltipListeners(html);
     this._bindDragListeners(html);
     this._updatePowerDisplay(html);
@@ -544,6 +577,76 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (ear && panel) ear.addEventListener("click", () => {
       this._panelOpen = panel.classList.toggle("open");
     });
+  }
+
+  // ── Loadout manager ───────────────────────────────────────────────────────
+  // Clicking the Loadout header opens a checklist of every loadout tag, so a
+  // player can activate / create / delete loadout tags without the sheet.
+
+  _bindLoadoutManagerListeners(html) {
+    html.find(".mh-theme-header.loadout").on("click", ev => {
+      ev.stopPropagation();
+      const manager = html.find(".mh-loadout-manager")[0];
+      if (!manager) return;
+      this._loadoutOpen = !manager.classList.contains("open");
+      manager.classList.toggle("open", this._loadoutOpen);
+    });
+
+    html.find(".mh-loadout-toggle").on("change", async ev => {
+      ev.stopPropagation();
+      const id  = ev.currentTarget.closest("[data-id]")?.dataset.id;
+      const tag = id && this.actor.items.get(id);
+      if (!tag) return;
+      const active = ev.currentTarget.checked;
+      // A deactivated tag leaves the HUD, so it must not stay selected for a roll.
+      if (!active) getOrCreateState(this.key).selectedTags.delete(id);
+      if (!!tag.system.activated_loadout === active) return;
+      if (typeof tag.toggleLoadoutActivation === "function") await tag.toggleLoadoutActivation();
+      else await tag.update({ "system.activated_loadout": active });
+    });
+
+    html.find(".mh-loadout-name").on("dblclick", async ev => {
+      ev.preventDefault();
+      const tag = this.actor.items.get(ev.currentTarget.closest("[data-id]")?.dataset.id);
+      if (tag) await sys.CityDialogs.itemEditDialog(tag);
+    });
+
+    html.find(".mh-loadout-delete").on("click", async ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const id  = ev.currentTarget.closest("[data-id]")?.dataset.id;
+      const tag = id && this.actor.items.get(id);
+      if (!tag) return;
+      const ok = await foundry.applications.api.DialogV2.confirm({
+        window: { title: game.i18n.localize("MistHUD.hud.deleteTag") },
+        content: `<p>${game.i18n.format("MistHUD.hud.deleteTagConfirm",
+          { tag: Handlebars.escapeExpression(tag.name) })}</p>`,
+      });
+      if (!ok) return;
+      getOrCreateState(this.key).selectedTags.delete(id);
+      await this.actor.deleteTag(id);
+    });
+
+    html.find(".mh-loadout-create").on("click", ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      this._createLoadoutTag();
+    });
+  }
+
+  async _createLoadoutTag() {
+    try {
+      if (!this.actor.loadout) await this.actor.createLoadoutTheme?.();
+      const result = await this.actor.createLoadoutTag?.();
+      const id     = Array.isArray(result) ? result[0]?.id : result?.id;
+      const tag    = id && this.actor.items.get(id);
+      if (!tag) return;
+      const updated = await sys.CityHelpers.itemDialog(tag);
+      if (!updated) await this.actor.deleteTag(id);
+    } catch (err) {
+      console.error(`${MODULE_ID} | Could not create loadout tag`, err);
+      ui.notifications.error(game.i18n.localize("MistHUD.hud.loadoutCreateFailed"));
+    }
   }
 
   // ── Roll bar ──────────────────────────────────────────────────────────────

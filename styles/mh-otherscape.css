@@ -850,3 +850,88 @@ color: var(--mythosOS-verylight-color);
 .mh-improvement-marker.Self i {
   transform: translateY(-3px);
 }
+
+
+/* ── Side panel / theme tooltip text ──
+   Both otherwise inherit the system's Bruno Ace, which is far too wide here. */
+.mh-panel-content,
+.mh-tooltip {
+  font-family: var(--font-family-hud);
+}
+
+/* .mh-theme-name is display:block in Otherscape; titles with an action button
+   (Crew Relationships "+") must stay one flex row. */
+.mh-theme-name.mh-title-container {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 5px;
+}
+
+.mh-theme-name.mh-title-container > :first-child {
+  min-width: 0;
+}
+
+.mh-theme-name.mh-title-container > a {
+  flex: 0 0 auto;
+}
+
+.improvements .item-name {
+  font-family: var(--font-family-main1);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+.improvements .item-description,
+.improvements .item-choice {
+  font-family: var(--font-family-hud);
+  font-size: 0.78rem;
+  line-height: 1.25;
+  text-transform: none;
+}
+
+.mh-tooltip .mystery-type {
+  font-family: var(--font-family-main1);
+  font-size: 0.85rem;
+}
+
+.mh-tooltip .mystery-text {
+  font-family: var(--font-family-hud);
+  font-size: 0.8rem;
+  text-transform: none;
+}
+
+/* ── Title tag (the theme's first power tag, question "A") ── */
+.mh-power-tag.mh-title-tag {
+  margin: 2px 1px 3px;
+}
+
+.mh-power-tag.mh-title-tag .mh-tag-text {
+  font-size: 1.3em;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
+}
+
+/* ── HUD background tinted by Essence ──────────────────────────────────────
+   Near-opaque dark finish; --mh-tone-a is the essence colour, --mh-tone-b
+   carries the second influence of two-type essences into the far corner. */
+.player-hud .window-content > .mh-hud {
+  --mh-tone-a: #2a2f36f2;
+  --mh-tone-b: #000000f2;
+  --mh-hud-bg: linear-gradient(45deg, var(--mh-tone-a) 0%, #000000f2 65%, var(--mh-tone-b) 100%);
+  background: var(--mh-hud-bg);
+  border-radius: inherit;
+}
+/* Same tint on the open side panel (it inherits the tone vars from .mh-hud) */
+.player-hud .mh-sliding-panel.open {
+  background: var(--mh-hud-bg);
+}
+.player-hud .mh-hud.mh-bg-nexus          { --mh-tone-a: #494949f2; }
+.player-hud .mh-hud.mh-bg-real           { --mh-tone-a: #3a1226f2; }
+.player-hud .mh-hud.mh-bg-avatar-conduit { --mh-tone-a: #2c1846f2; }
+.player-hud .mh-hud.mh-bg-singularity    { --mh-tone-a: #0c3440f2; }
+.player-hud .mh-hud.mh-bg-spiritualist   { --mh-tone-a: #3a1226f2; --mh-tone-b: #1e1030f2; }
+.player-hud .mh-hud.mh-bg-cyborg         { --mh-tone-a: #3a1226f2; --mh-tone-b: #082430f2; }
+.player-hud .mh-hud.mh-bg-transhuman     { --mh-tone-a: #2c1846f2; --mh-tone-b: #082430f2; }

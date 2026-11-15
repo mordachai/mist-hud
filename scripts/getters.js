@@ -236,14 +236,30 @@ export function getCrewThemes(actor) {
 // ── Power / weakness tags ────────────────────────────────────────────────────
 
 export function getPowerTags(themeId, tagItems, subTagsByParent, actor) {
-  return tagItems
-    .filter(t => t.system.theme_id === themeId && t.system.subtype === "power")
-    .map(tag => {
-      const d = applyBurnState(actor, tag.id);
-      const subtags = (subTagsByParent[tag.id] ?? []).map(sub => applyBurnState(actor, sub.id));
-      return { ...d, tagName: tag.name, crispy: !!tag.system.crispy, actorId: actor.id,
-               themeId: tag.system.theme_id, subtags };
-    });
+  let tags = tagItems.filter(t => t.system.theme_id === themeId && t.system.subtype === "power");
+
+  // Otherscape / Legend: the theme's first power tag (question "A") is its
+  // title tag. Use the system's own ordering so the HUD matches the sheet.
+  const usesTitleTag = ["otherscape", "legend"].includes(getActiveSystem());
+  let titleId = null;
+  if (usesTitleTag) {
+    const theme = actor.items.get(themeId);
+    try {
+      const ordered = theme?.powerTags;
+      if (Array.isArray(ordered) && ordered.length) {
+        const rank = new Map(ordered.map((t, i) => [t.id, i]));
+        tags = [...tags].sort((a, b) => (rank.get(a.id) ?? 1e6) - (rank.get(b.id) ?? 1e6));
+      }
+      titleId = theme?.headerTag?.[0]?.id ?? tags[0]?.id ?? null;
+    } catch { titleId = tags[0]?.id ?? null; }
+  }
+
+  return tags.map(tag => {
+    const d = applyBurnState(actor, tag.id);
+    const subtags = (subTagsByParent[tag.id] ?? []).map(sub => applyBurnState(actor, sub.id));
+    return { ...d, tagName: tag.name, crispy: !!tag.system.crispy, actorId: actor.id,
+             themeId: tag.system.theme_id, subtags, isTitle: tag.id === titleId };
+  });
 }
 
 export function getWeaknessTags(themeId, tagItems, subTagsByParent, actor) {
@@ -265,6 +281,18 @@ export function getLoadoutTags(actor) {
       const d = applyBurnState(actor, tag.id);
       return { ...d, id: tag.id, tagName: tag.name, actorId: actor.id, themeId: tag.system.theme_id };
     });
+}
+
+/**
+ * Every loadout tag (active or not), for the HUD's loadout manager.
+ * @returns {{id: string, name: string, active: boolean}[]}
+ */
+export function getAllLoadoutTags(actor) {
+  if (!actor) return [];
+  return actor.items.contents
+    .filter(i => i.type === "tag" && i.system.subtype === "loadout")
+    .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0))
+    .map(tag => ({ id: tag.id, name: tag.name, active: !!tag.system.activated_loadout }));
 }
 
 // ── Relationship tags (Otherscape crew relationships / Legend fellowship) ────
@@ -432,7 +460,8 @@ export function getJuiceAndClues(actor) {
 
 // ── Essence (Otherscape) ──────────────────────────────────────────────────────
 
-export function getEssence(themes) {
+/** Counts themes per themebook category (Self/Noise/Mythos/Logos/Mist). */
+export function getThemeTypeCounts(themes) {
   const counts = { Self: 0, Noise: 0, Mythos: 0, Logos: 0, Mist: 0 };
   for (const theme of themes.filter(t => t.name !== "__LOADOUT__")) {
     let tb = theme.themebook;
@@ -440,6 +469,11 @@ export function getEssence(themes) {
     const cat = tb?.system?.subtype;
     if (cat && cat in counts) counts[cat]++;
   }
+  return counts;
+}
+
+export function getEssence(themes) {
+  const counts = getThemeTypeCounts(themes);
   const { Self, Noise, Mythos } = counts;
   const total = Self + Noise + Mythos;
 

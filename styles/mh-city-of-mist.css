@@ -615,3 +615,16 @@ input[type="checkbox"].hurt-toggle {
 .hurt-toggle:checked::after {
   content: none;
 }
+
+/* ── HUD background tinted by Mythos/Logos/Mist balance ────────────────────
+   --mh-tone-a is set on .mh-hud by player-hud.js (theme colours weighted by
+   theme count). Very subtle: a dark tinted corner fading to near-opaque black. */
+.player-hud .window-content > .mh-hud {
+  --mh-hud-bg: linear-gradient(45deg, var(--mh-tone-a, #1e1620f2) 0%, #000000f2 60%);
+  background: var(--mh-hud-bg);
+  border-radius: inherit;
+}
+/* Same tint on the open side panel (it inherits the vars from .mh-hud) */
+.player-hud .mh-sliding-panel.open {
+  background: var(--mh-hud-bg);
+}

@@ -1,4 +1,4 @@
-<div class="mh-hud">
+<div class="mh-hud{{#if essenceClass}} mh-bg-{{essenceClass}}{{/if}}"{{#if comTone}} style="--mh-tone-a: {{comTone}}"{{/if}}>
 
   {{!-- ── Roll Bar ── --}}
   <div class="mh-roll-bar">
@@ -84,7 +84,7 @@
         <!-- Power Tags -->
         <ul class="mh-tags">
           {{#each powerTags}}
-            <li class="mh-power-tag {{this.cssClass}} {{../category}} {{#if selected}}selected{{/if}}"
+            <li class="mh-power-tag {{this.cssClass}} {{../category}} {{#if isTitle}}mh-title-tag{{/if}} {{#if selected}}selected{{/if}}"
                 data-id="{{this.id}}"
                 data-theme-id="{{this.themeId}}"
                 data-actor-id="{{actorId}}">
@@ -124,12 +124,29 @@
       <!-- Loadout (Otherscape / Legend) -->
       {{#if (or isOtherscape isLegend)}}
         <div class="theme-container">
-          <div class="mh-theme-header neutral loadout mh-title-container">
+          <div class="mh-theme-header neutral loadout mh-title-container" title="{{localize "MistHUD.hud.manageLoadout"}}">
             <span class="mh-theme-name mh-theme-name-neutral">
               {{#if isOtherscape}}{{localize "Otherscape.terms.loadoutTheme.name"}}{{/if}}
               {{#if isLegend}}{{localize "Legend.terms.loadoutTheme.name"}}{{/if}}
             </span>
             <span class="mh-theme-icon-notip loadout"></span>
+          </div>
+          {{!-- Loadout manager: every loadout tag with an activation checkbox --}}
+          <div class="mh-loadout-manager {{#if loadoutOpen}}open{{/if}}">
+            <ul class="mh-loadout-list">
+              {{#each allLoadoutTags}}
+                <li class="mh-loadout-row {{#if active}}active{{/if}}" data-id="{{id}}">
+                  <label>
+                    <input type="checkbox" class="mh-loadout-toggle" {{#if active}}checked{{/if}} />
+                    <span class="mh-loadout-name" title="{{localize "MistHUD.hud.editLoadoutTag"}}">{{name}}</span>
+                  </label>
+                  <a class="mh-loadout-delete" title="{{localize "MistHUD.hud.deleteTag"}}"><i class="fas fa-trash"></i></a>
+                </li>
+              {{else}}
+                <li class="mh-loadout-empty">{{localize "MistHUD.hud.noLoadoutTags"}}</li>
+              {{/each}}
+            </ul>
+            <a class="mh-loadout-create"><i class="fas fa-plus"></i> {{localize "MistHUD.hud.createLoadoutTag"}}</a>
           </div>
           <ul class="mh-tags">
             {{#each loadoutTags}}
@@ -261,7 +278,7 @@
             </div>
             <ul class="mh-tags">
               {{#each powerTags}}
-                <li class="mh-power-tag {{this.cssClass}} Crew {{#if selected}}selected{{/if}} {{#if crispy}}mh-crispy{{/if}}"
+                <li class="mh-power-tag {{this.cssClass}} Crew {{#if isTitle}}mh-title-tag{{/if}} {{#if selected}}selected{{/if}} {{#if crispy}}mh-crispy{{/if}}"
                     data-id="{{this.id}}"
                     data-actor-id="{{actorId}}"
                     data-theme-id="{{this.themeId}}">
@@ -323,6 +340,21 @@
     <span class="mh-panel-badge"></span>
     <div class="mh-panel-content">
 
+      {{#if isOtherscape}}
+        <div class="section otherscape">
+          <div class="mh-theme-name mh-theme-name-neutral mh-essence-title">
+            <div>Essence:</div>
+            <div class="mh-essence-title {{essenceClass}}">{{essence}}</div>
+          </div>
+          <div class="mh-essence-chart {{essenceClass}}">
+            <img src="modules/mist-hud/ui/essences/{{essenceImage}}" alt="{{essence}}" />
+          </div>
+          {{{essenceText}}}
+        </div>
+        <hr class="panel-divider mh-fade-divider" />
+      {{/if}}
+
+
       {{!-- Relationship tags (Otherscape crew relationships / Legend fellowship).
            Rows are also .mh-story-tag so they share its select / burn / invert /
            edit / delete behaviour. --}}
@@ -381,9 +413,8 @@
                 <div class="improvement-container">
                   <div class="mh-title-container">
                     <span class="item-name">
-                      <i class="fa-solid fa-star" style="font-size: 0.45rem; margin-right: 2px;"></i>
-                      {{this.name}}
-                      {{#if (gt this.uses.max 0)}} - {{this.uses.current}}/{{this.uses.max}}{{/if}}
+                      <i class="fa-solid fa-star mh-improvement-star"></i>
+                      <span>{{this.name}}{{#if (gt this.uses.max 0)}} - {{this.uses.current}}/{{this.uses.max}}{{/if}}</span>
                     </span>
                   </div>
                   {{#if this.description}}
@@ -473,19 +504,6 @@
               </div>
             </div>
           {{/each}}
-        </div>
-      {{/if}}
-
-      {{#if isOtherscape}}
-        <div class="section otherscape">
-          <div class="mh-theme-name mh-theme-name-neutral mh-essence-title">
-            <div>Essence:</div>
-            <div class="mh-essence-title {{essenceClass}}">{{essence}}</div>
-          </div>
-          <div class="mh-essence-chart {{essenceClass}}">
-            <img src="modules/mist-hud/ui/essences/{{essenceImage}}" alt="{{essence}}" />
-          </div>
-          {{{essenceText}}}
         </div>
       {{/if}}
 

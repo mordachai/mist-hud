@@ -806,7 +806,7 @@ hr {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start; /* star stays on the first line of a wrapped title */
   font-weight: bold;
   font-family: var(--font-family-main2);
   font-size: 0.85rem;
@@ -1341,4 +1341,113 @@ hr {
   padding: 1px 6px;
   font-size: 0.7em;
   cursor: pointer;
+}
+
+
+/* Theme special star: pinned to the first line of the title */
+.improvements .mh-improvement-star {
+  flex: 0 0 auto;
+  font-size: 0.45rem;
+  margin: 0.45em 3px 0 0;
+}
+
+/* Fading divider (Essence block at the top of the side panel) */
+.panel-divider.mh-fade-divider {
+  height: 1px;
+  margin: 8px 0;
+  background: linear-gradient(to right,
+    transparent, rgba(245, 245, 245, 0.7) 50%, transparent);
+}
+
+/* Essence chart floats; keep it inside its section */
+.section.otherscape {
+  display: flow-root;
+}
+
+/* ── Loadout manager (checklist under the Loadout header) ── */
+.mh-theme-header.loadout {
+  cursor: pointer;
+}
+
+.mh-loadout-manager {
+  display: none;
+  margin: 2px 6px 6px;
+  padding: 4px 6px;
+  border: 1px solid #555;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.55);
+  color: whitesmoke;
+  font-family: var(--font-family-hud);
+  font-size: 0.8rem;
+}
+
+.mh-loadout-manager.open {
+  display: block;
+}
+
+.mh-loadout-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mh-loadout-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 0;
+}
+
+.mh-loadout-row label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.mh-loadout-row input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
+
+.mh-loadout-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #b4b9c0;
+}
+
+.mh-loadout-row.active .mh-loadout-name {
+  color: whitesmoke;
+}
+
+.mh-loadout-delete {
+  flex: 0 0 auto;
+  font-size: 0.65rem;
+  opacity: 0.6;
+}
+
+.mh-loadout-delete:hover {
+  opacity: 1;
+}
+
+.mh-loadout-empty {
+  font-style: italic;
+  color: #9aa5a8;
+}
+
+.mh-loadout-create {
+  display: block;
+  margin-top: 4px;
+  padding-top: 3px;
+  border-top: 1px dashed #555;
+  font-size: 0.75rem;
+  color: #b4b9c0;
+}
+
+.mh-loadout-create:hover {
+  color: whitesmoke;
 }

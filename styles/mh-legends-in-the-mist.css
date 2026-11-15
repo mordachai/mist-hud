@@ -1332,3 +1332,11 @@
   font-size: large;
   font-weight: 600;
 }
+
+/* ── Title tag (the theme's first power tag, question "A") ── */
+.mh-power-tag.mh-title-tag {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 2px;
+}
