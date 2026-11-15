@@ -1,5 +1,14 @@
 {
 
+"MistHUD.hud.moveGroup.session": "Session & Cinematic",
+
+"MistHUD.tooltip.unspent": "Unspent upgrades",
+"MistHUD.tooltip.chooseImprovement": "Choose improvement",
+"MistHUD.tooltip.resetCrack": "Reset crack",
+"MistHUD.tooltip.resetCrackConfirm": "Spend an upgrade to reset crack/fade on {theme}?",
+
+"MistHUD.notify.noThemePermission": "You don't have permission to edit this theme.",
+
 "Legend.terms.improve": "Improve",
 "Legend.terms.abandon": "Abandon",
 "Legend.terms.quest": "Quest",

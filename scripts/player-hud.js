@@ -37,6 +37,13 @@ const SYSTEM_FILES = {
 };
 
 /** @type {{CityRoll?: any, CityDB?: any, CityHelpers?: any, CityDialogs?: any}} */
+const MOVE_GROUP_LABELS = {
+  core:    "CityOfMist.terms.coreMoves",
+  session: "MistHUD.hud.moveGroup.session",
+  special: "MistHUD.hud.specialMoves",
+  shb:     "CityOfMist.terms.shb",
+};
+
 const sys = {};
 const _systemFailures = [];
 
@@ -226,11 +233,13 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     });
 
     // ── Improvements ──────────────────────────────────────────────────────────
-    const improvements = getImprovements(this.actor);
+    const improvements = [...getImprovements(this.actor), ...getCrewImprovements(this.actor)];
 
     // ── Move buttons ──────────────────────────────────────────────────────────
     const allMoves = sys.CityDB?.movesList ?? [];
-    const { core, advanced, shb } = organizeMoves(allMoves);
+    // Advanced moves follow the character sheet's rule (e.g. Mist/Mythos-theme
+    // moves need such a theme).
+    const groups = organizeMoves(allMoves, m => this.actor.canUseMove?.(m) ?? true);
     const useText    = game.settings.get(MODULE_ID, SETTINGS.USE_TEXT_BUTTONS);
     const isDynamite = game.settings.get(MODULE_ID, SETTINGS.ROLL_IS_DYNAMITE);
     const dynamiteImg = isDynamite
@@ -263,8 +272,12 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       hasImprovements: improvements.length > 0,
       modifier:        state.modifier,
       isDynamite, dynamiteImg,
-      coreMoves:       core.map(_fmt),
-      advancedMoves:   [...advanced, ...shb].map(_fmt),
+      moveGroups:      groups.map((g, i) => ({
+        key: g.key, index: i, first: i === 0,
+        label: game.i18n.localize(MOVE_GROUP_LABELS[g.key]),
+        moves: g.moves.map(_fmt),
+      })),
+      multipleMoveGroups: groups.length > 1,
       useText,
     };
   }
@@ -507,17 +520,16 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     });
 
     // Toggle core ↔ advanced moves
+    // Cycle through the move pages (core → session → special → SHB → core…)
     html.find(".mh-roll-toggle").on("click", ev => {
-      const core = html.find(".core-moves");
-      const adv  = html.find(".special-moves");
-      const btn  = $(ev.currentTarget).find("i");
-      if (core.is(":visible")) {
-        core.slideUp(250, () => adv.slideDown(250));
-        btn.removeClass("fa-caret-up").addClass("fa-caret-down");
-      } else {
-        adv.slideUp(250, () => core.slideDown(250));
-        btn.removeClass("fa-caret-down").addClass("fa-caret-up");
-      }
+      const pages = html.find(".mh-roll-container[data-group-index]");
+      if (pages.length < 2) return;
+      const cur  = pages.filter(":visible").first();
+      const next = pages.eq((pages.index(cur) + 1) % pages.length);
+      cur.slideUp(250, () => next.slideDown(250));
+      $(ev.currentTarget).attr("title", pages.eq((pages.index(next) + 1) % pages.length).data("label"));
+      $(ev.currentTarget).find("i").toggleClass("fa-caret-up", pages.index(next) === 0)
+                                   .toggleClass("fa-caret-down", pages.index(next) !== 0);
     });
 
     // Dynamite toggle
@@ -808,19 +820,38 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       const themeType = el.dataset.themeType;
       $(el).off("mouseenter mouseleave").on({
         mouseenter: async ev => {
-          if (this._currentTooltip) { this._currentTooltip.remove(); this._currentTooltip = null; }
+          this._cancelTooltipHide();
+          this._removeTooltip();
           try {
-            const data = themeType === "crew"
-              ? (getCrewThemes(this.actor).find(t => t.id === themeId) ?? { mysteryText: "" })
-              : getMysteryFromTheme(this.actor, themeId);
+            const data = this._tooltipData(themeId, themeType);
             this._currentTooltip = await this._showTooltip(ev, data);
+            this._currentTooltip.data({ themeId, themeType });
           } catch { /* ignore */ }
         },
-        mouseleave: () => {
-          if (this._currentTooltip) { this._currentTooltip.remove(); this._currentTooltip = null; }
-        },
+        mouseleave: () => this._scheduleTooltipHide(),
       });
     });
+  }
+
+  _tooltipData(themeId, themeType) {
+    return themeType === "crew"
+      ? (getCrewThemes(this.actor).find(t => t.id === themeId) ?? { mysteryText: "" })
+      : getMysteryFromTheme(this.actor, themeId);
+  }
+
+  _removeTooltip() {
+    if (this._currentTooltip) { this._currentTooltip.remove(); this._currentTooltip = null; }
+    $(".mh-tooltip").remove();
+  }
+
+  _scheduleTooltipHide() {
+    this._cancelTooltipHide();
+    this._tooltipHideTimer = setTimeout(() => this._removeTooltip(), 250);
+  }
+
+  _cancelTooltipHide() {
+    clearTimeout(this._tooltipHideTimer);
+    this._tooltipHideTimer = null;
   }
 
   async _showTooltip(event, data) {
@@ -830,11 +861,84 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     $("body").append(tooltip);
     const ww = $(window).width(), wh = $(window).height();
     const tw = tooltip.outerWidth(), th = tooltip.outerHeight();
-    let top  = event.pageY + 16, left = event.pageX + 10;
+    let top  = event.pageY + 8, left = event.pageX + 6;
     if (left + tw > ww) left = ww - tw - 10;
     if (top  + th > wh) top  = wh - th - 10;
     tooltip.css({ top, left, position: "fixed" });
+
+    // Interactive: stay open while hovered; click a track box to add/remove a point.
+    tooltip.on({
+      mouseenter: () => this._cancelTooltipHide(),
+      mouseleave: () => this._scheduleTooltipHide(),
+    });
+    tooltip.on("click", ".mh-box[data-track]", ev => this._onTrackBoxClick(ev, tooltip));
+    tooltip.on("click", ".mh-upgrade-btn", ev => this._onUpgradeAction(ev, tooltip));
     return tooltip;
+  }
+
+  /** Spend an unspent upgrade: pick an improvement, or reset crack/fade. */
+  async _onUpgradeAction(ev, tooltip) {
+    ev.preventDefault(); ev.stopPropagation();
+    const action  = ev.currentTarget.dataset.action;
+    const root    = tooltip.find(".mh-tooltip-theme")[0];
+    const themeId = root?.dataset.themeId;
+    const owner   = game.actors.get(root?.dataset.ownerId) ?? this.actor;
+    const theme   = owner?.getTheme?.(themeId);
+    if (!theme) return;
+    if (!owner.isOwner) return ui.notifications.warn(game.i18n.localize("MistHUD.notify.noThemePermission"));
+    // Dialogs outlive the hover: keep the tooltip from vanishing underneath them.
+    this._cancelTooltipHide();
+    try {
+      if (action === "choose-improvement") {
+        const choice = await sys.CityDialogs.improvementOrTagChoiceList(owner, theme, "improvement");
+        if (choice == null) return;
+        const created = await owner.addImprovement(themeId, Number(choice));
+        const imp = owner.getImprovement(created.id);
+        if (imp) {
+          await sys.CityHelpers.itemDialog(imp);
+          await sys.CityHelpers.modificationLog(owner, "Created", imp);
+        }
+      } else if (action === "reset-crack") {
+        const ok = await foundry.applications.api.DialogV2.confirm({
+          window: { title: game.i18n.localize("MistHUD.tooltip.resetCrack") },
+          content: `<p>${game.i18n.format("MistHUD.tooltip.resetCrackConfirm", { theme: theme.name })}</p>`,
+        });
+        if (!ok) return;
+        await owner.resetFade(themeId);
+        await sys.CityHelpers.modificationLog(owner, "Spent Theme Upgrade to Reset Fade", theme);
+      }
+    } catch (e) { console.error("mist-hud | upgrade action failed", e); return; }
+    await this._refreshTooltip(tooltip);
+  }
+
+  async _refreshTooltip(tooltip) {
+    if (!this._currentTooltip || this._currentTooltip[0] !== tooltip[0]) return;
+    const { themeId, themeType } = tooltip.data();
+    const data = this._tooltipData(themeId, themeType);
+    tooltip.html(await foundry.applications.handlebars.renderTemplate("modules/mist-hud/templates/mh-tooltip-theme.hbs", data));
+  }
+
+  /** Filled box → remove a point; empty box → add one (system rules handle wrap-around/improvements). */
+  async _onTrackBoxClick(ev, tooltip) {
+    ev.preventDefault(); ev.stopPropagation();
+    const box     = ev.currentTarget;
+    const track   = box.dataset.track;
+    const filled  = box.classList.contains("active");
+    const root    = tooltip.find(".mh-tooltip-theme")[0];
+    const themeId = root?.dataset.themeId;
+    const owner   = game.actors.get(root?.dataset.ownerId) ?? this.actor;
+    if (!themeId || !owner) return;
+    if (!owner.isOwner) return ui.notifications.warn(game.i18n.localize("MistHUD.notify.noThemePermission"));
+
+    const fn = {
+      attention: filled ? "removeAttention" : "addAttention",
+      crack:     filled ? "removeFade"      : "addFade",
+      milestone: filled ? "removeMilestone" : "addMilestone",
+    }[track];
+    if (typeof owner[fn] !== "function") return;
+    try { await owner[fn](themeId); } catch (e) { console.error("mist-hud | track update failed", e); return; }
+
+    await this._refreshTooltip(tooltip);
   }
 
   // ── Drag ──────────────────────────────────────────────────────────────────
@@ -879,6 +983,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   async close(options) {
+    this._cancelTooltipHide();
     $(".mh-tooltip").remove();
     // Only remove our own entry (a newer HUD may already own the key)
     if (this.key && playerHudRegistry.get(this.key) === this) playerHudRegistry.delete(this.key);

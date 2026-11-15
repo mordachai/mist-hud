@@ -1,5 +1,14 @@
 {
 
+"MistHUD.hud.moveGroup.session": "Sessão & Cinemáticos",
+
+"MistHUD.tooltip.unspent": "Melhorias não gastas",
+"MistHUD.tooltip.chooseImprovement": "Escolher melhoria",
+"MistHUD.tooltip.resetCrack": "Resetar rachadura",
+"MistHUD.tooltip.resetCrackConfirm": "Gastar uma melhoria para resetar rachadura/fade em {theme}?",
+
+"MistHUD.notify.noThemePermission": "Você não tem permissão para editar este tema.",
+
 "Legend.terms.upgrade": "Melhorar",
 "Legend.terms.decay": "Abandonar",
 "Legend.terms.quest": "Missão",

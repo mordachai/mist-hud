@@ -2,18 +2,40 @@
 // Move data (name, effects, localization) comes from CityDB.movesList.
 // This file only defines where buttons appear in the HUD footer.
 
+/** Effect classes of narrative / session-flow moves, in display order. */
+const SESSION_FX = ["MONOLOGUE", "FLASHBACK", "DOWNTIME", "SESSION_END"];
+
+function _sessionRank(move) {
+  const fx = String(move.system?.effect_class ?? "").split(/\s+/);
+  const i = SESSION_FX.findIndex(k => fx.includes(k));
+  return i;
+}
+
 /**
- * Returns the moves from CityDB.movesList organised for display.
- * Core moves → primary row, Advanced/SHB → secondary row.
+ * Organise CityDB.movesList into the HUD's pages (only non-empty ones):
+ *   core    → the basic moves
+ *   session → cinematic / session-flow moves (Opening Monologue, Flashback,
+ *             Downtime, Session End / Credit Roll)
+ *   special → every other Advanced move (theme-specific and custom moves)
+ *   shb     → Stop Holding Back / Go Out in a Blaze / Sacrifice
  *
  * @param {Item[]} movesList  CityDB.movesList (already filtered to active system)
- * @returns {{ core: Item[], advanced: Item[], shb: Item[] }}
+ * @param {(move: Item) => boolean} [canUse]  filter for Advanced moves
+ * @returns {{ key: string, moves: Item[] }[]}
  */
-export function organizeMoves(movesList) {
+export function organizeMoves(movesList, canUse = () => true) {
   const core     = movesList.filter(m => m.system.category === "Core");
-  const advanced = movesList.filter(m => m.system.category === "Advanced");
+  const advanced = movesList.filter(m => m.system.category === "Advanced" && canUse(m));
   const shb      = movesList.filter(m => m.system.category === "SHB");
-  return { core, advanced, shb };
+  const session  = advanced.filter(m => _sessionRank(m) >= 0)
+                           .sort((a, b) => _sessionRank(a) - _sessionRank(b));
+  const special  = advanced.filter(m => _sessionRank(m) < 0);
+  return [
+    { key: "core", moves: core },
+    { key: "session", moves: session },
+    { key: "special", moves: special },
+    { key: "shb", moves: shb },
+  ].filter(g => g.moves.length);
 }
 
 /**
@@ -45,7 +67,12 @@ const MOVE_IMAGES = {
     stopholdingback1: "SHB-Significant.webp", stopholdingback2: "SHB-NoReturn.webp",
     stopholdingback3: "SHB-Ultimate.webp",
     openingmonologue: "Monologue.webp", flashback: "Flashback.webp",
-    downtime: "Downtime.webp", sessionend: "Session End.webp"
+    downtime: "Downtime.webp", sessionend: "Session End.webp",
+    escapefrommemory: "Escape From Memory.webp", finallysomeanswers: "Finally Some Answers.webp",
+    foreshadowing: "Foreshadow.webp", lookbehind: "Look Behind The Mist.webp",
+    // GK variant must precede the generic key: lookup is first startsWith match
+    makeahardchoicegk: "Make a Hard Choice - Gatekeeper.webp", makeahardchoice: "Hardchoice.webp",
+    performancereview: "Performance Review.webp"
   },
   otherscape: {
     mitigate: "Mitigate Consequences.webp", quickoutcome: "Quick Outcome.webp",

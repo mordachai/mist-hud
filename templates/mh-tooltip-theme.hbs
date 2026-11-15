@@ -1,4 +1,4 @@
-<div class="mh-tooltip-theme">
+<div class="mh-tooltip-theme" data-theme-id="{{themeId}}" data-owner-id="{{ownerId}}">
 
   <div class="mh-tooltip-header">
     <div class="mh-tooltip-title">
@@ -28,7 +28,7 @@
         <div class="mh-resource-group attention-group">
           <div class="boxes">
             {{#each attention}}
-              <span class="mh-box attention {{#if this}}active{{/if}}"></span>
+              <span class="mh-box attention {{#if this}}active{{/if}}" data-track="attention" data-index="{{@index}}"></span>
             {{/each}}
           </div>
           <div class="mh-resource-label">{{attentionLabel}}</div>
@@ -38,14 +38,42 @@
         <div class="mh-resource-group crack-group">
           <div class="boxes">
             {{#each crack}}
-              <span class="mh-box crack {{#if this}}active{{/if}}"></span>
+              <span class="mh-box crack {{#if this}}active{{/if}}" data-track="crack" data-index="{{@index}}"></span>
             {{/each}}
           </div>
           <div class="mh-resource-label">{{crackLabel}}</div>
         </div>
+
+        {{#if useMilestone}}
+        <!-- Milestone Column (Legend) -->
+        <div class="mh-resource-group milestone-group">
+          <div class="boxes">
+            {{#each milestone}}
+              <span class="mh-box milestone {{#if this}}active{{/if}}" data-track="milestone" data-index="{{@index}}"></span>
+            {{/each}}
+          </div>
+          <div class="mh-resource-label">{{milestoneLabel}}</div>
+        </div>
+        {{/if}}
       </div>
 
   </div>
+
+  {{#if unspent}}
+  <div class="mh-upgrade-actions">
+    <span class="mh-upgrade-count" title="{{localize "MistHUD.tooltip.unspent"}}">
+      {{#times unspent}}<i class="fa-light fa-star"></i>{{/times}}
+    </span>
+    <button type="button" class="mh-upgrade-btn" data-action="choose-improvement">
+      <i class="fa-solid fa-star"></i> {{localize "MistHUD.tooltip.chooseImprovement"}}
+    </button>
+    {{#if canReset}}
+    <button type="button" class="mh-upgrade-btn" data-action="reset-crack">
+      <i class="fa-solid fa-rotate-left"></i> {{localize "MistHUD.tooltip.resetCrack"}}
+    </button>
+    {{/if}}
+  </div>
+  {{/if}}
 
   <hr class="mh-divider">
 

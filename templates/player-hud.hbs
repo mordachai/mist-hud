@@ -2,8 +2,9 @@
 
   {{!-- ── Roll Bar ── --}}
   <div class="mh-roll-bar">
-    <div class="mh-roll-container core-moves">
-      {{#each coreMoves}}
+    {{#each moveGroups}}
+    <div class="mh-roll-container mh-move-group-{{key}}" data-group-index="{{index}}" data-label="{{label}}" {{#unless first}}style="display:none"{{/unless}}>
+      {{#each moves}}
         {{#if useText}}
           <button class="mh-roll-button" data-move-id="{{this.id}}" title="{{this.tooltip}}">
             <div class="mh-roll-main">{{this.abbr}}</div>
@@ -15,27 +16,17 @@
         {{/if}}
       {{/each}}
     </div>
-    <div class="mh-roll-container special-moves" style="display:none">
-      {{#each advancedMoves}}
-        {{#if useText}}
-          <button class="mh-roll-button" data-move-id="{{this.id}}" title="{{this.tooltip}}">
-            <div class="mh-roll-main">{{this.abbr}}</div>
-          </button>
-        {{else}}
-          <button class="mh-roll-button mh-roll-button-img" data-move-id="{{this.id}}" title="{{this.tooltip}}">
-            <img src="{{this.imgSrc}}" alt="{{this.name}}" class="mh-roll-img">
-          </button>
-        {{/if}}
-      {{/each}}
-    </div>
+    {{/each}}
     {{#if isCityOfMist}}
     <button class="mh-roll-button-img mh-dynamite-toggle" title="{{localize "CityOfMist.terms.dynamite"}}">
       <img src="{{dynamiteImg}}" class="mh-roll-img" alt="Dynamite">
     </button>
     {{/if}}
-    <button class="mh-roll-toggle" title="{{localize "MistHUD.hud.specialMoves"}}">
+    {{#if multipleMoveGroups}}
+    <button class="mh-roll-toggle" title="{{moveGroups.1.label}}">
       <i class="fa-solid fa-caret-up"></i>
     </button>
+    {{/if}}
   </div>
 
   {{!-- ── Main Content ── --}}
@@ -427,7 +418,7 @@
 
         <div class="section juice">
           <div class="mh-theme-name title-effect mh-title-container">
-            <div><i class="fa-sharp-duotone fa-regular fa-battery-bolt"></i> {{localize "CityOfMist.terms.juice"}}</div>
+            <div><i class="fa-solid fa-bolt"></i> {{localize "CityOfMist.terms.juice"}}</div>
             <a class="create-juice" title="{{localize "MistHUD.hud.createJuice"}}"><i class="fas fa-plus"></i></a>
           </div>
           {{#each juiceItems}}

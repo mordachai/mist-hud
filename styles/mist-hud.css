@@ -228,7 +228,16 @@ overflow: visible !important;
 }
 
 #mist-hud.minimized .window-content {
-  display: none;
+  display: none !important;
+}
+
+/* The 500px min-height must not survive minimizing, or an empty frame stays behind */
+#mist-hud.minimized {
+  min-height: 0 !important;
+  height: auto !important;
+  background: none !important;
+  box-shadow: none;
+  border: none;
 }
 
 .mist-hud.collapsed .window-content {
@@ -473,7 +482,7 @@ hr {
   border: 1px solid whitesmoke;
   border-radius: 5px;
   box-shadow: 0 4px 6px rgba(80, 52, 97, 0.5); 
-  pointer-events: none; 
+  pointer-events: auto; 
 }
 
 .mystery-type {
@@ -1085,10 +1094,29 @@ hr {
   font-weight: bold;
 }
 
-/* Tooltip styling for hover-only tooltips */
+/* Tooltip is interactive (track boxes are clickable) */
 .mh-tooltip {
-  pointer-events: none; 
+  pointer-events: auto;
   z-index: 1000;
+}
+
+.mh-tooltip .mh-box[data-track] {
+  cursor: pointer;
+}
+.mh-tooltip .mh-box[data-track]:hover {
+  filter: brightness(1.5);
+}
+
+/* Third track (Legend milestone) */
+.mh-box.milestone {
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+}
+.mh-box.milestone.active {
+  background: currentColor;
 }
 
 /* Menu styling for the interactive menu */
@@ -1199,4 +1227,21 @@ hr {
   background-color: rgba(0, 0, 0, 0.1);
   padding: 0 4px;
   border-radius: 3px;
+}
+/* Tooltip upgrade actions (choose improvement / reset crack) */
+.mh-upgrade-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 4px 0 2px;
+}
+.mh-upgrade-count { font-size: 0.7em; }
+.mh-upgrade-btn {
+  width: auto;
+  height: auto;
+  line-height: 1.2;
+  padding: 1px 6px;
+  font-size: 0.7em;
+  cursor: pointer;
 }

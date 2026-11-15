@@ -66,11 +66,28 @@ export function getMysteryFromTheme(actor, themeId) {
     crack:          theme.system.crack ?? [],
     attentionLabel,
     crackLabel,
+    ..._trackExtras(theme),
     themeInfo: {
       locale_name: realThemebook.system?.locale_name
         ? game.i18n.localize(realThemebook.system.locale_name.replace(/^#/, "")) : "",
     },
     activeSystem: system,
+  };
+}
+
+/** Ids + optional third track (Legend milestone) so the tooltip can edit the tracks. */
+function _trackExtras(theme) {
+  let milestoneLabel = "";
+  try { milestoneLabel = theme.getThemePropertyTerm?.("milestone") ?? ""; } catch { /* none */ }
+  return {
+    themeId:        theme.id,
+    ownerId:        theme.parent?.id,
+    milestone:      theme.system.milestone ?? [],
+    milestoneLabel,
+    useMilestone:   milestoneLabel.length > 0,
+    unspent:        theme.system.unspent_upgrades || 0,
+    canReset:       (theme.system.unspent_upgrades || 0) > 0
+                    && (theme.system.crack ?? []).some(Boolean),
   };
 }
 
@@ -209,6 +226,7 @@ export function getCrewThemes(actor) {
         unspent_upgrades:     theme.system.unspent_upgrades || 0,
         localizedThemebookName: tb?.name ?? theme.name,
         prefix, attentionLabel, crackLabel,
+        ..._trackExtras(theme),
         activeSystem:         system,
       };
     })
@@ -270,7 +288,7 @@ export function getActorStatuses(actor) {
 export function getImprovements(actor) {
   if (!actor) return [];
   const themeMap = _buildThemeMap(actor.items.contents, actor);
-  return _groupImprovements(actor.items.contents, themeMap);
+  return Object.values(_groupImprovements(actor.items.contents, themeMap));
 }
 
 export function getCrewImprovements(actor) {
@@ -294,11 +312,18 @@ function _buildThemeMap(items, actor, useActorNameForThemebook = false) {
     if (!tb) return acc;
     acc[theme.id] = {
       id: theme.id,
-      themebookName: useActorNameForThemebook ? actor.name : tb.name,
+      themebookName: useActorNameForThemebook ? actor.name : _loc(tb.name),
       themeType:     tb.system.subtype || "Unknown",
     };
     return acc;
   }, {});
+}
+
+/** Compendium text is stored as "#Some.lang.key"; localize those, leave plain text alone. */
+function _loc(text) {
+  if (typeof text !== "string" || !text.startsWith("#")) return text;
+  const key = text.slice(1);
+  return game.i18n.has(key) ? game.i18n.localize(key) : text;
 }
 
 function _groupImprovements(items, themeMap, grouped = {}) {
@@ -310,11 +335,11 @@ function _groupImprovements(items, themeMap, grouped = {}) {
     }
     grouped[key].improvements.push({
       id:          item.id,
-      name:        item.name,
-      description: item.system.description || "",
+      name:        _loc(item.name),
+      description: _loc(item.system.description) || "",
       effect_class: item.system.effect_class || null,
       theme_id:    item.system.theme_id || null,
-      choiceItem:  item.system.choice_item || null,
+      choiceItem:  _loc(item.system.choice_item) || null,
       uses:        item.system.uses || { max: 0, current: 0, expended: false },
     });
   }
