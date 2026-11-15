@@ -1064,6 +1064,19 @@
   font-size: 0.7em;
   text-align: center;
   color: var(--light-color);
+  white-space: nowrap;
+}
+
+/* Three tracks (Improve / Abandon / Milestone) need more room than the base 300px */
+.mh-tooltip-theme {
+  max-width: 360px;
+}
+.mh-tooltip-theme .mh-tooltip-title {
+  gap: 12px;
+}
+.mh-tooltip-theme .mh-resource-bar {
+  gap: 8px;
+  flex-wrap: nowrap;
 }
 
 .mh-improvement-marker {
@@ -1223,9 +1236,14 @@
     align-items: center;
     justify-content: center;
     margin: auto;
-    padding: 0;
+    /* Shield is wide on top and pointed below: lift the number into the wide
+       part so it reads as centred. Box keeps the SVG's 40.68:50 ratio. */
+    box-sizing: border-box;
+    padding: 0 0 0.22em;
     width: 1.2em;
     height: auto;
+    aspect-ratio: 40.68 / 50;
+    line-height: 1;
     text-align: center;
     font-size: 1.2rem;
     background-image: url('../ui/icons/litm-limit-shield.svg');
@@ -1293,13 +1311,20 @@
     text-shadow: 1px 1px 2px rgb(255, 249, 249);
 }
 
-/* Consequence bullet: the book's skull diamond, aligned to the first line */
+/* Consequence bullet: the book's skull diamond, centred on the first line.
+   The li aligns its items on the first baseline, and the img sits
+   vertical-align: middle on the marker's own baseline, so the skull lands on
+   the middle of the first text line whatever its height (inline tags included). */
+.npc-threat ul li:has(> .npc-consequence-marker) {
+  align-items: baseline;
+}
 .npc-threat ul li .npc-consequence-marker {
-  display: flex;
-  align-items: center;
-  height: 1.3em;
-  line-height: 1;
+  display: block;
   margin-right: 6px;
+}
+.npc-threat ul li .npc-consequence-marker img {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .npc-consequence-marker img {
@@ -1354,4 +1379,99 @@
   font-weight: 700;
   line-height: 1.1;
   margin-bottom: 2px;
+}
+
+/* -- Backpack activation popup: parchment like the HUD -- */
+.mh-loadout-popup {
+  /* Opaque: the HUD must not show through */
+  background: #efe7d6 url('../ui/litm_hud2_BG.webp') center / 100% 100% no-repeat;
+  border: 1px solid var(--effects-color1);
+  box-shadow: 0 4px 10px rgba(60, 40, 20, 0.45);
+}
+.mh-loadout-popup .mh-loadout-popup-header {
+  border-bottom-color: var(--effects-color1);
+}
+.mh-loadout-popup .mh-loadout-popup-title,
+.mh-loadout-popup .mh-loadout-create {
+  font-family: var(--font-family-main1);
+  color: var(--effects-color1);
+}
+.mh-loadout-popup .mh-loadout-create:hover {
+  color: var(--effects-color2);
+}
+/* Popup rows: square | burn marker | name. Overrides the HUD tag grid
+   (.mh-loadout-tag) above; must stay in this unlayered file to win. */
+.mh-loadout-popup .mh-loadout-choice {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  margin: 1px 0;
+  padding: 0 2px;
+  text-align: left;
+}
+.mh-loadout-popup .mh-loadout-choice .mh-loadout-toggle {
+  flex: 0 0 auto;
+  width: 1em;
+  font-size: 0.9rem;
+  text-align: center;
+  color: var(--effects-color1);
+}
+.mh-loadout-popup .mh-loadout-choice .burn-icon {
+  flex: 0 0 auto;
+  margin: 0;
+}
+.mh-loadout-popup .mh-loadout-choice .mh-tag-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+/* Not activated: still listed, dimmed */
+.mh-loadout-popup .mh-loadout-choice:not(.active) .mh-tag-text,
+.mh-loadout-popup .mh-loadout-choice:not(.active) .burn-icon {
+  opacity: 0.5;
+}
+
+/* Loadout weakness nested under its loadout tag (as on the sheet) */
+.mh-tags .mh-weakness-tag.mh-loadout-weakness {
+  margin-left: 18px;
+}
+
+/* Popup edit mode: rename field + delete button per row */
+.mh-loadout-popup .mh-loadout-choice .mh-loadout-rename {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 1.7em;
+  margin: 1px 0;
+  padding: 0 4px;
+  font: inherit;
+  font-size: 0.95rem;
+  text-transform: none;
+  border-radius: 3px;
+  box-shadow: none;
+}
+.mh-loadout-popup .mh-loadout-choice .mh-loadout-delete {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  opacity: 0.65;
+  cursor: pointer;
+}
+.mh-loadout-popup .mh-loadout-choice .mh-loadout-delete:hover {
+  opacity: 1;
+}
+.mh-loadout-popup .mh-loadout-choice .mh-loadout-rename {
+  color: var(--text-tag-color);
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--effects-color1);
+}
+.mh-loadout-popup .mh-loadout-choice .mh-loadout-delete,
+.mh-loadout-popup .mh-loadout-edit {
+  color: var(--effects-color1);
+}
+.mh-loadout-popup .mh-loadout-edit:hover,
+.mh-loadout-popup .mh-loadout-edit.active {
+  color: var(--effects-color2);
 }

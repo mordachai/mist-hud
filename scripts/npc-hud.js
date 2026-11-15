@@ -120,8 +120,19 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
             minimizable: true,
             title: "MistHUD.window.npcHud"
         },
-        position: { width: 310, height: 'auto', left: 950, top: 120 }
+        position: { width: 310, height: 'auto', left: 950, top: 120 },
+        actions: {
+            openSheet: NpcHUD.#onOpenSheet,
+        },
     };
+
+    /** Header button: open the actor's sheet and close the HUD. */
+    static async #onOpenSheet(event) {
+        event.preventDefault();
+        const actor = this.actor;
+        await this.close();
+        actor?.sheet?.render(true);
+    }
 
     static PARTS = {
         app: { template: 'modules/mist-hud/templates/npc-hud.hbs' }
@@ -1253,7 +1264,17 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         }
 
         header.find('.window-title').hide();
-        header.find('.mh-token-image, .mh-char-name, .mh-close-button').remove();
+        header.find('.mh-token-image, .mh-char-name, .mh-close-button, .mh-open-sheet').remove();
+
+        // Open-sheet button, placed before the ⋮ menu (handled by the openSheet action).
+        if (this.actor?.sheet) {
+            const label = game.i18n.localize('MistHUD.hud.openSheet');
+            const btn = $('<button type="button" class="header-control icon fa-solid fa-id-card mh-open-sheet" data-action="openSheet"></button>')
+                .attr({ 'data-tooltip': label, 'aria-label': label });
+            const firstControl = header.find('.header-control').first();
+            if (firstControl.length) firstControl.before(btn);
+            else header.append(btn);
+        }
 
         // Built with DOM APIs (.attr/.text): the actor name and image path are user-editable.
         const name = this.actor?.name || 'Character';

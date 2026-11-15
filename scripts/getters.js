@@ -284,15 +284,36 @@ export function getLoadoutTags(actor) {
 }
 
 /**
- * Every loadout tag (active or not), for the HUD's loadout manager.
- * @returns {{id: string, name: string, active: boolean}[]}
+ * Weakness tags of the loadout theme (Otherscape / Legend: at most one per
+ * loadout tag, linked by system.parentId). Includes `parentId` so the HUD can
+ * nest each one under its loadout tag.
+ */
+export function getLoadoutWeaknessTags(actor) {
+  if (!actor) return [];
+  const loadoutIds = new Set(actor.items.contents
+    .filter(i => i.type === "theme" && i.name === "__LOADOUT__")
+    .map(i => i.id));
+  if (!loadoutIds.size) return [];
+  const tagItems = actor.items.contents
+    .filter(i => i.type === "tag" && loadoutIds.has(i.system.theme_id))
+    .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
+  return [...loadoutIds].flatMap(id => getWeaknessTags(id, tagItems, null, actor))
+    .map(w => ({ ...w, parentId: actor.items.get(w.id)?.system.parentId || null }));
+}
+
+/**
+ * Every loadout tag (active or not), for the loadout activation popup. Same
+ * shape as getLoadoutTags (burn state included) plus `active`.
  */
 export function getAllLoadoutTags(actor) {
   if (!actor) return [];
   return actor.items.contents
     .filter(i => i.type === "tag" && i.system.subtype === "loadout")
     .sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0))
-    .map(tag => ({ id: tag.id, name: tag.name, active: !!tag.system.activated_loadout }));
+    .map(tag => ({
+      ...applyBurnState(actor, tag.id),
+      id: tag.id, tagName: tag.name, active: !!tag.system.activated_loadout,
+    }));
 }
 
 // ── Relationship tags (Otherscape crew relationships / Legend fellowship) ────

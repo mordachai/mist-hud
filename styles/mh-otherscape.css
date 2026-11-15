@@ -140,6 +140,15 @@
   font-style: italic;
 }
 
+/* Text move buttons: Rift is caps-only and too large for the 40px button */
+.mh-roll-button .mh-roll-main {
+  font-family: var(--font-family-npcmoves);
+  font-size: 11px;
+  line-height: 1.05;
+  text-transform: capitalize;
+  overflow-wrap: break-word;
+}
+
 .mh-theme-name-com-Self {
   color: var(--self-verylight-color);
   font-family: var(--font-family-main1);
@@ -935,3 +944,83 @@ color: var(--mythosOS-verylight-color);
 .player-hud .mh-hud.mh-bg-spiritualist   { --mh-tone-a: #3a1226f2; --mh-tone-b: #1e1030f2; }
 .player-hud .mh-hud.mh-bg-cyborg         { --mh-tone-a: #3a1226f2; --mh-tone-b: #082430f2; }
 .player-hud .mh-hud.mh-bg-transhuman     { --mh-tone-a: #2c1846f2; --mh-tone-b: #082430f2; }
+
+/* -- Loadout activation popup: dark HUD finish -- */
+.mh-loadout-popup {
+  background: linear-gradient(45deg, #2a2f36f2 0%, #000000f2 100%);
+  font-family: var(--font-family-hud);
+}
+.mh-loadout-popup .mh-loadout-choice .mh-loadout-toggle {
+  color: whitesmoke;
+}
+/* Popup rows: square | burn marker | name. Overrides the HUD tag grid
+   (.mh-loadout-tag) above; must stay in this unlayered file to win. */
+.mh-loadout-popup .mh-loadout-choice {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  margin: 1px 0;
+  padding: 0 2px;
+  text-align: left;
+}
+.mh-loadout-popup .mh-loadout-choice .mh-loadout-toggle {
+  flex: 0 0 auto;
+  width: 1em;
+  font-size: 0.9rem;
+  text-align: center;
+  color: var(--effects-color1);
+}
+.mh-loadout-popup .mh-loadout-choice .burn-icon {
+  flex: 0 0 auto;
+  margin: 0;
+}
+.mh-loadout-popup .mh-loadout-choice .mh-tag-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+/* Not activated: still listed, dimmed */
+.mh-loadout-popup .mh-loadout-choice:not(.active) .mh-tag-text,
+.mh-loadout-popup .mh-loadout-choice:not(.active) .burn-icon {
+  opacity: 0.5;
+}
+
+/* Loadout weakness nested under its loadout tag (as on the sheet) */
+.mh-tags .mh-weakness-tag.mh-loadout-weakness {
+  margin-left: 18px;
+}
+
+/* Popup edit mode: rename field + delete button per row */
+.mh-loadout-popup .mh-loadout-choice .mh-loadout-rename {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 1.7em;
+  margin: 1px 0;
+  padding: 0 4px;
+  font: inherit;
+  font-size: 0.95rem;
+  text-transform: none;
+  border-radius: 3px;
+  box-shadow: none;
+}
+.mh-loadout-popup .mh-loadout-choice .mh-loadout-delete {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  opacity: 0.65;
+  cursor: pointer;
+}
+.mh-loadout-popup .mh-loadout-choice .mh-loadout-delete:hover {
+  opacity: 1;
+}
+.mh-loadout-popup .mh-loadout-choice .mh-loadout-rename {
+  color: whitesmoke;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid #777;
+}
+.mh-loadout-popup .mh-loadout-choice .mh-loadout-delete {
+  color: whitesmoke;
+}

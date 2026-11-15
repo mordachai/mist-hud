@@ -1364,90 +1364,88 @@ hr {
   display: flow-root;
 }
 
-/* ── Loadout manager (checklist under the Loadout header) ── */
+/* -- Loadout activation popup --
+   Opens from the Loadout header (appended to <body>). The panel and header
+   live here; the tag ROW layout lives in the system CSS (Otherscape/Legend),
+   which is injected unlayered and would otherwise override it with the HUD's
+   tag grid. */
 .mh-theme-header.loadout {
   cursor: pointer;
 }
 
-.mh-loadout-manager {
-  display: none;
-  margin: 2px 6px 6px;
-  padding: 4px 6px;
-  border: 1px solid #555;
-  border-radius: 5px;
-  background: rgba(0, 0, 0, 0.55);
-  color: whitesmoke;
-  font-family: var(--font-family-hud);
-  font-size: 0.8rem;
+.mh-loadout-popup {
+  position: fixed;
+  z-index: 1000;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 220px;
+  max-width: 320px;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 6px 6px;
+  border: 1px solid whitesmoke;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.88);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-.mh-loadout-manager.open {
-  display: block;
+.mh-loadout-popup .mh-loadout-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 2px 4px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--divider-color1, #555);
 }
 
-.mh-loadout-list {
-  list-style: none;
+.mh-loadout-popup .mh-loadout-popup-title {
+  font-family: var(--font-family-main1);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--text-hud-subtitles-color, #b4b9c0);
+}
+
+.mh-loadout-popup .mh-loadout-create {
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  color: var(--text-hud-subtitles-color, #b4b9c0);
+  cursor: pointer;
+}
+
+.mh-loadout-popup .mh-loadout-create:hover {
+  color: var(--text-hud-main-color, whitesmoke);
+  text-shadow: none;
+}
+
+.mh-loadout-popup .mh-loadout-choices {
   margin: 0;
   padding: 0;
 }
 
-.mh-loadout-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 1px 0;
+.mh-loadout-empty {
+  list-style: none;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--text-hud-subtitles-color, #9aa5a8);
 }
 
-.mh-loadout-row label {
+.mh-loadout-popup .mh-loadout-popup-buttons {
   display: flex;
   align-items: center;
-  gap: 4px;
-  flex: 1 1 auto;
-  min-width: 0;
+  gap: 10px;
+}
+
+.mh-loadout-popup .mh-loadout-edit {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  color: var(--text-hud-subtitles-color, #b4b9c0);
   cursor: pointer;
 }
 
-.mh-loadout-row input[type="checkbox"] {
-  flex: 0 0 auto;
-  width: 14px;
-  height: 14px;
-  margin: 0;
-}
-
-.mh-loadout-name {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  color: #b4b9c0;
-}
-
-.mh-loadout-row.active .mh-loadout-name {
-  color: whitesmoke;
-}
-
-.mh-loadout-delete {
-  flex: 0 0 auto;
-  font-size: 0.65rem;
-  opacity: 0.6;
-}
-
-.mh-loadout-delete:hover {
-  opacity: 1;
-}
-
-.mh-loadout-empty {
-  font-style: italic;
-  color: #9aa5a8;
-}
-
-.mh-loadout-create {
-  display: block;
-  margin-top: 4px;
-  padding-top: 3px;
-  border-top: 1px dashed #555;
-  font-size: 0.75rem;
-  color: #b4b9c0;
-}
-
-.mh-loadout-create:hover {
-  color: whitesmoke;
+.mh-loadout-popup .mh-loadout-edit:hover,
+.mh-loadout-popup .mh-loadout-edit.active {
+  color: var(--text-hud-main-color, whitesmoke);
+  text-shadow: none;
 }

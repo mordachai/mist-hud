@@ -16,7 +16,7 @@ import { organizeMoves, getMoveAbbreviation, getMoveImageSrc } from "./move-layo
 import {
   getMysteryFromTheme, getCrewThemes, getThemesAndTags,
   getImprovements, getCrewImprovements, getActorStatuses,
-  getJuiceAndClues, getEssence, getThemeTypeCounts, getLoadoutTags, getAllLoadoutTags, getRelationshipTags,
+  getJuiceAndClues, getEssence, getThemeTypeCounts, getLoadoutTags, getAllLoadoutTags, getLoadoutWeaknessTags, getRelationshipTags,
 } from "./getters.js";
 import { BonusManager } from "./bonus-manager.js";
 
@@ -118,8 +118,12 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Side panel open/closed; kept here so a re-render does not close it. */
   _panelOpen = false;
 
-  /** Loadout manager (checklist under the Loadout header) open/closed. */
-  _loadoutOpen = false;
+  /** Loadout activation popup element (appended to <body>), or null. */
+  _loadoutPopup = null;
+  /** Popup in edit mode (rename / delete tags). */
+  _loadoutEditing = false;
+  /** A dialog opened from the popup is up; outside clicks must not close it. */
+  _loadoutBusy = false;
 
   constructor(actor, options = {}) {
     super(options);
@@ -139,10 +143,26 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       minimizable: true,
     },
     position: { width: "auto", height: "auto", left: 200, top: 120 },
+    actions: {
+      openSheet: PlayerHUD.#onOpenSheet,
+    },
   };
 
+  /** Header button: open the actor's sheet and close the HUD. */
+  static async #onOpenSheet(event) {
+    event.preventDefault();
+    const actor = this.actor;
+    await this.close();
+    actor?.sheet?.render(true);
+  }
+
   static PARTS = {
-    app: { template: "modules/mist-hud/templates/player-hud.hbs" },
+    // scrollable: keep the scroll position when a re-render (burn, select...)
+    // replaces the DOM, instead of jumping back to the top.
+    app: {
+      template: "modules/mist-hud/templates/player-hud.hbs",
+      scrollable: [".mh-content-container", ".mh-panel-content"],
+    },
   };
 
   // ── Context preparation ───────────────────────────────────────────────────
@@ -190,11 +210,28 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         : '<i class="fa-light fa-angles-up"></i>',
     }));
 
+    // Loadout weaknesses, nested under their loadout tag as on the sheet: shown
+    // only while that tag is activated. A weakness whose loadout tag no longer
+    // exists is listed on its own so it isn't lost.
+    const allLoadoutWeaknesses = (isOtherscape || isLegend)
+      ? getLoadoutWeaknessTags(this.actor).map(tag => ({
+          ...tag,
+          selected:      state.selectedTags.has(tag.id),
+          inverted:      state.invertedTags.has(tag.id),
+          inversionIcon: state.invertedTags.has(tag.id)
+            ? '<i class="fa-light fa-angles-up"></i>'
+            : '<i class="fa-light fa-angles-down"></i>',
+        }))
+      : [];
     const loadoutTags = getLoadoutTags(this.actor).map(tag => ({
       ...tag,
-      selected: state.selectedTags.has(tag.id),
+      selected:   state.selectedTags.has(tag.id),
+      weaknesses: allLoadoutWeaknesses.filter(w => w.parentId === tag.id),
     }));
-    const allLoadoutTags = (isOtherscape || isLegend) ? getAllLoadoutTags(this.actor) : [];
+    const loadoutTagIds = new Set(this.actor.items.contents
+      .filter(i => i.type === "tag" && i.system.subtype === "loadout").map(i => i.id));
+    const loadoutWeaknessTags = allLoadoutWeaknesses
+      .filter(w => !w.parentId || !loadoutTagIds.has(w.parentId));
 
     // Relationship tags (side panel): crew relationships / fellowship
     const showRelationships = isOtherscape || isLegend;
@@ -307,9 +344,8 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       actor:           this.actor,
       actorId:         this.actor.id,
       activeSystem, isCityOfMist, isOtherscape, isLegend,
-      themes, storyTags, loadoutTags, crewThemes,
-      allLoadoutTags,
-      loadoutOpen:     this._loadoutOpen,
+      themes, storyTags, loadoutTags, loadoutWeaknessTags, crewThemes,
+      loadoutName:     this._loadoutName(),
       hasCrewThemes:   crewThemes.length > 0,
       showRelationships, relationshipTags,
       relationshipSlots:  relationships.openSlots,
@@ -349,7 +385,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     this._bindSlidingPanelListeners(html);
     this._bindRollBarListeners(html);
     this._bindCreateDeleteListeners(html);
-    this._bindLoadoutManagerListeners(html);
+    this._bindLoadoutListeners(html);
     this._bindTooltipListeners(html);
     this._bindDragListeners(html);
     this._updatePowerDisplay(html);
@@ -365,7 +401,17 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     if (!header.length) return;
 
     header.find(".window-title").hide();
-    header.find(".mh-token-image, .mh-char-name, .mh-close-button").remove();
+    header.find(".mh-token-image, .mh-char-name, .mh-close-button, .mh-open-sheet").remove();
+
+    // Open-sheet button, placed before the ⋮ menu (handled by the openSheet action).
+    if (this.actor?.sheet) {
+      const label = game.i18n.localize("MistHUD.hud.openSheet");
+      const btn = $('<button type="button" class="header-control icon fa-solid fa-id-card mh-open-sheet" data-action="openSheet"></button>')
+        .attr({ "data-tooltip": label, "aria-label": label });
+      const firstControl = header.find(".header-control").first();
+      if (firstControl.length) firstControl.before(btn);
+      else header.append(btn);
+    }
 
     // Built with DOM APIs (.attr/.text), never by string-concatenating HTML: the
     // actor name and image path are user-editable.
@@ -579,62 +625,142 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     });
   }
 
-  // ── Loadout manager ───────────────────────────────────────────────────────
-  // Clicking the Loadout header opens a checklist of every loadout tag, so a
-  // player can activate / create / delete loadout tags without the sheet.
+  // ── Loadout activation popup ──────────────────────────────────────────────
+  // Otherscape / Legend: the sheet lets the player choose which loadout tags
+  // are activated, and only those show in the HUD. Clicking the Loadout
+  // header opens a popup with that choice; the HUD list itself is unchanged.
+  // Header buttons: edit mode (rename / delete tags) and "+" (new tag).
 
-  _bindLoadoutManagerListeners(html) {
+  _bindLoadoutListeners(html) {
     html.find(".mh-theme-header.loadout").on("click", ev => {
       ev.stopPropagation();
-      const manager = html.find(".mh-loadout-manager")[0];
-      if (!manager) return;
-      this._loadoutOpen = !manager.classList.contains("open");
-      manager.classList.toggle("open", this._loadoutOpen);
+      if (this._loadoutPopup) this._closeLoadoutPopup();
+      else this._showLoadoutPopup();
     });
-
-    html.find(".mh-loadout-toggle").on("change", async ev => {
-      ev.stopPropagation();
-      const id  = ev.currentTarget.closest("[data-id]")?.dataset.id;
-      const tag = id && this.actor.items.get(id);
-      if (!tag) return;
-      const active = ev.currentTarget.checked;
-      // A deactivated tag leaves the HUD, so it must not stay selected for a roll.
-      if (!active) getOrCreateState(this.key).selectedTags.delete(id);
-      if (!!tag.system.activated_loadout === active) return;
-      if (typeof tag.toggleLoadoutActivation === "function") await tag.toggleLoadoutActivation();
-      else await tag.update({ "system.activated_loadout": active });
-    });
-
-    html.find(".mh-loadout-name").on("dblclick", async ev => {
-      ev.preventDefault();
-      const tag = this.actor.items.get(ev.currentTarget.closest("[data-id]")?.dataset.id);
-      if (tag) await sys.CityDialogs.itemEditDialog(tag);
-    });
-
-    html.find(".mh-loadout-delete").on("click", async ev => {
-      ev.preventDefault();
-      ev.stopPropagation();
-      const id  = ev.currentTarget.closest("[data-id]")?.dataset.id;
-      const tag = id && this.actor.items.get(id);
-      if (!tag) return;
-      const ok = await foundry.applications.api.DialogV2.confirm({
-        window: { title: game.i18n.localize("MistHUD.hud.deleteTag") },
-        content: `<p>${game.i18n.format("MistHUD.hud.deleteTagConfirm",
-          { tag: Handlebars.escapeExpression(tag.name) })}</p>`,
-      });
-      if (!ok) return;
-      getOrCreateState(this.key).selectedTags.delete(id);
-      await this.actor.deleteTag(id);
-    });
-
-    html.find(".mh-loadout-create").on("click", ev => {
-      ev.preventDefault();
-      ev.stopPropagation();
-      this._createLoadoutTag();
-    });
+    // A re-render (e.g. after toggling a tag) keeps the popup open, refreshed.
+    if (this._loadoutPopup) this._showLoadoutPopup();
   }
 
+  async _showLoadoutPopup() {
+    let popup = this._loadoutPopup;
+    if (!popup) {
+      // Created synchronously so a click and a re-render can't make two.
+      popup = document.createElement("div");
+      popup.className = "mh-loadout-popup";
+      document.body.append(popup);
+      this._loadoutPopup = popup;
+      this._loadoutEditing = false;
+
+      popup.addEventListener("click", ev => this._onLoadoutPopupClick(ev));
+
+      // Rename: committed on change (blur / Enter); Escape reverts.
+      popup.addEventListener("change", ev => {
+        const input = ev.target.closest(".mh-loadout-rename");
+        if (input) this._renameLoadoutTag(input);
+      });
+      popup.addEventListener("keydown", ev => {
+        const input = ev.target.closest(".mh-loadout-rename");
+        if (!input) return;
+        if (ev.key === "Enter") { ev.preventDefault(); input.blur(); }
+        if (ev.key === "Escape") {
+          ev.stopPropagation();
+          input.value = input.defaultValue;
+          input.blur();
+        }
+      });
+
+      this._loadoutOutside = ev => {
+        if (popup.contains(ev.target)) return;
+        // A dialog from the popup is open: clicks in it must not close it.
+        if (this._loadoutBusy) return;
+        // The header's own click toggles the popup.
+        if (ev.target.closest?.(".mh-theme-header.loadout") && this.element?.contains(ev.target)) return;
+        this._closeLoadoutPopup();
+      };
+      this._loadoutEscape = ev => {
+        if (ev.key === "Escape" && !this._loadoutBusy) this._closeLoadoutPopup();
+      };
+      document.addEventListener("pointerdown", this._loadoutOutside, true);
+      document.addEventListener("keydown", this._loadoutEscape);
+    }
+
+    const loadoutName = this._loadoutName();
+    const content = await foundry.applications.handlebars.renderTemplate(
+      "modules/mist-hud/templates/loadout-popup.hbs",
+      { title: loadoutName, loadoutName, editing: this._loadoutEditing,
+        tags: getAllLoadoutTags(this.actor) });
+    if (this._loadoutPopup !== popup) return; // closed while rendering
+
+    // Keep focus in the rename field being typed in across a refresh.
+    const focusedId = popup.querySelector(".mh-loadout-rename:focus")
+      ?.closest("[data-id]")?.dataset.id;
+    popup.innerHTML = content;
+    if (focusedId) popup.querySelector(`[data-id="${focusedId}"] .mh-loadout-rename`)?.focus();
+    this._positionLoadoutPopup();
+  }
+
+  _onLoadoutPopupClick(ev) {
+    if (ev.target.closest(".mh-loadout-create")) {
+      ev.preventDefault();
+      this._createLoadoutTag();
+      return;
+    }
+    if (ev.target.closest(".mh-loadout-edit")) {
+      ev.preventDefault();
+      this._loadoutEditing = !this._loadoutEditing;
+      this._showLoadoutPopup();
+      return;
+    }
+    const row = ev.target.closest(".mh-loadout-choice");
+    if (!row) return;
+    if (ev.target.closest(".mh-loadout-delete")) {
+      ev.preventDefault();
+      this._deleteLoadoutTag(row.dataset.id);
+      return;
+    }
+    // Edit mode: rows are for renaming, not (de)activating.
+    if (this._loadoutEditing) return;
+
+    const active = !row.classList.contains("active");
+    row.classList.toggle("active", active);
+    const box = row.querySelector(".mh-loadout-toggle");
+    box?.classList.toggle("fa-solid", active);
+    box?.classList.toggle("fa-regular", !active);
+    this._setLoadoutActive(row.dataset.id, active);
+  }
+
+  /** Place the popup above the Loadout header (below it if there's no room). */
+  _positionLoadoutPopup() {
+    const popup  = this._loadoutPopup;
+    const header = this.element?.querySelector(".mh-theme-header.loadout");
+    const rect   = header?.getBoundingClientRect();
+    if (!popup || !rect?.width) return this._closeLoadoutPopup();
+
+    popup.style.minWidth = `${Math.round(rect.width)}px`;
+    const pw = popup.offsetWidth, ph = popup.offsetHeight;
+    const ww = window.innerWidth,  wh = window.innerHeight;
+    let left = Math.min(rect.left, ww - pw - 8);
+    // Opens upward: the header sits low in the HUD, so there is more room above.
+    // Falls back to below only when it doesn't fit above.
+    let top = rect.top - ph - 4;
+    if (top < 8) top = rect.bottom + 4 + ph <= wh - 8 ? rect.bottom + 4 : 8;
+    popup.style.left = `${Math.max(8, left)}px`;
+    popup.style.top  = `${top}px`;
+  }
+
+  _closeLoadoutPopup() {
+    if (!this._loadoutPopup) return;
+    this._loadoutPopup.remove();
+    this._loadoutPopup = null;
+    this._loadoutEditing = false;
+    document.removeEventListener("pointerdown", this._loadoutOutside, true);
+    document.removeEventListener("keydown", this._loadoutEscape);
+  }
+
+  /** "+" in the popup: create a loadout tag and open its edit dialog. */
   async _createLoadoutTag() {
+    if (this._loadoutBusy) return;
+    this._loadoutBusy = true;
     try {
       if (!this.actor.loadout) await this.actor.createLoadoutTheme?.();
       const result = await this.actor.createLoadoutTag?.();
@@ -645,8 +771,81 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       if (!updated) await this.actor.deleteTag(id);
     } catch (err) {
       console.error(`${MODULE_ID} | Could not create loadout tag`, err);
-      ui.notifications.error(game.i18n.localize("MistHUD.hud.loadoutCreateFailed"));
+      ui.notifications.error(game.i18n.format("MistHUD.hud.loadoutCreateFailed", { name: this._loadoutName() }));
+    } finally {
+      this._loadoutBusy = false;
     }
+  }
+
+  /** Edit mode: commit a renamed loadout tag (an empty name is reverted). */
+  async _renameLoadoutTag(input) {
+    const tag  = this.actor.items.get(input.closest("[data-id]")?.dataset.id);
+    const name = input.value.trim();
+    if (!tag) return;
+    if (!name) { input.value = tag.name; return; }
+    if (name === tag.name) return;
+    input.defaultValue = name;
+    await tag.update({ name });
+  }
+
+  /**
+   * Edit mode: delete a loadout tag after confirmation. Its weakness goes with
+   * it: the sheet only lists a weakness under its loadout tag, so it would be
+   * left behind out of sight.
+   */
+  async _deleteLoadoutTag(id) {
+    const tag = id && this.actor.items.get(id);
+    if (!tag || this._loadoutBusy) return;
+    const weaknesses = this.actor.items.contents
+      .filter(i => i.type === "tag" && i.system.parentId === id);
+    const esc = Handlebars.escapeExpression;
+    const content = weaknesses.length
+      ? game.i18n.format("MistHUD.hud.deleteLoadoutTagConfirm",
+          { tag: esc(tag.name), weakness: weaknesses.map(w => esc(w.name)).join(", ") })
+      : game.i18n.format("MistHUD.hud.deleteTagConfirm", { tag: esc(tag.name) });
+
+    this._loadoutBusy = true;
+    try {
+      const ok = await foundry.applications.api.DialogV2.confirm({
+        window: { title: game.i18n.localize("MistHUD.hud.deleteTag") },
+        content: `<p>${content}</p>`,
+      });
+      if (!ok) return;
+      const selected = getOrCreateState(this.key).selectedTags;
+      for (const w of weaknesses) {
+        selected.delete(w.id);
+        await this.actor.deleteTag(w.id);
+      }
+      selected.delete(id);
+      await this.actor.deleteTag(id);
+    } finally {
+      this._loadoutBusy = false;
+    }
+  }
+
+  async _setLoadoutActive(id, active) {
+    const tag = id && this.actor.items.get(id);
+    if (!tag) return;
+    // A deactivated tag leaves the HUD, so it must not stay selected for a roll.
+    // Its weakness is hidden with it, so drop that from the selection too.
+    if (!active) {
+      const selected = getOrCreateState(this.key).selectedTags;
+      selected.delete(id);
+      this.actor.items.contents
+        .filter(i => i.type === "tag" && i.system.parentId === id)
+        .forEach(w => selected.delete(w.id));
+    }
+    if (!!tag.system.activated_loadout === active) return;
+    if (typeof tag.toggleLoadoutActivation === "function") await tag.toggleLoadoutActivation();
+    else await tag.update({ "system.activated_loadout": active });
+  }
+
+  /** The system's name for the loadout theme ("Loadout" / "Backpack"). */
+  _loadoutName() {
+    const sysId = getActiveSystem();
+    if (sysId === "legend")     return game.i18n.localize("Legend.terms.loadoutTheme.name");
+    if (sysId === "otherscape") return game.i18n.localize("Otherscape.terms.loadoutTheme.name");
+    return "";
   }
 
   // ── Roll bar ──────────────────────────────────────────────────────────────
@@ -1151,7 +1350,14 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
+  /** Keep the loadout popup attached to its header when the HUD moves. */
+  _onPosition(position) {
+    super._onPosition?.(position);
+    if (this._loadoutPopup) this._positionLoadoutPopup();
+  }
+
   async close(options) {
+    this._closeLoadoutPopup();
     this._cancelTooltipHide();
     $(".mh-tooltip").remove();
     // Only remove our own entry (a newer HUD may already own the key)

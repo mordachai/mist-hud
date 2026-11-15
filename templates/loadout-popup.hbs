@@ -1,0 +1,27 @@
+<div class="mh-loadout-popup-header">
+  <span class="mh-loadout-popup-title">{{title}}</span>
+  <span class="mh-loadout-popup-buttons">
+    <a class="mh-loadout-edit {{#if editing}}active{{/if}}"
+       data-tooltip="{{localize "MistHUD.hud.editLoadoutTags" name=loadoutName}}"
+       aria-label="{{localize "MistHUD.hud.editLoadoutTags" name=loadoutName}}"><i class="fa-solid fa-pen"></i></a>
+    <a class="mh-loadout-create" data-tooltip="{{localize "MistHUD.hud.createLoadoutTag" name=loadoutName}}"
+       aria-label="{{localize "MistHUD.hud.createLoadoutTag" name=loadoutName}}"><i class="fa-solid fa-plus"></i></a>
+  </span>
+</div>
+<ul class="mh-tags mh-loadout-choices {{#if editing}}editing{{/if}}">
+  {{#each tags}}
+    <li class="mh-loadout-tag mh-loadout-choice {{cssClass}} {{#if active}}active{{/if}}" data-id="{{id}}">
+      {{#if ../editing}}
+        <input type="text" class="mh-loadout-rename" value="{{tagName}}" />
+        <a class="mh-loadout-delete" data-tooltip="{{localize "MistHUD.hud.deleteTag"}}"
+           aria-label="{{localize "MistHUD.hud.deleteTag"}}"><i class="fa-solid fa-trash"></i></a>
+      {{else}}
+        <i class="mh-loadout-toggle {{#if active}}fa-solid{{else}}fa-regular{{/if}} fa-square"></i>
+        <span class="burn-icon {{burnState}}"></span>
+        <span class="mh-tag-text">{{tagName}}</span>
+      {{/if}}
+    </li>
+  {{else}}
+    <li class="mh-loadout-empty">{{localize "MistHUD.hud.noLoadoutTags" name=loadoutName}}</li>
+  {{/each}}
+</ul>

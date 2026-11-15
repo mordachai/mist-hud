@@ -124,30 +124,26 @@
       <!-- Loadout (Otherscape / Legend) -->
       {{#if (or isOtherscape isLegend)}}
         <div class="theme-container">
-          <div class="mh-theme-header neutral loadout mh-title-container" title="{{localize "MistHUD.hud.manageLoadout"}}">
-            <span class="mh-theme-name mh-theme-name-neutral">
-              {{#if isOtherscape}}{{localize "Otherscape.terms.loadoutTheme.name"}}{{/if}}
-              {{#if isLegend}}{{localize "Legend.terms.loadoutTheme.name"}}{{/if}}
-            </span>
+          <div class="mh-theme-header neutral loadout mh-title-container" title="{{localize "MistHUD.hud.manageLoadout" name=loadoutName}}">
+            <span class="mh-theme-name mh-theme-name-neutral">{{loadoutName}}</span>
             <span class="mh-theme-icon-notip loadout"></span>
           </div>
-          {{!-- Loadout manager: every loadout tag with an activation checkbox --}}
-          <div class="mh-loadout-manager {{#if loadoutOpen}}open{{/if}}">
-            <ul class="mh-loadout-list">
-              {{#each allLoadoutTags}}
-                <li class="mh-loadout-row {{#if active}}active{{/if}}" data-id="{{id}}">
-                  <label>
-                    <input type="checkbox" class="mh-loadout-toggle" {{#if active}}checked{{/if}} />
-                    <span class="mh-loadout-name" title="{{localize "MistHUD.hud.editLoadoutTag"}}">{{name}}</span>
-                  </label>
-                  <a class="mh-loadout-delete" title="{{localize "MistHUD.hud.deleteTag"}}"><i class="fas fa-trash"></i></a>
-                </li>
-              {{else}}
-                <li class="mh-loadout-empty">{{localize "MistHUD.hud.noLoadoutTags"}}</li>
-              {{/each}}
-            </ul>
-            <a class="mh-loadout-create"><i class="fas fa-plus"></i> {{localize "MistHUD.hud.createLoadoutTag"}}</a>
-          </div>
+          {{!-- A loadout weakness row; sits right under its loadout tag (a
+                sibling li, so the tag's selected/burned styles don't reach it). --}}
+          {{#*inline "loadoutWeakness"}}
+            <li class="mh-weakness-tag {{#if nested}}mh-loadout-weakness{{/if}} {{cssClass}} {{#if inverted}}inverted{{/if}} {{#if selected}}selected{{/if}}"
+                data-id="{{id}}"
+                data-theme-id="{{themeId}}"
+                data-actor-id="{{actorId}}">
+              <span class="mh-weakness-toggle clickable" data-id="{{id}}">
+                {{{inversionIcon}}}
+              </span>
+              <span class="mh-tag-text">{{tagName}}</span>
+            </li>
+          {{/inline}}
+          {{!-- Only the activated loadout tags, each followed by its weakness
+                (as on the sheet). Clicking the header opens the activation
+                popup (_showLoadoutPopup). --}}
           <ul class="mh-tags">
             {{#each loadoutTags}}
               <li class="mh-loadout-tag {{this.cssClass}} {{#if selected}}selected{{/if}}"
@@ -156,18 +152,11 @@
                   data-actor-id="{{actorId}}">
                 <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
                 <span class="mh-tag-text">{{this.tagName}}</span>
-                {{#if subtags}}
-                  <ul class="mh-subtag">
-                    {{#each subtags}}
-                      <li class="subtag-item {{cssClass}}">
-                        <span class="subtag-burn">{{{burnIcon}}}</span>
-                        <span class="subtag-name">{{tagName}}</span>
-                      </li>
-                    {{/each}}
-                  </ul>
-                {{/if}}
               </li>
+              {{#each weaknesses}}{{> loadoutWeakness nested=true}}{{/each}}
             {{/each}}
+            {{!-- Weaknesses whose loadout tag no longer exists --}}
+            {{#each loadoutWeaknessTags}}{{> loadoutWeakness}}{{/each}}
           </ul>
         </div>
       {{/if}}
