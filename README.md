@@ -1,5 +1,8 @@
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W01A1ZN1) ![Static Badge](https://img.shields.io/badge/Foundry_VTT-v13-red)  ![Static Badge](https://img.shields.io/badge/latest_release-v_2.50.2-blue)
-  ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/mordachai/mist-hud/mist-hud.zip)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W01A1ZN1)
+
+![Foundry v14](https://img.shields.io/badge/foundry-v14-blue?style=for-the-badge) ![Github All Releases](https://img.shields.io/github/downloads/mordachai/mist-hud/total.svg?style=for-the-badge) ![GitHub Release](https://img.shields.io/github/v/release/mordachai/mist-hud?display_name=tag&style=for-the-badge&label=Current%20version)
+
+> **v3.0 — Foundry v14 update!** We are back in full force for Foundry v14. From this version on the module supports **Foundry v14 only**. If you are still on v13, stay on the latest 2.x release. Found a bug? Please open an issue — we will be happy to fix it.
 
 
 # Mist Engine HUD

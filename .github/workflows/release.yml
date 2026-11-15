@@ -1,0 +1,83 @@
+name: Release Module
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "module.json"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract Version
+        id: get_version
+        run: |
+          VERSION=$(jq -r .version module.json)
+          echo "Detected version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if tag exists
+        uses: mukunku/tag-exists-action@v1.6.0
+        id: check_tag
+        with:
+          tag: "v${{ steps.get_version.outputs.version }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update module.json URLs for this release
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          REPO=${{ github.repository }}
+          jq \
+            --arg manifest "https://github.com/${REPO}/releases/latest/download/module.json" \
+            --arg download "https://github.com/${REPO}/releases/download/v${VERSION}/mist-hud.zip" \
+            '.manifest = $manifest | .download = $download' \
+            module.json > module.json.tmp
+          mv module.json.tmp module.json
+
+      - name: Create mist-hud.zip
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          zip -r mist-hud.zip module.json scripts styles templates lang ui data
+
+      - name: Create Release
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ steps.get_version.outputs.version }}"
+          name: "v${{ steps.get_version.outputs.version }}"
+          generate_release_notes: true
+          files: |
+            mist-hud.zip
+            module.json
+
+      - name: Publish to Foundry package listing
+        if: steps.check_tag.outputs.exists == 'false'
+        env:
+          FOUNDRY_PACKAGE_TOKEN: ${{ secrets.FOUNDRY_PACKAGE_TOKEN }}
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          REPO=${{ github.repository }}
+          jq -n \
+            --arg id "$(jq -r .id module.json)" \
+            --arg version "$VERSION" \
+            --arg manifest "https://github.com/${REPO}/releases/download/v${VERSION}/module.json" \
+            --arg notes "https://github.com/${REPO}/releases/tag/v${VERSION}" \
+            --arg min "$(jq -r .compatibility.minimum module.json)" \
+            --arg verified "$(jq -r .compatibility.verified module.json)" \
+            '{id: $id, release: {version: $version, manifest: $manifest, notes: $notes, compatibility: {minimum: $min, verified: $verified}}}' \
+            > payload.json
+          HTTP=$(curl -sS -o response.json -w "%{http_code}" \
+            -X POST "https://foundryvtt.com/_api/packages/release_version/" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: ${FOUNDRY_PACKAGE_TOKEN}" \
+            -d @payload.json)
+          cat response.json; echo
+          [ "$HTTP" = "200" ]
