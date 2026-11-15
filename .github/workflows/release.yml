@@ -37,15 +37,15 @@ jobs:
           REPO=${{ github.repository }}
           jq \
             --arg manifest "https://github.com/${REPO}/releases/latest/download/module.json" \
-            --arg download "https://github.com/${REPO}/releases/download/v${VERSION}/mist-hud.zip" \
+            --arg download "https://github.com/${REPO}/releases/download/v${VERSION}/module.zip" \
             '.manifest = $manifest | .download = $download' \
             module.json > module.json.tmp
           mv module.json.tmp module.json
 
-      - name: Create mist-hud.zip
+      - name: Create module.zip
         if: steps.check_tag.outputs.exists == 'false'
         run: |
-          zip -r mist-hud.zip module.json scripts styles templates lang ui data
+          zip -r module.zip module.json scripts styles templates lang ui data
 
       - name: Create Release
         if: steps.check_tag.outputs.exists == 'false'
@@ -55,7 +55,7 @@ jobs:
           name: "v${{ steps.get_version.outputs.version }}"
           generate_release_notes: true
           files: |
-            mist-hud.zip
+            module.zip
             module.json
 
       - name: Publish to Foundry package listing
