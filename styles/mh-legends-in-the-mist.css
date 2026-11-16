@@ -110,6 +110,22 @@
   --marker-negativeTag-color: #c1806c;
 }
 
+#mist-hud .window-header {
+  background: var(--hud-bg-color);
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+  flex-basis: 35px;
+  flex-direction: row;
+  justify-content:center;
+  align-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid white;
+  cursor: grab;
+  border-radius: 0 8px 0 0;
+  padding-left: 30px;
+}
+
 #mist-hud .window-content {
   padding: 0;
   margin: 0;
