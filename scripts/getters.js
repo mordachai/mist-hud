@@ -136,7 +136,7 @@ function _systemLabels(system, category) {
 // ── Themes + tags ────────────────────────────────────────────────────────────
 
 export function getThemesAndTags(actor) {
-  if (!actor) return { themes: [], storyTags: [], crewThemes: [] };
+  if (!actor) return { themes: [], storyTags: [], crewThemes: [], extraThemes: [] };
   const items     = actor.items.contents;
   const themeItems = items.filter(i => i.type === "theme" && i.name !== "__LOADOUT__");
   const tagItems   = items.filter(i => i.type === "tag");
@@ -192,7 +192,7 @@ export function getThemesAndTags(actor) {
       return d;
     }).filter(Boolean);
 
-  return { themes, storyTags, crewThemes: getCrewThemes(actor) };
+  return { themes, storyTags, crewThemes: getCrewThemes(actor), extraThemes: getExtraThemes(actor) };
 }
 
 // ── Crew themes ───────────────────────────────────────────────────────────────
@@ -203,41 +203,61 @@ export function getCrewThemes(actor) {
   const crews = game.actors.filter(a =>
     a.type === "crew" && nonGMOwners.some(u => a.testUserPermission(u, "OWNER"))
   );
-  const system = getActiveSystem();
-
   return crews.flatMap(crew =>
-    crew.items.filter(i => i.type === "theme").map(theme => {
-      const tags          = crew.items.filter(i => i.type === "tag");
-      const subByParent   = tags.reduce((a, t) => {
-        if (t.system.parentId) (a[t.system.parentId] ??= []).push(t); return a;
-      }, {});
-      let tb = theme.themebook;
-      if (tb?.isThemeKit?.()) tb = tb.themebook;
-
-      const { attentionLabel, crackLabel, prefix } = _systemLabels(
-        system, tb?.system?.subtype ?? ""
-      );
-
-      return {
-        id:                   theme.id,
-        name:                 theme.name,
-        crewName:             crew.name,
-        actorId:              crew.id,
-        powerTags:            getPowerTags(theme.id, tags, subByParent, crew),
-        weaknessTags:         getWeaknessTags(theme.id, tags, subByParent, crew),
-        mystery:              theme.system.mystery || "",
-        mysteryText:          theme.system.mystery || _noMotivationText(prefix),
-        attention:            theme.system.attention ?? [],
-        crack:                theme.system.crack ?? [],
-        category:             "Crew",
-        unspent_upgrades:     theme.system.unspent_upgrades || 0,
-        localizedThemebookName: tb?.name ?? theme.name,
-        prefix, attentionLabel, crackLabel,
-        ..._trackExtras(theme),
-        activeSystem:         system,
-      };
-    })
+    crew.items.filter(i => i.type === "theme").map(theme => _linkedThemeData(theme, crew, "Crew"))
   );
+}
+
+/** The character's active extra theme (a danger's theme lent to the PC; the
+ *  system's `activeExtra`), as a one-item list, or empty. Its tags live on
+ *  the danger, like crew tags live on the crew. */
+export function getExtraThemes(actor) {
+  const theme = actor?.activeExtra;
+  if (!theme?.parent) return [];
+  return [_linkedThemeData(theme, theme.parent, "Extra")];
+}
+
+/** HUD data for a theme that belongs to another actor (crew or extra). */
+function _linkedThemeData(theme, owner, category) {
+  const system = getActiveSystem();
+  const tags        = owner.items.filter(i => i.type === "tag");
+  const subByParent = tags.reduce((a, t) => {
+    if (t.system.parentId) (a[t.system.parentId] ??= []).push(t); return a;
+  }, {});
+  let tb = theme.themebook;
+  if (tb?.isThemeKit?.()) tb = tb.themebook;
+
+  const { attentionLabel, crackLabel, prefix } = _systemLabels(
+    system, tb?.system?.subtype ?? ""
+  );
+
+  // Otherscape extras show their own theme's icon (Mythos / Self / Noise; the
+  // HUD CSS draws a plain circle for any other); elsewhere the Extra icon.
+  const themeCategory = tb?.system?.subtype || theme.system.subtype || "";
+  const iconClass = (category === "Extra" && system === "otherscape")
+    ? `mh-theme-icon Extra ${themeCategory}`.trim()
+    : `mh-theme-icon ${category}`;
+
+  return {
+    id:                   theme.id,
+    name:                 theme.name,
+    iconClass,
+    crewName:             owner.name,
+    actorId:              owner.id,
+    themeType:            category.toLowerCase(),
+    powerTags:            getPowerTags(theme.id, tags, subByParent, owner),
+    weaknessTags:         getWeaknessTags(theme.id, tags, subByParent, owner),
+    mystery:              theme.system.mystery || "",
+    mysteryText:          theme.system.mystery || _noMotivationText(prefix),
+    attention:            theme.system.attention ?? [],
+    crack:                theme.system.crack ?? [],
+    category,
+    unspent_upgrades:     theme.system.unspent_upgrades || 0,
+    localizedThemebookName: tb?.name ?? theme.name,
+    prefix, attentionLabel, crackLabel,
+    ..._trackExtras(theme),
+    activeSystem:         system,
+  };
 }
 
 // ── Power / weakness tags ────────────────────────────────────────────────────
@@ -261,11 +281,34 @@ export function getPowerTags(themeId, tagItems, subTagsByParent, actor) {
     } catch { titleId = tags[0]?.id ?? null; }
   }
 
-  return tags.map(tag => {
+  // Subtags are power tags of the same theme with a parentId: list each one
+  // right under its parent, indented by depth, as the sheet does (and only
+  // once: they used to be printed again inside the parent's row).
+  const ids = new Set(tags.map(t => t.id));
+  const childrenOf = new Map();
+  for (const t of tags) {
+    const parent = ids.has(t.system.parentId) ? t.system.parentId : null;
+    if (!childrenOf.has(parent)) childrenOf.set(parent, []);
+    childrenOf.get(parent).push(t);
+  }
+  const ordered = [];
+  const seen = new Set();
+  const visit = (parent, depth) => {
+    for (const t of childrenOf.get(parent) ?? []) {
+      if (seen.has(t.id)) continue;
+      seen.add(t.id);
+      ordered.push({ tag: t, depth });
+      visit(t.id, depth + 1);
+    }
+  };
+  visit(null, 0);
+  // Anything left (a parent cycle) still shows, at the top level
+  for (const t of tags) if (!seen.has(t.id)) ordered.push({ tag: t, depth: 0 });
+
+  return ordered.map(({ tag, depth }) => {
     const d = applyBurnState(actor, tag.id);
-    const subtags = (subTagsByParent[tag.id] ?? []).map(sub => applyBurnState(actor, sub.id));
     return { ...d, tagName: tag.name, crispy: !!tag.system.crispy, actorId: actor.id,
-             themeId: tag.system.theme_id, subtags, isTitle: tag.id === titleId };
+             themeId: tag.system.theme_id, depth, isTitle: tag.id === titleId };
   });
 }
 

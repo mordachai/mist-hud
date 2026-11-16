@@ -567,6 +567,78 @@
   .chat-message.whisper,
   .chat-message.blind                   { --mhx-accent: var(--noise-border, #a3daf7); }
 
+  /* Roll outcome (classes added by init.js, renderChatMessageHTML).
+     Partial keeps the default cyan. Failure is red, success lime, dynamite
+     amber: the line tokens are re-pointed so the frame, brackets, chamfer,
+     dice and total all follow; the hard-coded cyan glows are redone below. */
+  .chat-message.mh-roll-failure {
+    --mhx-out-rgb:    226, 84, 104;
+    --mhx-line:       #e25468;
+    --mhx-line-dim:   rgba(226, 84, 104, 0.32);
+    --mhx-line-faint: rgba(226, 84, 104, 0.2);
+    --mhx-glow:      0 0 4px rgba(226, 84, 104, 0.6), 0 0 10px rgba(150, 30, 60, 0.45);
+  }
+
+  .chat-message.mh-roll-success {
+    --mhx-out-rgb:    186, 240, 52;
+    --mhx-line:       #baf034;
+    --mhx-line-dim:   rgba(186, 240, 52, 0.32);
+    --mhx-line-faint: rgba(186, 240, 52, 0.18);
+    --mhx-glow:       0 0 4px rgba(186, 240, 52, 0.6), 0 0 10px rgba(120, 180, 0, 0.45);
+  }
+
+  /* Dynamite also carries .mh-roll-success; this rule comes after it, so
+     amber wins. */
+  .chat-message.mh-roll-dynamite {
+    --mhx-out-rgb:    240, 176, 72;
+    --mhx-line:       #f0b048;
+    --mhx-line-dim:   rgba(240, 176, 72, 0.34);
+    --mhx-line-faint: rgba(240, 176, 72, 0.2);
+    --mhx-glow:      0 0 4px rgba(240, 176, 72, 0.65), 0 0 10px rgba(170, 100, 20, 0.5);
+  }
+
+  .chat-message:is(.mh-roll-failure, .mh-roll-success) {
+    box-shadow: inset -3px 0 10px -6px rgba(var(--mhx-out-rgb), 0.45);
+  }
+
+  /* The panel stays the usual dark navy; the outcome colour is a wash that
+     runs diagonally from the top-right corner and is gone by mid-card. z-index -1 sits
+     between the card background and its content (clip-path makes the card a
+     stacking context). */
+  .chat-message:is(.mh-roll-failure, .mh-roll-success)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(to bottom left,
+        rgba(var(--mhx-out-rgb), 0.14) 0,
+        rgba(var(--mhx-out-rgb), 0.05) 20%,
+        transparent 45%);
+  }
+
+  .chat-message:is(.mh-roll-failure, .mh-roll-success) .city-roll div.move-name {
+    text-shadow: -1px 1px 2px var(--mhx-line), 0 0 10px rgba(var(--mhx-out-rgb), 0.55);
+  }
+
+  .chat-message:is(.mh-roll-failure, .mh-roll-success) .city-roll .dice-rolls .roll {
+    box-shadow: inset 0 0 8px rgba(var(--mhx-out-rgb), 0.35), 0 0 6px rgba(var(--mhx-out-rgb), 0.25);
+  }
+
+  .chat-message:is(.mh-roll-failure, .mh-roll-success) .city-roll div.roll-total {
+    background: linear-gradient(90deg, transparent, rgba(var(--mhx-out-rgb), 0.16), transparent);
+  }
+
+  .chat-message:is(.mh-roll-failure, .mh-roll-success) .city-roll .roll-modifiers .name:not(.strikeout) {
+    background: rgba(var(--mhx-out-rgb), 0.1);
+  }
+
+  .chat-message:is(.mh-roll-failure, .mh-roll-success) .city-roll .roll-modifiers .name:not(.strikeout):hover {
+    background: rgba(var(--mhx-out-rgb), 0.25);
+    box-shadow: 0 0 8px rgba(var(--mhx-out-rgb), 0.5);
+  }
+
   /* Header */
   .chat-message .message-header {
     flex-wrap: wrap;
@@ -1990,7 +2062,6 @@
 
   .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) ul.sub-tag-list {
     margin-left: 1em;
-    border-left: 1px solid color-mix(in srgb, var(--mhx-theme) 35%, transparent);
   }
 
   /* ── Tag bars (Otherscape core book look) ─────────────────────────────
@@ -7627,12 +7698,12 @@
     }
   }
 
-  /* ── AppV2 header keys: core dialogs, the Player HUD and the NPC HUD ───
+  /* ── AppV2 header keys: core dialogs ────────────────────────────────────
      Square dim keys (Phase 1's `button` rule made them green, core rounds
-     them), cyan outline on hover, close red; the HUD's two-column toggle
-     lights cyan when on. The ⋮ controls dropdown in glass. The HUDs keep
-     their own header bar and name. */
-  :is(.application.dialog, #mist-hud, .application.npc-hud) > .window-header .header-control {
+     them), cyan outline on hover, close red. The ⋮ controls dropdown in
+     glass. The Player HUD and NPC HUD get the same keys from
+     mh-otherscape.css, External Style or not. */
+  .application.dialog > .window-header .header-control {
     --button-text-color: var(--mhx-text-dim);
     --button-hover-text-color: var(--mhx-bright);
     --button-size: 22px;
@@ -7658,15 +7729,9 @@
       box-shadow: 0 0 6px rgba(255, 40, 40, 0.4);
     }
 
-    &.mh-wide-toggle:is(.active, [aria-pressed=true]) {
-      color: var(--mhx-line);
-      text-shadow: var(--mhx-glow);
-      background: rgba(0, 222, 246, 0.14);
-      border-color: var(--mhx-line-dim);
-    }
   }
 
-  :is(.application.dialog, #mist-hud, .application.npc-hud) .controls-dropdown {
+  .application.dialog .controls-dropdown {
     font-family: var(--mhx-font-label);
     letter-spacing: 0.06em;
     text-transform: uppercase;

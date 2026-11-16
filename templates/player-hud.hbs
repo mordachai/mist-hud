@@ -84,22 +84,13 @@
         <!-- Power Tags -->
         <ul class="mh-tags">
           {{#each powerTags}}
-            <li class="mh-power-tag {{this.cssClass}} {{../category}} {{#if isTitle}}mh-title-tag{{/if}} {{#if selected}}selected{{/if}}"
+            <li class="mh-power-tag {{this.cssClass}} {{../category}} {{#if isTitle}}mh-title-tag{{/if}} {{#if depth}}mh-nested-tag{{/if}} {{#if selected}}selected{{/if}}"
+                {{#if depth}}style="--mh-tag-depth: {{depth}}"{{/if}}
                 data-id="{{this.id}}"
                 data-theme-id="{{this.themeId}}"
                 data-actor-id="{{actorId}}">
               <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../category}}"></div>
               <div class="mh-tag-text {{../category}}">{{this.tagName}}</div>
-              {{#if subtags}}
-                <ul class="mh-subtag">
-                  {{#each subtags}}
-                    <li class="subtag-item {{cssClass}}">
-                      <span class="subtag-burn burn-icon {{burnIcon}}"></span>
-                      <span class="subtag-name">{{this.tagName}}</span>
-                    </li>
-                  {{/each}}
-                </ul>
-              {{/if}}
             </li>
           {{/each}}
         </ul>
@@ -120,6 +111,77 @@
         </ul>
       </div>
       {{/each}}
+
+      {{!-- Crew themes, then the active extra (danger) theme: right after the
+           character's own themes, so in the wide layout they pair up --}}
+      {{#if linkedThemes.length}}
+        {{#each linkedThemes}}
+          <div class="theme-container {{category}}">
+            <div class="mh-theme-header {{category}}">
+              <span class="{{iconClass}}" data-theme-id="{{id}}" data-theme-type="{{themeType}}" data-mystery="{{mystery}}"></span>
+              {{#if (eq ../activeSystem "city-of-mist")}}
+                <span class="mh-theme-name mh-theme-name-com-{{category}}">
+                  {{name}} {{themeName}}
+                  {{#if unspent_upgrades}}
+                    <span class="mh-improvement-marker {{category}}">
+                      {{#times unspent_upgrades}}<i class="fa-solid fa-star"></i>{{/times}}
+                    </span>
+                  {{/if}}
+                </span>
+              {{/if}}
+              {{#if (eq ../activeSystem "otherscape")}}
+                <span class="mh-theme-name mh-theme-name-com-{{category}}">
+                  {{crewName}}
+                  {{#if unspent_upgrades}}
+                    <span class="mh-improvement-marker {{category}}">
+                      {{#times unspent_upgrades}}<i class="fa-solid fa-star"></i>{{/times}}
+                    </span>
+                  {{/if}}
+                </span>
+              {{/if}}
+              {{#if (eq ../activeSystem "legend")}}
+                <span class="mh-theme-name mh-theme-name-com-{{category}}">
+                  {{crewName}} {{localizedThemebookName}}
+                  {{#if unspent_upgrades}}
+                    <span class="mh-improvement-marker {{category}}">
+                      {{#if nascent}}
+                        <i class="fa-solid fa-bolt nascent-upgrade-indicator" title="{{localize "MistHUD.hud.nascent"}}"></i>
+                      {{else}}
+                        {{#times unspent_upgrades}}<i class="fa-light fa-star"></i>{{/times}}
+                      {{/if}}
+                    </span>
+                  {{/if}}
+                </span>
+              {{/if}}
+            </div>
+            <ul class="mh-tags">
+              {{#each powerTags}}
+                <li class="mh-power-tag {{this.cssClass}} {{../category}} {{#if isTitle}}mh-title-tag{{/if}} {{#if depth}}mh-nested-tag{{/if}} {{#if selected}}selected{{/if}} {{#if crispy}}mh-crispy{{/if}}"
+                    {{#if depth}}style="--mh-tag-depth: {{depth}}"{{/if}}
+                    data-id="{{this.id}}"
+                    data-actor-id="{{actorId}}"
+                    data-theme-id="{{this.themeId}}">
+                  <div class="mh-burn-toggle burn-icon {{this.burnState}} {{../category}}"></div>
+                  <div class="mh-tag-text {{../category}}">{{this.tagName}}</div>
+                </li>
+              {{/each}}
+            </ul>
+            <ul class="mh-tags">
+              {{#each weaknessTags}}
+                <li class="mh-weakness-tag {{this.cssClass}} {{../category}} {{#if selected}}selected{{/if}}"
+                    data-id="{{this.id}}"
+                    data-actor-id="{{actorId}}"
+                    data-theme-id="{{this.themeId}}">
+                  <span class="mh-weakness-toggle {{../category}} clickable {{#if this.inverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
+                    {{{this.inversionIcon}}}
+                  </span>
+                  <span class="mh-tag-text">{{this.tagName}}</span>
+                </li>
+              {{/each}}
+            </ul>
+          </div>
+        {{/each}}
+      {{/if}}
 
       <!-- Loadout (Otherscape / Legend) -->
       {{#if (or isOtherscape isLegend)}}
@@ -225,74 +287,6 @@
         </div>
       </div>
 
-      <!-- Crew Themes -->
-      {{#if hasCrewThemes}}
-        {{#each crewThemes}}
-          <div class="theme-container Crew">
-            <div class="mh-theme-header Crew">
-              <span class="mh-theme-icon Crew" data-theme-id="{{id}}" data-theme-type="crew" data-mystery="{{mystery}}"></span>
-              {{#if (eq ../activeSystem "city-of-mist")}}
-                <span class="mh-theme-name mh-theme-name-com-Crew">
-                  {{name}} {{themeName}}
-                  {{#if unspent_upgrades}}
-                    <span class="mh-improvement-marker Crew">
-                      {{#times unspent_upgrades}}<i class="fa-solid fa-star"></i>{{/times}}
-                    </span>
-                  {{/if}}
-                </span>
-              {{/if}}
-              {{#if (eq ../activeSystem "otherscape")}}
-                <span class="mh-theme-name mh-theme-name-com-Crew">
-                  {{crewName}} {{localizedThemebookName}}
-                  {{#if unspent_upgrades}}
-                    <span class="mh-improvement-marker Crew">
-                      {{#times unspent_upgrades}}<i class="fa-solid fa-star"></i>{{/times}}
-                    </span>
-                  {{/if}}
-                </span>
-              {{/if}}
-              {{#if (eq ../activeSystem "legend")}}
-                <span class="mh-theme-name mh-theme-name-com-Crew">
-                  {{crewName}} {{localizedThemebookName}}
-                  {{#if unspent_upgrades}}
-                    <span class="mh-improvement-marker Crew">
-                      {{#if nascent}}
-                        <i class="fa-solid fa-bolt nascent-upgrade-indicator" title="{{localize "MistHUD.hud.nascent"}}"></i>
-                      {{else}}
-                        {{#times unspent_upgrades}}<i class="fa-light fa-star"></i>{{/times}}
-                      {{/if}}
-                    </span>
-                  {{/if}}
-                </span>
-              {{/if}}
-            </div>
-            <ul class="mh-tags">
-              {{#each powerTags}}
-                <li class="mh-power-tag {{this.cssClass}} Crew {{#if isTitle}}mh-title-tag{{/if}} {{#if selected}}selected{{/if}} {{#if crispy}}mh-crispy{{/if}}"
-                    data-id="{{this.id}}"
-                    data-actor-id="{{actorId}}"
-                    data-theme-id="{{this.themeId}}">
-                  <div class="mh-burn-toggle burn-icon {{this.burnState}} Crew"></div>
-                  <div class="mh-tag-text Crew">{{this.tagName}}</div>
-                </li>
-              {{/each}}
-            </ul>
-            <ul class="mh-tags">
-              {{#each weaknessTags}}
-                <li class="mh-weakness-tag {{this.cssClass}} Crew {{#if selected}}selected{{/if}}"
-                    data-id="{{this.id}}"
-                    data-actor-id="{{actorId}}"
-                    data-theme-id="{{this.themeId}}">
-                  <span class="mh-weakness-toggle Crew clickable {{#if this.inverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
-                    {{{this.inversionIcon}}}
-                  </span>
-                  <span class="mh-tag-text">{{this.tagName}}</span>
-                </li>
-              {{/each}}
-            </ul>
-          </div>
-        {{/each}}
-      {{/if}}
 
     </div>
   </div>

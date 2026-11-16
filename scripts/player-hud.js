@@ -14,7 +14,7 @@ import {
 } from "./hud-state.js";
 import { organizeMoves, getMoveAbbreviation, getMoveImageSrc } from "./move-layout.js";
 import {
-  getMysteryFromTheme, getCrewThemes, getThemesAndTags,
+  getMysteryFromTheme, getCrewThemes, getExtraThemes, getThemesAndTags,
   getImprovements, getCrewImprovements, getActorStatuses,
   getJuiceAndClues, getEssence, getThemeTypeCounts, getLoadoutTags, getAllLoadoutTags, getLoadoutWeaknessTags, getRelationshipTags,
 } from "./getters.js";
@@ -73,6 +73,10 @@ const systemReady = Promise.all(Object.entries(SYSTEM_FILES).map(async ([name, f
 // ── Module-level registry (one PlayerHUD per hudKey) ─────────────────────────
 // Defined in hud-state.js; re-exported for init.js and other importers.
 export { playerHudRegistry };
+
+// System classes for other mist-hud files (init.js tags roll cards with their
+// outcome). Await `systemReady` before reading `sys`.
+export { sys, systemReady };
 
 // ── Handlebars helpers (registered once at module level) ─────────────────────
 Handlebars.registerHelper("times", function (n, block) {
@@ -267,7 +271,12 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         : '<i class="fa-light fa-angles-up"></i>',
     }));
 
-    const crewThemes = (themesAndTags.crewThemes ?? []).map(ct => {
+    // Themes lent by other actors: crew themes, then the active extra (danger)
+    // theme. Their tags live on that actor (data-actor-id).
+    const linkedThemes = [
+      ...(themesAndTags.crewThemes ?? []),
+      ...(themesAndTags.extraThemes ?? []),
+    ].map(ct => {
       const crewActor     = game.actors.get(ct.actorId);
       const crewThemeItem = crewActor?.items.get(ct.id);
       return {
@@ -365,9 +374,8 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       actor:           this.actor,
       actorId:         this.actor.id,
       activeSystem, isCityOfMist, isOtherscape, isLegend,
-      themes, storyTags, loadoutTags, loadoutWeaknessTags, crewThemes,
+      themes, storyTags, loadoutTags, loadoutWeaknessTags, linkedThemes,
       loadoutName:     this._loadoutName(),
-      hasCrewThemes:   crewThemes.length > 0,
       showRelationships, relationshipTags,
       relationshipSlots:  relationships.openSlots,
       relationshipsLabel: game.i18n.localize(
@@ -568,9 +576,9 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       const tagId = tagEl.dataset.id;
       if (!tagId) return;
 
-      // Crew vs main actor
+      // Crew / extra (danger) theme tags live on that actor
       let tagActor = this.actor;
-      if (tagEl.classList.contains("Crew")) {
+      if (tagEl.classList.contains("Crew") || tagEl.classList.contains("Extra")) {
         const crewId = tagEl.dataset.actorId;
         if (crewId) tagActor = game.actors.get(crewId) ?? this.actor;
       }
@@ -1224,6 +1232,8 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   _tooltipData(themeId, themeType) {
+    if (themeType === "extra")
+      return getExtraThemes(this.actor).find(t => t.id === themeId) ?? { mysteryText: "" };
     return themeType === "crew"
       ? (getCrewThemes(this.actor).find(t => t.id === themeId) ?? { mysteryText: "" })
       : getMysteryFromTheme(this.actor, themeId);

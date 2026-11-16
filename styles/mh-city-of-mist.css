@@ -628,3 +628,9 @@ input[type="checkbox"].hurt-toggle {
 .player-hud .mh-sliding-panel.open {
   background: var(--mh-hud-bg);
 }
+
+/* Subtags (power tags with a parent): own row right under the parent,
+   indented per level (getters.js getPowerTags, --mh-tag-depth) */
+.mh-tags .mh-power-tag.mh-nested-tag {
+  margin-left: calc(var(--mh-tag-depth, 1) * 18px);
+}

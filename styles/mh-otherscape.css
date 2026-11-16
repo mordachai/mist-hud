@@ -102,6 +102,12 @@
   /* text-shadow: 1px 1px 2px var(--effects-color1); */
 }
 
+/* Extra (danger) theme lent to the character: neutral, as on the sheet */
+.mh-theme-header.Extra {
+  background-image: url('../ui/header-neutral.webp');
+  margin-top: 3px;
+}
+
 .mh-theme-header.spaced {
   background-image: url('../ui/header-neutral.webp');
   justify-content: space-between;
@@ -221,6 +227,21 @@
   width: 24px;
   height: 21px;
   background-image: url('../ui/icons/crew_OS_icn.svg');
+  filter: drop-shadow(1px 0 4px var(--effects-color1));
+}
+
+/* Extra (danger) theme: its own theme's icon (.Mythos / .Self / .Noise,
+   added by getters.js); any other theme gets a plain circle */
+.mh-theme-icon.Extra:not(.Mythos, .Self, .Noise) {
+  position: relative;
+  right: -8px;
+  top: -5px;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: 2px solid rgb(236, 244, 237);
+  border-radius: 50%;
   filter: drop-shadow(1px 0 4px var(--effects-color1));
 }
 
@@ -350,6 +371,7 @@ color: var(--mythosOS-verylight-color);
 .mh-story-tag.selected,
 .mh-loadout-tag.selected,
 .mh-power-tag.Crew.selected,
+.mh-power-tag.Extra.selected,
 .mh-weakness-tag.inverted.selected {
   align-items: center;
   color: white;
@@ -366,7 +388,8 @@ color: var(--mythosOS-verylight-color);
 
 .mh-story-tag.selected.toBurn,
 .mh-loadout-tag.selected.toBurn,
-.mh-power-tag.Crew.selected.toBurn {
+.mh-power-tag.Crew.selected.toBurn,
+.mh-power-tag.Extra.selected.toBurn {
   background-image: url('../ui/select-bar-neutral2-toburn.webp');
   /* filter: drop-shadow(0 0 2px var(--effects-color1)); */
 }
@@ -471,20 +494,23 @@ color: var(--mythosOS-verylight-color);
 
 .mh-loadout-tag .burn-icon.unburned,
 .mh-story-tag .burn-icon.unburned,
-.mh-power-tag.Crew .burn-icon.unburned{
+.mh-power-tag.Crew .burn-icon.unburned,
+.mh-power-tag.Extra .burn-icon.unburned{
   background-image: url("../ui/icons/burn_neutral_empty.svg");
 }
 
 .mh-loadout-tag .burn-icon.toBurn,
 .mh-story-tag .burn-icon.toBurn,
-.mh-power-tag.Crew .burn-icon.toBurn {
+.mh-power-tag.Crew .burn-icon.toBurn,
+.mh-power-tag.Extra .burn-icon.toBurn {
   background-image: url("../ui/icons/burn_neutral_toburn.svg");
   filter: drop-shadow(0 0 2px var(--effects-color1));
 }
 
 .mh-loadout-tag .burn-icon.burned,
 .mh-story-tag .burn-icon.burned,
-.mh-power-tag.Crew .burn-icon.burned {
+.mh-power-tag.Crew .burn-icon.burned,
+.mh-power-tag.Extra .burn-icon.burned {
   background-image: url("../ui/icons/burn_neutral_burned.svg");
 }
 
@@ -1216,4 +1242,80 @@ color: var(--mythosOS-verylight-color);
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.25);
   box-shadow: none;
+}
+
+/* ── Player HUD and NPC HUD: header keys ───────────────────────────────
+   Square dim keys, cyan outline on hover, close red; the Player HUD's
+   two-column toggle lights cyan when on. The ⋮ controls dropdown in glass.
+   Always on for Otherscape (External Style or not); the external file
+   gives core dialogs the same keys. Beats mist-hud.css / mh-npc-hud.css
+   (white keys, orange wide toggle), core's button colours (through
+   --button-text-color) and External Style's `.style-custom button`. */
+:is(#mist-hud, .application.npc-hud) > .window-header .header-control {
+  --button-text-color: var(--text-hud-subtitles-color, #b4b9c0);
+  --button-hover-text-color: var(--outcome-text-color, #f5f5f5);
+  --button-size: 22px;
+  color: var(--text-hud-subtitles-color, #b4b9c0);
+  text-shadow: none;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0;
+  box-shadow: none;
+  transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+:is(#mist-hud, .application.npc-hud) > .window-header .header-control:hover {
+  color: var(--roll-shadow-color, #00def6);
+  background: rgba(0, 222, 246, 0.1);
+  border-color: rgba(0, 222, 246, 0.32);
+  box-shadow: 0 0 6px rgba(0, 222, 246, 0.3);
+}
+
+:is(#mist-hud, .application.npc-hud) > .window-header .header-control[data-action=close]:hover {
+  color: var(--destroyed-tag-color, rgba(255, 40, 40, 0.83));
+  background: rgba(255, 40, 40, 0.18);
+  border-color: var(--destroyed-tag-color, rgba(255, 40, 40, 0.83));
+  box-shadow: 0 0 6px rgba(255, 40, 40, 0.4);
+}
+
+:is(#mist-hud, .application.npc-hud) > .window-header .header-control.mh-wide-toggle:is(.active, [aria-pressed=true]) {
+  color: var(--roll-shadow-color, #00def6);
+  text-shadow: 0 0 4px rgba(0, 222, 246, 0.75), 0 0 10px rgba(0, 123, 191, 0.6);
+  background: rgba(0, 222, 246, 0.14);
+  border-color: rgba(0, 222, 246, 0.32);
+}
+
+:is(#mist-hud, .application.npc-hud) .controls-dropdown {
+  font-family: var(--font-family-main1, "Rift"), "Rift Bold", "Rajdhani", sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-hud-main-color, #d7e5f5);
+  background: rgba(5, 16, 34, 0.97);
+  border: 1px solid rgba(0, 222, 246, 0.32);
+  border-left: 2px solid var(--roll-shadow-color, #00def6);
+  border-radius: 0;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+:is(#mist-hud, .application.npc-hud) .controls-dropdown .header-control {
+  --button-text-color: var(--text-hud-main-color, #d7e5f5);
+  color: var(--text-hud-main-color, #d7e5f5);
+  text-shadow: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+:is(#mist-hud, .application.npc-hud) .controls-dropdown .header-control > i {
+  color: var(--roll-shadow-color, #00def6);
+}
+
+:is(#mist-hud, .application.npc-hud) .controls-dropdown .header-control:hover {
+  color: var(--outcome-text-color, #f5f5f5);
+  background: rgba(0, 222, 246, 0.12);
+}
+
+/* Subtags (power tags with a parent): own row right under the parent,
+   indented per level (getters.js getPowerTags, --mh-tag-depth) */
+.mh-tags .mh-power-tag.mh-nested-tag {
+  margin-left: calc(var(--mh-tag-depth, 1) * 18px);
 }

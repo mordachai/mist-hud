@@ -67,17 +67,29 @@ const isActiveGM = () => game.user === game.users.activeGM;
 const getVisualStyle = () => game.settings.get("city-of-mist", "visualStyle");
 const setVisualStyle = style => game.settings.set("city-of-mist", "visualStyle", style);
 
+// The system's onChangeTo() re-runs itself (setting `system` fires its onChange
+// again), so one Game System change resets visualStyle several times. Show
+// each notice once per burst.
+const NOTICE_WINDOW_MS = 5000;
+const lastNotice = new Map();
+function noticeOnce(level, key) {
+  const now = Date.now();
+  if (now - (lastNotice.get(key) ?? 0) < NOTICE_WINDOW_MS) return;
+  lastNotice.set(key, now);
+  ui.notifications[level](game.i18n.localize(key));
+}
+
 /** Put the system on External Style if our setting wants it. Active GM only. */
 async function enforceExternalStyle() {
   if (!isActiveGM() || !externalStyleEnabled()) return;
   const system = getActiveSystem();
   if (!hasExternalStyle(system)) {
-    ui.notifications.warn(game.i18n.localize("MistHUD.notify.externalStyleUnavailable"));
+    noticeOnce("warn", "MistHUD.notify.externalStyleUnavailable");
     return;
   }
   if (getVisualStyle() === "custom") return;
   await setVisualStyle("custom");
-  ui.notifications.info(game.i18n.localize("MistHUD.notify.externalStyleRestored"));
+  noticeOnce("info", "MistHUD.notify.externalStyleRestored");
 }
 
 export async function detectActiveSystem() {

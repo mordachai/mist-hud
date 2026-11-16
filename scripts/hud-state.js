@@ -344,7 +344,8 @@ export class HUDState {
   // ─── Private helpers ──────────────────────────────────────────────────────
 
   /**
-   * Find a tag item by ID, checking the main actor and all accessible crew actors.
+   * Find a tag item by ID, checking the main actor, all accessible crew actors
+   * and the danger behind the active extra theme.
    *
    * @param {string}     id
    * @param {CityActor}  actor
@@ -363,6 +364,10 @@ export class HUDState {
         if (crewTag) return crewTag;
       }
     }
+
+    // The active extra (danger) theme's tags live on the danger
+    const extraTag = actor.activeExtra?.parent?.items.get(id);
+    if (extraTag) return extraTag;
     return null;
   }
 

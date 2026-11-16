@@ -4,7 +4,7 @@
 // Other files export classes/functions; this file wires them to Foundry events.
 
 import { MODULE_ID, SOCKET_NAME } from "./constants.js";
-import { playerHudRegistry, getOrCreateHud } from "./player-hud.js";
+import { playerHudRegistry, getOrCreateHud, sys, systemReady } from "./player-hud.js";
 import { hudKey } from "./hud-state.js";
 import { BonusManager }              from "./bonus-manager.js";
 import { StatusScreen }              from "./status-screen.js";
@@ -101,6 +101,35 @@ Hooks.on("renderStoryTagWindow", (app) => {
   app.options.width  = 300;
   app.options.height = "auto";
   app.setPosition({ width: 300, height: "auto" });
+});
+
+// ── Roll cards: tag the message with its outcome ─────────────────────────────
+// city-roll.hbs has no result class, so the card gets one here:
+// mh-roll-failure | mh-roll-partial | mh-roll-success | mh-roll-dynamite
+// (dynamite also gets mh-roll-success). The system's own getRollStatus decides,
+// so caps, grit mode and auto fail/success match the move text. Re-runs when
+// the message updates (edit roll, strike out a modifier).
+const ROLL_OUTCOME_CLASSES = ["mh-roll-failure", "mh-roll-partial", "mh-roll-success", "mh-roll-dynamite"];
+
+Hooks.on("renderChatMessageHTML", async (message, html) => {
+  const roll = message.rolls?.[0];
+  if (!roll?.options?.moveId || roll.options.noRoll) return;
+  if (!html.querySelector?.(".city-roll")) return;
+  await systemReady;
+  const CityRoll = sys.CityRoll;
+  if (!CityRoll) return;
+  let status;
+  try {
+    const { total } = CityRoll.getTotal(roll);
+    status = CityRoll.getRollStatus(roll, total, roll.options);
+  } catch (e) {
+    console.warn("Mist HUD | Could not read roll outcome:", e);
+    return;
+  }
+  const outcome = String(status).toLowerCase();
+  html.classList.remove(...ROLL_OUTCOME_CLASSES);
+  if (outcome === "dynamite") html.classList.add("mh-roll-dynamite", "mh-roll-success");
+  else if (ROLL_OUTCOME_CLASSES.includes(`mh-roll-${outcome}`)) html.classList.add(`mh-roll-${outcome}`);
 });
 
 // ── Actor / Item reactivity ───────────────────────────────────────────────────
