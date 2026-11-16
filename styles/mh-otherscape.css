@@ -819,6 +819,12 @@ color: var(--mythosOS-verylight-color);
   margin-bottom: 5px;
 }
 
+/* Otherscape order is Decay | Upgrade (core book and sheet); the template
+   renders Upgrade (attention) first. */
+.mh-resource-bar .crack-group {
+  order: -1;
+}
+
 /* Basic box style */
 .mh-box {
   background-image: url('../ui/icons/track-os-empty.svg');

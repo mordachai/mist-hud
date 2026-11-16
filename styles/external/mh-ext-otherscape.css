@@ -1,0 +1,2853 @@
+/* ==========================================================================
+   Mist HUD — External Style: Otherscape
+   Loaded by settings.js (applyExternalCSS) only while the "Restyle system
+   sheets" setting is on and the active system is Otherscape.
+
+   Applies when the system's Visual Style is "External Style" (body.style-custom).
+   Under that style the system still loads city.css and otherscape.css, but
+   every .style-otherscape rule stops matching. This file brings those back
+   and then restyles on top.
+
+   Root is `.style-custom` (not `body.style-custom`) so specificity matches the
+   system's `.style-otherscape` rules exactly. Everything is nested under it.
+
+   Not ported, because they are unscoped in the system's otherscape.css and
+   still apply: the :root tokens (--green-OS-text, --self-*, --mythos-*,
+   --noise-*, --misc-*), the Rajdhani/Orbitron @font-face rules, .holo-glass,
+   .self-bg, the bare div.Noise-theme blocks, `.settings-sidebar .info > div *`
+   and `body.game .app option`. If the system ever scopes those, copy them here.
+
+   Fonts and images live in the system: use absolute /systems/city-of-mist/...
+   paths, never ../ (that resolves against this module).
+   ========================================================================== */
+
+.style-custom {
+
+  /* ────────────────────────────────────────────────────────────────────────
+     Phase 1 — parity port of city-of-mist 4.5.3 styles/otherscape.css
+     Source order kept so same-specificity ties resolve as before.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  /* Body-level rules (source lines 228 and 442; 442's color wins) */
+  font-family: "Orbitron";
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background-color: rgb(48, 40, 49);
+  color: white;
+
+  .tag .positive-selected {
+    color: black;
+  }
+
+  .sidebar-tab {
+    background: url(/systems/city-of-mist/images/OS-BG.webp) center/cover repeat;
+    font-family: "Orbitron";
+  }
+
+  .chat-sidebar {
+    background: url(/systems/city-of-mist/images/OS-BG.webp) center/cover repeat;
+    font-family: "Orbitron";
+  }
+
+  .city-roll div.actor-name {
+    color: var(--self-border);
+  }
+
+  button.ui-control[aria-pressed=true],
+  a.ui-control[aria-pressed=true],
+  li.ui-control[aria-pressed=true],
+  .placeable-hud .control-icon[aria-pressed=true],
+  .placeable-hud input[aria-pressed=true] {
+    color: var(--green-OS-text);
+    text-shadow: var(--green-OS-textShadow);
+  }
+
+  .move-name {
+    text-transform: uppercase;
+  }
+
+  .move-name,
+  .move-text {
+    color: var(--logos-orange);
+  }
+
+  div.roll-total {
+    font-family: "Rajdhani";
+    color: var(--green-OS-text);
+    text-transform: uppercase;
+  }
+
+  .roll-modifiers {
+    font-family: "Orbitron";
+    color: var(--green-OS-text);
+    text-shadow: var(--green-OS-textShadow);
+    text-transform: uppercase;
+    font-size: 1.0em;
+  }
+
+  .chat-message {
+    background-color: var(--mythos-background);
+    margin: 0.3em;
+    padding: 0.6em 1em;
+    font-size: 1.1em;
+    line-height: 1.2em;
+    font-family: "Rajdhani";
+    text-transform: none;
+    color: var(--green-OS-text);
+    background-image: none;
+    border: none;
+    border-top-left-radius: 1em;
+    border-top-right-radius: 1em;
+  }
+
+  .window-app form button,
+  input,
+  textarea {
+    color: var(--green-OS-text);
+  }
+
+  button {
+    text-shadow: var(--green-OS-textShadow);
+  }
+
+  .yellow-highlight,
+  .item-selection-context .tag .positive-selected,
+  .item-selection-context .status .positive-selected,
+  .positive-selected .tag,
+  .positive-selected .status {
+    background-image: linear-gradient(
+      to right,
+      var(--tag-yellow),
+      var(--tag-yellow-light),
+      var(--tag-yellow)
+    );
+  }
+
+  #pause figcaption {
+    font-family: "Orbitron";
+    color: var(--green-OS-text);
+    text-shadow: var(--green-OS-textShadow);
+    font-size: 2.0em;
+  }
+
+  #settings button,
+  .button,
+  .directory .action-buttons button {
+    font-family: "Orbitron";
+    color: var(--green-OS-text);
+    text-shadow: var(--green-OS-textShadow);
+    box-shadow: 0 0 10px var(--noise-background);
+    border: 2px solid var(--noise-border);
+  }
+
+  .status-box,
+  .story-tag-box,
+  .empty-box {
+    font-family: "Orbitron";
+    color: var(--green-OS-text);
+    text-shadow: var(--green-OS-textShadow);
+    background-image: none;
+    background: var(--misc-background);
+    border-bottom: 1em solid var(--misc-border);
+    border-top: 1em solid var(--misc-border);
+    backdrop-filter: blur(6px);
+  }
+
+  #build-up-section .tracker-circle {
+    border: 4px solid var(--misc-border);
+  }
+
+  .journal-entry-content {
+    color: var(--green-OS-text);
+    background-image: none !important;
+    background: var(--noise-background);
+    backdrop-filter: blur(6px);
+  }
+
+  .character-basic-info {
+    flex-shrink: 1;
+    flex-grow: 1;
+    min-width: 40%;
+    max-width: 70%;
+  }
+
+  .journal-page-header *,
+  .journal-entry-content .journal-page-content * {
+    color: var(--green-OS-text);
+  }
+
+  .essence-block .burn-box {
+    max-width: 10%;
+  }
+
+  .essence-block label {
+    font-family: "Rift Bold";
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 15px;
+  }
+
+  .essence-block {
+    padding: 5px;
+    border-radius: 1em;
+    background-image: url(/systems/city-of-mist/images/mistcardbg.webp);
+  }
+
+  .essence-block .description {
+    margin-right: 5px;
+    margin-left: 5px;
+    font-size: smaller;
+  }
+
+  .header-right-side {
+    flex-shrink: 1;
+    max-width: 10%;
+  }
+
+  .header-right-side * {
+    flex-shrink: 2;
+    min-width: 0;
+  }
+
+  .essence-block .burned {
+    color: red !important;
+  }
+
+  .essence-block .shaded {
+    opacity: 75%;
+  }
+
+  .whisper-to {
+    color: var(--self-border);
+  }
+
+  .mist-engine-theme-block .theme-title .main-tag .tag-name-block .fas {
+    font-size: 0.5em;
+  }
+
+  .fas {
+    text-shadow: none !important;
+  }
+
+  .mist-engine-theme-block .theme-title .main-tag .tag-name-block {
+    font-family: "Orbitron";
+  }
+
+  .app.window-app.story-tag-window {
+    background-image: url(/systems/city-of-mist/images/OS-BG.webp);
+    background-size: cover;
+  }
+
+  div.Noise-theme .theme-block {
+    color: var(--green-OS-text);
+  }
+
+  .gmmove-text,
+  div.Noise-theme .theme-block {
+    background: var(--noise-background);
+    backdrop-filter: blur(6px);
+  }
+
+  .app.window-app .window-content {
+    color: var(--green-OS-text);
+  }
+
+  .window-app:not(.story-tag-window) .window-content {
+    background-image: url(/systems/city-of-mist/images/OS-BG.webp);
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+
+  div.Self-theme .theme-block {
+    backdrop-filter: blur(6px);
+    background: var(--self-background);
+  }
+
+  .scene-tag-window,
+  .app.window-app.story-tag-window .window-title,
+  .scene-tags-block .label {
+    font-family: "Orbitron";
+    text-transform: uppercase;
+    color: var(--green-OS-text);
+  }
+
+  .combatant-name {
+    padding-bottom: 2rem;
+  }
+
+  .combatant-name span.name {
+    font-family: "Rajdhani";
+    font-size: 19px;
+    text-transform: uppercase;
+    color: var(--green-OS-text);
+    text-shadow: 0 0 6px #51eeff, 0 0 12px #007bbf;
+  }
+
+  div.Self-theme .theme-block {
+    color: var(--green-OS-text);
+    text-shadow: var(--green-OS-textShadow);
+    border-radius: 1em;
+    border-bottom: 1em solid var(--self-border);
+    border-top: 2em solid var(--self-border);
+    box-shadow: 0px -5px 0px 10px #a85d4ba6;
+  }
+
+  div.Loadout-theme.theme-block,
+  div.Crew-OS-theme.theme-block,
+  div.Extra-theme.theme-block {
+    color: var(--green-OS-text);
+    text-shadow: var(--green-OS-textShadow);
+    border-radius: 1em;
+    border-bottom: 1em solid var(--misc-border);
+    border-top: 2em solid var(--misc-border);
+    background-image: none;
+    background-color: var(--misc-background);
+    background-position: center;
+    background-size: cover;
+    box-shadow: 0px -5px 0px 10px #686358a6;
+    backdrop-filter: blur(6px);
+  }
+
+  div.Mythos-theme .theme-block,
+  div.Mythos-OS-theme .theme-block {
+    color: var(--green-OS-text);
+    text-shadow: var(--green-OS-textShadow);
+    border-radius: 1em;
+    border-bottom: 1em solid var(--mythos-border);
+    border-top: 2em solid var(--mythos-border);
+    background-image: none;
+    background-color: var(--mythos-background);
+    background-position: center;
+    background-size: 125%;
+    box-shadow: 0px -5px 0px 10px #502c5da6;
+    backdrop-filter: blur(6px);
+  }
+
+  .Mythos-theme .theme-name {
+    text-shadow: 0px 0px 10px var(--mythos-bright),
+                 0px 1px 12px var(--mythos-pink);
+    color: var(--mythos-white);
+  }
+
+  .gmmove-text {
+    color: var(--green-OS-text);
+    text-shadow: var(--green-OS-textShadow);
+    background-image: none;
+  }
+
+  .narration-box {
+    font-family: "Rajdhani";
+    /* The system's text-shadow here was invalid (a shadow list inside a
+       shadow) and browsers dropped it. Replaced in Phase 2 § 1. */
+    color: var(--green-OS-text);
+    font-size: 0.9em;
+    border-style: solid;
+    padding: 5px;
+    border: 1px;
+    transition-duration: 0.2s;
+    height: 100%;
+    border-radius: 1em;
+    border-top: 2em solid var(--self-border);
+    border-bottom: 1em solid var(--self-border);
+    background-image: url(/systems/city-of-mist/images/OS-BG.webp);
+    background-position: center;
+    background-size: 100%;
+  }
+
+  div.Mythos-theme textarea.motivation-input {
+    color: var(--green-OS-text);
+  }
+
+  #settings button {
+    font-size: 1.0em;
+  }
+
+  .directory .action-buttons button {
+    font-size: 1.1em;
+  }
+
+  .directory,
+  .settings-sidebar {
+    color: var(--green-OS-text);
+  }
+
+  /* fix for light theme */
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--noise-border);
+  }
+
+  .combat-sidebar .combat-tracker .combatant {
+    color: var(--green-OS-text);
+  }
+
+  div.city-die-tooltip {
+    color: unset;
+  }
+
+  .hint {
+    text-transform: none;
+  }
+
+  a.button,
+  button {
+    color: var(--green-OS-text);
+    fill: var(--green-OS-text);
+  }
+
+  input {
+    background-color: rgb(48, 40, 49);
+    color: var(--green-OS-text);
+  }
+
+  span.filled-circle {
+    border: 2px solid var(--green-OS-text);
+    background-color: var(--green-OS-text);
+  }
+
+  span.empty-circle {
+    border: 3px solid var(--mythos-bright);
+    background-color: rgba(0, 0, 0, 0);
+  }
+
+  .status span.filled-circle,
+  .status span.filled-circle-status {
+    border: 2px solid var(--mythos-bright);
+    background-color: var(--green-OS-text);
+  }
+
+  .status span.empty-circle,
+  .status span.empty-circle-status {
+    border: 3px solid var(--mythos-bright);
+    background-color: inherit;
+  }
+
+  .city-of-mist--tooltip {
+    backdrop-filter: blur(6px);
+    background: var(--self-background);
+    border-radius: 2px;
+    border: 2px solid var(--self-border);
+  }
+
+  .city-of-mist--name {
+    color: var(--green-OS-text);
+    text-shadow: var(--green-OS-textShadow);
+  }
+
+  /* ════════════════════════════════════════════════════════════════════════
+     Phase 2 — redesign ("holo-terminal": dark navy glass, cyan hairlines,
+     corner brackets, HUD fonts and tag chips)
+     ════════════════════════════════════════════════════════════════════════ */
+
+  /* ── Shared tokens ─────────────────────────────────────────────────────
+     Built on the HUD palette in mh-otherscape.css / mist-hud.css so the
+     sheets and the HUD match. Fallbacks keep it working if those are
+     missing. */
+  & {
+    --mhx-panel:        rgba(3, 13, 33, 0.88);          /* --dark-color */
+    --mhx-panel-hi:     rgba(29, 45, 59, 0.92);         /* --hud-bg-color2 */
+    --mhx-line:         var(--roll-shadow-color, #00def6);
+    --mhx-line-dim:     rgba(0, 222, 246, 0.32);
+    --mhx-line-faint:   rgba(0, 222, 246, 0.14);
+    --mhx-text:         var(--text-hud-main-color, #d7e5f5);
+    --mhx-text-dim:     var(--text-hud-subtitles-color, #b4b9c0);
+    --mhx-bright:       var(--outcome-text-color, #f5f5f5);
+    --mhx-glow:         0 0 4px rgba(0, 222, 246, 0.75), 0 0 10px rgba(0, 123, 191, 0.6);
+    --mhx-self:         var(--self-dark-color, #f7106e);
+    --mhx-mythos:       var(--mythosOS-light-color, #c160e8);
+    --mhx-noise:        var(--noise-dark-color, #04e6fb);
+    --mhx-limit:        var(--limit-color, #ae295b);
+    --mhx-effect:       var(--effects-color1, #84c600);
+    --mhx-improve:      var(--effects-color3, #d3f265);
+    --mhx-danger:       var(--destroyed-tag-color, rgba(255, 40, 40, 0.83));
+    --mhx-tag-bg:       var(--positive-tag-borderColor, #89dffff1);
+    --mhx-tag-edge:     var(--positive-tag-color, #078ababb);
+    --mhx-status-bg:    var(--negative-tag-borderColor, rgba(250, 193, 137, 0.84));
+    --mhx-status-edge:  var(--negative-tag-color, rgba(235, 153, 70, 0.68));
+    --mhx-tag-text:     var(--text-tag-color, #0b0643);
+    --mhx-font-title:   var(--font-family-move, "SDGlitch"), "Orbitron", sans-serif;
+    --mhx-font-label:   var(--font-family-main1, "Rift"), "Rift Bold", "Rajdhani", sans-serif;
+    --mhx-font-body:    var(--font-family-hud, "Roboto Condensed"), "Rajdhani", sans-serif;
+    --mhx-font-readout: "Orbitron", sans-serif;
+  }
+
+  /* Electric-blue scrollbars on the chat log (sidebar, popout, toasts)
+     and the system sheets. Core reads --color-scrollbar; the system's
+     ::-webkit-scrollbar rules are ignored once scrollbar-color is set. */
+  :is(#chat, .chat-popout, #chat-notifications, .city.sheet) {
+    --color-scrollbar: var(--mhx-line);
+    --color-scrollbar-track: transparent;
+  }
+
+  :is(#chat, .chat-popout, #chat-notifications, .city.sheet),
+  :is(#chat, .chat-popout, #chat-notifications, .city.sheet) * {
+    scrollbar-color: var(--mhx-line) transparent;
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     § 1. Chat cards
+     Templates: city-roll.hbs (also used by Mist HUD rolls),
+     gmmove-part.hbs / gmmove-chat-description.html,
+     improvement-chat-description.html, chatmessages/downtime*.hbs,
+     narration-box.html, modification-log-post.hbs, parts/clue-reveal.hbs.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  /* Card shell. --mhx-accent is the left stripe, set per card type below.
+     Bottom-right corner is chamfered (--mhx-chamfer); clip-path cuts the
+     border there, so the diagonal edge is drawn as a background layer.
+     Border colours are !important because Foundry puts the author's colour
+     inline (style="border-color") on out-of-character messages. */
+  .chat-message {
+    --mhx-accent: var(--mhx-line-dim);
+    --mhx-chamfer: 14px;
+    position: relative;
+    margin: 0.35em 0.3em;
+    padding: 0.55em 0.8em 0.65em 0.9em;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    line-height: 1.3;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-text);
+    border: 1px solid;
+    border-color: var(--mhx-line-faint) !important;
+    border-left-color: var(--mhx-accent) !important;
+    border-radius: 0;
+    box-shadow: none;
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% calc(100% - var(--mhx-chamfer)),
+      calc(100% - var(--mhx-chamfer)) 100%,
+      0 100%
+    );
+    background:
+      /* top-right corner bracket */
+      linear-gradient(var(--mhx-line), var(--mhx-line)) top right / 14px 1px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) top right / 1px 14px no-repeat,
+      /* chamfer edge plus a bracket on each side of it */
+      linear-gradient(to bottom right,
+        transparent calc(50% - 1px),
+        var(--mhx-line) calc(50% - 1px),
+        var(--mhx-line) calc(50% + 0.5px),
+        transparent calc(50% + 0.5px))
+        bottom right / var(--mhx-chamfer) var(--mhx-chamfer) no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line))
+        right var(--mhx-chamfer) bottom 0 / 12px 1px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line))
+        right 0 bottom var(--mhx-chamfer) / 1px 12px no-repeat,
+      /* scanlines */
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+      linear-gradient(180deg, var(--mhx-panel-hi), var(--mhx-panel));
+    background-origin: border-box;
+  }
+
+  .chat-message:has(.city-roll)         { --mhx-accent: var(--mhx-line); }
+  .chat-message:has(.gmmove-section)    { --mhx-accent: var(--mhx-limit); }
+  .chat-message:has(.narration-box)     { --mhx-accent: var(--mhx-mythos); }
+  .chat-message:has(.clue-reveal)       { --mhx-accent: var(--mhx-noise); }
+  .chat-message:has(.improvement-name-send) { --mhx-accent: var(--mhx-improve); }
+  .chat-message:has(.downtime)          { --mhx-accent: var(--mhx-effect); }
+  .chat-message:has(.log.action)        { --mhx-accent: rgba(180, 185, 192, 0.5); }
+  .chat-message.whisper,
+  .chat-message.blind                   { --mhx-accent: var(--noise-border, #a3daf7); }
+
+  /* Header */
+  .chat-message .message-header {
+    flex-wrap: wrap;
+    align-items: baseline;
+    margin-bottom: 0.4em;
+    padding-bottom: 0.25em;
+    border-bottom: 1px dashed var(--mhx-line-faint);
+  }
+
+  .chat-message .message-header .message-sender {
+    font-family: var(--mhx-font-label);
+    font-size: 1.05em;
+    font-weight: normal;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mhx-noise);
+    text-shadow: var(--mhx-glow);
+  }
+
+  .chat-message .message-header .message-metadata {
+    font-family: var(--mhx-font-body);
+    font-size: 0.8em;
+    color: var(--mhx-text-dim);
+  }
+
+  .chat-message .message-header .message-metadata a {
+    color: var(--mhx-text-dim);
+  }
+
+  .chat-message .whisper-to {
+    flex-basis: 100%;
+    font-family: var(--mhx-font-body);
+    font-size: 0.8em;
+    font-style: italic;
+    color: var(--noise-border, #a3daf7);
+  }
+
+  .chat-message .message-header .flavor-text {
+    flex-basis: 100%;
+    font-size: 0.85em;
+    font-style: italic;
+    color: var(--mhx-text-dim);
+  }
+
+  .chat-message .message-content hr {
+    height: 1px;
+    margin: 0.5em 0;
+    border: none;
+    background: linear-gradient(90deg, transparent, var(--mhx-line-dim), transparent);
+  }
+
+  /* Buttons inside any card */
+  .chat-message .message-content button {
+    font-family: var(--mhx-font-label);
+    font-size: 0.95em;
+    font-weight: normal;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mhx-text);
+    text-shadow: none;
+    background: rgba(0, 222, 246, 0.07);
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 2px;
+    box-shadow: none;
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+  }
+
+  .chat-message .message-content button:hover:not(:disabled) {
+    color: var(--mhx-bright);
+    background: rgba(0, 222, 246, 0.2);
+    border-color: var(--mhx-line);
+    box-shadow: 0 0 8px rgba(0, 222, 246, 0.45);
+  }
+
+  .chat-message .message-content input[type=checkbox],
+  .chat-message .message-content input[type=radio] {
+    accent-color: var(--mhx-line);
+  }
+
+  .chat-message .message-content textarea {
+    font-family: var(--mhx-font-body);
+    color: var(--mhx-text);
+    background: rgba(3, 13, 33, 0.7);
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 2px;
+  }
+
+  .chat-message .message-content textarea:focus {
+    border-color: var(--mhx-line);
+    box-shadow: 0 0 6px rgba(0, 222, 246, 0.5);
+  }
+
+  /* Tags and statuses written into GM moves and narration: HUD chips */
+  .chat-message .narrated-story-tag {
+    margin: 0;
+    padding: 0 0.35em;
+    font-family: var(--mhx-font-label);
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--mhx-tag-text);
+    text-shadow: none;
+    background: var(--mhx-tag-bg);
+    border: 1px solid var(--mhx-tag-edge);
+    border-radius: 2px;
+  }
+
+  .chat-message .narrated-status-name {
+    padding: 0 0.35em;
+    font-family: var(--mhx-font-body);
+    font-weight: normal;
+    font-style: italic;
+    text-transform: lowercase;
+    color: black;
+    text-shadow: none;
+    background: var(--mhx-status-bg);
+    border: 1px solid var(--mhx-status-edge);
+    border-radius: 2px;
+  }
+
+  .chat-message .narrated-status-name .status-tier {
+    font-weight: bold;
+    font-style: normal;
+  }
+
+  /* ── Roll card (city-roll.hbs) ───────────────────────────────────────── */
+
+  .city-roll,
+  div.city-die-tooltip {
+    color: var(--mhx-text);
+  }
+
+  .city-roll div.actor-name {
+    font-family: var(--mhx-font-readout);
+    font-size: 0.7em;
+    font-weight: normal;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--mhx-text-dim);
+  }
+
+  .city-roll div.move-name {
+    margin: 0.15em 0 0.1em;
+    font-family: var(--mhx-font-title);
+    font-size: 1.9em;
+    font-weight: normal;
+    font-style: italic;
+    line-height: 1.05;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--mhx-bright);
+    text-shadow: -1px 1px 2px var(--mhx-line), 0 0 10px rgba(0, 123, 191, 0.7);
+  }
+
+  .city-roll .roll-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45em;
+  }
+
+  .city-roll ol.dice-rolls {
+    margin: 0.2em 0 0;
+    padding: 0;
+    gap: 0.4em;
+  }
+
+  .city-roll .dice-rolls .roll {
+    float: none;
+    width: 1.7em;
+    height: 1.7em;
+    margin: 0;
+    line-height: 1.6em;
+    font-family: var(--mhx-font-readout);
+    font-size: 1.35em;
+    font-weight: bold;
+    color: var(--mhx-bright);
+    text-shadow: var(--mhx-glow);
+    background-color: var(--mhx-panel);
+    border: 1px solid var(--mhx-line);
+    border-radius: 3px;
+    box-shadow: inset 0 0 8px rgba(0, 222, 246, 0.35), 0 0 6px rgba(0, 222, 246, 0.25);
+  }
+
+  .city-roll ul.roll-modifiers {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3px 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--mhx-font-body);
+    font-size: 0.85em;
+    letter-spacing: normal;
+    text-transform: none;
+    text-shadow: none;
+    color: var(--mhx-text);
+  }
+
+  .city-roll .roll-modifiers li {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.3em;
+  }
+
+  .city-roll .roll-modifiers .name {
+    display: inline-block;
+    padding: 1px 6px;
+    font-family: var(--mhx-font-label);
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--mhx-text);
+    background: rgba(0, 222, 246, 0.1);
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 2px;
+  }
+
+  .city-roll .roll-modifiers .name:hover {
+    color: var(--mhx-bright);
+    background: rgba(0, 222, 246, 0.25);
+    border-color: var(--mhx-line);
+    box-shadow: 0 0 8px rgba(0, 222, 246, 0.5);
+  }
+
+  .city-roll .roll-modifiers .name.strikeout {
+    color: var(--mhx-danger);
+    text-decoration: line-through;
+    background: rgba(255, 40, 40, 0.08);
+    border-color: rgba(255, 40, 40, 0.4);
+    opacity: 0.8;
+  }
+
+  .city-roll .roll-modifiers .burns-on-use,
+  .city-roll .roll-modifiers .attention-award {
+    font-size: 0.85em;
+    font-style: italic;
+    color: var(--mhx-text-dim);
+  }
+
+  .city-roll .roll-modifiers .burns-on-use {
+    color: #ff8a4c;
+  }
+
+  .city-roll div.roll-total {
+    position: relative;
+    min-width: 2.6em;
+    margin: 0.1em auto 0;
+    padding: 0.05em 0.6em;
+    font-family: var(--mhx-font-readout);
+    font-size: 2em;
+    font-weight: bold;
+    line-height: 1.3;
+    text-align: center;
+    color: var(--mhx-bright);
+    text-shadow: var(--mhx-glow);
+    border-top: 1px solid var(--mhx-line);
+    border-bottom: 1px solid var(--mhx-line);
+    background: linear-gradient(90deg, transparent, rgba(0, 222, 246, 0.12), transparent);
+  }
+
+  .city-roll .roll-total .edit-roll {
+    position: absolute;
+    top: 50%;
+    right: -1.2em;
+    transform: translateY(-50%);
+    font-size: 0.45em;
+    color: var(--mhx-text-dim);
+    text-shadow: none;
+  }
+
+  .city-roll .roll-total .edit-roll:hover {
+    color: var(--mhx-line);
+  }
+
+  .city-roll .move-text {
+    margin: 0.2em 0 0.35em;
+    font-family: var(--mhx-font-body);
+    font-size: 1.05em;
+    font-weight: 700;
+    text-align: center;
+    color: var(--mhx-bright);
+  }
+
+  .city-roll ul.move-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .city-roll li.move-list-item,
+  .city-roll li.move-list-bullets {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45em;
+    margin: 0 0 2px;
+    padding: 2px 6px;
+    font-size: 0.95em;
+    font-weight: normal;
+    line-height: 1.25;
+    list-style: none;
+    color: var(--mhx-text);
+    border-left: 2px solid transparent;
+  }
+
+  .city-roll li.move-list-bullets::before {
+    content: "▸";
+    color: var(--mhx-line);
+  }
+
+  .city-roll li.move-list-item input.roll-selector-checkbox {
+    flex: none;
+    position: relative;
+    top: 0.1em;
+    accent-color: var(--mhx-line);
+  }
+
+  .city-roll li.selected.move-list-item {
+    font-weight: normal;
+    color: var(--mhx-bright);
+    background: rgba(132, 198, 0, 0.12);
+    border-left-color: var(--mhx-effect);
+  }
+
+  .city-roll button.show-effects-list {
+    display: block;
+    width: 100%;
+    margin-top: 0.5em;
+  }
+
+  .city-roll .move-tag-status-creator {
+    font-size: 0.95em;
+  }
+
+  .city-roll .me-effects {
+    gap: 3px;
+  }
+
+  .city-roll .me-effects .me-effect {
+    margin: 0;
+    height: auto;
+    min-height: 25px;
+    padding: 2px 4px;
+    font-size: 0.85em;
+    line-height: 1.1;
+    white-space: normal;
+  }
+
+  .city-roll ul.created-items,
+  .city-roll ul.extra-feats {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0.3em 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .city-roll .created-items li,
+  .city-roll .extra-feats li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4em;
+    padding: 2px 6px;
+    background: rgba(0, 222, 246, 0.06);
+    border-left: 2px solid var(--mhx-line-dim);
+  }
+
+  .city-roll .created-items .item-control,
+  .city-roll .extra-feats .item-control {
+    color: var(--mhx-text-dim);
+  }
+
+  .city-roll .created-items .item-control:hover,
+  .city-roll .extra-feats .item-control:hover {
+    color: var(--mhx-danger);
+  }
+
+  .city-roll .spent-points {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.4em;
+    padding: 2px 8px;
+    font-family: var(--mhx-font-label);
+    font-weight: normal;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mhx-text);
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 2px;
+  }
+
+  .city-roll .spent-points span {
+    font-family: var(--mhx-font-readout);
+    color: var(--mhx-line);
+    text-shadow: var(--mhx-glow);
+  }
+
+  /* ── GM move (gmmove-part.hbs / gmmove-chat-description.html) ─────────── */
+
+  .chat-message .gmmove-name {
+    font-family: var(--mhx-font-title);
+    font-size: 1.45em;
+    font-weight: normal;
+    font-style: italic;
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: var(--mhx-bright);
+    text-shadow: -1px 1px 2px var(--mhx-limit), 0 0 10px rgba(174, 41, 91, 0.7);
+  }
+
+  .chat-message div.gmmove-description {
+    font-size: 1em;
+    line-height: 1.4;
+    color: var(--mhx-text);
+  }
+
+  /* ── Improvement (improvement-chat-description.html) ──────────────────── */
+
+  .chat-message .improvement-name-send {
+    font-family: var(--mhx-font-label);
+    font-size: 1.2em;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--mhx-improve);
+    text-shadow: 0 0 6px rgba(211, 242, 101, 0.45);
+    background: none;
+  }
+
+  .chat-message .improvement-name-send::before {
+    content: "▲ ";
+    font-size: 0.75em;
+    vertical-align: 0.1em;
+  }
+
+  .chat-message div.improvement-description-send {
+    margin-top: 0.25em;
+    font-family: var(--mhx-font-body);
+    color: var(--mhx-text);
+  }
+
+  /* ── Narration (narration-box.html) ─────────────────────────────────────
+     Replaces the Phase 1 frame: the card shell is the frame now. */
+
+  .chat-message .narration-box {
+    height: auto;
+    padding: 0;
+    font-family: var(--mhx-font-body);
+    font-size: 1.05em;
+    color: var(--mhx-text);
+    text-shadow: 0 0 3px rgba(193, 96, 232, 0.35);
+    border: none;
+    border-radius: 0;
+    background: none;
+  }
+
+  .chat-message .narration-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0 0 0.4em;
+    font-family: var(--mhx-font-label);
+    font-size: 0.95em;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--mhx-mythos);
+    text-shadow: 0 0 6px rgba(193, 96, 232, 0.6);
+  }
+
+  .chat-message .narration-title::before,
+  .chat-message .narration-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--mhx-mythos));
+  }
+
+  .chat-message .narration-title::after {
+    background: linear-gradient(90deg, var(--mhx-mythos), transparent);
+  }
+
+  .chat-message .narration-box pre {
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    white-space: normal;
+    color: inherit;
+    background: none;
+    border: none;
+  }
+
+  .chat-message .narrated-text-new {
+    line-height: 1.4;
+  }
+
+  /* ── Clue (parts/clue-reveal.hbs) ───────────────────────────────────── */
+
+  .chat-message .clue-reveal {
+    height: auto;
+    margin: 0;
+    padding: 0;
+    color: var(--mhx-text);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+  }
+
+  .chat-message .clue-reveal h1.header {
+    margin: 0 0 0.35em;
+    padding: 0 0 0.2em;
+    font-family: var(--mhx-font-title);
+    font-size: 1.7em;
+    font-weight: normal;
+    font-style: italic;
+    text-align: center;
+    color: var(--mhx-bright);
+    text-shadow: -1px 1px 2px var(--mhx-noise), 0 0 10px rgba(4, 230, 251, 0.55);
+    border: none;
+    border-bottom: 1px solid var(--mhx-line-dim);
+  }
+
+  .chat-message .clue-reveal h2 {
+    margin: 0.4em 0;
+    font-family: var(--mhx-font-label);
+    font-weight: normal;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--mhx-noise);
+    border: none;
+  }
+
+  .chat-message .clue-reveal .clue-source,
+  .chat-message .clue-reveal .clue-method {
+    margin-bottom: 0.2em;
+  }
+
+  .chat-message .clue-reveal .clue-source b,
+  .chat-message .clue-reveal .clue-method b,
+  .chat-message .clue-reveal .question-block .header,
+  .chat-message .clue-reveal .answer-block .header,
+  .chat-message .clue-reveal .gm-only.partial-clue label {
+    font-family: var(--mhx-font-label);
+    font-weight: normal;
+    font-size: 0.85em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-noise);
+  }
+
+  .chat-message .clue-reveal .question-block,
+  .chat-message .clue-reveal .answer-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1em;
+    padding: 0.3em 0.5em;
+    background: rgba(4, 230, 251, 0.06);
+    border-left: 2px solid var(--mhx-line-dim);
+  }
+
+  .chat-message .clue-reveal .question-part .text {
+    font-family: var(--mhx-font-body);
+    font-style: italic;
+  }
+
+  .chat-message .clue-reveal .answer-part {
+    padding-top: 0.5em;
+    border-top: 1px dashed var(--mhx-line-dim);
+  }
+
+  .chat-message .clue-reveal .answer-part .text {
+    font-family: var(--mhx-font-body);
+    color: var(--mhx-bright);
+  }
+
+  .chat-message .clue-reveal .player-only.partial-clue {
+    font-style: italic;
+    color: var(--mhx-text-dim);
+  }
+
+  .chat-message .clue-reveal .rejected-question {
+    color: var(--mhx-danger);
+  }
+
+  .chat-message .clue-reveal .waiting-msg {
+    font-family: var(--mhx-font-label);
+    font-size: 1em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-text-dim);
+  }
+
+  .chat-message .clue-reveal img.waiting-msg {
+    display: block;
+    margin: 0.3em auto;
+    max-width: 60px;
+    max-height: 60px;
+    opacity: 0.8;
+  }
+
+  .chat-message .clue-reveal textarea {
+    width: 100%;
+    min-height: 5em;
+    font-size: 0.95em;
+  }
+
+  .chat-message .clue-reveal button {
+    width: calc(50% - 4px);
+    margin: 4px 0 0;
+    padding: 3px 0;
+  }
+
+  .chat-message .clue-reveal button + button {
+    margin-left: 4px;
+  }
+
+  /* ── Downtime (chatmessages/downtime*.hbs) ──────────────────────────────
+     The partials use <tr>/<td> outside a table, so the browser drops those
+     tags: the children land straight in .downtime, two per option. */
+
+  .chat-message .downtime {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 3px 0.5em;
+  }
+
+  .chat-message .downtime .option-name {
+    padding: 2px 6px;
+    font-size: 0.95em;
+    background: rgba(132, 198, 0, 0.06);
+    border-left: 2px solid rgba(132, 198, 0, 0.35);
+  }
+
+  .chat-message .downtime .choosers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    justify-content: flex-end;
+  }
+
+  .chat-message .downtime .choosers .name {
+    padding: 0 4px;
+    font-family: var(--mhx-font-label);
+    font-size: 0.85em;
+    text-transform: uppercase;
+    color: var(--mhx-tag-text);
+    background: var(--mhx-tag-bg);
+    border-radius: 2px;
+  }
+
+  .chat-message .downtime input[type=radio] {
+    margin: 0;
+    accent-color: var(--mhx-effect);
+  }
+
+  .chat-message .downtime button.submit {
+    grid-column: 1 / -1;
+    margin-top: 0.3em;
+  }
+
+  /* ── Modification log (modification-log-post.hbs) ─────────────────────── */
+
+  .chat-message:has(.log.action) .message-content {
+    font-family: var(--font-family-effects, "Courier New"), monospace;
+    font-size: 0.85em;
+    color: var(--mhx-text-dim);
+  }
+
+  .chat-message .character-name.log {
+    margin-bottom: 0.15em;
+    font-family: var(--mhx-font-label);
+    font-size: 1.1em;
+    font-weight: normal;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--mhx-noise);
+  }
+
+  .chat-message .log.action {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--mhx-line);
+  }
+
+  .chat-message .log.object {
+    font-style: italic;
+    color: var(--mhx-bright);
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     § 2. PC sheet
+     Templates: actor-sheet.html, otherscape/pc-sheet-header.hbs,
+     otherscape/theme-card.hbs → parts/theme-display-me-front.hbs and
+     theme-display-com-back.hbs, parts/loadout-theme*.hbs,
+     parts/tag-status-card.hbs (+ build-up-section.hbs), tag-display.html,
+     tag-name.html, status-with-controls.hbs, themePointControls.hbs.
+
+     Rules are rooted at `.city.sheet` (the system's AppV1 sheet window), so
+     they outrank the Phase 1 port (.style-custom div.X-theme .theme-block)
+     by one class. Theme cards and the story tag card are shared with the
+     crew sheet, so they will already show this look there.
+
+     Deliberate: inside sheets the body text is mixed case with normal
+     letter spacing (the system's Otherscape body rule makes everything
+     uppercase Orbitron); labels and names set uppercase themselves.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  /* Theme colours. Custom properties inherit, and the type class sits on
+     the flip-card-inner (dynThemeType) and/or the theme-block (themebook
+     subtype), so either element feeds the card below. Art is the HUD's. */
+  .city.sheet {
+    --mhx-theme:        var(--mhx-line);
+    --mhx-theme-soft:   rgba(0, 222, 246, 0.12);
+    --mhx-theme-header: url(/modules/mist-hud/ui/header-neutral.webp);
+    --mhx-theme-bar:    url(/modules/mist-hud/ui/select-bar-neutral2.webp);
+    --mhx-theme-art:    none;
+    --mhx-theme-icon:   none;
+    --mhx-weak-bar:     url(/modules/mist-hud/ui/select-bar-weakness.webp);
+  }
+
+  /* Theme title font and colour, as the HUD's .mh-theme-name-com-* */
+  .city.sheet {
+    --mhx-title-size: 1.45em;
+    --mhx-theme-font: var(--font-family-main1, "Rift"), "Rift Bold", sans-serif;
+    --mhx-theme-name-color: whitesmoke;
+  }
+  .Self-theme      { --mhx-theme-font: var(--font-family-main1, "Rift"), "Rift Bold", sans-serif;
+                     --mhx-theme-name-color: var(--self-verylight-color, #fff0f9); }
+  .Mythos-OS-theme,
+  .Mythos-theme    { --mhx-theme-font: var(--font-family-move, "SDGlitch"), sans-serif;
+                     --mhx-theme-name-color: var(--mythosOS-verylight-color, #f8f0ff); }
+  .Noise-theme     { --mhx-theme-font: var(--font-family-move, "SDGlitch"), sans-serif;
+                     --mhx-theme-name-color: var(--noise-verylight-color, #f4feff); }
+  .Crew-OS-theme,
+  .Crew-theme,
+  .Extra-theme     { --mhx-theme-font: var(--font-family-main1, "Rift"), "Rift Bold", sans-serif;
+                     --mhx-theme-name-color: rgb(236, 244, 237); }
+
+  /* White theme icons for the title bands (HUD icon set) */
+  .Self-theme      { --mhx-theme-icon: url(/modules/mist-hud/ui/icons/self_os_icn.svg); }
+  .Noise-theme     { --mhx-theme-icon: url(/modules/mist-hud/ui/icons/noise_os_icn.svg); }
+  .Mythos-OS-theme,
+  .Mythos-theme    { --mhx-theme-icon: url(/modules/mist-hud/ui/icons/mythos_os_icn.svg); }
+  .Crew-OS-theme,
+  .Crew-theme      { --mhx-theme-icon: url(/modules/mist-hud/ui/icons/crew_OS_icn.svg); }
+  .Loadout-theme   { --mhx-theme-icon: url(/modules/mist-hud/ui/icons/loadout_icn.svg); }
+  .Extra-theme     { --mhx-theme-icon: url(/modules/mist-hud/ui/icons/special_icn.svg); }
+
+  .Self-theme {
+    --mhx-theme:        var(--self-dark-color, #f7106e);
+    --mhx-theme-soft:   rgba(247, 16, 110, 0.14);
+    --mhx-theme-header: url(/modules/mist-hud/ui/header-self.webp);
+    --mhx-theme-bar:    url(/modules/mist-hud/ui/select-bar-self.webp);
+    --mhx-theme-art:    url(/modules/mist-hud/ui/self_BG.webp);
+  }
+
+  .Noise-theme {
+    --mhx-theme:        var(--noise-dark-color, #04e6fb);
+    --mhx-theme-soft:   rgba(4, 230, 251, 0.12);
+    --mhx-theme-header: url(/modules/mist-hud/ui/header-noise.webp);
+    --mhx-theme-bar:    url(/modules/mist-hud/ui/select-bar-noise.webp);
+    --mhx-theme-art:    url(/modules/mist-hud/ui/noise_BG.webp);
+  }
+
+  .Mythos-OS-theme,
+  .Mythos-theme {
+    --mhx-theme:        var(--mythosOS-light-color, #c160e8);
+    --mhx-theme-soft:   rgba(152, 51, 242, 0.16);
+    --mhx-theme-header: url(/modules/mist-hud/ui/header-mythosOS.webp);
+    --mhx-theme-bar:    url(/modules/mist-hud/ui/select-bar-mythosOS.webp);
+    --mhx-theme-art:    url(/modules/mist-hud/ui/mythosOS_BG.webp);
+  }
+
+  .Crew-OS-theme,
+  .Crew-theme {
+    --mhx-theme:        var(--misc-border, #6faed9);
+    --mhx-theme-soft:   rgba(111, 174, 217, 0.14);
+    --mhx-theme-header: url(/modules/mist-hud/ui/header-crew.webp);
+    --mhx-theme-art:    none;
+  }
+
+  .Loadout-theme,
+  .Extra-theme {
+    --mhx-theme:        #9fb3c4;
+    --mhx-theme-soft:   rgba(159, 179, 196, 0.12);
+    --mhx-theme-header: url(/modules/mist-hud/ui/header-neutral.webp);
+    --mhx-theme-art:    none;
+  }
+
+  /* ── Sheet body ─────────────────────────────────────────────────────── */
+
+  .city.sheet .actor-sheet {
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-text);
+    text-shadow: none;
+  }
+
+  .city.sheet .actor-sheet a {
+    color: var(--mhx-text-dim);
+    text-shadow: none;
+    transition: color 0.15s, text-shadow 0.15s;
+  }
+
+  .city.sheet .actor-sheet a:hover {
+    max-width: none;
+    color: var(--mhx-line);
+    text-shadow: 0 0 6px rgba(0, 222, 246, 0.6);
+  }
+
+  .city.sheet .actor-sheet .fa-disabled {
+    color: var(--mhx-text-dim);
+    opacity: 0.25;
+  }
+
+  /* ── Header ────────────────────────────────────────────────────────── */
+
+  .city.sheet header.sheet-header {
+    gap: 0.6em;
+    padding: 0.4em 0.5em 0.5em;
+    border-bottom: 1px solid var(--mhx-line-faint);
+    align-items: stretch;
+  }
+
+  .city.sheet .image-block {
+    position: relative;
+    align-self: center;
+    padding: 4px;
+    background:
+      linear-gradient(var(--mhx-line), var(--mhx-line)) top left / 12px 1px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) top left / 1px 12px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) bottom right / 12px 1px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) bottom right / 1px 12px no-repeat;
+  }
+
+  .city.sheet header.sheet-header img.profile-img {
+    display: block;
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 0;
+    background: var(--mhx-panel);
+    box-shadow: 0 0 12px rgba(0, 222, 246, 0.18);
+  }
+
+  .city.sheet .character-basic-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.35em;
+  }
+
+  .city.sheet .actor-sheet .header-row {
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+  }
+
+  .city.sheet .actor-sheet input.character-name {
+    height: auto;
+    font-family: var(--mhx-font-title);
+    font-size: 2.8em;
+    font-weight: normal;
+    font-style: italic;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--mhx-bright);
+    text-shadow: -1px 1px 2px var(--mhx-line), 0 0 14px rgba(0, 123, 191, 0.8);
+    background: none;
+    border: none;
+  }
+
+  .city.sheet .actor-sheet input.short-description {
+    width: 100%;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    font-style: italic;
+    color: var(--mhx-text-dim);
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--mhx-line-faint);
+    border-radius: 0;
+  }
+
+  .city.sheet .actor-sheet input.short-description:focus,
+  .city.sheet .actor-sheet input.character-name:focus {
+    box-shadow: none;
+    border-bottom: 1px solid var(--mhx-line);
+  }
+
+  /* Essence */
+  .city.sheet .essence-block {
+    padding: 0.35em 0.6em;
+    border: 1px solid var(--mhx-line-dim);
+    border-left: 2px solid var(--mhx-line);
+    border-radius: 0;
+    background:
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+      linear-gradient(90deg, rgba(0, 222, 246, 0.12), var(--mhx-panel) 60%);
+  }
+
+  .city.sheet .essence-block .flexrow {
+    align-items: center;
+  }
+
+  .city.sheet .essence-block .name,
+  .city.sheet .essence-block label {
+    font-family: var(--mhx-font-label);
+    font-size: 1.1em;
+    font-weight: normal;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-line);
+    text-shadow: var(--mhx-glow);
+  }
+
+  .city.sheet .essence-block .description,
+  .city.sheet .essence-block .no-essence {
+    margin: 0.1em 0 0;
+    font-size: 0.85em;
+    line-height: 1.25;
+    color: var(--mhx-text-dim);
+  }
+
+  .city.sheet .essence-block .burn-box {
+    flex: 0 0 auto;
+    max-width: none;
+    font-size: 1.2em;
+  }
+
+  .city.sheet .essence-block .essence-burn:hover {
+    color: #ff8a4c;
+    text-shadow: 0 0 8px rgba(255, 120, 40, 0.8);
+  }
+
+  .city.sheet .essence-block .burned .name {
+    color: #ff6b6b !important;
+    text-decoration: line-through;
+    text-shadow: none;
+  }
+
+  /* Lock and info buttons */
+  .city.sheet .header-right-side {
+    flex: 0 0 auto;
+    max-width: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5em;
+  }
+
+  .city.sheet .header-right-side * {
+    flex-shrink: 0;
+  }
+
+  .city.sheet .lock-button {
+    margin: 0;
+    padding: 0;
+    max-width: none;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .city.sheet .lock-button:hover {
+    background: none;
+  }
+
+  .city.sheet .pushable,
+  .city.sheet .pushable.unlocked {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4em;
+    height: 2.4em;
+    padding: 0;
+    border-radius: 0;
+    background: var(--mhx-panel);
+    border: 1px solid var(--mhx-line);
+    box-shadow: inset 0 0 8px rgba(0, 222, 246, 0.3), 0 0 6px rgba(0, 222, 246, 0.25);
+  }
+
+  .city.sheet .pushable.unlocked {
+    border-color: var(--mhx-effect);
+    box-shadow: inset 0 0 8px rgba(132, 198, 0, 0.35), 0 0 8px rgba(132, 198, 0, 0.4);
+  }
+
+  .city.sheet .pushable .front {
+    padding: 0;
+    font-size: 1.05rem;
+    transform: none;
+    color: var(--mhx-line);
+  }
+
+  .city.sheet .pushable.unlocked .front {
+    color: var(--mhx-effect);
+  }
+
+  .city.sheet .pushable:active .front {
+    transform: translateY(1px);
+  }
+
+  .city.sheet .open-tutorial {
+    font-size: 1.1em;
+  }
+
+  /* ── Tabs ──────────────────────────────────────────────────────────── */
+
+  .city.sheet nav.sheet-tabs {
+    gap: 2px;
+    margin: 0.4em 0;
+    padding: 0;
+    font-family: var(--mhx-font-label);
+    font-size: 1em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-top: 1px solid var(--mhx-line-dim);
+    border-bottom: 1px solid var(--mhx-line-dim);
+  }
+
+  .city.sheet nav.sheet-tabs .item {
+    padding: 0.25em 0.5em;
+    color: var(--mhx-text-dim);
+    text-shadow: none;
+    border-bottom: 2px solid transparent;
+  }
+
+  .city.sheet nav.sheet-tabs .item:hover {
+    color: var(--mhx-text);
+  }
+
+  .city.sheet nav.sheet-tabs .item.active {
+    font-weight: normal;
+    color: var(--mhx-bright);
+    text-shadow: var(--mhx-glow);
+    background: linear-gradient(0deg, rgba(0, 222, 246, 0.2), transparent);
+    border-bottom-color: var(--mhx-line);
+  }
+
+  /* ── Move bar ──────────────────────────────────────────────────────── */
+
+  .city.sheet section.move-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    max-height: none;
+    margin: 0.2em 0 0.5em;
+    font-family: var(--mhx-font-body);
+  }
+
+  .city.sheet .move-section select {
+    width: auto;
+    min-width: 9em;
+    height: 2em;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    font-weight: normal;
+    color: var(--mhx-text);
+    background: var(--mhx-panel);
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .city.sheet .move-section select:focus {
+    border-color: var(--mhx-line);
+    box-shadow: 0 0 6px rgba(0, 222, 246, 0.45);
+  }
+
+  .city.sheet .move-section select option {
+    color: var(--mhx-text);
+    background: #0b1a2e;
+  }
+
+  .city.sheet button.execute-move-button {
+    width: auto;
+    height: 2em;
+    padding: 0 1.2em;
+    font-family: var(--mhx-font-label);
+    font-size: 1.05em;
+    font-weight: normal;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #031424;
+    text-shadow: none;
+    background: linear-gradient(180deg, #5cf2ff, var(--mhx-line));
+    border: none;
+    border-radius: 0;
+    box-shadow: 0 0 10px rgba(0, 222, 246, 0.45);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+  }
+
+  .city.sheet button.execute-move-button:hover {
+    color: #031424;
+    background: linear-gradient(180deg, #a6f8ff, #2fe8fb);
+    box-shadow: 0 0 16px rgba(0, 222, 246, 0.8);
+  }
+
+  /* ── Theme cards ─────────────────────────────────────────────────────
+     Same shell as the chat cards: navy glass, hairline in the theme
+     colour, chamfered bottom-right. The header band and the faint art
+     are the HUD's per-theme images. */
+
+  /* Card frame, reusable on the other systems (CoM puts the icon left).
+     - The title band is the card's top edge, full width.
+     - No CSS border: the side, bottom and chamfer lines are background
+       layers, so the side lines start under the band and the card body
+       never shows through the band's ragged cut-outs.
+     - Height: the system's --theme-card-size is 500px; a third less in the
+       tag area. */
+  .city.sheet {
+    --theme-card-size: 380px;
+  }
+
+  .city.sheet div.flex-theme-block-flip,
+  .city.sheet div.flex-theme-block {
+    min-height: var(--theme-card-size);
+    height: var(--theme-card-size);
+    padding: 0;
+    border-radius: 0;
+  }
+
+  .city.sheet div.theme-block,
+  .city.sheet .flip-card .story-tag-box {
+    --mhx-band: 36px;           /* HUD header art is 250×30, stretched */
+    --mhx-cut: 16px;            /* chamfer */
+    --mhx-edge: color-mix(in srgb, var(--mhx-theme) 65%, transparent);
+    position: relative;
+    box-sizing: border-box;
+    height: var(--theme-card-size);
+    padding: 0 8px 8px;
+    overflow: hidden auto;
+    scrollbar-width: none;
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-text);
+    text-shadow: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--mhx-cut)), calc(100% - var(--mhx-cut)) 100%, 0 100%);
+    background:
+      /* edges */
+      linear-gradient(var(--mhx-edge), var(--mhx-edge))
+        left 0 top var(--mhx-band) / 1px calc(100% - var(--mhx-band)) no-repeat,
+      linear-gradient(var(--mhx-edge), var(--mhx-edge))
+        right 0 top var(--mhx-band) / 1px calc(100% - var(--mhx-band) - var(--mhx-cut)) no-repeat,
+      linear-gradient(var(--mhx-edge), var(--mhx-edge))
+        left 0 bottom 0 / calc(100% - var(--mhx-cut)) 1px no-repeat,
+      linear-gradient(to bottom right,
+        transparent calc(50% - 1px),
+        var(--mhx-edge) calc(50% - 1px),
+        var(--mhx-edge) calc(50% + 0.5px),
+        transparent calc(50% + 0.5px))
+        right 0 bottom 0 / var(--mhx-cut) var(--mhx-cut) no-repeat,
+      /* body, starting under the band */
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 3px)
+        left 0 top var(--mhx-band) / 100% calc(100% - var(--mhx-band)) no-repeat,
+      linear-gradient(180deg, rgba(3, 13, 33, 0.55), rgba(3, 13, 33, 0.85))
+        left 0 top var(--mhx-band) / 100% calc(100% - var(--mhx-band)) no-repeat,
+      var(--mhx-theme-art) center 60% / 80% no-repeat,
+      linear-gradient(180deg, var(--mhx-theme-soft), transparent 45%)
+        left 0 top var(--mhx-band) / 100% calc(100% - var(--mhx-band)) no-repeat,
+      linear-gradient(180deg, var(--mhx-panel-hi), var(--mhx-panel))
+        left 0 top var(--mhx-band) / 100% calc(100% - var(--mhx-band)) no-repeat;
+    background-origin: border-box;
+  }
+
+  .city.sheet div.theme-block::-webkit-scrollbar,
+  .city.sheet .flip-card .story-tag-box::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Header band (themebook name / loadout name). The theme icon sits on
+     the right as ::after, absolutely placed so the title stays centred. */
+  .city.sheet div.theme-block div.themebook-name {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35em;
+    box-sizing: border-box;
+    height: var(--mhx-band);
+    min-height: var(--mhx-band);
+    margin: 0 -8px 0.45em;
+    padding: 0 38px;
+    font-family: var(--mhx-font-label);
+    font-size: 1.15em;
+    font-style: normal;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mhx-bright);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+    border-radius: 0;
+    background: var(--mhx-theme-header) center / 100% 100% no-repeat;
+  }
+
+  /* Theme cards (not Loadout): the band title is the theme title — left,
+     bigger, in the HUD's font and colour for that theme
+     (.mh-theme-name-com-*). The icon stays on the right. */
+  .city.sheet div.theme-block:not(.Loadout-theme) div.themebook-name {
+    justify-content: flex-start;
+    padding-left: 10px;
+    font-family: var(--mhx-theme-font);
+    font-size: var(--mhx-title-size);
+    font-style: italic;
+    letter-spacing: 0.02em;
+    color: var(--mhx-theme-name-color);
+  }
+
+  .city.sheet div.theme-block:not(.Loadout-theme) span.themebook-name {
+    text-align: left;
+  }
+
+  .city.sheet div.theme-block div.themebook-name::after,
+  .city.sheet .story-tag-box .story-tags-header::after,
+  .city.sheet .story-tag-box .relationship-tag-category h2::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    width: 23px;
+    height: 23px;
+    transform: translateY(-50%);
+    background: var(--mhx-theme-icon) center / contain no-repeat;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
+    pointer-events: none;
+  }
+
+  /* The Noise glyph reads off-centre; push it further right */
+  .city.sheet div.Noise-theme div.themebook-name::after {
+    right: 5px;
+  }
+
+  /* Loadout, Story Tags, Statuses (and Crew Relationships, same card) keep
+     the icon on the left */
+  .city.sheet div.Loadout-theme.theme-block div.themebook-name::after,
+  .city.sheet .story-tag-box .story-tags-header::after,
+  .city.sheet .story-tag-box .relationship-tag-category h2::after {
+    left: 10px;
+    right: auto;
+  }
+
+  .city.sheet div.theme-block span.themebook-name {
+    width: auto;
+    max-width: none;
+    flex: 1 1 auto;
+    min-width: 0;
+    text-overflow: ellipsis;
+  }
+
+  .city.sheet div.theme-block .themebook-name a {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .city.sheet div.theme-block .themebook-name a:hover {
+    color: #fff;
+    text-shadow: 0 0 6px #fff;
+  }
+
+  .city.sheet .level-up-arrow {
+    color: var(--mhx-improve);
+    text-shadow: 0 0 6px var(--mhx-improve);
+  }
+
+  /* Main (title) tag */
+  .city.sheet .mist-engine-theme-block .theme-title {
+    margin: 0.1em 0 0.2em;
+    text-align: left;
+  }
+
+  .city.sheet .mist-engine-theme-block .theme-title .main-tag .tag-name-block,
+  .city.sheet div.Noise-theme .mist-engine-theme-block .theme-title .main-tag .tag-name-block {
+    font-family: var(--mhx-theme-font);
+    font-size: 24px;
+    font-weight: normal;
+    font-style: italic;
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--mhx-theme-name-color);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--mhx-theme) 80%, transparent);
+  }
+
+  .city.sheet .mist-engine-theme-block .theme-title .main-tag .flex-tag-name {
+    font-size: 1em;
+  }
+
+  /* The tag-name span sets its own font for all bars; the title wins here */
+  .city.sheet .theme-block .theme-title .tag.item-entry span.flex-tag-name {
+    font-family: var(--mhx-theme-font);
+    font-weight: normal;
+    color: var(--mhx-theme-name-color);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--mhx-theme) 80%, transparent), 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  .city.sheet .theme-block .theme-title .tag.item-entry .flex-tag-name-cell,
+  .city.sheet .theme-block .theme-title .tag.item-entry .flex-wide {
+    text-align: left;
+  }
+
+  /* Loadout, Story Tags, Crew Relationships and Statuses: drop the type
+     icons (briefcase, tag, relationship leaf, status ring); the card
+     already says what they are. Other markers (temporary, hidden,
+     permanent…) stay. */
+  .city.sheet div.Loadout-theme.theme-block .tag.item-entry span.tag-symbols a:has(> .fa-briefcase),
+  .city.sheet .story-tag-box .tag.item-entry span.tag-symbols a:has(> .fa-tag),
+  .city.sheet .story-tag-box .relationship-tag-category .tag.item-entry span.tag-symbols a:has(> .fa-leaf),
+  .city.sheet .story-tag-box .status-name-block > a:has(> .fa-life-ring) {
+    display: none;
+  }
+
+  .city.sheet :is(div.Loadout-theme.theme-block, .story-tag-box) .tag.item-entry span.tag-symbols:not(:has(a:not(:has(> .fa-briefcase, > .fa-tag)))),
+  .city.sheet .story-tag-box .relationship-tag-category .tag.item-entry span.tag-symbols:not(:has(a:not(:has(> .fa-tag, > .fa-leaf)))) {
+    display: none;
+  }
+
+  /* Card controls row */
+  .city.sheet .mist-engine-theme-block .theme-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    padding: 0.15em 0 0.3em;
+    margin-bottom: 0.3em;
+    border-bottom: 1px solid color-mix(in srgb, var(--mhx-theme) 30%, transparent);
+  }
+
+  /* Drop the greyed "add power tag" bolt (no attention to spend). The
+     live bolt still shows when an upgrade is available; the row hides
+     itself when nothing clickable is left in it. */
+  .city.sheet .mist-engine-theme-block .theme-controls > span:has(> .fa-disabled) {
+    display: none;
+  }
+
+  .city.sheet .mist-engine-theme-block .theme-controls:not(:has(a, .nascent-label)) {
+    display: none;
+  }
+
+  .city.sheet .mist-engine-theme-block .nascent-label {
+    font-size: 0.85em;
+    color: var(--mhx-improve);
+  }
+
+  /* ── Tags (theme cards, loadout, story tag card) ─────────────────────── */
+
+  .city.sheet .actor-sheet ul.tag-list {
+    font-size: 1em;
+  }
+
+  .city.sheet .actor-sheet ul.tag-list > li {
+    margin: 1px 0;
+  }
+
+  .city.sheet .actor-sheet .tag.item-entry {
+    align-items: center;
+    gap: 0.2em;
+    padding: 1px 2px;
+    text-align: left;
+  }
+
+  .city.sheet .actor-sheet .flex-trash {
+    padding-right: 0;
+    font-size: 0.8em;
+  }
+
+  .city.sheet .actor-sheet span.tag-symbols {
+    width: auto;
+    min-width: 1.1em;
+    max-width: none;
+    font-size: 0.8em;
+  }
+
+  .city.sheet .actor-sheet span.tag-symbols a,
+  .city.sheet .actor-sheet .power-tag-icon {
+    color: var(--mhx-theme);
+  }
+
+  .city.sheet .actor-sheet span.tag-name-block {
+    font-size: 1em;
+  }
+
+  .city.sheet .actor-sheet span.flex-tag-name {
+    font-family: var(--mhx-font-label);
+    font-size: 1.05em;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: whitesmoke;
+  }
+
+  .city.sheet .actor-sheet span.flex-tag-name.weakness-tag {
+    color: var(--marker-negativeTag-color, #ffd4a8);
+  }
+
+  .city.sheet .actor-sheet .story-tag-location {
+    font-family: var(--mhx-font-body);
+    font-size: 0.8em;
+    text-transform: none;
+    color: var(--mhx-text-dim);
+  }
+
+  .city.sheet .actor-sheet ul.sub-tag-list {
+    margin-left: 1em;
+    border-left: 1px solid color-mix(in srgb, var(--mhx-theme) 35%, transparent);
+  }
+
+  /* ── Tag bars (Otherscape core book look) ─────────────────────────────
+     Each tag row on a card is a bar using the HUD's per-theme bar art,
+     with the burn icon at its right end. Weaknesses use the striped bar.
+     Selected = full-strength bar with a glow (striped if negative), "to
+     burn" = the white-notch bar, burned = yellow struck-through text.
+     The selection classes sit on the inner .flex-tag-name, so the row
+     reads them with :has(). */
+
+  .city.sheet {
+    --mhx-burn:   url(/modules/mist-hud/ui/icons/burn_neutral_empty.svg);
+    --mhx-burned: url(/modules/mist-hud/ui/icons/burn_neutral_toburn.svg);
+  }
+
+  .Self-theme {
+    --mhx-burn:   url(/modules/mist-hud/ui/icons/burn_self_empty.svg);
+    --mhx-burned: url(/modules/mist-hud/ui/icons/burn_self_toburn.svg);
+  }
+
+  .Noise-theme {
+    --mhx-burn:   url(/modules/mist-hud/ui/icons/burn_noise_empty.svg);
+    --mhx-burned: url(/modules/mist-hud/ui/icons/burn_noise_toburn.svg);
+  }
+
+  .Mythos-OS-theme,
+  .Mythos-theme {
+    --mhx-burn:   url(/modules/mist-hud/ui/icons/burn_mythosOS_empty.svg);
+    --mhx-burned: url(/modules/mist-hud/ui/icons/burn_mythosOS_toburn.svg);
+  }
+
+  /* Bar art per theme: the HUD's selection bars (ui/select-bar-*.webp).
+     --mhx-tag-bar is the normal bar, --mhx-tag-bar-burn the "to burn" one
+     (white notch). Weaknesses and negative selection use the striped bar. */
+  .city.sheet {
+    --mhx-tag-bar:      url(/modules/mist-hud/ui/select-bar-neutral2.webp);
+    --mhx-tag-bar-burn: url(/modules/mist-hud/ui/select-bar-neutral2-toburn.webp);
+  }
+
+  .Self-theme {
+    --mhx-tag-bar:      url(/modules/mist-hud/ui/select-bar-self.webp);
+    --mhx-tag-bar-burn: url(/modules/mist-hud/ui/select-bar-self-toburn.webp);
+  }
+
+  .Noise-theme {
+    --mhx-tag-bar:      url(/modules/mist-hud/ui/select-bar-noise.webp);
+    --mhx-tag-bar-burn: url(/modules/mist-hud/ui/select-bar-noise-toburn.webp);
+  }
+
+  .Mythos-OS-theme,
+  .Mythos-theme {
+    --mhx-tag-bar:      url(/modules/mist-hud/ui/select-bar-mythosOS.webp);
+    --mhx-tag-bar-burn: url(/modules/mist-hud/ui/select-bar-mythosOS-toburn.webp);
+  }
+
+  /* Every tag row is a bar. The art sits on ::before so its opacity can
+     change with state: dimmed at rest, full when selected. */
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry {
+    --mhx-bar-img: var(--mhx-tag-bar);
+    --mhx-bar-alpha: 0.6;
+    position: relative;
+    isolation: isolate;
+    align-items: center;
+    gap: 0.25em;
+    min-height: 1.75em;
+    margin: 3px 0;
+    padding: 2px 10px 2px 9px;
+    text-align: left;
+  }
+
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--mhx-bar-img) left center / 100% 100% no-repeat;
+    opacity: var(--mhx-bar-alpha);
+    transition: opacity 0.15s, filter 0.15s;
+    pointer-events: none;
+  }
+
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:hover {
+    --mhx-bar-alpha: 0.85;
+  }
+
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry span.flex-tag-name {
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry span.tag-symbols a,
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry .flex-trash a,
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry .power-tag-icon {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry .flex-burn-flame-cell {
+    flex: none;
+    min-width: 0;
+    max-width: none;
+    margin: 0;
+  }
+
+  /* Main (title) tag: taller bar, always full strength */
+  .city.sheet .theme-block .theme-title .tag.item-entry {
+    --mhx-bar-alpha: 0.9;
+    min-height: 2.3em;
+    padding: 4px 12px 4px 11px;
+  }
+
+  /* Locked theme cards: drop the power-tag bolt and weakness chevrons
+     (the bar already says which is which), and the empty delete cell.
+     Other markers (bonus, crispy, temporary, hidden…) stay. */
+  .city.sheet .actor-sheet.locked .theme-block .tag.item-entry :is(
+    .power-tag-icon,
+    span.tag-symbols a:has(> .fa-angle-double-down)
+  ) {
+    display: none;
+  }
+
+  .city.sheet .actor-sheet.locked .theme-block .tag.item-entry span.tag-symbols:not(:has(a:not(.power-tag-icon):not(:has(> .fa-angle-double-down)))),
+  .city.sheet .actor-sheet.locked .theme-block .tag.item-entry .flex-trash:not(:has(*)) {
+    display: none;
+  }
+
+  /* Weakness: striped bar, light text like the HUD */
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:has(.weakness-tag) {
+    --mhx-bar-img: var(--mhx-weak-bar);
+  }
+
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry span.flex-tag-name.weakness-tag {
+    color: #f4ffd0;
+  }
+
+  /* Selection: the inner span drops the system/Phase 1 highlight; the
+     bar carries the state (full strength + glow, striped if negative). */
+  .city.sheet :is(.theme-block, .story-tag-box) .tag .flex-tag-name:is(.positive-selected, .negative-selected),
+  .city.sheet .item-selection-context :is(.theme-block, .story-tag-box) .active-tag:hover:not(.positive-selected):not(.negative-selected) {
+    margin: 0;
+    padding: 0;
+    font-weight: 600;
+    color: #fff;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry {
+    opacity: 0.9;
+  }
+
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:has(.positive-selected),
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:has(.negative-selected) {
+    --mhx-bar-alpha: 1;
+    opacity: 1;
+  }
+
+  /* Selected uses the white-notch bar (more readable). This also covers
+     an inverted weakness (weakness selected as positive): it gets the
+     theme bar like any power tag. */
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:has(.positive-selected) {
+    --mhx-bar-img: var(--mhx-tag-bar-burn);
+  }
+
+  /* Selected text: the same yellow as burned text, on every bar
+     (main tag and weaknesses included) */
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry span.flex-tag-name:is(.positive-selected, .negative-selected) {
+    color: #ffd84a;
+    text-shadow: 0 0 6px rgba(255, 216, 74, 0.45), 0 1px 2px rgba(0, 0, 0, 0.7);
+  }
+
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:has(.positive-selected)::before,
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:has(.negative-selected)::before {
+    filter: drop-shadow(0 0 4px var(--mhx-theme));
+  }
+
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:has(.negative-selected) {
+    --mhx-bar-img: var(--mhx-weak-bar);
+  }
+
+  /* To burn (burn-level 2–4): the white-notch bar */
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:has(.burn-level-2, .burn-level-3, .burn-level-4) {
+    --mhx-bar-img: var(--mhx-tag-bar-burn);
+    --mhx-bar-alpha: 1;
+  }
+
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:has(.burn-level-2, .burn-level-3, .burn-level-4)::before {
+    filter: drop-shadow(0 0 3px lime);
+  }
+
+  /* Burned: yellow text, bar dimmed */
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:has(.burn-level-1) {
+    --mhx-bar-alpha: 0.3;
+  }
+
+  /* The system's `.burn-level-1 { color: red !important }` sits in a
+     cascade layer, and a layered !important beats any unlayered one, so
+     `color` can't be overridden from here. text-fill-color paints the
+     glyphs instead and the system doesn't set it. */
+  .city.sheet .actor-sheet .flex-tag-name.burn-level-1,
+  .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry span.flex-tag-name.burn-level-1 {
+    color: #ffd84a !important;
+    -webkit-text-fill-color: #ffd84a;
+    text-decoration: line-through;
+    text-decoration-color: rgba(255, 216, 74, 0.7);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Burn controls: the HUD's burn images instead of the flame glyph */
+  .city.sheet .actor-sheet :is(.tag-burn, .tag-unburn, .essence-burn) i {
+    display: inline-block;
+    vertical-align: middle;
+    width: 28px;
+    height: 15px;
+    background: var(--mhx-burn) center / contain no-repeat;
+  }
+
+  .city.sheet .actor-sheet :is(.tag-burn, .tag-unburn, .essence-burn) i::before {
+    content: none;
+  }
+
+  /* Burned tags show the "to burn" art (sheet only; the HUD keeps its
+     own burned icon) */
+  .city.sheet .actor-sheet .tag-unburn i {
+    background-image: var(--mhx-burned);
+  }
+
+  .city.sheet .actor-sheet :is(.tag-burn, .essence-burn):hover i {
+    filter: drop-shadow(0 0 3px lime);
+  }
+
+  .city.sheet .actor-sheet :is(.tag-burn, .essence-burn):hover {
+    text-shadow: none;
+  }
+
+  /* Hover while locked (selectable): soft cyan instead of yellow/red */
+  .city.sheet .item-selection-context .active-tag:hover:not(.positive-selected):not(.negative-selected),
+  .city.sheet .item-selection-context .status-name:hover:not(.positive-selected):not(.negative-selected) {
+    margin: 0;
+    padding: 0 0.3em;
+    font-weight: normal;
+    color: var(--mhx-bright);
+    border-radius: 0;
+    background: rgba(0, 222, 246, 0.16);
+    box-shadow: inset 2px 0 0 var(--mhx-line);
+  }
+
+  .city.sheet .actor-sheet .tag-edit-button:hover {
+    text-shadow: 0 0 8px var(--mhx-line);
+  }
+
+  .city.sheet .actor-sheet .tag-burn:hover {
+    color: #ff8a4c;
+    text-shadow: 0 0 8px rgba(255, 120, 40, 0.8);
+  }
+
+  .city.sheet .actor-sheet .activation-square {
+    color: var(--mhx-theme);
+  }
+
+  /* ── Motivation (identity / itch / ritual) ───────────────────────────── */
+
+  /* The system splits the card 90% tags / 10% motivation, which crops the
+     motivation text. Make the card a column: tags take what is left and
+     scroll if needed, motivation sizes to its text. */
+  .city.sheet div.mist-engine-theme-block.theme-block {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Spans the card's padding so the band's -8px margins aren't clipped by
+     its overflow. Scrolls without a visible bar. */
+  .city.sheet .mist-engine-theme-block .top-section {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    margin: 0 -8px;
+    padding: 0 8px;
+    overflow: hidden auto;
+    scrollbar-width: none;
+  }
+
+  .city.sheet .mist-engine-theme-block .top-section::-webkit-scrollbar {
+    display: none;
+  }
+
+  .city.sheet .mist-engine-theme-block .motivation-section {
+    flex: none;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    padding-top: 0.3em;
+  }
+
+  /* Label (Identity / Itch / Ritual), core book style: small caps in the
+     theme colour, then a rule running right that ends in a thicker,
+     angled cap. Same font for every theme. */
+  .city.sheet .mist-engine-theme-block .themebook-motivation-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    text-align: left;
+  }
+
+  .city.sheet .mist-engine-theme-block .themebook-motivation-label::after {
+    content: "";
+    flex: 1;
+    height: 6px;
+    background:
+      linear-gradient(var(--mhx-theme), var(--mhx-theme)) left center / 100% 1px no-repeat,
+      linear-gradient(var(--mhx-theme), var(--mhx-theme)) right center / 34px 6px no-repeat;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  }
+
+  .city.sheet .mist-engine-theme-block .themebook-motivation {
+    font-family: var(--mhx-font-body);
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-theme);
+  }
+
+  .city.sheet .mist-engine-theme-block textarea.motivation-input,
+  .city.sheet div.Mythos-theme textarea.motivation-input {
+    flex: none;
+    field-sizing: content;
+    min-height: 1.2em;
+    max-height: 140px;
+    height: auto;
+    padding: 0.1em 0.2em 0.3em;
+    overflow-y: auto;
+    scrollbar-width: none;
+    margin-top: 0.15em;
+    font-family: var(--mhx-font-label);
+    font-size: 1.25em;
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--mhx-theme);
+    text-shadow: none;
+    resize: none;
+  }
+
+  /* ── Card backs: progress tracks and improvements ────────────────────── */
+
+  /* Upgrade / Decay: the official sheet's lime capsule, laid horizontal.
+     One pill split in two halves (Decay left, Upgrade right — the system
+     renders Upgrade first, so `order` swaps them), ticks for points, and
+     "‹ DECAY | UPGRADE ›" under the halves. The pill outline is the
+     track's ::before, sized to the first row only, so the label sits
+     outside it. A Milestone track, if enabled, gets a full pill below. */
+  .city.sheet div.theme-block div.att-fade-section {
+    --mhx-track: #d6f53f;
+    --mhx-track-dim: rgba(214, 245, 63, 0.38);
+    --mhx-track-row: 26px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0;
+    padding: 0.5em 2px 0.3em;
+  }
+
+  .city.sheet div.theme-block div.theme-progress-track {
+    position: relative;
+    flex: 1 1 50%;
+    min-width: 0;
+    padding: 0;
+    overflow: visible;
+    background: none;
+    border: none;
+  }
+
+  .city.sheet div.theme-block div.theme-progress-track::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--mhx-track-row);
+    box-sizing: border-box;
+    border: 2px solid var(--mhx-track);
+    border-radius: 0 999px 999px 0;
+    border-left: none;
+    background: rgba(28, 38, 0, 0.45);
+    box-shadow: 0 0 7px rgba(214, 245, 63, 0.55), inset 0 0 7px rgba(214, 245, 63, 0.3);
+    pointer-events: none;
+  }
+
+  .city.sheet div.theme-block div.theme-progress-track:has([data-type="crack"]) {
+    order: -1;
+  }
+
+  .city.sheet div.theme-block div.theme-progress-track:has([data-type="crack"])::before {
+    border-left: 2px solid var(--mhx-track);
+    border-radius: 999px 0 0 999px;
+  }
+
+  .city.sheet div.theme-block div.theme-progress-track:has([data-type="milestone"]) {
+    order: 1;
+    flex-basis: 100%;
+    margin-top: 0.4em;
+  }
+
+  .city.sheet div.theme-block div.theme-progress-track:has([data-type="milestone"])::before {
+    border-left: 2px solid var(--mhx-track);
+    border-radius: 999px;
+  }
+
+  .city.sheet div.theme-block .theme-progress-track .dots-section {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0 4px;
+    padding: 0;
+  }
+
+  /* Controls inside the pill, mirrored at the outer ends: Decay's on the
+     left, Upgrade's on the right; ticks stay centred. The system only
+     renders "−" on an unlocked sheet, so locked shows just "+". */
+  .city.sheet div.theme-block .theme-progress-track .dots-section > a {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    height: var(--mhx-track-row);
+    display: flex;
+    align-items: center;
+    font-size: 0.9em;
+    line-height: 1;
+    color: var(--mhx-track);
+    opacity: 0.9;
+  }
+
+  .city.sheet div.theme-block .theme-progress-track .dots-section > a:hover {
+    opacity: 1;
+    color: #f2ffb0;
+    text-shadow: 0 0 6px var(--mhx-track);
+  }
+
+  .city.sheet div.theme-block .theme-progress-track .dots-section > a.theme-add-progress-point { right: 10px; }
+  .city.sheet div.theme-block .theme-progress-track .dots-section > a.theme-remove-progress-point { right: 25px; }
+
+  .city.sheet div.theme-block .theme-progress-track:has([data-type="crack"]) .dots-section > a.theme-add-progress-point {
+    right: auto;
+    left: 10px;
+  }
+
+  .city.sheet div.theme-block .theme-progress-track:has([data-type="crack"]) .dots-section > a.theme-remove-progress-point {
+    right: auto;
+    left: 25px;
+  }
+
+  /* Keep the ticks clear of the buttons: reserve the outer end */
+  .city.sheet div.theme-block .theme-progress-track .dots-section {
+    padding-right: 36px;
+  }
+
+  .city.sheet div.theme-block .theme-progress-track:has([data-type="crack"]) .dots-section {
+    padding-right: 0;
+    padding-left: 36px;
+  }
+
+  /* Ticks row: fixed to the pill's height so they sit centred in it */
+  .city.sheet div.theme-block .theme-progress-track .dots-section {
+    min-height: var(--mhx-track-row);
+    align-content: flex-start;
+  }
+
+  .city.sheet div.theme-block .theme-progress-track .dots-section > span.tracker-circle {
+    margin-top: calc((var(--mhx-track-row) - 13px) / 2) !important;
+    margin-bottom: calc((var(--mhx-track-row) - 13px) / 2) !important;
+  }
+
+  /* Ticks: short vertical dashes (the art's dashes, turned) */
+  .city.sheet div.theme-block .theme-progress-track span.tracker-circle.filled-circle,
+  .city.sheet div.theme-block .theme-progress-track span.tracker-circle.empty-circle {
+    flex: none;
+    width: 4px !important;
+    height: 13px !important;
+    min-width: 4px !important;
+    max-width: 4px !important;
+    min-height: 13px !important;
+    margin: 0 3px;
+    transform: none;
+    border-radius: 1px;
+    border: 1px solid var(--mhx-track-dim);
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  .city.sheet div.theme-block .theme-progress-track span.tracker-circle.filled-circle {
+    border-color: var(--mhx-track);
+    background-color: var(--mhx-track);
+    box-shadow: 0 0 6px var(--mhx-track);
+  }
+
+  /* Label under each half, pinned to the centre split so the two words
+     can never collide: "‹ DECAY" ends 10px left of centre, "UPGRADE ›"
+     starts 10px right of it, the "|" sits on the split. */
+  .city.sheet div.theme-block div.att-fade-section {
+    position: relative;
+    padding-bottom: 1.9em;
+  }
+
+  .city.sheet div.theme-block div.att-fade-section::after {
+    content: "|";
+    position: absolute;
+    left: 50%;
+    bottom: 0.35em;
+    transform: translateX(-50%);
+    font-family: var(--mhx-font-label);
+    font-size: 1.05em;
+    color: var(--mhx-track);
+    text-shadow: 0 0 5px rgba(214, 245, 63, 0.5);
+  }
+
+  .city.sheet div.theme-block .theme-progress-track .attention-label {
+    position: absolute;
+    top: calc(var(--mhx-track-row) + 4px);
+    flex: none;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .city.sheet div.theme-block .theme-progress-track:has([data-type="crack"]) .attention-label {
+    right: 10px;
+  }
+
+  .city.sheet div.theme-block .theme-progress-track:has([data-type="attention"]) .attention-label {
+    left: 10px;
+  }
+
+  .city.sheet div.theme-block .theme-progress-track:has([data-type="milestone"]) .attention-label {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .city.sheet div.theme-block .theme-progress-track div.attention-text.attention-text {
+    display: block;
+    padding: 0;
+    font-family: var(--mhx-font-label);
+    font-size: 1.05em;
+    font-weight: normal;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--mhx-track);
+    text-shadow: 0 0 5px rgba(214, 245, 63, 0.5);
+  }
+
+  .city.sheet div.theme-block .theme-progress-track div.attention-text > span {
+    display: inline;
+  }
+
+  .city.sheet div.theme-block .theme-progress-track:has([data-type="crack"]) div.attention-text::before {
+    content: "‹ ";
+  }
+
+  .city.sheet div.theme-block .theme-progress-track:has([data-type="attention"]) div.attention-text::after {
+    content: " ›";
+  }
+
+  .city.sheet div.theme-block .theme-progress-track .unspent-upgrades {
+    font-family: var(--mhx-font-readout);
+    font-size: 0.75em;
+    letter-spacing: 0;
+  }
+
+  .city.sheet div.theme-block div.attention-text,
+  .city.sheet div.theme-block span.attention-text {
+    justify-content: center;
+    gap: 0.25em;
+    font-family: var(--mhx-font-label);
+    font-size: 0.95em;
+    font-weight: normal;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mhx-theme);
+  }
+
+  .city.sheet .theme-block .unspent-upgrades {
+    color: var(--mhx-improve);
+  }
+
+  .city.sheet .theme-block .dots-section {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35em;
+  }
+
+  .city.sheet .theme-block .dots-section .fa-plus-square,
+  .city.sheet .theme-block .dots-section .fa-minus-square {
+    font-size: 1em;
+  }
+
+  /* Tracker pips: diamonds instead of circles */
+  .city.sheet span.tracker-circle.filled-circle,
+  .city.sheet span.tracker-circle.empty-circle {
+    margin: 0 0.1em;
+    width: 0.7em !important;
+    height: 0.7em !important;
+    min-width: 0.7em;
+    border: 1px solid var(--mhx-theme);
+    border-radius: 0;
+    transform: rotate(45deg);
+  }
+
+  .city.sheet span.tracker-circle.filled-circle {
+    background-color: var(--mhx-theme);
+    box-shadow: 0 0 6px var(--mhx-theme);
+  }
+
+  .city.sheet span.tracker-circle.empty-circle {
+    background-color: transparent;
+  }
+
+  .city.sheet .theme-block .improvement-section {
+    text-align: left;
+  }
+
+  .city.sheet .theme-block .improvements-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0.5em 0 0.25em;
+    padding-bottom: 0.15em;
+    font-family: var(--mhx-font-label);
+    font-size: 1em;
+    font-weight: normal;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mhx-theme);
+    border-bottom: 1px solid color-mix(in srgb, var(--mhx-theme) 35%, transparent);
+  }
+
+  .city.sheet ul.improvement-list {
+    padding: 0;
+  }
+
+  .city.sheet ul.improvement-list li,
+  .city.sheet .evolutions-list li {
+    margin: 2px 0;
+    padding: 1px 6px;
+    font-size: 0.95em;
+    background: rgba(3, 13, 33, 0.4);
+    border-left: 2px solid color-mix(in srgb, var(--mhx-theme) 60%, transparent);
+  }
+
+  .city.sheet .improvement-block {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+
+  .city.sheet .improvement-name:hover,
+  .city.sheet .improvement-edit:hover {
+    text-shadow: 0 0 8px var(--mhx-line);
+  }
+
+  .city.sheet .improvement-expended {
+    color: var(--mhx-text-dim);
+    text-decoration: line-through;
+  }
+
+  .city.sheet .loadout-theme .att-fade-section,
+  .city.sheet .Loadout-theme .att-fade-section {
+    max-width: none;
+  }
+
+  /* ── Empty slots ─────────────────────────────────────────────────── */
+
+  .city.sheet .empty-box {
+    color: var(--mhx-text-dim);
+    text-shadow: none;
+    border: 1px dashed var(--mhx-line-dim);
+    border-radius: 0;
+    background: rgba(3, 13, 33, 0.55);
+    backdrop-filter: none;
+  }
+
+  .city.sheet div.flex-theme-block:hover {
+    border-color: var(--mhx-line);
+    box-shadow: 0 0 12px rgba(0, 222, 246, 0.35);
+  }
+
+  .city.sheet .empty-extra-placeholder-text {
+    font-family: var(--mhx-font-label);
+    font-weight: normal;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .city.sheet .add-theme {
+    color: var(--mhx-line);
+  }
+
+  /* ── Story tags / statuses card and Moment of Evolution back ─────────── */
+
+  .city.sheet .flip-card .story-tag-box {
+    --mhx-theme: var(--mhx-line);
+    --mhx-theme-icon: url(/modules/mist-hud/ui/icons/storytag_icn.svg);
+  }
+
+  .city.sheet .story-tag-box .status-text-list {
+    --mhx-theme-icon: url(/modules/mist-hud/ui/icons/statuses_icn.svg);
+  }
+
+  .city.sheet .story-tag-box .relationship-tag-category {
+    --mhx-theme-icon: url(/modules/mist-hud/ui/icons/crew_OS_icn.svg);
+  }
+
+  .city.sheet .story-tag-box .story-tags-header,
+  .city.sheet .story-tag-box .relationship-tag-category h2,
+  .city.sheet #build-up-section .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    position: relative;
+    box-sizing: border-box;
+    margin: 0 -8px 0.4em;
+    padding: 0 38px;
+    height: var(--mhx-band);
+    font-family: var(--mhx-font-label);
+    font-size: 1.15em;
+    font-weight: normal;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mhx-bright);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+    border: none;
+    background: url(/modules/mist-hud/ui/header-neutral.webp) center / 100% 100% no-repeat;
+  }
+
+  .city.sheet .story-tag-box .story-tags {
+    margin: 0;
+  }
+
+  .city.sheet .story-tag-box .story-tag-category {
+    padding-top: 0.2em;
+  }
+
+  .city.sheet .story-tag-box .relationship-tag-category h2 {
+    margin-top: 0.5em;
+    font-size: 0.95em;
+    background-image: url(/modules/mist-hud/ui/header-crew.webp);
+  }
+
+  .city.sheet .story-tag-box .status-text-list {
+    margin: 0.5em 0 0;
+  }
+
+  .city.sheet .story-tag-box .status-text-list > hr {
+    display: none;
+  }
+
+  .city.sheet .story-tag-box .story-tags-header a,
+  .city.sheet #build-up-section .section-header a {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  /* Status rows */
+  .city.sheet .actor-sheet div.status-line {
+    align-items: center;
+    gap: 0.25em;
+    margin: 2px 0;
+  }
+
+  .city.sheet .actor-sheet .status-name-block {
+    display: flex;
+    align-items: center;
+    gap: 0.25em;
+    font-size: 0.8em;
+    text-align: left;
+  }
+
+  .city.sheet .actor-sheet .status-name-block a {
+    color: var(--mhx-text-dim);
+  }
+
+  .city.sheet .actor-sheet span.status-name {
+    flex: 1;
+    padding: 1px 6px;
+    font-family: var(--mhx-font-body);
+    font-size: 1.15em;
+    font-style: italic;
+    font-weight: normal;
+    text-transform: lowercase;
+    color: var(--mhx-text);
+    border: 1px solid rgba(200, 200, 200, 0.5);
+    border-radius: 2px;
+    background: none;
+  }
+
+  .city.sheet .actor-sheet .status .status-name.positive-selected {
+    margin: 0;
+    color: black;
+    background: var(--mhx-tag-bg);
+    border-color: var(--mhx-tag-edge);
+  }
+
+  .city.sheet .actor-sheet .status .status-name.negative-selected {
+    margin: 0;
+    color: black;
+    background: var(--mhx-status-bg);
+    border-color: var(--mhx-status-edge);
+  }
+
+  .city.sheet .actor-sheet .plus-minus-controls {
+    display: inline-flex;
+    gap: 0.3em;
+    font-size: 0.8em;
+  }
+
+  /* Moment of Evolution (card back) */
+  .city.sheet .flip-card #build-up-section .section-header {
+    background-image: url(/modules/mist-hud/ui/header-mythosOS.webp);
+  }
+
+  .city.sheet .evolutions-list {
+    padding: 0;
+    font-size: 1em;
+    font-weight: normal;
+    text-align: left;
+  }
+
+  .city.sheet .BUPoints {
+    margin: 1.5em 0;
+  }
+
+  .city.sheet .flip-card .BUPoints-header {
+    margin-bottom: 0.5em;
+    font-family: var(--mhx-font-label);
+    font-size: 1em;
+    font-weight: normal;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mhx-mythos);
+  }
+
+  .city.sheet #build-up-section .tracker-circle {
+    --mhx-theme: var(--mhx-mythos);
+    min-width: 1em;
+    min-height: 1em;
+    width: 1em !important;
+    height: 1em !important;
+    margin: 0 0.25em;
+    border: 1px solid var(--mhx-mythos);
+  }
+
+  /* The system styles these by #build-up-section, so match the ID here */
+  .city.sheet #build-up-section .filled-circle {
+    background-color: var(--mhx-mythos);
+    box-shadow: 0 0 6px var(--mhx-mythos);
+  }
+
+  .city.sheet .BUPoints .increment-buildup,
+  .city.sheet .BUPoints .decrement-buildup {
+    font-size: 1.4em;
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     Phase 2 sections still to do, in order:
+       3. Threat / crew / limited sheets
+       4. Item sheets
+       5. Dialogs
+       6. Story tag window, scene tags, status tracker, token tooltip
+       7. Sidebar and chrome
+     ──────────────────────────────────────────────────────────────────────── */
+}
