@@ -91,6 +91,18 @@ function _refreshPowerPreviews() {
 Hooks.on("TagOrStatusSelected",     _refreshPowerPreviews);
 Hooks.on("TagOrStatusSelectChange", _refreshPowerPreviews);
 
+// ── External Style: Scene Tags window fits its content ───────────────────────
+// The system opens it at a fixed 400×500. Under our External Style it opens
+// 300px wide and its height follows what it holds (V1 "auto" height refits on
+// every re-render, up to the screen height; past that the list scrolls).
+Hooks.on("renderStoryTagWindow", (app) => {
+  if (app._mhFitted || !document.querySelector("link[data-mh-external]")) return;
+  app._mhFitted = true;
+  app.options.width  = 300;
+  app.options.height = "auto";
+  app.setPosition({ width: 300, height: "auto" });
+});
+
 // ── Actor / Item reactivity ───────────────────────────────────────────────────
 function _rerenderForActor(actor) {
   if (!actor) return;

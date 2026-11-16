@@ -467,6 +467,19 @@
     --mhx-status-bg:    var(--negative-tag-borderColor, rgba(250, 193, 137, 0.84));
     --mhx-status-edge:  var(--negative-tag-color, rgba(235, 153, 70, 0.68));
     --mhx-tag-text:     var(--text-tag-color, #0b0643);
+    /* Book highlights (mh-otherscape.css): story tags yellow, statuses
+       green. Rest = soft tint, positive = solid + glow, negative = solid
+       under a red hatch, mention (in move text) = solid. */
+    --mhx-hl-tag:              var(--os-hl-tag, #f3e04e);
+    --mhx-hl-tag-text:         var(--os-hl-tag-text, #231f00);
+    --mhx-hl-tag-soft:         var(--os-hl-tag-soft, rgba(243, 224, 78, 0.34));
+    --mhx-hl-tag-soft-text:    var(--os-hl-tag-soft-text, #fff3a6);
+    --mhx-hl-status:           var(--os-hl-status, #8edb5f);
+    --mhx-hl-status-text:      var(--os-hl-status-text, #0c2205);
+    --mhx-hl-status-soft:      var(--os-hl-status-soft, rgba(142, 219, 95, 0.2));
+    --mhx-hl-status-soft-text: var(--os-hl-status-soft-text, #d2f7bd);
+    --mhx-hl-neg:              var(--os-hl-neg, #e2383a);
+    --mhx-hl-hatch:            var(--os-hl-hatch, repeating-linear-gradient(135deg, #e2383a 0 2px, transparent 2px 4px) left top / 7px 100% no-repeat border-box);
     --mhx-font-title:   var(--font-family-move, "SDGlitch"), "Orbitron", sans-serif;
     --mhx-font-label:   var(--font-family-main1, "Rift"), "Rift Bold", "Rajdhani", sans-serif;
     --mhx-font-body:    var(--font-family-hud, "Roboto Condensed"), "Rajdhani", sans-serif;
@@ -646,18 +659,19 @@
     box-shadow: 0 0 6px rgba(0, 222, 246, 0.5);
   }
 
-  /* Tags and statuses written into GM moves and narration: HUD chips */
+  /* Tags and statuses written into GM moves and narration: the book's
+     highlights (tags yellow, statuses green) */
   .chat-message .narrated-story-tag {
     margin: 0;
     padding: 0 0.35em;
-    font-family: var(--mhx-font-label);
+    font-family: var(--mhx-font-body);
     font-style: italic;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: var(--mhx-tag-text);
+    text-transform: lowercase;
+    letter-spacing: normal;
+    color: var(--mhx-hl-tag-text);
     text-shadow: none;
-    background: var(--mhx-tag-bg);
-    border: 1px solid var(--mhx-tag-edge);
+    background: var(--mhx-hl-tag);
+    border: 1px solid var(--mhx-hl-tag);
     border-radius: 2px;
   }
 
@@ -667,10 +681,10 @@
     font-weight: normal;
     font-style: italic;
     text-transform: lowercase;
-    color: black;
+    color: var(--mhx-hl-status-text);
     text-shadow: none;
-    background: var(--mhx-status-bg);
-    border: 1px solid var(--mhx-status-edge);
+    background: var(--mhx-hl-status);
+    border: 1px solid var(--mhx-hl-status);
     border-radius: 2px;
   }
 
@@ -1881,8 +1895,10 @@
     display: none;
   }
 
-  .city.sheet :is(div.Loadout-theme.theme-block, .story-tag-box) .tag.item-entry span.tag-symbols:not(:has(a:not(:has(> .fa-briefcase, > .fa-tag)))),
-  .city.sheet .story-tag-box .relationship-tag-category .tag.item-entry span.tag-symbols:not(:has(a:not(:has(> .fa-tag, > .fa-leaf)))) {
+  /* Cell left with only hidden icons: gone too. (:has() can't be nested,
+     so "no icon other than these" is spelled as one :has().) */
+  .city.sheet :is(div.Loadout-theme.theme-block, .story-tag-box) .tag.item-entry span.tag-symbols:not(:has(> a > i:not(.fa-briefcase, .fa-tag))),
+  .city.sheet .story-tag-box .relationship-tag-category .tag.item-entry span.tag-symbols:not(:has(> a > i:not(.fa-tag, .fa-leaf))) {
     display: none;
   }
 
@@ -2096,7 +2112,7 @@
     display: none;
   }
 
-  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet).locked .theme-block .tag.item-entry span.tag-symbols:not(:has(a:not(.power-tag-icon):not(:has(> .fa-angle-double-down)))),
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet).locked .theme-block .tag.item-entry span.tag-symbols:not(:has(> a:not(.power-tag-icon) > i:not(.fa-angle-double-down))),
   .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet).locked .theme-block .tag.item-entry .flex-trash:not(:has(*)) {
     display: none;
   }
@@ -2771,24 +2787,37 @@
     font-style: italic;
     font-weight: normal;
     text-transform: lowercase;
-    color: var(--mhx-text);
-    border: 1px solid rgba(200, 200, 200, 0.5);
+    color: var(--mhx-hl-status-soft-text);
+    text-shadow: none;
+    border: 1px solid color-mix(in srgb, var(--mhx-hl-status) 70%, transparent);
     border-radius: 2px;
-    background: none;
+    background: var(--mhx-hl-status-soft);
   }
 
+  /* Book green: solid + glow when selected, red hatch when negative */
   .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .status .status-name.positive-selected {
     margin: 0;
-    color: black;
-    background: var(--mhx-tag-bg);
-    border-color: var(--mhx-tag-edge);
+    color: var(--mhx-hl-status-text);
+    background: var(--mhx-hl-status);
+    border-color: var(--mhx-hl-status);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--mhx-hl-status) 70%, transparent);
   }
 
   .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .status .status-name.negative-selected {
     margin: 0;
-    color: black;
-    background: var(--mhx-status-bg);
-    border-color: var(--mhx-status-edge);
+    color: var(--mhx-hl-status-text);
+    background: var(--mhx-hl-hatch), var(--mhx-hl-status);
+    border-color: var(--mhx-hl-neg);
+    border-left: 7px solid transparent;
+    box-shadow: 0 0 6px rgba(226, 56, 58, 0.6);
+  }
+
+  .city.sheet .item-selection-context span.status-name:hover:not(.positive-selected):not(.negative-selected) {
+    padding: 1px 6px;
+    color: var(--mhx-bright);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--mhx-hl-status) 38%, transparent);
+    box-shadow: none;
   }
 
   .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .plus-minus-controls {
@@ -2796,6 +2825,9 @@
     gap: 0.3em;
     font-size: 0.8em;
   }
+
+  /* The story tag card's tags and statuses are restyled again in § 6
+     (HUD-format tags, text-wide status boxes). */
 
   /* Moment of Evolution (card back) */
   .city.sheet .flip-card #build-up-section .section-header {
@@ -2860,7 +2892,7 @@
      the core book's threat profile: dark gradient body, grey subtitles
      with a rule, lime spectrum chips, "NAME - text" move rows split by
      faint dividers, lime › / » markers for threats and consequences,
-     olive story tag chips and teal status chips.
+     and the book's highlights: story tags yellow, statuses green.
      ──────────────────────────────────────────────────────────────────────── */
 
   .city.sheet {
@@ -3273,28 +3305,18 @@
     gap: 0.3em;
     min-width: 4em;
     max-width: 100%;
-    padding: 2px 12px 2px 9px;
+    padding: 1px 8px;
     font-weight: normal;
-    color: #fff;
-    border: none;
-    border-radius: 0;
+    color: var(--mhx-hl-tag-soft-text);
+    border: 1px solid color-mix(in srgb, var(--mhx-hl-tag) 70%, transparent);
+    border-radius: 2px;
     box-shadow: none;
-    background: none;
+    background: var(--mhx-hl-tag-soft);
   }
 
-  /* Tags: the neutral tag bar */
-  .city.sheet .threat-sheet .default-tags-and-statuses .list-item::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: var(--mhx-tag-bar) left center / 100% 100% no-repeat;
-    opacity: 0.75;
-    pointer-events: none;
-  }
-
-  .city.sheet .threat-sheet .default-tags-and-statuses .list-item:hover::before {
-    opacity: 1;
+  /* Tags: the book's yellow, soft (these are templates, not live tags) */
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item:hover {
+    background: color-mix(in srgb, var(--mhx-hl-tag) 35%, transparent);
   }
 
   .city.sheet .threat-sheet .default-tags-and-statuses .list-item :is(input, span) {
@@ -3303,35 +3325,35 @@
     field-sizing: content;
     height: auto;
     padding: 0;
-    font-family: var(--mhx-font-label);
+    font-family: var(--mhx-font-body);
     font-size: 1.05em;
     font-style: italic;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    color: #fff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    font-weight: normal;
+    letter-spacing: normal;
+    text-transform: lowercase;
+    color: var(--mhx-hl-tag-soft-text);
+    text-shadow: none;
     background: none;
     border: none;
   }
 
-  /* Statuses: the NPC HUD's teal chip, lowercase */
+  /* Statuses: the book's green, lowercase */
   .city.sheet .threat-sheet .default-tags-and-statuses .list-item:is(.default-status, :has(.inherited-status)) {
-    padding: 1px 8px;
-    background: var(--npc-status);
-    border: 1px solid color-mix(in srgb, var(--npc-status) 60%, white);
-    border-radius: 2px;
+    color: var(--mhx-hl-status-soft-text);
+    background: var(--mhx-hl-status-soft);
+    border-color: color-mix(in srgb, var(--mhx-hl-status) 70%, transparent);
   }
 
-  .city.sheet .threat-sheet .default-tags-and-statuses .list-item:is(.default-status, :has(.inherited-status))::before {
-    content: none;
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item:is(.default-status, :has(.inherited-status)):hover {
+    background: color-mix(in srgb, var(--mhx-hl-status) 35%, transparent);
   }
 
   .city.sheet .threat-sheet .default-tags-and-statuses .list-item:is(.default-status, :has(.inherited-status)) :is(input, span) {
     font-family: var(--mhx-font-body);
     font-weight: normal;
+    letter-spacing: normal;
     text-transform: lowercase;
-    color: var(--npc-status-text);
+    color: var(--mhx-hl-status-soft-text);
     text-shadow: none;
   }
 
@@ -3341,11 +3363,7 @@
 
   .city.sheet .threat-sheet .default-tags-and-statuses .list-item a {
     font-size: 0.8em;
-    color: rgba(255, 255, 255, 0.75);
-  }
-
-  .city.sheet .threat-sheet .default-tags-and-statuses .list-item:is(.default-status, :has(.inherited-status)) a {
-    color: rgba(236, 245, 244, 0.7);
+    color: rgba(255, 255, 255, 0.7);
   }
 
   /* ── GM moves ─────────────────────────────────────────────────────────
@@ -3540,18 +3558,18 @@
   .city.sheet .threat-sheet .gmmove-text .narrated-story-tag {
     margin: 0;
     padding: 0 0.35em;
-    font-family: var(--mhx-font-label);
+    font-family: var(--mhx-font-body);
     font-style: italic;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: var(--mhx-tag-text);
+    text-transform: lowercase;
+    letter-spacing: normal;
+    color: var(--mhx-hl-tag-text);
     text-shadow: none;
-    background: var(--mhx-tag-bg);
-    border: 1px solid var(--mhx-tag-edge);
+    background: var(--mhx-hl-tag);
+    border: 1px solid var(--mhx-hl-tag);
     border-radius: 2px;
   }
 
-  /* Statuses: the NPC HUD's teal chip (.npc-status-moves) */
+  /* Statuses: the book's green (= NPC HUD .npc-status-moves) */
   .city.sheet .threat-sheet .gmmove-text .narrated-status-name {
     padding: 0 0.35em;
     font-family: var(--mhx-font-body);
@@ -3561,7 +3579,7 @@
     color: var(--npc-status-text);
     text-shadow: none;
     background: var(--npc-status);
-    border: 1px solid color-mix(in srgb, var(--npc-status) 60%, white);
+    border: 1px solid var(--npc-status);
     border-radius: 2px;
   }
 
@@ -3818,14 +3836,14 @@
   .app.dialog .dialog-content > .gmmove-section .narrated-story-tag {
     margin: 0;
     padding: 0 0.35em;
-    font-family: var(--mhx-font-label);
+    font-family: var(--mhx-font-body);
     font-style: italic;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: var(--mhx-tag-text);
+    text-transform: lowercase;
+    letter-spacing: normal;
+    color: var(--mhx-hl-tag-text);
     text-shadow: none;
-    background: var(--mhx-tag-bg);
-    border: 1px solid var(--mhx-tag-edge);
+    background: var(--mhx-hl-tag);
+    border: 1px solid var(--mhx-hl-tag);
     border-radius: 2px;
   }
 
@@ -3839,7 +3857,7 @@
     color: var(--npc-status-text);
     text-shadow: none;
     background: var(--npc-status);
-    border: 1px solid color-mix(in srgb, var(--npc-status) 60%, white);
+    border: 1px solid var(--npc-status);
     border-radius: 2px;
   }
 
@@ -5267,8 +5285,3136 @@
   }
 
   /* ────────────────────────────────────────────────────────────────────────
-     Phase 2 sections still to do, in order:
-       6. Story tag window, scene tags, status tracker, token tooltip
-       7. Sidebar and chrome
+     § 6. Story tag window, scene tags, status tracker, token tooltip
+     The system's floating tag/status views:
+       StoryTagWindow ....... templates/story-tag-window.hbs
+         (.app.story-tag-window.scene-tag-window: the "Scene Tags" window,
+         with the scene's own tags, one block per combatant and one per
+         actor with showcased items)
+       StatusTrackerWindow .. module/city-status-tracker/tracker.hbs
+         (#city-of-mist-tracker-app, no class of its own)
+       TokenTooltip ......... module/token-tooltip/tooltip.html
+         (.city-of-mist--tooltip, a bare div on <body>)
+     Every tag and status in them is templates/parts/tag-or-status.hbs.
+
+     Same language as § 2 to § 5: navy glass, 2px cyan stripe, cyan
+     section headings (block + fading hairline). Tags and statuses use
+     the book's highlights (story tags yellow, statuses green; tokens in
+     mh-otherscape.css, shared with the HUD), as wide as their text.
+     Tag rows keep the HUD's layout: burn icon on the left. The same
+     tag/status rules also restyle the story tag card on the sheets.
+     storyTagContainer-redux.html isn't used by any system JS, so it has
+     no rules here.
      ──────────────────────────────────────────────────────────────────────── */
+
+  /* ── Shared: yellow tags and green statuses ───────────────────────────
+     The three windows plus the story tag card on PC / threat sheets
+     (§ 2's .story-tag-box, crew relationships included). Theme and
+     loadout cards keep § 2's full-width bars. */
+
+  :is(.app.story-tag-window, .app[id="city-of-mist-tracker-app"], .city-of-mist--tooltip, .city.sheet .story-tag-box) {
+    --mhx-tag-bar:      url(/modules/mist-hud/ui/select-bar-neutral2.webp);
+    --mhx-tag-bar-burn: url(/modules/mist-hud/ui/select-bar-neutral2-toburn.webp);
+    --mhx-weak-bar:     url(/modules/mist-hud/ui/select-bar-weakness.webp);
+    --mhx-burn:         url(/modules/mist-hud/ui/icons/burn_neutral_empty.svg);
+    --mhx-burn-to:      url(/modules/mist-hud/ui/icons/burn_neutral_toburn.svg);
+    --mhx-burned:       url(/modules/mist-hud/ui/icons/burn_neutral_toburn.svg);   /* burned shows the "to burn" art, as on the § 2 sheet */
+    --color-scrollbar:       var(--mhx-line);
+    --color-scrollbar-track: transparent;
+
+    &, & * {
+      scrollbar-color: var(--mhx-line) transparent;
+    }
+
+    & :is(ul.tag-or-status-list, ol#city-status-tracker-list) {
+      margin: 0;
+      padding: 0;
+      font-size: 1em;
+      list-style: none;
+    }
+
+    & :is(ul.tag-or-status-list, ol#city-status-tracker-list) li {
+      margin: 0;
+      list-style: none;
+    }
+
+    /* Row icons (markers, delete, + / −): solid cyan. Delete uses the
+       outline trash, also cyan, and turns red on hover. */
+    & :is(.tag.item-entry, .status-line) a {
+      color: var(--mhx-line);
+      text-shadow: none;
+      transition: color 0.15s, text-shadow 0.15s;
+    }
+
+    & :is(.tag.item-entry, .status-line) a:hover {
+      color: var(--mhx-bright);
+      text-shadow: 0 0 6px rgba(0, 222, 246, 0.8);
+    }
+
+    & :is(.tag-delete, .status-delete) i.fa-trash {
+      font-weight: 400;
+    }
+
+    & :is(.tag-delete, .status-delete) i.fa-trash::before {
+      content: "\f2ed";
+    }
+
+    & :is(.tag-delete, .status-delete):hover {
+      color: var(--mhx-danger);
+      text-shadow: 0 0 6px rgba(255, 40, 40, 0.5);
+    }
+
+    & .flex-trash {
+      flex: none;
+      min-width: 0;
+      padding-right: 0;
+      font-size: 0.75em;
+    }
+
+    /* Status pips (system "tier + circles" display): small dots in the
+       chip's own ink, filled or hollow */
+    & span.status-name .dotStatus {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    & span.status-name .tracker-circle {
+      display: inline-block;
+      box-sizing: border-box;
+      /* The system sets the hollow ones to `1em !important` (layered,
+         unbeatable), so the size comes from font-size instead */
+      font-size: 0.5em;
+      width: 1em;
+      height: 1em;
+      min-width: 1em;
+      min-height: 0;
+      margin: 0;
+      padding: 0;
+      vertical-align: middle;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      background: none;
+      box-shadow: none;
+    }
+
+    & span.status-name .dotStatus > .tracker-circle:first-of-type {
+      margin-left: 0.4em;
+    }
+
+    & span.status-name .tracker-circle.filled-circle {
+      background: currentColor;
+    }
+
+    /* Drop the type icons (story tag, status ring): the row's shape says
+       which it is. Other markers (hidden, temporary, permanent…) stay. */
+    & .tag.item-entry span.tag-symbols a:has(> .fa-tag),
+    & .status-name-block > a:has(> .fa-life-ring) {
+      display: none;
+    }
+
+    /* (one :has(): it can't be nested) */
+    & .tag.item-entry span.tag-symbols:not(:has(> a > i:not(.fa-tag))) {
+      display: none;
+    }
+
+    /* Tags: the HUD's row (burn icon on the left, markers after the name,
+       delete at the far right) with the book's yellow highlight on the
+       name: soft at rest, solid + glow when selected, red hatch when
+       negative, lime glow when marked to burn, grey when burned. */
+    & .tag.item-entry {
+      position: relative;
+      box-sizing: border-box;
+      width: auto;
+      max-width: 100%;
+      align-items: center;
+      gap: 0.3em;
+      min-height: 1.6em;
+      margin: 2px 0;
+      padding: 0 4px 0 2px;
+      text-align: left;
+      opacity: 1;
+      transition: opacity 0.15s;
+    }
+
+    /* No bar art (§ 2 draws one on the sheet card) */
+    & .tag.item-entry::before {
+      content: none;
+    }
+
+    & .tag.item-entry:hover {
+      opacity: 0.85;
+    }
+
+    /* Burn icon first, delete last */
+    & .tag.item-entry .flex-burn-flame-cell {
+      display: flex;
+      flex: none;
+      order: -1;
+      justify-content: center;
+      min-width: 0;
+      max-width: none;
+      margin: 0;
+    }
+
+    & .tag.item-entry:not(:has(.burn-level-2, .burn-level-3, .burn-level-4)) .flex-burn-flame-cell:not(:has(a)) {
+      display: none;
+    }
+
+    & .tag.item-entry .flex-trash {
+      order: 1;
+    }
+
+    & .tag.item-entry .flex-tag-name {
+      min-width: 0;
+    }
+
+    /* Markers (hidden, temporary, permanent…) after the name */
+    & .tag.item-entry span.tag-name-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35em;
+      max-width: 100%;
+      font-size: 1em;
+    }
+
+    & .tag.item-entry span.tag-symbols {
+      order: 1;
+      width: auto;
+      min-width: 0;
+      max-width: none;
+      font-size: 0.8em;
+    }
+
+    & .tag.item-entry span.tag-symbols a {
+      color: var(--mhx-line);
+    }
+
+    & .tag.item-entry span.flex-tag-name {
+      margin: 0;
+      padding: 0 0.4em;
+      font-family: var(--mhx-font-body);
+      font-size: 0.92em;   /* = statuses (1.15em inside a 0.8em block) */
+      font-style: italic;
+      font-weight: normal;
+      letter-spacing: normal;
+      text-transform: lowercase;
+      color: var(--mhx-hl-tag-soft-text);
+      text-shadow: none;
+      border: 1px solid color-mix(in srgb, var(--mhx-hl-tag) 70%, transparent);
+      border-radius: 2px;
+      background: var(--mhx-hl-tag-soft);
+      box-shadow: none;
+    }
+
+    & .tag.item-entry .story-tag-location {
+      font-family: var(--mhx-font-body);
+      font-size: 0.8em;
+      font-style: normal;
+      text-transform: none;
+      color: inherit;
+      opacity: 0.75;
+    }
+
+    /* Hover while selectable: a stronger tint instead of the system's
+       yellow/red gradient */
+    & .item-selection-context .tag.item-entry .active-tag:hover:not(.positive-selected):not(.negative-selected) {
+      margin: 0;
+      padding: 0 0.4em;
+      font-weight: normal;
+      color: var(--mhx-bright);
+      border-radius: 2px;
+      background: color-mix(in srgb, var(--mhx-hl-tag) 38%, transparent);
+      box-shadow: none;
+    }
+
+    & .tag.item-entry span.flex-tag-name:is(.positive-selected, .negative-selected) {
+      margin: 0;
+      padding: 0 0.4em;
+      font-weight: normal;
+      color: var(--mhx-hl-tag-text);
+      text-shadow: none;
+      border-radius: 2px;
+    }
+
+    & .tag.item-entry span.flex-tag-name.positive-selected {
+      background: var(--mhx-hl-tag);
+      border-color: var(--mhx-hl-tag);
+      box-shadow: 0 0 6px color-mix(in srgb, var(--mhx-hl-tag) 70%, transparent);
+    }
+
+    & .tag.item-entry span.flex-tag-name.negative-selected {
+      background: var(--mhx-hl-hatch), var(--mhx-hl-tag);
+      border-color: var(--mhx-hl-neg);
+      border-left: 7px solid transparent;
+      box-shadow: 0 0 6px rgba(226, 56, 58, 0.6);
+    }
+
+    /* To burn (burn-level 2–4): solid yellow, lime glow, and the HUD's
+       "to burn" icon in the burn slot (the system leaves it empty). The
+       system's layered `!important` fire colours can't be beaten, so
+       text-fill-color paints the glyphs. */
+    & .tag.item-entry span.flex-tag-name:is(.burn-level-2, .burn-level-3, .burn-level-4) {
+      -webkit-text-fill-color: var(--mhx-hl-tag-text);
+      text-shadow: none;
+      background: var(--mhx-hl-tag);
+      border-color: var(--mhx-hl-tag);
+      box-shadow: 0 0 6px var(--mhx-effect);
+    }
+
+    & .tag.item-entry:has(.burn-level-2, .burn-level-3, .burn-level-4) .flex-burn-flame-cell::before {
+      content: "";
+      width: 28px;
+      height: 15px;
+      background: var(--mhx-burn-to) center / contain no-repeat;
+      filter: drop-shadow(0 0 2px var(--mhx-effect));
+    }
+
+    /* Burned: the HUD's struck-through grey on a faded chip */
+    & .tag.item-entry span.flex-tag-name.burn-level-1 {
+      color: #b1c7ca !important;
+      -webkit-text-fill-color: #b1c7ca;
+      text-decoration: line-through;
+      text-decoration-color: rgb(235, 235, 235);
+      text-decoration-thickness: 2px;
+      text-shadow: none;
+      background: rgba(243, 224, 78, 0.06);
+      border-color: rgba(243, 224, 78, 0.3);
+      box-shadow: none;
+    }
+
+    /* Burn controls: the HUD's burn images */
+    & .tag.item-entry :is(.tag-burn, .tag-unburn) i {
+      display: inline-block;
+      vertical-align: middle;
+      width: 28px;
+      height: 15px;
+      background: var(--mhx-burn) center / contain no-repeat;
+    }
+
+    & .tag.item-entry :is(.tag-burn, .tag-unburn) i::before {
+      content: none;
+    }
+
+    & .tag.item-entry .tag-unburn i {
+      background-image: var(--mhx-burned);
+    }
+
+    & .tag.item-entry :is(.tag-burn, .tag-unburn):hover {
+      text-shadow: none;
+    }
+
+    & .tag.item-entry :is(.tag-burn, .tag-unburn):hover i {
+      filter: drop-shadow(0 0 3px lime);
+    }
+
+    /* Statuses: the book's green, as wide as the text, + / − after it */
+    & div.status-line {
+      display: flex;
+      box-sizing: border-box;
+      width: fit-content;
+      max-width: 100%;
+      align-items: center;
+      gap: 0.25em;
+      margin: 3px 0;
+      padding: 0 2px;
+      text-align: left;
+    }
+
+    & .status-line .status-name-block {
+      display: flex;
+      flex: 0 1 auto;
+      align-items: center;
+      gap: 0.25em;
+      min-width: 0;
+      font-size: 0.8em;
+      text-align: left;
+    }
+
+    & .status-line .status-name-block a {
+      color: var(--mhx-line);
+    }
+
+    & .status-line span.status-name {
+      flex: 0 1 auto;
+      min-width: 0;
+      margin: 0;
+      padding: 1px 6px;
+      font-family: var(--mhx-font-body);
+      font-size: 1.15em;
+      font-style: italic;
+      font-weight: normal;
+      letter-spacing: normal;
+      text-transform: lowercase;
+      color: var(--mhx-hl-status-soft-text);
+      text-shadow: none;
+      border: 1px solid color-mix(in srgb, var(--mhx-hl-status) 70%, transparent);
+      border-radius: 2px;
+      background: var(--mhx-hl-status-soft);
+      box-shadow: none;
+    }
+
+    & .item-selection-context .status-line span.status-name:hover:not(.positive-selected):not(.negative-selected) {
+      padding: 1px 6px;
+      font-weight: normal;
+      color: var(--mhx-bright);
+      border-radius: 2px;
+      background: color-mix(in srgb, var(--mhx-hl-status) 38%, transparent);
+      box-shadow: none;
+    }
+
+    & .status-line span.status-name:is(.positive-selected, .negative-selected) {
+      margin: 0;
+      padding: 1px 6px;
+      color: var(--mhx-hl-status-text);
+      border-radius: 2px;
+    }
+
+    & .status-line span.status-name.positive-selected {
+      background: var(--mhx-hl-status);
+      border-color: var(--mhx-hl-status);
+      box-shadow: 0 0 6px color-mix(in srgb, var(--mhx-hl-status) 70%, transparent);
+    }
+
+    & .status-line span.status-name.negative-selected {
+      background: var(--mhx-hl-hatch), var(--mhx-hl-status);
+      border-color: var(--mhx-hl-neg);
+      border-left: 7px solid transparent;
+      box-shadow: 0 0 6px rgba(226, 56, 58, 0.6);
+    }
+
+    & .status-line .plus-minus {
+      flex: none;
+    }
+
+    & .status-line .plus-minus-controls {
+      display: inline-flex;
+      gap: 0.3em;
+      font-size: 0.8em;
+    }
+  }
+
+  /* ── Scene Tags window ──────────────────────────────────────────────── */
+
+  .app.window-app.story-tag-window {
+    padding: 0.3em 0.5em 0.4em 0.6em;
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-text);
+    text-shadow: none;
+    border: none;
+    border-left: 2px solid var(--mhx-line);
+    border-radius: 0;
+    box-shadow: 0 0 0 1px var(--mhx-line-faint), 0 8px 24px rgba(0, 0, 0, 0.6);
+    background:
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+      linear-gradient(90deg, rgba(0, 222, 246, 0.1), transparent 1.5em),
+      linear-gradient(90deg, rgba(1, 6, 16, 0.55), transparent 55%),
+      linear-gradient(180deg, var(--mhx-panel-hi), var(--mhx-panel)),
+      url(/systems/city-of-mist/images/OS-BG.webp) center / cover no-repeat;
+
+    & .window-header {
+      padding: 0.2em 0 0.3em;
+      border: none;
+      background: linear-gradient(90deg, var(--mhx-line-dim), transparent 85%) left bottom / 100% 1px no-repeat;
+    }
+
+    & .window-header .window-title {
+      font-family: var(--mhx-font-title);
+      font-size: 1.35em;
+      font-style: italic;
+      font-weight: normal;
+      letter-spacing: 0.1em;
+      text-align: left;
+      text-transform: uppercase;
+      color: var(--mhx-bright);
+      text-shadow: var(--mhx-glow);
+    }
+
+    & .window-content {
+      color: var(--mhx-text);
+      background: none;
+    }
+
+    /* The inner div repeats the window's classes */
+    & .window-content > .scene-tag-window {
+      margin: 0.2em 0 0;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      line-height: 1.25;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-text);
+      text-shadow: none;
+    }
+
+    & .scene-tag-content {
+      margin: 0 0.2em 0 0;
+    }
+
+    & .tag-or-status-list {
+      font-size: 0.95em;
+    }
+
+    /* Section headings: "Scene", each combatant, each showcased actor */
+    & :is(.scene-name, .combatant-name) {
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+      height: auto;
+      margin: 0.75em 0 0.3em;
+      padding: 0 0 0.2em 16px;
+      font-size: 1em;
+      text-align: left;
+      text-shadow: none;
+      background:
+        linear-gradient(var(--mhx-line), var(--mhx-line)) left 0 top calc(50% - 0.1em) / 7px 7px no-repeat,
+        linear-gradient(90deg, var(--mhx-line-dim), transparent 85%) left bottom / 100% 1px no-repeat;
+    }
+
+    & .scene-name {
+      margin-top: 0.2em;
+    }
+
+    & :is(.scene-name .label, .combatant-name .name) {
+      flex: 1;
+      height: auto;
+      padding: 0;
+      font-family: var(--mhx-font-label);
+      font-size: 1.15em;
+      font-weight: normal;
+      line-height: 1.2;
+      letter-spacing: 0.14em;
+      text-align: left;
+      text-transform: uppercase;
+      color: var(--mhx-bright);
+      text-shadow: var(--mhx-glow);
+      background: none;
+    }
+
+    & .scene-name .label {
+      font-size: 1.3em;
+    }
+
+    /* Combatant names centre the map on the token (right-click: sheet) */
+    & .combatant-name {
+      cursor: pointer;
+    }
+
+    & .combatant-name:hover .name {
+      color: var(--mhx-line);
+    }
+
+    & :is(.scene-name, .combatant-name) > span:empty {
+      display: none;
+    }
+
+    & :is(.scene-name, .combatant-name) a {
+      font-size: 0.85em;
+      color: var(--mhx-line);
+      text-shadow: none;
+      transition: color 0.15s, text-shadow 0.15s;
+    }
+
+    & :is(.scene-name, .combatant-name) a:hover {
+      color: var(--mhx-bright);
+      text-shadow: 0 0 6px rgba(0, 222, 246, 0.8);
+    }
+
+    & .combatant-name .toggle-combat:hover {
+      color: var(--mhx-danger);
+      text-shadow: 0 0 6px rgba(255, 40, 40, 0.5);
+    }
+
+    /* The heading's hairline replaces the system's <hr>; the one between
+       combatants and showcased actors becomes a faint rule */
+    & .scene-tags-block > hr {
+      display: none;
+    }
+
+    & .scene-tag-content > hr {
+      height: 1px;
+      margin: 0.9em 0 0.3em;
+      border: none;
+      background: linear-gradient(90deg, transparent, var(--mhx-line-faint) 15%, var(--mhx-line-faint) 85%, transparent);
+    }
+
+    & .scene-tag-content > hr:last-child {
+      display: none;
+    }
+  }
+
+  /* ── Status tracker ─────────────────────────────────────────────────── */
+
+  .app[id="city-of-mist-tracker-app"] {
+    & .window-content {
+      padding: 0.6em 0.7em 0.7em 0.8em;
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-text);
+      text-shadow: none;
+      border-left: 2px solid var(--mhx-line);
+      background:
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+        linear-gradient(90deg, rgba(0, 222, 246, 0.1), transparent 1.5em),
+        linear-gradient(90deg, rgba(1, 6, 16, 0.55), transparent 55%),
+        linear-gradient(180deg, var(--mhx-panel-hi), var(--mhx-panel)),
+        url(/systems/city-of-mist/images/OS-BG.webp) center / cover no-repeat;
+    }
+
+    & .city-status-tracker {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45em;
+    }
+
+    /* One glass card per actor: name heading, the two create links on its
+       right, the list under them */
+    & .status-block {
+      --mhx-cut: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.1em 0.45em;
+      margin: 0;
+      padding: 0.35em 0.6em 0.45em;
+      font-family: var(--mhx-font-body);
+      text-align: left;
+      color: var(--mhx-text);
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--mhx-cut)), calc(100% - var(--mhx-cut)) 100%, 0 100%);
+      background:
+        linear-gradient(var(--mhx-line-dim), var(--mhx-line-dim)) left top / 2px 100% no-repeat,
+        linear-gradient(90deg, var(--mhx-line-faint), transparent 70%) left top / 100% 1px no-repeat,
+        linear-gradient(180deg, rgba(3, 13, 33, 0.55), rgba(3, 13, 33, 0.85));
+    }
+
+    & .status-block .actor-name {
+      order: -1;
+      flex: 1 1 auto;
+      min-width: 0;
+      padding-left: 14px;
+      font-family: var(--mhx-font-label);
+      font-size: 1.05em;
+      line-height: 1.3;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mhx-bright);
+      text-shadow: var(--mhx-glow);
+      cursor: pointer;
+      background: linear-gradient(var(--mhx-line), var(--mhx-line)) left 0 top calc(50% - 0.1em) / 6px 6px no-repeat;
+      transition: color 0.15s;
+    }
+
+    & .status-block .actor-name:hover {
+      color: var(--mhx-line);
+    }
+
+    & .status-block > a {
+      font-size: 0.85em;
+      color: var(--mhx-line);
+      text-shadow: none;
+      transition: color 0.15s, text-shadow 0.15s;
+    }
+
+    & .status-block > a:hover {
+      color: var(--mhx-bright);
+      text-shadow: 0 0 6px rgba(0, 222, 246, 0.8);
+    }
+
+    & .status-block ol#city-status-tracker-list {
+      flex: 1 0 100%;
+      margin-top: 0.15em;
+    }
+
+    /* Actors with nothing on them: a slim, dimmed row */
+    & .status-block:not(:has(ol#city-status-tracker-list > *)) {
+      padding-block: 0.2em;
+      opacity: 0.65;
+
+      & ol#city-status-tracker-list {
+        display: none;
+      }
+    }
+  }
+
+  /* ── Token tooltip ──────────────────────────────────────────────────── */
+
+  .city-of-mist--tooltip {
+    padding: 0.35em 0.55em 0.45em 0.6em;
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-text);
+    text-shadow: none;
+    border: 1px solid var(--mhx-line-dim);
+    border-left: 2px solid var(--mhx-line);
+    border-radius: 0;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55), 0 0 10px rgba(0, 222, 246, 0.15);
+    backdrop-filter: blur(6px);
+    background:
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+      linear-gradient(90deg, rgba(0, 222, 246, 0.1), transparent 1.5em),
+      linear-gradient(180deg, var(--mhx-panel-hi), var(--mhx-panel));
+
+    & .city-of-mist--name {
+      padding: 0;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      font-weight: normal;
+      text-align: left;
+      color: var(--mhx-text);
+      text-shadow: none;
+    }
+
+    & .token-tooltip-container {
+      margin: 0;
+      min-width: 10em;
+      max-width: 250px;
+    }
+
+    /* Name row: heading with the toggle and create links */
+    & .flex-row-center {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.4em;
+      margin: 0 0 0.3em;
+      padding: 0 0 0.2em;
+      background: linear-gradient(90deg, var(--mhx-line-dim), transparent 85%) left bottom / 100% 1px no-repeat;
+    }
+
+    & .tooltip-token-name {
+      flex: 1;
+      min-width: 0;
+      font-family: var(--mhx-font-label);
+      font-size: 1.15em;
+      line-height: 1.25;
+      letter-spacing: 0.12em;
+      text-align: left;
+      text-decoration: none;
+      text-transform: uppercase;
+      color: var(--mhx-bright);
+      text-shadow: var(--mhx-glow);
+    }
+
+    & .flex-row-center a {
+      font-size: 0.85em;
+      color: var(--mhx-line);
+      text-shadow: none;
+      transition: color 0.15s, text-shadow 0.15s;
+    }
+
+    & .flex-row-center a:hover {
+      color: var(--mhx-bright);
+      text-shadow: 0 0 6px rgba(0, 222, 246, 0.8);
+    }
+
+    /* Token is in the Scene Tags window */
+    & .fas.green-icon {
+      color: var(--mhx-effect);
+      text-shadow: 0 0 6px color-mix(in srgb, var(--mhx-effect) 70%, transparent);
+    }
+
+    /* Statuses, then story tags: one column */
+    & .tool-tip.flex-row {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      flex-basis: auto;
+      max-width: none;
+      margin: 0;
+    }
+
+    & .tool-tip.flex-row:not(:has(*)) {
+      display: none;
+    }
+
+    & .tool-tip.flex-row + .tool-tip.flex-row:has(*) {
+      margin-top: 0.25em;
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     § 6b. Roll and chat dialogs
+     The system's V1 Dialogs that aren't opened from a sheet:
+       RollDialog ...................... dialogs/roll-dialog.html
+         (the roll window before a move: Roll Bonus / Effect readouts, the
+         tags and statuses in use, Custom Modifier, Allow Dynamite, the
+         Otherscape essence boxes, the effect slider, Burn Tag)
+       CityDialogs.getRollModifierBox .. dialogs/roll-modification-dialog.html
+         ("Make Roll": the chat card's Edit Roll, GM only)
+       HTMLTools.dynamicDialog ......... (no template) tag / status creation
+         from chat: getTagCreationData, getStatusData
+       CityDialogs.getHelpHurt ......... dialogs/get-help-hurt-initial.hbs
+       CityDialogs.chooseHelpHurt ...... dialogs/get-help-hurt-selector.hbs
+       TagReviewDialog (tagReview) ..... dialogs/tag-review.hbs
+       CityDialogs.downtimePCSelector .. dialogs/pc-downtime-chooser-*.hbs
+       CityDialogs.downtimeGMMoveDialog  dialogs/downtime-GM-moves.hbs
+       CityDialogs.narratorDialog ...... (no template) the GM narration box
+     GMMoveTextBox is the § 3 GM move pop-up and keeps that look.
+     downtimeGMMoveSelector renders gm-move-chooser.hbs but never shows it.
+
+     Matched by content, as in § 5: a template class, dynamicDialog's
+     .string-input / .number-input / .boolean-input rows, the Help / Hurt
+     slider, or the help prompt's none + help / hurt buttons. § 5's
+     dialogs, the § 3 pop-up, core and other modules never match.
+
+     Same language as § 5: navy glass, 2px cyan stripe, Rift 600 caps
+     labels, glass fields with a cyan edge, outline buttons, the confirming
+     one filled with a clipped corner. Readouts are Orbitron. Tags and
+     statuses are the book's highlights (story tags yellow, statuses
+     green); power tags are cyan glass, weakness tags amber glass.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  .app.dialog:is(
+    :has(> .window-content > .dialog-content > :is(
+      .roll-dialog, .roll-modifier-dialog, .tag-review,
+      .pc-downtime-selector, .downtime-dialog, textarea.narrator-text
+    )),
+    /* dynamicDialog (tag / status creation) */
+    :has(> .window-content > .dialog-content > div > :is(.string-input, .number-input, .boolean-input)),
+    /* chooseHelpHurt */
+    :has(> .window-content > .dialog-content > form .slidecontainer > input.HelpHurt),
+    /* getHelpHurt (one line: a line break here would be a descendant combinator) */
+    :has(> .window-content > .dialog-buttons > .dialog-button.none + .dialog-button:is(.help, .hurt))
+  ) {
+    --mhx-spectrum:        var(--spectrum-color, #abff00);
+    --mhx-dlg-accent:      var(--mhx-line);
+    --mhx-dlg-accent-soft: rgba(0, 222, 246, 0.1);
+    --mhx-dlg-focus:       rgba(0, 222, 246, 0.45);
+    --mhx-dlg-on-accent:   #04101f;
+    --mhx-field-bg:        rgba(2, 10, 26, 0.72);
+    --color-scrollbar:       var(--mhx-line);
+    --color-scrollbar-track: transparent;
+
+    &, & * {
+      scrollbar-color: var(--mhx-line) transparent;
+    }
+
+    /* ── Window body: the § 4 item sheet glass ─────────────────────────── */
+    & .window-content {
+      gap: 0.6em;
+      padding: 0.7em 0.9em 0.8em 1em;
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-text);
+      text-shadow: none;
+      border-left: 2px solid var(--mhx-dlg-accent);
+      background:
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+        linear-gradient(90deg, var(--mhx-dlg-accent-soft), transparent 1.5em),
+        linear-gradient(90deg, rgba(1, 6, 16, 0.55), transparent 55%),
+        linear-gradient(180deg, var(--mhx-panel-hi), var(--mhx-panel)),
+        url(/systems/city-of-mist/images/OS-BG.webp) center / cover no-repeat;
+    }
+
+    & .dialog-content {
+      font-family: var(--mhx-font-body);
+      font-size: 1.05em;
+      line-height: 1.4;
+      color: var(--mhx-text);
+    }
+
+    & .dialog-content form {
+      margin: 0;
+      font-family: var(--mhx-font-body);
+      color: var(--mhx-text);
+    }
+
+    /* ── Labels (as § 5) ──────────────────────────────────────────────── */
+    & .dialog-content :is(label, .dialog-label) {
+      font-family: var(--mhx-font-label);
+      font-size: 0.9em;
+      font-weight: 600;
+      line-height: 1.2;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      text-transform: uppercase;
+      color: var(--mhx-text);
+      text-shadow: none;
+    }
+
+    /* ── Fields (as § 5) ──────────────────────────────────────────────── */
+    & .dialog-content :is(input:not([type]), input[type=text], input[type=number], select, textarea) {
+      height: 2em;
+      margin: 0;
+      padding: 0 0.5em;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      font-weight: normal;
+      font-style: normal;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-text);
+      text-shadow: none;
+      background: var(--mhx-field-bg);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 0;
+      box-shadow: inset 0 0 8px rgba(0, 222, 246, 0.06);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    & .dialog-content input[type=number] {
+      width: 3.6em;
+      padding: 0 0.3em;
+      font-family: var(--mhx-font-readout);
+      text-align: center;
+    }
+
+    & .dialog-content :is(input, select, textarea):focus {
+      border-color: var(--mhx-dlg-accent);
+      box-shadow: 0 0 6px var(--mhx-dlg-focus);
+    }
+
+    & .dialog-content select option {
+      color: var(--mhx-text);
+      background: #0b1a2e;
+    }
+
+    /* Checkbox / radio: a glass square (radio: round) that fills with the
+       accent when checked */
+    & .dialog-content input:is([type=checkbox], [type=radio]) {
+      appearance: none;
+      flex: none;
+      width: 1.05em;
+      height: 1.05em;
+      margin: 0;
+      padding: 0;
+      vertical-align: -0.15em;
+      cursor: pointer;
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 0;
+      background: var(--mhx-field-bg);
+      box-shadow: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+    }
+
+    & .dialog-content input[type=radio] {
+      border-radius: 50%;
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio]):hover {
+      border-color: var(--mhx-dlg-accent);
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio]):checked {
+      border-color: var(--mhx-dlg-accent);
+      background: var(--mhx-dlg-accent);
+      box-shadow: inset 0 0 0 2px #04101f, 0 0 6px var(--mhx-dlg-focus);
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio])::before {
+      display: none;
+    }
+
+    /* Sliders (effect penalty, Help / Hurt amount): the § 5 range-picker
+       look, hairline track and accent block thumb */
+    & .dialog-content input[type=range] {
+      appearance: none;
+      flex: 1;
+      width: auto;
+      min-width: 0;
+      height: 1.2em;
+      margin: 0;
+      opacity: 1;
+      background: none;
+      border: none;
+      box-shadow: none;
+      cursor: pointer;
+    }
+
+    & .dialog-content input[type=range]::-webkit-slider-runnable-track {
+      height: 2px;
+      background: linear-gradient(90deg, var(--mhx-dlg-accent), var(--mhx-line-dim));
+    }
+
+    & .dialog-content input[type=range]::-webkit-slider-thumb {
+      appearance: none;
+      width: 0.6em;
+      height: 1.1em;
+      margin-top: calc(1px - 0.55em);
+      border: none;
+      border-radius: 0;
+      background: var(--mhx-dlg-accent);
+      box-shadow: 0 0 6px var(--mhx-dlg-focus);
+    }
+
+    & .dialog-content input[type=range]:focus::-webkit-slider-thumb {
+      box-shadow: 0 0 0 1px var(--mhx-bright), 0 0 8px var(--mhx-dlg-focus);
+    }
+
+    & .dialog-content hr {
+      height: 1px;
+      margin: 0.35em 0;
+      border: none;
+      background: linear-gradient(90deg, var(--mhx-line-dim), transparent 85%);
+    }
+
+    /* ── Buttons: the § 3 pop-up's outline; the confirming one filled ─── */
+    & .dialog-buttons {
+      flex: none;
+      gap: 0.5em;
+      margin-top: 0.2em;
+    }
+
+    & .dialog-buttons .dialog-button {
+      height: auto;
+      min-height: 2.1em;
+      margin: 0;
+      padding: 0.25em 0.5em;
+      line-height: 1.15;
+      white-space: normal;
+      font-family: var(--mhx-font-label);
+      font-size: 1em;
+      font-weight: normal;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-text);
+      text-shadow: none;
+      background: rgba(0, 222, 246, 0.07);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 0;
+      box-shadow: none;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+    }
+
+    & .dialog-buttons .dialog-button:is(:hover, :focus-visible) {
+      color: var(--mhx-bright);
+      background: rgba(0, 222, 246, 0.2);
+      border-color: var(--mhx-line);
+      box-shadow: 0 0 8px rgba(0, 222, 246, 0.45);
+    }
+
+    /* Confirm / OK / Add / Close / Help; Hurt the same in red */
+    & .dialog-buttons .dialog-button:is(.one, .okay, .Okay, .help, .hurt) {
+      color: var(--mhx-dlg-on-accent);
+      background: var(--mhx-dlg-accent);
+      border: none;
+      box-shadow: none;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+
+      &:is(:hover, :focus-visible) {
+        color: var(--mhx-dlg-on-accent);
+        background: color-mix(in srgb, var(--mhx-dlg-accent) 75%, white);
+        box-shadow: none;
+      }
+    }
+
+    & .dialog-buttons .dialog-button.hurt {
+      --mhx-dlg-accent:    var(--mhx-danger);
+      --mhx-dlg-on-accent: #fff;
+    }
+
+    /* Roll window's Confirm while the MC reviews the tags ("Wait for MC") */
+    & .dialog-buttons .dialog-button.one:is(.disabled, :disabled) {
+      cursor: default;
+      color: var(--mhx-text-dim);
+      background: rgba(0, 222, 246, 0.12);
+      animation: mhx-dlg-wait 1.6s ease-in-out infinite;
+    }
+
+    /* ── Section headings (as § 3): Rift caps, cyan block, fading hairline */
+    & :is(.tag-review .move-name, .pc-downtime-selector > .header, .downtime-dialog > .gmmove-type-label) {
+      margin: 0;
+      padding: 0 0 0.2em 16px;
+      font-family: var(--mhx-font-label);
+      font-size: 1.05em;
+      font-weight: 600;
+      line-height: 1.3;
+      letter-spacing: 0.1em;
+      text-align: left;
+      text-decoration: none;
+      text-transform: uppercase;
+      color: var(--mhx-bright);
+      text-shadow: var(--mhx-glow);
+      background:
+        linear-gradient(var(--mhx-line), var(--mhx-line)) left 0 top calc(50% - 0.1em) / 7px 7px no-repeat,
+        linear-gradient(90deg, var(--mhx-line-dim), transparent 85%) left bottom / 100% 1px no-repeat;
+    }
+
+    /* ── Tag / status chips (roll window, tag review) ─────────────────────
+       Story tags yellow, statuses green (the book's highlights), power
+       tags cyan glass, weakness tags amber glass. Each chip sets its
+       colours as --mhx-chip-*; the states below only swap them. */
+    & :is(.modifier-list, .tag-review) {
+      & span.tag-name-block {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3em;
+        min-width: 0;
+        margin: 0;
+        font-size: 1em;
+      }
+
+      & span.tag-symbols {
+        display: inline-flex;
+        gap: 0.25em;
+        font-size: 0.75em;
+      }
+
+      & span.tag-symbols a,
+      & .status-name-block > a {
+        color: var(--mhx-line);
+        text-shadow: none;
+      }
+
+      /* Type icons go: the chip's colour says which it is. Other markers
+         (power bolt, weakness chevrons, hidden, temporary…) stay. */
+      & span.tag-symbols a:has(> .fa-tag),
+      & .status-name-block > a:has(> .fa-life-ring) {
+        display: none;
+      }
+
+      /* Cell left with only the story tag icon: gone too (one :has(): it
+         can't be nested) */
+      & span.tag-symbols:not(:has(> a > i:not(.fa-tag))) {
+        display: none;
+      }
+
+      /* Wrappers: no highlight of their own (a global .positive-selected
+         rule paints a pale gradient on the .tag inside); the chip has it */
+      & :is(.tag, .status) {
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        background: none;
+        border: none;
+        box-shadow: none;
+      }
+
+      & .status-name-block {
+        display: inline-flex;
+        flex: none;
+        align-items: center;
+        gap: 0.3em;
+        font-size: 1em;
+      }
+
+      & span.flex-tag-name.story-tag {
+        --mhx-chip-ink:   var(--mhx-hl-tag-soft-text);
+        --mhx-chip-bg:    var(--mhx-hl-tag-soft);
+        --mhx-chip-edge:  color-mix(in srgb, var(--mhx-hl-tag) 70%, transparent);
+        --mhx-chip-solid: var(--mhx-hl-tag);
+        --mhx-chip-solid-ink: var(--mhx-hl-tag-text);
+      }
+
+      & span.status-name {
+        --mhx-chip-ink:   var(--mhx-hl-status-soft-text);
+        --mhx-chip-bg:    var(--mhx-hl-status-soft);
+        --mhx-chip-edge:  color-mix(in srgb, var(--mhx-hl-status) 70%, transparent);
+        --mhx-chip-solid: var(--mhx-hl-status);
+        --mhx-chip-solid-ink: var(--mhx-hl-status-text);
+      }
+
+      & span.flex-tag-name:not(.story-tag) {
+        --mhx-chip-ink:   #fff;
+        --mhx-chip-bg:    rgba(0, 222, 246, 0.12);
+        --mhx-chip-edge:  var(--mhx-line-dim);
+        --mhx-chip-solid: rgba(0, 222, 246, 0.34);
+        --mhx-chip-solid-ink: #fff;
+      }
+
+      & span.flex-tag-name.weakness-tag {
+        --mhx-chip-ink:   #ffd4a8;
+        --mhx-chip-bg:    rgba(255, 166, 77, 0.12);
+        --mhx-chip-edge:  rgba(255, 190, 120, 0.45);
+        --mhx-chip-solid: rgba(255, 166, 77, 0.38);
+        --mhx-chip-solid-ink: #fff3e3;
+      }
+
+      /* One line: Chrome sizes the italic chips about 1px short, which
+         wraps them (or trips an ellipsis), so they don't wrap and don't
+         clip; the row clips a really long name instead */
+      & :is(span.flex-tag-name, span.status-name) {
+        flex: 0 0 auto;
+        min-width: 0;
+        white-space: nowrap;
+        margin: 0;
+        padding: 0 0.4em;
+        font-family: var(--mhx-font-body);
+        font-size: 1.05em;
+        font-style: italic;
+        font-weight: normal;
+        line-height: 1.45;
+        letter-spacing: normal;
+        text-align: left;
+        text-decoration: none;
+        text-transform: lowercase;
+        color: var(--mhx-chip-ink);
+        -webkit-text-fill-color: var(--mhx-chip-ink);
+        text-shadow: none;
+        background: var(--mhx-chip-bg);
+        border: 1px solid var(--mhx-chip-edge);
+        border-radius: 2px;
+        box-shadow: none;
+        transition: filter 0.15s, box-shadow 0.15s;
+      }
+
+      /* Theme tags keep the theme bars' Rift caps */
+      & span.flex-tag-name:not(.story-tag) {
+        font-family: var(--mhx-font-label);
+        font-size: 0.95em;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      & .story-tag-location {
+        font-size: 0.8em;
+        font-style: normal;
+        text-transform: none;
+        opacity: 0.75;
+      }
+
+      /* Burned: the HUD's struck-through grey on a faded chip */
+      & span.flex-tag-name.burn-level-1 {
+        color: #b1c7ca !important;
+        -webkit-text-fill-color: #b1c7ca;
+        text-decoration: line-through;
+        text-decoration-color: rgb(235, 235, 235);
+        text-decoration-thickness: 2px;
+        background: rgba(243, 224, 78, 0.06);
+        border-color: rgba(243, 224, 78, 0.3);
+        box-shadow: none;
+      }
+
+      /* To burn: solid, lime glow */
+      & span.flex-tag-name:is(.burn-level-2, .burn-level-3, .burn-level-4) {
+        -webkit-text-fill-color: var(--mhx-chip-solid-ink);
+        background: var(--mhx-chip-solid);
+        border-color: var(--mhx-chip-solid);
+        box-shadow: 0 0 6px var(--mhx-effect);
+      }
+
+      & .juice {
+        padding: 0 0.45em;
+        font-family: var(--mhx-font-label);
+        font-size: 0.95em;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--mhx-bright);
+        background: rgba(0, 222, 246, 0.12);
+        border: 1px solid var(--mhx-line-dim);
+        border-radius: 2px;
+      }
+    }
+
+    /* Status pips (system "tier + circles" display), as in § 6 */
+    & span.status-name .dotStatus {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    & span.status-name .tracker-circle {
+      display: inline-block;
+      box-sizing: border-box;
+      font-size: 0.5em;
+      width: 1em;
+      height: 1em;
+      min-width: 1em;
+      min-height: 0;
+      margin: 0;
+      padding: 0;
+      vertical-align: middle;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      background: none;
+      box-shadow: none;
+    }
+
+    & span.status-name .dotStatus > .tracker-circle:first-of-type {
+      margin-left: 0.4em;
+    }
+
+    & span.status-name .tracker-circle.filled-circle {
+      background: currentColor;
+    }
+
+    /* ── Roll window and Make Roll: label / field grid (as § 5) ───────── */
+    & form:is(.roll-dialog, .roll-modifier-dialog) {
+      display: grid;
+      grid-template-columns: minmax(7em, max-content) minmax(0, 1fr);
+      align-items: center;
+      gap: 0.45em 0.9em;
+
+      & > * {
+        grid-column: 1 / -1;
+        min-width: 0;
+        margin: 0;
+      }
+
+      /* The essence boxes and the effect slider sit in wrappers; their
+         label / field pairs join the grid */
+      & :is(.essence-effects, .essence-effects div, .effect-slider-block) {
+        display: contents;
+      }
+
+      & label {
+        grid-column: 1;
+      }
+
+      & label + :is(input, select) {
+        grid-column: 2;
+      }
+
+      & label + input:is([type=checkbox], [type=radio]) {
+        justify-self: start;
+      }
+
+      & label + input[type=number] {
+        justify-self: start;
+      }
+
+      & > br {
+        display: none;
+      }
+
+      & > hr {
+        margin: 0.1em 0;
+      }
+    }
+
+    /* Make Roll: the move picker is the title row */
+    & form.roll-modifier-dialog > select.move-select {
+      height: 2.1em;
+      font-family: var(--mhx-font-label);
+      font-size: 1.1em;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mhx-bright);
+      border-left: 2px solid var(--mhx-dlg-accent);
+    }
+
+    & form.roll-modifier-dialog > select.move-select option {
+      text-transform: none;
+    }
+
+    /* Roll window: Roll Bonus and Effect as readout tiles, then the tags
+       and statuses in use */
+    & form.roll-dialog > section.header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0.45em 0.5em;
+      margin: 0;
+      padding: 0;
+      background: none;
+      border: none;
+
+      & > div:not([class]) {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.5em;
+        min-width: 0;
+        padding: 0.3em 0.6em 0.35em;
+        background: linear-gradient(90deg, var(--mhx-dlg-accent-soft), transparent 70%), var(--mhx-field-bg);
+        border: 1px solid var(--mhx-line-faint);
+        border-left: 2px solid var(--mhx-dlg-accent);
+      }
+
+      & > div:not([class]) .dialog-label {
+        font-size: 0.85em;
+        color: var(--mhx-text-dim);
+      }
+
+      & :is(.roll-bonus, .move-effect) {
+        font-family: var(--mhx-font-readout);
+        font-size: 1.55em;
+        font-weight: 600;
+        line-height: 1;
+        color: var(--mhx-bright);
+        text-shadow: var(--mhx-glow);
+      }
+
+      /* Effect: the book's lime */
+      & > div:not([class]):has(.move-effect) {
+        border-left-color: var(--mhx-effect);
+        background: linear-gradient(90deg, rgba(132, 198, 0, 0.14), transparent 70%), var(--mhx-field-bg);
+      }
+
+      & .move-effect {
+        color: color-mix(in srgb, var(--mhx-effect) 55%, white);
+        text-shadow: 0 0 6px color-mix(in srgb, var(--mhx-effect) 70%, transparent);
+      }
+
+      & > :is(.modifier-list, .juice-section) {
+        grid-column: 1 / -1;
+      }
+
+      & > .modifier-list:not(:has(.modifier)),
+      & > .juice-section:not(:has(*)) {
+        display: none;
+      }
+    }
+
+    & .modifier-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    & .modifier-list .modifier {
+      overflow: hidden;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 0.45em;
+      min-height: 1.9em;
+      margin: 0;
+      padding: 0.15em 0.5em;
+      text-align: left;
+      background: var(--mhx-field-bg);
+      border: 1px solid var(--mhx-line-faint);
+      border-left: 2px solid var(--mhx-line-dim);
+    }
+
+    & .modifier-list .modifier > .review-icon:not(:has(*)) {
+      display: none;
+    }
+
+    /* Review state: approved lime, pending cyan, query yellow, rejected red */
+    & .modifier-list .modifier > a {
+      flex: none;
+      width: 1.1em;
+      font-size: 0.85em;
+      text-align: center;
+      color: var(--mhx-line);
+      text-shadow: none;
+    }
+
+    & .modifier-list .modifier > a.approved {
+      color: var(--mhx-effect);
+    }
+
+    & .modifier-list .modifier > a.clarification-requested {
+      color: var(--mhx-hl-tag);
+    }
+
+    & .modifier-list .modifier > a.rejected {
+      color: var(--mhx-danger);
+    }
+
+    & .modifier-list .modifier.approved {
+      border-left-color: var(--mhx-effect);
+    }
+
+    & .modifier-list .modifier:is(.pending, .request-clarification) {
+      border-left-color: var(--mhx-hl-tag);
+    }
+
+    & .modifier-list .modifier.rejected {
+      text-decoration: none;
+      opacity: 0.55;
+      border-left-color: var(--mhx-danger);
+    }
+
+    & .modifier-list .modifier.rejected :is(span.flex-tag-name, span.status-name) {
+      text-decoration: line-through;
+      text-decoration-color: var(--mhx-danger);
+      text-decoration-thickness: 2px;
+    }
+
+    /* In the roll: solid highlight (the markup doesn't say which way) */
+    & .modifier-list .modifier:not(.rejected) :is(span.flex-tag-name, span.status-name):not(.burn-level-1) {
+      color: var(--mhx-chip-solid-ink);
+      -webkit-text-fill-color: var(--mhx-chip-solid-ink);
+      background: var(--mhx-chip-solid);
+      border-color: var(--mhx-chip-solid);
+    }
+
+    & .juice-section .juice-pending {
+      font-family: var(--mhx-font-label);
+      font-size: 0.9em;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-line);
+      animation: mhx-dlg-wait 1.2s ease-in-out infinite;
+    }
+
+    /* ── Tag / status creation (dynamicDialog): label / field grid ────── */
+    & .dialog-content:has(> div > :is(.string-input, .number-input, .boolean-input)) {
+      & > br {
+        display: none;
+      }
+
+      & > hr {
+        display: none;
+      }
+
+      & > div {
+        display: grid;
+        grid-template-columns: minmax(6em, max-content) minmax(0, 1fr);
+        align-items: center;
+        gap: 0.45em 0.9em;
+      }
+
+      & > div > :is(.string-input, .number-input, .boolean-input) {
+        display: contents;
+      }
+
+      & label {
+        grid-column: 1;
+      }
+
+      & label + input {
+        grid-column: 2;
+      }
+
+      & label + input:is([type=checkbox], [type=number]) {
+        justify-self: start;
+      }
+
+      /* Category: the system writes its label inside the <select>, where
+         it can't show, so the picker takes the whole row */
+      & > div > select {
+        grid-column: 1 / -1;
+      }
+
+      /* The name field in the book's colour: green for a status (it has a
+         tier), yellow for a tag */
+      & > div > .key-name input {
+        font-style: italic;
+        text-transform: lowercase;
+        color: var(--mhx-hl-tag-soft-text);
+        background: linear-gradient(var(--mhx-hl-tag-soft), var(--mhx-hl-tag-soft)), var(--mhx-field-bg);
+        border-color: color-mix(in srgb, var(--mhx-hl-tag) 70%, transparent);
+      }
+
+      & > div:has(> .key-tier) > .key-name input {
+        color: var(--mhx-hl-status-soft-text);
+        background: linear-gradient(var(--mhx-hl-status-soft), var(--mhx-hl-status-soft)), var(--mhx-field-bg);
+        border-color: color-mix(in srgb, var(--mhx-hl-status) 70%, transparent);
+      }
+
+      & > div > .key-name input:focus {
+        border-color: var(--mhx-hl-tag);
+        box-shadow: 0 0 6px color-mix(in srgb, var(--mhx-hl-tag) 60%, transparent);
+      }
+
+      & > div:has(> .key-tier) > .key-name input:focus {
+        border-color: var(--mhx-hl-status);
+        box-shadow: 0 0 6px color-mix(in srgb, var(--mhx-hl-status) 60%, transparent);
+      }
+    }
+
+    /* ── Help / Hurt ──────────────────────────────────────────────────── */
+    /* The prompt: "<PC> is making a roll for <move>" */
+    & .dialog-content > div:only-child:not([class]) {
+      font-size: 1.05em;
+    }
+
+    /* Amount: slider + readout */
+    & .slidecontainer {
+      display: flex;
+      align-items: center;
+      gap: 0.8em;
+      width: 100%;
+      padding: 0.3em 0.6em;
+      background: var(--mhx-field-bg);
+      border: 1px solid var(--mhx-line-faint);
+      border-left: 2px solid var(--mhx-dlg-accent);
+    }
+
+    & .slidecontainer > output.HelpHurt {
+      flex: none;
+      min-width: 1.4em;
+      font-family: var(--mhx-font-readout);
+      font-size: 1.5em;
+      font-weight: 600;
+      line-height: 1;
+      text-align: center;
+      color: var(--mhx-bright);
+      text-shadow: var(--mhx-glow);
+    }
+
+    /* ── Tag review (MC): selected tags with approve / query / reject,
+       then suggestions ──────────────────────────────────────────────── */
+    /* Two columns of chips + review keys need more than the 400px default */
+    &:has(> .window-content > .dialog-content > .tag-review) {
+      min-width: 33em;
+    }
+
+    & .tag-review {
+      & > .purpose {
+        font-style: italic;
+        color: var(--mhx-text-dim);
+      }
+
+      & > .move-name {
+        margin-top: 0.4em;
+      }
+
+      & > hr {
+        display: none;
+      }
+
+      & > br {
+        display: none;
+      }
+
+      & > .flex-row {
+        align-items: flex-start;
+        gap: 0.9em;
+        margin-top: 0.5em;
+      }
+
+      & :is(.selected-list, .suggestion-list) {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+      }
+
+      & .center-label {
+        margin: 0 0 0.2em;
+        padding-bottom: 0.15em;
+        font-family: var(--mhx-font-label);
+        font-size: 0.85em;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-align: left;
+        text-decoration: none;
+        text-transform: uppercase;
+        color: var(--mhx-text-dim);
+        background: linear-gradient(90deg, var(--mhx-line-dim), transparent 85%) left bottom / 100% 1px no-repeat;
+      }
+
+      & :is(.selected-list, .suggestion-list) > .flex-row-center {
+        overflow: hidden;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        gap: 0.45em;
+        min-height: 1.9em;
+        padding: 0.15em 0.4em;
+        background: var(--mhx-field-bg);
+        border: 1px solid var(--mhx-line-faint);
+        border-left: 2px solid var(--mhx-line-dim);
+      }
+
+      & .suggestion-list > .flex-row-center {
+        justify-content: flex-start;
+      }
+
+      & :is(.selected-list, .suggestion-list) .name {
+        cursor: pointer;
+      }
+
+      & :is(.selected-list, .suggestion-list) .name:hover {
+        filter: brightness(1.2);
+      }
+
+      /* Selected list: solid + glow when positive, red cap when negative */
+      & .positive-selected :is(span.flex-tag-name, span.status-name):not(.burn-level-1) {
+        color: var(--mhx-chip-solid-ink);
+        -webkit-text-fill-color: var(--mhx-chip-solid-ink);
+        background: var(--mhx-chip-solid);
+        border-color: var(--mhx-chip-solid);
+        box-shadow: 0 0 6px color-mix(in srgb, var(--mhx-chip-solid) 70%, transparent);
+      }
+
+      & .negative-selected :is(span.flex-tag-name, span.status-name):not(.burn-level-1) {
+        color: var(--mhx-chip-solid-ink);
+        -webkit-text-fill-color: var(--mhx-chip-solid-ink);
+        background: var(--mhx-hl-hatch), var(--mhx-chip-solid);
+        border-color: var(--mhx-hl-neg);
+        border-left: 7px solid transparent;
+        box-shadow: 0 0 6px rgba(226, 56, 58, 0.6);
+      }
+
+      /* Review keys: outline squares; the chosen one filled */
+      & .review-icons {
+        display: flex;
+        flex: none;
+        gap: 3px;
+      }
+
+      & .review-icons a.item-control {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.7em;
+        height: 1.7em;
+        font-size: 0.85em;
+        color: var(--mhx-line);
+        text-shadow: none;
+        background: rgba(0, 222, 246, 0.07);
+        border: 1px solid var(--mhx-line-dim);
+        transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+      }
+
+      & .review-icons a.item-control.approved     { --mhx-review: var(--mhx-effect); }
+      & .review-icons a.item-control.request-clarification { --mhx-review: var(--mhx-hl-tag); }
+      & .review-icons a.item-control.rejected     { --mhx-review: var(--mhx-danger); }
+
+      & .review-icons a.item-control:hover {
+        color: var(--mhx-review);
+        border-color: var(--mhx-review);
+        box-shadow: 0 0 6px color-mix(in srgb, var(--mhx-review) 60%, transparent);
+      }
+
+      & .review-icons a.item-control.active {
+        font-size: 0.85em;
+        color: #04101f;
+        background: var(--mhx-review);
+        border-color: var(--mhx-review);
+        box-shadow: 0 0 6px color-mix(in srgb, var(--mhx-review) 60%, transparent);
+      }
+    }
+
+    /* ── PC downtime: the choices as glass rows, the picked one lit ───── */
+    & .pc-downtime-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+
+      & > .header {
+        margin-bottom: 0.3em;
+      }
+
+      & > .move-text {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.6em;
+        padding: 0.35em 0.6em;
+        font-weight: normal;
+        color: var(--mhx-text);
+        background: var(--mhx-field-bg);
+        border: 1px solid var(--mhx-line-faint);
+        border-left: 2px solid var(--mhx-line-dim);
+        transition: background 0.15s, border-color 0.15s;
+      }
+
+      /* The labels point at ids the radios don't have, so clicking the
+         text did nothing: the radio now covers the whole row, invisible,
+         and the row draws its round marker */
+      & > .move-text > input[type=radio] {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+      }
+
+      & > .move-text::before {
+        content: "";
+        flex: none;
+        box-sizing: border-box;
+        width: 1.05em;
+        height: 1.05em;
+        border: 1px solid var(--mhx-line-dim);
+        border-radius: 50%;
+        background: var(--mhx-field-bg);
+        transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+      }
+
+      & > .move-text:hover::before {
+        border-color: var(--mhx-dlg-accent);
+      }
+
+      & > .move-text:has(input:checked)::before {
+        border-color: var(--mhx-dlg-accent);
+        background: var(--mhx-dlg-accent);
+        box-shadow: inset 0 0 0 2px #04101f, 0 0 6px var(--mhx-dlg-focus);
+      }
+
+      & > .move-text:has(input:focus-visible) {
+        outline: 1px solid var(--mhx-dlg-accent);
+        outline-offset: -1px;
+      }
+
+      & > .move-text:hover {
+        background: linear-gradient(90deg, var(--mhx-dlg-accent-soft), transparent), var(--mhx-field-bg);
+      }
+
+      & > .move-text:has(input:checked) {
+        background: linear-gradient(90deg, rgba(0, 222, 246, 0.18), rgba(0, 222, 246, 0.05)), var(--mhx-field-bg);
+        border-color: var(--mhx-line-dim);
+        border-left-color: var(--mhx-dlg-accent);
+      }
+
+      & > .move-text > label {
+        font-family: var(--mhx-font-body);
+        font-size: 1em;
+        font-weight: normal;
+        letter-spacing: normal;
+        line-height: 1.35;
+        text-transform: none;
+        color: var(--mhx-text);
+      }
+
+      & > .move-text:has(input:checked) > label {
+        color: var(--mhx-bright);
+      }
+    }
+
+    /* ── GM downtime moves: one heading per threat, § 3 lime move cards ─ */
+    & .downtime-dialog {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35em;
+      max-height: 70vh;
+      overflow-y: auto;
+
+      & > .gmmove-type-label:not(:first-child) {
+        margin-top: 0.4em;
+      }
+
+      & .actor-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      & .actor-group > .gm-move {
+        --mhx-chamfer: 12px;
+        align-items: flex-start;
+        gap: 0.3em;
+        margin: 0;
+        padding: 0.45em 0.6em 0.55em 0.7em;
+        font-size: 1em;
+        line-height: 1.35;
+        cursor: pointer;
+        border: 1px solid var(--mhx-line-faint);
+        border-left: 2px solid var(--mhx-spectrum);
+        border-radius: 0;
+        box-shadow: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--mhx-chamfer)), calc(100% - var(--mhx-chamfer)) 100%, 0 100%);
+        background:
+          linear-gradient(to bottom right,
+            transparent calc(50% - 1px),
+            var(--mhx-line-dim) calc(50% - 1px),
+            var(--mhx-line-dim) calc(50% + 0.5px),
+            transparent calc(50% + 0.5px))
+            bottom right / var(--mhx-chamfer) var(--mhx-chamfer) no-repeat,
+          linear-gradient(90deg, rgba(171, 255, 0, 0.09), transparent 1.5em),
+          rgba(2, 10, 26, 0.6);
+        background-origin: border-box;
+      }
+
+      & .actor-group > .gm-move:hover {
+        border-color: var(--mhx-line-dim);
+        border-left-color: var(--mhx-spectrum);
+        box-shadow: inset 0 0 14px rgba(0, 222, 246, 0.16);
+      }
+
+      & .gm-move > .trash-can-flex:not(:has(*)),
+      & .gm-move > div:last-child:not(:has(*)) {
+        display: none;
+      }
+
+      & .gm-move .gmmove-text {
+        flex: 1;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        font-family: var(--mhx-font-body);
+        font-size: 1em;
+        line-height: 1.35;
+        color: var(--mhx-text);
+        text-shadow: none;
+        background: none;
+        border: none;
+        border-radius: 0;
+        backdrop-filter: none;
+      }
+
+      & .gm-move .gmmove-name {
+        font-family: var(--mhx-font-title);
+        font-size: 1.2em;
+        font-weight: normal;
+        font-style: italic;
+        line-height: 1.1;
+        text-transform: uppercase;
+        color: var(--mhx-bright);
+        text-shadow: -1px 1px 2px rgba(110, 170, 0, 0.9), 0 0 10px rgba(171, 255, 0, 0.45);
+      }
+
+      & .gm-move .gmmove-section > hr {
+        height: 1px;
+        margin: 0.25em 0 0.35em;
+        border: none;
+        background: linear-gradient(90deg, var(--mhx-spectrum), transparent 80%);
+      }
+
+      & .gm-move div.gmmove-description {
+        font-size: 1em;
+        line-height: 1.4;
+        color: var(--mhx-text);
+      }
+
+      & .gm-move .gmmove-description > span[title]:first-child {
+        color: var(--mhx-spectrum);
+      }
+
+      & .gmmove-text .narrated-story-tag {
+        margin: 0;
+        padding: 0 0.35em;
+        font-family: var(--mhx-font-body);
+        font-style: italic;
+        text-transform: lowercase;
+        letter-spacing: normal;
+        color: var(--mhx-hl-tag-text);
+        text-shadow: none;
+        background: var(--mhx-hl-tag);
+        border: 1px solid var(--mhx-hl-tag);
+        border-radius: 2px;
+      }
+
+      & .gmmove-text .narrated-status-name {
+        padding: 0 0.35em;
+        font-family: var(--mhx-font-body);
+        font-weight: normal;
+        font-style: italic;
+        text-transform: lowercase;
+        color: var(--mhx-hl-status-text);
+        text-shadow: none;
+        background: var(--mhx-hl-status);
+        border: 1px solid var(--mhx-hl-status);
+        border-radius: 2px;
+      }
+
+      & .gmmove-text .narrated-status-name .status-tier {
+        font-weight: bold;
+        font-style: normal;
+      }
+
+      & .gm-move .submove {
+        margin: 0.35em 0 0 0.2em;
+        padding-left: 0.6em;
+        border-left: 1px solid color-mix(in srgb, var(--mhx-spectrum) 50%, transparent);
+      }
+
+      & .submove .gm-move {
+        gap: 0.3em;
+        margin: 0;
+        padding: 0;
+        background: none;
+        border: none;
+        box-shadow: none;
+      }
+
+      & .submove .gmmove-name {
+        font-size: 1.05em;
+      }
+
+      & .inherited-move .inherit-msg {
+        margin-top: 0.35em;
+        font-family: var(--mhx-font-label);
+        font-size: 0.8em;
+        letter-spacing: 0.08em;
+        text-align: left;
+        text-transform: uppercase;
+        color: var(--mhx-text-dim);
+      }
+    }
+
+    /* ── GM narration: one big glass page ─────────────────────────────── */
+    & .dialog-content:has(> textarea.narrator-text) {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    & .dialog-content > textarea.narrator-text {
+      flex: 1;
+      width: 100%;
+      height: auto;
+      min-height: 12em;
+      padding: 0.6em 0.8em;
+      font-size: 1.5em;
+      line-height: 1.4;
+      resize: none;
+      background:
+        linear-gradient(90deg, var(--mhx-dlg-accent-soft), transparent 1.5em),
+        var(--mhx-field-bg);
+      border-left: 2px solid var(--mhx-dlg-accent);
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     § 7. Sidebar and chrome
+     Window chrome (title bar, header buttons, resize handle, frame) of the
+     system windows that § 2 to § 6b restyle: actor sheets (.city.sheet),
+     item sheets, the GM move pop-up, the § 5 and § 6b dialogs, the Scene
+     Tags window and the status tracker. Core and other modules' windows
+     keep their own chrome.
+
+     The right sidebar (core v14 markup: templates/sidebar/*): the tab
+     strip, every tab's panel, directory headers (create buttons, search),
+     directory lists and folders, the placeables tab, playlist volume
+     sliders, the combat tracker, the chat controls and input (also in
+     #chat-notifications, where core moves it while the sidebar is
+     collapsed), the settings tab and the core context menu. § 1 styles
+     the chat cards themselves.
+
+     The window list sits in :where(), so the root weighs (0,3,0) with
+     .style-custom: § 6's own Scene Tags header, title and frame (0,4,0+)
+     keep winning, and that window only takes the buttons and the handle.
+     The dialog branches repeat the § 3 / § 5 / § 6b roots: keep them in
+     sync if those change.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  .app.window-app:where(
+    .city.sheet,
+    .city-of-mist.sheet.item,
+    .story-tag-window,
+    [id="city-of-mist-tracker-app"],
+    .dialog:has(> .window-content > .dialog-content > :is(
+      .gmmove-section,
+      .single-choice-box, .multi-choice-box, .themebook-selection-dialog,
+      input.face-danger, .merge-status-dialog, .status-merge-dialog,
+      .SHB-confirm-dialog, .Blaze-dialog,
+      .roll-dialog, .roll-modifier-dialog, .tag-review,
+      .pc-downtime-selector, .downtime-dialog, textarea.narrator-text
+    )),
+    .dialog:has(> .window-content > .dialog-content > div > :is(.string-input, .number-input, .boolean-input)),
+    .dialog:has(> .window-content > .dialog-content > form .slidecontainer > input.HelpHurt),
+    /* each two-:has() branch stays on one line (a line break would be a descendant combinator) */
+    .dialog:has(> .window-content > .dialog-buttons > .dialog-button.none + .dialog-button:is(.help, .hurt)),
+    .dialog:has(> .window-content > .dialog-content > div:only-child:not([class])):has(> .window-content > .dialog-buttons > .dialog-button.yes + .dialog-button.no:last-child),
+    .dialog:not(:has(> .window-content > .dialog-content > *)):has(> .window-content > .dialog-buttons > .dialog-button.one + .dialog-button.two + .dialog-button.cancel:last-child)
+  ) {
+    /* The window's accent: the item sheet's or dialog's own (lime on GM
+       move / spectrum items, red on Stop Holding Back), else cyan */
+    --mhx-chrome-accent: var(--mhx-item-accent, var(--mhx-dlg-accent, var(--mhx-line)));
+    --mhx-chrome-accent-soft: color-mix(in srgb, var(--mhx-chrome-accent) 14%, transparent);
+
+    /* Threat and limited sheets, and the GM move pop-up: lime, as § 3 */
+    &:is(.city.sheet:has(.threat-sheet), .dialog:has(> .window-content > .dialog-content > .gmmove-section)) {
+      --mhx-chrome-accent: var(--spectrum-color, #abff00);
+    }
+
+    /* ── Frame ─────────────────────────────────────────────────────────── */
+    border: none;
+    border-radius: 0;
+    background: #030d21;
+    box-shadow:
+      0 0 0 1px var(--mhx-line-faint),
+      0 0 18px rgba(0, 222, 246, 0.08),
+      0 10px 30px rgba(0, 0, 0, 0.65);
+
+    /* ── Title bar: dark glass, accent stripe, fading hairline, a corner
+       bracket top right ──────────────────────────────────────────────── */
+    & > .window-header {
+      flex: 0 0 30px;
+      gap: 0.15em;
+      padding: 0 4px 0 10px;
+      font-family: var(--mhx-font-label);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-text);
+      border: none;
+      border-left: 2px solid var(--mhx-chrome-accent);
+      background:
+        linear-gradient(var(--mhx-line), var(--mhx-line)) top right / 14px 1px no-repeat,
+        linear-gradient(var(--mhx-line), var(--mhx-line)) top right / 1px 8px no-repeat,
+        linear-gradient(90deg, var(--mhx-line-dim), var(--mhx-line-faint) 60%, transparent) left bottom / 100% 1px no-repeat,
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+        linear-gradient(90deg, var(--mhx-chrome-accent-soft), transparent 1.5em),
+        linear-gradient(180deg, rgba(16, 32, 48, 0.98), rgba(4, 13, 30, 0.98));
+    }
+
+    & > .window-header .window-title {
+      font-family: var(--mhx-font-label);
+      font-size: 1.1em;
+      font-weight: 600;
+      line-height: 30px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mhx-bright);
+      text-shadow: var(--mhx-glow);
+    }
+
+    /* The section heading's block, before the title */
+    &:not(.story-tag-window) > .window-header .window-title::before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 0.7em;
+      margin-right: 0.55em;
+      vertical-align: 0.02em;
+      background: var(--mhx-chrome-accent);
+      box-shadow: 0 0 6px var(--mhx-chrome-accent);
+    }
+
+    & > .window-header .document-id-link {
+      margin-left: 0.5em;
+      font-size: 0.8em;
+      color: var(--mhx-text-dim);
+      text-shadow: none;
+      opacity: 0.7;
+      transition: color 0.15s, opacity 0.15s;
+
+      &:hover {
+        color: var(--mhx-line);
+        opacity: 1;
+      }
+    }
+
+    /* Header buttons: dim Rift caps, cyan icon, outlined on hover;
+       Close turns red */
+    & > .window-header .header-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35em;
+      height: 20px;
+      margin: 0 0 0 2px;
+      padding: 0 0.45em;
+      font-family: var(--mhx-font-label);
+      font-size: 0.9em;
+      font-weight: 600;
+      line-height: 1;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: var(--mhx-text-dim);
+      text-shadow: none;
+      background: transparent;
+      border: 1px solid transparent;
+      transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+      & > i {
+        margin: 0;
+        font-size: 0.9em;
+        color: var(--mhx-line);
+        transition: color 0.15s, text-shadow 0.15s;
+      }
+
+      &:hover {
+        color: var(--mhx-bright);
+        background: rgba(0, 222, 246, 0.1);
+        border-color: var(--mhx-line-dim);
+        box-shadow: 0 0 6px rgba(0, 222, 246, 0.3);
+
+        & > i { text-shadow: var(--mhx-glow); }
+      }
+
+      &.close:hover {
+        color: #fff;
+        background: rgba(255, 40, 40, 0.18);
+        border-color: var(--mhx-danger);
+        box-shadow: 0 0 6px rgba(255, 40, 40, 0.4);
+
+        & > i {
+          color: var(--mhx-danger);
+          text-shadow: 0 0 6px rgba(255, 40, 40, 0.6);
+        }
+      }
+    }
+
+    /* Resize handle: a cyan corner bracket instead of the grey tab */
+    & > .window-resizable-handle {
+      right: 3px;
+      bottom: 3px;
+      width: 14px;
+      height: 14px;
+      padding: 0;
+      border: none;
+      border-radius: 0;
+      background:
+        linear-gradient(var(--mhx-line), var(--mhx-line)) right bottom / 100% 2px no-repeat,
+        linear-gradient(var(--mhx-line), var(--mhx-line)) right bottom / 2px 100% no-repeat;
+      opacity: 0.6;
+      transition: opacity 0.15s, filter 0.15s;
+
+      & > i { display: none; }
+
+      &:hover {
+        opacity: 1;
+        filter: drop-shadow(0 0 3px var(--mhx-line));
+      }
+    }
+
+    /* Minimized: the title bar alone, with its frame */
+    &.minimized > .window-header {
+      border-bottom: none;
+    }
+  }
+
+  /* ── Core dialogs (DialogV2: confirm / prompt / wait, e.g. End Combat,
+     Delete …, Create … from the sidebar) ─────────────────────────────────
+     Same chrome as the system windows above and the § 5 body: glass,
+     cyan stripe, Rift caps labels, glass fields, outline buttons with
+     the confirming one (Yes / OK / the default) filled. The system's
+     `form button` painted the buttons purple. */
+  .application.dialog {
+    --mhx-dlg-accent: var(--mhx-line);
+    --mhx-field-bg: rgba(2, 10, 26, 0.72);
+    --color-scrollbar: var(--mhx-line);
+    --color-scrollbar-track: transparent;
+    border: none;
+    border-radius: 0;
+    background: #030d21;
+    box-shadow:
+      0 0 0 1px var(--mhx-line-faint),
+      0 0 18px rgba(0, 222, 246, 0.08),
+      0 10px 30px rgba(0, 0, 0, 0.65);
+
+    & > .window-header {
+      flex: 0 0 30px;
+      gap: 0.35em;
+      padding: 0 4px 0 10px;
+      font-family: var(--mhx-font-label);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-text);
+      border: none;
+      border-left: 2px solid var(--mhx-line);
+      background:
+        linear-gradient(var(--mhx-line), var(--mhx-line)) top right / 14px 1px no-repeat,
+        linear-gradient(var(--mhx-line), var(--mhx-line)) top right / 1px 8px no-repeat,
+        linear-gradient(90deg, var(--mhx-line-dim), var(--mhx-line-faint) 60%, transparent) left bottom / 100% 1px no-repeat,
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+        linear-gradient(90deg, rgba(0, 222, 246, 0.14), transparent 1.5em),
+        linear-gradient(180deg, rgba(16, 32, 48, 0.98), rgba(4, 13, 30, 0.98));
+    }
+
+    & > .window-header .window-icon {
+      font-size: 0.85em;
+      color: var(--mhx-line);
+      text-shadow: var(--mhx-glow);
+    }
+
+    & > .window-header .window-title {
+      font-family: var(--mhx-font-label);
+      font-size: 1.1em;
+      font-weight: 600;
+      line-height: 30px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mhx-bright);
+      text-shadow: var(--mhx-glow);
+    }
+
+    & > .window-content {
+      gap: 0.6em;
+      padding: 0.7em 0.9em 0.8em 1em;
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-text);
+      text-shadow: none;
+      border-left: 2px solid var(--mhx-line);
+      background:
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+        linear-gradient(90deg, rgba(0, 222, 246, 0.1), transparent 1.5em),
+        linear-gradient(90deg, rgba(1, 6, 16, 0.55), transparent 55%),
+        linear-gradient(180deg, var(--mhx-panel-hi), var(--mhx-panel)),
+        url(/systems/city-of-mist/images/OS-BG.webp) center / cover no-repeat;
+    }
+
+    & .dialog-content {
+      font-family: var(--mhx-font-body);
+      font-size: 1.05em;
+      line-height: 1.4;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-text);
+
+      & :is(p, li) { color: var(--mhx-text); }
+      & :is(strong, b) { color: var(--mhx-bright); }
+
+      & .hint {
+        font-size: 0.9em;
+        color: var(--mhx-text-dim);
+      }
+    }
+
+    /* Labels and fields (create document, prompts) */
+    & .dialog-content :is(label, .form-group > label, legend) {
+      font-family: var(--mhx-font-label);
+      font-size: 0.9em;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-text);
+      text-shadow: none;
+    }
+
+    & .dialog-content :is(input:not([type]), input[type=text], input[type=search], input[type=number], select, textarea) {
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-text);
+      text-shadow: none;
+      background: var(--mhx-field-bg);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 0;
+      box-shadow: inset 0 0 8px rgba(0, 222, 246, 0.06);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+
+      &:focus {
+        border-color: var(--mhx-line);
+        box-shadow: 0 0 6px rgba(0, 222, 246, 0.45);
+      }
+    }
+
+    & .dialog-content select option {
+      color: var(--mhx-text);
+      background: #0b1a2e;
+    }
+
+    & .dialog-content :is(fieldset) {
+      border: 1px solid var(--mhx-line-faint);
+      border-radius: 0;
+    }
+
+    /* Buttons: § 5 outline; the confirming one filled with a clipped corner */
+    & .form-footer {
+      gap: 0.5em;
+    }
+
+    & .form-footer button {
+      height: auto;
+      min-height: 2.1em;
+      margin: 0;
+      padding: 0.25em 0.5em;
+      font-family: var(--mhx-font-label);
+      font-size: 1em;
+      font-weight: 600;
+      line-height: 1.15;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-text);
+      text-shadow: none;
+      background: rgba(0, 222, 246, 0.07);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 0;
+      box-shadow: none;
+      outline: none;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+
+      & > i { color: var(--mhx-line); }
+
+      &:is(:hover, :focus-visible) {
+        color: var(--mhx-bright);
+        background: rgba(0, 222, 246, 0.2);
+        border-color: var(--mhx-line);
+        box-shadow: 0 0 8px rgba(0, 222, 246, 0.45);
+      }
+
+      &:is([data-action=yes], [data-action=ok], .default) {
+        color: #04101f;
+        background: var(--mhx-line);
+        border-color: transparent;
+        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+
+        & > i { color: inherit; }
+
+        &:is(:hover, :focus-visible) {
+          color: #04101f;
+          background: color-mix(in srgb, var(--mhx-line) 75%, white);
+          box-shadow: none;
+        }
+      }
+    }
+
+    &, & * {
+      scrollbar-color: var(--mhx-line) transparent;
+    }
+  }
+
+  /* ── AppV2 header keys: core dialogs, the Player HUD and the NPC HUD ───
+     Square dim keys (Phase 1's `button` rule made them green, core rounds
+     them), cyan outline on hover, close red; the HUD's two-column toggle
+     lights cyan when on. The ⋮ controls dropdown in glass. The HUDs keep
+     their own header bar and name. */
+  :is(.application.dialog, #mist-hud, .application.npc-hud) > .window-header .header-control {
+    --button-text-color: var(--mhx-text-dim);
+    --button-hover-text-color: var(--mhx-bright);
+    --button-size: 22px;
+    color: var(--mhx-text-dim);
+    text-shadow: none;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0;
+    box-shadow: none;
+    transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+    &:hover {
+      color: var(--mhx-line);
+      background: rgba(0, 222, 246, 0.1);
+      border-color: var(--mhx-line-dim);
+      box-shadow: 0 0 6px rgba(0, 222, 246, 0.3);
+    }
+
+    &[data-action=close]:hover {
+      color: var(--mhx-danger);
+      background: rgba(255, 40, 40, 0.18);
+      border-color: var(--mhx-danger);
+      box-shadow: 0 0 6px rgba(255, 40, 40, 0.4);
+    }
+
+    &.mh-wide-toggle:is(.active, [aria-pressed=true]) {
+      color: var(--mhx-line);
+      text-shadow: var(--mhx-glow);
+      background: rgba(0, 222, 246, 0.14);
+      border-color: var(--mhx-line-dim);
+    }
+  }
+
+  :is(.application.dialog, #mist-hud, .application.npc-hud) .controls-dropdown {
+    font-family: var(--mhx-font-label);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mhx-text);
+    background: rgba(5, 16, 34, 0.97);
+    border: 1px solid var(--mhx-line-dim);
+    border-left: 2px solid var(--mhx-line);
+    border-radius: 0;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+
+    & .header-control {
+      color: var(--mhx-text);
+      text-shadow: none;
+      background: transparent;
+      border-radius: 0;
+
+      & > i { color: var(--mhx-line); }
+
+      &:hover {
+        color: var(--mhx-bright);
+        background: rgba(0, 222, 246, 0.12);
+      }
+    }
+  }
+
+  /* ── Sidebar ─────────────────────────────────────────────────────────── */
+
+  :is(#sidebar, #chat-notifications, #context-menu) {
+    --color-scrollbar: var(--mhx-line);
+    --color-scrollbar-track: transparent;
+  }
+
+  :is(#sidebar, #chat-notifications, #context-menu) * {
+    scrollbar-color: var(--mhx-line) transparent;
+  }
+
+  /* Tab strip: glass keys, the open tab lit cyan. Core draws these from
+     --control-* (the system's pink frame round the strip goes) */
+  #sidebar-tabs {
+    --control-bg-color: rgba(3, 13, 33, 0.82);
+    --control-border-color: var(--mhx-line-faint);
+    --control-icon-color: var(--mhx-text-dim);
+    --control-hover-bg-color: rgba(0, 222, 246, 0.12);
+    --control-hover-border-color: var(--mhx-line-dim);
+    --control-hover-icon-color: var(--mhx-bright);
+    --control-active-bg-color: rgba(0, 222, 246, 0.16);
+    --control-active-border-color: var(--mhx-line);
+    --control-active-icon-color: var(--mhx-line);
+    border: none;
+    box-shadow: none;
+
+    & .ui-control {
+      border-radius: 0;
+      color: var(--control-icon-color);
+      text-shadow: none;
+      transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+      &:hover {
+        color: var(--control-hover-icon-color);
+        box-shadow: 0 0 6px rgba(0, 222, 246, 0.3);
+      }
+
+      &[aria-pressed=true] {
+        color: var(--control-active-icon-color);
+        text-shadow: var(--mhx-glow);
+        box-shadow: inset 2px 0 0 var(--mhx-line), 0 0 8px rgba(0, 222, 246, 0.4);
+      }
+    }
+
+    & .notification-pip {
+      background: var(--mhx-line);
+      border-radius: 0;
+      box-shadow: 0 0 6px var(--mhx-line);
+    }
+  }
+
+  /* Every tab's panel: the § 4 glass with a cyan stripe on the left */
+  #sidebar-content > .sidebar-tab {
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-text);
+    border-radius: 0;
+    border-left: 2px solid var(--mhx-line);
+    box-shadow: 0 0 0 1px var(--mhx-line-faint), 0 0 18px rgba(0, 222, 246, 0.08);
+    background:
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+      linear-gradient(90deg, rgba(0, 222, 246, 0.1), transparent 1.5em),
+      linear-gradient(90deg, rgba(1, 6, 16, 0.55), transparent 55%),
+      linear-gradient(180deg, var(--mhx-panel-hi), var(--mhx-panel)),
+      url(/systems/city-of-mist/images/OS-BG.webp) center / cover no-repeat;
+  }
+
+  /* ── Directories (actors, items, journal, scenes, tables, cards, macros,
+     playlists, compendiums) ───────────────────────────────────────────── */
+  #sidebar .directory {
+    --sidebar-separator: 1px solid var(--mhx-line-faint);
+    --sidebar-folder-color: var(--mhx-line-dim);
+    --sidebar-entry-hover-bg: rgba(0, 222, 246, 0.1);
+    color: var(--mhx-text);
+
+    /* Header buttons: § 5 outline; Create (the entry) filled, clipped */
+    & .action-buttons button {
+      height: auto;
+      min-height: 2em;
+      margin: 0;
+      padding: 0.2em 0.5em;
+      font-family: var(--mhx-font-label);
+      font-size: 1em;
+      font-weight: 600;
+      line-height: 1.15;
+      white-space: nowrap;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mhx-text);
+      text-shadow: none;
+      background: rgba(0, 222, 246, 0.07);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 0;
+      box-shadow: none;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+
+      & > i { color: var(--mhx-line); }
+
+      &:is(:hover, :focus-visible) {
+        color: var(--mhx-bright);
+        background: rgba(0, 222, 246, 0.2);
+        border-color: var(--mhx-line);
+        box-shadow: 0 0 8px rgba(0, 222, 246, 0.45);
+      }
+    }
+
+    & .header-actions button.create-entry {
+      color: #04101f;
+      background: var(--mhx-line);
+      border-color: transparent;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+
+      & > i { color: inherit; }
+
+      &:is(:hover, :focus-visible) {
+        color: #04101f;
+        background: color-mix(in srgb, var(--mhx-line) 75%, white);
+        box-shadow: none;
+      }
+    }
+
+    /* Search: a glass field with a cyan edge; dim icon keys */
+    & .directory-header search input {
+      height: 1.9em;
+      padding: 0 0.5em;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-text);
+      background: rgba(2, 10, 26, 0.72);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 0;
+      box-shadow: inset 0 0 8px rgba(0, 222, 246, 0.06);
+      transition: border-color 0.15s, box-shadow 0.15s;
+
+      &::placeholder {
+        font-family: var(--mhx-font-label);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--mhx-text-dim);
+        opacity: 0.7;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: var(--mhx-line);
+        box-shadow: 0 0 6px rgba(0, 222, 246, 0.45);
+      }
+    }
+
+    & :is(.directory-header .inline-control, .folder-header .create-button) {
+      color: var(--mhx-text-dim);
+      text-shadow: none;
+      background: none;
+      border: none;
+      box-shadow: none;
+      transition: color 0.15s, text-shadow 0.15s;
+
+      &:hover {
+        color: var(--mhx-line);
+        text-shadow: var(--mhx-glow);
+      }
+    }
+
+    /* Rows: hairline separators; hover = soft cyan with an inset stripe */
+    & .directory-item {
+      border-top: 1px solid var(--mhx-line-faint);
+    }
+
+    & .directory-item.entry {
+      transition: background 0.15s, box-shadow 0.15s;
+
+      &:hover {
+        background: linear-gradient(90deg, rgba(0, 222, 246, 0.16), rgba(0, 222, 246, 0.03) 70%);
+        box-shadow: inset 2px 0 0 var(--mhx-line);
+      }
+    }
+
+    & .directory-item .entry-name {
+      font-family: var(--mhx-font-label);
+      font-size: 1.05em;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mhx-text);
+      text-shadow: none;
+    }
+
+    & .directory-item.entry:hover .entry-name {
+      color: var(--mhx-bright);
+    }
+
+    & .directory-item:is(.context, .active)::after {
+      border-color: var(--mhx-line);
+      box-shadow: inset 0 0 8px rgba(0, 222, 246, 0.3);
+    }
+
+    & .directory-item img.thumbnail {
+      border-right: 1px solid var(--mhx-line-faint);
+    }
+
+    /* Folders: the user's colour stays (inline), darkened toward navy;
+       Rift caps name, cyan icon, a 2px rail down the contents */
+    & .directory-item.folder {
+      border-top-color: var(--mhx-line-faint);
+    }
+
+    & .folder-header {
+      font-family: var(--mhx-font-label);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--mhx-bright);
+      text-shadow: none;
+      background-color: rgba(16, 32, 48, 0.92);
+      background-image: linear-gradient(90deg, rgba(3, 13, 33, 0.3), rgba(3, 13, 33, 0.85));
+      border-bottom: 1px solid var(--mhx-line-faint);
+
+      & > i { color: var(--mhx-line); }
+    }
+
+    & .directory-item .subdirectory {
+      border-left-width: 2px;
+    }
+
+    & .directory-item.folder .directory-item {
+      border-left-color: var(--mhx-line-faint);
+    }
+
+    /* Footer buttons (compendium browser, etc.) */
+    & .directory-footer {
+      gap: 6px;
+      padding: 6px 8px;
+    }
+  }
+
+  /* Placeables (v14): sub-tab keys, the filter field and toggles, rows */
+  #sidebar .placeables-sidebar {
+    & > nav.tabs {
+      border-bottom: 1px solid var(--mhx-line-faint);
+    }
+
+    & :is(> nav.tabs .inline-control, search button) {
+      color: var(--mhx-text-dim);
+      text-shadow: none;
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 0;
+      box-shadow: none;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+
+      &:hover {
+        color: var(--mhx-line);
+        text-shadow: var(--mhx-glow);
+      }
+
+      &:is(.active, [aria-pressed=true]) {
+        color: var(--mhx-line);
+        text-shadow: var(--mhx-glow);
+        background: rgba(0, 222, 246, 0.14);
+        border-color: var(--mhx-line-dim);
+      }
+    }
+
+    & search input {
+      height: 1.9em;
+      padding: 0 0.5em;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-text);
+      background: rgba(2, 10, 26, 0.72);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 0;
+      box-shadow: inset 0 0 8px rgba(0, 222, 246, 0.06);
+
+      &::placeholder {
+        font-family: var(--mhx-font-label);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--mhx-text-dim);
+        opacity: 0.7;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: var(--mhx-line);
+        box-shadow: 0 0 6px rgba(0, 222, 246, 0.45);
+      }
+    }
+
+    & .placeable-entry {
+      border-top: 1px solid var(--mhx-line-faint);
+      transition: background 0.15s, box-shadow 0.15s;
+
+      &:hover {
+        background: linear-gradient(90deg, rgba(0, 222, 246, 0.16), rgba(0, 222, 246, 0.03) 70%);
+        box-shadow: inset 2px 0 0 var(--mhx-line);
+      }
+    }
+
+    & .placeable-entry .description {
+      font-family: var(--mhx-font-label);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mhx-text);
+    }
+
+    & .placeable-entry .controls :is(button, a) {
+      color: var(--mhx-text-dim);
+      text-shadow: none;
+      background: none;
+      border: none;
+      box-shadow: none;
+
+      &:hover { color: var(--mhx-line); }
+    }
+  }
+
+  /* Playlists: Rift caps headers, cyan volume sliders (hairline track,
+     block thumb, as § 5's range-picker) */
+  #sidebar .playlists-sidebar {
+    & :is(.global-control, .directory-list) header :is(strong, label, h4) {
+      font-family: var(--mhx-font-label);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-text);
+    }
+
+    & :is(.global-control, .directory-list) button {
+      --button-text-color: var(--mhx-text-dim);
+      --button-hover-text-color: var(--mhx-line);
+      background: none;
+      box-shadow: none;
+      text-shadow: none;
+    }
+
+    & input[type=range] {
+      appearance: none;
+      height: 1.1em;
+      background: none;
+      border: none;
+      box-shadow: none;
+      cursor: pointer;
+
+      &::-webkit-slider-runnable-track {
+        height: 2px;
+        background: linear-gradient(90deg, var(--mhx-line), var(--mhx-line-dim));
+        border: none;
+      }
+
+      &::-webkit-slider-thumb {
+        appearance: none;
+        width: 0.5em;
+        height: 1em;
+        margin-top: calc(1px - 0.5em);
+        border: none;
+        border-radius: 0;
+        background: var(--mhx-line);
+        box-shadow: 0 0 6px rgba(0, 222, 246, 0.45);
+      }
+    }
+  }
+
+  /* ── Chat: controls, input and editor menu (sidebar and the floating
+     input core shows while the chat tab is closed). The system's
+     `form button` paints these purple ─────────────────────────────────── */
+  :is(#chat, #chat-notifications) {
+    & :is(#chat-controls, .jump-to-bottom) .ui-control,
+    & .jump-to-bottom.ui-control {
+      color: var(--mhx-text-dim);
+      text-shadow: none;
+      background: rgba(3, 13, 33, 0.85);
+      border: 1px solid var(--mhx-line-faint);
+      border-radius: 0;
+      box-shadow: none;
+      transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+      &:hover {
+        color: var(--mhx-bright);
+        background: rgba(0, 222, 246, 0.12);
+        border-color: var(--mhx-line-dim);
+        box-shadow: 0 0 6px rgba(0, 222, 246, 0.3);
+      }
+
+      &[aria-pressed=true] {
+        color: var(--mhx-line);
+        text-shadow: var(--mhx-glow);
+        background: rgba(0, 222, 246, 0.16);
+        border-color: var(--mhx-line);
+      }
+    }
+
+    /* Message modes: one joined strip */
+    & #message-modes .ui-control + .ui-control {
+      margin-left: -1px;
+    }
+
+    & #message-modes .ui-control[aria-pressed=true] {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Flush log: red on hover */
+    & #chat-controls .control-buttons .ui-control[data-action=flush]:hover {
+      color: #fff;
+      background: rgba(255, 40, 40, 0.18);
+      border-color: var(--mhx-danger);
+      box-shadow: 0 0 6px rgba(255, 40, 40, 0.4);
+    }
+
+    & #chat-message {
+      --text-color: var(--mhx-text);
+      --placeholder-color: var(--mhx-line-dim);
+      --background-color: rgba(2, 10, 26, 0.82);
+      --border-color: var(--mhx-line-dim);
+      --menu-background: rgba(3, 13, 33, 0.92);
+    }
+
+    & #chat-message > .editor-container {
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      background:
+        linear-gradient(90deg, rgba(0, 222, 246, 0.08), transparent 1.5em),
+        rgba(2, 10, 26, 0.82);
+      border: 1px solid var(--mhx-line-dim);
+      border-left: 2px solid var(--mhx-line);
+      border-radius: 0;
+      box-shadow: inset 0 0 8px rgba(0, 222, 246, 0.06);
+
+      &:focus-within {
+        border-color: var(--mhx-line);
+        box-shadow: 0 0 8px rgba(0, 222, 246, 0.35);
+      }
+
+      & .editor-content {
+        font-family: var(--mhx-font-body);
+        font-size: 1.05em;
+        letter-spacing: normal;
+        text-transform: none;
+        color: var(--mhx-text);
+      }
+    }
+
+    & #chat-message > .editor-container:not(:focus-within):has(.editor-content > p:only-child > br:only-child)::after {
+      font-family: var(--mhx-font-label);
+      font-size: 1.05em;
+      font-style: normal;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--mhx-line-dim);
+    }
+
+    & #chat-message .editor-menu {
+      background: rgba(3, 13, 33, 0.92);
+      border: 1px solid var(--mhx-line-faint);
+      border-radius: 0;
+    }
+
+    & #chat-message .editor-menu button {
+      font-family: var(--mhx-font-label);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mhx-text-dim);
+      text-shadow: none;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 0;
+      box-shadow: none;
+
+      &:hover,
+      &.active {
+        color: var(--mhx-line);
+        background: rgba(0, 222, 246, 0.12);
+        border-color: var(--mhx-line-dim);
+      }
+    }
+
+    & #chat-message .editor-menu .pm-dropdown ul {
+      background: rgba(5, 16, 34, 0.97);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 0;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  /* ── Combat tracker ──────────────────────────────────────────────────── */
+  #sidebar .combat-sidebar {
+    & :is(.combat-tracker-header, .encounter-controls, .combat-controls) button.ui-control,
+    & .combat-control {
+      color: var(--mhx-text-dim);
+      text-shadow: none;
+      background: transparent;
+      border-color: transparent;
+      border-radius: 0;
+
+      &:hover {
+        color: var(--mhx-line);
+        text-shadow: var(--mhx-glow);
+      }
+    }
+
+    & .encounter-title,
+    & .encounters h4 {
+      font-family: var(--mhx-font-label);
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mhx-bright);
+    }
+
+    & .combat-tracker .combatant {
+      color: var(--mhx-text);
+      border-top: 1px solid var(--mhx-line-faint);
+
+      &.active {
+        background: linear-gradient(90deg, rgba(0, 222, 246, 0.18), rgba(0, 222, 246, 0.03) 70%);
+        box-shadow: inset 2px 0 0 var(--mhx-line);
+      }
+    }
+
+    & .combat-tracker .token-name {
+      font-family: var(--mhx-font-label);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    & :is(.combat-controls button:not(.ui-control, .inline-control), .encounters button.combat-control-lg) {
+      font-family: var(--mhx-font-label);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-text);
+      text-shadow: none;
+      background: rgba(0, 222, 246, 0.07);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 0;
+
+      &:hover {
+        color: var(--mhx-bright);
+        background: rgba(0, 222, 246, 0.2);
+        border-color: var(--mhx-line);
+        box-shadow: 0 0 8px rgba(0, 222, 246, 0.45);
+      }
+    }
+  }
+
+  /* ── Settings tab: info card, cyan section headings, outline buttons ── */
+  #sidebar .settings-sidebar {
+    & .info {
+      padding: 0.5em 0.6em;
+      background: rgba(2, 10, 26, 0.6);
+      border: 1px solid var(--mhx-line-faint);
+      border-left: 2px solid var(--mhx-line-dim);
+    }
+
+    & .info .title {
+      font-family: var(--mhx-font-title);
+      font-style: italic;
+      font-weight: normal;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-bright);
+      text-shadow: var(--mhx-glow);
+      border: none;
+    }
+
+    & .info :is(.subtitle, .label, .value),
+    & .info > div * {
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-text);
+    }
+
+    & .info .label {
+      font-family: var(--mhx-font-label);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-text-dim);
+    }
+
+    & h4.divider {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      margin: 0.6em 0 0.2em;
+      font-family: var(--mhx-font-label);
+      font-size: 1.05em;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mhx-line);
+      text-shadow: var(--mhx-glow);
+
+      &::before {
+        content: "";
+        flex: none;
+        width: 7px;
+        height: 0.7em;
+        background: var(--mhx-line);
+        box-shadow: 0 0 6px var(--mhx-line);
+        border: none;
+      }
+
+      &::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        margin: 0;
+        background: linear-gradient(90deg, var(--mhx-line-dim), transparent);
+        border: none;
+      }
+    }
+
+    & :is(button, a.button) {
+      gap: 0.6em;
+      height: 2.1em;
+      padding: 0 0.7em;
+      font-family: var(--mhx-font-label);
+      font-size: 1.05em;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-text);
+      text-shadow: none;
+      background: rgba(0, 222, 246, 0.07);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 0;
+      box-shadow: none;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+
+      & > i { color: var(--mhx-line); }
+
+      &:is(:hover, :focus-visible) {
+        color: var(--mhx-bright);
+        background: rgba(0, 222, 246, 0.2);
+        border-color: var(--mhx-line);
+        box-shadow: 0 0 8px rgba(0, 222, 246, 0.45);
+      }
+    }
+
+    /* Log Out / Return to Setup: red on hover */
+    & :is(button[data-action=logout], button[data-action=setup]):is(:hover, :focus-visible) {
+      color: #fff;
+      background: rgba(255, 40, 40, 0.18);
+      border-color: var(--mhx-danger);
+      box-shadow: 0 0 8px rgba(255, 40, 40, 0.45);
+
+      & > i { color: var(--mhx-danger); }
+    }
+  }
+
+  /* ── Context menu (directories, chat cards, sheet tags and statuses) ─── */
+  #context-menu {
+    --background-color: rgba(5, 16, 34, 0.97);
+    --border-color: var(--mhx-line-dim);
+    --text-color: var(--mhx-text);
+    --hover-text-color: var(--mhx-bright);
+    --group-separator: var(--mhx-line-faint);
+    --hover-entry-border: var(--mhx-line-dim);
+    --hover-entry-background: rgba(0, 222, 246, 0.12);
+    font-family: var(--mhx-font-label);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-left: 2px solid var(--mhx-line);
+    border-radius: 0;
+    box-shadow: 0 0 12px rgba(0, 222, 246, 0.15), 0 10px 24px rgba(0, 0, 0, 0.6);
+    background:
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+      var(--background-color);
+
+    & li.context-item {
+      font-size: 0.95em;
+      font-weight: 600;
+      text-shadow: none;
+
+      & > i {
+        color: var(--mhx-line);
+      }
+
+      &:hover {
+        box-shadow: inset 2px 0 0 var(--mhx-line);
+
+        & > i { text-shadow: var(--mhx-glow); }
+      }
+
+      /* Delete: red */
+      &:has(> i:is(.fa-trash, .fa-trash-can)):hover {
+        color: #fff;
+        background: rgba(255, 40, 40, 0.16);
+        border-color: rgba(255, 40, 40, 0.5);
+        box-shadow: inset 2px 0 0 var(--mhx-danger);
+
+        & > i {
+          color: var(--mhx-danger);
+          text-shadow: 0 0 6px rgba(255, 40, 40, 0.6);
+        }
+      }
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     Phase 2 is complete (§ 1 to § 7). Deliberately left as they are:
+     core and other modules' windows other than DialogV2 dialogs (their
+     title bars, AppV2 windows such as the sidebar pop-outs' frames,
+     journal sheets, settings apps), the
+     scene controls / hotbar / players list / navigation, and core tooltips.
+     ──────────────────────────────────────────────────────────────────────── */
+}
+
+/* § 6b: the roll window's "Wait for MC" and pending Help / Hurt blink
+   (at top level: @keyframes can't be nested in a style rule) */
+@keyframes mhx-dlg-wait {
+  50% { opacity: 0.45; }
 }

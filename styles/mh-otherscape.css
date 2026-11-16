@@ -1040,3 +1040,180 @@ color: var(--mythosOS-verylight-color);
 .npc-content {
   background: linear-gradient(#000000ba, var(--hud-bg-color2));
 }
+
+/* ==========================================================================
+   Book highlights: story tags in yellow, statuses in green
+   (Otherscape core book: "Tags are highlighted in yellow, statuses in
+   green"). Shared with the External Style sheets through these tokens.
+     rest ...... soft tint, coloured edge, light coloured text
+     positive .. solid highlight, dark text, glow
+     negative .. solid highlight under a red hatch, red edge
+     mention ... solid highlight (tags/statuses written into move text)
+   Theme power / weakness / loadout tags keep their theme bars.
+   ========================================================================== */
+:root {
+  --os-hl-tag:            #f3e04e;
+  --os-hl-tag-text:       #231f00;
+  --os-hl-tag-soft:       rgba(243, 224, 78, 0.34);
+  --os-hl-tag-soft-text:  #fff3a6;
+  --os-hl-status:         #8edb5f;
+  --os-hl-status-text:    #0c2205;
+  --os-hl-status-soft:    rgba(142, 219, 95, 0.2);
+  --os-hl-status-soft-text: #d2f7bd;
+  --os-hl-neg:            #e2383a;
+  /* Negative: a red-striped cap on the left edge (under a 7px transparent
+     left border), so the text keeps a solid background */
+  --os-hl-hatch:          repeating-linear-gradient(135deg, #e2383a 0 2px, transparent 2px 4px) left top / 7px 100% no-repeat border-box;
+
+  /* NPC HUD chip colours follow the book too */
+  --storytag-color:       var(--os-hl-tag);
+  --storytag-text-color:  var(--os-hl-tag-text);
+  --status-color:         var(--os-hl-status);
+  --text-status-color:    var(--os-hl-status-text);
+}
+
+/* ── Player HUD: story tags and crew relationships ─────────────────────
+   The highlight sits on the text; the row loses its selection bar. */
+.mh-story-tag.selected,
+.mh-story-tag.selected.toBurn,
+.mh-story-tag.inverted.selected {
+  background-image: none;
+}
+
+.mh-story-tag .mh-tag-text {
+  justify-self: start;
+  width: fit-content;
+  padding: 0 0.4em;
+  /* Same type as the statuses (.mh-status) */
+  font-family: var(--font-family-tags);
+  font-size: 1.1em;
+  font-style: italic;
+  text-transform: lowercase;
+  color: var(--os-hl-tag-soft-text);
+  background: var(--os-hl-tag-soft);
+  border: 1px solid color-mix(in srgb, var(--os-hl-tag) 70%, transparent);
+  border-radius: 2px;
+}
+
+.mh-story-tag.selected .mh-tag-text {
+  color: var(--os-hl-tag-text);
+  background: var(--os-hl-tag);
+  border-color: var(--os-hl-tag);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--os-hl-tag) 70%, transparent);
+}
+
+.mh-story-tag.selected:is(.inverted, :has(> .mh-story-toggle.inverted)) .mh-tag-text {
+  background: var(--os-hl-hatch), var(--os-hl-tag);
+  border-color: var(--os-hl-neg);
+  border-left: 7px solid transparent;
+  box-shadow: 0 0 6px rgba(226, 56, 58, 0.6);
+}
+
+.mh-story-tag.selected.toBurn .mh-tag-text {
+  box-shadow: 0 0 6px var(--effects-color1);
+}
+
+.mh-story-tag.burned .mh-tag-text {
+  color: #b1c7ca;
+  background: rgba(243, 224, 78, 0.06);
+  border-color: rgba(243, 224, 78, 0.3);
+}
+
+/* ── Player HUD: statuses ───────────────────────────────────────────── */
+.mh-status.neutral {
+  color: var(--os-hl-status-soft-text);
+  background: var(--os-hl-status-soft);
+  border: 1px solid color-mix(in srgb, var(--os-hl-status) 70%, transparent);
+}
+
+.mh-status.positive {
+  color: var(--os-hl-status-text);
+  background: var(--os-hl-status);
+  border: 1px solid var(--os-hl-status);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--os-hl-status) 70%, transparent);
+}
+
+.mh-status.negative {
+  color: var(--os-hl-status-text);
+  background: var(--os-hl-hatch), var(--os-hl-status);
+  border: 1px solid var(--os-hl-neg);
+  border-left: 7px solid transparent;
+  box-shadow: 0 0 6px rgba(226, 56, 58, 0.6);
+}
+
+/* ── NPC HUD: tag / status lists (selectable) and move-text mentions ── */
+.npc-story-tag,
+.npc-story-tag.neutral {
+  color: var(--os-hl-tag-soft-text);
+  background: var(--os-hl-tag-soft);
+  border: 1px solid color-mix(in srgb, var(--os-hl-tag) 70%, transparent);
+  border-radius: 2px;
+}
+
+.npc-status,
+.npc-status.neutral {
+  color: var(--os-hl-status-soft-text);
+  background: var(--os-hl-status-soft);
+  border: 1px solid color-mix(in srgb, var(--os-hl-status) 70%, transparent);
+  border-radius: 2px;
+}
+
+.npc-story-tag-moves {
+  color: var(--os-hl-tag-text);
+  background: var(--os-hl-tag);
+  border-radius: 2px;
+}
+
+.npc-status-moves {
+  color: var(--os-hl-status-text);
+  background: var(--os-hl-status);
+  border-radius: 2px;
+}
+
+.npc-story-tag.positive,
+.npc-status.positive {
+  margin: 0;
+  border-width: 1px;
+  border-radius: 2px;
+}
+
+.npc-story-tag.positive {
+  color: var(--os-hl-tag-text);
+  background: var(--os-hl-tag);
+  border-color: var(--os-hl-tag);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--os-hl-tag) 70%, transparent);
+}
+
+.npc-status.positive {
+  color: var(--os-hl-status-text);
+  background: var(--os-hl-status);
+  border-color: var(--os-hl-status);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--os-hl-status) 70%, transparent);
+}
+
+.npc-story-tag.negative,
+.npc-status.negative {
+  margin: 0;
+  border: 1px solid var(--os-hl-neg);
+  border-left: 7px solid transparent;
+  border-radius: 2px;
+  box-shadow: 0 0 6px rgba(226, 56, 58, 0.6);
+}
+
+.npc-story-tag.negative {
+  color: var(--os-hl-tag-text);
+  background: var(--os-hl-hatch), var(--os-hl-tag);
+}
+
+.npc-status.negative {
+  color: var(--os-hl-status-text);
+  background: var(--os-hl-hatch), var(--os-hl-status);
+}
+
+.npc-story-tag.burned,
+.npc-status.burned {
+  color: #b1c7ca;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: none;
+}
