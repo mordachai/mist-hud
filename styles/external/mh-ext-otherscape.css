@@ -1354,7 +1354,7 @@
 
   /* ── Sheet body ─────────────────────────────────────────────────────── */
 
-  .city.sheet .actor-sheet {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) {
     font-family: var(--mhx-font-body);
     letter-spacing: normal;
     text-transform: none;
@@ -1362,19 +1362,19 @@
     text-shadow: none;
   }
 
-  .city.sheet .actor-sheet a {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) a {
     color: var(--mhx-text-dim);
     text-shadow: none;
     transition: color 0.15s, text-shadow 0.15s;
   }
 
-  .city.sheet .actor-sheet a:hover {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) a:hover {
     max-width: none;
     color: var(--mhx-line);
     text-shadow: 0 0 6px rgba(0, 222, 246, 0.6);
   }
 
-  .city.sheet .actor-sheet .fa-disabled {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .fa-disabled {
     color: var(--mhx-text-dim);
     opacity: 0.25;
   }
@@ -1414,13 +1414,13 @@
     gap: 0.35em;
   }
 
-  .city.sheet .actor-sheet .header-row {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .header-row {
     margin: 0;
     padding: 0;
     min-height: 0;
   }
 
-  .city.sheet .actor-sheet input.character-name {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) input.character-name {
     height: auto;
     font-family: var(--mhx-font-title);
     font-size: 2.8em;
@@ -1435,7 +1435,7 @@
     border: none;
   }
 
-  .city.sheet .actor-sheet input.short-description {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) input.short-description {
     width: 100%;
     font-family: var(--mhx-font-body);
     font-size: 1em;
@@ -1447,8 +1447,8 @@
     border-radius: 0;
   }
 
-  .city.sheet .actor-sheet input.short-description:focus,
-  .city.sheet .actor-sheet input.character-name:focus {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) input.short-description:focus,
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) input.character-name:focus {
     box-shadow: none;
     border-bottom: 1px solid var(--mhx-line);
   }
@@ -1687,8 +1687,9 @@
   }
 
   .city.sheet div.theme-block,
-  .city.sheet .flip-card .story-tag-box {
-    --mhx-band: 36px;           /* HUD header art is 250×30, stretched */
+  .city.sheet :is(.flip-card, .threat-sheet) .story-tag-box,
+  .city.sheet .threat-sheet .flex-theme-block.status-box {
+    --mhx-band: 36px;         /* HUD header art is 250×30, stretched */
     --mhx-cut: 16px;            /* chamfer */
     --mhx-edge: color-mix(in srgb, var(--mhx-theme) 65%, transparent);
     position: relative;
@@ -1735,7 +1736,8 @@
   }
 
   .city.sheet div.theme-block::-webkit-scrollbar,
-  .city.sheet .flip-card .story-tag-box::-webkit-scrollbar {
+  .city.sheet :is(.flip-card, .threat-sheet) .story-tag-box::-webkit-scrollbar,
+  .city.sheet .threat-sheet .flex-theme-block.status-box::-webkit-scrollbar {
     display: none;
   }
 
@@ -1914,43 +1916,43 @@
 
   /* ── Tags (theme cards, loadout, story tag card) ─────────────────────── */
 
-  .city.sheet .actor-sheet ul.tag-list {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) ul.tag-list {
     font-size: 1em;
   }
 
-  .city.sheet .actor-sheet ul.tag-list > li {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) ul.tag-list > li {
     margin: 1px 0;
   }
 
-  .city.sheet .actor-sheet .tag.item-entry {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .tag.item-entry {
     align-items: center;
     gap: 0.2em;
     padding: 1px 2px;
     text-align: left;
   }
 
-  .city.sheet .actor-sheet .flex-trash {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .flex-trash {
     padding-right: 0;
     font-size: 0.8em;
   }
 
-  .city.sheet .actor-sheet span.tag-symbols {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.tag-symbols {
     width: auto;
     min-width: 1.1em;
     max-width: none;
     font-size: 0.8em;
   }
 
-  .city.sheet .actor-sheet span.tag-symbols a,
-  .city.sheet .actor-sheet .power-tag-icon {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.tag-symbols a,
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .power-tag-icon {
     color: var(--mhx-theme);
   }
 
-  .city.sheet .actor-sheet span.tag-name-block {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.tag-name-block {
     font-size: 1em;
   }
 
-  .city.sheet .actor-sheet span.flex-tag-name {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.flex-tag-name {
     font-family: var(--mhx-font-label);
     font-size: 1.05em;
     font-style: italic;
@@ -1959,18 +1961,18 @@
     color: whitesmoke;
   }
 
-  .city.sheet .actor-sheet span.flex-tag-name.weakness-tag {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.flex-tag-name.weakness-tag {
     color: var(--marker-negativeTag-color, #ffd4a8);
   }
 
-  .city.sheet .actor-sheet .story-tag-location {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .story-tag-location {
     font-family: var(--mhx-font-body);
     font-size: 0.8em;
     text-transform: none;
     color: var(--mhx-text-dim);
   }
 
-  .city.sheet .actor-sheet ul.sub-tag-list {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) ul.sub-tag-list {
     margin-left: 1em;
     border-left: 1px solid color-mix(in srgb, var(--mhx-theme) 35%, transparent);
   }
@@ -2087,15 +2089,15 @@
   /* Locked theme cards: drop the power-tag bolt and weakness chevrons
      (the bar already says which is which), and the empty delete cell.
      Other markers (bonus, crispy, temporary, hidden…) stay. */
-  .city.sheet .actor-sheet.locked .theme-block .tag.item-entry :is(
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet).locked .theme-block .tag.item-entry :is(
     .power-tag-icon,
     span.tag-symbols a:has(> .fa-angle-double-down)
   ) {
     display: none;
   }
 
-  .city.sheet .actor-sheet.locked .theme-block .tag.item-entry span.tag-symbols:not(:has(a:not(.power-tag-icon):not(:has(> .fa-angle-double-down)))),
-  .city.sheet .actor-sheet.locked .theme-block .tag.item-entry .flex-trash:not(:has(*)) {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet).locked .theme-block .tag.item-entry span.tag-symbols:not(:has(a:not(.power-tag-icon):not(:has(> .fa-angle-double-down)))),
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet).locked .theme-block .tag.item-entry .flex-trash:not(:has(*)) {
     display: none;
   }
 
@@ -2173,7 +2175,7 @@
      cascade layer, and a layered !important beats any unlayered one, so
      `color` can't be overridden from here. text-fill-color paints the
      glyphs instead and the system doesn't set it. */
-  .city.sheet .actor-sheet .flex-tag-name.burn-level-1,
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .flex-tag-name.burn-level-1,
   .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry span.flex-tag-name.burn-level-1 {
     color: #ffd84a !important;
     -webkit-text-fill-color: #ffd84a;
@@ -2183,7 +2185,7 @@
   }
 
   /* Burn controls: the HUD's burn images instead of the flame glyph */
-  .city.sheet .actor-sheet :is(.tag-burn, .tag-unburn, .essence-burn) i {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) :is(.tag-burn, .tag-unburn, .essence-burn) i {
     display: inline-block;
     vertical-align: middle;
     width: 28px;
@@ -2191,21 +2193,21 @@
     background: var(--mhx-burn) center / contain no-repeat;
   }
 
-  .city.sheet .actor-sheet :is(.tag-burn, .tag-unburn, .essence-burn) i::before {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) :is(.tag-burn, .tag-unburn, .essence-burn) i::before {
     content: none;
   }
 
   /* Burned tags show the "to burn" art (sheet only; the HUD keeps its
      own burned icon) */
-  .city.sheet .actor-sheet .tag-unburn i {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .tag-unburn i {
     background-image: var(--mhx-burned);
   }
 
-  .city.sheet .actor-sheet :is(.tag-burn, .essence-burn):hover i {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) :is(.tag-burn, .essence-burn):hover i {
     filter: drop-shadow(0 0 3px lime);
   }
 
-  .city.sheet .actor-sheet :is(.tag-burn, .essence-burn):hover {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) :is(.tag-burn, .essence-burn):hover {
     text-shadow: none;
   }
 
@@ -2221,16 +2223,16 @@
     box-shadow: inset 2px 0 0 var(--mhx-line);
   }
 
-  .city.sheet .actor-sheet .tag-edit-button:hover {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .tag-edit-button:hover {
     text-shadow: 0 0 8px var(--mhx-line);
   }
 
-  .city.sheet .actor-sheet .tag-burn:hover {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .tag-burn:hover {
     color: #ff8a4c;
     text-shadow: 0 0 8px rgba(255, 120, 40, 0.8);
   }
 
-  .city.sheet .actor-sheet .activation-square {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .activation-square {
     color: var(--mhx-theme);
   }
 
@@ -2679,7 +2681,7 @@
 
   /* ── Story tags / statuses card and Moment of Evolution back ─────────── */
 
-  .city.sheet .flip-card .story-tag-box {
+  .city.sheet :is(.flip-card, .threat-sheet) .story-tag-box {
     --mhx-theme: var(--mhx-line);
     --mhx-theme-icon: url(/modules/mist-hud/ui/icons/storytag_icn.svg);
   }
@@ -2743,13 +2745,13 @@
   }
 
   /* Status rows */
-  .city.sheet .actor-sheet div.status-line {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) div.status-line {
     align-items: center;
     gap: 0.25em;
     margin: 2px 0;
   }
 
-  .city.sheet .actor-sheet .status-name-block {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .status-name-block {
     display: flex;
     align-items: center;
     gap: 0.25em;
@@ -2757,11 +2759,11 @@
     text-align: left;
   }
 
-  .city.sheet .actor-sheet .status-name-block a {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .status-name-block a {
     color: var(--mhx-text-dim);
   }
 
-  .city.sheet .actor-sheet span.status-name {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.status-name {
     flex: 1;
     padding: 1px 6px;
     font-family: var(--mhx-font-body);
@@ -2775,21 +2777,21 @@
     background: none;
   }
 
-  .city.sheet .actor-sheet .status .status-name.positive-selected {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .status .status-name.positive-selected {
     margin: 0;
     color: black;
     background: var(--mhx-tag-bg);
     border-color: var(--mhx-tag-edge);
   }
 
-  .city.sheet .actor-sheet .status .status-name.negative-selected {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .status .status-name.negative-selected {
     margin: 0;
     color: black;
     background: var(--mhx-status-bg);
     border-color: var(--mhx-status-edge);
   }
 
-  .city.sheet .actor-sheet .plus-minus-controls {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .plus-minus-controls {
     display: inline-flex;
     gap: 0.3em;
     font-size: 0.8em;
@@ -2843,8 +2845,1132 @@
   }
 
   /* ────────────────────────────────────────────────────────────────────────
+     § 3. Threat, crew and limited sheets
+     Templates: threat-sheet.html, parts/threat-sheet-header.html,
+     parts/spectrum-display.html, parts/default-tags-and-statuses.hbs,
+     parts/gmmoves-section.hbs → gmmove-display.html → gmmove-part.hbs,
+     parts/danger-template.html, parts/bio-display.html, crew-sheet.html,
+     limited-actor.html (its form is also .threat-sheet).
+
+     § 2 already covers these through `:is(.actor-sheet, .threat-sheet,
+     .crew-sheet)`: body text, links, header frame, lock button, tabs,
+     theme cards, tag bars and status rows.
+
+     The threat sheet follows the NPC HUD (mh-npc-hud.css), which follows
+     the core book's threat profile: dark gradient body, grey subtitles
+     with a rule, lime spectrum chips, "NAME - text" move rows split by
+     faint dividers, lime › / » markers for threats and consequences,
+     olive story tag chips and teal status chips.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  .city.sheet {
+    --mhx-spectrum: var(--spectrum-color, #abff00);
+  }
+
+  .city.sheet .threat-sheet {
+    --npc-sub:         var(--text-hud-subtitles-color, #b4b9c0);
+    --npc-rule:        var(--divider-color1, rgba(255, 255, 255, 0.3));
+    --npc-status:      var(--status-color, rgb(0, 93, 93));
+    --npc-status-text: var(--text-status-color, #ecf5f4);
+    --npc-tag:         var(--storytag-color, #646800);
+    --npc-tag-text:    var(--storytag-text-color, whitesmoke);
+    --npc-name-font:   "Rift Bold", var(--font-family-main1, "Rift"), sans-serif;
+    color: whitesmoke;
+  }
+
+  /* Foundry's `.flexcol > * { flex: 1 }` would stretch the header and the
+     spectrum row to share the window height; only the body grows. */
+  .city.sheet .threat-sheet > :not(.sheet-body) {
+    flex: none;
+  }
+
+  /* ── Section headings ─────────────────────────────────────────────────
+     Moves tab and Themes tab: Rift caps, a small cyan block on the left
+     and a hairline fading out to the right. */
+  .city.sheet .threat-sheet :is(
+    .gm-moves-header,
+    .default-tags-and-statuses > h2,
+    .danger-templates-label,
+    .theme-section .theme-header
+  ) {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5em;
+    margin: 0.7em 0 0.45em;
+    padding: 0 0 0.2em 16px;
+    font-family: var(--mhx-font-label);
+    font-size: 1.3em;
+    font-weight: normal;
+    line-height: 1.2;
+    letter-spacing: 0.14em;
+    text-align: left;
+    text-transform: uppercase;
+    color: var(--mhx-bright);
+    text-shadow: var(--mhx-glow);
+    border: none;
+    background:
+      linear-gradient(var(--mhx-line), var(--mhx-line)) left 0 top calc(50% - 0.1em) / 7px 7px no-repeat,
+      linear-gradient(90deg, var(--mhx-line-dim), transparent 85%) left bottom / 100% 1px no-repeat;
+  }
+
+  .city.sheet .threat-sheet :is(
+    .gm-moves-header, .default-tags-and-statuses > h2, .danger-templates-label, .theme-header
+  ) a {
+    font-size: 0.75em;
+    color: var(--mhx-text-dim);
+  }
+
+  .city.sheet .threat-sheet .flex-overview-block > :first-child > h2,
+  .city.sheet .threat-sheet .theme-section .theme-header {
+    margin-top: 0.2em;
+  }
+
+  .city.sheet .threat-sheet .theme-section .section-header {
+    flex-direction: row;
+    margin: 0;
+    border: none;
+  }
+
+  .city.sheet .threat-sheet .theme-section .theme-header {
+    flex: 1;
+  }
+
+  /* ── Subtitles (NPC HUD .npc-subtitle-container-c) ────────────────────
+     Spectrums and the bio labels: grey Rift caps between two 2px rules. */
+  .city.sheet .threat-sheet :is(.spectrum-section-label, .bio-section-label) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0.5em 0 0.2em;
+    padding: 0;
+    font-family: var(--mhx-font-label);
+    font-size: 1.05em;
+    font-weight: normal;
+    line-height: 1.25;
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--npc-sub);
+    text-shadow: none;
+    border: none;
+    background: none;
+  }
+
+  .city.sheet .threat-sheet :is(.spectrum-section-label, .bio-section-label)::before,
+  .city.sheet .threat-sheet :is(.spectrum-section-label, .bio-section-label)::after {
+    content: "";
+    flex: 1;
+    height: 2px;
+    opacity: 0.75;
+    background: var(--npc-sub);
+  }
+
+  .city.sheet .threat-sheet .spectrum-section-label a {
+    font-size: 0.8em;
+    color: var(--npc-sub);
+  }
+
+  /* ── Header ─────────────────────────────────────────────────────────── */
+
+  .city.sheet .threat-sheet header.sheet-header {
+    align-items: center;
+  }
+
+  .city.sheet .threat-sheet .character-basic-info {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+    gap: 0.25em;
+  }
+
+  .city.sheet .threat-sheet .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.4em;
+  }
+
+  .city.sheet .threat-sheet .header-row input {
+    min-width: 0;
+    height: auto;
+    padding: 0 0.15em;
+    background: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    opacity: 1;
+  }
+
+  .city.sheet .threat-sheet .header-row input:focus {
+    box-shadow: none;
+    background: rgba(171, 255, 0, 0.06);
+  }
+
+  /* Name: the NPC HUD's Rift Bold in spectrum lime */
+  .city.sheet .threat-sheet input.danger-name {
+    flex: 0 1 auto;
+    width: auto;
+    field-sizing: content;
+    min-width: 4em;
+    max-width: 72%;
+    padding-right: 0.25em;
+    font-family: var(--npc-name-font);
+    font-size: 2.5em;
+    font-weight: bold;
+    font-style: normal;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+    text-align: left;
+    text-transform: uppercase;
+    color: var(--mhx-spectrum);
+    text-shadow: none;
+    filter: drop-shadow(2px 2px 2px black);
+  }
+
+  .city.sheet .threat-sheet input.alias-input {
+    flex: 1 1 35%;
+    font-family: var(--mhx-font-label);
+    font-size: 1.3em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--npc-sub);
+  }
+
+  .city.sheet .threat-sheet :is(input.mythos-name, input.logos-name) {
+    flex: 1 1 50%;
+    font-family: var(--mhx-font-label);
+    font-size: 1.1em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: whitesmoke;
+    border-bottom: 1px solid var(--npc-rule);
+  }
+
+  .city.sheet .threat-sheet .header-row input.short-description {
+    font-family: var(--mhx-font-body);
+    font-style: italic;
+    text-align: left;
+    color: rgba(245, 245, 245, 0.85);
+    border-bottom: 1px solid var(--npc-rule);
+  }
+
+  .city.sheet .threat-sheet .header-row input::placeholder {
+    color: var(--npc-sub);
+    opacity: 0.5;
+    text-shadow: none;
+  }
+
+  .city.sheet .threat-sheet .separator-icon {
+    flex: none;
+    width: auto;
+    margin: 0;
+    font-size: 0.85em;
+    line-height: 1;
+    color: var(--mhx-spectrum);
+  }
+
+  /* Lock, info and "Is template" column */
+  .city.sheet .threat-sheet .lock-container {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5em;
+    align-self: flex-start;
+  }
+
+  .city.sheet .threat-sheet .lock-container .Checkbox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1em;
+  }
+
+  .city.sheet .threat-sheet .lock-container .Checkbox label {
+    font-family: var(--mhx-font-label);
+    font-size: 0.75em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--npc-sub);
+  }
+
+  .city.sheet .threat-sheet input[type=checkbox],
+  .city.sheet .threat-sheet input[type=radio] {
+    accent-color: var(--mhx-spectrum);
+  }
+
+  /* Scale / collective size (locked): as the NPC HUD's collective bar */
+  .city.sheet .threat-sheet .header-row:has(> input[type=radio]) {
+    gap: 0 0.15em;
+    font-family: var(--mhx-font-readout);
+    font-size: 0.85em;
+    color: var(--mhx-spectrum);
+  }
+
+  .city.sheet .threat-sheet .header-row:has(> input[type=radio])::after {
+    content: "";
+    flex: 1;
+    height: 2px;
+    margin-left: 0.6em;
+    background: var(--mhx-spectrum);
+  }
+
+  .city.sheet .threat-sheet .header-row > label.dialog-label {
+    margin-right: 0.5em;
+    font-family: var(--npc-name-font);
+    font-size: 1.15em;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mhx-spectrum);
+  }
+
+  .city.sheet .threat-sheet .header-row > input[type=radio] {
+    flex: none;
+    width: 0.95em;
+    height: 0.95em;
+    margin: 0 0.15em 0 0.5em;
+  }
+
+  /* ── Spectrums / limits: the NPC HUD's lime chips ─────────────────── */
+
+  /* Editor row (GM, unlocked): centred title with rules, chips under it */
+  .city.sheet .threat-sheet .threat-spectrums {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25em;
+    height: auto;
+    max-height: none;
+    margin: 0.2em 0.5em 0.3em;
+    text-align: center;
+  }
+
+  .city.sheet .threat-sheet .threat-spectrums .spectrum-section-label {
+    margin: 0;
+  }
+
+  .city.sheet .threat-sheet .spectrum-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px 8px;
+    font-size: 1em;
+    font-weight: normal;
+  }
+
+  .city.sheet .threat-sheet .header-row > .spectrum-list {
+    justify-content: flex-start;
+  }
+
+  .city.sheet .threat-sheet .header-row > .spectrum-list > b {
+    margin-right: 0.3em;
+    font-family: var(--mhx-font-label);
+    font-weight: normal;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--npc-sub);
+  }
+
+  /* Font size 0 on the chip hides the bare ":" between name and tier */
+  .city.sheet .threat-sheet .spectrum,
+  .city.sheet .threat-sheet .spectrum-short-label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 4px 10px 4px 8px;
+    font-family: var(--npc-name-font);
+    font-weight: bold;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: black;
+    text-shadow: none;
+    background: var(--mhx-spectrum);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+
+  .city.sheet .threat-sheet .spectrum {
+    font-size: 0;
+  }
+
+  .city.sheet .threat-sheet .spectrum-short-label {
+    font-size: 0.9em;
+  }
+
+  .city.sheet .threat-sheet .spectrum .spectrum-name {
+    font-size: 0.9rem;
+  }
+
+  .city.sheet .threat-sheet .spectrum .spectrum-tier {
+    font-size: 1.15rem;
+  }
+
+  .city.sheet .threat-sheet .spectrum a.spectrum-delete {
+    font-size: 0.75rem;
+    color: rgba(0, 0, 0, 0.55);
+  }
+
+  .city.sheet .threat-sheet .spectrum a.spectrum-delete:hover {
+    color: #000;
+    text-shadow: none;
+  }
+
+  .city.sheet .threat-sheet .spectrum-editable:hover {
+    text-shadow: none;
+    filter: brightness(1.12);
+  }
+
+  /* ── Moves tab layout ─────────────────────────────────────────────────
+     Moves get the wide column; tags & statuses a narrow one, sized to
+     what they hold. */
+  .city.sheet .threat-sheet .tab[data-tab="moves"] > .flex-row {
+    align-items: flex-start;
+    gap: 1.2em;
+    padding: 0 0.4em;
+  }
+
+  .city.sheet .threat-sheet div.flex-overview-block {
+    flex: 1 1 64%;
+    width: auto;
+    min-width: 0;
+    padding: 0;
+  }
+
+  .city.sheet .threat-sheet .tab[data-tab="moves"] .flex-column {
+    flex: 1 1 36%;
+    min-width: 0;
+    padding: 0;
+  }
+
+  /* ── Story tags / statuses card ───────────────────────────────────────
+     The PC card (§ 2 frame, bands, tag bars, status rows), as tall as
+     what it holds. */
+  .city.sheet .threat-sheet .flex-column > .story-tag-box {
+    height: auto;
+    min-height: 0;
+  }
+
+  /* No card to flip here */
+  .city.sheet .threat-sheet .story-tag-header-label > span:has(> .fa-turn-up) {
+    display: none;
+  }
+
+  /* ── Default (starting) tags and statuses ─────────────────────────── */
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list {
+    gap: 4px 6px;
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item {
+    position: relative;
+    isolation: isolate;
+    flex: 0 1 auto;
+    gap: 0.3em;
+    min-width: 4em;
+    max-width: 100%;
+    padding: 2px 12px 2px 9px;
+    font-weight: normal;
+    color: #fff;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+  }
+
+  /* Tags: the neutral tag bar */
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--mhx-tag-bar) left center / 100% 100% no-repeat;
+    opacity: 0.75;
+    pointer-events: none;
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item:hover::before {
+    opacity: 1;
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item :is(input, span) {
+    width: auto;
+    min-width: 2ch;
+    field-sizing: content;
+    height: auto;
+    padding: 0;
+    font-family: var(--mhx-font-label);
+    font-size: 1.05em;
+    font-style: italic;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    background: none;
+    border: none;
+  }
+
+  /* Statuses: the NPC HUD's teal chip, lowercase */
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item:is(.default-status, :has(.inherited-status)) {
+    padding: 1px 8px;
+    background: var(--npc-status);
+    border: 1px solid color-mix(in srgb, var(--npc-status) 60%, white);
+    border-radius: 2px;
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item:is(.default-status, :has(.inherited-status))::before {
+    content: none;
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item:is(.default-status, :has(.inherited-status)) :is(input, span) {
+    font-family: var(--mhx-font-body);
+    font-weight: normal;
+    text-transform: lowercase;
+    color: var(--npc-status-text);
+    text-shadow: none;
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item.inherited {
+    opacity: 0.6;
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item a {
+    font-size: 0.8em;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item:is(.default-status, :has(.inherited-status)) a {
+    color: rgba(236, 245, 244, 0.7);
+  }
+
+  /* ── GM moves ─────────────────────────────────────────────────────────
+     Each move is a chat-card shell: navy glass, hairline, lime stripe on
+     the left, chamfered bottom-right. Submoves (consequences) sit inside.
+     The system's header symbols become the book's lime markers (› threat,
+     » consequence, limit icon for intrusions), hung in a left gutter. */
+  .city.sheet .threat-sheet section.gm-moves {
+    margin-bottom: 0.8em;
+  }
+
+  .city.sheet .threat-sheet .gmmove-type-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0.6em 0 0.3em;
+    font-family: var(--mhx-font-body);
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--mhx-spectrum) 70%, white);
+  }
+
+  /* The motivation label's rule with an angled cap, in lime */
+  .city.sheet .threat-sheet .gmmove-type-label::after {
+    content: "";
+    flex: 1;
+    height: 6px;
+    background:
+      linear-gradient(var(--mhx-spectrum), var(--mhx-spectrum)) left center / 100% 1px no-repeat,
+      linear-gradient(var(--mhx-spectrum), var(--mhx-spectrum)) right center / 34px 6px no-repeat;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  }
+
+  .city.sheet .threat-sheet .gm-moves > .gm-move {
+    --mhx-accent: var(--mhx-spectrum);
+    --mhx-chamfer: 12px;
+    align-items: flex-start;
+    gap: 0.3em;
+    margin: 0 0 6px;
+    padding: 0.45em 0.6em 0.55em 0.7em;
+    font-size: 1em;
+    line-height: 1.35;
+    border: 1px solid var(--mhx-line-faint);
+    border-left: 2px solid var(--mhx-accent);
+    border-radius: 0;
+    box-shadow: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% calc(100% - var(--mhx-chamfer)),
+      calc(100% - var(--mhx-chamfer)) 100%,
+      0 100%
+    );
+    background:
+      linear-gradient(to bottom right,
+        transparent calc(50% - 1px),
+        var(--mhx-line-dim) calc(50% - 1px),
+        var(--mhx-line-dim) calc(50% + 0.5px),
+        transparent calc(50% + 0.5px))
+        bottom right / var(--mhx-chamfer) var(--mhx-chamfer) no-repeat,
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+      linear-gradient(90deg, rgba(171, 255, 0, 0.09), transparent 40%),
+      linear-gradient(180deg, var(--mhx-panel-hi), var(--mhx-panel));
+    background-origin: border-box;
+  }
+
+  .city.sheet .threat-sheet .gm-moves > .gm-move:is(.gmmove-select, .gmmove-edit):hover {
+    border-color: var(--mhx-line-dim);
+    border-left-color: var(--mhx-accent);
+    box-shadow: inset 0 0 14px rgba(0, 222, 246, 0.16);
+  }
+
+  .city.sheet .threat-sheet .gm-moves > .gm-move.inherited-move {
+    --mhx-accent: color-mix(in srgb, var(--mhx-spectrum) 45%, transparent);
+  }
+
+  /* The text panel inside drops the system's paper / Phase 1 noise box */
+  .city.sheet .threat-sheet .gm-move .gmmove-text {
+    margin: 0;
+    padding: 0;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    line-height: 1.35;
+    color: var(--mhx-text);
+    text-shadow: none;
+    background: none;
+    border: none;
+    border-radius: 0;
+    backdrop-filter: none;
+  }
+
+  .city.sheet .threat-sheet .inherited-move .gmmove-text {
+    opacity: 0.75;
+  }
+
+  .city.sheet .threat-sheet .gm-move .gmmove-name {
+    font-family: var(--mhx-font-title);
+    font-size: 1.3em;
+    font-weight: normal;
+    font-style: italic;
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: var(--mhx-bright);
+    text-shadow: -1px 1px 2px rgba(110, 170, 0, 0.9), 0 0 10px rgba(171, 255, 0, 0.45);
+  }
+
+  .city.sheet .threat-sheet .gm-move .gmmove-section > hr {
+    height: 1px;
+    margin: 0.25em 0 0.35em;
+    border: none;
+    background: linear-gradient(90deg, var(--mhx-spectrum), transparent 80%);
+  }
+
+  .city.sheet .threat-sheet .gm-move div.gmmove-description {
+    font-size: 1em;
+    line-height: 1.4;
+    color: var(--mhx-text);
+  }
+
+  /* Header symbols → lime markers in a left gutter. The name stays above
+     the gutter; only the description is indented. */
+  .city.sheet .threat-sheet .gm-move .gmmove-description > span[title]:first-child {
+    color: var(--mhx-spectrum);
+  }
+
+  .city.sheet .threat-sheet .gm-move div.gmmove-description:has(> span[title]:first-child > :is(.fa-chevron-right, .fa-angles-right, .fa-circle-exclamation)) {
+    position: relative;
+    padding-left: 0.85em;
+  }
+
+  .city.sheet .threat-sheet .gm-move div.gmmove-description:has(> span[title]:first-child > .fa-circle-exclamation) {
+    padding-left: 28px;
+  }
+
+  .city.sheet .threat-sheet .gm-move .gmmove-description > span[title]:first-child:has(> :is(.fa-chevron-right, .fa-angles-right, .fa-circle-exclamation)) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    line-height: 1.4;
+  }
+
+  .city.sheet .threat-sheet .gm-move .gmmove-description > span[title]:has(> :is(.fa-chevron-right, .fa-angles-right)) > i {
+    display: none;
+  }
+
+  .city.sheet .threat-sheet .gm-move .gmmove-description > span[title]:has(> :is(.fa-chevron-right, .fa-angles-right))::after {
+    font-size: 1.5em;
+    font-weight: 400;
+    line-height: 0.85;
+  }
+
+  .city.sheet .threat-sheet .gm-move .gmmove-description > span[title]:has(> .fa-chevron-right)::after {
+    content: "›";
+  }
+
+  .city.sheet .threat-sheet .gm-move .gmmove-description > span[title]:has(> .fa-angles-right)::after {
+    content: "»";
+  }
+
+  .city.sheet .threat-sheet .gm-move .gmmove-description > span[title]:has(> .fa-circle-exclamation) > i {
+    display: inline-block;
+    width: 25px;
+    height: 14px;
+    vertical-align: -0.1em;
+    background: url(/modules/mist-hud/ui/icons/limit_icn.svg) center / contain no-repeat;
+  }
+
+  .city.sheet .threat-sheet .gm-move .gmmove-description > span[title]:has(> .fa-circle-exclamation) > i::before {
+    content: none;
+  }
+
+  /* Specials (hard moves that aren't consequences): no marker, as on the
+     NPC HUD */
+  .city.sheet .threat-sheet .gm-moves > .gm-move > .gmmove-text > .gmmove-section > .gmmove-description > span[title]:first-child:has(> .fa-angles-right) {
+    display: none;
+  }
+
+  .city.sheet .threat-sheet .gm-moves > .gm-move > .gmmove-text > .gmmove-section > div.gmmove-description:has(> span[title]:first-child > .fa-angles-right) {
+    padding-left: 0;
+  }
+
+  /* Threats: italic, as on the HUD */
+  .city.sheet .threat-sheet .gm-moves > .gm-move > .gmmove-text > .gmmove-section > .gmmove-description:has(> span[title]:first-child > .fa-chevron-right) {
+    font-style: italic;
+  }
+
+  /* Tags and statuses inside the text: the chat card's HUD chips */
+  .city.sheet .threat-sheet .gmmove-text .narrated-story-tag {
+    margin: 0;
+    padding: 0 0.35em;
+    font-family: var(--mhx-font-label);
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--mhx-tag-text);
+    text-shadow: none;
+    background: var(--mhx-tag-bg);
+    border: 1px solid var(--mhx-tag-edge);
+    border-radius: 2px;
+  }
+
+  /* Statuses: the NPC HUD's teal chip (.npc-status-moves) */
+  .city.sheet .threat-sheet .gmmove-text .narrated-status-name {
+    padding: 0 0.35em;
+    font-family: var(--mhx-font-body);
+    font-weight: normal;
+    font-style: italic;
+    text-transform: lowercase;
+    color: var(--npc-status-text);
+    text-shadow: none;
+    background: var(--npc-status);
+    border: 1px solid color-mix(in srgb, var(--npc-status) 60%, white);
+    border-radius: 2px;
+  }
+
+  .city.sheet .threat-sheet .gmmove-text .narrated-status-name .status-tier {
+    font-weight: bold;
+    font-style: normal;
+  }
+
+  /* Empty trash / add-submove cells (locked sheet) take no room */
+  .city.sheet .threat-sheet .gm-move > .trash-can-flex:not(:has(*)),
+  .city.sheet .threat-sheet .gm-move > div:last-child:not(:has(*)) {
+    display: none;
+  }
+
+  .city.sheet .threat-sheet .gm-move .trash-can-flex,
+  .city.sheet .threat-sheet .gm-move a.add-sub-move {
+    font-size: 0.85em;
+  }
+
+  /* Consequences (submoves): indented under a lime hairline, no card */
+  .city.sheet .threat-sheet .gm-move .submove {
+    margin: 0.35em 0 0 0.2em;
+    padding-left: 0.6em;
+    border-left: 1px solid color-mix(in srgb, var(--mhx-spectrum) 50%, transparent);
+  }
+
+  .city.sheet .threat-sheet .submove .gm-move {
+    gap: 0.3em;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  .city.sheet .threat-sheet .submove .gmmove-name {
+    font-size: 1.1em;
+  }
+
+  .city.sheet .threat-sheet .inherited-move .inherit-msg {
+    margin-top: 0.35em;
+    font-family: var(--mhx-font-label);
+    font-size: 0.8em;
+    letter-spacing: 0.08em;
+    text-align: left;
+    text-transform: uppercase;
+    color: var(--mhx-text-dim);
+  }
+
+  /* ── Danger templates (GM, unlocked) ──────────────────────────────── */
+
+  .city.sheet .threat-sheet section.danger-templates {
+    max-height: none;
+    margin: 0.8em 0 0.4em;
+    padding-top: 0.2em;
+    text-align: left;
+    border-top: 1px dashed var(--mhx-line-faint);
+  }
+
+  .city.sheet .threat-sheet .template-list {
+    justify-content: flex-start;
+    gap: 4px 6px;
+    font-size: 1em;
+    font-weight: normal;
+  }
+
+  .city.sheet .threat-sheet .template-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    padding: 2px 8px;
+    font-family: var(--mhx-font-label);
+    font-size: 1.05em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mhx-text);
+    background: rgba(0, 222, 246, 0.07);
+    border: 1px solid var(--mhx-line-dim);
+    transition: border-color 0.15s, box-shadow 0.15s, color 0.15s;
+  }
+
+  .city.sheet .threat-sheet .template-name:hover {
+    color: var(--mhx-bright);
+    text-shadow: none;
+    border-color: var(--mhx-line);
+    box-shadow: 0 0 8px rgba(0, 222, 246, 0.4);
+  }
+
+  .city.sheet .threat-sheet .template-name a {
+    font-size: 0.8em;
+  }
+
+  /* ── Themes tab (threat) ──────────────────────────────────────────── */
+
+  .city.sheet .threat-sheet .theme-block-group {
+    gap: 8px;
+  }
+
+  /* Statuses card: the PC card frame, an icon-only band (no title) */
+  .city.sheet .threat-sheet .flex-theme-block.status-box {
+    --mhx-theme: var(--mhx-line);
+  }
+
+  .city.sheet .threat-sheet .flex-theme-block.status-box::before {
+    content: "";
+    display: block;
+    height: var(--mhx-band);
+    margin: 0 -8px 0.4em;
+    background:
+      url(/modules/mist-hud/ui/icons/statuses_icn.svg) center / 23px 23px no-repeat,
+      url(/modules/mist-hud/ui/header-neutral.webp) center / 100% 100% no-repeat;
+  }
+
+  .city.sheet .threat-sheet .flex-theme-block.story-tag-box .story-tags {
+    margin: 0;
+  }
+
+  /* ── Bio (threat bio tab, limited sheet) ──────────────────────────── */
+
+  .city.sheet .threat-sheet div.bio-section {
+    gap: 0.3em;
+  }
+
+  .city.sheet .threat-sheet div.bio-subsection {
+    margin-top: 0.2em;
+    font-size: 14px;
+  }
+
+  .city.sheet .threat-sheet .bio-subsection .editor-box {
+    padding: 0.3em 0.5em;
+    border: none;
+    background: rgba(0, 0, 0, 0.22);
+  }
+
+  .city.sheet .threat-sheet .bio-subsection .editor {
+    font-family: var(--mhx-font-body);
+    font-size: 1.05em;
+    line-height: 1.4;
+    letter-spacing: normal;
+    text-transform: none;
+    color: whitesmoke;
+  }
+
+  .city.sheet .threat-sheet .bio-subsection .editor :is(h1, h2, h3, h4) {
+    font-family: var(--mhx-font-label);
+    font-weight: normal;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--npc-sub);
+    border-color: var(--npc-rule);
+  }
+
+  .city.sheet .threat-sheet .bio-subsection .editor a.editor-edit {
+    color: var(--mhx-spectrum);
+  }
+
+  /* ── Limited sheet (players without observer rights) ────────────────── */
+
+  .city.sheet .threat-sheet:not(:has(.sheet-tabs)) header.sheet-header {
+    align-items: center;
+    gap: 0.8em;
+  }
+
+  .city.sheet .threat-sheet:not(:has(.sheet-tabs)) header.sheet-header img.profile-img {
+    padding: 3px;
+    background:
+      linear-gradient(var(--mhx-line), var(--mhx-line)) top left / 12px 1px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) top left / 1px 12px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) bottom right / 12px 1px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) bottom right / 1px 12px no-repeat,
+      var(--mhx-panel);
+  }
+
+  .city.sheet .threat-sheet .charname-limited {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--npc-name-font);
+    font-size: 2.5em;
+    font-weight: bold;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--mhx-spectrum);
+    filter: drop-shadow(2px 2px 2px black);
+  }
+
+  .city.sheet .threat-sheet:not(:has(.sheet-tabs)) > hr {
+    height: 2px;
+    margin: 0.3em 0;
+    border: none;
+    opacity: 0.75;
+    background: var(--npc-sub);
+  }
+
+  /* ── GM move pop-up (CityDialogs.GMMoveTextBox) ───────────────────────
+     A plain V1 Dialog opened by clicking a move on a locked threat sheet;
+     its only marker is the .gmmove-section inside. Same card language as
+     the sheet: navy glass, lime stripe, SDGlitch name, HUD chips; Send
+     To Chat is the lime primary button. */
+  .app.dialog:has(.dialog-content > .gmmove-section) {
+    --npc-status:      var(--status-color, rgb(0, 93, 93));
+    --npc-status-text: var(--text-status-color, #ecf5f4);
+    --mhx-spectrum:    var(--spectrum-color, #abff00);
+  }
+
+  .app.dialog:has(.dialog-content > .gmmove-section) .window-content {
+    gap: 0.6em;
+    padding: 0.7em 0.9em 0.8em 1em;
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-text);
+    border-left: 2px solid var(--mhx-spectrum);
+    background:
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+      linear-gradient(90deg, rgba(171, 255, 0, 0.08), transparent 35%),
+      linear-gradient(180deg, var(--mhx-panel-hi), var(--mhx-panel));
+  }
+
+  .app.dialog .dialog-content > .gmmove-section {
+    font-size: 1.05em;
+    line-height: 1.4;
+  }
+
+  .app.dialog .dialog-content > .gmmove-section .gmmove-name {
+    font-family: var(--mhx-font-title);
+    font-size: 1.45em;
+    font-weight: normal;
+    font-style: italic;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--mhx-bright);
+    text-shadow: -1px 1px 2px rgba(110, 170, 0, 0.9), 0 0 10px rgba(171, 255, 0, 0.45);
+  }
+
+  .app.dialog .dialog-content > .gmmove-section > hr {
+    height: 1px;
+    margin: 0.3em 0 0.45em;
+    border: none;
+    background: linear-gradient(90deg, var(--mhx-spectrum), transparent 80%);
+  }
+
+  .app.dialog .dialog-content > .gmmove-section div.gmmove-description {
+    font-size: 1em;
+    color: var(--mhx-text);
+  }
+
+  .app.dialog .dialog-content > .gmmove-section .gmmove-description > span[title]:first-child {
+    color: var(--mhx-spectrum);
+  }
+
+  .app.dialog .dialog-content > .gmmove-section .narrated-story-tag {
+    margin: 0;
+    padding: 0 0.35em;
+    font-family: var(--mhx-font-label);
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--mhx-tag-text);
+    text-shadow: none;
+    background: var(--mhx-tag-bg);
+    border: 1px solid var(--mhx-tag-edge);
+    border-radius: 2px;
+  }
+
+  .app.dialog .dialog-content > .gmmove-section .narrated-status-name {
+    padding: 0 0.35em;
+    font-family: var(--mhx-font-body);
+    font-weight: normal;
+    font-style: italic;
+    letter-spacing: normal;
+    text-transform: lowercase;
+    color: var(--npc-status-text);
+    text-shadow: none;
+    background: var(--npc-status);
+    border: 1px solid color-mix(in srgb, var(--npc-status) 60%, white);
+    border-radius: 2px;
+  }
+
+  .app.dialog .dialog-content > .gmmove-section :is(.narrated-story-tag, .narrated-status-name),
+  .city.sheet .threat-sheet .gmmove-text :is(.narrated-story-tag, .narrated-status-name) {
+    white-space: nowrap;
+  }
+
+  .app.dialog .dialog-content > .gmmove-section .narrated-status-name .status-tier {
+    font-weight: bold;
+    font-style: normal;
+  }
+
+  /* Buttons: cyan outline like the chat buttons; Send To Chat in lime */
+  .app.dialog:has(.dialog-content > .gmmove-section) .dialog-buttons {
+    gap: 0.5em;
+    margin-top: 0.2em;
+  }
+
+  .app.dialog:has(.dialog-content > .gmmove-section) .dialog-button {
+    height: 2.1em;
+    font-family: var(--mhx-font-label);
+    font-size: 1em;
+    font-weight: normal;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-text);
+    text-shadow: none;
+    background: rgba(0, 222, 246, 0.07);
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 0;
+    box-shadow: none;
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+  }
+
+  .app.dialog:has(.dialog-content > .gmmove-section) .dialog-button:hover {
+    color: var(--mhx-bright);
+    background: rgba(0, 222, 246, 0.2);
+    border-color: var(--mhx-line);
+    box-shadow: 0 0 8px rgba(0, 222, 246, 0.45);
+  }
+
+  .app.dialog:has(.dialog-content > .gmmove-section) .dialog-button.one {
+    color: #0b1400;
+    background: var(--mhx-spectrum);
+    border: none;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+  }
+
+  .app.dialog:has(.dialog-content > .gmmove-section) .dialog-button.one:hover {
+    color: #0b1400;
+    background: color-mix(in srgb, var(--mhx-spectrum) 75%, white);
+    box-shadow: none;
+  }
+
+  /* ── Crew sheet ─────────────────────────────────────────────────────── */
+
+  .city.sheet .crew-sheet header.sheet-header {
+    align-items: center;
+  }
+
+  .city.sheet .crew-sheet .character-basic-info {
+    flex: 1 1 auto;
+    max-width: none;
+  }
+
+  .city.sheet .crew-sheet input#crew-name {
+    height: auto;
+    font-family: var(--mhx-font-title);
+    font-size: 2.6em;
+    font-weight: normal;
+    font-style: italic;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--mhx-bright);
+    text-shadow: -1px 1px 2px var(--mhx-line), 0 0 14px rgba(0, 123, 191, 0.8);
+    background: none;
+    border: none;
+    border-bottom: 1px solid transparent;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .city.sheet .crew-sheet input#crew-name:focus {
+    border-bottom-color: var(--mhx-line);
+  }
+
+  .city.sheet .crew-sheet header.sheet-header > .lock-button {
+    flex: none;
+    align-self: flex-start;
+  }
+
+  .city.sheet .crew-sheet .theme-block-group {
+    gap: 8px;
+  }
+
+  /* "Themes" heading: Rift caps, a cyan block and a fading hairline */
+  .city.sheet .crew-sheet .theme-section > h1 {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0.3em 0 0.45em;
+    padding: 0 0 0.2em 16px;
+    font-family: var(--mhx-font-label);
+    font-size: 1.3em;
+    font-weight: normal;
+    line-height: 1.2;
+    letter-spacing: 0.14em;
+    text-align: left;
+    text-transform: uppercase;
+    color: var(--mhx-bright);
+    text-shadow: var(--mhx-glow);
+    border: none;
+    background:
+      linear-gradient(var(--mhx-line), var(--mhx-line)) left 0 top calc(50% - 0.1em) / 7px 7px no-repeat,
+      linear-gradient(90deg, var(--mhx-line-dim), transparent 85%) left bottom / 100% 1px no-repeat;
+  }
+
+  .city.sheet .crew-sheet .theme-section > h1 > p {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0;
+  }
+
+  .city.sheet .crew-sheet .theme-section > h1 a {
+    font-size: 0.75em;
+    color: var(--mhx-text-dim);
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
      Phase 2 sections still to do, in order:
-       3. Threat / crew / limited sheets
        4. Item sheets
        5. Dialogs
        6. Story tag window, scene tags, status tracker, token tooltip
