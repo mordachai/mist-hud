@@ -27,9 +27,63 @@ export function applySystemCSS(system) {
   document.head.appendChild(link);
 }
 
+// ── External Style (system Visual Style "custom") ─────────────────────────────
+// Sheet/chat/sidebar restyle for the system's "External Style (requires Module)"
+// visual style. Each file is rooted under body.style-custom, and only systems
+// listed here can use it (others keep the system's own style).
+
+const EXTERNAL_CSS_MAP = {
+  "otherscape": "/modules/mist-hud/styles/external/mh-ext-otherscape.css",
+};
+
+export function hasExternalStyle(system) {
+  return Object.hasOwn(EXTERNAL_CSS_MAP, system);
+}
+
+function externalStyleEnabled() {
+  try { return game.settings.get(MODULE_ID, SETTINGS.EXTERNAL_SHEET_STYLE); }
+  catch { return false; }
+}
+
+export function applyExternalCSS(system) {
+  const cssPath = externalStyleEnabled() ? EXTERNAL_CSS_MAP[system] : undefined;
+  const existing = document.querySelector("link[data-mh-external]");
+  if (existing && cssPath && existing.href.includes(cssPath)) return;
+  existing?.remove();
+  if (!cssPath) return;
+  const link = document.createElement("link");
+  link.rel  = "stylesheet";
+  link.href = cssPath;
+  link.type = "text/css";
+  link.dataset.mhExternal = "true";
+  // Stand in for the system's otherscape.css: load before module stylesheets
+  // (including our HUD CSS) so the HUD still wins same-specificity ties.
+  const firstModuleSheet = document.head.querySelector('link[rel="stylesheet"][href*="modules/"]');
+  document.head.insertBefore(link, firstModuleSheet);
+}
+
+const VISUAL_STYLE_KEY = "city-of-mist.visualStyle";
+const isActiveGM = () => game.user === game.users.activeGM;
+const getVisualStyle = () => game.settings.get("city-of-mist", "visualStyle");
+const setVisualStyle = style => game.settings.set("city-of-mist", "visualStyle", style);
+
+/** Put the system on External Style if our setting wants it. Active GM only. */
+async function enforceExternalStyle() {
+  if (!isActiveGM() || !externalStyleEnabled()) return;
+  const system = getActiveSystem();
+  if (!hasExternalStyle(system)) {
+    ui.notifications.warn(game.i18n.localize("MistHUD.notify.externalStyleUnavailable"));
+    return;
+  }
+  if (getVisualStyle() === "custom") return;
+  await setVisualStyle("custom");
+  ui.notifications.info(game.i18n.localize("MistHUD.notify.externalStyleRestored"));
+}
+
 export async function detectActiveSystem() {
   const system = getActiveSystem();
   applySystemCSS(system ?? null);
+  applyExternalCSS(system ?? null);
   return system ?? null;
 }
 
@@ -108,6 +162,21 @@ Hooks.once("init", () => {
     scope: "client", config: true, type: Boolean, default: true,
   });
 
+  // Restyle system sheets/chat through the system's "External Style" visual style
+  game.settings.register(MODULE_ID, SETTINGS.EXTERNAL_SHEET_STYLE, {
+    name: K("externalSheetStyle.name"),
+    hint: K("externalSheetStyle.hint"),
+    scope: "world", config: true, type: Boolean, default: false,
+    onChange: async enabled => {
+      applyExternalCSS(getActiveSystem());
+      if (!isActiveGM()) return;
+      if (enabled) await enforceExternalStyle();
+      // Turned off: drop back to the system's own style, unless the GM already
+      // picked another style by hand.
+      else if (getVisualStyle() === "custom") await setVisualStyle("base");
+    },
+  });
+
   // Layout settings (client-side, no config UI — set programmatically)
   game.settings.register(MODULE_ID, SETTINGS.LAYOUT_MODE, {
     name: K("layoutMode.name"),
@@ -138,11 +207,42 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", async () => {
   await detectActiveSystem();
+  // Fallback: a Game System change reloads the world and may have left the
+  // system on its own visual style.
+  await enforceExternalStyle();
+});
+
+// Changing Game System runs the system's onChangeTo(), which writes
+// baseSystem/system and then sets visualStyle to that system's own style.
+// A visualStyle change right after a system change is that reset (undo it).
+// Otherwise our setting follows the GM's own Visual Style choice both ways:
+// External Style turns it on (supported systems only), any other style off.
+let lastSystemChange = 0;
+const SYSTEM_CHANGE_WINDOW_MS = 5000;
+
+Hooks.on("updateSetting", async setting => {
+  if (setting.key !== VISUAL_STYLE_KEY || !isActiveGM()) return;
+  const isCustom = getVisualStyle() === "custom";
+  const enabled  = externalStyleEnabled();
+
+  if (isCustom) {
+    if (!enabled && hasExternalStyle(getActiveSystem())) {
+      await game.settings.set(MODULE_ID, SETTINGS.EXTERNAL_SHEET_STYLE, true);
+    }
+    return;
+  }
+  if (!enabled) return;
+  if (Date.now() - lastSystemChange < SYSTEM_CHANGE_WINDOW_MS) {
+    await enforceExternalStyle();
+  } else {
+    await game.settings.set(MODULE_ID, SETTINGS.EXTERNAL_SHEET_STYLE, false);
+  }
 });
 
 // Re-apply CSS and re-render HUDs when the system setting changes at runtime.
 Hooks.on("updateSetting", async setting => {
   if (!["city-of-mist.system", "city-of-mist.baseSystem"].includes(setting.key)) return;
+  lastSystemChange = Date.now();
   await detectActiveSystem();
   for (const app of foundry.applications.instances.values()) {
     if (app.constructor?.name === "PlayerHUD" && app.rendered) app.render({ force: true });

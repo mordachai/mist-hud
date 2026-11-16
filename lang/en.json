@@ -119,6 +119,10 @@
 "MistHUD.settings.autoDiceSet.name": "Automatic Dice So Nice Dice Set",
 "MistHUD.settings.autoDiceSet.hint": "Show d6 rolls with this module's dice set for the active system (City of Mist, Otherscape or Legend in the Mist). In Otherscape each die is randomly Mythos, Noise or Self. Turn off to use your own Dice So Nice appearance.",
 
+"MistHUD.settings.externalSheetStyle.name": "Restyle System Sheets (External Style)",
+
+"MistHUD.settings.externalSheetStyle.hint": "Switch the system's Visual Style to External Style and use this module's styling for sheets, chat cards, dialogs and the sidebar. Kept on External Style after a Game System change. Linked to the system's Visual Style: choosing External Style turns this on, choosing another style turns it off. Available for: Otherscape.",
+
 "MistHUD.settings.dockSide.left": "Left",
 
 "MistHUD.settings.dockSide.right": "Right",
@@ -139,6 +143,10 @@
 "MistHUD.notify.accordionRefresh": "Changing accordion state requires a page refresh.",
 
 "MistHUD.notify.buttonsChanged": "Button display changed. Refresh to apply.",
+
+"MistHUD.notify.externalStyleRestored": "Mist HUD: Visual Style set back to External Style.",
+
+"MistHUD.notify.externalStyleUnavailable": "Mist HUD: sheet restyling isn't available for this game system yet. Using the system's own style.",
 
 "MistHUD.notify.statusTabsChanged": "Status screen tabs changed. Reopen the screen to apply.",
 

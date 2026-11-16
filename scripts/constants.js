@@ -27,6 +27,7 @@ export const SETTINGS = {
   DOCK_SIDE:                   "dockSide",
   WIDE_LAYOUT:                 "wideLayout",
   AUTO_DICE_SET:               "autoDiceSet",
+  EXTERNAL_SHEET_STYLE:        "externalSheetStyle",
   IMPORTED_STATUS_COLLECTION:  "importedStatusCollection",
 };
 

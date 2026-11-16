@@ -119,6 +119,10 @@
 "MistHUD.settings.autoDiceSet.name": "Conjunto de dados automático no Dice So Nice",
 "MistHUD.settings.autoDiceSet.hint": "Mostra as rolagens de d6 com o conjunto de dados deste módulo para o sistema ativo (City of Mist, Otherscape ou Legend in the Mist). No Otherscape cada dado é sorteado entre Mythos, Noise ou Self. Desative para usar a sua própria aparência do Dice So Nice.",
 
+"MistHUD.settings.externalSheetStyle.name": "Reestilizar fichas do sistema (Estilo Externo)",
+
+"MistHUD.settings.externalSheetStyle.hint": "Muda o Estilo Visual do sistema para Estilo Externo e usa o visual deste módulo nas fichas, cartões de chat, diálogos e barra lateral. Mantém o Estilo Externo após trocar o Sistema de Jogo. Vinculado ao Estilo Visual do sistema: escolher Estilo Externo liga esta opção, escolher outro estilo a desliga. Disponível para: Otherscape.",
+
 "MistHUD.settings.dockSide.left": "Esquerda",
 
 "MistHUD.settings.dockSide.right": "Direita",
@@ -139,6 +143,10 @@
 "MistHUD.notify.accordionRefresh": "Alterar o estado dos acordeões exige atualizar a página.",
 
 "MistHUD.notify.buttonsChanged": "A exibição dos botões mudou. Atualize para aplicar.",
+
+"MistHUD.notify.externalStyleRestored": "Mist HUD: Estilo Visual voltou para Estilo Externo.",
+
+"MistHUD.notify.externalStyleUnavailable": "Mist HUD: a reestilização das fichas ainda não está disponível para este sistema de jogo. Usando o estilo do próprio sistema.",
 
 "MistHUD.notify.statusTabsChanged": "As abas da tela de status mudaram. Reabra a tela para aplicar.",
 
