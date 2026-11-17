@@ -55,6 +55,13 @@
      dialogs are that canvas.
    ========================================================================== */
 
+/* The Juice / Clues tracking cards' marker hand (system font, § 2) */
+@font-face {
+  font-family: "MHX Marker";
+  src: url(/systems/city-of-mist/fonts/RockSalt.ttf) format("truetype");
+  font-display: swap;
+}
+
 .style-custom {
 
   /* ────────────────────────────────────────────────────────────────────────
@@ -3037,53 +3044,317 @@
     color: var(--mhx-ink-dim);
   }
 
-  .city.sheet .actor-sheet section.card-style {
-    margin: 0 8px 8px 0;
+  /* Each juice and clue is the core book's Tracking Card, turned landscape
+     (init.js decorateTrackingCards adds the band, the strip and the kind
+     word, takes the "(N)" out of the name and runs name, source and
+     method together): a rounded grey card stock, a rust band with the
+     card's kind icon, a white strip numbered 1-6 with the amount ringed in
+     pen, the kind word stencilled where the book prints "TAG", then
+     "Name // Source - Method" in marker, and a rust stripe along the foot
+     holding the delete control. Three cards to a row. Help / Hurt are not
+     cards: they stay plain notes (below). */
+
+  .city.sheet .actor-sheet .juice-tab .flex-row-left,
+  .city.sheet .actor-sheet .clues-section #clue-section {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .city.sheet .actor-sheet .clues-section #clue-section > :is(.section-header, hr) {
+    flex: 0 0 100%;
+  }
+
+  .city.sheet .actor-sheet section.card-style.mh-track-card {
+    --mhx-track-rust:  #a5553a;
+    --mhx-track-white: #f5f2ed;
+    --mhx-track-grey:  #77716b;
+    --mhx-pen:         #1d1b20;
+    --mhx-pen-loop: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60' preserveAspectRatio='none'%3E%3Cpath d='M41 7C22 1 5 13 6 31c1 17 16 25 31 23c15-2 21-17 17-31C50 10 37 3 22 9' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E");
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "band  band"
+      "strip strip"
+      "stamp line"
+      "ans   ans"
+      "use   use";
+    align-content: start;
+    align-items: start;
+    column-gap: 7px;
+    flex: 0 0 calc((100% - 24px) / 3);
+    min-width: 0;
+    margin: 0;
+    padding: 0 10px 36px;
+    font-family: var(--mhx-font-body);
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--mhx-ink);
+    background:
+      linear-gradient(rgba(226, 222, 215, 0.6), rgba(226, 222, 215, 0.6)),
+      var(--mhx-paper-art) center / 520px,
+      #d9d4cb;
+    background-blend-mode: normal, multiply;
+    border: none;
+    border-radius: 11px;
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.28),
+      0 3px 8px rgba(0, 0, 0, 0.55);
+    transition: none;
+  }
+
+  .city.sheet .actor-sheet section.card-style.mh-track-card:hover {
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.28),
+      0 5px 12px rgba(0, 0, 0, 0.65);
+  }
+
+  /* The foot stripe (the book's long right-hand stripe, turned) */
+  .city.sheet .actor-sheet section.mh-track-card::after {
+    content: "";
+    position: absolute;
+    left: 9px;
+    right: 9px;
+    bottom: 8px;
+    height: 20px;
+    background: var(--mhx-paper-art) center / cover, var(--mhx-track-rust);
+    background-blend-mode: multiply;
+    border-radius: 2px;
+  }
+
+  /* Band: rust, the title in heavy condensed caps worn into the paper */
+  .city.sheet .actor-sheet .mh-track-band {
+    grid-area: band;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    height: 27px;
+    margin: 8px -1px 6px;
+    padding: 0 6px 0 8px;
+    background: var(--mhx-paper-art) center / cover, var(--mhx-track-rust);
+    background-blend-mode: multiply;
+    border-radius: 3px;
+  }
+
+  .city.sheet .actor-sheet .mh-track-title {
+    overflow: hidden;
+    font-family: var(--mhx-font-label);
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-overflow: clip;
+    background: var(--mhx-paper-art) center / 260px, #f6f1ea;
+    background-blend-mode: multiply;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* The card's kind: one white disc with the rust glyph */
+  .city.sheet .actor-sheet .mh-track-icon {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 19px;
+    height: 19px;
+    font-size: 10px;
+    color: var(--mhx-track-rust);
+    background: var(--mhx-track-white);
+    border-radius: 50%;
+  }
+
+  /* Strip: white, ticked slots before each number, grey worn numbers */
+  .city.sheet .actor-sheet .mh-track-strip {
+    grid-area: strip;
+    display: flex;
+    height: 38px;
+    margin: 0 0 6px;
+    padding: 0 3px;
+    background: var(--mhx-paper-art) center / cover, var(--mhx-track-white);
+    background-blend-mode: multiply;
+    border-radius: 2px;
+    box-shadow: inset 0 0 0 1px rgba(60, 50, 40, 0.12);
+  }
+
+  .city.sheet .actor-sheet .mh-track-cell {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 0 3px 9px;
+    font-family: var(--mhx-font-title);
+    font-size: 28px;
+    line-height: 1;
+    color: var(--mhx-track-grey);
+    background:
+      linear-gradient(90deg,
+        #c4bfb7 0 2px, transparent 2px 4px,
+        #c4bfb7 4px 6px, transparent 6px 8px,
+        #c4bfb7 8px 9px, transparent 9px)
+      left 1px bottom 5px / 9px 60% no-repeat;
+  }
+
+  .city.sheet .actor-sheet .mh-track-cell:first-child {
+    padding-left: 0;
+    background: none;
+  }
+
+  /* Pen loop round the amount (over the number, not the slots) */
+  .city.sheet .actor-sheet .mh-track-cell.mh-marked::after {
+    content: "";
+    position: absolute;
+    inset: 2px -3px 0 6px;
+    background: var(--mhx-pen);
+    -webkit-mask: var(--mhx-pen-loop) center / 100% 100% no-repeat;
+    mask: var(--mhx-pen-loop) center / 100% 100% no-repeat;
+    transform: rotate(-8deg);
+    pointer-events: none;
+  }
+
+  .city.sheet .actor-sheet .mh-track-cell:first-child.mh-marked::after {
+    inset: 2px -3px 0 -3px;
+  }
+
+  /* Kind word, stencilled where the book's card prints "TAG" */
+  .city.sheet .actor-sheet .mh-track-stamp {
+    grid-area: stamp;
+    font-family: var(--mhx-font-title);
+    font-size: 25px;
+    line-height: 1;
+    text-transform: uppercase;
+    background: var(--mhx-paper-art) center / 200px, #6f6a65;
+    background-blend-mode: multiply;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* "Name // Source - Method" in marker, wrapping as one line */
+  .city.sheet .actor-sheet .mh-track-card :is(.mh-track-line, .question) {
+    grid-area: line;
+    min-width: 0;
+    font-family: "MHX Marker", var(--mhx-font-body);
+    font-size: 12.5px;
+    font-weight: normal;
+    line-height: 1.75;
+    color: var(--mhx-pen);
+    text-shadow: none;
+    overflow-wrap: anywhere;
+  }
+
+  .city.sheet .actor-sheet .mh-track-line > * {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+  }
+
+  .city.sheet .actor-sheet .mh-track-line :is(.juice-source, .juice-method, .clue-source, .clue-method) b {
+    display: none;
+  }
+
+  .city.sheet .actor-sheet .mh-track-line .mh-track-sep {
+    color: var(--mhx-track-grey);
+    white-space: pre;
+  }
+
+  .city.sheet .actor-sheet .mh-track-card .card-name {
+    text-shadow: none;
+  }
+
+  .city.sheet .actor-sheet .mh-track-card .card-name:hover {
+    text-shadow: none;
+    text-decoration: underline wavy rgba(29, 27, 32, 0.35);
+    text-underline-offset: 4px;
+  }
+
+  /* A Source / Method with nothing filled in (marked by init.js) */
+  .city.sheet .actor-sheet .mh-track-card .mh-track-blank {
+    display: none;
+  }
+
+  .city.sheet .actor-sheet .mh-track-card button.clue-use-button {
+    grid-area: use;
+    justify-self: end;
+    margin: 4px 0 0;
+  }
+
+  /* Clue journal: the answer under the question */
+  .city.sheet .actor-sheet .mh-track-card .answer {
+    grid-area: ans;
+    margin-top: 4px;
+    font-family: var(--mhx-font-body);
+    font-size: 0.95em;
+    line-height: 1.35;
+  }
+
+  .city.sheet .actor-sheet .mh-track-card .answer b {
+    font-family: var(--mhx-font-type);
+    font-size: 0.85em;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* Delete: pale glyph on the foot stripe */
+  .city.sheet .actor-sheet .mh-track-card > a.item-control {
+    position: absolute;
+    right: 15px;
+    bottom: 8px;
+    z-index: 1;
+    font-size: 12px;
+    line-height: 20px;
+    color: rgba(246, 241, 234, 0.85);
+  }
+
+  .city.sheet .actor-sheet .mh-track-card > a.item-control:hover {
+    color: #fff;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Help / Hurt: a plain note pinned to the window */
+  .city.sheet .actor-sheet section.card-style:not(.mh-track-card) {
+    margin: 0;
     padding: 0.4em 0.6em;
     font-family: var(--mhx-font-body);
     font-size: 1em;
     line-height: 1.3;
     color: var(--mhx-ink);
-    background: rgba(255, 252, 245, 0.6);
+    background: rgba(255, 252, 245, 0.85);
     border: none;
     border-left: 2px solid var(--mhx-ink);
     border-radius: 0;
-    box-shadow: 0 1px 3px rgba(20, 16, 12, 0.25);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   }
 
-  .city.sheet .actor-sheet section.card-style:hover {
-    box-shadow: 0 2px 6px rgba(20, 16, 12, 0.35);
-  }
-
-  .city.sheet .actor-sheet section.card-style .card-name {
+  .city.sheet .actor-sheet section.card-style:not(.mh-track-card) .card-name {
     font-family: var(--mhx-font-body);
     font-weight: bold;
     color: var(--mhx-ink);
   }
 
-  .city.sheet .actor-sheet section.card-style .card-name:hover {
-    text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
+  .city.sheet .actor-sheet section.card-style:not(.mh-track-card) .card-name:hover {
+    text-shadow: none;
+    text-decoration: underline;
   }
 
-  .city.sheet .actor-sheet section.card-style :is(.juice-source, .juice-method, .clue-source, .clue-method) {
-    font-family: var(--mhx-font-body);
-    font-size: 0.9em;
-  }
-
-  .city.sheet .actor-sheet section.card-style :is(.juice-source, .juice-method, .clue-source, .clue-method) b {
-    font-family: var(--mhx-font-type);
-    font-size: 0.85em;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .city.sheet .actor-sheet section.card-style .item-control {
+  .city.sheet .actor-sheet section.card-style:not(.mh-track-card) .item-control {
+    margin-right: 0.3em;
     font-size: 0.8em;
     color: var(--mhx-ink-dim);
   }
 
   .city.sheet .actor-sheet button.clue-use-button {
-    margin: 0.3em 0.4em;
     padding: 0 0.7em;
     font-family: var(--mhx-font-label);
     font-size: 0.85em;
@@ -3107,7 +3378,7 @@
     height: 1px;
     margin: 0.6em 0;
     border: none;
-    background: linear-gradient(90deg, transparent, var(--mhx-line-dim), transparent);
+    background: linear-gradient(90deg, transparent, rgba(236, 230, 242, 0.35), transparent);
   }
 
   /* ── Bio tab ─────────────────────────────────────────────────────── */

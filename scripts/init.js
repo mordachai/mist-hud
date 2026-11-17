@@ -3,7 +3,7 @@
 // All Hooks.on / Hooks.once calls live here.
 // Other files export classes/functions; this file wires them to Foundry events.
 
-import { MODULE_ID, SOCKET_NAME } from "./constants.js";
+import { MODULE_ID, SOCKET_NAME, getActiveSystem } from "./constants.js";
 import { playerHudRegistry, getOrCreateHud, sys, systemReady } from "./player-hud.js";
 import { hudKey } from "./hud-state.js";
 import { BonusManager }              from "./bonus-manager.js";
@@ -165,6 +165,99 @@ Hooks.on("renderCityThreatSheet", (app) => {
   requestAnimationFrame(() => {
     if (app.rendered && !app._minimized) app.setPosition({ height: "auto" });
   });
+});
+
+// City of Mist External Style: the PC sheet's Juice and Clues tabs draw each
+// juice and clue as the core book's Tracking Card, turned landscape (Help /
+// Hurt stay plain notes). The templates print the amount inside the name
+// ("(2) name"), so mark the card with its kind and amount, take the "(N)" out
+// of the name, add the card's band (its kind icon) and numbered strip, and run
+// name, source and method together as one line: "Name // Source - Method".
+// Only while our CoM External Style sheet is loaded.
+const TRACK_KINDS = {
+  clue:  ["fa-magnifying-glass", "CityOfMist.terms.clue"],
+  juice: ["fa-bolt",             "CityOfMist.terms.juice"],
+};
+const TRACK_CELLS = 6;
+
+function decorateTrackingCards(app, root) {
+  if (getActiveSystem() !== "city-of-mist") return;
+  if (!document.querySelector("link[data-mh-external]")) return;
+  const actor = app.actor ?? app.document;
+  const blocks = root.querySelectorAll(
+    "#juice-section section.juice-data-block, .clues-section section:is(.clue-data-block, .cluejournal-data-block)"
+  );
+  for (const block of blocks) {
+    if (block.classList.contains("mh-track-card")) continue;
+    const journal = block.classList.contains("cluejournal-data-block");
+    const item    = journal ? null : actor?.items?.get(block.dataset.juiceId ?? block.dataset.clueId);
+    const kind    = block.classList.contains("juice-data-block") ? "juice" : "clue";
+    const [icon, label] = TRACK_KINDS[kind];
+    block.classList.add("mh-track-card", `mh-track-${kind}`);
+
+    const band = document.createElement("header");
+    band.className = "mh-track-band";
+    const title = document.createElement("span");
+    title.className = "mh-track-title";
+    title.textContent = game.i18n.localize("MistHUD.sheet.trackingCard");
+    const mark = document.createElement("i");
+    mark.className = `mh-track-icon fa-solid ${icon}`;
+    mark.title = game.i18n.localize(label);
+    band.append(title, mark);
+    block.prepend(band);
+
+    // Kind word where the book's card prints "TAG"
+    const stamp = document.createElement("span");
+    stamp.className = "mh-track-stamp";
+    stamp.textContent = game.i18n.localize(label);
+
+    if (journal) {
+      block.querySelector(".question")?.before(stamp);
+      continue;
+    }
+
+    const amount = Math.max(0, Number(item?.system?.amount) || 0);
+    block.dataset.mhAmount = amount;
+    const strip = document.createElement("div");
+    strip.className = "mh-track-strip";
+    for (let n = 1; n <= Math.max(TRACK_CELLS, amount); n++) {
+      const cell = document.createElement("span");
+      cell.className = `mh-track-cell${n === amount ? " mh-marked" : ""}`;
+      cell.textContent = n;
+      strip.append(cell);
+    }
+    band.after(strip);
+
+    const name = block.querySelector(".card-name");
+    if (!name) continue;
+    const first = [...name.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+    if (first) first.textContent = first.textContent.replace(/^\s*\(\d+\)\s*/, "");
+    name.before(stamp);
+
+    // One line: Name // Source - Method (empty parts and their divider left out)
+    const line = document.createElement("span");
+    line.className = "mh-track-line";
+    name.before(line);
+    line.append(name);
+    const parts = [...block.querySelectorAll(":scope > :is(.juice-source, .clue-source, .juice-method, .clue-method)")];
+    let divider = "//";
+    for (const part of parts) {
+      const labelText = part.querySelector("b")?.textContent ?? "";
+      if (!part.textContent.replace(labelText, "").trim()) {
+        part.classList.add("mh-track-blank");
+        continue;
+      }
+      const sep = document.createElement("span");
+      sep.className = "mh-track-sep";
+      sep.textContent = ` ${divider} `;
+      line.append(sep, part);
+      divider = "-";
+    }
+  }
+}
+
+Hooks.on("renderCityCharacterSheet", (app, html) => {
+  decorateTrackingCards(app, html instanceof HTMLElement ? html : html[0]);
 });
 
 // ── Actor / Item reactivity ───────────────────────────────────────────────────

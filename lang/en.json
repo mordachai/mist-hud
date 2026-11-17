@@ -147,6 +147,7 @@
 "MistHUD.notify.externalStyleRestored": "Mist HUD: Visual Style set back to External Style.",
 
 "MistHUD.notify.externalStyleUnavailable": "Mist HUD: sheet restyling isn't available for this game system yet. Using the system's own style.",
+"MistHUD.sheet.trackingCard": "Tracking Card",
 
 "MistHUD.notify.statusTabsChanged": "Status screen tabs changed. Reopen the screen to apply.",
 
