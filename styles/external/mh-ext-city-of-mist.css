@@ -49,10 +49,10 @@
               § 6 story tag window, scene tags, status tracker, token tooltip
               § 6b roll and chat dialogs
               § 7 sidebar and chrome
-     Written so far: § 1 to § 4. The PC and crew sheets sit on the dark
+     Written so far: § 1 to § 5. The PC and crew sheets sit on the dark
      window (com_sheet_BG); the danger and limited sheets are a torn paper
-     scrap on the plain canvas (com_chat_BG_s), and the item sheets are
-     that canvas.
+     scrap on the plain canvas (com_chat_BG_s), and the item sheets and
+     dialogs are that canvas.
    ========================================================================== */
 
 .style-custom {
@@ -5279,5 +5279,636 @@
   .city-of-mist.sheet.item #move-core .move-conditonal-block > .move-list-input {
     flex: 1;
     min-width: 0;
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     § 5. Dialogs
+     The system's V1 Dialogs opened from the PC, danger and crew sheets:
+       HTMLTools.confirmBox ............ module/tools/confirmation-dialog.hbs
+       HTMLTools.singleChoiceBox ....... module/tools/singleChoiceBox.hbs
+         ("Choose Item", tag / improvement lists, build-up, templates;
+         tag-and-improvement-selector-dialog.html is the same markup)
+       HTMLTools.multiChoiceBox ........ module/tools/multiChoiceBox.hbs
+       CityDialogs.statusDropDialog .... dialogs/status-drop-dialog.hbs
+       CityDialogs.mergeWithStatusDialog dialogs/merge-status-dialog.hbs
+       CityDialogs.themeBookSelector ... dialogs/themebook-selector-dialog.html
+       CitySheet.themeDeleteChoicePrompt (plain text, no template)
+       CityHelpers._statusAddSubDialog . dialogs/status-addition-dialog.html
+         (the + / − buttons on a status)
+       CityDialogs.SHBDialog / BlazeDialog  dialogs/SHB-dialog.html,
+         Blaze-Dialog.hbs (Stop Holding Back)
+
+     Mirrors § 5 of mh-ext-legend.css and mh-ext-otherscape.css: V1
+     Dialogs carry no class of their own, so the root matches each one by
+     its content (a template class, the drop dialog's .face-danger box,
+     confirmBox's lone bare <div> with Yes / No, or the delete prompt's
+     text-only content with one / two / cancel). Core, other modules, the
+     GM move pop-up (§ 3) and the roll dialogs (§ 6b) never match. The two
+     :has() of one branch stay on one line: a line break between them is
+     a descendant combinator.
+
+     The look is the § 4 item sheets', on light paper (never the PC
+     sheet's dark window): the plain canvas (com_chat_BG_s) as the window,
+     small heavy Fira caps labels, pale paper fields in charcoal ink with a
+     charcoal focus, checkboxes and radios that fill charcoal, Rift caps
+     headings over a charcoal rule. Status names are the book's italic
+     green highlight. Buttons are the GM move pop-up's paper keys (§ 3);
+     the confirming one is the PC sheet's charcoal Execute key. Grit noir:
+     no accent colour, the Stop Holding Back warning included (it takes
+     the danger name's heavy black rule instead).
+     ──────────────────────────────────────────────────────────────────────── */
+
+  .app.dialog:is(
+    :has(> .window-content > .dialog-content > :is(
+      .single-choice-box, .multi-choice-box,
+      .themebook-selection-dialog,
+      input.face-danger, .merge-status-dialog, .status-merge-dialog,
+      .SHB-confirm-dialog, .Blaze-dialog
+    )),
+    /* confirmBox (one line: a line break here would be a descendant combinator) */
+    :has(> .window-content > .dialog-content > div:only-child:not([class])):has(> .window-content > .dialog-buttons > .dialog-button.yes + .dialog-button.no:last-child),
+    /* themeDeleteChoicePrompt */
+    :not(:has(> .window-content > .dialog-content > *)):has(> .window-content > .dialog-buttons > .dialog-button.one + .dialog-button.two + .dialog-button.cancel:last-child)
+  ) {
+    --mhx-item-accent: #1f1b17;
+    --mhx-black-rule:  #1f1b17;
+    --mhx-field-bg:    rgba(255, 252, 245, 0.75);           /* the PC move bar's select */
+    --mhx-wash:        rgba(31, 27, 23, 0.07);              /* hovered row */
+    --mhx-wash-on:     rgba(31, 27, 23, 0.15);              /* picked row */
+
+    /* ── Window body: the plain canvas, as the § 4 item sheets ────────── */
+    & .window-content {
+      gap: 0.6em;
+      padding: 0.8em 1.2em 0.9em 1.1em;
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: var(--mhx-paper-art) center / cover no-repeat, var(--mhx-paper-hi);
+      background-blend-mode: normal;
+    }
+
+    & .dialog-content {
+      font-family: var(--mhx-font-body);
+      font-size: 1.05em;
+      line-height: 1.4;
+      color: var(--mhx-ink);
+    }
+
+    & .dialog-content form {
+      margin: 0;
+      font-family: var(--mhx-font-body);
+      color: var(--mhx-ink);
+    }
+
+    /* ── Labels: small heavy Fira caps (as § 4)
+       The drop dialog's existing statuses are names, not captions: they
+       get the highlight below. (:where keeps the exclusion at zero
+       specificity, so the heading and name rules below still win.) */
+    & .dialog-content label:not(:where(br + label:has(+ input.status-selector))) {
+      font-family: var(--mhx-font-label);
+      font-size: 0.85em;
+      font-weight: 900;
+      font-style: normal;
+      line-height: 1.2;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      text-transform: uppercase;
+      color: var(--mhx-ink);
+      text-shadow: none;
+    }
+
+    /* ── Fields: pale paper, charcoal ink and focus (as § 4)
+       Status names are left to the highlight below; :where keeps the
+       number field's rule below winning. */
+    & .dialog-content :is(input:not([type]), input[type=text], input[type=string], input[type=number], select, textarea):not(:where(.status-name, .status-name-input)) {
+      height: 2em;
+      margin: 0;
+      padding: 0 0.5em;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      font-weight: normal;
+      font-style: normal;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: var(--mhx-field-bg);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 2px;
+      box-shadow: none;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    & .dialog-content input[type=number] {
+      width: 3.6em;
+      padding: 0 0.3em;
+      font-family: var(--mhx-font-label);
+      font-weight: 900;
+      font-variant-numeric: lining-nums;
+      text-align: center;
+    }
+
+    & .dialog-content :is(input, select, textarea):focus {
+      border-color: var(--mhx-ink);
+      box-shadow: 0 0 6px rgba(31, 27, 23, 0.3);
+    }
+
+    & .dialog-content :is(input, textarea)::placeholder {
+      color: var(--mhx-ink-dim);
+      opacity: 0.55;
+    }
+
+    & .dialog-content select option {
+      color: var(--mhx-ink);
+      background: var(--mhx-paper);
+    }
+
+    /* Status names: the book's italic green highlight, sized to the name;
+       the block is the field, so focus is a charcoal rim (as § 4) */
+    & .dialog-content :is(input.status-name, input.status-name-input),
+    & .dialog-content > br + label:has(+ input.status-selector) {
+      --mhx-hl: var(--mhx-status);
+      justify-self: start;
+      width: auto;
+      field-sizing: content;
+      min-width: 6em;
+      max-width: 100%;
+      height: auto;
+      margin: 0;
+      padding: 0.05em 0.4em;
+      font-family: var(--mhx-font-body);
+      font-size: 1.15em;
+      font-style: italic;
+      font-weight: normal;
+      line-height: 1.35;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-hl-text);
+      text-shadow: none;
+      background: var(--mhx-hl);
+      border: none;
+      border-radius: 1px;
+      box-shadow: none;
+      outline: none;
+    }
+
+    & .dialog-content :is(input.status-name, input.status-name-input):focus {
+      box-shadow: inset 0 0 0 1.5px var(--mhx-ink);
+    }
+
+    /* Checkbox / radio: a pale paper square (radio: round) in charcoal
+       that fills charcoal when checked (as § 4) */
+    & .dialog-content input:is([type=checkbox], [type=radio]) {
+      appearance: none;
+      flex: none;
+      width: 1.05em;
+      height: 1.05em;
+      margin: 0;
+      padding: 0;
+      vertical-align: -0.15em;
+      cursor: pointer;
+      border: 1.5px solid var(--mhx-line);
+      border-radius: 2px;
+      background: var(--mhx-field-bg);
+      box-shadow: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+    }
+
+    & .dialog-content input[type=radio] {
+      border-radius: 50%;
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio]):hover {
+      box-shadow: 0 0 5px rgba(31, 27, 23, 0.41);
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio]):checked {
+      border-color: var(--mhx-item-accent);
+      background: var(--mhx-item-accent);
+      box-shadow: inset 0 0 0 2px var(--mhx-paper-hi);
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio]):checked:hover {
+      box-shadow: inset 0 0 0 2px var(--mhx-paper-hi), 0 0 5px rgba(31, 27, 23, 0.41);
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio])::before,
+    & .dialog-content input:is([type=checkbox], [type=radio])::after {
+      display: none;
+    }
+
+    /* Tier slider (core range-picker): a charcoal rule, a charcoal key */
+    & .dialog-content range-picker {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      min-width: 0;
+    }
+
+    & .dialog-content range-picker input[type=range] {
+      appearance: none;
+      flex: 1;
+      min-width: 0;
+      height: 1.2em;
+      margin: 0;
+      background: none;
+      border: none;
+      box-shadow: none;
+      cursor: pointer;
+    }
+
+    & .dialog-content range-picker input[type=range]::-webkit-slider-runnable-track {
+      height: 2px;
+      background: linear-gradient(90deg, var(--mhx-line), var(--mhx-line-faint));
+    }
+
+    & .dialog-content range-picker input[type=range]::-webkit-slider-thumb {
+      appearance: none;
+      width: 0.65em;
+      height: 1.15em;
+      margin-top: calc(1px - 0.575em);
+      border: none;
+      border-radius: 2px;
+      background: linear-gradient(180deg, #3a342e, #1f1b17);
+      box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.12), 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    & .dialog-content range-picker input[type=range]:is(:hover, :focus)::-webkit-slider-thumb {
+      box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.18), 0 0 5px rgba(31, 27, 23, 0.5);
+    }
+
+    & .dialog-content range-picker input[type=number] {
+      font-family: var(--mhx-font-label);
+      font-weight: 900;
+    }
+
+    & .dialog-content hr {
+      height: 1px;
+      margin: 0.35em 0;
+      border: none;
+      background: linear-gradient(90deg, var(--mhx-line-dim), transparent 85%);
+    }
+
+    /* ── Buttons: the GM move pop-up's paper keys (§ 3); the confirming
+       one the PC sheet's charcoal Execute key. They wrap instead of
+       truncating. ──────────────────────────────────────────────────────── */
+    & .dialog-buttons {
+      flex: none;
+      gap: 0.5em;
+      margin-top: 0.2em;
+    }
+
+    & .dialog-buttons .dialog-button {
+      height: auto;
+      min-height: 2.1em;
+      margin: 0;
+      padding: 0.25em 0.6em;
+      line-height: 1.15;
+      white-space: normal;
+      font-family: var(--mhx-font-label);
+      font-size: 1em;
+      font-weight: 900;
+      font-variant: normal;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: linear-gradient(to bottom, var(--mhx-paper-hi) 0%, var(--mhx-paper-lo) 100%);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 2px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 2px rgba(30, 24, 18, 0.25);
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+    }
+
+    & .dialog-buttons .dialog-button:is(:hover, :focus-visible) {
+      border-color: var(--mhx-ink);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 4px rgba(30, 24, 18, 0.4);
+    }
+
+    & .dialog-buttons :is(
+      .dialog-button.yes,
+      .dialog-button.add
+    ),
+    &:has(:is(.single-choice-box, .multi-choice-box, .themebook-selection-dialog, .SHB-confirm-dialog, .Blaze-dialog)) .dialog-buttons .dialog-button.one,
+    &:not(:has(> .window-content > .dialog-content > *)) .dialog-buttons .dialog-button.two {
+      color: #efe9df;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(180deg, #3a342e, #1f1b17);
+      border: none;
+      box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.12), 0 1px 3px rgba(0, 0, 0, 0.4);
+
+      &:is(:hover, :focus-visible) {
+        color: #fff;
+        background: linear-gradient(180deg, #4a433b, #2a2520);
+        box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.18), 0 1px 5px rgba(0, 0, 0, 0.55);
+      }
+    }
+
+    /* ── Single / multi choice list: pale paper rows, the picked one
+       washed in charcoal with a charcoal edge ──────────────────────────── */
+    & :is(.single-choice-box, .multi-choice-box) {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    /* The template puts <div>s between <tr>s; the parser hoists them out */
+    & :is(.single-choice-box, .multi-choice-box) > .item-to-add {
+      display: none;
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) {
+      width: 100%;
+      margin: 0;
+      border: none;
+      border-collapse: separate;
+      border-spacing: 0 3px;
+      background: none;
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) :is(tbody, tr) {
+      background: none;
+      border: none;
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) td {
+      padding: 0.3em 0.55em;
+      vertical-align: middle;
+      text-align: left;
+      background: var(--mhx-field-bg);
+      border: none;
+      border-top: 1px solid var(--mhx-line-faint);
+      border-bottom: 1px solid var(--mhx-line-faint);
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) td:first-child {
+      width: 1.05em;
+      padding-right: 0.2em;
+      border-left: 2px solid var(--mhx-line-dim);
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) td:last-child {
+      border-right: 1px solid var(--mhx-line-faint);
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) tr:hover td {
+      background: linear-gradient(90deg, var(--mhx-wash), transparent), var(--mhx-field-bg);
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) tr:has(input:checked) td {
+      background: linear-gradient(90deg, var(--mhx-wash-on), var(--mhx-wash)), var(--mhx-field-bg);
+      border-color: var(--mhx-line-dim);
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) tr:has(input:checked) td:first-child {
+      border-left-color: var(--mhx-item-accent);
+    }
+
+    & .single-choice-item-data {
+      font-family: var(--mhx-font-body);
+      color: var(--mhx-ink);
+    }
+
+    & tr:has(input:checked) .single-choice-item-data {
+      font-weight: 700;
+    }
+
+    & .single-choice-item-data:is([title]:not([title=""])) {
+      cursor: help;
+      text-decoration: underline dotted var(--mhx-line-dim);
+      text-underline-offset: 0.2em;
+    }
+
+    /* ── Themebook selector: a two-column pick list ───────────────────── */
+    & .themebook-selection-dialog {
+      display: block;
+    }
+
+    & #themebook-choices {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(10.5em, 1fr));
+      gap: 3px 0.5em;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    & #themebook-choices > div {
+      display: flex;
+      align-items: center;
+      gap: 0.55em;
+      min-width: 0;
+      padding: 0.3em 0.55em;
+      background: var(--mhx-field-bg);
+      border: 1px solid var(--mhx-line-faint);
+      border-left: 2px solid var(--mhx-line-dim);
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    & #themebook-choices > div:hover {
+      background: linear-gradient(90deg, var(--mhx-wash), transparent), var(--mhx-field-bg);
+    }
+
+    & #themebook-choices > div:has(input:checked) {
+      background: linear-gradient(90deg, var(--mhx-wash-on), var(--mhx-wash)), var(--mhx-field-bg);
+      border-color: var(--mhx-line-dim);
+      border-left-color: var(--mhx-item-accent);
+    }
+
+    /* Theme kit: last, full width, set apart */
+    & #themebook-choices > div:last-child {
+      grid-column: 1 / -1;
+      margin-top: 0.3em;
+      border-style: dashed solid dashed solid;
+    }
+
+    /* Names, not captions: the cards' title face in sentence case.
+       (#themebook-choices lifts this over the label caps above.) */
+    & #themebook-choices .themebook-selector-themebook-name {
+      overflow: hidden;
+      font-family: var(--mhx-font-label);
+      font-size: 1.05em;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: var(--mhx-ink);
+      cursor: pointer;
+    }
+
+    & #themebook-choices > div:has(input:checked) .themebook-selector-themebook-name {
+      font-weight: 900;
+    }
+
+    & #themebook-choices > div:last-child .themebook-selector-themebook-name {
+      font-style: italic;
+      color: var(--mhx-ink-dim);
+    }
+
+    & .themebook-selection-dialog + hr {
+      display: none;
+    }
+
+    /* ── Status drop: label / field grid (as § 4) ─────────────────────── */
+    & .dialog-content:has(> input.face-danger) {
+      display: grid;
+      grid-template-columns: minmax(7em, max-content) minmax(0, 1fr);
+      align-items: center;
+      gap: 0.45em 0.9em;
+
+      & > * {
+        grid-column: 1 / -1;
+        min-width: 0;
+        margin: 0;
+      }
+
+      & > label {
+        grid-column: 1;
+      }
+
+      & > :is(label + input, input.face-danger + range-picker) {
+        grid-column: 2;
+      }
+
+      & > label + input:is([type=checkbox], [type=radio]) {
+        justify-self: start;
+      }
+
+      & > br {
+        display: none;
+      }
+
+      /* Existing statuses to merge into: green highlights (above), the
+         names, not captions */
+      & > br + label:has(+ input.status-selector) {
+        font-size: 1em;
+        cursor: default;
+      }
+    }
+
+    /* ── Merge status: heading, name, tier ────────────────────────────── */
+    & .merge-status-dialog {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+
+      /* The section heading of § 4: Rift caps over a 2px charcoal rule */
+      & > label {
+        margin: 0 0 0.1em;
+        padding: 0 0 0.1em;
+        font-family: var(--mhx-font-title);
+        font-size: 1.35em;
+        font-weight: normal;
+        line-height: 1.1;
+        letter-spacing: 0.03em;
+        border-bottom: 2px solid var(--mhx-black-rule);
+      }
+
+      & > input.status-name {
+        align-self: flex-start;
+      }
+    }
+
+    /* ── Status + / − : name, hint, tier keys ─────────────────────────── */
+    & .status-merge-dialog {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      align-items: center;
+      gap: 0.45em 0.9em;
+
+      & > * {
+        grid-column: 1 / -1;
+        margin: 0;
+      }
+
+      & > label {
+        grid-column: 1;
+      }
+
+      & > label + input {
+        grid-column: 2;
+      }
+
+      & > .status-add-message {
+        font-style: italic;
+        color: var(--mhx-ink-dim);
+      }
+    }
+
+    /* The tiers 1–6: square paper keys with heavy Fira digits that turn
+       charcoal on hover */
+    &:has(.status-merge-dialog) .dialog-buttons .dialog-button:not(.cancel) {
+      flex: 0 0 2.4em;
+      padding: 0;
+      font-size: 1.15em;
+      font-variant-numeric: lining-nums;
+      letter-spacing: 0;
+    }
+
+    &:has(.status-merge-dialog) .dialog-buttons .dialog-button:not(.cancel):is(:hover, :focus-visible) {
+      color: #efe9df;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(180deg, #3a342e, #1f1b17);
+      border-color: #1f1b17;
+    }
+
+    /* ── Stop Holding Back / Blaze: the warning under the danger name's
+       heavy black rule, in Rift caps ──────────────────────────────────── */
+    & :is(.SHB-confirm-dialog, .Blaze-dialog) {
+      display: block;
+      margin: 0;
+      line-height: 1.9;
+    }
+
+    & .SHB-warning {
+      margin: 0 0 0.6em;
+      padding: 0 0 0.3em;
+      font-family: var(--mhx-font-title);
+      font-size: 1.2em;
+      font-weight: normal;
+      line-height: 1.2;
+      letter-spacing: 0.03em;
+      text-align: left;
+      text-transform: uppercase;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: none;
+      border: none;
+      border-bottom: 4px solid var(--mhx-black-rule);
+
+      & > br {
+        display: none;
+      }
+
+      /* The second line (a <br> sits between the two <div>s) */
+      & > div ~ div {
+        margin-top: 0.2em;
+        font-family: var(--mhx-font-body);
+        font-size: 0.8em;
+        font-style: italic;
+        letter-spacing: normal;
+        text-transform: none;
+      }
+    }
+
+    & .SHB-choice-label {
+      display: block;
+      margin: 0;
+    }
+
+    & .SHB-choice-label + br {
+      display: none;
+    }
+
+    & .SHB-selector {
+      margin-right: 0.45em;
+    }
+
+    & .Blaze-dialog select {
+      width: 100%;
+    }
   }
 }
