@@ -1345,13 +1345,13 @@
      The night city: com_sheet_BG (dark violet brush strokes) covers the
      window, so the paper theme cards stand off it. Text that sits on the
      window itself is re-inked pale in "On the dark window" below. */
-  .city.sheet:has(> .window-content > .actor-sheet) > .window-content {
+  .city.sheet:has(> .window-content > :is(.actor-sheet, .crew-sheet)) > .window-content {
     background: url(/modules/mist-hud/ui/com_sheet_BG.webp) center / cover no-repeat, #1b1030;
   }
 
   /* ── Sheet body ─────────────────────────────────────────────────────── */
 
-  .city.sheet .actor-sheet {
+  .city.sheet :is(.actor-sheet, .crew-sheet) {
     font-family: var(--mhx-font-body);
     letter-spacing: normal;
     text-transform: none;
@@ -1359,25 +1359,25 @@
     text-shadow: none;
   }
 
-  .city.sheet .actor-sheet a {
+  .city.sheet :is(.actor-sheet, .crew-sheet) a {
     color: var(--mhx-ink-dim);
     text-shadow: none;
     transition: color 0.15s, text-shadow 0.15s;
   }
 
-  .city.sheet .actor-sheet a:hover {
+  .city.sheet :is(.actor-sheet, .crew-sheet) a:hover {
     color: var(--mhx-ink);
     text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
   }
 
-  .city.sheet .actor-sheet .fa-disabled {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .fa-disabled {
     color: var(--mhx-ink-dim);
     opacity: 0.3;
   }
 
   /* ── Header ────────────────────────────────────────────────────────── */
 
-  .city.sheet .actor-sheet header.sheet-header {
+  .city.sheet :is(.actor-sheet, .crew-sheet) header.sheet-header {
     gap: 0.6em;
     padding: 0.4em 0.5em 0.5em;
     border-bottom: 1px solid var(--mhx-line-faint);
@@ -1385,7 +1385,7 @@
   }
 
   /* Portrait: charcoal corner brackets, as a pinned photo */
-  .city.sheet .actor-sheet .image-block {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .image-block {
     position: relative;
     align-self: center;
     padding: 4px;
@@ -1396,7 +1396,7 @@
       linear-gradient(var(--mhx-line), var(--mhx-line)) bottom right / 1px 12px no-repeat;
   }
 
-  .city.sheet .actor-sheet header.sheet-header img.profile-img {
+  .city.sheet :is(.actor-sheet, .crew-sheet) header.sheet-header img.profile-img {
     display: block;
     border: 1px solid var(--mhx-line-dim);
     border-radius: 0;
@@ -1404,14 +1404,14 @@
     box-shadow: 0 1px 6px rgba(20, 16, 12, 0.35);
   }
 
-  .city.sheet .actor-sheet .character-basic-info {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .character-basic-info {
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 0.3em;
   }
 
-  .city.sheet .actor-sheet .header-row {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .header-row {
     align-items: baseline;
     margin: 0;
     padding: 0;
@@ -1420,7 +1420,7 @@
 
   /* Name: Rift Bold caps in charcoal (drops Phase 1's white letters with
      the orange / purple offset shadows) */
-  .city.sheet .actor-sheet input.character-name {
+  .city.sheet :is(.actor-sheet, .crew-sheet) input.character-name {
     height: auto;
     font-family: var(--mhx-font-title);
     font-size: 2.6em;
@@ -1437,7 +1437,7 @@
 
   /* Mythos ♦ Logos: the typed case-file line (com.css gives them Rift
      Bold with Mythos / Logos glows) */
-  .city.sheet .actor-sheet :is(input.mythos-name, input.logos-name) {
+  .city.sheet :is(.actor-sheet, .crew-sheet) :is(input.mythos-name, input.logos-name) {
     height: auto;
     font-family: var(--mhx-font-body);
     font-size: 1.05em;
@@ -1451,7 +1451,7 @@
     border-radius: 0;
   }
 
-  .city.sheet .actor-sheet .separator-icon {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .separator-icon {
     flex: none;
     padding: 0 0.4em;
     font-size: 0.8em;
@@ -1459,7 +1459,7 @@
     text-shadow: none;
   }
 
-  .city.sheet .actor-sheet input.short-description {
+  .city.sheet :is(.actor-sheet, .crew-sheet) input.short-description {
     width: 100%;
     font-family: var(--mhx-font-body);
     font-size: 1em;
@@ -1472,18 +1472,18 @@
     border-radius: 0;
   }
 
-  .city.sheet .actor-sheet header.sheet-header input:focus {
+  .city.sheet :is(.actor-sheet, .crew-sheet) header.sheet-header input:focus {
     box-shadow: none;
     border-bottom: 1px solid var(--mhx-ink);
   }
 
-  .city.sheet .actor-sheet header.sheet-header input::placeholder {
+  .city.sheet :is(.actor-sheet, .crew-sheet) header.sheet-header input::placeholder {
     color: var(--mhx-ink-dim);
     opacity: 0.6;
   }
 
   /* Lock and info buttons */
-  .city.sheet .actor-sheet .header-right-side {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .header-right-side {
     flex: 0 0 auto;
     max-width: none;
     flex-direction: column;
@@ -1492,11 +1492,11 @@
     gap: 0.5em;
   }
 
-  .city.sheet .actor-sheet .header-right-side * {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .header-right-side * {
     flex-shrink: 0;
   }
 
-  .city.sheet .actor-sheet .lock-button {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .lock-button {
     margin: 0;
     padding: 0;
     max-width: none;
@@ -1506,13 +1506,13 @@
     border-radius: 0;
   }
 
-  .city.sheet .actor-sheet .lock-button:hover {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .lock-button:hover {
     background: none;
   }
 
   /* The lock: a paper key; unlocked, it is inked charcoal */
-  .city.sheet .actor-sheet .pushable,
-  .city.sheet .actor-sheet .pushable.unlocked {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable,
+  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable.unlocked {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1527,13 +1527,13 @@
       0 1px 2px rgba(30, 24, 18, 0.25);
   }
 
-  .city.sheet .actor-sheet .pushable.unlocked {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable.unlocked {
     background: linear-gradient(180deg, #3a342e, #1f1b17);
     border-color: #111;
     box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.12), 0 1px 3px rgba(0, 0, 0, 0.4);
   }
 
-  .city.sheet .actor-sheet .pushable .front {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable .front {
     padding: 0;
     font-size: 1.05rem;
     transform: none;
@@ -1541,15 +1541,15 @@
     background: none;
   }
 
-  .city.sheet .actor-sheet .pushable.unlocked .front {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable.unlocked .front {
     color: #efe9df;
   }
 
-  .city.sheet .actor-sheet .pushable:active .front {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable:active .front {
     transform: translateY(1px);
   }
 
-  .city.sheet .actor-sheet .open-tutorial {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .open-tutorial {
     font-size: 1.1em;
   }
 
@@ -2998,7 +2998,7 @@
      move picker, lock key, empty slots) takes a pale ink; the cards and
      paper notes keep their charcoal. Rules come last so they override the
      paper-ink rules above at equal specificity. */
-  .city.sheet .actor-sheet :is(
+  .city.sheet :is(.actor-sheet, .crew-sheet) :is(
     header.sheet-header,
     nav.sheet-tabs,
     .section-header,
@@ -3012,19 +3012,71 @@
     --mhx-lift:       0 1px 2px rgba(0, 0, 0, 0.7);
   }
 
+  /* Crew sheet: the name as the PC's (Rift Bold caps, pale ink; drops
+     Phase 1's brown letters with the white / orange glow) and the
+     "Themes" heading as the PC's section headings */
+  .city.sheet .crew-sheet input#crew-name {
+    height: auto;
+    font-family: var(--mhx-font-title);
+    font-size: 2.6em;
+    font-weight: normal;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #ece6f2;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(236, 230, 242, 0.18);
+    border-radius: 0;
+  }
+
+  .city.sheet .crew-sheet input#crew-name:focus {
+    box-shadow: none;
+    border-bottom-color: #ece6f2;
+  }
+
+  .city.sheet .crew-sheet .theme-section > h1.item-block {
+    margin: 0.4em 0 0.5em;
+    padding: 0 0 0.15em;
+    font-family: var(--mhx-font-title);
+    font-size: 1.5em;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: left;
+    color: #ece6f2;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    border: none;
+    border-bottom: 1px solid rgba(236, 230, 242, 0.55);
+  }
+
+  .city.sheet .crew-sheet .theme-section > h1.item-block p {
+    margin: 0;
+  }
+
+  .city.sheet .crew-sheet .theme-section > h1.item-block a {
+    font-size: 0.6em;
+    color: rgba(236, 230, 242, 0.65);
+  }
+
+  .city.sheet .crew-sheet .theme-section > h1.item-block a:hover {
+    color: #ece6f2;
+  }
+
   /* Move picker: a smoked-glass field on the dark art */
-  .city.sheet .actor-sheet .move-section select {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .move-section select {
     color: #ece6f2;
     background: rgba(14, 8, 26, 0.72);
     border-color: rgba(236, 230, 242, 0.3);
   }
 
-  .city.sheet .actor-sheet .move-section select:focus {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .move-section select:focus {
     border-color: rgba(236, 230, 242, 0.6);
     box-shadow: 0 0 4px rgba(236, 230, 242, 0.25);
   }
 
-  .city.sheet .actor-sheet .move-section select option {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .move-section select option {
     color: #ece6f2;
     background: #1b1030;
   }
@@ -3032,24 +3084,24 @@
   /* Tabs: the themebook's neon sign, solid. Muted pink when off, a
      white-pink tube with a pink bloom when active (text-fill-color so a
      system colour can't override it). */
-  .city.sheet .actor-sheet nav.sheet-tabs {
+  .city.sheet :is(.actor-sheet, .crew-sheet) nav.sheet-tabs {
     --mhx-neon:      #ff2aa6;
     --mhx-neon-hi:   #ff6cc4;
     border-color: rgba(255, 42, 166, 0.3);
   }
 
-  .city.sheet .actor-sheet nav.sheet-tabs .item {
+  .city.sheet :is(.actor-sheet, .crew-sheet) nav.sheet-tabs .item {
     -webkit-text-fill-color: #d9a3c8;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
     transition: -webkit-text-fill-color 0.15s, text-shadow 0.15s;
   }
 
-  .city.sheet .actor-sheet nav.sheet-tabs .item:hover {
+  .city.sheet :is(.actor-sheet, .crew-sheet) nav.sheet-tabs .item:hover {
     -webkit-text-fill-color: var(--mhx-neon-hi);
     text-shadow: 0 0 6px rgba(255, 42, 166, 0.45);
   }
 
-  .city.sheet .actor-sheet nav.sheet-tabs .item.active {
+  .city.sheet :is(.actor-sheet, .crew-sheet) nav.sheet-tabs .item.active {
     -webkit-text-fill-color: #ffe0f2;
     text-shadow:
       0 0 3px var(--mhx-neon),
@@ -3061,7 +3113,7 @@
   }
 
   /* Lock key: smoked glass with a pale glyph; unlocked, the tube lights */
-  .city.sheet .actor-sheet .pushable {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable {
     background: linear-gradient(180deg, rgba(48, 32, 72, 0.9), rgba(20, 12, 36, 0.9));
     border: 1px solid rgba(236, 230, 242, 0.28);
     box-shadow:
@@ -3069,11 +3121,11 @@
       0 1px 3px rgba(0, 0, 0, 0.5);
   }
 
-  .city.sheet .actor-sheet .pushable .front {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable .front {
     color: #ece6f2;
   }
 
-  .city.sheet .actor-sheet .pushable.unlocked {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable.unlocked {
     background: linear-gradient(180deg, rgba(70, 18, 60, 0.9), rgba(30, 8, 30, 0.9));
     border-color: #ff2aa6;
     box-shadow:
@@ -3081,13 +3133,13 @@
       0 0 8px rgba(255, 42, 166, 0.55);
   }
 
-  .city.sheet .actor-sheet .pushable.unlocked .front {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable.unlocked .front {
     color: #ff6cc4;
     text-shadow: 0 0 4px #ff2aa6, 0 0 10px rgba(255, 42, 166, 0.6);
   }
 
   /* Placeholders on the dark art: legible but clearly empty */
-  .city.sheet .actor-sheet header.sheet-header input::placeholder {
+  .city.sheet :is(.actor-sheet, .crew-sheet) header.sheet-header input::placeholder {
     color: rgba(236, 230, 242, 0.5);
     opacity: 1;
   }
