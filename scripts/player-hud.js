@@ -19,6 +19,7 @@ import {
   getJuiceAndClues, getEssence, getThemeTypeCounts, getLoadoutTags, getAllLoadoutTags, getLoadoutWeaknessTags, getRelationshipTags,
 } from "./getters.js";
 import { BonusManager } from "./bonus-manager.js";
+import { attachFoldBehaviour, scheduleFold, cancelFold } from "./hud-fold.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -130,14 +131,16 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   _loadoutBusy = false;
 
   constructor(actor, options = {}) {
-    super(options);
+    const key = hudKey(actor);
+    // One window per character (own DOM id), reopened where the user left it.
+    super(foundry.utils.mergeObject({ id: `mist-hud-${key}`, position: startPosition(key) }, options));
     this.actor = actor;
-    this.key   = hudKey(actor);
+    this.key   = key;
     playerHudRegistry.set(this.key, this);
   }
 
   static DEFAULT_OPTIONS = {
-    id:      "mist-hud",
+    // id is set per character in the constructor (mist-hud-<hudKey>)
     classes: ["player-hud", "mist-hud", "mh-hud"],
     window: {
       frame:       true,
@@ -158,9 +161,13 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     event.preventDefault();
     const wide = !game.settings.get(MODULE_ID, SETTINGS.WIDE_LAYOUT);
     await game.settings.set(MODULE_ID, SETTINGS.WIDE_LAYOUT, wide);
-    this._applyWideLayout($(this.element));
-    // Re-clamp to the viewport: the window doubles in width.
-    this.setPosition();
+    // The layout is one setting for every HUD this user has open
+    for (const hud of playerHudRegistry.values()) {
+      if (!hud.rendered) continue;
+      hud._applyWideLayout($(hud.element));
+      // Re-clamp to the viewport: the window doubles in width.
+      hud.setPosition();
+    }
   }
 
   /** Apply the stored layout to the window and its header toggle. */
@@ -1386,13 +1393,26 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-  /** Keep the loadout popup attached to its header when the HUD moves. */
+  async _onFirstRender(context, options) {
+    await super._onFirstRender(context, options);
+    attachFoldBehaviour(this);
+  }
+
+  /** Keep the loadout popup attached to its header when the HUD moves, and remember where it is. */
   _onPosition(position) {
     super._onPosition?.(position);
     if (this._loadoutPopup) this._positionLoadoutPopup();
+    this._savePosition ??= foundry.utils.debounce(() => savePosition(this.key, this.position), 500);
+    this._savePosition();
+  }
+
+  async maximize() {
+    await super.maximize();
+    scheduleFold(this);
   }
 
   async close(options) {
+    cancelFold(this);
     this._closeLoadoutPopup();
     this._cancelTooltipHide();
     $(".mh-tooltip").remove();
@@ -1414,4 +1434,56 @@ export function getOrCreateHud(actor) {
   const existing = playerHudRegistry.get(hudKey(actor));
   if (existing) return existing;
   return new PlayerHUD(actor);
+}
+
+/**
+ * Show an actor's HUD: open it, or unfold it and bring it to the front.
+ * @param {CityActor} actor
+ * @returns {PlayerHUD|null}
+ */
+export function openHud(actor) {
+  const hud = getOrCreateHud(actor);
+  if (!hud) return null;
+  if (!hud.rendered) hud.render({ force: true });
+  else {
+    if (hud.minimized) hud.maximize();
+    hud.bringToFront();
+  }
+  return hud;
+}
+
+/**
+ * Keyboard shortcut: unfold/open the HUD, or fold it when it is already showing.
+ * @param {CityActor} actor
+ */
+export function toggleHud(actor) {
+  const hud = playerHudRegistry.get(hudKey(actor));
+  if (hud?.rendered && !hud.minimized) return hud.minimize();
+  return openHud(actor);
+}
+
+// ── Saved positions ──────────────────────────────────────────────────────────
+// Per character (hudKey), per user and browser: a client setting.
+
+function savedPositions() {
+  try { return game.settings.get(MODULE_ID, SETTINGS.HUD_POSITIONS) ?? {}; }
+  catch { return {}; }
+}
+
+function savePosition(key, { left, top } = {}) {
+  if (!key || !Number.isFinite(left) || !Number.isFinite(top)) return;
+  const all = savedPositions();
+  const prev = all[key];
+  if (prev && prev.left === Math.round(left) && prev.top === Math.round(top)) return;
+  game.settings.set(MODULE_ID, SETTINGS.HUD_POSITIONS,
+    { ...all, [key]: { left: Math.round(left), top: Math.round(top) } });
+}
+
+/** Saved spot, or the default one cascaded past the HUDs already open. */
+function startPosition(key) {
+  const saved = savedPositions()[key];
+  if (saved && Number.isFinite(saved.left) && Number.isFinite(saved.top)) return { left: saved.left, top: saved.top };
+  const base = PlayerHUD.DEFAULT_OPTIONS.position;
+  const offset = 32 * ([...playerHudRegistry.values()].filter(h => h.rendered).length % 10);
+  return { left: base.left + offset, top: base.top + offset };
 }

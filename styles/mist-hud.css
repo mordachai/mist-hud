@@ -66,7 +66,9 @@
 }
 
 /* Main HUD container */
-#mist-hud {
+/* The id never matches (each character HUD has its own id, mist-hud-<key>);
+   it is kept inside :is() so these rules keep id-level priority. */
+:is(#mist-hud, .player-hud) {
   position: absolute;
   z-index: 2;
   border: 1px solid var(--mist-border-color);
@@ -80,7 +82,7 @@
   overflow: visible !important;
 }
 
-#mist-hud .window-app {
+:is(#mist-hud, .player-hud) .window-app {
 padding: 0;
 margin: 0;
 list-style: none;
@@ -89,7 +91,7 @@ background: none;
 border: none;
 }
 
-#mist-hud .app {
+:is(#mist-hud, .player-hud) .app {
   padding: 0;
   margin: 0;
   list-style: none;
@@ -100,14 +102,14 @@ border: none;
 
 
 /* ApplicationV2 clips its frame; the portrait and roll bar float outside it */
-#mist-hud.application,
-#mist-hud .window-header {
+:is(#mist-hud, .player-hud).application,
+:is(#mist-hud, .player-hud) .window-header {
   overflow: visible !important;
   contain: none !important;
 }
 
 /* Customize the Foundry header */
-#mist-hud .window-header {
+:is(#mist-hud, .player-hud) .window-header {
   background: var(--hud-bg-color);
   display: flex;
   flex-basis: 35px;
@@ -121,7 +123,7 @@ border: none;
   padding-left: 30px;
 }
 
-#mist-hud ul {
+:is(#mist-hud, .player-hud) ul {
   padding: 3px;
   margin: 0;
   list-style: none;
@@ -145,7 +147,7 @@ border: none;
   transition: ease-in, top, 0.2s;
 }
 
-#mist-hud.minimized .mh-token-image {
+:is(#mist-hud, .player-hud).minimized .mh-token-image {
   top: -13px;
   transition: ease-in, top, 0.2s;
 }
@@ -158,7 +160,7 @@ border: none;
 }
 
 /* Character name */
-#mist-hud .mh-char-name {
+:is(#mist-hud, .player-hud) .mh-char-name {
   font-size: 1.4rem;
   font-family: var(--font-family-move);
   filter: drop-shadow(1px 2px 3px var(--mythos-dark-color));
@@ -168,51 +170,51 @@ border: none;
   padding-top: 3px;
 }
 
-#mist-hud.minimized .mh-char-name {
+:is(#mist-hud, .player-hud).minimized .mh-char-name {
   margin-left: 0px;
 }
 
 /* Header order: name first, native controls (⋮ / minimize / close) at the right */
-#mist-hud .window-header .mh-char-name { order: 0; }
-#mist-hud .window-header .header-control,
-#mist-hud .window-header .window-icon { order: 1; flex: 0 0 auto; }
-#mist-hud .window-header .header-control { color: #fff; }
-#mist-hud .window-header .mh-wide-toggle.active { color: var(--color-warm-1, #ff6400); }
+:is(#mist-hud, .player-hud) .window-header .mh-char-name { order: 0; }
+:is(#mist-hud, .player-hud) .window-header .header-control,
+:is(#mist-hud, .player-hud) .window-header .window-icon { order: 1; flex: 0 0 auto; }
+:is(#mist-hud, .player-hud) .window-header .header-control { color: #fff; }
+:is(#mist-hud, .player-hud) .window-header .mh-wide-toggle.active { color: var(--color-warm-1, #ff6400); }
 
 /* Wide layout (header toggle, player-hud.js _applyWideLayout): two columns of
    the normal one-column width — themes in pairs, then loadout | story tags,
    statuses across both. The grid lives inside .mh-content-container, so there
    is still a single scrollbar for the whole content. */
-#mist-hud.mh-wide {
+:is(#mist-hud, .player-hud).mh-wide {
   min-width: 500px;
   max-width: 600px !important;
 }
 
-#mist-hud.mh-wide .mh-content {
+:is(#mist-hud, .player-hud).mh-wide .mh-content {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
   column-gap: 4px;
 }
 
-#mist-hud.mh-wide .mh-content > .mh-statuses-container {
+:is(#mist-hud, .player-hud).mh-wide .mh-content > .mh-statuses-container {
   grid-column: 1 / -1;
 }
 
 /* Themes (any count, extra themes included) fill the rows in pairs; the
    loadout always starts a new row in column 1, so an odd last theme leaves
    its partner cell empty instead of pushing loadout | tags out of line. */
-#mist-hud.mh-wide .mh-content > .mh-loadout-container {
+:is(#mist-hud, .player-hud).mh-wide .mh-content > .mh-loadout-container {
   grid-column: 1;
 }
 
 /* No loadout (City of Mist): the story tags take the whole row */
-#mist-hud.mh-wide .mh-content > .mh-story-tags-wide {
+:is(#mist-hud, .player-hud).mh-wide .mh-content > .mh-story-tags-wide {
   grid-column: 1 / -1;
 }
 
 /* Collapse Buttons */
-#mist-hud .mh-collapse-button {
+:is(#mist-hud, .player-hud) .mh-collapse-button {
   font-size: 1.2rem;
   color: #ffffff;
   cursor: pointer;
@@ -220,12 +222,12 @@ border: none;
   flex: 1;
 }
 
-#mist-hud .mh-collapse-button:hover{
+:is(#mist-hud, .player-hud) .mh-collapse-button:hover{
   opacity: 0.8;
 }
 
 /* Close Buttons */
-#mist-hud .mh-close-button {
+:is(#mist-hud, .player-hud) .mh-close-button {
   font-size: 1.2rem;
   color: #ffffff;
   cursor: pointer;
@@ -235,12 +237,12 @@ border: none;
   margin-left: 5px;
 }
 
-#mist-hud .mh-close-button:hover {
+:is(#mist-hud, .player-hud) .mh-close-button:hover {
   opacity: 0.8;
 }
 
 /* Main Content Area */
-#mist-hud .window-content {
+:is(#mist-hud, .player-hud) .window-content {
   padding: 0;
   margin: 0;
   margin-top: 3px;
@@ -252,7 +254,7 @@ border: none;
   overflow: visible !important;
 }
 
-#mist-hud .mh-content {
+:is(#mist-hud, .player-hud) .mh-content {
 overflow: visible !important;
 }
 
@@ -260,12 +262,12 @@ overflow: visible !important;
   display: block !important; /* Ensure all elements remain visible */
 }
 
-#mist-hud.minimized .window-content {
+:is(#mist-hud, .player-hud).minimized .window-content {
   display: none !important;
 }
 
 /* The 500px min-height must not survive minimizing, or an empty frame stays behind */
-#mist-hud.minimized {
+:is(#mist-hud, .player-hud).minimized {
   min-height: 0 !important;
   height: auto !important;
   background: none !important;
@@ -278,11 +280,31 @@ overflow: visible !important;
 }
 
 /* Minimized state header */
-#mist-hud.minimized .window-header {
+:is(#mist-hud, .player-hud).minimized .window-header {
   height: 50px;
   overflow: visible; /* Allow overflow */
   min-width: fit-content;
   padding-left: 40px;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+/* Folded: portrait, the full name and close only. The frame hugs the name
+   instead of keeping the open width (core leaves the px width inline, and
+   the max-width above is !important, so it would never shrink). */
+:is(#mist-hud, .player-hud).minimized {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+:is(#mist-hud, .player-hud).minimized .window-header .mh-char-name {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+:is(#mist-hud, .player-hud).minimized .window-header .header-control:not([data-action="close"]) {
+  display: none !important;
 }
 
 
@@ -1270,15 +1292,15 @@ hr {
   overflow: visible !important;
 }
 
-/* Fill the window even when the content is shorter than #mist-hud's
+/* Fill the window even when the content is shorter than the HUD's
    min-height (e.g. the wide layout), so the tinted background reaches the
    footer instead of leaving a bare strip. */
-#mist-hud .window-content > .mh-hud {
+:is(#mist-hud, .player-hud) .window-content > .mh-hud {
   flex: 1 1 auto;
   min-height: 0;
 }
 
-#mist-hud,
+:is(#mist-hud, .player-hud),
 .mh-hud {
   overflow: visible !important;
 }

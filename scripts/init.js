@@ -3,8 +3,9 @@
 // All Hooks.on / Hooks.once calls live here.
 // Other files export classes/functions; this file wires them to Foundry events.
 
-import { MODULE_ID, SOCKET_NAME, getActiveSystem } from "./constants.js";
-import { playerHudRegistry, getOrCreateHud, sys, systemReady } from "./player-hud.js";
+import { MODULE_ID, SETTINGS, SOCKET_NAME, getActiveSystem } from "./constants.js";
+import { playerHudRegistry, openHud, toggleHud, sys, systemReady } from "./player-hud.js";
+import { NpcHUD } from "./npc-hud.js";
 import { hudKey } from "./hud-state.js";
 import { BonusManager }              from "./bonus-manager.js";
 import { StatusScreen }              from "./status-screen.js";
@@ -24,8 +25,13 @@ Hooks.once("ready", () => {
   globalThis.openStatusScreen         = () => StatusScreen.open();
   globalThis.openNPCInfluenceManager  = openNPCInfluenceManager;
 
-  // Clear the load guard after a short delay
-  setTimeout(() => { _gameJustLoaded = false; }, 2000);
+  // Clear the load guard after a short delay, then show the player's own
+  // character HUD (it follows the player; see "openOnSelect").
+  setTimeout(() => {
+    _gameJustLoaded = false;
+    const own = game.user.character;
+    if (!game.user.isGM && own?.type === "character" && own.isOwner && _openOnSelect()) openHud(own);
+  }, 2000);
 
   // Register socket listener for NPC influence data
   game.socket.on(SOCKET_NAME, data => {
@@ -41,34 +47,109 @@ Hooks.once("ready", () => {
   globalThis.activeNpcInfluences ??= {};
 });
 
-// ── Token control ─────────────────────────────────────────────────────────────
-Hooks.on("controlToken", (token, controlled) => {
-  if (_gameJustLoaded) return;
+// ── Opening the HUDs ──────────────────────────────────────────────────────────
+// HUDs stay open until closed by hand (several at once, each where it was left).
+// They open from: selecting a token (per-user setting), the token's right-click
+// menu, the sheet header, or the keyboard shortcut.
 
-  if (controlled && token.actor?.type === "character" && token.isOwner) {
-    // Only open a HUD when exactly one character token is selected
-    if (canvas.tokens.controlled.length === 1) {
-      const key = hudKey(token.actor);
-      // Close any HUDs that belong to a different actor / unlinked token. All HUDs
-      // share the DOM id "mist-hud", so wait for them to be gone before opening
-      // the new one (otherwise the old close can tear down the new window).
-      const closing = [];
-      for (const [k, other] of playerHudRegistry.entries()) {
-        if (k !== key) closing.push(other.close());
-      }
-      Promise.all(closing).then(() => {
-        if (!token.controlled || canvas.tokens.controlled.length !== 1) return;
-        const hud = getOrCreateHud(token.actor);
-        if (hud && !hud.rendered) hud.render(true);
-      });
-    }
-  } else if (!controlled) {
-    // Close the HUD only when no tokens remain selected
-    if (canvas.tokens.controlled.length === 0) {
-      const hud = playerHudRegistry.get(hudKey(token.actor));
-      if (hud) hud.close();
-    }
-  }
+/** "openOnSelect": auto = players yes, GM no. */
+function _openOnSelect() {
+  const mode = game.settings.get(MODULE_ID, SETTINGS.OPEN_ON_SELECT);
+  if (mode === "always") return true;
+  if (mode === "never")  return false;
+  return !game.user.isGM;
+}
+
+/** Which HUD this user may open for an actor: "pc", "npc" or null. */
+function _hudKind(actor) {
+  if (actor?.type === "character" && actor.isOwner) return "pc";
+  if (actor?.type === "threat" && game.user.isGM) return "npc";
+  return null;
+}
+
+/** Open the HUD of a token, or of an actor that has no token on the scene. */
+function _openHudFor(actor, token = null) {
+  const kind = _hudKind(actor);
+  if (kind === "pc")  return openHud(actor);
+  if (kind === "npc") return NpcHUD.openForToken(token, actor);
+  return null;
+}
+
+Hooks.on("controlToken", (token, controlled) => {
+  if (_gameJustLoaded || !controlled) return;
+  // Only when exactly one token is selected (not while box-selecting a group)
+  if (canvas.tokens.controlled.length !== 1 || !_openOnSelect()) return;
+  _openHudFor(token.actor, token);
+});
+
+// Token right-click menu: "Mist HUD" button
+Hooks.on("renderTokenHUD", (app, html) => {
+  const token = app.object;
+  if (!_hudKind(token?.actor)) return;
+  const root = html instanceof HTMLElement ? html : html?.[0];
+  const col  = root?.querySelector(".col.left");
+  if (!col || col.querySelector(".mh-open-hud")) return;
+
+  const label = game.i18n.localize("MistHUD.hud.openHud");
+  const btn = document.createElement("button");
+  btn.type      = "button";
+  btn.className = "control-icon mh-open-hud";
+  btn.dataset.tooltip = label;
+  btn.setAttribute("aria-label", label);
+  btn.innerHTML = '<i class="fa-solid fa-square-user" inert></i>';
+  btn.addEventListener("click", ev => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    _openHudFor(token.actor, token);
+    app.close();
+  });
+  col.append(btn);
+});
+
+// Sheet header: "HUD" button, closes the sheet and shows the HUD (the HUD's
+// header has the matching "open sheet" button). City of Mist sheets are AppV1.
+Hooks.on("getActorSheetHeaderButtons", (app, buttons) => {
+  const actor = app.actor;
+  if (!_hudKind(actor)) return;
+  buttons.unshift({
+    label:   "MistHUD.hud.openHudShort",
+    tooltip: game.i18n.localize("MistHUD.hud.openHud"),
+    class:   "mh-open-hud",
+    icon:    "fa-solid fa-square-user",
+    onclick: async () => {
+      const token = app.token?.object ?? actor.getActiveTokens()[0] ?? null;
+      await app.close();
+      _openHudFor(actor, token);
+    },
+  });
+});
+
+// Core adds "Sheet" / "Token" after the hook above runs, so the HUD button
+// would sit right of them: move it to the left of "Sheet".
+Hooks.on("renderActorSheet", (app) => {
+  const header = app.element?.[0]?.querySelector(".window-header");
+  const hud    = header?.querySelector(".header-button.mh-open-hud");
+  const sheet  = header?.querySelector(".header-button.configure-sheet");
+  if (hud && sheet && hud.nextElementSibling !== sheet) sheet.before(hud);
+});
+
+// Keyboard shortcut: the selected token's HUD, else the player's own character.
+// Folds the HUD when it is already showing.
+Hooks.once("init", () => {
+  game.keybindings.register(MODULE_ID, "toggleHud", {
+    name:     "MistHUD.keybindings.toggleHud.name",
+    hint:     "MistHUD.keybindings.toggleHud.hint",
+    editable: [{ key: "KeyH" }],
+    onDown: () => {
+      const token = canvas.tokens?.controlled?.[0];
+      const actor = token?.actor ?? game.user.character;
+      const kind  = _hudKind(actor);
+      if (kind === "pc") toggleHud(actor);
+      else if (kind === "npc") NpcHUD.toggleForToken(token ?? null, actor);
+      else return false;
+      return true;
+    },
+  });
 });
 
 // ── CityDB readiness — re-render HUDs once moves are loaded ──────────────────

@@ -29,6 +29,9 @@ export const SETTINGS = {
   AUTO_DICE_SET:               "autoDiceSet",
   EXTERNAL_SHEET_STYLE:        "externalSheetStyle",
   IMPORTED_STATUS_COLLECTION:  "importedStatusCollection",
+  OPEN_ON_SELECT:              "openOnSelect",
+  AUTO_FOLD_DELAY:             "autoFoldDelay",
+  HUD_POSITIONS:               "hudPositions",
 };
 
 export const SOCKET_NAME = "module.mist-hud";

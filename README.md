@@ -23,7 +23,7 @@ Click on the image for an awesome setup tutorial made by McMaia
 
 ![image](external_files/OSScreen.png)
 
-**Danger/Threats HUD**: Keep the enemies close and at hand. Right-click on any Danger/Threat token to call the HUD
+**Danger/Threats HUD**: Keep the enemies close and at hand. Right-click a Danger/Threat token and click the **Mist HUD** button to call the HUD
 
 ![image](external_files/npcHUDs.png)
 
@@ -69,7 +69,13 @@ https://github.com/mordachai/mist-hud/releases/latest/download/module.zip
 
 ## Usage
 
-Once installed and activated, the HUD will automatically appear when a character token is selected **(right-click for NPCs)**.
+Once installed and activated, a player's HUD appears when they select their character token, and opens on its own for their assigned character when they join. Every HUD (characters and NPCs) can also be opened from:
+
+- the **Mist HUD** button in the token's right-click menu,
+- the **HUD** button in the sheet header (it closes the sheet; the HUD's own header has the button back to the sheet),
+- the keyboard shortcut **H** (selected token, or your own character; press again to fold it).
+
+Several HUDs can be open at once, and each character's HUD reopens where you left it. In the module settings, **Open HUD When a Token Is Selected** picks when selecting a token opens it (by default: players yes, GM no), and **Fold Idle HUDs** folds a HUD down to its header after some seconds without use. Click a folded header or portrait to unfold it.
 
 Choose your game in the City of Mist game settings: _City of Mist_ or _Otherscape_. Legends in the Mist is not supported by the HUD (yet).
 
@@ -131,7 +137,7 @@ When you gain an improvement a star appears on the themebook title. Open the cha
 
 ## NPC's HUD: Easy Control for the MC
 
-**RIGHT-CLICK** on any Danger/Threat token to bring their HUD up.
+**RIGHT-CLICK** any Danger/Threat token and click the **Mist HUD** button to bring their HUD up (or use the **HUD** button on the sheet).
 
 If there is any  Description / Biography for your Danger you can click the title to reveal the text. If there isn't, this title section is hidden to save space.
 
@@ -272,7 +278,6 @@ Now, if one of the Rifts movements is always Dynamite the MC can toggle this by 
 
 - The NPC Influence viewer not always displays the updated values. Use the buttons there to solve this issue.
 - Help and Hurt bonuses only works correctly between players, but not if thye MC do the roll. the players must have the correct ownership of the character and also need to have limited ownership of the others.
-- When you close the HUD you need to deselect your token and select it again.
 
 ## Compatibility
 

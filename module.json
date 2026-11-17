@@ -31,6 +31,7 @@
   },
   "esmodules": [
     "scripts/constants.js",
+    "scripts/hud-fold.js",
     "scripts/settings.js",
     "scripts/move-layout.js",
     "scripts/hud-state.js",

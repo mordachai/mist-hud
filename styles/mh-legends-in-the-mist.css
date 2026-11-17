@@ -110,7 +110,7 @@
   --marker-negativeTag-color: #c1806c;
 }
 
-#mist-hud .window-header {
+:is(#mist-hud, .player-hud) .window-header {
   background: var(--hud-bg-color);
   background-repeat: no-repeat;
   background-size: cover;
@@ -126,7 +126,7 @@
   padding-left: 30px;
 }
 
-#mist-hud .window-content {
+:is(#mist-hud, .player-hud) .window-content {
   padding: 0;
   margin: 0;
   margin-top: 3px;
@@ -140,7 +140,7 @@
   border-radius: 8px;
 }
 
-#mist-hud .mh-char-name {
+:is(#mist-hud, .player-hud) .mh-char-name {
     font-size: 1.4rem;
     color: #0f172a;
     font-family: var(--font-family-titles);
@@ -211,7 +211,7 @@
 
 /* HUD Token image */
 
-#mist-hud.mh-token-image {
+:is(#mist-hud, .player-hud).mh-token-image {
     position: absolute;
     top: -57px;
     left: -67px;
@@ -270,7 +270,7 @@
         0 0 0 1px rgba(40, 24, 12, 0.4);
 }
 
-#mist-hud.minimized .mh-token-image {
+:is(#mist-hud, .player-hud).minimized .mh-token-image {
     top: -52px;
     left: -41px;
     transition: ease-in, top, 0.2s;
@@ -1651,7 +1651,7 @@
 /* Two-column layout: the parchment (litm_hud_BG, stretched 100% 100%) has
    a transparent torn edge that grows with the wider window, so the full-
    width title bands poked past the paper. Pull the grid in off both edges. */
-#mist-hud.mh-wide .mh-content {
+:is(#mist-hud, .player-hud).mh-wide .mh-content {
   padding-left: 7px;
   padding-right: 7px;
   column-gap: 6px;

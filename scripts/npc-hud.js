@@ -1,21 +1,10 @@
 import { initializeAccordions, parseMoveText, registerNpcHelpers } from './npc-helpers.js';
 import { detectActiveSystem } from './settings.js';
+import { attachFoldBehaviour, scheduleFold, cancelFold } from './hud-fold.js';
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
 
 globalThis.activeNpcInfluences = globalThis.activeNpcInfluences || {};
-let gameJustLoaded = true;
-
-Hooks.once('ready', () => {
-    // Mark the game as just loaded
-    gameJustLoaded = true;
-    
-    // Reset the flag after a small delay to allow the game to fully initialize
-    setTimeout(() => {
-      gameJustLoaded = false;
-      console.log("Game load period ended, NPC HUDs will now function normally");
-    }, 2000); // 2 second delay
-  });
 
 // Add hooks to handle NPC and item lifecycle events
 Hooks.on('deleteActor', (actor, options, userId) => {
@@ -144,14 +133,21 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     /**
      * Open the HUD for a token, or bring the existing one to the front.
-     * There is at most one HUD window per token.
+     * There is at most one HUD window per token. Without a token (sheet opened
+     * from the sidebar, no token on the scene) the HUD is tied to the actor only.
      */
-    static openForToken(token) {
-        const actor = token?.actor;
+    static toggleForToken(token, actor = token?.actor) {
+        const existing = npcHudRegistry.get(token?.id ?? actor?.id);
+        const same = existing && (token ? existing.token?.id === token.id : !existing.token);
+        if (same && existing.rendered && !existing.minimized) return existing.minimize();
+        return NpcHUD.openForToken(token, actor);
+    }
+
+    static openForToken(token, actor = token?.actor) {
         if (!actor || actor.type !== 'threat') return null;
 
-        const existing = npcHudRegistry.get(token.id);
-        if (existing && existing.token?.id === token.id) {
+        const existing = npcHudRegistry.get(token?.id ?? actor.id);
+        if (existing && (token ? existing.token?.id === token.id : !existing.token)) {
             existing.token = token;
             if (existing.rendered) {
                 if (existing.minimized) existing.maximize();
@@ -171,7 +167,7 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         const base = NpcHUD.DEFAULT_OPTIONS.position;
 
         const hud = new NpcHUD({
-            id: `npc-hud-${token.id ?? actor.id}`,
+            id: `npc-hud-${token?.id ?? actor.id}`,
             position: { left: base.left + offset, top: base.top + offset }
         });
         hud._cascadeSlot = slot;
@@ -1250,7 +1246,18 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         });
     }
 
+    async _onFirstRender(context, options) {
+        await super._onFirstRender(context, options);
+        attachFoldBehaviour(this);
+    }
+
+    async maximize() {
+        await super.maximize();
+        scheduleFold(this);
+    }
+
     _onClose(options) {
+        cancelFold(this);
         // Remove references from registry (only the ones that point at this HUD)
         this._unregister();
         super._onClose?.(options);
@@ -1567,67 +1574,6 @@ export async function syncSceneInfluences() {
 // Register Handlebars helpers (once, from npc-helpers.js)
 Hooks.once("init", () => {
     registerNpcHelpers();
-});
-
-// Hooks.on('controlToken', (token, controlled) => {
-//     // If game just loaded, don't open HUDs
-//     if (gameJustLoaded) {
-//       console.log("Game just loaded - skipping HUD open");
-//       return;
-//     }
-  
-//     console.log("Token control changed:", token, controlled);
-    
-//     // Original hook behavior continues from here
-//     if (controlled && token.actor && token.actor.type === 'character') {
-//       // Check if the user has ownership of the token
-//       if (!token.isOwner) {
-//         console.log("User doesn't have ownership of the selected token");
-//         return; // Do nothing if the user doesn't own the token
-//       }
-      
-//       // Get all currently selected tokens
-//       const selectedTokens = canvas.tokens.controlled;
-      
-//       // If we have exactly one token selected, show its HUD
-//       if (selectedTokens.length === 1) {
-//         // Close any existing HUDs first
-//         for (const [actorId, hud] of playerHudRegistry.entries()) {
-//           if (actorId !== token.actor.id) {
-//             hud.close();
-//           }
-//         }
-        
-//         // Create or get the HUD for this actor
-//         const hud = MistHUD.getOrCreateHudForActor(token.actor);
-        
-//         // Make sure it's rendered
-//         if (hud && !hud.rendered) {
-//           hud.render(true);
-//         }
-        
-//         console.log("HUD result:", hud);
-//       }
-//     } else if (!controlled) {
-//       // Only close if no tokens are selected
-//       if (canvas.tokens.controlled.length === 0) {
-//         const hud = playerHudRegistry.get(token.actor?.id);
-//         if (hud) hud.close();
-//       }
-//     }
-//   });
-
-Hooks.on('renderTokenHUD', (app, html, data) => {
-    // Skip if game just loaded or user is not GM
-    if (gameJustLoaded || !game.user.isGM) return;
-
-    // Get the token instance from the HUD rendering context
-    const token = app.object;
-    const actor = token.actor;
-    if (actor && actor.type === 'threat') {
-        // One HUD per token: opens it, or brings the existing one to the front
-        NpcHUD.openForToken(token);
-    }
 });
 
 Hooks.on('updateActor', (actor, data, options, userId) => {

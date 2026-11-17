@@ -2,6 +2,7 @@
 // (accordion logic is now inlined where needed; useHotbarForRolls removed)
 
 import { MODULE_ID, SETTINGS, getActiveSystem } from "./constants.js";
+import { rescheduleAllFolds } from "./hud-fold.js";
 
 export { MODULE_ID };
 
@@ -221,6 +222,35 @@ Hooks.once("init", () => {
   game.settings.register(MODULE_ID, SETTINGS.WIDE_LAYOUT, {
     name: K("wideLayout.name"),
     scope: "client", config: false, type: Boolean, default: false,
+  });
+
+  // When selecting a token opens its HUD. Per user; "auto" = players yes, GM no.
+  game.settings.register(MODULE_ID, SETTINGS.OPEN_ON_SELECT, {
+    name: K("openOnSelect.name"),
+    hint: K("openOnSelect.hint"),
+    scope: "client", config: true, type: String,
+    choices: {
+      auto:   K("openOnSelect.auto"),
+      always: K("openOnSelect.always"),
+      never:  K("openOnSelect.never"),
+    },
+    default: "auto",
+  });
+
+  // Fold (minimize) a HUD after this many seconds without interaction; 0 = never
+  game.settings.register(MODULE_ID, SETTINGS.AUTO_FOLD_DELAY, {
+    name: K("autoFoldDelay.name"),
+    hint: K("autoFoldDelay.hint"),
+    scope: "client", config: true, type: Number,
+    range: { min: 0, max: 60, step: 5 },
+    default: 15,
+    onChange: () => rescheduleAllFolds(),
+  });
+
+  // Where each character's HUD was left ({ [hudKey]: { left, top } })
+  game.settings.register(MODULE_ID, SETTINGS.HUD_POSITIONS, {
+    name: K("hudPositions.name"),
+    scope: "client", config: false, type: Object, default: {},
   });
 
   // Status collection storage

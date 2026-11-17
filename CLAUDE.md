@@ -18,7 +18,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Module Structure
 
 ```
-scripts/         ES modules (15 files — see module.json esmodules)
+scripts/         ES modules (16 files — see module.json esmodules)
 styles/          CSS files (base + system-specific)
 templates/       Handlebars .hbs templates
 lang/            en.json, pt-br.json
@@ -30,6 +30,7 @@ ui/              Button/icon images
 
 ### Scripts (module.json `esmodules`, in load order)
 - `constants.js` — `MODULE_ID`, `FLAG_KEYS`
+- `hud-fold.js` — auto-fold timer and click-to-unfold header shared by the player and NPC HUDs
 - `settings.js` — registers game settings, applies system CSS
 - `move-layout.js` — move/slot configuration per system
 - `hud-state.js` — per-HUD state (`HUDState`), `hudKey()`/`resolveActorByKey()`, HUD registry, `isTagBurned()`, builds the `CityRoll` selection
@@ -53,7 +54,7 @@ actor.getFlag('mist-hud', 'inverted-tags')
 actor.getFlag('mist-hud', 'received-bonuses')
 ```
 
-**HUD Registry** — One HUD per `hudKey(actor)` (token id for unlinked tokens, actor id otherwise), kept in `playerHudRegistry` (`hud-state.js`). Use `getOrCreateHud(actor)` from `player-hud.js` — never instantiate directly. Help/Hurt bonuses stay on the world actor (`bonusActorFor`).
+**HUD Registry** — One HUD per `hudKey(actor)` (token id for unlinked tokens, actor id otherwise), kept in `playerHudRegistry` (`hud-state.js`). Use `getOrCreateHud(actor)` / `openHud(actor)` from `player-hud.js` — never instantiate directly. Each HUD has its own DOM id (`mist-hud-<hudKey>`, CSS targets `:is(#mist-hud, .player-hud)`) and its position is saved per key in the client setting `hudPositions`. Help/Hurt bonuses stay on the world actor (`bonusActorFor`).
 
 **Hook-Based Reactivity** — HUDs re-render on `controlToken`, `updateActor`, `createItem`, `updateItem`, `deleteItem` hooks (`init.js`).
 
