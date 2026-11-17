@@ -1224,4 +1224,1775 @@
     color: var(--mhx-ink);
   }
 
+  /* ────────────────────────────────────────────────────────────────────────
+     § 2. PC sheet
+     Templates: actor-sheet.html, parts/character-sheet-header.html,
+     lock-button.html, parts/theme-display.html →
+     theme-display-com-front.hbs / theme-display-com-back.hbs,
+     loadout-theme-front.hbs / -back.hbs, tag-status-card.hbs
+     (story-tag-header.html, status-text-list.html, build-up-section.hbs),
+     tag-list-display.hbs, tag-display.html, tag-name.html,
+     status-with-controls.hbs, status-name.hbs, themePointControls.hbs,
+     improvement-display.html, juice-display.html, clue-display.html,
+     bio-display.html.
+
+     Same structure as § 2 of mh-ext-legend.css and mh-ext-otherscape.css;
+     the City of Mist cards differ in three ways:
+     - Card art (ui/com_mythos_bg, com_logos_bg, com_mist_bg,
+       com_neutral_bg for crew, extra, loadout, story tags) carries its
+       own coloured top strip and a City of Mist foot strip. The top strip
+       IS the title band: no HUD header art on theme cards. The art keeps
+       its aspect (100% wide, anchored top); the foot is redrawn at the
+       bottom by ::after, so the logo is never stretched.
+     - As the book's cards: the theme type (themebook name) sits small on
+       the strip, with the theme icon on the right; the theme's name runs
+       big below it in the system's own CoM title format.
+     - Grit noir: one charcoal ink for labels, rules, keys and bullets.
+       Colour comes from the art, the HUD's per-theme select bars and the
+       story tag / status highlights only.
+
+     The theme-block is the card's scroll box. It is left unpositioned so
+     the band overlays (band title, icon, foot) take the
+     flip-card face as their containing block: they are neither clipped
+     nor scrolled by the card.
+
+     Rooted at `.city.sheet` (the system's AppV1 sheet window), which
+     outranks Phase 1 and com.css's unscoped Mythos / Logos / Mist card
+     rules. Cards are shared with the crew sheet (§ 3).
+     ──────────────────────────────────────────────────────────────────────── */
+
+  /* Theme tokens. The type class sits on the flip-card-inner (theme type)
+     and on the theme-block (themebook subtype); custom properties
+     inherit, so the inner one wins. */
+  .city.sheet {
+    --theme-card-size:  420px;               /* the system's is 500px */
+    --mhx-band:         34px;                /* the art's top strip at 240px wide */
+    --mhx-foot:         37px;                /* the art's foot strip at 240px wide */
+    --mhx-theme-bg:     url(/modules/mist-hud/ui/com_neutral_bg.webp);
+    --mhx-theme-icon:   none;
+    --mhx-theme-bar:    var(--mhx-bar);      /* select-bar-com-Crew */
+    --mhx-theme-name:   whitesmoke;
+    --mhx-theme-glow:   var(--mist-dark-color, #466a81);
+    --mhx-burn:         url(/modules/mist-hud/ui/icons/burn_com_empty_icn.svg);
+    --mhx-burn-to:      url(/modules/mist-hud/ui/icons/burn_com_active_icn.svg);
+    --mhx-burned-ic:    url(/modules/mist-hud/ui/icons/burn_com_full_icn.svg);
+    --mhx-track:        url(/modules/mist-hud/ui/icons/track-com-empty.svg);
+    --mhx-track-full:   url(/modules/mist-hud/ui/icons/track-com-full.svg);
+    --mhx-ink-outline:  drop-shadow(0 0 1px rgba(31, 27, 22, 0.9)) drop-shadow(0 0 1px rgba(31, 27, 22, 0.9));
+  }
+
+  .city.sheet .Mythos-theme {
+    --mhx-theme-bg:     url(/modules/mist-hud/ui/com_mythos_bg.webp);
+    --mhx-theme-icon:   url(/modules/mist-hud/ui/icons/mythos_icn.svg);
+    --mhx-theme-bar:    url(/modules/mist-hud/ui/select-bar-com-Mythos.webp);
+    --mhx-theme-name:   var(--mythosOS-verylight-color, #f8f0ff);
+    --mhx-theme-glow:   var(--mythosOS-dark-color, #9833f2);
+  }
+
+  .city.sheet .Logos-theme {
+    --mhx-theme-bg:     url(/modules/mist-hud/ui/com_logos_bg.webp);
+    --mhx-theme-icon:   url(/modules/mist-hud/ui/icons/logos_icn.svg);
+    --mhx-theme-bar:    url(/modules/mist-hud/ui/select-bar-com-Logos.webp);
+    --mhx-theme-name:   var(--logos-verylight-color, #faf8eb);
+    --mhx-theme-glow:   var(--logos-dark-color, #b05d33);
+  }
+
+  .city.sheet .Mist-theme {
+    --mhx-theme-bg:     url(/modules/mist-hud/ui/com_mist_bg.webp);
+    --mhx-theme-icon:   url(/modules/mist-hud/ui/icons/mist_icn.svg);
+    --mhx-theme-bar:    url(/modules/mist-hud/ui/select-bar-com-Mist.webp);
+    --mhx-theme-name:   var(--mist-verylight-color, #d7e5f5);
+    --mhx-theme-glow:   var(--mist-dark-color, #466a81);
+  }
+
+  /* Card ink on Mythos and Mist (user, 2026-11-17; white was tried and
+     dropped): the card's ink and rule tokens are swapped on the card
+     itself, so every label, rule, tag name and motivation (and the Mist
+     title, which inherits the card's colour) takes it. Mythos: dark
+     purple; Mist: dark grey. Bars, highlights, the Mythos title and the
+     burn flames are unchanged. */
+  .city.sheet .flip-card .Mythos-theme.theme-block {
+    --mhx-ink:        #3c2145;
+    --mhx-ink-dim:    rgba(60, 33, 69, 0.75);
+    --mhx-line:       rgba(60, 33, 69, 0.8);
+    --mhx-line-dim:   rgba(60, 33, 69, 0.45);
+    --mhx-line-faint: rgba(60, 33, 69, 0.25);
+  }
+
+  .city.sheet .flip-card .Mist-theme.theme-block {
+    --mhx-ink:        #2a2d31;
+    --mhx-ink-dim:    rgba(42, 45, 49, 0.75);
+    --mhx-line:       rgba(42, 45, 49, 0.8);
+    --mhx-line-dim:   rgba(42, 45, 49, 0.45);
+    --mhx-line-faint: rgba(42, 45, 49, 0.25);
+  }
+
+  .city.sheet :is(.Crew-theme, .Extra-theme) {
+    --mhx-theme-bg:     url(/modules/mist-hud/ui/com_neutral_bg.webp);
+    --mhx-theme-icon:   url(/modules/mist-hud/ui/icons/crew_icn.svg);
+    --mhx-theme-bar:    var(--mhx-bar);
+    --mhx-theme-name:   whitesmoke;
+    --mhx-theme-glow:   var(--mist-dark-color, #466a81);
+  }
+
+  .city.sheet .Loadout-theme {
+    --mhx-theme-bg:     url(/modules/mist-hud/ui/com_neutral_bg.webp);
+    --mhx-theme-icon:   url(/modules/mist-hud/ui/icons/loadout_icn.svg);
+    --mhx-theme-bar:    var(--mhx-bar);
+  }
+
+  /* ── Window ──────────────────────────────────────────────────────────
+     The HUD's canvas (com_chat_BG_s) under a light grey wash, as the
+     chat cards, so the theme cards stand off it. */
+  .city.sheet:has(> .window-content > .actor-sheet) > .window-content {
+    background:
+      linear-gradient(rgba(217, 216, 212, 0.45), rgba(217, 216, 212, 0.45)),
+      var(--mhx-paper-art) center top / cover no-repeat,
+      var(--mhx-paper);
+    background-blend-mode: normal;
+  }
+
+  /* ── Sheet body ─────────────────────────────────────────────────────── */
+
+  .city.sheet .actor-sheet {
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    text-shadow: none;
+  }
+
+  .city.sheet .actor-sheet a {
+    color: var(--mhx-ink-dim);
+    text-shadow: none;
+    transition: color 0.15s, text-shadow 0.15s;
+  }
+
+  .city.sheet .actor-sheet a:hover {
+    color: var(--mhx-ink);
+    text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
+  }
+
+  .city.sheet .actor-sheet .fa-disabled {
+    color: var(--mhx-ink-dim);
+    opacity: 0.3;
+  }
+
+  /* ── Header ────────────────────────────────────────────────────────── */
+
+  .city.sheet .actor-sheet header.sheet-header {
+    gap: 0.6em;
+    padding: 0.4em 0.5em 0.5em;
+    border-bottom: 1px solid var(--mhx-line-faint);
+    align-items: stretch;
+  }
+
+  /* Portrait: charcoal corner brackets, as a pinned photo */
+  .city.sheet .actor-sheet .image-block {
+    position: relative;
+    align-self: center;
+    padding: 4px;
+    background:
+      linear-gradient(var(--mhx-line), var(--mhx-line)) top left / 12px 1px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) top left / 1px 12px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) bottom right / 12px 1px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) bottom right / 1px 12px no-repeat;
+  }
+
+  .city.sheet .actor-sheet header.sheet-header img.profile-img {
+    display: block;
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 0;
+    background: var(--mhx-paper);
+    box-shadow: 0 1px 6px rgba(20, 16, 12, 0.35);
+  }
+
+  .city.sheet .actor-sheet .character-basic-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.3em;
+  }
+
+  .city.sheet .actor-sheet .header-row {
+    align-items: baseline;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+  }
+
+  /* Name: Rift Bold caps in charcoal (drops Phase 1's white letters with
+     the orange / purple offset shadows) */
+  .city.sheet .actor-sheet input.character-name {
+    height: auto;
+    font-family: var(--mhx-font-title);
+    font-size: 2.6em;
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+    background: none;
+    border: none;
+  }
+
+  /* Mythos ♦ Logos: the typed case-file line (com.css gives them Rift
+     Bold with Mythos / Logos glows) */
+  .city.sheet .actor-sheet :is(input.mythos-name, input.logos-name) {
+    height: auto;
+    font-family: var(--mhx-font-body);
+    font-size: 1.05em;
+    font-style: italic;
+    font-weight: normal;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--mhx-line-faint);
+    border-radius: 0;
+  }
+
+  .city.sheet .actor-sheet .separator-icon {
+    flex: none;
+    padding: 0 0.4em;
+    font-size: 0.8em;
+    color: var(--mhx-ink-dim);
+    text-shadow: none;
+  }
+
+  .city.sheet .actor-sheet input.short-description {
+    width: 100%;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    font-style: italic;
+    color: var(--mhx-ink-dim);
+    text-shadow: none;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--mhx-line-faint);
+    border-radius: 0;
+  }
+
+  .city.sheet .actor-sheet header.sheet-header input:focus {
+    box-shadow: none;
+    border-bottom: 1px solid var(--mhx-ink);
+  }
+
+  .city.sheet .actor-sheet header.sheet-header input::placeholder {
+    color: var(--mhx-ink-dim);
+    opacity: 0.6;
+  }
+
+  /* Lock and info buttons */
+  .city.sheet .actor-sheet .header-right-side {
+    flex: 0 0 auto;
+    max-width: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5em;
+  }
+
+  .city.sheet .actor-sheet .header-right-side * {
+    flex-shrink: 0;
+  }
+
+  .city.sheet .actor-sheet .lock-button {
+    margin: 0;
+    padding: 0;
+    max-width: none;
+    background: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .city.sheet .actor-sheet .lock-button:hover {
+    background: none;
+  }
+
+  /* The lock: a paper key; unlocked, it is inked charcoal */
+  .city.sheet .actor-sheet .pushable,
+  .city.sheet .actor-sheet .pushable.unlocked {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4em;
+    height: 2.4em;
+    padding: 0;
+    border-radius: 2px;
+    background: linear-gradient(to bottom, var(--mhx-paper-hi) 0%, var(--mhx-paper-lo) 100%);
+    border: 1px solid var(--mhx-line-dim);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 1px 2px rgba(30, 24, 18, 0.25);
+  }
+
+  .city.sheet .actor-sheet .pushable.unlocked {
+    background: linear-gradient(180deg, #3a342e, #1f1b17);
+    border-color: #111;
+    box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.12), 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  .city.sheet .actor-sheet .pushable .front {
+    padding: 0;
+    font-size: 1.05rem;
+    transform: none;
+    color: var(--mhx-ink);
+    background: none;
+  }
+
+  .city.sheet .actor-sheet .pushable.unlocked .front {
+    color: #efe9df;
+  }
+
+  .city.sheet .actor-sheet .pushable:active .front {
+    transform: translateY(1px);
+  }
+
+  .city.sheet .actor-sheet .open-tutorial {
+    font-size: 1.1em;
+  }
+
+  /* ── Tabs ──────────────────────────────────────────────────────────── */
+
+  .city.sheet .actor-sheet nav.sheet-tabs {
+    gap: 2px;
+    margin: 0.4em 0;
+    padding: 0;
+    font-family: var(--mhx-font-title);
+    font-size: 1.25em;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-top: 1px solid var(--mhx-line-dim);
+    border-bottom: 1px solid var(--mhx-line-dim);
+  }
+
+  .city.sheet .actor-sheet nav.sheet-tabs .item {
+    padding: 0.25em 0.5em;
+    color: var(--mhx-ink-dim);
+    text-shadow: none;
+    border-bottom: 2px solid transparent;
+  }
+
+  .city.sheet .actor-sheet nav.sheet-tabs .item:hover {
+    color: var(--mhx-ink);
+  }
+
+  .city.sheet .actor-sheet nav.sheet-tabs .item.active {
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+    background: linear-gradient(0deg, rgba(31, 27, 23, 0.1), transparent);
+    border-bottom-color: var(--mhx-ink);
+  }
+
+  /* ── Move bar ──────────────────────────────────────────────────────── */
+
+  .city.sheet .actor-sheet section.move-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    max-height: none;
+    margin: 0.2em 0 0.5em;
+    font-family: var(--mhx-font-body);
+  }
+
+  .city.sheet .actor-sheet .move-section select {
+    width: auto;
+    min-width: 9em;
+    height: 2em;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    font-weight: normal;
+    color: var(--mhx-ink);
+    background: rgba(255, 252, 245, 0.75);
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 2px;
+    box-shadow: none;
+  }
+
+  .city.sheet .actor-sheet .move-section select:focus {
+    border-color: var(--mhx-ink);
+    box-shadow: 0 0 4px rgba(31, 27, 23, 0.4);
+  }
+
+  .city.sheet .actor-sheet .move-section select option {
+    font-family: var(--mhx-font-body);
+    font-weight: normal;
+    color: var(--mhx-ink);
+    background: var(--mhx-paper);
+  }
+
+  /* Execute: the charcoal key (as the chat cards' bottom key) */
+  .city.sheet .actor-sheet button.execute-move-button {
+    width: auto;
+    height: 2em;
+    padding: 0 1.2em;
+    font-family: var(--mhx-font-label);
+    font-size: 1.05em;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #efe9df;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(180deg, #3a342e, #1f1b17);
+    border: none;
+    border-radius: 2px;
+    box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.12), 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  .city.sheet .actor-sheet button.execute-move-button:hover {
+    color: #fff;
+    background: linear-gradient(180deg, #4a433b, #2a2520);
+    box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.18), 0 1px 5px rgba(0, 0, 0, 0.55);
+  }
+
+  /* ── Card frame ──────────────────────────────────────────────────────
+     240px wide (the system's), 420px tall (the system's 500, less 80). The art is drawn 100%
+     wide from the top, so its top strip is the band; ::after repaints
+     the art's foot (logo) at the bottom. Transparent top and bottom
+     borders keep the scrolling content off both strips. */
+
+  .city.sheet div.flex-theme-block-flip,
+  .city.sheet div.flex-theme-block {
+    min-height: var(--theme-card-size);
+    height: var(--theme-card-size);
+    padding: 0;
+    border-radius: 0;
+  }
+
+  .city.sheet .flip-card {
+    height: var(--theme-card-size);
+  }
+
+  .city.sheet .flip-card div.theme-block {
+    position: static;
+    box-sizing: border-box;
+    height: var(--theme-card-size);
+    margin: 0;
+    padding: 0.25em 10px 0.3em;
+    overflow: hidden auto;
+    scrollbar-width: none;
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    text-align: left;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    border: none;
+    border-top: var(--mhx-band) solid transparent;
+    border-bottom: var(--mhx-foot) solid transparent;
+    border-image: none;
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    clip-path: none;
+    background: var(--mhx-theme-bg) center top / 100% auto no-repeat;
+    background-origin: border-box;
+    background-clip: border-box;
+    background-color: transparent;
+    background-blend-mode: normal;
+  }
+
+  .city.sheet .flip-card div.theme-block::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Foot strip, the art's own, at its own scale */
+  .city.sheet .flip-card div.theme-block::after,
+  .city.sheet .flip-card .story-tag-box::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--mhx-foot);
+    background: var(--mhx-theme-bg) center bottom / 100% auto no-repeat;
+    pointer-events: none;
+  }
+
+  /* Theme icon in the band, on the right (white HUD icon set) */
+  .city.sheet .flip-card div.theme-block::before {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    top: calc(var(--mhx-band) / 2);
+    right: 10px;
+    width: 22px;
+    height: 22px;
+    transform: translateY(-50%);
+    background: var(--mhx-theme-icon) center / contain no-repeat;
+    filter: drop-shadow(1px 0 3px var(--mhx-theme-glow));
+    pointer-events: none;
+  }
+
+  /* Loadout keeps its icon on the left (as the HUD and the other systems) */
+  .city.sheet .flip-card div.Loadout-theme.theme-block::before {
+    right: auto;
+    left: 10px;
+  }
+
+  /* ── Band and title ──────────────────────────────────────────────────
+     As the core book's cards: the theme TYPE (the themebook name) sits
+     small on the art's top strip, the theme's NAME runs big below it in
+     the system's own City of Mist title format (com.css / city.css: Rift
+     Bold caps, centred; Mythos white with its glow, Logos brown with the
+     white-and-orange lift, Mist in its dark ink). Card backs and the
+     loadout show the same band. */
+
+  /* Band: the themebook-name row (the flip key), on every card */
+  .city.sheet .flip-card div.theme-block > div.themebook-name {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    right: 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.35em;
+    height: var(--mhx-band);
+    min-height: 0;
+    margin: 0;
+    padding: 0 38px 0 16px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-family: var(--mhx-font-label);
+    font-size: 16px;
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    text-align: left;
+    color: var(--mhx-theme-name);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+    border: none;
+    border-radius: 0;
+    background: none;
+  }
+
+  .city.sheet .flip-card div.Loadout-theme.theme-block > div.themebook-name {
+    padding: 0 10px 0 38px;
+  }
+
+  .city.sheet .flip-card div.theme-block > div.themebook-name a {
+    font-size: 0.8em;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  .city.sheet .flip-card div.theme-block > div.themebook-name a:hover {
+    color: #fff;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  }
+
+  .city.sheet .flip-card div.theme-block span.themebook-name {
+    flex: 1 1 auto;
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+  }
+
+  .city.sheet .flip-card .level-up-arrow {
+    flex: none;
+    color: #fff;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
+  }
+
+  /* Title: the theme's name under the band. Only the layout is set here
+     (the textarea grows with the name instead of the system's two fixed
+     rows); colour and glow are left to com.css per theme. */
+  .city.sheet .flip-card div.theme-block > div.theme-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1em 0.5em;
+    margin: 0.15em 0 0.2em;
+    padding: 0;
+    text-align: center;
+  }
+
+  .city.sheet .flip-card div.theme-block > div.theme-title form.theme-name {
+    flex: 0 0 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 1em;
+    line-height: 1;
+  }
+
+  .city.sheet .flip-card div.theme-block > div.theme-title textarea.theme-name-input,
+  .city.sheet .flip-card div.theme-block > div.theme-title textarea.theme-name-input.borderless:disabled {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    field-sizing: content;
+    height: auto;
+    min-height: 1em;
+    margin: 0;
+    padding: 0.05em 0 0;
+    overflow: hidden;
+    resize: none;
+    font-family: "Rift Bold", var(--mhx-font-title);
+    font-size: 2.5em;
+    font-style: normal;
+    font-weight: bold;
+    line-height: 0.95;
+    letter-spacing: normal;
+    text-transform: uppercase;
+    text-align: center;
+    word-break: break-word;
+    background: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* Unlocked: a faint field so the name reads as editable */
+  .city.sheet .flip-card div.theme-block > div.theme-title textarea.theme-name-input:not(:disabled) {
+    color: var(--mhx-ink);
+    background: rgba(255, 252, 245, 0.45);
+    box-shadow: inset 0 -1px 0 var(--mhx-line-dim);
+  }
+
+  .city.sheet .flip-card div.theme-block > div.theme-title textarea.theme-name-input:hover:not([disabled]) {
+    text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
+  }
+
+  /* Edit / delete keys (unlocked) and the Nascent label, under the name */
+  .city.sheet .flip-card div.theme-block > div.theme-title a {
+    flex: none;
+    font-size: 0.85em;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city.sheet .flip-card div.theme-block > div.theme-title a:hover {
+    color: var(--mhx-ink);
+  }
+
+  .city.sheet .flip-card div.theme-block > div.theme-title .nascent-label {
+    flex: none;
+    font-family: var(--mhx-font-type);
+    font-size: 0.75em;
+    font-style: italic;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+  }
+
+  /* ── Motivation (Mystery / Identity) and section labels ──────────────
+     As the book's cards: a small Rift caps label with a rule running
+     right; the motivation in the body serif, italic. com.css colours the
+     label and text per theme; here they are charcoal. */
+
+  .city.sheet .flip-card div.theme-block :is(div.themebook-motivation-label, div.tag-add-icons, .improvements-header) {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    margin: 0.35em 0 0.15em;
+    padding: 0;
+    font-family: var(--mhx-font-title);
+    font-size: 0.95em;
+    font-weight: normal;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+  }
+
+  .city.sheet .flip-card div.theme-block :is(div.themebook-motivation-label, .improvements-header)::after,
+  .city.sheet .flip-card div.theme-block div.tag-add-icons::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--mhx-line), transparent);
+  }
+
+  .city.sheet .flip-card div.theme-block .themebook-motivation {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+  }
+
+  .city.sheet .flip-card div.theme-block textarea.motivation-input {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    field-sizing: content;
+    min-height: 1.3em;
+    max-height: 7em;
+    height: auto;
+    margin: 0 0 0.2em;
+    padding: 0.05em 0.1em;
+    overflow-y: auto;
+    scrollbar-width: none;
+    resize: none;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    font-style: italic;
+    font-weight: normal;
+    line-height: 1.25;
+    letter-spacing: normal;
+    text-transform: none;
+    text-align: left;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    background: none;
+    border: none;
+    border-radius: 0;
+  }
+
+  .city.sheet .flip-card div.theme-block textarea.motivation-input:not(:disabled) {
+    background: rgba(255, 252, 245, 0.45);
+    box-shadow: inset 0 -1px 0 var(--mhx-line-dim);
+  }
+
+  /* Power Tags label and its add keys. The template prints "Theme Tags";
+     as the book, the label reads Power Tags: the printed text is sized to
+     nothing and the system's localized term (--mhx-label-power-tags, set
+     by settings.js) is drawn in its place, at the label size (13.3px =
+     0.95em of the card). Greyed keys (nothing to spend, or locked) are
+     dropped; a live bolt still shows. */
+  .city.sheet .flip-card div.theme-block div.tag-add-icons .tags-header {
+    display: flex;
+    align-items: center;
+    gap: 0.35em;
+    font-family: inherit;
+    font-size: 0;
+    letter-spacing: inherit;
+  }
+
+  /* Power Tags and Weakness Tags headings, as the book's cards: heavy
+     condensed caps (Fira Sans Extra Condensed 900), a size above the
+     tags, no rule */
+  .city.sheet .flip-card div.theme-block div.tag-add-icons .tags-header::before,
+  .city.sheet .flip-card div.theme-block > ul.tag-list ~ ul.tag-list:has(> li)::before {
+    font-family: var(--mhx-font-label);
+    font-size: 19px;
+    font-style: normal;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+  }
+
+  .city.sheet .flip-card div.theme-block div.tag-add-icons .tags-header::before {
+    content: var(--mhx-label-power-tags, "Power Tags");
+  }
+
+  .city.sheet .flip-card div.theme-block div.tag-add-icons {
+    margin-top: 0.5em;
+  }
+
+  .city.sheet .flip-card div.theme-block div.tag-add-icons::after {
+    content: none;
+  }
+
+  .city.sheet .flip-card div.theme-block div.tag-add-icons .tags-header a {
+    font-size: 11.3px;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city.sheet .flip-card div.theme-block div.tag-add-icons .tags-header a:hover {
+    color: var(--mhx-ink);
+  }
+
+  .city.sheet .flip-card div.theme-block div.tag-add-icons .tags-header > span:has(> .fa-disabled) {
+    display: none;
+  }
+
+  /* Weakness Tags: the weakness list (the card's second tag list) opens
+     with its own heading, as the book (styled with Power Tags above).
+     A grid puts the heading (::before) on its own row above the rows; the
+     label is the system's localized term (settings.js). No weaknesses,
+     no heading. The front of the card is a column and the list's auto top
+     margin pushes it down onto the card's base, just above the City of
+     Mist foot strip (the card's bottom border); when the card is full it
+     simply follows the power tags. */
+  .city.sheet .flip-card div.theme-block:has(> div.theme-title) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .city.sheet .flip-card div.theme-block:has(> div.theme-title) > * {
+    flex: none;
+  }
+
+  .city.sheet .flip-card div.theme-block > ul.tag-list ~ ul.tag-list:has(> li) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 0.4em;
+    margin-top: auto;
+    padding-top: 0.5em;
+  }
+
+  .city.sheet .flip-card div.theme-block > ul.tag-list ~ ul.tag-list:has(> li) > li {
+    grid-column: 1 / -1;
+  }
+
+  .city.sheet .flip-card div.theme-block > ul.tag-list ~ ul.tag-list:has(> li)::before {
+    content: var(--mhx-label-weakness-tags, "Weakness Tags");
+    grid-row: 1;
+    grid-column: 1;
+    margin-bottom: 0.15em;
+  }
+
+  /* ── Tags (theme cards, loadout, story tag card) ─────────────────────── */
+
+  .city.sheet .actor-sheet ul.tag-list {
+    margin: 0;
+    padding: 0;
+    font-size: 1em;
+    list-style: none;
+  }
+
+  .city.sheet .actor-sheet ul.tag-list > li {
+    margin: 0;
+  }
+
+  .city.sheet .actor-sheet ul.sub-tag-list {
+    margin: 0 0 0 1em;
+    padding: 0;
+  }
+
+  .city.sheet .actor-sheet .tag.item-entry {
+    align-items: center;
+    gap: 0.2em;
+    text-align: left;
+  }
+
+  .city.sheet .actor-sheet .flex-trash {
+    flex: none;
+    min-width: 0;
+    padding-right: 0;
+    font-size: 0.8em;
+  }
+
+  .city.sheet .actor-sheet span.tag-symbols {
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    font-size: 0.8em;
+  }
+
+  .city.sheet .actor-sheet span.tag-symbols a,
+  .city.sheet .actor-sheet .power-tag-icon,
+  .city.sheet .actor-sheet .flex-trash a,
+  .city.sheet .actor-sheet .activation-square {
+    color: var(--mhx-ink-dim);
+  }
+
+  .city.sheet .actor-sheet span.tag-name-block {
+    display: flex;
+    align-items: center;
+    gap: 0.25em;
+    font-size: 1em;
+  }
+
+  /* Tag names: the HUD's tag face (Roboto Condensed) at its regular
+     weight, as the book's cards, charcoal. (The face ships 400 and 700
+     only, so anything in between renders bold.) */
+  .city.sheet .actor-sheet span.flex-tag-name {
+    font-family: var(--mhx-font-tags);
+    font-size: 1.2em;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1.2;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    text-shadow: none;
+  }
+
+  .city.sheet .actor-sheet span.flex-tag-name.weakness-tag {
+    font-style: italic;
+  }
+
+  .city.sheet .actor-sheet .story-tag-location {
+    font-family: var(--mhx-font-body);
+    font-size: 0.75em;
+    font-style: italic;
+    font-weight: normal;
+    text-transform: none;
+    color: var(--mhx-ink-dim);
+  }
+
+  /* Loadout, Story Tags and Statuses rows: no type icons (briefcase,
+     tag, status ring), as the user asked. Other markers (temporary,
+     hidden, permanent, crispy…) stay. */
+  .city.sheet div.Loadout-theme.theme-block .tag.item-entry span.tag-symbols a:has(> .fa-briefcase),
+  .city.sheet .story-tag-box .tag.item-entry span.tag-symbols a:has(> .fa-tag),
+  .city.sheet .story-tag-box .status-name-block > a:has(> .fa-life-ring) {
+    display: none;
+  }
+
+  /* Locked theme cards: drop the power-tag bolt too (the card says what
+     they are). */
+  .city.sheet .actor-sheet.locked .theme-block .tag.item-entry .power-tag-icon {
+    display: none;
+  }
+
+  /* Theme cards: no weakness double chevron either; the Weakness Tags
+     label already sets them apart (user, 2026-11-17) */
+  .city.sheet .theme-block .tag.item-entry span.tag-symbols a:has(> .fa-angle-double-down) {
+    display: none;
+  }
+
+  /* A cell left with only hidden icons goes too. (:has() can't nest, so
+     "no other icon" is spelled as one :has().) */
+  .city.sheet :is(div.Loadout-theme.theme-block, .story-tag-box) .tag.item-entry span.tag-symbols:not(:has(> a > i:not(.fa-briefcase, .fa-tag))),
+  .city.sheet .theme-block .tag.item-entry span.tag-symbols:not(:has(> a > i:not(.fa-angle-double-down))),
+  .city.sheet .actor-sheet.locked .theme-block .tag.item-entry span.tag-symbols:not(:has(> a > i:not(.fa-bolt, .fa-angle-double-down))),
+  .city.sheet .actor-sheet.locked .tag.item-entry .flex-trash:not(:has(*)) {
+    display: none;
+  }
+
+  /* ── Tag bars (the HUD's select bars) ─────────────────────────────────
+     Power and loadout tags are plain text at rest. The HUD's bar for the
+     theme (select-bar-com-Mythos / -Logos / -Mist; Crew for crew, extra
+     and loadout) shows when the tag is selected or marked to burn, at
+     half strength on hover while selectable. Weaknesses are plain text
+     too (no faint bar: the Weakness Tags label sets them apart) and take
+     the weakness bar when selected. A weakness selected
+     as positive (inverted) takes the Crew bar, as the HUD. The bar is
+     the row's ::before, stopping short of the burn column so the burn
+     mark stays on the card. Story tags use highlights instead (below). */
+
+  .city.sheet .theme-block .tag.item-entry {
+    --mhx-bar-img: var(--mhx-theme-bar);
+    --mhx-bar-alpha: 0;
+    position: relative;
+    isolation: isolate;
+    min-height: 1.6em;
+    margin: 2px -4px;
+    padding: 1px 4px 1px 8px;
+  }
+
+  .city.sheet .theme-block .tag.item-entry::before {
+    content: "";
+    position: absolute;
+    inset: 0 24px 0 0;
+    z-index: -1;
+    background: var(--mhx-bar-img) left center / 100% 100% no-repeat;
+    opacity: var(--mhx-bar-alpha);
+    transition: opacity 0.15s;
+    pointer-events: none;
+  }
+
+  .city.sheet .actor-sheet.unlocked .theme-block .tag.item-entry::before {
+    inset: 0;
+  }
+
+  .city.sheet .theme-block .tag.item-entry:has(.weakness-tag) {
+    --mhx-bar-img: var(--mhx-bar-weakness);
+  }
+
+  .city.sheet .item-selection-context .theme-block .tag.item-entry:has(.active-tag):hover {
+    --mhx-bar-alpha: 0.5;
+  }
+
+  .city.sheet .theme-block .tag.item-entry:has(.positive-selected),
+  .city.sheet .theme-block .tag.item-entry:has(.negative-selected),
+  .city.sheet .theme-block .tag.item-entry:has(.burn-level-2, .burn-level-3, .burn-level-4) {
+    --mhx-bar-alpha: 1;
+  }
+
+  .city.sheet .theme-block .tag.item-entry:has(.negative-selected) {
+    --mhx-bar-img: var(--mhx-bar-weakness);
+  }
+
+  .city.sheet .theme-block .tag.item-entry:has(.weakness-tag.positive-selected) {
+    --mhx-bar-img: var(--mhx-bar);
+  }
+
+  /* The system's selection and hover highlights (gradient blocks with a
+     negative margin) give way to the bar */
+  .city.sheet .theme-block .tag.item-entry span.flex-tag-name:is(.positive-selected, .negative-selected),
+  .city.sheet .item-selection-context .theme-block .tag.item-entry span.flex-tag-name.active-tag:hover {
+    margin: 0;
+    padding: 0;
+    font-weight: 400;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  /* On a solid bar the name turns white, as the HUD's selected tags */
+  .city.sheet .theme-block .tag.item-entry span.flex-tag-name:is(.positive-selected, .negative-selected) {
+    color: var(--mhx-tag-text);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+  }
+
+  .city.sheet .theme-block .tag.item-entry:has(:is(.positive-selected, .negative-selected, .burn-level-2, .burn-level-3, .burn-level-4)) :is(span.tag-symbols a, .flex-trash a) {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  /* To burn (burn-level 2–4): white on the bar. The system's colours are
+     `!important` in a cascade layer, which beats any unlayered rule, so
+     the glyphs are painted with text-fill-color instead; its fire glow
+     goes. */
+  .city.sheet .actor-sheet .tag.item-entry span.flex-tag-name:is(.burn-level-2, .burn-level-3, .burn-level-4) {
+    -webkit-text-fill-color: var(--mhx-tag-text);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Burned: struck through in the dim ink, as the HUD */
+  .city.sheet .actor-sheet .tag.item-entry span.flex-tag-name.burn-level-1 {
+    -webkit-text-fill-color: var(--mhx-ink-dim);
+    text-shadow: none;
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+    text-decoration-color: var(--mhx-ink);
+    opacity: 0.85;
+  }
+
+  .city.sheet .actor-sheet .tag-edit-button:hover {
+    text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
+  }
+
+  /* ── Burn mark: the HUD's CoM flames, on the RIGHT of the tag ─────────
+     The burn cell is already last in tag-display.html. On locked sheets
+     it keeps a fixed width so names line up whether or not a tag can
+     burn. Empty = the grey flame inked charcoal; hover and "to burn" =
+     the yellow flame with a charcoal edge; burned = the red flame. */
+
+  .city.sheet .actor-sheet .tag.item-entry .flex-burn-flame-cell {
+    flex: none;
+    min-width: 0;
+    max-width: none;
+    margin: 0;
+  }
+
+  .city.sheet .actor-sheet.locked .tag.item-entry .flex-burn-flame-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    min-width: 18px;
+  }
+
+  .city.sheet .actor-sheet :is(.tag-burn, .tag-unburn) {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .city.sheet .actor-sheet :is(.tag-burn, .tag-unburn) i {
+    display: inline-block;
+    width: 14px;
+    height: 20px;
+    background: var(--mhx-burn) center / contain no-repeat;
+    filter: brightness(0.2);
+    opacity: 0.55;
+    transition: opacity 0.15s, filter 0.15s;
+  }
+
+  .city.sheet .actor-sheet :is(.tag-burn, .tag-unburn) i::before {
+    content: none;
+  }
+
+  /* Mythos cards: the empty flame in the card's dark purple ink
+     (--mhx-ink there), painted through the icon as a mask; on hover the
+     yellow flame above takes over */
+  .city.sheet .actor-sheet .Mythos-theme .tag-burn:not(:hover) i {
+    background: var(--mhx-ink);
+    -webkit-mask: var(--mhx-burn) center / contain no-repeat;
+    mask: var(--mhx-burn) center / contain no-repeat;
+    filter: none;
+    opacity: 0.85;
+  }
+
+  .city.sheet .actor-sheet .tag-burn:hover {
+    text-shadow: none;
+  }
+
+  .city.sheet .actor-sheet .tag-burn:hover i {
+    background-image: var(--mhx-burn-to);
+    filter: var(--mhx-ink-outline);
+    opacity: 1;
+  }
+
+  .city.sheet .actor-sheet .tag-unburn i {
+    background-image: var(--mhx-burned-ic);
+    filter: none;
+    opacity: 1;
+  }
+
+  /* To burn: the system renders no control, so the flame is drawn in
+     the empty cell */
+  .city.sheet .actor-sheet .tag.item-entry:has(.flex-tag-name:is(.burn-level-2, .burn-level-3, .burn-level-4)) .flex-burn-flame-cell::before {
+    content: "";
+    display: inline-block;
+    width: 14px;
+    height: 20px;
+    background: var(--mhx-burn-to) center / contain no-repeat;
+    filter: var(--mhx-ink-outline);
+  }
+
+  /* ── Card backs: progress tracks and improvements ──────────────────── */
+
+  /* Attention, Fade / Crack (and Milestone): side by side on one row,
+     as the book's cards, the HUD's CoM track boxes (track-com-*) inked
+     charcoal, the label under each */
+  .city.sheet .flip-card div.theme-block div.att-fade-section {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.6em;
+    max-width: none;
+    margin: 0.3em 0 0;
+    padding: 0.2em 0 0.4em;
+  }
+
+  .city.sheet .flip-card div.theme-block :is(div.theme-progress-track, div.attention-block) {
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    background: none;
+    border: none;
+  }
+
+  .city.sheet .flip-card div.theme-block :is(.theme-progress-track, .attention-block) .dots-section {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0 3px;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .city.sheet .flip-card div.theme-block :is(.theme-progress-track, .attention-block) .dots-section > a {
+    position: static;
+    font-size: 0.85em;
+    line-height: 1;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city.sheet .flip-card div.theme-block :is(.theme-progress-track, .attention-block) .dots-section > a:hover {
+    color: var(--mhx-ink);
+  }
+
+  .city.sheet .flip-card div.theme-block .dots-section > a:is(.theme-remove-progress-point, .theme-remove-attention) { order: 1; margin-left: 2px; }
+  .city.sheet .flip-card div.theme-block .dots-section > a:is(.theme-add-progress-point, .theme-add-attention) { order: 2; }
+
+  .city.sheet .flip-card div.theme-block .attention-label {
+    order: 3;
+    flex: 0 0 100%;
+    position: static;
+    margin: 0.15em 0 0;
+    text-align: center;
+  }
+
+  .city.sheet .flip-card div.theme-block div.attention-text,
+  .city.sheet .flip-card div.theme-block div.attention-text.flex-std {
+    display: block;
+    padding: 0;
+    font-family: var(--mhx-font-label);
+    font-size: 0.78em;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+    white-space: nowrap;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+  }
+
+  .city.sheet .flip-card div.theme-block div.attention-text > span {
+    display: inline;
+  }
+
+  .city.sheet .flip-card div.theme-block .unspent-upgrades {
+    font-family: var(--mhx-font-label);
+    font-variant-numeric: lining-nums;
+    letter-spacing: 0;
+    color: var(--mhx-ink);
+  }
+
+  /* Track boxes. The system sizes the hollow ones `1em !important` in a
+     layer (unbeatable), so the size comes from font-size: 1em = 15px. */
+  .city.sheet .flip-card span.tracker-circle:is(.filled-circle, .empty-circle) {
+    flex: none;
+    box-sizing: border-box;
+    font-size: 15px;
+    width: 1em;
+    height: 1em;
+    min-width: 1em;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    transform: none;
+    box-shadow: none;
+    background: var(--mhx-track) center / contain no-repeat;
+    filter: brightness(0.2);
+    opacity: 0.8;
+  }
+
+  .city.sheet .flip-card span.tracker-circle.filled-circle {
+    background-image: var(--mhx-track-full);
+    opacity: 1;
+  }
+
+  .city.sheet .flip-card div.theme-block .improvement-section {
+    text-align: left;
+  }
+
+  .city.sheet .flip-card div.theme-block .improvements-header {
+    margin-top: 0.5em;
+  }
+
+  .city.sheet .flip-card div.theme-block .improvements-header a {
+    order: 2;
+    font-size: 0.85em;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city.sheet .flip-card div.theme-block .improvements-header::after {
+    order: 1;
+  }
+
+  .city.sheet .flip-card div.theme-block .improvements-header > span:has(> .fa-disabled) {
+    display: none;
+  }
+
+  .city.sheet .flip-card ul:is(.improvement-list, .evolutions-list) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .city.sheet .flip-card :is(ul.improvement-list, ul.evolutions-list) li {
+    margin: 2px 0;
+    padding: 2px 6px;
+    font-size: 0.95em;
+    line-height: 1.25;
+    background: rgba(255, 252, 245, 0.5);
+    border-left: 2px solid var(--mhx-ink);
+  }
+
+  .city.sheet .flip-card .improvement-block {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4em;
+  }
+
+  .city.sheet .flip-card :is(.improvement-name, .improvement-edit):hover {
+    text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
+  }
+
+  .city.sheet .flip-card .improvement-expended {
+    color: var(--mhx-ink-dim);
+    text-decoration: line-through;
+  }
+
+  /* ── Empty slots ─────────────────────────────────────────────────── */
+
+  .city.sheet div.flex-theme-block.empty-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    color: var(--mhx-ink-dim);
+    text-shadow: none;
+    border: 1px dashed var(--mhx-line-dim);
+    border-radius: 2px;
+    background: rgba(255, 252, 245, 0.35);
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .city.sheet div.flex-theme-block.empty-box:hover {
+    border-color: var(--mhx-ink);
+    box-shadow: 0 0 6px rgba(31, 27, 23, 0.25);
+  }
+
+  .city.sheet .empty-extra-placeholder-text {
+    font-family: var(--mhx-font-type);
+    font-size: 0.9em;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .city.sheet .empty-extra-placeholder-text br {
+    display: none;
+  }
+
+  .city.sheet .empty-extra-placeholder-text .add-theme {
+    display: block;
+    margin-top: 1em;
+    color: var(--mhx-ink);
+  }
+
+  /* ── Story tags / statuses card, Moment of Evolution back ─────────────
+     The neutral card in the same frame. The card itself is the flip
+     face, so it can't hand its overlays to an outer box: it clips
+     (overflow hidden) and lets the story tag list and the status list
+     scroll inside it. The Story Tags header is the band (icon on the
+     left, as the HUD); Statuses get the HUD's neutral brush band. */
+
+  .city.sheet .flip-card .story-tag-box {
+    --mhx-theme-bg: url(/modules/mist-hud/ui/com_neutral_bg.webp);
+    --mhx-theme-icon: url(/modules/mist-hud/ui/icons/storytag_icn.svg);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: var(--theme-card-size);
+    margin: 0;
+    padding: var(--mhx-band) 0 var(--mhx-foot);
+    overflow: hidden;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    line-height: 1.25;
+    letter-spacing: normal;
+    text-transform: none;
+    text-align: left;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: var(--mhx-theme-bg) center top / 100% auto no-repeat;
+    background-color: transparent;
+  }
+
+  .city.sheet .flip-card .story-tag-box > :is(.story-tags, #build-up-section) {
+    position: static;
+    flex: 0 1 auto;
+    min-height: 3em;
+    margin: 0;
+    padding: 0.3em 10px 0.2em;
+    overflow: hidden auto;
+    scrollbar-width: none;
+  }
+
+  .city.sheet .flip-card .story-tag-box .status-text-list {
+    --mhx-theme-icon: url(/modules/mist-hud/ui/icons/statuses_icn.svg);
+    flex: 0 1 auto;
+    max-height: 48%;
+    margin: 0;
+    padding: 0 10px 0.3em;
+    overflow: hidden auto;
+    scrollbar-width: none;
+  }
+
+  .city.sheet .flip-card .story-tag-box :is(.story-tags, #build-up-section, .status-text-list)::-webkit-scrollbar {
+    display: none;
+  }
+
+  .city.sheet .flip-card .story-tag-box .status-text-list > hr {
+    display: none;
+  }
+
+  /* Band headers: Story Tags (on the art's strip) and Moment of
+     Evolution (back) sit at the top of the card; Statuses is a brush
+     band in the flow. Plain selector lists, not :is(): an :is() holding
+     the #build-up-section ID would outrank the Statuses rule. The ID is
+     needed to beat city.css's own `#build-up-section .section-header`. */
+  .city.sheet .flip-card .story-tag-box .story-tags-header,
+  .city.sheet .flip-card .story-tag-box #build-up-section .section-header {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.35em;
+    padding: 0 10px 0 38px;
+    font-family: var(--mhx-font-title);
+    font-size: 19px;
+    font-style: italic;
+    font-weight: normal;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    text-align: left;
+    white-space: nowrap;
+    color: whitesmoke;
+    text-shadow: var(--mist-dark-color, #466a81) 1px 1px, 0 0 4px rgba(0, 0, 0, 0.45);
+    border: none;
+    background: none;
+  }
+
+  .city.sheet .flip-card .story-tag-box .story-tags > .story-tags-header,
+  .city.sheet .flip-card .story-tag-box #build-up-section > .section-header {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--mhx-band);
+    margin: 0;
+  }
+
+  .city.sheet .flip-card .story-tag-box .status-text-list > .story-tags-header {
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    height: 28px;
+    margin: 0.35em -10px 0.3em;
+    background: url(/modules/mist-hud/ui/header-neutral-com.webp) center / 100% 100% no-repeat;
+  }
+
+  .city.sheet .flip-card .story-tag-box :is(.story-tags-header, #build-up-section .section-header)::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    width: 21px;
+    height: 21px;
+    transform: translateY(-50%);
+    background: var(--mhx-theme-icon) center / contain no-repeat;
+    filter: drop-shadow(1px 0 3px var(--mist-dark-color, #466a81));
+    pointer-events: none;
+  }
+
+  .city.sheet .flip-card .story-tag-box #build-up-section .section-header::before {
+    background-image: url(/modules/mist-hud/ui/icons/mythos_icn.svg);
+  }
+
+  .city.sheet .flip-card .story-tag-box .story-tag-header-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .city.sheet .flip-card .story-tag-box :is(.story-tags-header, #build-up-section .section-header) :is(a, span[title] > i) {
+    font-size: 0.72em;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  .city.sheet .flip-card .story-tag-box :is(.story-tags-header, #build-up-section .section-header) a:hover {
+    color: #fff;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  }
+
+  .city.sheet .flip-card .story-tag-box .story-tag-category {
+    padding: 0;
+  }
+
+  /* Crew relationships are an Otherscape rule; on a locked CoM sheet an
+     empty list goes */
+  .city.sheet .actor-sheet.locked .flip-card .story-tag-box .relationship-tag-category:not(:has(.tag.item-entry)) {
+    display: none;
+  }
+
+  .city.sheet .flip-card .story-tag-box .relationship-tag-category h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    margin: 0.5em 0 0.15em;
+    padding: 0;
+    font-family: var(--mhx-font-title);
+    font-size: 0.95em;
+    font-weight: normal;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    border: none;
+  }
+
+  .city.sheet .flip-card .story-tag-box .relationship-tag-category h2::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--mhx-line), transparent);
+  }
+
+  /* ── Story tags and statuses: the book's highlighter ───────────────────
+     Flat marker blocks in the body serif, upright (as the chat
+     modifiers): yellow story tags, green statuses, salmon for anything
+     selected against the roll. Selected for the roll: a charcoal rim,
+     drawn inset (the system's tag cell is overflow: hidden). No bars on
+     this card. */
+
+  .city.sheet .story-tag-box .tag.item-entry {
+    min-height: 1.5em;
+    margin: 3px 0;
+    padding: 0;
+  }
+
+  .city.sheet .story-tag-box .tag.item-entry span.flex-tag-name,
+  .city.sheet .actor-sheet .story-tag-box span.status-name {
+    --mhx-hl: var(--mhx-storytag);
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    padding: 0.05em 0.35em;
+    font-family: var(--mhx-font-body);
+    font-size: 1.1em;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1.3;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-hl-text);
+    text-shadow: none;
+    border: none;
+    border-radius: 1px;
+    box-shadow: none;
+    background: var(--mhx-hl);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    transition: filter 0.15s, box-shadow 0.15s;
+  }
+
+  .city.sheet .actor-sheet .story-tag-box span.status-name {
+    --mhx-hl: var(--mhx-status);
+  }
+
+  .city.sheet .story-tag-box .tag.item-entry span.flex-tag-name.negative-selected,
+  .city.sheet .actor-sheet .story-tag-box .status span.status-name.negative-selected {
+    --mhx-hl: var(--mhx-negative);
+  }
+
+  .city.sheet .story-tag-box .tag.item-entry span.flex-tag-name:is(.positive-selected, .negative-selected),
+  .city.sheet .actor-sheet .story-tag-box .status span.status-name:is(.positive-selected, .negative-selected) {
+    font-weight: bold;
+    box-shadow: inset 0 0 0 1.5px var(--mhx-ink);
+  }
+
+  /* Hover while selectable: the system's red / yellow gradient gives way
+     to the highlight with a soft charcoal halo */
+  .city.sheet .item-selection-context .story-tag-box .tag.item-entry span.flex-tag-name.active-tag:hover,
+  .city.sheet .item-selection-context .story-tag-box span.status-name:hover {
+    margin: 0;
+    padding: 0.05em 0.35em;
+    border-radius: 1px;
+    background: var(--mhx-hl);
+    filter: drop-shadow(0 0 2px rgba(31, 27, 23, 0.6));
+  }
+
+  /* Burned story tag: the block fades, struck through */
+  .city.sheet .story-tag-box .tag.item-entry span.flex-tag-name.burn-level-1 {
+    opacity: 0.55;
+  }
+
+  .city.sheet .story-tag-box .tag.item-entry span.flex-tag-name:is(.burn-level-2, .burn-level-3, .burn-level-4) {
+    -webkit-text-fill-color: var(--mhx-hl-text);
+    text-shadow: none;
+    box-shadow: inset 0 0 0 1.5px var(--mhx-ink);
+  }
+
+  /* Status rows */
+  .city.sheet .actor-sheet div.status-line {
+    align-items: center;
+    gap: 0.25em;
+    margin: 3px 0;
+  }
+
+  .city.sheet .actor-sheet .status-name-block {
+    display: flex;
+    align-items: center;
+    gap: 0.25em;
+    min-width: 0;
+    font-size: 0.85em;
+    text-align: left;
+  }
+
+  .city.sheet .actor-sheet .status-name-block > a {
+    font-size: 0.85em;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city.sheet .actor-sheet .story-tag-box span.status-name {
+    font-size: 1.3em;
+  }
+
+  .city.sheet .actor-sheet .plus-minus-controls {
+    display: inline-flex;
+    gap: 0.35em;
+    font-size: 0.8em;
+  }
+
+  .city.sheet .actor-sheet .plus-minus-controls a {
+    color: var(--mhx-ink-dim);
+  }
+
+  /* Moment of Evolution (card back) */
+  .city.sheet .flip-card .story-tag-box .evolutions-list {
+    font-size: 1em;
+    font-weight: normal;
+    text-align: left;
+  }
+
+  .city.sheet .flip-card .story-tag-box .BUPoints {
+    margin: 1em 0;
+    text-align: center;
+  }
+
+  .city.sheet .flip-card .story-tag-box .BUPoints-header {
+    margin-bottom: 0.4em;
+    font-family: var(--mhx-font-label);
+    font-size: 0.85em;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+  }
+
+  .city.sheet .flip-card .story-tag-box .BUPoints span.tracker-circle {
+    display: inline-block;
+    margin: 0 2px;
+    vertical-align: middle;
+  }
+
+  .city.sheet .flip-card .story-tag-box .BUPoints a {
+    font-size: 1.1em;
+    color: var(--mhx-ink-dim);
+  }
+
+  /* ── Juice / Help / Hurt and Clues tabs ──────────────────────────────
+     Section headings in Rift caps over a charcoal rule; each juice or
+     clue is a note pinned to the canvas (com.css's Rubik headings,
+     Mythos glows and purple Use key give way). */
+
+  .city.sheet .actor-sheet :is(.juice-tab, .clues-section) .section-header {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.4em;
+    margin: 0.6em 0 0.4em;
+    padding: 0 0 0.15em;
+    font-family: var(--mhx-font-title);
+    font-size: 1.5em;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+    border-bottom: 1px solid var(--mhx-line);
+  }
+
+  .city.sheet .actor-sheet :is(.juice-tab, .clues-section) .section-header a {
+    font-size: 0.6em;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city.sheet .actor-sheet section.card-style {
+    margin: 0 8px 8px 0;
+    padding: 0.4em 0.6em;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    line-height: 1.3;
+    color: var(--mhx-ink);
+    background: rgba(255, 252, 245, 0.6);
+    border: none;
+    border-left: 2px solid var(--mhx-ink);
+    border-radius: 0;
+    box-shadow: 0 1px 3px rgba(20, 16, 12, 0.25);
+  }
+
+  .city.sheet .actor-sheet section.card-style:hover {
+    box-shadow: 0 2px 6px rgba(20, 16, 12, 0.35);
+  }
+
+  .city.sheet .actor-sheet section.card-style .card-name {
+    font-family: var(--mhx-font-body);
+    font-weight: bold;
+    color: var(--mhx-ink);
+  }
+
+  .city.sheet .actor-sheet section.card-style .card-name:hover {
+    text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
+  }
+
+  .city.sheet .actor-sheet section.card-style :is(.juice-source, .juice-method, .clue-source, .clue-method) {
+    font-family: var(--mhx-font-body);
+    font-size: 0.9em;
+  }
+
+  .city.sheet .actor-sheet section.card-style :is(.juice-source, .juice-method, .clue-source, .clue-method) b {
+    font-family: var(--mhx-font-type);
+    font-size: 0.85em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .city.sheet .actor-sheet section.card-style .item-control {
+    font-size: 0.8em;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city.sheet .actor-sheet button.clue-use-button {
+    margin: 0.3em 0.4em;
+    padding: 0 0.7em;
+    font-family: var(--mhx-font-label);
+    font-size: 0.85em;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #efe9df;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(180deg, #3a342e, #1f1b17);
+    border: none;
+    border-radius: 2px;
+    box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.12), 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  .city.sheet .actor-sheet button.clue-use-button:hover {
+    color: #fff;
+    background: linear-gradient(180deg, #4a433b, #2a2520);
+  }
+
+  .city.sheet .actor-sheet .clues-section hr {
+    height: 1px;
+    margin: 0.6em 0;
+    border: none;
+    background: linear-gradient(90deg, transparent, var(--mhx-line-dim), transparent);
+  }
+
+  /* ── Bio tab ─────────────────────────────────────────────────────── */
+
+  .city.sheet .actor-sheet .bio-section-label {
+    margin: 0.5em 0 0.3em;
+    padding: 0 0 0.15em;
+    font-family: var(--mhx-font-title);
+    font-size: 1.5em;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+    border-bottom: 1px solid var(--mhx-line);
+  }
+
+  .city.sheet .actor-sheet .bio-section .editor-box {
+    padding: 0.3em 0.6em;
+    font-family: var(--mhx-font-body);
+    color: var(--mhx-ink);
+    background: rgba(255, 252, 245, 0.55);
+    border: none;
+    border-left: 2px solid var(--mhx-ink);
+    border-radius: 0;
+  }
 }

@@ -50,11 +50,16 @@ function externalStyleEnabled() {
 export function applyExternalCSS(system) {
   const cssPath = externalStyleEnabled() ? EXTERNAL_CSS_MAP[system] : undefined;
   // Titles the system's templates don't print (the threat sheet's Statuses
-  // card): handed to the CSS as localized strings for `content:`.
-  document.documentElement.style.setProperty(
-    "--mhx-label-statuses",
-    JSON.stringify(game.i18n.localize("CityOfMist.terms.statuses"))
-  );
+  // card, the CoM theme card's Power Tags / Weakness Tags labels): handed to
+  // the CSS as localized strings for `content:`.
+  const labels = {
+    "--mhx-label-statuses":      "CityOfMist.terms.statuses",
+    "--mhx-label-power-tags":    "CityOfMist.terms.powerTags",
+    "--mhx-label-weakness-tags": "CityOfMist.terms.weaknessTags",
+  };
+  for (const [prop, key] of Object.entries(labels)) {
+    document.documentElement.style.setProperty(prop, JSON.stringify(game.i18n.localize(key)));
+  }
   const existing = document.querySelector("link[data-mh-external]");
   if (existing && cssPath && existing.href.includes(cssPath)) return;
   existing?.remove();
