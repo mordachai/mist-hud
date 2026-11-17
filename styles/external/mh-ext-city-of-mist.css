@@ -6338,24 +6338,34 @@
   }
 
   /* ── Scene Tags window ──────────────────────────────────────────────────
-     The plain canvas; the title is the danger's name (Rift Bold caps over
-     the heavy black rule). The scene and each combatant / showcased actor
-     is a spiral notepad page (com_npc_bg-2, as the status tracker's)
-     pinned to it: "Scene" a heading over a 2px rule, each actor a Rift
-     caps sub-heading over a hairline. */
+     The whole window is one spiral notepad page (com_npc_bg-2, drawn with
+     border-image so the ring strip stays at the top and the torn right
+     edge at any size; the slices are the art's, 471×691, at about 0.6),
+     with no background inside it. The title is the danger's name (Rift
+     Bold caps over the heavy black rule), "Scene" a heading over a 2px
+     rule, each actor a Rift caps sub-heading over a hairline. */
 
   .app.window-app.story-tag-window {
-    padding: 0.3em 0.8em 0.6em 0.8em;
+    box-sizing: border-box;
+    padding: 0.1em 0.8em 0.6em 0.8em;
     font-family: var(--mhx-font-body);
     letter-spacing: normal;
     text-transform: none;
     color: var(--mhx-ink);
     text-shadow: none;
-    border: none;
+    border-style: solid;
+    border-color: transparent;
+    border-width: 28px 6px 6px 4px;
     border-radius: 0;
-    box-shadow: 0 0 0 1px var(--mhx-line-faint), 0 6px 20px rgba(20, 16, 12, 0.55);
-    background: var(--mhx-paper-art) center / cover no-repeat, var(--mhx-paper-hi);
-    background-blend-mode: normal;
+    border-image: url(/modules/mist-hud/ui/com_npc_bg-2.webp) 46 10 10 6 fill / 28px 6px 6px 4px stretch;
+    box-shadow: none;
+    background: none;
+    /* Floating paper: a tight contact shadow on the edge, then a deep,
+       soft one well below it, so the page reads as lifted off the map.
+       drop-shadow follows the torn edge and the ring holes. */
+    filter:
+      drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45))
+      drop-shadow(0 14px 18px rgba(0, 0, 0, 0.55));
 
     & .window-header {
       padding: 0.2em 0 0.15em;
@@ -6409,25 +6419,13 @@
       margin: 0 0.2em 0 0;
     }
 
-    /* One notepad page per block (as the status tracker): border-image
-       keeps the ring strip at the top and the torn right edge at any
-       height; the slices are the art's (471×691), drawn at about 0.6 */
+    /* The blocks lie straight on the page: no background of their own */
     & :is(.scene-tags-block, .combatant-block) {
-      box-sizing: border-box;
-      margin: 0 0 0.6em;
-      padding: 0.1em 0.5em 0.4em;
-      border-style: solid;
-      border-width: 28px 6px 6px 4px;
-      border-radius: 0;
-      border-image: url(/modules/mist-hud/ui/com_npc_bg-2.webp) 46 10 10 6 fill / 28px 6px 6px 4px stretch;
+      margin: 0;
+      padding: 0;
+      border: none;
       background: none;
       box-shadow: none;
-      filter: drop-shadow(0 1px 3px rgba(20, 16, 12, 0.3));
-    }
-
-    /* The page's ring strip is the gap above each heading */
-    & :is(.scene-tags-block, .combatant-block) :is(.scene-name, .combatant-name) {
-      margin-top: 0;
     }
 
     /* Headings: name on the left, the create links on the right */
