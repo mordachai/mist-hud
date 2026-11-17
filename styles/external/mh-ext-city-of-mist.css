@@ -1653,6 +1653,40 @@
     font-size: 1.1em;
   }
 
+  /* PC sheet: lock and info side by side at the end of the name row
+     instead of stacked in their own column. The header becomes a grid
+     (the info block's rows join it through display: contents); the
+     Mythos ♦ Logos and description rows run the full width under them.
+     The 1fr rows above and below centre the rows beside the portrait. */
+  .city.sheet .actor-sheet header.sheet-header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: 1fr auto auto auto 1fr;
+    grid-template-areas:
+      "img .    .   "
+      "img name side"
+      "img ml   ml  "
+      "img desc desc"
+      "img .    .   ";
+    column-gap: 0.6em;
+    row-gap: 0.3em;
+  }
+
+  .city.sheet .actor-sheet header.sheet-header > .image-block { grid-area: img; }
+  .city.sheet .actor-sheet header.sheet-header > .character-basic-info { display: contents; }
+  .city.sheet .actor-sheet .character-basic-info > .header-row:nth-child(1) { grid-area: name; min-width: 0; }
+  .city.sheet .actor-sheet .character-basic-info > .header-row:nth-child(2) { grid-area: ml; min-width: 0; }
+  .city.sheet .actor-sheet .character-basic-info > .header-row:nth-child(3) { grid-area: desc; min-width: 0; }
+
+  .city.sheet .actor-sheet header.sheet-header > .header-right-side {
+    grid-area: side;
+    flex-direction: row;
+    align-items: center;
+    align-self: center;
+    height: auto;
+    gap: 0.6em;
+  }
+
   /* ── Tabs ──────────────────────────────────────────────────────────── */
 
   .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) nav.sheet-tabs {
@@ -2001,6 +2035,16 @@
     border: none;
     border-radius: 0;
     box-shadow: none;
+  }
+
+  /* Mist (locked): white with a misty glow, as the book's Mist cards and
+     the system's Mythos title (com.css: white, bright + pink glow). The
+     system has no Mist rule, so the name took the card's dark ink. */
+  .city.sheet .flip-card div.Mist-theme.theme-block > div.theme-title textarea.theme-name-input.borderless:disabled {
+    color: #fff;
+    text-shadow: 0 2px 2px var(--mist-verylight-color, #d7e5f5),
+                 0 1px 4px var(--mist-dark-color, #466a81),
+                 0 0 10px rgba(215, 229, 245, 0.7);
   }
 
   /* Unlocked: a faint field so the name reads as editable */
@@ -2610,6 +2654,12 @@
   .city.sheet .flip-card span.tracker-circle.filled-circle {
     background-image: var(--mhx-track-full);
     opacity: 1;
+  }
+
+  /* Mythos and Mist: white boxes, as the book's cards (the SVGs are white;
+     a thin dark rim keeps them readable on the card) */
+  .city.sheet .flip-card :is(.Mythos-theme, .Mist-theme) span.tracker-circle:is(.filled-circle, .empty-circle) {
+    filter: drop-shadow(0 0 1px rgba(20, 18, 16, 0.75));
   }
 
   .city.sheet .flip-card div.theme-block .improvement-section {
