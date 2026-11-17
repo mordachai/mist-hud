@@ -6626,10 +6626,10 @@
   }
 
   /* ── Token tooltip ──────────────────────────────────────────────────────
-     The torn grey-beige scrap (com_outcome_bg, the danger's and the chat
-     outcome's paper), drawn with border-image so the torn edges keep
-     their shape; its edges are transparent, so the shadow is a
-     drop-shadow that follows the tear. */
+     Its own torn beige scrap (com_tooltip_BG, 532×387: rough edges, a
+     torn foot), drawn with border-image (slices 12 12 58 12, at about
+     half size) so the edges and the tear keep their shape; its edges are
+     transparent, so the shadow is a drop-shadow that follows the tear. */
 
   .city-of-mist--tooltip {
     padding: 0.1em 0.3em 0;
@@ -6640,9 +6640,9 @@
     text-shadow: none;
     border-style: solid;
     border-color: transparent;
-    border-width: 16px 10px 22px 8px;
+    border-width: 8px 8px 26px 8px;
     border-radius: 0;
-    border-image: url(/modules/mist-hud/ui/com_outcome_bg.webp) 34 8 50 6 fill / 16px 10px 22px 8px stretch;
+    border-image: url(/modules/mist-hud/ui/com_tooltip_BG.webp) 12 12 58 12 fill / 8px 8px 26px 8px stretch;
     box-shadow: none;
     filter: drop-shadow(0 3px 6px rgba(20, 16, 12, 0.55));
     backdrop-filter: none;
