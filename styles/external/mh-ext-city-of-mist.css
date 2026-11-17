@@ -49,10 +49,11 @@
               § 6 story tag window, scene tags, status tracker, token tooltip
               § 6b roll and chat dialogs
               § 7 sidebar and chrome
-     Written so far: § 1 to § 6b. The PC and crew sheets sit on the dark
-     window (com_sheet_BG); the danger and limited sheets are a torn paper
-     scrap on the plain canvas (com_chat_BG_s), and the item sheets and
-     dialogs are that canvas.
+     Written so far: § 1 to § 7 (Phase 2 is complete). The PC and crew
+     sheets sit on the dark window (com_sheet_BG); the danger and limited
+     sheets are a torn paper scrap on the plain canvas (com_chat_BG_s),
+     the item sheets and dialogs are that canvas, and the sidebar and
+     title bars are the PC sheet's night (§ 7).
    ========================================================================== */
 
 /* The Juice / Clues tracking cards' marker hand (system font, § 2) */
@@ -8659,6 +8660,1176 @@
       border-left: 3px solid var(--mhx-black-rule);
     }
   }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     § 7. Sidebar and chrome
+     Window chrome (title bar, header buttons, resize handle, frame) of the
+     system windows that § 2 to § 6b restyle: actor sheets (.city.sheet),
+     item sheets, the GM move pop-up, the § 5 and § 6b dialogs and the
+     status tracker; also core DialogV2 dialogs. The Scene Tags window
+     keeps § 6's notepad header and only takes the resize handle. Other
+     core and module windows keep their own chrome.
+
+     The right sidebar (core v14 markup: templates/sidebar/*): the tab
+     strip, every tab's panel, directory headers (create buttons, search),
+     directory lists and folders, the placeables tab, playlist volume
+     sliders, the combat tracker, the chat controls and input (also in
+     #chat-notifications, where core moves it while the sidebar is
+     collapsed), the settings tab and the core context menu. § 1 styles
+     the chat cards themselves.
+
+     Mirrors § 7 of mh-ext-legend.css and mh-ext-otherscape.css (same
+     scope, same selectors). The look is the PC sheet's night city: every
+     sidebar panel is com_sheet_BG (dark violet brush strokes) under the
+     sheet's night wash, so the canvas chat cards stand off it, and every
+     title bar is a strip of the same night with the title in pale Rift
+     Bold caps. On the night: pale ink, the paper keys of § 5, smoked-glass
+     fields. Neon is allowed on the dark (as the sheet's tabs and Execute
+     Move): the open sidebar tab and the active turn are the sheet tabs'
+     pink sign, and the one confirming key (Create, Close on hover, Flush,
+     Log Out) is the Execute Move key. Paper surfaces (core dialogs, the
+     editor menu, the context menu) stay grit noir: charcoal only.
+
+     The window list sits in :where(), so the root weighs (0,3,0) with
+     .style-custom, and the system's later rules (§ 6's Scene Tags frame
+     at (0,4,0)) keep winning. The dialog branches repeat the § 3 / § 5 /
+     § 6b roots: keep them in sync if those change. Each two-:has()
+     branch stays on one line (a line break would be a descendant
+     combinator).
+     ──────────────────────────────────────────────────────────────────────── */
+
+  & {
+    --mhx-night-art:   url(/modules/mist-hud/ui/com_sheet_BG.webp);
+    --mhx-night-base:  #120a20;
+    --mhx-night-text:  #ece6f2;                         /* the dark window's pale ink (§ 2) */
+    --mhx-night-dim:   rgba(236, 230, 242, 0.62);
+    --mhx-night-line:  rgba(236, 230, 242, 0.12);
+    --mhx-night-rim:   rgba(236, 230, 242, 0.22);
+    --mhx-night-wash:  rgba(236, 230, 242, 0.09);
+    --mhx-night-field: rgba(6, 3, 12, 0.6);
+    --mhx-night-key:   rgba(14, 9, 22, 0.88);           /* a key cut from the night */
+    --mhx-night-key-hi: rgba(42, 28, 54, 0.95);
+    --mhx-neon:        #ff2aa6;                         /* the sheet tabs' sign (§ 2) */
+    --mhx-neon-ink:    #ffe0f2;
+    --mhx-neon-glow:   rgba(255, 42, 166, 0.45);
+    --mhx-charcoal:    #1f1b17;
+  }
+
+  /* ── System windows ──────────────────────────────────────────────────── */
+
+  .app.window-app:where(
+    .city.sheet,
+    .city-of-mist.sheet.item,
+    .story-tag-window,
+    [id="city-of-mist-tracker-app"],
+    /* § 3: the GM move pop-up */
+    .dialog:has(.dialog-content > .gmmove-section),
+    /* § 5 */
+    .dialog:has(> .window-content > .dialog-content > :is(.single-choice-box, .multi-choice-box, .themebook-selection-dialog, input.face-danger, .merge-status-dialog, .status-merge-dialog, .SHB-confirm-dialog, .Blaze-dialog)),
+    .dialog:has(> .window-content > .dialog-content > div:only-child:not([class])):has(> .window-content > .dialog-buttons > .dialog-button.yes + .dialog-button.no:last-child),
+    .dialog:not(:has(> .window-content > .dialog-content > *)):has(> .window-content > .dialog-buttons > .dialog-button.one + .dialog-button.two + .dialog-button.cancel:last-child),
+    /* § 6b */
+    .dialog:has(> .window-content > .dialog-content > :is(.roll-dialog, .roll-modifier-dialog, .tag-review, .pc-downtime-selector, .downtime-dialog, textarea.narrator-text)),
+    .dialog:has(> .window-content > .dialog-content > div > :is(.string-input, .number-input, .boolean-input)),
+    .dialog:has(> .window-content > .dialog-content > form .slidecontainer > input.HelpHurt),
+    .dialog:has(> .window-content > .dialog-buttons > .dialog-button.none + .dialog-button:is(.help, .hurt))
+  ),
+  .application.dialog {
+    /* The resize bracket: charcoal on the paper windows, pale on the
+       PC and crew sheets' night (set below) */
+    --mhx-chrome-handle: var(--mhx-charcoal);
+
+    /* ── Frame: a black edge and a deep drop, no border ───────────────── */
+    border: none;
+    border-radius: 0;
+    background: var(--mhx-night-base);
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.85),
+      0 8px 26px rgba(0, 0, 0, 0.6);
+
+    /* ── Title bar: a strip of the night, a hard black foot ───────────
+       (:where keeps the Scene Tags exclusion at zero weight) */
+    &:where(:not(.story-tag-window)) > .window-header {
+      flex: 0 0 30px;
+      gap: 0.15em;
+      padding: 0 4px 0 10px;
+      font-family: var(--mhx-font-label);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-night-text);
+      border: none;
+      background:
+        linear-gradient(180deg, rgba(10, 6, 16, 0.72), rgba(4, 2, 8, 0.88)),
+        var(--mhx-night-art) center 30% / cover no-repeat,
+        var(--mhx-night-base);
+      box-shadow:
+        inset 0 1px 0 rgba(236, 230, 242, 0.08),
+        0 1px 0 rgba(0, 0, 0, 0.9),
+        0 2px 4px rgba(0, 0, 0, 0.45);
+    }
+
+    &:where(:not(.story-tag-window)) > .window-header .window-title {
+      font-family: var(--mhx-font-title);
+      font-size: 1.2em;
+      font-style: normal;
+      font-weight: normal;
+      line-height: 30px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mhx-night-text);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    &:where(:not(.story-tag-window)) > .window-header .document-id-link {
+      margin-left: 0.5em;
+      font-size: 0.7em;
+      color: var(--mhx-night-dim);
+      text-shadow: none;
+      opacity: 0.6;
+      transition: color 0.15s, opacity 0.15s;
+
+      &:hover {
+        color: var(--mhx-night-text);
+        opacity: 1;
+      }
+    }
+
+    /* Header buttons: pale heavy Fira caps; a faint pale key on hover,
+       Close lights the Execute Move key */
+    &:where(:not(.story-tag-window)) > .window-header .header-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35em;
+      height: 20px;
+      margin: 0 0 0 2px;
+      padding: 0 0.45em;
+      font-family: var(--mhx-font-label);
+      font-size: 0.85em;
+      font-weight: 900;
+      font-variant: normal;
+      line-height: 1;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: var(--mhx-night-dim);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+      & > i {
+        margin: 0;
+        font-size: 0.95em;
+        color: inherit;
+      }
+
+      &:hover {
+        color: var(--mhx-night-text);
+        background: var(--mhx-night-wash);
+        border-color: var(--mhx-night-rim);
+      }
+
+      &.close:hover {
+        color: #fff;
+        background: linear-gradient(180deg, #9c2a6c, #5e1642);
+        border-color: rgba(255, 108, 196, 0.55);
+        box-shadow: 0 0 6px rgba(255, 42, 166, 0.3);
+      }
+    }
+
+    /* Resize handle: an ink corner bracket instead of the grey tab */
+    & > .window-resizable-handle {
+      right: 3px;
+      bottom: 3px;
+      width: 14px;
+      height: 14px;
+      padding: 0;
+      border: none;
+      border-radius: 0;
+      background:
+        linear-gradient(var(--mhx-chrome-handle), var(--mhx-chrome-handle)) right bottom / 100% 2px no-repeat,
+        linear-gradient(var(--mhx-chrome-handle), var(--mhx-chrome-handle)) right bottom / 2px 100% no-repeat;
+      opacity: 0.5;
+      transition: opacity 0.15s;
+
+      & > i { display: none; }
+
+      &:hover { opacity: 1; }
+    }
+
+    /* Minimized: the strip alone */
+    &.minimized > .window-header {
+      border-bottom: none;
+    }
+  }
+
+  /* The PC and crew sheets' night: a pale bracket */
+  .city.sheet:has(> .window-content > :is(.actor-sheet, .crew-sheet)) {
+    --mhx-chrome-handle: var(--mhx-night-text);
+  }
+
+  /* ── Core dialogs (DialogV2: confirm / prompt / wait, e.g. End Combat,
+     Delete …, Create … from the sidebar) ─────────────────────────────────
+     The chrome above, and the § 5 body: the plain canvas, small heavy
+     Fira caps labels, pale paper fields with a charcoal focus, paper
+     keys with the confirming one (Yes / OK / the default) the charcoal
+     key. The system's `form button` painted the buttons purple. */
+  .application.dialog {
+    --mhx-field-bg: rgba(255, 252, 245, 0.75);
+    --color-scrollbar: rgba(31, 27, 23, 0.45);
+    --color-scrollbar-track: transparent;
+
+    & > .window-header .window-icon {
+      font-size: 0.85em;
+      color: var(--mhx-night-dim);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+    }
+
+    & > .window-content {
+      gap: 0.6em;
+      padding: 0.8em 1.2em 0.9em 1.1em;
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: var(--mhx-paper-art) center / cover no-repeat, var(--mhx-paper-hi);
+      background-blend-mode: normal;
+    }
+
+    & .dialog-content {
+      font-family: var(--mhx-font-body);
+      font-size: 1.05em;
+      line-height: 1.4;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+
+      & :is(p, li) { color: var(--mhx-ink); }
+      & :is(strong, b) { color: var(--mhx-charcoal); }
+
+      & .hint {
+        font-size: 0.9em;
+        color: var(--mhx-ink-dim);
+      }
+    }
+
+    /* Labels and fields (create document, prompts), as § 5 */
+    & .dialog-content :is(label, .form-group > label, legend) {
+      font-family: var(--mhx-font-label);
+      font-size: 0.85em;
+      font-weight: 900;
+      line-height: 1.2;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-ink);
+      text-shadow: none;
+    }
+
+    & .dialog-content :is(input:not([type]), input[type=text], input[type=search], input[type=number], select, textarea) {
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: var(--mhx-field-bg);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 2px;
+      box-shadow: none;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+
+      &:focus {
+        border-color: var(--mhx-charcoal);
+        box-shadow: 0 0 4px rgba(31, 27, 23, 0.4);
+      }
+    }
+
+    & .dialog-content select option {
+      color: var(--mhx-ink);
+      background: var(--mhx-paper-hi);
+    }
+
+    & .dialog-content :is(input[type=checkbox], input[type=radio]) {
+      --checkbox-checked-color: var(--mhx-charcoal);
+      accent-color: var(--mhx-charcoal);
+    }
+
+    & .dialog-content fieldset {
+      border: 1px solid var(--mhx-line-faint);
+      border-radius: 2px;
+    }
+
+    /* Buttons: the § 5 paper keys; the confirming one the charcoal key */
+    & .form-footer {
+      gap: 0.5em;
+    }
+
+    & .form-footer button {
+      height: auto;
+      min-height: 2.1em;
+      margin: 0;
+      padding: 0.25em 0.6em;
+      font-family: var(--mhx-font-label);
+      font-size: 1em;
+      font-weight: 900;
+      font-variant: normal;
+      line-height: 1.15;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: linear-gradient(to bottom, var(--mhx-paper-hi) 0%, var(--mhx-paper-lo) 100%);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 2px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 2px rgba(30, 24, 18, 0.25);
+      outline: none;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+
+      & > i { color: inherit; }
+
+      &:is(:hover, :focus-visible) {
+        border-color: var(--mhx-ink);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 4px rgba(30, 24, 18, 0.4);
+      }
+
+      &:is([data-action=yes], [data-action=ok], .default) {
+        color: #efe9df;
+        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+        background: linear-gradient(180deg, #3a342e, var(--mhx-charcoal));
+        border: none;
+        box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.12), 0 1px 3px rgba(0, 0, 0, 0.4);
+
+        &:is(:hover, :focus-visible) {
+          color: #fff;
+          background: linear-gradient(180deg, #4a433b, #2a2520);
+          box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.18), 0 1px 5px rgba(0, 0, 0, 0.55);
+        }
+      }
+    }
+
+    &, & * {
+      scrollbar-color: rgba(31, 27, 23, 0.45) transparent;
+    }
+  }
+
+  /* ── AppV2 header keys: core dialogs ────────────────────────────────────
+     Pale on the night strip (Phase 1's `button` look and core's rounded
+     keys go), a faint pale key on hover, Close the Execute Move key. The
+     ⋮ controls dropdown on the canvas. */
+  .application.dialog > .window-header .header-control {
+    --button-text-color: var(--mhx-night-dim);
+    --button-hover-text-color: var(--mhx-night-text);
+    --button-size: 22px;
+    color: var(--mhx-night-dim);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    box-shadow: none;
+    transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+    &:hover {
+      color: var(--mhx-night-text);
+      background: var(--mhx-night-wash);
+      border-color: var(--mhx-night-rim);
+    }
+
+    &[data-action=close]:hover {
+      color: #fff;
+      background: linear-gradient(180deg, #9c2a6c, #5e1642);
+      border-color: rgba(255, 108, 196, 0.55);
+      box-shadow: 0 0 6px rgba(255, 42, 166, 0.3);
+    }
+  }
+
+  .application.dialog .controls-dropdown {
+    font-family: var(--mhx-font-label);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    background: var(--mhx-paper-art) center / cover no-repeat, var(--mhx-paper-hi);
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    border-radius: 2px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
+
+    & .header-control {
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: transparent;
+      border-radius: 0;
+
+      & > i { color: inherit; }
+
+      &:hover {
+        color: var(--mhx-charcoal);
+        background: rgba(31, 27, 23, 0.1);
+      }
+    }
+  }
+
+  /* ── Sidebar ─────────────────────────────────────────────────────────── */
+
+  /* Pale scrollbars on the night; charcoal on the paper context menu */
+  :is(#sidebar, #chat-notifications) {
+    --color-scrollbar: rgba(236, 230, 242, 0.3);
+    --color-scrollbar-track: transparent;
+  }
+
+  :is(#sidebar, #chat-notifications) * {
+    scrollbar-color: rgba(236, 230, 242, 0.3) transparent;
+  }
+
+  #context-menu {
+    --color-scrollbar: rgba(31, 27, 23, 0.45);
+    --color-scrollbar-track: transparent;
+  }
+
+  #context-menu * {
+    scrollbar-color: rgba(31, 27, 23, 0.45) transparent;
+  }
+
+  /* Every sidebar tab (chat, combat, scenes, actors, items, journal,
+     tables, cards, macros, playlists, compendiums, settings, modules'
+     tabs) and its popout (popped-out directories are .sidebar-tab
+     themselves; the chat popout isn't): the PC sheet's night city
+     (com_sheet_BG under the same night wash), so the canvas chat cards
+     and the paper keys stand off it */
+  .sidebar-tab,
+  .chat-popout .window-content {
+    background:
+      linear-gradient(180deg, rgba(8, 4, 16, 0.55), rgba(8, 4, 16, 0.72)),
+      var(--mhx-night-art) center / cover no-repeat,
+      var(--mhx-night-base);
+    background-blend-mode: normal;
+  }
+
+  /* Tab strip: keys cut from the night, core's own icon colour at rest
+     (user: no rose on idle tabs); the open tab is the sheet tabs' lit
+     neon sign. Core draws these from --control-*, which it defines on
+     each .ui-control itself, so they are set there (the system's pink
+     frame round the strip goes) */
+  #sidebar-tabs {
+    border: none;
+    box-shadow: none;
+
+    & .ui-control {
+      --control-bg-color: var(--mhx-night-key);
+      --control-border-color: var(--mhx-night-line);
+      --control-hover-bg-color: var(--mhx-night-key-hi);
+      --control-hover-border-color: var(--mhx-night-rim);
+      --control-hover-icon-color: var(--mhx-neon-ink);
+      --control-active-bg-color: #0c0616;
+      --control-active-border-color: var(--mhx-neon);
+      --control-active-icon-color: var(--mhx-neon-ink);
+      border-radius: 2px;
+      color: var(--control-icon-color);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+      transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+      &:hover {
+        color: var(--control-hover-icon-color);
+      }
+
+      &[aria-pressed=true] {
+        color: var(--control-active-icon-color);
+        text-shadow: 0 0 4px var(--mhx-neon), 0 0 10px rgba(255, 42, 166, 0.6);
+        background: var(--control-active-bg-color);
+        box-shadow:
+          0 0 8px var(--mhx-neon-glow),
+          inset 0 0 6px rgba(255, 42, 166, 0.25);
+      }
+    }
+
+    & .notification-pip {
+      background: var(--mhx-neon);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--mhx-neon);
+    }
+  }
+
+  /* Every tab's panel framed as a recessed board; pale text in the body
+     face */
+  #sidebar-content > .sidebar-tab {
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-night-text);
+    border-radius: 0;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.85),
+      inset 0 0 0 1px rgba(236, 230, 242, 0.06),
+      inset 0 0 22px rgba(0, 0, 0, 0.45);
+  }
+
+  /* ── Directories (actors, items, journal, scenes, tables, cards, macros,
+     playlists, compendiums) ───────────────────────────────────────────── */
+  #sidebar .directory {
+    --sidebar-separator: 1px solid var(--mhx-night-line);
+    --sidebar-folder-color: var(--mhx-night-rim);
+    --sidebar-entry-hover-bg: var(--mhx-night-wash);
+    color: var(--mhx-night-text);
+
+    /* Header buttons: the § 5 paper keys (the system's neon outline
+       goes); Create (the entry) is the Execute Move key */
+    & .action-buttons button {
+      height: auto;
+      min-height: 2em;
+      margin: 0;
+      padding: 0.2em 0.5em;
+      font-family: var(--mhx-font-label);
+      font-size: 0.95em;
+      font-weight: 900;
+      font-variant: normal;
+      line-height: 1.15;
+      white-space: nowrap;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mhx-charcoal);
+      text-shadow: none;
+      background: linear-gradient(to bottom, var(--mhx-paper-hi) 0%, var(--mhx-paper-lo) 100%);
+      border: 1px solid rgba(0, 0, 0, 0.6);
+      border-radius: 2px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.5);
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+
+      & > i { color: inherit; }
+
+      &:is(:hover, :focus-visible) {
+        color: #000;
+        background: linear-gradient(to bottom, #fffcf5 0%, var(--mhx-paper) 100%);
+        border-color: #000;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 6px rgba(236, 230, 242, 0.4);
+      }
+    }
+
+    & .header-actions button.create-entry {
+      color: #ffe6f5;
+      text-shadow: 0 1px 1px rgba(30, 0, 20, 0.8);
+      background: linear-gradient(180deg, #9c2a6c, #5e1642);
+      border-color: rgba(255, 108, 196, 0.55);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 220, 240, 0.18),
+        0 0 6px rgba(255, 42, 166, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.6);
+
+      &:is(:hover, :focus-visible) {
+        color: #fff;
+        background: linear-gradient(180deg, #b8337f, #741b52);
+        border-color: rgba(255, 108, 196, 0.85);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 220, 240, 0.25),
+          0 0 10px rgba(255, 42, 166, 0.55),
+          0 1px 3px rgba(0, 0, 0, 0.6);
+      }
+    }
+
+    /* Search: a smoked-glass field in the night, pale focus; dim icon
+       keys */
+    & .directory-header search input {
+      height: 1.9em;
+      padding: 0 0.5em;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-night-text);
+      background: var(--mhx-night-field);
+      border: 1px solid var(--mhx-night-rim);
+      border-radius: 2px;
+      box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.5);
+      transition: border-color 0.15s, box-shadow 0.15s;
+
+      &::placeholder {
+        font-family: var(--mhx-font-body);
+        font-style: italic;
+        letter-spacing: normal;
+        text-transform: none;
+        color: var(--mhx-night-dim);
+        opacity: 0.8;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: rgba(236, 230, 242, 0.7);
+        box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.5), 0 0 6px rgba(236, 230, 242, 0.25);
+      }
+    }
+
+    & :is(.directory-header .inline-control, .folder-header .create-button) {
+      color: var(--mhx-night-dim);
+      text-shadow: none;
+      background: none;
+      border: none;
+      box-shadow: none;
+      transition: color 0.15s, text-shadow 0.15s;
+
+      &:hover {
+        color: var(--mhx-night-text);
+        text-shadow: 0 0 6px rgba(236, 230, 242, 0.6);
+      }
+    }
+
+    /* Rows: faint hairlines; hover = a pale wash with a pale left edge */
+    & .directory-item {
+      border-top: 1px solid var(--mhx-night-line);
+    }
+
+    & .directory-item.entry {
+      transition: background 0.15s, box-shadow 0.15s;
+
+      &:hover {
+        background: linear-gradient(90deg, rgba(236, 230, 242, 0.14), rgba(236, 230, 242, 0.02) 70%);
+        box-shadow: inset 2px 0 0 var(--mhx-night-text);
+      }
+    }
+
+    & .directory-item .entry-name {
+      font-family: var(--mhx-font-body);
+      font-size: 1.05em;
+      font-weight: normal;
+      letter-spacing: 0.01em;
+      text-transform: none;
+      color: var(--mhx-night-text);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    }
+
+    & .directory-item.entry:hover .entry-name {
+      color: #fff;
+    }
+
+    & .directory-item:is(.context, .active)::after {
+      border-color: rgba(236, 230, 242, 0.7);
+      box-shadow: inset 0 0 8px rgba(236, 230, 242, 0.2);
+    }
+
+    & .directory-item img.thumbnail {
+      border-right: 1px solid var(--mhx-night-line);
+    }
+
+    /* Folders: the user's colour stays (inline), darkened toward the
+       night; heavy Fira caps name, a rail down the contents */
+    & .directory-item.folder {
+      border-top-color: var(--mhx-night-line);
+    }
+
+    & .folder-header {
+      font-family: var(--mhx-font-label);
+      font-weight: 900;
+      font-variant: normal;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--mhx-night-text);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      background-color: #2a1d36;
+      background-image: linear-gradient(90deg, rgba(8, 4, 16, 0.3), rgba(8, 4, 16, 0.82));
+      border-bottom: 1px solid rgba(0, 0, 0, 0.6);
+      box-shadow: inset 0 1px 0 rgba(236, 230, 242, 0.08);
+
+      & > i { color: var(--mhx-night-dim); }
+    }
+
+    & .directory-item .subdirectory {
+      border-left-width: 2px;
+    }
+
+    & .directory-item.folder .directory-item {
+      border-left-color: var(--mhx-night-line);
+    }
+
+    /* Footer buttons (compendium browser, etc.) */
+    & .directory-footer {
+      gap: 6px;
+      padding: 6px 8px;
+    }
+  }
+
+  /* Placeables (v14): sub-tab keys, the filter field and toggles, rows */
+  #sidebar .placeables-sidebar {
+    & > nav.tabs {
+      border-bottom: 1px solid var(--mhx-night-line);
+    }
+
+    & :is(> nav.tabs .inline-control, search button) {
+      color: var(--mhx-night-dim);
+      text-shadow: none;
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      box-shadow: none;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+
+      &:hover {
+        color: var(--mhx-night-text);
+        text-shadow: 0 0 6px rgba(236, 230, 242, 0.6);
+      }
+
+      &:is(.active, [aria-pressed=true]) {
+        color: var(--mhx-neon-ink);
+        text-shadow: 0 0 4px var(--mhx-neon);
+        background: #0c0616;
+        border-color: var(--mhx-neon);
+        box-shadow: 0 0 6px var(--mhx-neon-glow);
+      }
+    }
+
+    & search input {
+      height: 1.9em;
+      padding: 0 0.5em;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-night-text);
+      background: var(--mhx-night-field);
+      border: 1px solid var(--mhx-night-rim);
+      border-radius: 2px;
+      box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.5);
+
+      &::placeholder {
+        font-family: var(--mhx-font-body);
+        font-style: italic;
+        letter-spacing: normal;
+        text-transform: none;
+        color: var(--mhx-night-dim);
+        opacity: 0.8;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: rgba(236, 230, 242, 0.7);
+        box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.5), 0 0 6px rgba(236, 230, 242, 0.25);
+      }
+    }
+
+    & .placeable-entry {
+      border-top: 1px solid var(--mhx-night-line);
+      transition: background 0.15s, box-shadow 0.15s;
+
+      &:hover {
+        background: linear-gradient(90deg, rgba(236, 230, 242, 0.14), rgba(236, 230, 242, 0.02) 70%);
+        box-shadow: inset 2px 0 0 var(--mhx-night-text);
+      }
+    }
+
+    & .placeable-entry .description {
+      font-family: var(--mhx-font-body);
+      font-weight: normal;
+      letter-spacing: 0.01em;
+      text-transform: none;
+      color: var(--mhx-night-text);
+    }
+
+    & .placeable-entry .controls :is(button, a) {
+      color: var(--mhx-night-dim);
+      text-shadow: none;
+      background: none;
+      border: none;
+      box-shadow: none;
+
+      &:hover { color: var(--mhx-night-text); }
+    }
+  }
+
+  /* Playlists: heavy Fira caps headers, pale volume sliders (a hairline
+     track, a paper knob with a black edge) */
+  #sidebar .playlists-sidebar {
+    & :is(.global-control, .directory-list) header :is(strong, label, h4) {
+      font-family: var(--mhx-font-label);
+      font-weight: 900;
+      font-variant: normal;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--mhx-night-text);
+    }
+
+    & :is(.global-control, .directory-list) button {
+      --button-text-color: var(--mhx-night-dim);
+      --button-hover-text-color: var(--mhx-night-text);
+      background: none;
+      box-shadow: none;
+      text-shadow: none;
+    }
+
+    & input[type=range] {
+      appearance: none;
+      height: 1.1em;
+      background: none;
+      border: none;
+      box-shadow: none;
+      cursor: pointer;
+
+      &::-webkit-slider-runnable-track {
+        height: 2px;
+        background: linear-gradient(90deg, var(--mhx-night-text), rgba(236, 230, 242, 0.25));
+        border: none;
+      }
+
+      &::-webkit-slider-thumb {
+        appearance: none;
+        width: 0.8em;
+        height: 0.8em;
+        margin-top: calc(1px - 0.4em);
+        border: 1px solid #000;
+        border-radius: 1px;
+        background: linear-gradient(to bottom, var(--mhx-paper-hi), var(--mhx-paper-lo));
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+      }
+    }
+  }
+
+  /* ── Chat: controls, input and editor menu (sidebar and the floating
+     input core shows while the chat tab is closed). The system's
+     `form button` paints these purple ─────────────────────────────────── */
+  :is(#chat, #chat-notifications) {
+    & :is(#chat-controls, .jump-to-bottom) .ui-control,
+    & .jump-to-bottom.ui-control {
+      color: var(--mhx-night-dim);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+      background: var(--mhx-night-key);
+      border: 1px solid var(--mhx-night-line);
+      border-radius: 2px;
+      box-shadow: none;
+      transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+      &:hover {
+        color: var(--mhx-night-text);
+        background: var(--mhx-night-key-hi);
+        border-color: var(--mhx-night-rim);
+      }
+
+      /* The picked message mode: the sheet tabs' sign */
+      &[aria-pressed=true] {
+        color: var(--mhx-neon-ink);
+        text-shadow: 0 0 4px var(--mhx-neon), 0 0 10px rgba(255, 42, 166, 0.6);
+        background: #0c0616;
+        border-color: var(--mhx-neon);
+        box-shadow: 0 0 6px var(--mhx-neon-glow);
+      }
+    }
+
+    /* Message modes: one joined strip */
+    & #message-modes .ui-control + .ui-control {
+      margin-left: -1px;
+    }
+
+    & #message-modes .ui-control[aria-pressed=true] {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Flush log: the Execute Move key on hover */
+    & #chat-controls .control-buttons .ui-control[data-action=flush]:hover {
+      color: #fff;
+      background: linear-gradient(180deg, #9c2a6c, #5e1642);
+      border-color: rgba(255, 108, 196, 0.55);
+      box-shadow: 0 0 6px rgba(255, 42, 166, 0.3);
+    }
+
+    /* The input: a canvas slip (as the chat cards) on the night,
+       charcoal ink, a pale focus ring */
+    & #chat-message {
+      --text-color: var(--mhx-ink);
+      --placeholder-color: var(--mhx-ink-dim);
+      --background-color: var(--mhx-paper-hi);
+      --border-color: rgba(0, 0, 0, 0.7);
+      --menu-background: var(--mhx-paper-hi);
+    }
+
+    & #chat-message > .editor-container {
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      background:
+        linear-gradient(rgba(217, 216, 212, 0.45), rgba(217, 216, 212, 0.45)),
+        var(--mhx-paper-art) center / cover no-repeat,
+        #d9d8d4;
+      border: 1px solid rgba(0, 0, 0, 0.75);
+      border-radius: 2px;
+      box-shadow: 0 0 0 1px rgba(20, 16, 12, 0.5), 0 2px 6px rgba(0, 0, 0, 0.55);
+
+      &:focus-within {
+        border-color: #000;
+        box-shadow: 0 0 0 1px rgba(236, 230, 242, 0.55), 0 2px 8px rgba(0, 0, 0, 0.6);
+      }
+
+      & .editor-content {
+        font-family: var(--mhx-font-body);
+        font-size: 1.05em;
+        letter-spacing: normal;
+        text-transform: none;
+        color: var(--mhx-ink);
+      }
+    }
+
+    /* The placeholder: a typed note */
+    & #chat-message > .editor-container:not(:focus-within):has(.editor-content > p:only-child > br:only-child)::after {
+      font-family: var(--mhx-font-type);
+      font-size: 1em;
+      font-style: italic;
+      font-weight: normal;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink-dim);
+      opacity: 0.85;
+    }
+
+    & #chat-message .editor-menu {
+      background: var(--mhx-paper-hi);
+      border: 1px solid var(--mhx-line-faint);
+      border-radius: 2px;
+    }
+
+    & #chat-message .editor-menu button {
+      font-family: var(--mhx-font-label);
+      font-weight: 700;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink-dim);
+      text-shadow: none;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      box-shadow: none;
+
+      &:hover,
+      &.active {
+        color: var(--mhx-charcoal);
+        background: rgba(31, 27, 23, 0.1);
+        border-color: var(--mhx-line-dim);
+      }
+    }
+
+    & #chat-message .editor-menu .pm-dropdown ul {
+      background: var(--mhx-paper-hi);
+      border: 1px solid rgba(0, 0, 0, 0.6);
+      border-radius: 2px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
+    }
+  }
+
+  /* ── Combat tracker ──────────────────────────────────────────────────── */
+  #sidebar .combat-sidebar {
+    & :is(.combat-tracker-header, .encounter-controls, .combat-controls) button.ui-control,
+    & .combat-control {
+      color: var(--mhx-night-dim);
+      text-shadow: none;
+      background: transparent;
+      border-color: transparent;
+      border-radius: 2px;
+
+      &:hover {
+        color: var(--mhx-night-text);
+        text-shadow: 0 0 6px rgba(236, 230, 242, 0.6);
+      }
+    }
+
+    & .encounter-title,
+    & .encounters h4 {
+      font-family: var(--mhx-font-title);
+      font-weight: normal;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--mhx-night-text);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    & .combat-tracker .combatant {
+      color: var(--mhx-night-text);
+      border-top: 1px solid var(--mhx-night-line);
+
+      /* The active turn: the neon sign's edge */
+      &.active {
+        background: linear-gradient(90deg, rgba(255, 42, 166, 0.16), rgba(255, 42, 166, 0.02) 70%);
+        box-shadow: inset 2px 0 0 var(--mhx-neon), inset 6px 0 8px -6px var(--mhx-neon-glow);
+      }
+    }
+
+    & .combat-tracker .token-name {
+      font-family: var(--mhx-font-body);
+      font-weight: normal;
+      letter-spacing: 0.01em;
+      text-transform: none;
+    }
+
+    & :is(.combat-controls button:not(.ui-control, .inline-control), .encounters button.combat-control-lg) {
+      font-family: var(--mhx-font-label);
+      font-weight: 900;
+      font-variant: normal;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mhx-charcoal);
+      text-shadow: none;
+      background: linear-gradient(to bottom, var(--mhx-paper-hi) 0%, var(--mhx-paper-lo) 100%);
+      border: 1px solid rgba(0, 0, 0, 0.6);
+      border-radius: 2px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.5);
+
+      &:hover {
+        color: #000;
+        background: linear-gradient(to bottom, #fffcf5 0%, var(--mhx-paper) 100%);
+        border-color: #000;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 6px rgba(236, 230, 242, 0.4);
+      }
+    }
+  }
+
+  /* ── Settings tab: smoked info card, Rift headings over a pale rule,
+     paper keys ─────────────────────────────────────────────────────────── */
+  #sidebar .settings-sidebar {
+    & .info {
+      padding: 0.5em 0.6em;
+      background: rgba(6, 3, 12, 0.45);
+      border: 1px solid var(--mhx-night-line);
+      border-radius: 2px;
+      box-shadow: inset 0 1px 6px rgba(0, 0, 0, 0.45);
+    }
+
+    & .info .title {
+      font-family: var(--mhx-font-title);
+      font-size: 1.6rem;
+      line-height: 1.1;
+      text-wrap: balance;
+      font-style: normal;
+      font-weight: normal;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--mhx-night-text);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      border: none;
+    }
+
+    & .info :is(.subtitle, .label, .value),
+    & .info > div * {
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-night-text);
+    }
+
+    & .info .label {
+      font-family: var(--mhx-font-label);
+      font-weight: 900;
+      font-variant: normal;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--mhx-night-dim);
+    }
+
+    /* The § 6b headings on the night: Rift caps over a pale 2px rule
+       (core's flanking lines go) */
+    & h4.divider {
+      display: block;
+      margin: 0.7em 0 0.3em;
+      padding: 0 0 0.1em;
+      font-family: var(--mhx-font-title);
+      font-size: 1.15em;
+      font-weight: normal;
+      line-height: 1.15;
+      letter-spacing: 0.06em;
+      text-align: left;
+      text-transform: uppercase;
+      color: var(--mhx-night-text);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      border: none;
+      border-bottom: 2px solid rgba(236, 230, 242, 0.55);
+
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+
+    & :is(button, a.button) {
+      gap: 0.6em;
+      height: 2.1em;
+      padding: 0 0.7em;
+      font-family: var(--mhx-font-label);
+      font-size: 1.05em;
+      font-weight: 900;
+      font-variant: normal;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--mhx-charcoal);
+      text-shadow: none;
+      background: linear-gradient(to bottom, var(--mhx-paper-hi) 0%, var(--mhx-paper-lo) 100%);
+      border: 1px solid rgba(0, 0, 0, 0.6);
+      border-radius: 2px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.5);
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+
+      & > i { color: inherit; }
+
+      &:is(:hover, :focus-visible) {
+        color: #000;
+        background: linear-gradient(to bottom, #fffcf5 0%, var(--mhx-paper) 100%);
+        border-color: #000;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 6px rgba(236, 230, 242, 0.4);
+      }
+    }
+
+    /* Log Out / Return to Setup: the Execute Move key on hover */
+    & :is(button[data-action=logout], button[data-action=setup]):is(:hover, :focus-visible) {
+      color: #fff;
+      text-shadow: 0 1px 1px rgba(30, 0, 20, 0.8);
+      background: linear-gradient(180deg, #9c2a6c, #5e1642);
+      border-color: rgba(255, 108, 196, 0.55);
+      box-shadow: inset 0 1px 0 rgba(255, 220, 240, 0.18), 0 0 8px rgba(255, 42, 166, 0.4);
+    }
+  }
+
+  /* ── Context menu (directories, chat cards, sheet tags and statuses):
+     a canvas card in charcoal ink, a charcoal wash and edge on hover,
+     delete on the book's salmon marker ───────────────────────────────── */
+  #context-menu {
+    --background-color: var(--mhx-paper-hi);
+    --border-color: rgba(0, 0, 0, 0.65);
+    --text-color: var(--mhx-ink);
+    --hover-text-color: var(--mhx-charcoal);
+    --group-separator: var(--mhx-line-dim);
+    --hover-entry-border: var(--mhx-line-dim);
+    --hover-entry-background: rgba(31, 27, 23, 0.1);
+    font-family: var(--mhx-font-label);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 8px 22px rgba(0, 0, 0, 0.6);
+    background: var(--mhx-paper-art) center / cover no-repeat, var(--background-color);
+
+    & li.context-item {
+      font-size: 1.05em;
+      font-weight: 700;
+      text-shadow: none;
+
+      & > i {
+        color: inherit;
+      }
+
+      &:hover {
+        box-shadow: inset 2px 0 0 var(--mhx-charcoal);
+      }
+
+      /* Delete: the salmon marker (against) */
+      &:has(> i:is(.fa-trash, .fa-trash-can)):hover {
+        color: var(--mhx-hl-text);
+        background: var(--mhx-negative);
+        border-color: var(--mhx-line-dim);
+        box-shadow: inset 2px 0 0 var(--mhx-charcoal);
+      }
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     Phase 2 is complete (§ 1 to § 7). Deliberately left as they are:
+     core and other modules' windows other than DialogV2 dialogs (their
+     title bars, AppV2 windows such as the sidebar pop-outs' frames,
+     journal sheets, settings apps), the Player HUD and NPC HUD header
+     keys (the HUD's own CSS), the scene controls / hotbar / players list
+     / navigation, and core tooltips.
+     ──────────────────────────────────────────────────────────────────────── */
 }
 
 /* § 6b: the roll window's "Wait for MC" and pending Help / Hurt breathe
