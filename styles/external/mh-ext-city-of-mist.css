@@ -6632,6 +6632,7 @@
   .city-of-mist--tooltip {
     padding: 0.1em 0.3em 0;
     font-family: var(--mhx-font-body);
+    font-size: 0.85em;                 /* everything inside scales in em */
     letter-spacing: normal;
     text-transform: none;
     color: var(--mhx-ink);
