@@ -7784,21 +7784,22 @@
   }
 
   /* Tab strip: glass keys, the open tab lit cyan. Core draws these from
-     --control-* (the system's pink frame round the strip goes) */
+     --control-*, which it defines on each .ui-control itself, so they
+     are set there (the system's pink frame round the strip goes) */
   #sidebar-tabs {
-    --control-bg-color: rgba(3, 13, 33, 0.82);
-    --control-border-color: var(--mhx-line-faint);
-    --control-icon-color: var(--mhx-text-dim);
-    --control-hover-bg-color: rgba(0, 222, 246, 0.12);
-    --control-hover-border-color: var(--mhx-line-dim);
-    --control-hover-icon-color: var(--mhx-bright);
-    --control-active-bg-color: rgba(0, 222, 246, 0.16);
-    --control-active-border-color: var(--mhx-line);
-    --control-active-icon-color: var(--mhx-line);
     border: none;
     box-shadow: none;
 
     & .ui-control {
+      --control-bg-color: rgba(3, 13, 33, 0.82);
+      --control-border-color: var(--mhx-line-faint);
+      --control-icon-color: var(--mhx-text-dim);
+      --control-hover-bg-color: rgba(0, 222, 246, 0.12);
+      --control-hover-border-color: var(--mhx-line-dim);
+      --control-hover-icon-color: var(--mhx-bright);
+      --control-active-bg-color: rgba(0, 222, 246, 0.16);
+      --control-active-border-color: var(--mhx-line);
+      --control-active-icon-color: var(--mhx-line);
       border-radius: 0;
       color: var(--control-icon-color);
       text-shadow: none;
