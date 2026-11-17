@@ -6004,12 +6004,12 @@
       display: none;
     }
 
-    /* Status pips (system "tier + circles" display): small square boxes
-       in the name's own ink, filled or hollow, as typed check boxes */
+    /* Status pips (system "tier + circles" display): the book's slanted
+       boxes, small parallelograms in the name's own ink, filled or hollow */
     & span.status-name .dotStatus {
       display: inline-flex;
       align-items: center;
-      gap: 2px;
+      gap: 3px;
     }
 
     & span.status-name .tracker-circle {
@@ -6029,7 +6029,7 @@
       border-radius: 0;
       background: none;
       box-shadow: none;
-      transform: none;
+      transform: skewX(-20deg);
     }
 
     & span.status-name .dotStatus > .tracker-circle:first-of-type {
@@ -6339,8 +6339,10 @@
 
   /* ── Scene Tags window ──────────────────────────────────────────────────
      The plain canvas; the title is the danger's name (Rift Bold caps over
-     the heavy black rule), "Scene" a heading over a 2px rule, each
-     combatant and showcased actor a Rift caps sub-heading over a hairline. */
+     the heavy black rule). The scene and each combatant / showcased actor
+     is a spiral notepad page (com_npc_bg-2, as the status tracker's)
+     pinned to it: "Scene" a heading over a 2px rule, each actor a Rift
+     caps sub-heading over a hairline. */
 
   .app.window-app.story-tag-window {
     padding: 0.3em 0.8em 0.6em 0.8em;
@@ -6405,6 +6407,27 @@
 
     & .scene-tag-content {
       margin: 0 0.2em 0 0;
+    }
+
+    /* One notepad page per block (as the status tracker): border-image
+       keeps the ring strip at the top and the torn right edge at any
+       height; the slices are the art's (471×691), drawn at about 0.6 */
+    & :is(.scene-tags-block, .combatant-block) {
+      box-sizing: border-box;
+      margin: 0 0 0.6em;
+      padding: 0.1em 0.5em 0.4em;
+      border-style: solid;
+      border-width: 28px 6px 6px 4px;
+      border-radius: 0;
+      border-image: url(/modules/mist-hud/ui/com_npc_bg-2.webp) 46 10 10 6 fill / 28px 6px 6px 4px stretch;
+      background: none;
+      box-shadow: none;
+      filter: drop-shadow(0 1px 3px rgba(20, 16, 12, 0.3));
+    }
+
+    /* The page's ring strip is the gap above each heading */
+    & :is(.scene-tags-block, .combatant-block) :is(.scene-name, .combatant-name) {
+      margin-top: 0;
     }
 
     /* Headings: name on the left, the create links on the right */
