@@ -43,12 +43,15 @@
      Phase 1  parity port of city-of-mist 4.5.3 styles/com.css
      Phase 2  § 1 chat cards
               § 2 PC sheet
-              § 3 threat / crew / limited sheets
+              § 3 danger (threat) / crew / limited sheets
               § 4 item sheets
               § 5 dialogs
               § 6 story tag window, scene tags, status tracker, token tooltip
               § 6b roll and chat dialogs
               § 7 sidebar and chrome
+     Written so far: § 1 to § 3. The PC and crew sheets sit on the dark
+     window (com_sheet_BG); the danger and limited sheets are a torn paper
+     scrap on the plain canvas.
    ========================================================================== */
 
 .style-custom {
@@ -1351,7 +1354,7 @@
 
   /* ── Sheet body ─────────────────────────────────────────────────────── */
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) {
     font-family: var(--mhx-font-body);
     letter-spacing: normal;
     text-transform: none;
@@ -1359,25 +1362,25 @@
     text-shadow: none;
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) a {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) a {
     color: var(--mhx-ink-dim);
     text-shadow: none;
     transition: color 0.15s, text-shadow 0.15s;
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) a:hover {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) a:hover {
     color: var(--mhx-ink);
     text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) .fa-disabled {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .fa-disabled {
     color: var(--mhx-ink-dim);
     opacity: 0.3;
   }
 
   /* ── Header ────────────────────────────────────────────────────────── */
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) header.sheet-header {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) header.sheet-header {
     gap: 0.6em;
     padding: 0.4em 0.5em 0.5em;
     border-bottom: 1px solid var(--mhx-line-faint);
@@ -1385,7 +1388,7 @@
   }
 
   /* Portrait: charcoal corner brackets, as a pinned photo */
-  .city.sheet :is(.actor-sheet, .crew-sheet) .image-block {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .image-block {
     position: relative;
     align-self: center;
     padding: 4px;
@@ -1396,7 +1399,7 @@
       linear-gradient(var(--mhx-line), var(--mhx-line)) bottom right / 1px 12px no-repeat;
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) header.sheet-header img.profile-img {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) header.sheet-header img.profile-img {
     display: block;
     border: 1px solid var(--mhx-line-dim);
     border-radius: 0;
@@ -1404,14 +1407,14 @@
     box-shadow: 0 1px 6px rgba(20, 16, 12, 0.35);
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) .character-basic-info {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .character-basic-info {
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 0.3em;
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) .header-row {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .header-row {
     align-items: baseline;
     margin: 0;
     padding: 0;
@@ -1420,7 +1423,7 @@
 
   /* Name: Rift Bold caps in charcoal (drops Phase 1's white letters with
      the orange / purple offset shadows) */
-  .city.sheet :is(.actor-sheet, .crew-sheet) input.character-name {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) input.character-name {
     height: auto;
     font-family: var(--mhx-font-title);
     font-size: 2.6em;
@@ -1437,7 +1440,7 @@
 
   /* Mythos ♦ Logos: the typed case-file line (com.css gives them Rift
      Bold with Mythos / Logos glows) */
-  .city.sheet :is(.actor-sheet, .crew-sheet) :is(input.mythos-name, input.logos-name) {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) :is(input.mythos-name, input.logos-name) {
     height: auto;
     font-family: var(--mhx-font-body);
     font-size: 1.05em;
@@ -1451,7 +1454,7 @@
     border-radius: 0;
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) .separator-icon {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .separator-icon {
     flex: none;
     padding: 0 0.4em;
     font-size: 0.8em;
@@ -1459,7 +1462,7 @@
     text-shadow: none;
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) input.short-description {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) input.short-description {
     width: 100%;
     font-family: var(--mhx-font-body);
     font-size: 1em;
@@ -1472,18 +1475,18 @@
     border-radius: 0;
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) header.sheet-header input:focus {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) header.sheet-header input:focus {
     box-shadow: none;
     border-bottom: 1px solid var(--mhx-ink);
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) header.sheet-header input::placeholder {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) header.sheet-header input::placeholder {
     color: var(--mhx-ink-dim);
     opacity: 0.6;
   }
 
   /* Lock and info buttons */
-  .city.sheet :is(.actor-sheet, .crew-sheet) .header-right-side {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .header-right-side {
     flex: 0 0 auto;
     max-width: none;
     flex-direction: column;
@@ -1492,11 +1495,11 @@
     gap: 0.5em;
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) .header-right-side * {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .header-right-side * {
     flex-shrink: 0;
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) .lock-button {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .lock-button {
     margin: 0;
     padding: 0;
     max-width: none;
@@ -1506,13 +1509,13 @@
     border-radius: 0;
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) .lock-button:hover {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .lock-button:hover {
     background: none;
   }
 
   /* The lock: a paper key; unlocked, it is inked charcoal */
-  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable,
-  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable.unlocked {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .pushable,
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .pushable.unlocked {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1527,13 +1530,13 @@
       0 1px 2px rgba(30, 24, 18, 0.25);
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable.unlocked {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .pushable.unlocked {
     background: linear-gradient(180deg, #3a342e, #1f1b17);
     border-color: #111;
     box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.12), 0 1px 3px rgba(0, 0, 0, 0.4);
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable .front {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .pushable .front {
     padding: 0;
     font-size: 1.05rem;
     transform: none;
@@ -1541,21 +1544,21 @@
     background: none;
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable.unlocked .front {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .pushable.unlocked .front {
     color: #efe9df;
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) .pushable:active .front {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .pushable:active .front {
     transform: translateY(1px);
   }
 
-  .city.sheet :is(.actor-sheet, .crew-sheet) .open-tutorial {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .open-tutorial {
     font-size: 1.1em;
   }
 
   /* ── Tabs ──────────────────────────────────────────────────────────── */
 
-  .city.sheet .actor-sheet nav.sheet-tabs {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) nav.sheet-tabs {
     gap: 2px;
     margin: 0.4em 0;
     padding: 0;
@@ -1568,18 +1571,18 @@
     border-bottom: 1px solid var(--mhx-line-dim);
   }
 
-  .city.sheet .actor-sheet nav.sheet-tabs .item {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) nav.sheet-tabs .item {
     padding: 0.25em 0.5em;
     color: var(--mhx-ink-dim);
     text-shadow: none;
     border-bottom: 2px solid transparent;
   }
 
-  .city.sheet .actor-sheet nav.sheet-tabs .item:hover {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) nav.sheet-tabs .item:hover {
     color: var(--mhx-ink);
   }
 
-  .city.sheet .actor-sheet nav.sheet-tabs .item.active {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) nav.sheet-tabs .item.active {
     color: var(--mhx-ink);
     text-shadow: var(--mhx-lift);
     background: linear-gradient(0deg, rgba(31, 27, 23, 0.1), transparent);
@@ -2055,50 +2058,50 @@
 
   /* ── Tags (theme cards, loadout, story tag card) ─────────────────────── */
 
-  .city.sheet .actor-sheet ul.tag-list {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) ul.tag-list {
     margin: 0;
     padding: 0;
     font-size: 1em;
     list-style: none;
   }
 
-  .city.sheet .actor-sheet ul.tag-list > li {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) ul.tag-list > li {
     margin: 0;
   }
 
-  .city.sheet .actor-sheet ul.sub-tag-list {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) ul.sub-tag-list {
     margin: 0 0 0 1em;
     padding: 0;
   }
 
-  .city.sheet .actor-sheet .tag.item-entry {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .tag.item-entry {
     align-items: center;
     gap: 0.2em;
     text-align: left;
   }
 
-  .city.sheet .actor-sheet .flex-trash {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .flex-trash {
     flex: none;
     min-width: 0;
     padding-right: 0;
     font-size: 0.8em;
   }
 
-  .city.sheet .actor-sheet span.tag-symbols {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.tag-symbols {
     width: auto;
     min-width: 0;
     max-width: none;
     font-size: 0.8em;
   }
 
-  .city.sheet .actor-sheet span.tag-symbols a,
-  .city.sheet .actor-sheet .power-tag-icon,
-  .city.sheet .actor-sheet .flex-trash a,
-  .city.sheet .actor-sheet .activation-square {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.tag-symbols a,
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .power-tag-icon,
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .flex-trash a,
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .activation-square {
     color: var(--mhx-ink-dim);
   }
 
-  .city.sheet .actor-sheet span.tag-name-block {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.tag-name-block {
     display: flex;
     align-items: center;
     gap: 0.25em;
@@ -2108,7 +2111,7 @@
   /* Tag names: the HUD's tag face (Roboto Condensed) at its regular
      weight, as the book's cards, charcoal. (The face ships 400 and 700
      only, so anything in between renders bold.) */
-  .city.sheet .actor-sheet span.flex-tag-name {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.flex-tag-name {
     font-family: var(--mhx-font-tags);
     font-size: 1.2em;
     font-weight: 400;
@@ -2120,11 +2123,11 @@
     text-shadow: none;
   }
 
-  .city.sheet .actor-sheet span.flex-tag-name.weakness-tag {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.flex-tag-name.weakness-tag {
     font-style: italic;
   }
 
-  .city.sheet .actor-sheet .story-tag-location {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .story-tag-location {
     font-family: var(--mhx-font-body);
     font-size: 0.75em;
     font-style: italic;
@@ -2144,7 +2147,7 @@
 
   /* Locked theme cards: drop the power-tag bolt too (the card says what
      they are). */
-  .city.sheet .actor-sheet.locked .theme-block .tag.item-entry .power-tag-icon {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet).locked .theme-block .tag.item-entry .power-tag-icon {
     display: none;
   }
 
@@ -2158,8 +2161,8 @@
      "no other icon" is spelled as one :has().) */
   .city.sheet :is(div.Loadout-theme.theme-block, .story-tag-box) .tag.item-entry span.tag-symbols:not(:has(> a > i:not(.fa-briefcase, .fa-tag))),
   .city.sheet .theme-block .tag.item-entry span.tag-symbols:not(:has(> a > i:not(.fa-angle-double-down))),
-  .city.sheet .actor-sheet.locked .theme-block .tag.item-entry span.tag-symbols:not(:has(> a > i:not(.fa-bolt, .fa-angle-double-down))),
-  .city.sheet .actor-sheet.locked .tag.item-entry .flex-trash:not(:has(*)) {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet).locked .theme-block .tag.item-entry span.tag-symbols:not(:has(> a > i:not(.fa-bolt, .fa-angle-double-down))),
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet).locked .tag.item-entry .flex-trash:not(:has(*)) {
     display: none;
   }
 
@@ -2195,7 +2198,7 @@
     pointer-events: none;
   }
 
-  .city.sheet .actor-sheet.unlocked .theme-block .tag.item-entry::before {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet).unlocked .theme-block .tag.item-entry::before {
     inset: 0;
   }
 
@@ -2247,13 +2250,13 @@
      `!important` in a cascade layer, which beats any unlayered rule, so
      the glyphs are painted with text-fill-color instead; its fire glow
      goes. */
-  .city.sheet .actor-sheet .tag.item-entry span.flex-tag-name:is(.burn-level-2, .burn-level-3, .burn-level-4) {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .tag.item-entry span.flex-tag-name:is(.burn-level-2, .burn-level-3, .burn-level-4) {
     -webkit-text-fill-color: var(--mhx-tag-text);
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
   }
 
   /* Burned: struck through in the dim ink, as the HUD */
-  .city.sheet .actor-sheet .tag.item-entry span.flex-tag-name.burn-level-1 {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .tag.item-entry span.flex-tag-name.burn-level-1 {
     -webkit-text-fill-color: var(--mhx-ink-dim);
     text-shadow: none;
     text-decoration: line-through;
@@ -2262,7 +2265,7 @@
     opacity: 0.85;
   }
 
-  .city.sheet .actor-sheet .tag-edit-button:hover {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .tag-edit-button:hover {
     text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
   }
 
@@ -2272,14 +2275,14 @@
      burn. Empty = the grey flame inked charcoal; hover and "to burn" =
      the yellow flame with a charcoal edge; burned = the red flame. */
 
-  .city.sheet .actor-sheet .tag.item-entry .flex-burn-flame-cell {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .tag.item-entry .flex-burn-flame-cell {
     flex: none;
     min-width: 0;
     max-width: none;
     margin: 0;
   }
 
-  .city.sheet .actor-sheet.locked .tag.item-entry .flex-burn-flame-cell {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet).locked .tag.item-entry .flex-burn-flame-cell {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2287,12 +2290,12 @@
     min-width: 18px;
   }
 
-  .city.sheet .actor-sheet :is(.tag-burn, .tag-unburn) {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) :is(.tag-burn, .tag-unburn) {
     display: inline-flex;
     align-items: center;
   }
 
-  .city.sheet .actor-sheet :is(.tag-burn, .tag-unburn) i {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) :is(.tag-burn, .tag-unburn) i {
     display: inline-block;
     width: 14px;
     height: 20px;
@@ -2302,14 +2305,14 @@
     transition: opacity 0.15s, filter 0.15s;
   }
 
-  .city.sheet .actor-sheet :is(.tag-burn, .tag-unburn) i::before {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) :is(.tag-burn, .tag-unburn) i::before {
     content: none;
   }
 
   /* Mythos cards: the empty flame in the card's dark purple ink
      (--mhx-ink there), painted through the icon as a mask; on hover the
      yellow flame above takes over */
-  .city.sheet .actor-sheet .Mythos-theme .tag-burn:not(:hover) i {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .Mythos-theme .tag-burn:not(:hover) i {
     background: var(--mhx-ink);
     -webkit-mask: var(--mhx-burn) center / contain no-repeat;
     mask: var(--mhx-burn) center / contain no-repeat;
@@ -2317,17 +2320,17 @@
     opacity: 0.85;
   }
 
-  .city.sheet .actor-sheet .tag-burn:hover {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .tag-burn:hover {
     text-shadow: none;
   }
 
-  .city.sheet .actor-sheet .tag-burn:hover i {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .tag-burn:hover i {
     background-image: var(--mhx-burn-to);
     filter: var(--mhx-ink-outline);
     opacity: 1;
   }
 
-  .city.sheet .actor-sheet .tag-unburn i {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .tag-unburn i {
     background-image: var(--mhx-burned-ic);
     filter: none;
     opacity: 1;
@@ -2335,7 +2338,7 @@
 
   /* To burn: the system renders no control, so the flame is drawn in
      the empty cell */
-  .city.sheet .actor-sheet .tag.item-entry:has(.flex-tag-name:is(.burn-level-2, .burn-level-3, .burn-level-4)) .flex-burn-flame-cell::before {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .tag.item-entry:has(.flex-tag-name:is(.burn-level-2, .burn-level-3, .burn-level-4)) .flex-burn-flame-cell::before {
     content: "";
     display: inline-block;
     width: 14px;
@@ -2696,7 +2699,7 @@
 
   /* Crew relationships are an Otherscape rule; on a locked CoM sheet an
      empty list goes */
-  .city.sheet .actor-sheet.locked .flip-card .story-tag-box .relationship-tag-category:not(:has(.tag.item-entry)) {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet).locked .flip-card .story-tag-box .relationship-tag-category:not(:has(.tag.item-entry)) {
     display: none;
   }
 
@@ -2736,7 +2739,7 @@
   }
 
   .city.sheet .story-tag-box .tag.item-entry span.flex-tag-name,
-  .city.sheet .actor-sheet .story-tag-box span.status-name {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .story-tag-box span.status-name {
     --mhx-hl: var(--mhx-storytag);
     flex: 0 1 auto;
     min-width: 0;
@@ -2761,17 +2764,17 @@
     transition: filter 0.15s, box-shadow 0.15s;
   }
 
-  .city.sheet .actor-sheet .story-tag-box span.status-name {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .story-tag-box span.status-name {
     --mhx-hl: var(--mhx-status);
   }
 
   .city.sheet .story-tag-box .tag.item-entry span.flex-tag-name.negative-selected,
-  .city.sheet .actor-sheet .story-tag-box .status span.status-name.negative-selected {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .story-tag-box .status span.status-name.negative-selected {
     --mhx-hl: var(--mhx-negative);
   }
 
   .city.sheet .story-tag-box .tag.item-entry span.flex-tag-name:is(.positive-selected, .negative-selected),
-  .city.sheet .actor-sheet .story-tag-box .status span.status-name:is(.positive-selected, .negative-selected) {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .story-tag-box .status span.status-name:is(.positive-selected, .negative-selected) {
     font-weight: bold;
     box-shadow: inset 0 0 0 1.5px var(--mhx-ink);
   }
@@ -2799,13 +2802,13 @@
   }
 
   /* Status rows */
-  .city.sheet .actor-sheet div.status-line {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) div.status-line {
     align-items: center;
     gap: 0.25em;
     margin: 3px 0;
   }
 
-  .city.sheet .actor-sheet .status-name-block {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .status-name-block {
     display: flex;
     align-items: center;
     gap: 0.25em;
@@ -2814,22 +2817,22 @@
     text-align: left;
   }
 
-  .city.sheet .actor-sheet .status-name-block > a {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .status-name-block > a {
     font-size: 0.85em;
     color: var(--mhx-ink-dim);
   }
 
-  .city.sheet .actor-sheet .story-tag-box span.status-name {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .story-tag-box span.status-name {
     font-size: 1.3em;
   }
 
-  .city.sheet .actor-sheet .plus-minus-controls {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .plus-minus-controls {
     display: inline-flex;
     gap: 0.35em;
     font-size: 0.8em;
   }
 
-  .city.sheet .actor-sheet .plus-minus-controls a {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .plus-minus-controls a {
     color: var(--mhx-ink-dim);
   }
 
@@ -2969,7 +2972,7 @@
 
   /* ── Bio tab ─────────────────────────────────────────────────────── */
 
-  .city.sheet .actor-sheet .bio-section-label {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .bio-section-label {
     margin: 0.5em 0 0.3em;
     padding: 0 0 0.15em;
     font-family: var(--mhx-font-title);
@@ -2983,7 +2986,7 @@
     border-bottom: 1px solid var(--mhx-line);
   }
 
-  .city.sheet .actor-sheet .bio-section .editor-box {
+  .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .bio-section .editor-box {
     padding: 0.3em 0.6em;
     font-family: var(--mhx-font-body);
     color: var(--mhx-ink);
@@ -3145,18 +3148,1177 @@
   }
 
   /* Empty theme slots: smoked glass with pale dashes */
-  .city.sheet div.flex-theme-block.empty-box {
+  .city.sheet :is(.actor-sheet, .crew-sheet) div.flex-theme-block.empty-box {
     color: rgba(236, 230, 242, 0.6);
     background: rgba(14, 8, 26, 0.45);
     border-color: rgba(236, 230, 242, 0.3);
   }
 
-  .city.sheet div.flex-theme-block.empty-box:hover {
+  .city.sheet :is(.actor-sheet, .crew-sheet) div.flex-theme-block.empty-box:hover {
     border-color: rgba(236, 230, 242, 0.7);
     box-shadow: 0 0 8px rgba(236, 230, 242, 0.2);
   }
 
-  .city.sheet .empty-extra-placeholder-text .add-theme {
+  .city.sheet :is(.actor-sheet, .crew-sheet) .empty-extra-placeholder-text .add-theme {
     color: #ece6f2;
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     § 3. Threat, crew and limited sheets
+     Templates: threat-sheet.html, parts/threat-sheet-header.html,
+     parts/spectrum-display.html, parts/default-tags-and-statuses.hbs,
+     parts/gmmoves-section.hbs → gmmove-display.html → gmmove-part.hbs,
+     parts/danger-template.html, parts/story-tag-header.html,
+     parts/status-text-list.html, parts/bio-display.html, crew-sheet.html,
+     limited-actor.html (its form is also .threat-sheet, with no tabs).
+
+     § 2 already covers these through `:is(.actor-sheet, .threat-sheet,
+     .crew-sheet)`: body text, links, header frame, lock key, paper tabs,
+     theme cards, tag rows, burn marks and status rows. The crew sheet
+     also shares § 2's "On the dark window" block; the danger and limited
+     sheets do not (that block names .actor-sheet and .crew-sheet only).
+
+     The danger (threat) sheet stays light (user, 2026-11-17), after the
+     core book's Danger blocks: the whole form is a torn grey-beige paper
+     scrap (ui/com_outcome_bg.webp, the chat outcome scrap, drawn with
+     border-image so the torn edges keep their size) lying on the plain
+     canvas (com_chat_BG_s). The name runs in Rift Bold caps over a heavy
+     black rule with its ★ rating after it, sub-headings are Rift caps,
+     text is the body serif, moves are bullets led by their name in bold,
+     and tags and statuses are the book's flat yellow / green highlights
+     in italics. Grit noir: one charcoal ink, no accent colours.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  .city.sheet .threat-sheet,
+  .app.dialog:has(.dialog-content > .gmmove-section) {
+    --mhx-scrap:        url(/modules/mist-hud/ui/com_outcome_bg.webp);
+    --mhx-black-rule:   #1f1b17;                 /* the book's heavy rule */
+  }
+
+  /* ── Window: the plain canvas; the form is the torn scrap on it ────── */
+
+  .city.sheet:has(> .window-content > .threat-sheet) > .window-content {
+    padding: 10px 12px 12px;
+    background: var(--mhx-paper-art) center / cover no-repeat, var(--mhx-paper-hi);
+    background-blend-mode: normal;
+  }
+
+  /* The scrap art is 485×294: its torn top (right half) and bottom edges
+     are the 34px and 50px slices, kept at natural size; the middle
+     stretches to the window. The transparent border is the scrap's
+     margin, so text never runs onto the torn edges. */
+  /* The scrap grows with its content (the window scrolls it), so the
+     torn foot always closes the text. */
+  .city.sheet .window-content > form.threat-sheet {
+    box-sizing: border-box;
+    flex: 1 0 auto;
+    min-height: 100%;
+    padding: 0 6px;
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    border-style: solid;
+    border-color: transparent;
+    border-width: 28px 14px 40px 12px;
+    border-image: var(--mhx-scrap) 34 8 50 6 fill / 34px 8px 50px 6px stretch;
+    background: none;
+  }
+
+  /* Foundry's `.flexcol > * { flex: 1 }` would stretch the header and the
+     limits row to share the height; only the body grows. */
+  .city.sheet .threat-sheet > :not(.sheet-body) {
+    flex: none;
+  }
+
+  .city.sheet .threat-sheet > .sheet-body {
+    min-height: 0;
+  }
+
+  /* ── Headings ─────────────────────────────────────────────────────────
+     Section headings (Moves, Default Tags and Statuses, Templates,
+     Themes, the bio labels): Rift Bold caps over a 2px charcoal rule.
+     Sub-headings (move types, limits, story tags, statuses): smaller
+     Rift caps, as the book's "HURT OR SUBDUE 2" lines, no rule. */
+  .city.sheet .threat-sheet :is(
+    .gm-moves-header,
+    .default-tags-and-statuses > h2,
+    .danger-templates-label,
+    .theme-section .theme-header,
+    .bio-section-label
+  ) {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 0.45em;
+    margin: 0.7em 0 0.4em;
+    padding: 0 0 0.1em;
+    font-family: var(--mhx-font-title);
+    font-size: 1.4em;
+    font-weight: normal;
+    line-height: 1.1;
+    letter-spacing: 0.03em;
+    text-align: left;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    background: none;
+    border: none;
+    border-bottom: 2px solid var(--mhx-black-rule);
+  }
+
+  .city.sheet .threat-sheet :is(
+    .gmmove-type-label,
+    .spectrum-section-label,
+    .flex-column > .story-tag-box .story-tags-header
+  ) {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 0.4em;
+    height: auto;
+    margin: 0.55em 0 0.2em;
+    padding: 0;
+    font-family: var(--mhx-font-title);
+    font-size: 1.1em;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1.15;
+    letter-spacing: 0.06em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    background: none;
+    border: none;
+  }
+
+  .city.sheet .threat-sheet :is(
+    .gm-moves-header, .default-tags-and-statuses > h2, .danger-templates-label,
+    .theme-header, .spectrum-section-label, .story-tags-header
+  ) a {
+    font-size: 0.7em;
+    color: var(--mhx-ink-dim);
+    text-shadow: none;
+  }
+
+  .city.sheet .threat-sheet .flex-overview-block > :first-child > h2,
+  .city.sheet .threat-sheet .theme-section .theme-header {
+    margin-top: 0.2em;
+  }
+
+  .city.sheet .threat-sheet .theme-section .section-header {
+    flex-direction: row;
+    margin: 0;
+    border: none;
+  }
+
+  .city.sheet .threat-sheet .theme-section .theme-header {
+    flex: 1;
+  }
+
+  /* ── Header ─────────────────────────────────────────────────────────── */
+
+  .city.sheet .threat-sheet header.sheet-header {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 0.8em;
+    max-height: none;
+    padding: 0 0 0.4em;
+    border-bottom: none;
+  }
+
+  .city.sheet .threat-sheet .image-block {
+    align-self: flex-start;
+  }
+
+  .city.sheet .threat-sheet header.sheet-header img.profile-img {
+    width: 92px;
+    height: 92px;
+    object-fit: cover;
+  }
+
+  .city.sheet .threat-sheet .character-basic-info {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+    justify-content: flex-start;
+    gap: 0.25em;
+  }
+
+  /* The system sets these rows to 2em type in a 1.5em box, centred */
+  .city.sheet .threat-sheet .header-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 0.4em;
+    height: auto;
+    font-size: 1em;
+  }
+
+  .city.sheet .threat-sheet .header-row input {
+    min-width: 0;
+    height: auto;
+    padding: 0 0.1em;
+    background: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* Locked: full ink (core fades disabled inputs with opacity and a grey
+     text fill) */
+  .city.sheet .threat-sheet .header-row input:disabled {
+    opacity: 1;
+    -webkit-text-fill-color: currentColor;
+  }
+
+  .city.sheet .threat-sheet .header-row input:focus {
+    background: rgba(255, 252, 245, 0.5);
+    box-shadow: none;
+  }
+
+  .city.sheet .threat-sheet .header-row input::placeholder {
+    color: var(--mhx-ink-dim);
+    opacity: 0.55;
+  }
+
+  /* Locked: an empty field shows nothing (no "Mythos" placeholder) */
+  .city.sheet .threat-sheet .header-row input:disabled::placeholder {
+    opacity: 0;
+  }
+
+  /* Name row: the book's Danger title, Rift Bold caps over a heavy black
+     rule, the ★ rating after the name and the token alias small at the
+     far end */
+  .city.sheet .threat-sheet header .header-row:first-child {
+    align-items: center;
+    padding-bottom: 0.1em;
+    border-bottom: 4px solid var(--mhx-black-rule);
+  }
+
+  .city.sheet .threat-sheet input.danger-name {
+    order: 0;
+    flex: 0 1 auto;
+    width: auto;
+    field-sizing: content;
+    min-width: 3em;
+    max-width: 78%;
+    font-family: var(--mhx-font-title);
+    font-size: 2.3em;
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+    text-align: left;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    text-shadow: none;
+  }
+
+  .city.sheet .threat-sheet header .header-row:first-child > .separator-icon {
+    display: none;
+  }
+
+  .city.sheet .threat-sheet input.alias-input {
+    order: 2;
+    flex: 0 1 12em;
+    margin-left: auto;
+    font-family: var(--mhx-font-label);
+    font-size: 0.85em;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-align: right;
+    text-transform: uppercase;
+    color: var(--mhx-ink-dim);
+  }
+
+  /* ★ rating: the danger's size (the "Collective Size" / "Scale" the
+     locked header carries as radios), one star per point. The radios
+     only exist on the locked sheet, so the stars show there. */
+  .city.sheet .threat-sheet header .header-row:first-child::after {
+    order: 1;
+    flex: none;
+    font-family: var(--mhx-font-title);
+    font-size: 1.6em;
+    line-height: 1;
+    letter-spacing: 0.05em;
+    color: var(--mhx-ink);
+  }
+
+  .city.sheet .threat-sheet:has(input[name="system.collectiveSize"][value="1"]:checked) header .header-row:first-child::after { content: "★"; }
+  .city.sheet .threat-sheet:has(input[name="system.collectiveSize"][value="2"]:checked) header .header-row:first-child::after { content: "★★"; }
+  .city.sheet .threat-sheet:has(input[name="system.collectiveSize"][value="3"]:checked) header .header-row:first-child::after { content: "★★★"; }
+  .city.sheet .threat-sheet:has(input[name="system.collectiveSize"][value="4"]:checked) header .header-row:first-child::after { content: "★★★★"; }
+  .city.sheet .threat-sheet:has(input[name="system.collectiveSize"][value="5"]:checked) header .header-row:first-child::after { content: "★★★★★"; }
+  .city.sheet .threat-sheet:has(input[name="system.collectiveSize"][value="6"]:checked) header .header-row:first-child::after { content: "★★★★★★"; }
+
+  /* Mythos ♦ Logos: the book's italic line under the title */
+  .city.sheet .threat-sheet :is(input.mythos-name, input.logos-name) {
+    flex: 1 1 50%;
+    font-size: 1em;
+    color: var(--mhx-ink-dim);
+    border-bottom: none;
+  }
+
+  .city.sheet .threat-sheet.unlocked :is(input.mythos-name, input.logos-name, input.short-description) {
+    border-bottom: 1px solid var(--mhx-line-faint);
+  }
+
+  .city.sheet .threat-sheet .header-row input.short-description {
+    flex: 1;
+    text-align: left;
+    font-family: var(--mhx-font-body);
+    font-size: 1.05em;
+    font-style: italic;
+    color: var(--mhx-ink);
+    border-bottom: none;
+  }
+
+  .city.sheet .threat-sheet .separator-icon {
+    color: var(--mhx-ink-dim);
+  }
+
+  /* Limits, locked: the book's "HURT OR SUBDUE 2" line. The system's
+     label goes small; each limit is Rift caps, set apart by a dot. */
+  .city.sheet .threat-sheet .header-row > .spectrum-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 0.1em 0;
+    font-family: var(--mhx-font-title);
+    font-size: 1em;
+    font-weight: normal;
+    text-transform: uppercase;
+  }
+
+  .city.sheet .threat-sheet .header-row > .spectrum-list > b {
+    margin-right: 0.6em;
+    font-family: var(--mhx-font-label);
+    font-size: 0.8em;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city.sheet .threat-sheet .spectrum-short-label {
+    padding: 0;
+    font-family: var(--mhx-font-title);
+    font-size: 1.25em;
+    font-variant-numeric: lining-nums;
+    letter-spacing: 0.04em;
+    color: var(--mhx-ink);
+  }
+
+  .city.sheet .threat-sheet .spectrum-short-label + .spectrum-short-label::before {
+    content: "·";
+    margin: 0 0.4em;
+  }
+
+  /* Collective size / scale radios (locked) */
+  .city.sheet .threat-sheet .header-row:has(> input[type=radio]) {
+    align-items: center;
+    gap: 0 0.15em;
+    font-family: var(--mhx-font-label);
+    font-size: 0.9em;
+    font-weight: 900;
+    font-variant-numeric: lining-nums;
+    color: var(--mhx-ink);
+  }
+
+  .city.sheet .threat-sheet .header-row > label.dialog-label {
+    margin-right: 0.4em;
+    font-family: var(--mhx-font-label);
+    font-size: 0.9em;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city.sheet .threat-sheet .header-row > input[type=radio] {
+    flex: none;
+    width: 0.9em;
+    height: 0.9em;
+    margin: 0 0.15em 0 0.5em;
+  }
+
+  .city.sheet .threat-sheet input:is([type=checkbox], [type=radio]) {
+    accent-color: var(--mhx-black-rule);
+  }
+
+  /* Lock, info and "Is template" column */
+  .city.sheet .threat-sheet .lock-container {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5em;
+  }
+
+  .city.sheet .threat-sheet .lock-container .Checkbox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1em;
+  }
+
+  .city.sheet .threat-sheet .lock-container .Checkbox label {
+    font-family: var(--mhx-font-label);
+    font-size: 0.7em;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-ink-dim);
+  }
+
+  /* ── Limits editor (GM, unlocked) ─────────────────────────────────── */
+
+  .city.sheet .threat-sheet .threat-spectrums {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2em 1em;
+    height: auto;
+    max-height: none;
+    margin: 0 0 0.3em;
+    text-align: left;
+  }
+
+  .city.sheet .threat-sheet .threat-spectrums .spectrum-section-label {
+    margin: 0;
+  }
+
+  .city.sheet .threat-sheet .spectrum-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 0.2em 0.9em;
+    font-family: var(--mhx-font-title);
+    font-weight: normal;
+  }
+
+  /* Name and tier are separate spans; font-size 0 hides the bare ":" */
+  .city.sheet .threat-sheet .spectrum {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    margin: 0;
+    font-size: 0;
+  }
+
+  .city.sheet .threat-sheet .spectrum :is(.spectrum-name, .spectrum-tier) {
+    font-family: var(--mhx-font-title);
+    font-size: 1.15rem;
+    font-variant-numeric: lining-nums;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+  }
+
+  .city.sheet .threat-sheet .spectrum a.spectrum-delete {
+    font-size: 0.7rem;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city.sheet .threat-sheet .spectrum-editable:hover {
+    text-shadow: none;
+  }
+
+  .city.sheet .threat-sheet .spectrum-editable:hover :is(.spectrum-name, .spectrum-tier) {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
+  }
+
+  /* ── Tabs: § 2's paper tabs, set off the header by a hairline ─────── */
+
+  .city.sheet .threat-sheet nav.sheet-tabs {
+    margin: 0.2em 0 0.5em;
+  }
+
+  /* ── Moves tab layout ─────────────────────────────────────────────────
+     Moves get the wide column; story tags and statuses a narrow one. */
+  .city.sheet .threat-sheet .tab[data-tab="moves"] > .flex-row {
+    align-items: flex-start;
+    gap: 1.2em;
+    padding: 0 0.2em;
+  }
+
+  .city.sheet .threat-sheet div.flex-overview-block {
+    flex: 1 1 64%;
+    width: auto;
+    min-width: 0;
+    padding: 0;
+  }
+
+  .city.sheet .threat-sheet .tab[data-tab="moves"] .flex-column {
+    flex: 1 1 36%;
+    min-width: 0;
+    padding: 0;
+  }
+
+  /* ── GM moves: the book's bullet list ─────────────────────────────────
+     No cards: each move is a bullet, its name in bold leading the text
+     ("• Ambush – …"). Consequences (submoves) follow as dashes. The
+     system's header symbols (› » and the like) go: the move-type
+     sub-headings already sort the moves. */
+  .city.sheet .threat-sheet section.gm-moves {
+    margin-bottom: 0.6em;
+  }
+
+  .city.sheet .threat-sheet .gm-moves .gm-move {
+    position: relative;
+    align-items: flex-start;
+    gap: 0.3em;
+    margin: 0 0 0.4em;
+    padding: 0 0 0 1em;
+    font-size: 1em;
+    line-height: 1.35;
+    color: var(--mhx-ink);
+    background: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    transition: background-color 0.15s;
+  }
+
+  .city.sheet .threat-sheet .gm-moves .gm-move::before {
+    content: "•";
+    position: absolute;
+    left: 0.1em;
+    top: 0;
+    font-family: var(--mhx-font-body);
+    font-size: 1.1em;
+    line-height: 1.25;
+    color: var(--mhx-ink);
+  }
+
+  .city.sheet .threat-sheet .gm-moves .gm-move:is(.gmmove-select, .gmmove-edit):hover {
+    box-shadow: none;
+    background: rgba(31, 27, 23, 0.06);
+  }
+
+  .city.sheet .threat-sheet .gm-move .gmmove-text {
+    margin: 0;
+    padding: 0;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    line-height: 1.35;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    background: none;
+    border: none;
+    border-radius: 0;
+  }
+
+  .city.sheet .threat-sheet .inherited-move .gmmove-text {
+    opacity: 0.7;
+  }
+
+  /* Name + text on one run: the name is the bold lead word */
+  .city.sheet .threat-sheet .gm-move .gmmove-section,
+  .app.dialog .dialog-content > .gmmove-section {
+    display: block;
+  }
+
+  .city.sheet .threat-sheet .gm-move .gmmove-name,
+  .app.dialog .dialog-content > .gmmove-section .gmmove-name {
+    display: inline;
+    margin: 0 0.25em 0 0;
+    padding: 0;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    font-weight: bold;
+    font-style: normal;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    background: none;
+    border: none;
+  }
+
+  /* An en dash after the name (the template leaves a space after it,
+     so a colon would sit apart) */
+  .city.sheet .threat-sheet .gm-move .gmmove-name::after,
+  .app.dialog .dialog-content > .gmmove-section .gmmove-name::after {
+    content: "–";
+    font-weight: normal;
+  }
+
+  .city.sheet .threat-sheet .gm-move .gmmove-section > hr,
+  .app.dialog .dialog-content > .gmmove-section > hr {
+    display: none;
+  }
+
+  .city.sheet .threat-sheet .gm-move div.gmmove-description,
+  .app.dialog .dialog-content > .gmmove-section div.gmmove-description {
+    display: inline;
+    font-size: 1em;
+    font-weight: normal;
+    color: var(--mhx-ink);
+  }
+
+  .city.sheet .threat-sheet .gm-move .gmmove-description > span[title]:first-child:has(> i[class*="fa-"]),
+  .app.dialog .dialog-content > .gmmove-section .gmmove-description > span[title]:first-child:has(> i[class*="fa-"]) {
+    display: none;
+  }
+
+  /* Consequences (submoves): dashes under the move */
+  .city.sheet .threat-sheet .gm-move .submove {
+    margin: 0.2em 0 0;
+    padding: 0;
+    border: none;
+  }
+
+  .city.sheet .threat-sheet .gm-moves .submove .gm-move {
+    margin: 0;
+    padding-left: 1em;
+  }
+
+  .city.sheet .threat-sheet .gm-moves .submove .gm-move::before {
+    content: "–";
+  }
+
+  /* Empty trash / add-submove cells (locked sheet) take no room */
+  .city.sheet .threat-sheet .gm-move > .trash-can-flex:not(:has(*)),
+  .city.sheet .threat-sheet .gm-move > div:last-child:not(:has(*)) {
+    display: none;
+  }
+
+  .city.sheet .threat-sheet .gm-move .trash-can-flex,
+  .city.sheet .threat-sheet .gm-move a.add-sub-move {
+    flex: none;
+    font-size: 0.8em;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city.sheet .threat-sheet .inherited-move .inherit-msg {
+    margin-top: 0.2em;
+    font-family: var(--mhx-font-label);
+    font-size: 0.7em;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-align: left;
+    text-transform: uppercase;
+    color: var(--mhx-ink-dim);
+  }
+
+  /* ── Tags and statuses: the book's italic highlights ──────────────────
+     Flat yellow (story tags) and green (statuses) blocks, as on the PC
+     sheet, in the body serif italic, as the book prints them in a
+     Danger. Covers the move text, the default tags and statuses, and
+     the story tag / status lists. */
+  .city.sheet .threat-sheet .gmmove-text :is(.narrated-story-tag, .narrated-status-name),
+  .app.dialog .dialog-content > .gmmove-section :is(.narrated-story-tag, .narrated-status-name) {
+    --mhx-hl: var(--mhx-storytag);
+    margin: 0;
+    padding: 0 0.25em;
+    font-family: var(--mhx-font-body);
+    font-style: italic;
+    font-weight: normal;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    color: var(--mhx-hl-text);
+    text-shadow: none;
+    border: none;
+    border-radius: 1px;
+    box-shadow: none;
+    background: var(--mhx-hl);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .city.sheet .threat-sheet .gmmove-text .narrated-status-name,
+  .app.dialog .dialog-content > .gmmove-section .narrated-status-name {
+    --mhx-hl: var(--mhx-status);
+  }
+
+  .city.sheet .threat-sheet .story-tag-box .tag.item-entry span.flex-tag-name,
+  .city.sheet .threat-sheet .story-tag-box span.status-name {
+    font-style: italic;
+  }
+
+  /* ── Default (starting) tags and statuses ─────────────────────────────
+     Each name is its highlight (an input sized to the name); the item is
+     only a row holding it and its hidden-eye. */
+  .city.sheet .threat-sheet .default-tags-and-statuses .list {
+    gap: 4px 8px;
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item {
+    --mhx-hl: var(--mhx-storytag);
+    flex: 0 1 auto;
+    gap: 0.25em;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0;
+    font-weight: normal;
+    color: var(--mhx-hl-text);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+    opacity: 1;
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item:is(.default-status, :has(.inherited-status)) {
+    --mhx-hl: var(--mhx-status);
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item :is(input, .inherited-tag, .inherited-status) {
+    width: auto;
+    min-width: 2ch;
+    field-sizing: content;
+    height: auto;
+    margin: 0;
+    padding: 0 0.3em;
+    font-family: var(--mhx-font-body);
+    font-size: 1.05em;
+    font-style: italic;
+    font-weight: normal;
+    line-height: 1.35;
+    color: var(--mhx-hl-text);
+    background: var(--mhx-hl);
+    border: none;
+    border-radius: 1px;
+    box-shadow: none;
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item input:focus {
+    box-shadow: inset 0 0 0 1.5px var(--mhx-ink);
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item.inherited {
+    opacity: 0.6;
+  }
+
+  .city.sheet .threat-sheet .default-tags-and-statuses .list-item a {
+    font-size: 0.8em;
+    color: var(--mhx-ink-dim);
+  }
+
+  /* ── Story tags / statuses (Moves tab) ────────────────────────────────
+     No card (Phase 1's dark box goes): a Rift sub-heading over a flow of
+     highlights, the controls small beside each. */
+  .city.sheet .threat-sheet .flex-column > .story-tag-box {
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    color: var(--mhx-ink);
+    background: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .city.sheet .threat-sheet .flex-column > .story-tag-box .story-tags-header:first-child,
+  .city.sheet .threat-sheet .flex-column > .story-tag-box .story-tags > .story-tags-header {
+    margin-top: 0.2em;
+  }
+
+  .city.sheet .threat-sheet .story-tag-header-label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35em;
+  }
+
+  /* No card to flip here */
+  .city.sheet .threat-sheet .story-tag-header-label > span:has(> .fa-turn-up) {
+    display: none;
+  }
+
+  .city.sheet .threat-sheet .flex-column > .story-tag-box :is(.story-tag-category, .status-text-list) {
+    margin: 0;
+    padding: 0;
+  }
+
+  .city.sheet .threat-sheet .flex-column > .story-tag-box .status-text-list > hr {
+    display: none;
+  }
+
+  .city.sheet .threat-sheet .flex-column > .story-tag-box ul.tag-list,
+  .city.sheet .threat-sheet .flex-column > .story-tag-box .status-text-list > div:not(.story-tags-header) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .city.sheet .threat-sheet .flex-column > .story-tag-box ul.tag-list > li {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+  }
+
+  .city.sheet .threat-sheet .flex-column > .story-tag-box .tag.item-entry {
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    gap: 0.15em;
+  }
+
+  .city.sheet .threat-sheet .flex-column > .story-tag-box .tag.item-entry > div.flex-tag-name {
+    flex: none;
+    width: auto;
+    min-width: 0;
+  }
+
+  .city.sheet .threat-sheet .flex-column > .story-tag-box :is(.tag.item-entry, div.status-line) .flex-trash:not(:has(*)) {
+    display: none;
+  }
+
+  .city.sheet .threat-sheet .flex-column > .story-tag-box :is(.flex-trash, .plus-minus-controls) a {
+    font-size: 0.75em;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city.sheet .threat-sheet .flex-column > .story-tag-box div.status-line {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.2em;
+    width: auto;
+    margin: 0;
+  }
+
+  .city.sheet .threat-sheet .flex-column > .story-tag-box div.status-line > * {
+    flex: none;
+    width: auto;
+    min-width: 0;
+  }
+
+  /* ── Danger templates (GM, unlocked) ──────────────────────────────── */
+
+  .city.sheet .threat-sheet section.danger-templates {
+    max-height: none;
+    margin: 0.8em 0 0.4em;
+    padding: 0;
+    text-align: left;
+    border: none;
+  }
+
+  .city.sheet .threat-sheet .template-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 4px 6px;
+    font-size: 1em;
+    font-weight: normal;
+  }
+
+  /* Each template: a typed label on a slip */
+  .city.sheet .threat-sheet .template-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    padding: 1px 8px;
+    font-family: var(--mhx-font-type);
+    font-size: 0.9em;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    background: rgba(255, 252, 245, 0.6);
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 1px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .city.sheet .threat-sheet .template-name:hover {
+    text-shadow: none;
+    border-color: var(--mhx-ink);
+    box-shadow: 0 1px 3px rgba(20, 16, 12, 0.3);
+  }
+
+  .city.sheet .threat-sheet .template-name a {
+    font-size: 0.85em;
+  }
+
+  /* ── Themes tab (danger) ──────────────────────────────────────────────
+     Theme cards keep § 2's frame. The statuses and story tags blocks
+     beside them are § 2's neutral card (com_neutral_bg) in the same
+     240 × 445 frame, Phase 1's dark box removed: the card clips and its
+     list scrolls inside, the foot strip redrawn by ::after. Statuses
+     print no title, so it comes from --mhx-label-statuses (settings.js),
+     drawn on the card's top strip like the Story Tags header. */
+  .city.sheet .threat-sheet .theme-block-group {
+    gap: 8px;
+  }
+
+  .city.sheet .threat-sheet .theme-block-group > .flex-theme-block:is(.status-box, .story-tag-box) {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: 240px;
+    height: var(--theme-card-size);
+    margin: 0;
+    padding: var(--mhx-band) 10px var(--mhx-foot);
+    overflow: hidden;
+    font-family: var(--mhx-font-body);
+    text-align: left;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: url(/modules/mist-hud/ui/com_neutral_bg.webp) center top / 100% auto no-repeat;
+  }
+
+  .city.sheet .threat-sheet .theme-block-group > .flex-theme-block:is(.status-box, .story-tag-box)::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--mhx-foot);
+    background: url(/modules/mist-hud/ui/com_neutral_bg.webp) center bottom / 100% auto no-repeat;
+    pointer-events: none;
+  }
+
+  .city.sheet .threat-sheet .theme-block-group > .flex-theme-block:is(.status-box, .story-tag-box) > * {
+    flex: 0 1 auto;
+    min-height: 0;
+    margin: 0;
+    padding-top: 0.3em;
+    overflow: hidden auto;
+    scrollbar-width: none;
+  }
+
+  /* Band titles: the PC Story Tags header (white italic Rift, icon left) */
+  .city.sheet .threat-sheet .theme-block-group > .flex-theme-block.status-box::before,
+  .city.sheet .threat-sheet .theme-block-group > .story-tag-box .story-tags-header {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    right: 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 0.35em;
+    height: var(--mhx-band);
+    margin: 0;
+    padding: 0 10px 0 38px;
+    font-family: var(--mhx-font-title);
+    font-size: 19px;
+    font-style: italic;
+    font-weight: normal;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    text-align: left;
+    white-space: nowrap;
+    color: whitesmoke;
+    text-shadow: var(--mist-dark-color, #466a81) 1px 1px, 0 0 4px rgba(0, 0, 0, 0.45);
+    border: none;
+    background: url(/modules/mist-hud/ui/icons/storytag_icn.svg) left 10px center / 21px 21px no-repeat;
+  }
+
+  .city.sheet .threat-sheet .theme-block-group > .flex-theme-block.status-box::before {
+    content: var(--mhx-label-statuses, "Statuses");
+    background-image: url(/modules/mist-hud/ui/icons/statuses_icn.svg);
+  }
+
+  /* Statuses on this card: the green highlight, as on the Moves tab */
+  .city.sheet .threat-sheet .status-box span.status-name {
+    --mhx-hl: var(--mhx-status);
+    padding: 0.05em 0.35em;
+    font-family: var(--mhx-font-body);
+    font-size: 1.1em;
+    font-style: italic;
+    font-weight: normal;
+    line-height: 1.3;
+    text-transform: none;
+    color: var(--mhx-hl-text);
+    text-shadow: none;
+    border-radius: 1px;
+    background: var(--mhx-hl);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .city.sheet .threat-sheet .theme-block-group > .flex-theme-block:is(.status-box, .story-tag-box) :is(.tag.item-entry, div.status-line, .status-name-block) {
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .city.sheet .threat-sheet .theme-block-group > .story-tag-box .story-tags-header a {
+    font-size: 0.72em;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  /* ── Bio (danger bio tab, limited sheet) ──────────────────────────── */
+
+  .city.sheet .threat-sheet div.bio-subsection {
+    margin-top: 0.2em;
+  }
+
+  .city.sheet .threat-sheet .bio-subsection .editor-box {
+    padding: 0.3em 0.6em;
+    font-family: var(--mhx-font-body);
+    color: var(--mhx-ink);
+    background: rgba(255, 252, 245, 0.45);
+    border: none;
+    border-left: 2px solid var(--mhx-ink);
+    border-radius: 0;
+  }
+
+  .city.sheet .threat-sheet .bio-subsection .editor {
+    font-family: var(--mhx-font-body);
+    font-size: 1.05em;
+    line-height: 1.4;
+    color: var(--mhx-ink);
+  }
+
+  .city.sheet .threat-sheet .bio-subsection .editor :is(h1, h2, h3, h4) {
+    font-family: var(--mhx-font-title);
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    border-color: var(--mhx-line-dim);
+  }
+
+  /* ── Limited sheet (players without observer rights) ──────────────────
+     The same scrap: the portrait, then the name as the Danger title. */
+  .city.sheet .threat-sheet:not(:has(.sheet-tabs)) header.sheet-header {
+    align-items: flex-end;
+    gap: 0.8em;
+  }
+
+  /* No .image-block here: the corner brackets go on the img itself */
+  .city.sheet .threat-sheet:not(:has(.sheet-tabs)) header.sheet-header img.profile-img {
+    padding: 4px;
+    border: none;
+    background:
+      linear-gradient(var(--mhx-line), var(--mhx-line)) top left / 12px 1px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) top left / 1px 12px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) bottom right / 12px 1px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) bottom right / 1px 12px no-repeat;
+  }
+
+  .city.sheet .threat-sheet .charname-limited {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: 0.1em;
+    font-family: var(--mhx-font-title);
+    font-size: 2.3em;
+    font-weight: normal;
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    border-bottom: 4px solid var(--mhx-black-rule);
+  }
+
+  /* The name's rule replaces the template's <hr> */
+  .city.sheet .threat-sheet:not(:has(.sheet-tabs)) > hr {
+    display: none;
+  }
+
+  /* ── GM move pop-up (CityDialogs.GMMoveTextBox) ───────────────────────
+     A plain V1 Dialog opened by clicking a move on a locked danger sheet;
+     its only marker is the .gmmove-section inside. The move as on the
+     sheet (bold lead, serif text, italic highlights; shared rules above)
+     on the plain canvas; Send To Chat is the PC sheet's charcoal key. */
+  .app.dialog:has(.dialog-content > .gmmove-section) .window-content {
+    gap: 0.6em;
+    padding: 1em 1.1em;
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    background: var(--mhx-paper-art) center / cover no-repeat, var(--mhx-paper-hi);
+  }
+
+  .app.dialog .dialog-content > .gmmove-section {
+    font-size: 1.1em;
+    line-height: 1.4;
+  }
+
+  .app.dialog:has(.dialog-content > .gmmove-section) .dialog-buttons {
+    gap: 0.5em;
+  }
+
+  .app.dialog:has(.dialog-content > .gmmove-section) .dialog-button {
+    height: 2.1em;
+    font-family: var(--mhx-font-label);
+    font-size: 1em;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    background: linear-gradient(to bottom, var(--mhx-paper-hi) 0%, var(--mhx-paper-lo) 100%);
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 2px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 2px rgba(30, 24, 18, 0.25);
+  }
+
+  .app.dialog:has(.dialog-content > .gmmove-section) .dialog-button:hover {
+    border-color: var(--mhx-ink);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 4px rgba(30, 24, 18, 0.4);
+  }
+
+  .app.dialog:has(.dialog-content > .gmmove-section) .dialog-button.one {
+    color: #efe9df;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(180deg, #3a342e, #1f1b17);
+    border: none;
+    box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.12), 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  .app.dialog:has(.dialog-content > .gmmove-section) .dialog-button.one:hover {
+    color: #fff;
+    background: linear-gradient(180deg, #4a433b, #2a2520);
+  }
+
+  /* ── Crew sheet ───────────────────────────────────────────────────────
+     The dark window, name and "Themes" heading are in § 2's "On the dark
+     window" block; the cards and tag rows are § 2's. Here: the header
+     layout (the crew template has no .header-right-side) and the card
+     row. */
+  .city.sheet .crew-sheet header.sheet-header {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .city.sheet .crew-sheet .character-basic-info {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .city.sheet .crew-sheet header.sheet-header > .lock-button {
+    flex: none;
+    align-self: flex-start;
+    width: auto;
+  }
+
+  .city.sheet .crew-sheet .theme-block-group {
+    gap: 8px;
+  }
+
+  .city.sheet .crew-sheet .theme-section > h1.item-block > p {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5em;
   }
 }
