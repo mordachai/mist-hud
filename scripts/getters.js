@@ -391,7 +391,6 @@ export function getRelationshipTags(actor) {
         actorId:    actor.id,
         targetId:   target?.id ?? null,
         targetName: target?.name ?? "",
-        targetImg:  target ? _portraitOf(target) : "",
       };
     });
 

@@ -204,7 +204,7 @@
 "MistHUD.hud.narrowLayout": "One-column layout",
 "MistHUD.hud.deleteTagConfirm": "Delete the tag <strong>{tag}</strong>?",
 "MistHUD.hud.relationships.otherscape": "Crew Relationships",
-"MistHUD.hud.relationships.legend": "Fellowship Relationships",
+"MistHUD.hud.relationships.legend": "Fellowship",
 "MistHUD.hud.createRelationship": "Create Relationship Tag",
 "MistHUD.hud.addRelationship": "Add relationship",
 "MistHUD.hud.newRelationship": "New Relationship",

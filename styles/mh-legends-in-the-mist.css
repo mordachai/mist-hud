@@ -239,6 +239,37 @@
     transition: ease-in, top, 0.2s;
 }
 
+/* Player HUD portrait: the photo sits inside the portrait-litm frame,
+   inset so the frame's border shows around it. Outer size unchanged. */
+.player-hud .mh-token-image {
+    box-sizing: border-box;
+    padding: 7.5px; /* photo inset inside the frame; keep ::after inset in sync */
+    background: url('../ui/portrait-litm.webp') center / 100% 100% no-repeat;
+    box-shadow: none;
+    filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.5));
+}
+
+.player-hud .mh-token-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Bevel: an inset shadow can't paint over an <img>, so it lives on an overlay
+   covering the photo (same 7.5px inset as the padding). Dark top-left edge +
+   light bottom-right edge = photo pressed into the frame. */
+.player-hud .mh-token-image::after {
+    content: "";
+    position: absolute;
+    inset: 7.5px;
+    pointer-events: none;
+    box-shadow:
+        inset 1px 1px 2px rgba(0, 0, 0, 0.5),
+        inset -1px -1px 1px rgba(255, 255, 255, 0.2),
+        0 0 0 1px rgba(40, 24, 12, 0.4);
+}
+
 #mist-hud.minimized .mh-token-image {
     top: -52px;
     left: -41px;
@@ -343,19 +374,25 @@
   padding-top: 2px;
 }
 
+/* Backpack, Tags, Statuses, Crew and Extra themes share the neutral LitM band */
+.mh-theme-header.neutral,
+.mh-theme-header.Extra,
+.mh-theme-header.Crew,
+.mh-theme-header.spaced {
+  background-image: url('../ui/header-neutral-litm.webp');
+  background-size: 100% 100%;
+}
+
 .mh-theme-header.neutral,
 .mh-theme-header.Extra {
-  background-image: url('../ui/header-backpack.webp');
   margin-top: 2px;
 }
 
 .mh-theme-header.Crew {
-  background-image: url('../ui/header-backpack.webp');
   margin-top: 3px;
 }
 
 .mh-theme-header.spaced {
-  background-image: url('../ui/header-backpack.webp');
   justify-content: space-between;
   margin-top: 2px;
 }
@@ -405,6 +442,25 @@
   color: rgb(236, 236, 236);
   text-shadow: -1px -1px 1px rgba(29, 29, 29, 0.8);
 
+}
+
+/* Theme header titles stay on one line: a long name ends in an ellipsis
+   (full name in the tooltip) and the upgrade stars stay visible after it. */
+.mh-theme-header > .mh-theme-name {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.mh-theme-header > .mh-theme-name > .mh-theme-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mh-theme-header > .mh-theme-name > .mh-improvement-marker {
+  flex: none;
 }
 
 /* .mh-theme-name-com-Origin {
@@ -615,6 +671,26 @@
   padding: 0px 5px;
 }
 
+/* Weaknesses always show the red weakness bar, as on the sheet: faint at
+   rest, solid once selected (the rule above then draws it). On ::before so
+   only the bar fades, not the text. */
+.mh-weakness-tag .mh-tag-text {
+  position: relative;
+  isolation: isolate;
+}
+.mh-weakness-tag .mh-tag-text::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url('../ui/select-bar-litm-weakness.webp') center / 100% 100% no-repeat;
+  opacity: 0.35;
+  pointer-events: none;
+}
+.mh-weakness-tag.selected .mh-tag-text::before {
+  opacity: 0;
+}
+
 /* .mh-burn-toggle,
 .mh-tag-text {
   align-items: center;
@@ -624,13 +700,21 @@
   margin-left: 10px;
 } */
 
+/* Tags / Statuses "+": in the header's title colour, centred on the band */
+.mh-theme-header > :is(.mh-create-story-tag, .mh-create-status) {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+}
 .mh-create-story-tag i,
 .mh-create-status i {
   position: relative;
-  top: -3px;
+  top: 0;
   right: -2px;
   font-size: 0.85rem;
-  color: var(--text-main-color);
+  line-height: 1;
+  color: rgb(236, 236, 236);
+  text-shadow: -1px -1px 1px rgba(29, 29, 29, 0.8);
 }
 
 .mh-story-toggle i{
@@ -1454,6 +1538,20 @@
   opacity: 0.5;
 }
 
+/* .mh-theme-name is display:block in Legend; titles with an action button
+   (Fellowship "+") must stay one flex row. */
+.mh-theme-name.mh-title-container {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 5px;
+}
+.mh-theme-name.mh-title-container > :first-child {
+  min-width: 0;
+}
+.mh-theme-name.mh-title-container > a {
+  flex: 0 0 auto;
+}
+
 /* Loadout weakness nested under its loadout tag (as on the sheet) */
 .mh-tags .mh-weakness-tag.mh-loadout-weakness {
   margin-left: 18px;
@@ -1499,4 +1597,62 @@
    indented per level (getters.js getPowerTags, --mh-tag-depth) */
 .mh-tags .mh-power-tag.mh-nested-tag {
   margin-left: calc(var(--mh-tag-depth, 1) * 18px);
+}
+
+/* ── Side panel: HUD parchment instead of the dark base panel ──
+   Text flips from the base whitesmoke to the HUD's ink colours. */
+.player-hud .mh-sliding-panel.open {
+  background: var(--hud-bg-color) center / 100% 100% no-repeat;
+}
+.mh-sliding-panel.open .mh-panel-content {
+  color: var(--text-main-color);
+}
+.mh-panel-content .mh-theme-name {
+  color: var(--text-main-color);
+  text-shadow: none;
+}
+.mh-panel-content .panel-divider {
+  background: rgba(60, 36, 20, 0.3);
+}
+.mh-panel-content .mh-relationship-tag {
+  color: var(--text-tag-color);
+  text-align: left;
+}
+.mh-panel-content .mh-relationship-tag.burned .mh-tag-text {
+  color: #8b7a68;
+  text-decoration-color: #8b7a68;
+}
+.mh-panel-content .mh-relationship-who {
+  color: #6b5443;
+}
+.mh-panel-content .mh-relationship-slot {
+  border-color: rgba(60, 36, 20, 0.45);
+  color: #6b5443;
+}
+.mh-panel-content .mh-relationship-slot:hover {
+  border-color: var(--text-main-color);
+  color: var(--text-main-color);
+}
+
+/* Improvements: light parchment cards */
+.improvements .improvement-container {
+  background: url('../ui/bg1-litm.webp') center / 100% 100% no-repeat;
+  border: none;
+  border-radius: 0;
+  padding: 6px 8px;
+  color: var(--text-tag-color);
+  filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.35));
+}
+.improvements .item-description,
+.improvements .item-choice {
+  color: var(--text-main-color);
+}
+
+/* Two-column layout: the parchment (litm_hud_BG, stretched 100% 100%) has
+   a transparent torn edge that grows with the wider window, so the full-
+   width title bands poked past the paper. Pull the grid in off both edges. */
+#mist-hud.mh-wide .mh-content {
+  padding-left: 7px;
+  padding-right: 7px;
+  column-gap: 6px;
 }

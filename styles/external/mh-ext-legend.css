@@ -406,7 +406,7 @@
   .chat-message {
     position: relative;
     margin: 0.4em 0.3em;
-    padding: 0.6em 0.85em 0.7em;
+    padding: 0.4em 0.45em 0.45em;
     font-family: var(--mhx-font-body);
     font-size: 1em;
     line-height: 1.3;
@@ -414,10 +414,31 @@
     text-transform: none;
     color: var(--mhx-ink);
     border: none;
-    border-radius: 0;
-    box-shadow: 0 1px 4px rgba(60, 36, 20, 0.3);
-    background: var(--mhx-paper-art) center / 100% 100% no-repeat, var(--mhx-paper);
+    border-radius: 3px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 230, 190, 0.12),
+      0 0 0 1px rgba(12, 6, 2, 0.75),
+      0 2px 6px rgba(0, 0, 0, 0.55);
+    background:
+      linear-gradient(180deg, rgba(18, 10, 4, 0.05), rgba(18, 10, 4, 0.3)),
+      url(/modules/mist-hud/ui/leather_bg_litm.webp) center top / 100% auto repeat-y,
+      #4a2e1a;
     background-blend-mode: normal;
+  }
+
+  /* Leather card, parchment slip: the card is the sidebar's leather
+     (ui/leather_bg_litm.webp), lighter, outlined so it stands off the
+     panel; the header sits on it in light letters, and the content is the
+     HUD's first parchment (litm_hud_BG, not the --mhx-paper-art
+     litm_hud2_BG the dialogs use). No colour under the art: its torn
+     edges are transparent and show the leather, not a light rim. */
+  .chat-message .message-content {
+    padding: 0.5em 1.0em 1.2em;
+    border-radius: 2px;
+    background: url(/modules/mist-hud/ui/litm_hud_BG.webp) center / 100% 100% no-repeat;
+    box-shadow:
+      inset 0 0 0 1px rgba(60, 36, 20, 0.25),
+      0 1px 3px rgba(0, 0, 0, 0.5);
   }
 
   /* Sidebar panels: dark wood, in place of the Phase 1 paper. Every
@@ -426,17 +447,27 @@
      its popout (popped-out directories are .sidebar-tab themselves; the
      chat popout isn't). § 7 builds the rest of the sidebar on it.
      Layers: a darkening wash (deeper toward the bottom, for the
-     parchment text), the plank art (ui/wood_planks.webp: vertical
-     boards) fitted to the panel's width so the seams stay put at any
+     parchment text), the leather art (ui/leather_bg_litm.webp)
+     fitted to the panel's width so the seams stay put at any
      width and repeated down, and the base tone while it loads. */
-  .sidebar-tab,
-  .chat-sidebar,
-  .chat-popout .window-content {
+  .sidebar-tab {
     background:
       linear-gradient(180deg, rgba(18, 10, 4, 0.25), rgba(18, 10, 4, 0.45)),
-      url(/modules/mist-hud/ui/wood_planks.webp) center top / 100% auto repeat-y,
+      url(/modules/mist-hud/ui/leather_bg_litm.webp) center top / 100% auto repeat-y,
       #3a2414;
     background-blend-mode: normal;
+  }
+
+  /* The chat log keeps Foundry's own dark, semi-transparent panel so the
+     leather cards stand on it: the tab goes clear over #sidebar-content's
+     core --sidebar-background, and a popped-out message gets the same
+     tone. */
+  .sidebar-tab.chat-sidebar {
+    background: transparent;
+  }
+
+  .chat-popout .window-content {
+    background: var(--color-cool-5-90);
   }
 
   /* Directories: the chat tab's light parchment text on the wood,
@@ -476,9 +507,9 @@
   .chat-message .message-header {
     flex-wrap: wrap;
     align-items: baseline;
-    margin-bottom: 0.4em;
-    padding-bottom: 0.25em;
-    border-bottom: 1px dashed var(--mhx-line-faint);
+    margin-bottom: 0.35em;
+    padding: 0 0.1em;
+    border-bottom: none;
   }
 
   .chat-message .message-header .message-sender {
@@ -487,22 +518,23 @@
     font-weight: normal;
     letter-spacing: 0.02em;
     text-transform: none;
-    color: var(--mhx-ink);
-    text-shadow: var(--mhx-lift);
+    color: #f1e0c2;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
   }
 
   .chat-message .message-header .message-metadata {
     font-family: var(--mhx-font-body);
     font-size: 0.8em;
-    color: var(--mhx-ink-dim);
+    color: rgba(231, 209, 177, 0.75);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
   }
 
   .chat-message .message-header .message-metadata a {
-    color: var(--mhx-ink-dim);
+    color: rgba(231, 209, 177, 0.75);
   }
 
   .chat-message .message-header .message-metadata a:hover {
-    color: var(--mhx-adventure);
+    color: #e3c46e;
   }
 
   .chat-message .whisper-to {
@@ -510,14 +542,16 @@
     font-family: var(--mhx-font-body);
     font-size: 0.8em;
     font-style: italic;
-    color: var(--mhx-ink-dim);
+    color: rgba(231, 209, 177, 0.75);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
   }
 
   .chat-message .message-header .flavor-text {
     flex-basis: 100%;
     font-size: 0.85em;
     font-style: italic;
-    color: var(--mhx-ink-dim);
+    color: rgba(231, 209, 177, 0.75);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
   }
 
   .chat-message .message-content hr {
@@ -790,6 +824,12 @@
     filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.35));
   }
 
+  /* No outcome text (Quick Outcome…): no empty outcome panel. init.js
+     marks the blank .move-text. */
+  .city-roll .move-text.mh-empty {
+    display: none;
+  }
+
   .city-roll ul.move-list {
     margin: 0;
     padding: 0;
@@ -834,6 +874,23 @@
     display: block;
     width: 100%;
     margin-top: 0.5em;
+  }
+
+  /* The card's bottom key (+ tags / statuses): the brown leather key of
+     the sheet's Execute and the dialogs' confirm buttons */
+  .chat-message .city-roll button.show-effects-list {
+    color: var(--mhx-paper-hi);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(180deg, var(--mhx-effect), var(--mhx-effect-dark));
+    border: none;
+    border-radius: 3px;
+    box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.25), 0 1px 3px rgba(60, 36, 20, 0.4);
+  }
+
+  .chat-message .city-roll button.show-effects-list:hover:not(:disabled) {
+    color: #fff6dc;
+    background: linear-gradient(180deg, #8a5b3e, var(--mhx-effect));
+    box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.3), 0 0 10px rgba(212, 175, 55, 0.7);
   }
 
   .city-roll .move-tag-status-creator {
@@ -1537,7 +1594,7 @@
     background: var(--mhx-paper);
   }
 
-  /* Execute: a brown leather key with a clipped corner, parchment letters */
+  /* Execute: a brown leather key, parchment letters */
   .city.sheet button.execute-move-button {
     width: auto;
     height: 2em;
@@ -1552,9 +1609,8 @@
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
     background: linear-gradient(180deg, var(--mhx-effect), var(--mhx-effect-dark));
     border: none;
-    border-radius: 0;
+    border-radius: 3px;
     box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.25), 0 1px 3px rgba(60, 36, 20, 0.4);
-    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
   }
 
   .city.sheet button.execute-move-button:hover {
@@ -1987,11 +2043,11 @@
   /* Weakness: the pink weakness bar, dark red ink */
   .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:has(.weakness-tag) {
     --mhx-bar-img: var(--mhx-weak-bar);
-    --mhx-bar-alpha: 0.55;
+    --mhx-bar-alpha: 0.35;
   }
 
   .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:has(.weakness-tag):hover {
-    --mhx-bar-alpha: 0.85;
+    --mhx-bar-alpha: 0.55;
   }
 
   .city.sheet :is(.theme-block, .story-tag-box) .tag.item-entry:has(.weakness-tag) span.tag-symbols a {
@@ -2375,6 +2431,20 @@
 
   .city.sheet span.tracker-circle.empty-circle {
     background-color: transparent;
+  }
+
+  /* Status pips (the system's "tier + circles": filled-circle /
+     empty-circle-status): the same diamonds. The hollow ones are sized
+     `1em !important` by the system (layered, unbeatable), so their size
+     comes from font-size: 1em here = the filled pip's 0.7em. */
+  .city.sheet span.tracker-circle.empty-circle-status {
+    font-size: 0.7em;
+    margin: 0 0.15em;
+    min-width: 1em;
+    border: 1px solid var(--mhx-theme);
+    border-radius: 0;
+    background-color: transparent;
+    transform: rotate(45deg);
   }
 
   .city.sheet .theme-block .improvement-section {
@@ -2903,11 +2973,16 @@
     border-bottom: 1px solid var(--mhx-line-faint);
   }
 
-  .city.sheet .threat-sheet .header-row input.short-description {
+  /* Full ink, also when locked: core fades disabled inputs (opacity and
+     a grey text fill) on top of the dim ink, which left it barely there */
+  .city.sheet .threat-sheet .header-row input.short-description,
+  .city.sheet .threat-sheet .header-row input.short-description:disabled {
     font-family: var(--mhx-font-body);
     font-style: italic;
     text-align: left;
-    color: var(--mhx-ink-dim);
+    color: var(--mhx-ink);
+    -webkit-text-fill-color: var(--mhx-ink);
+    opacity: 1;
     border-bottom: 1px solid var(--mhx-line-faint);
   }
 
@@ -3850,9 +3925,8 @@
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
     background: linear-gradient(180deg, var(--mhx-effect), var(--mhx-effect-dark));
     border: none;
-    border-radius: 0;
+    border-radius: 3px;
     box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.25), 0 1px 3px rgba(60, 36, 20, 0.4);
-    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
   }
 
   .app.dialog:has(.dialog-content > .gmmove-section) .dialog-button.one:hover {
@@ -5183,9 +5257,8 @@
       text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
       background: linear-gradient(180deg, var(--mhx-key-top), var(--mhx-key-bottom));
       border: none;
-      border-radius: 0;
+      border-radius: 3px;
       box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.25), 0 1px 3px rgba(60, 36, 20, 0.4);
-      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
 
       &:is(:hover, :focus-visible) {
         color: #fff6dc;
@@ -5605,8 +5678,8 @@
       display: none;
     }
 
-    /* Status pips (system "tier + circles" display): small dots in the
-       name's own ink, filled or hollow */
+    /* Status pips (system "tier + circles" display): small diamonds in
+       the name's own ink, filled or hollow */
     & span.status-name .dotStatus {
       display: inline-flex;
       align-items: center;
@@ -5627,9 +5700,10 @@
       padding: 0;
       vertical-align: middle;
       border: 1px solid currentColor;
-      border-radius: 50%;
+      border-radius: 0;
       background: none;
       box-shadow: none;
+      transform: rotate(45deg);
     }
 
     & span.status-name .dotStatus > .tracker-circle:first-of-type {
@@ -6195,9 +6269,13 @@
     text-shadow: none;
     border: none;
     border-radius: 0;
-    box-shadow: 0 4px 14px rgba(30, 18, 8, 0.5);
+    /* The HUD improvement cards' torn slip (ui/bg1-litm.webp); its edges
+       are transparent, so no colour under it and the shadow follows the
+       tear */
+    box-shadow: none;
+    filter: drop-shadow(0 3px 6px rgba(30, 18, 8, 0.55));
     backdrop-filter: none;
-    background: var(--mhx-paper-art) center / 100% 100% no-repeat, var(--mhx-paper);
+    background: url(/modules/mist-hud/ui/bg1-litm.webp) center / 100% 100% no-repeat;
 
     & .city-of-mist--name {
       padding: 0;
@@ -6209,10 +6287,16 @@
       text-shadow: none;
     }
 
+    /* Grows with its longest tag or status (one line each) up to a
+       wider cap than core's 250px */
     & .token-tooltip-container {
       margin: 0;
       min-width: 10em;
-      max-width: 250px;
+      max-width: 420px;
+    }
+
+    & :is(span.status-name, span.flex-tag-name.story-tag) {
+      white-space: nowrap;
     }
 
     /* Name row: the NPC HUD's left subtitle, the rule between the name
@@ -6579,9 +6663,8 @@
       text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
       background: linear-gradient(180deg, var(--mhx-key-top), var(--mhx-key-bottom));
       border: none;
-      border-radius: 0;
+      border-radius: 3px;
       box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.25), 0 1px 3px rgba(60, 36, 20, 0.4);
-      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
 
       &:is(:hover, :focus-visible) {
         color: #fff6dc;
@@ -6838,9 +6921,10 @@
       padding: 0;
       vertical-align: middle;
       border: 1px solid currentColor;
-      border-radius: 50%;
+      border-radius: 0;
       background: none;
       box-shadow: none;
+      transform: rotate(45deg);
     }
 
     & span.status-name .dotStatus > .tracker-circle:first-of-type {
@@ -7922,9 +8006,8 @@
         text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
         background: linear-gradient(180deg, var(--mhx-key-top), var(--mhx-key-bottom));
         border: none;
-        border-radius: 0;
+        border-radius: 3px;
         box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.25), 0 1px 3px rgba(60, 36, 20, 0.4);
-        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
 
         & > i { color: inherit; }
 

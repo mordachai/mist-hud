@@ -662,7 +662,16 @@ hr {
   word-wrap: break-word;
 }
 
-/* Who the relationship is with: small portrait + name above the tag text */
+/* Who the relationship is with: " (Name)" right after the tag text */
+.mh-relationship-target {
+  font-size: 0.75em;
+  font-style: normal;
+  text-transform: none;
+  white-space: nowrap;
+  opacity: 0.75;
+}
+
+/* Character name on an open "Add relationship" slot */
 .mh-relationship-who {
   display: flex;
   align-items: center;
@@ -677,10 +686,7 @@ hr {
   color: #b4b9c0;
 }
 
-.mh-relationship-who img,
 .mh-relationship-slot img {
-  width: 16px;
-  height: 16px;
   border: none;
   border-radius: 50%;
   object-fit: cover;
@@ -706,10 +712,11 @@ hr {
   color: whitesmoke;
 }
 
+/* Portrait spans the slot's two text lines (name + "Add relationship") */
 .mh-relationship-slot img {
-  width: 22px;
-  height: 22px;
-  opacity: 0.7;
+  width: 30px;
+  height: 30px;
+  opacity: 0.85;
 }
 
 /* Ear Hover Effect */

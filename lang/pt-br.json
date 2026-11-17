@@ -204,7 +204,7 @@
 "MistHUD.hud.narrowLayout": "Layout em uma coluna",
 "MistHUD.hud.deleteTagConfirm": "Excluir a tag <strong>{tag}</strong>?",
 "MistHUD.hud.relationships.otherscape": "Relacionamentos da Equipe",
-"MistHUD.hud.relationships.legend": "Relacionamentos da Irmandade",
+"MistHUD.hud.relationships.legend": "Irmandade",
 "MistHUD.hud.createRelationship": "Criar Tag de Relacionamento",
 "MistHUD.hud.addRelationship": "Adicionar relacionamento",
 "MistHUD.hud.newRelationship": "Novo Relacionamento",

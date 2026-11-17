@@ -67,7 +67,7 @@
           {{/if}}
           {{#if (eq ../activeSystem "legend")}}
             <span class="mh-theme-name mh-theme-name-com-{{category}}">
-              {{themebookLabel}}
+              <span class="mh-theme-name-text" title="{{themebookLabel}}">{{themebookLabel}}</span>
               {{#if unspent_upgrades}}
                 <span class="mh-improvement-marker {{category}}">
                   {{#if nascent}}
@@ -141,7 +141,7 @@
               {{/if}}
               {{#if (eq ../activeSystem "legend")}}
                 <span class="mh-theme-name mh-theme-name-com-{{category}}">
-                  {{crewName}} {{localizedThemebookName}}
+                  <span class="mh-theme-name-text" title="{{crewName}}">{{crewName}}</span>
                   {{#if unspent_upgrades}}
                     <span class="mh-improvement-marker {{category}}">
                       {{#if nascent}}
@@ -354,12 +354,7 @@
                   data-id="{{this.id}}"
                   data-actor-id="{{actorId}}">
                 <span class="mh-burn-toggle burn-icon {{this.burnState}}"></span>
-                <span class="mh-tag-text">
-                  {{#if targetName}}
-                    <span class="mh-relationship-who"><img src="{{targetImg}}" alt="">{{targetName}}</span>
-                  {{/if}}
-                  {{this.tagName}}
-                </span>
+                <span class="mh-tag-text">{{this.tagName}}{{#if targetName}} <span class="mh-relationship-target">({{targetName}})</span>{{/if}}</span>
                 <span class="mhr-mls mh-story-toggle clickable {{#if inverted}}inverted{{else}}default{{/if}}" data-id="{{this.id}}">
                   {{{this.inversionIcon}}}
                 </span>
@@ -491,7 +486,7 @@
         </div>
       {{/if}}
 
-      {{#unless (or isCityOfMist isOtherscape isLegend)}}
+      {{#unless (or isCityOfMist (or isOtherscape isLegend))}}
         <div class="section fallback">
           <div class="mh-theme-name"><i class="fa-solid fa-exclamation-triangle"></i> No Content Available</div>
         </div>

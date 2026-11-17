@@ -115,6 +115,10 @@ Hooks.on("renderChatMessageHTML", async (message, html) => {
   const roll = message.rolls?.[0];
   if (!roll?.options?.moveId || roll.options.noRoll) return;
   if (!html.querySelector?.(".city-roll")) return;
+  // Moves with no outcome text (Quick Outcome…) still render a blank
+  // .move-text; CSS can't match whitespace-only, so mark it for hiding
+  const moveText = html.querySelector(".city-roll .move-text");
+  moveText?.classList.toggle("mh-empty", !moveText.textContent.trim() && !moveText.children.length);
   await systemReady;
   const CityRoll = sys.CityRoll;
   if (!CityRoll) return;
@@ -130,6 +134,18 @@ Hooks.on("renderChatMessageHTML", async (message, html) => {
   html.classList.remove(...ROLL_OUTCOME_CLASSES);
   if (outcome === "dynamite") html.classList.add("mh-roll-dynamite", "mh-roll-success");
   else if (ROLL_OUTCOME_CLASSES.includes(`mh-roll-${outcome}`)) html.classList.add(`mh-roll-${outcome}`);
+});
+
+// Threat sheets open at the system's fixed 1070px (clamped to the screen),
+// even when the moves take half of it. On the first render, fit the window
+// to its content instead (still clamped to the screen; later re-renders and
+// the user's own resizing keep their size).
+Hooks.on("renderCityThreatSheet", (app) => {
+  if (app._mhFitted) return;
+  app._mhFitted = true;
+  requestAnimationFrame(() => {
+    if (app.rendered && !app._minimized) app.setPosition({ height: "auto" });
+  });
 });
 
 // ── Actor / Item reactivity ───────────────────────────────────────────────────

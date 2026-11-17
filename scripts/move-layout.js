@@ -81,7 +81,7 @@ const MOVE_IMAGES = {
     trackedoutcome: "Tracked Outcome.webp", downtime: "Downtime-OS.webp", creditroll: "Session End-OS.webp"
   },
   legend: {
-    quickoutcome: "Quick Way.webp", detailedoutcome: "Detailed Way - Attack.webp", reaction: "Reaction.webp",
+    quickoutcome: "Quick Way.webp", detailedoutcome: "Detailed.webp", reaction: "Reaction.webp",
     sacrificepainful: "sacrifice-painful.webp", sacrificescarring: "sacrifice-scarring.webp",
     sacrificegrave: "sacrifice-grave.webp"
   }
