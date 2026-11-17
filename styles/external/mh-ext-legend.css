@@ -281,14 +281,28 @@
 
   /* Moss-green scrollbars, as on the HUD (--scrollbar-thumb-color). Core
      reads --color-scrollbar; the system's ::-webkit-scrollbar rules are
-     ignored once scrollbar-color is set. */
-  :is(#chat, .chat-popout, #chat-notifications, .city.sheet, .city-of-mist.sheet.item) {
+     ignored once scrollbar-color is set. The last entry is the § 5
+     dialogs (the § 5 root); #chat already makes the :is() an id, so it
+     raises nothing. */
+  :is(#chat, .chat-popout, #chat-notifications, .city.sheet, .city-of-mist.sheet.item,
+    .app.dialog:is(
+      :has(> .window-content > .dialog-content > :is(.single-choice-box, .multi-choice-box, .themebook-selection-dialog, input.face-danger, .merge-status-dialog, .status-merge-dialog, .SHB-confirm-dialog, .Blaze-dialog)),
+      :has(> .window-content > .dialog-content > div:only-child:not([class])):has(> .window-content > .dialog-buttons > .dialog-button.yes + .dialog-button.no:last-child),
+      :not(:has(> .window-content > .dialog-content > *)):has(> .window-content > .dialog-buttons > .dialog-button.one + .dialog-button.two + .dialog-button.cancel:last-child))) {
     --color-scrollbar: var(--scrollbar-thumb-color, #4f7354);
     --color-scrollbar-track: transparent;
   }
 
-  :is(#chat, .chat-popout, #chat-notifications, .city.sheet, .city-of-mist.sheet.item),
-  :is(#chat, .chat-popout, #chat-notifications, .city.sheet, .city-of-mist.sheet.item) * {
+  :is(#chat, .chat-popout, #chat-notifications, .city.sheet, .city-of-mist.sheet.item,
+    .app.dialog:is(
+      :has(> .window-content > .dialog-content > :is(.single-choice-box, .multi-choice-box, .themebook-selection-dialog, input.face-danger, .merge-status-dialog, .status-merge-dialog, .SHB-confirm-dialog, .Blaze-dialog)),
+      :has(> .window-content > .dialog-content > div:only-child:not([class])):has(> .window-content > .dialog-buttons > .dialog-button.yes + .dialog-button.no:last-child),
+      :not(:has(> .window-content > .dialog-content > *)):has(> .window-content > .dialog-buttons > .dialog-button.one + .dialog-button.two + .dialog-button.cancel:last-child))),
+  :is(#chat, .chat-popout, #chat-notifications, .city.sheet, .city-of-mist.sheet.item,
+    .app.dialog:is(
+      :has(> .window-content > .dialog-content > :is(.single-choice-box, .multi-choice-box, .themebook-selection-dialog, input.face-danger, .merge-status-dialog, .status-merge-dialog, .SHB-confirm-dialog, .Blaze-dialog)),
+      :has(> .window-content > .dialog-content > div:only-child:not([class])):has(> .window-content > .dialog-buttons > .dialog-button.yes + .dialog-button.no:last-child),
+      :not(:has(> .window-content > .dialog-content > *)):has(> .window-content > .dialog-buttons > .dialog-button.one + .dialog-button.two + .dialog-button.cancel:last-child))) * {
     scrollbar-color: var(--scrollbar-thumb-color, #4f7354) transparent;
   }
 
@@ -304,9 +318,14 @@
      so later rules that reset `background` restore it with
      var(--mhx-hl-bg). Power and relationship tags stay handwriting (§ 2).
      The item sheets (§ 4) put it on the story tag and status name fields;
-     only story tags have the Temporary box, which tells them apart. */
+     only story tags have the Temporary box, which tells them apart.
+     The dialogs (§ 5) put it on the status name fields of the drop,
+     merge and + / − dialogs, and on the drop dialog's existing statuses. */
   .city-of-mist.sheet.item .window-content > form.tag-sheet:has(> input[name="system.temporary"]) > input[name=name],
   .city-of-mist.sheet.item .window-content > form.status-sheet > input[name=name],
+  .app.dialog .dialog-content:has(> input.face-danger) > :is(input.status-name, br + label:has(+ input.status-selector)),
+  .app.dialog .dialog-content > .merge-status-dialog > input.status-name,
+  .app.dialog .dialog-content > form.status-merge-dialog > input.status-name-input,
   .chat-message :is(.narrated-story-tag, .narrated-status-name),
   .city.sheet .threat-sheet .gmmove-text :is(.narrated-story-tag, .narrated-status-name),
   .app.dialog .dialog-content > .gmmove-section :is(.narrated-story-tag, .narrated-status-name),
@@ -341,6 +360,9 @@
   }
 
   .city-of-mist.sheet.item .window-content > form.status-sheet > input[name=name],
+  .app.dialog .dialog-content:has(> input.face-danger) > :is(input.status-name, br + label:has(+ input.status-selector)),
+  .app.dialog .dialog-content > .merge-status-dialog > input.status-name,
+  .app.dialog .dialog-content > form.status-merge-dialog > input.status-name-input,
   .chat-message .narrated-status-name,
   .city.sheet .threat-sheet .gmmove-text .narrated-status-name,
   .app.dialog .dialog-content > .gmmove-section .narrated-status-name,
@@ -2640,8 +2662,13 @@
 
   .city.sheet,
   .city-of-mist.sheet.item,
-  .app.dialog:has(.dialog-content > .gmmove-section) {
-    --mhx-npc-sub:      var(--effects-color1, #724a32);             /* HUD .npc-subtitle-text */
+  .app.dialog:has(.dialog-content > .gmmove-section),
+  /* the § 5 dialogs (the § 5 root) */
+  .app.dialog:is(
+    :has(> .window-content > .dialog-content > :is(.single-choice-box, .multi-choice-box, .themebook-selection-dialog, input.face-danger, .merge-status-dialog, .status-merge-dialog, .SHB-confirm-dialog, .Blaze-dialog)),
+    :has(> .window-content > .dialog-content > div:only-child:not([class])):has(> .window-content > .dialog-buttons > .dialog-button.yes + .dialog-button.no:last-child),
+    :not(:has(> .window-content > .dialog-content > *)):has(> .window-content > .dialog-buttons > .dialog-button.one + .dialog-button.two + .dialog-button.cancel:last-child)) {
+    --mhx-npc-sub:     var(--effects-color1, #724a32);             /* HUD .npc-subtitle-text */
     --mhx-npc-rule:     var(--effects-color3, #752b2b);             /* HUD subtitle rules */
     --mhx-limit-tier:   var(--limit-tier-color, #ffe5e5);
     --mhx-limit-shield: url(/modules/mist-hud/ui/icons/litm-limit-shield.svg);
@@ -3899,7 +3926,12 @@
      sheet's dark red on the threat items (GM move, spectrum).
      ──────────────────────────────────────────────────────────────────────── */
 
-  .city-of-mist.sheet.item {
+  .city-of-mist.sheet.item,
+  /* the § 5 dialogs (the § 5 root) */
+  .app.dialog:is(
+    :has(> .window-content > .dialog-content > :is(.single-choice-box, .multi-choice-box, .themebook-selection-dialog, input.face-danger, .merge-status-dialog, .status-merge-dialog, .SHB-confirm-dialog, .Blaze-dialog)),
+    :has(> .window-content > .dialog-content > div:only-child:not([class])):has(> .window-content > .dialog-buttons > .dialog-button.yes + .dialog-button.no:last-child),
+    :not(:has(> .window-content > .dialog-content > *)):has(> .window-content > .dialog-buttons > .dialog-button.one + .dialog-button.two + .dialog-button.cancel:last-child)) {
     --mhx-item-accent: var(--mhx-effect);
     --mhx-field-bg:    rgba(255, 250, 238, 0.7);           /* the PC move bar's select */
   }
@@ -4819,6 +4851,647 @@
   .city-of-mist.sheet.item #move-core .move-conditonal-block > .move-list-input {
     flex: 1;
     min-width: 0;
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     § 5. Dialogs
+     The system's V1 Dialogs opened from the PC, threat and crew sheets:
+       HTMLTools.confirmBox ............ module/tools/confirmation-dialog.hbs
+       HTMLTools.singleChoiceBox ....... module/tools/singleChoiceBox.hbs
+         ("Choose Item", tag / improvement lists, build-up, templates;
+         tag-and-improvement-selector-dialog.html is the same markup)
+       HTMLTools.multiChoiceBox ........ module/tools/multiChoiceBox.hbs
+       CityDialogs.statusDropDialog .... dialogs/status-drop-dialog.hbs
+       CityDialogs.mergeWithStatusDialog dialogs/merge-status-dialog.hbs
+       CityDialogs.themeBookSelector ... dialogs/themebook-selector-dialog.html
+       CitySheet.themeDeleteChoicePrompt (plain text, no template)
+       CityHelpers._statusAddSubDialog . dialogs/status-addition-dialog.html
+         (the + / − buttons on a status)
+       CityDialogs.SHBDialog / BlazeDialog  dialogs/SHB-dialog.html,
+         Blaze-Dialog.hbs (Stop Holding Back)
+
+     Mirrors § 5 of mh-ext-otherscape.css. V1 Dialogs carry no class of
+     their own, so the root matches each one by its content: a template
+     class, the drop dialog's .face-danger box, confirmBox's lone bare
+     <div> with Yes / No, or the delete prompt's text-only content with
+     one / two / cancel. Core, other modules, the GM move pop-up (§ 3) and
+     the roll dialogs (§ 6b) never match. The two :has() of one branch
+     stay on one line: a line break between them is a descendant
+     combinator. The same root is in the scrollbar, § 3 and § 4 token
+     lists, which give these dialogs the moss scrollbars, --mhx-npc-*,
+     --mhx-item-accent and --mhx-field-bg.
+
+     Same language as the § 4 item sheets: the book page (bg3-litm) as
+     the window, small brown Labrada caps labels, parchment fields in
+     brown ink with a gold focus, parchment checkboxes and radios that
+     fill with the accent, the NPC HUD subtitle as a heading. Status
+     names are in the sage highlighter (shared block above § 1). Buttons
+     are the § 3 pop-up's parchment keys; the confirming one is the
+     leather key of the PC sheet's Execute button.
+
+     The accent is the leather brown, or the threat sheet's dark red on
+     the Stop Holding Back warnings (whose confirming key is red leather).
+     ──────────────────────────────────────────────────────────────────────── */
+
+  .app.dialog:is(
+    :has(> .window-content > .dialog-content > :is(
+      .single-choice-box, .multi-choice-box,
+      .themebook-selection-dialog,
+      input.face-danger, .merge-status-dialog, .status-merge-dialog,
+      .SHB-confirm-dialog, .Blaze-dialog
+    )),
+    /* confirmBox (one line: a line break here would be a descendant combinator) */
+    :has(> .window-content > .dialog-content > div:only-child:not([class])):has(> .window-content > .dialog-buttons > .dialog-button.yes + .dialog-button.no:last-child),
+    /* themeDeleteChoicePrompt */
+    :not(:has(> .window-content > .dialog-content > *)):has(> .window-content > .dialog-buttons > .dialog-button.one + .dialog-button.two + .dialog-button.cancel:last-child)
+  ) {
+    /* The confirming key's leather */
+    --mhx-key-top:    var(--mhx-effect);
+    --mhx-key-bottom: var(--mhx-effect-dark);
+    --mhx-key-hover:  #8a5b3e;
+
+    /* Stop Holding Back: the threat sheet's dark red, as § 4's threat items */
+    &:has(:is(.SHB-confirm-dialog, .Blaze-dialog)) {
+      --mhx-item-accent: var(--mhx-npc-rule);
+      --mhx-key-top:     #8a3a35;
+      --mhx-key-bottom:  #4f1b1b;
+      --mhx-key-hover:   #a04640;
+    }
+
+    /* ── Window body: the book page, as the § 4 item sheets ───────────── */
+    & .window-content {
+      gap: 0.6em;
+      padding: 0.8em 1.2em 0.9em 1.1em;
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: url(/modules/mist-hud/ui/bg3-litm.webp) center / 100% 100% no-repeat, var(--mhx-paper);
+      background-blend-mode: normal;
+    }
+
+    & .dialog-content {
+      font-family: var(--mhx-font-body);
+      font-size: 1.05em;
+      line-height: 1.4;
+      color: var(--mhx-ink);
+    }
+
+    & .dialog-content form {
+      margin: 0;
+      font-family: var(--mhx-font-body);
+      color: var(--mhx-ink);
+    }
+
+    /* ── Labels: the threat sheet's small brown Labrada caps (as § 4)
+       The drop dialog's existing statuses are names, not captions: they
+       keep the highlighter. (:where keeps the exclusion at zero
+       specificity, so the heading and name rules below still win.) */
+    & .dialog-content label:not(:where(br + label:has(+ input.status-selector))) {
+      font-family: var(--mhx-font-label);
+      font-size: 0.85em;
+      font-weight: 700;
+      font-style: normal;
+      line-height: 1.2;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      text-transform: uppercase;
+      color: var(--mhx-npc-sub);
+      text-shadow: none;
+    }
+
+    /* ── Fields: parchment, brown ink, gold focus (as § 4)
+       Status names are left to the highlighter (sized below); :where
+       keeps the number field's rule below winning. */
+    & .dialog-content :is(input:not([type]), input[type=text], input[type=string], input[type=number], select, textarea):not(:where(.status-name, .status-name-input)) {
+      height: 2em;
+      margin: 0;
+      padding: 0 0.5em;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      font-weight: normal;
+      font-style: normal;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: var(--mhx-field-bg);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 2px;
+      box-shadow: none;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    & .dialog-content input[type=number] {
+      width: 3.6em;
+      padding: 0 0.3em;
+      font-family: var(--mhx-font-label);
+      font-weight: 700;
+      font-variant-numeric: lining-nums;
+      text-align: center;
+    }
+
+    & .dialog-content :is(input, select, textarea):focus {
+      border-color: var(--mhx-gold-ink);
+      box-shadow: 0 0 6px rgba(212, 175, 55, 0.55);
+    }
+
+    & .dialog-content :is(input, textarea)::placeholder {
+      color: var(--mhx-ink-dim);
+      opacity: 0.55;
+    }
+
+    & .dialog-content select option {
+      color: var(--mhx-ink);
+      background: var(--mhx-paper);
+    }
+
+    /* Status names: the sage highlighter, sized to the name; the stroke
+       is the field, so focus is a gold underline (as § 4) */
+    & .dialog-content :is(input.status-name, input.status-name-input) {
+      justify-self: start;
+      width: auto;
+      field-sizing: content;
+      min-width: 6em;
+      max-width: 100%;
+      height: auto;
+      font-size: 1.15em;
+      line-height: 1.35;
+      outline: none;
+    }
+
+    & .dialog-content :is(input.status-name, input.status-name-input):focus {
+      box-shadow: 0 2px 0 -1px var(--mhx-gold-ink);
+    }
+
+    /* Checkbox / radio: a parchment square (radio: round) in brown ink
+       that fills with the accent when checked (as § 4) */
+    & .dialog-content input:is([type=checkbox], [type=radio]) {
+      appearance: none;
+      flex: none;
+      width: 1.05em;
+      height: 1.05em;
+      margin: 0;
+      padding: 0;
+      vertical-align: -0.15em;
+      cursor: pointer;
+      border: 1.5px solid var(--mhx-line);
+      border-radius: 2px;
+      background: var(--mhx-field-bg);
+      box-shadow: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+    }
+
+    & .dialog-content input[type=radio] {
+      border-radius: 50%;
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio]):hover {
+      box-shadow: 0 0 5px rgba(212, 175, 55, 0.75);
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio]):checked {
+      border-color: var(--mhx-item-accent);
+      background: var(--mhx-item-accent);
+      box-shadow: inset 0 0 0 2px var(--mhx-paper-hi);
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio]):checked:hover {
+      box-shadow: inset 0 0 0 2px var(--mhx-paper-hi), 0 0 5px rgba(212, 175, 55, 0.75);
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio])::before,
+    & .dialog-content input:is([type=checkbox], [type=radio])::after {
+      display: none;
+    }
+
+    /* Tier slider (core range-picker): a brown ink rule, a leather thumb */
+    & .dialog-content range-picker {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      min-width: 0;
+    }
+
+    & .dialog-content range-picker input[type=range] {
+      appearance: none;
+      flex: 1;
+      min-width: 0;
+      height: 1.2em;
+      margin: 0;
+      background: none;
+      border: none;
+      box-shadow: none;
+      cursor: pointer;
+    }
+
+    & .dialog-content range-picker input[type=range]::-webkit-slider-runnable-track {
+      height: 2px;
+      background: linear-gradient(90deg, var(--mhx-line), var(--mhx-line-faint));
+    }
+
+    & .dialog-content range-picker input[type=range]::-webkit-slider-thumb {
+      appearance: none;
+      width: 0.65em;
+      height: 1.15em;
+      margin-top: calc(1px - 0.575em);
+      border: none;
+      border-radius: 2px;
+      background: linear-gradient(180deg, var(--mhx-key-top), var(--mhx-key-bottom));
+      box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.25), 0 1px 2px rgba(60, 36, 20, 0.45);
+    }
+
+    & .dialog-content range-picker input[type=range]:is(:hover, :focus)::-webkit-slider-thumb {
+      box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.3), 0 0 6px rgba(212, 175, 55, 0.8);
+    }
+
+    & .dialog-content hr {
+      height: 1px;
+      margin: 0.35em 0;
+      border: none;
+      background: linear-gradient(90deg, var(--mhx-line-dim), transparent 85%);
+    }
+
+    /* ── Buttons: the § 3 pop-up's parchment keys; the confirming one the
+       Execute button's leather. They wrap instead of truncating. ────── */
+    & .dialog-buttons {
+      flex: none;
+      gap: 0.5em;
+      margin-top: 0.2em;
+    }
+
+    & .dialog-buttons .dialog-button {
+      height: auto;
+      min-height: 2.1em;
+      margin: 0;
+      padding: 0.25em 0.6em;
+      line-height: 1.15;
+      white-space: normal;
+      font-family: var(--mhx-font-label);
+      font-size: 1em;
+      font-weight: 600;
+      font-variant: small-caps;
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
+      color: var(--mhx-ink);
+      text-shadow: var(--mhx-lift);
+      background: linear-gradient(to bottom, #f2e6c9 0%, #e2d2a8 100%);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 3px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 2px rgba(60, 36, 20, 0.2);
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+    }
+
+    & .dialog-buttons .dialog-button:is(:hover, :focus-visible) {
+      color: var(--mhx-effect-dark);
+      background: linear-gradient(to bottom, #f8eed4 0%, #ead9a8 100%);
+      border-color: var(--mhx-gold-ink);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 6px rgba(212, 175, 55, 0.6);
+    }
+
+    & .dialog-buttons :is(
+      .dialog-button.yes,
+      .dialog-button.add
+    ),
+    &:has(:is(.single-choice-box, .multi-choice-box, .themebook-selection-dialog, .SHB-confirm-dialog, .Blaze-dialog)) .dialog-buttons .dialog-button.one,
+    &:not(:has(> .window-content > .dialog-content > *)) .dialog-buttons .dialog-button.two {
+      font-weight: 700;
+      color: var(--mhx-paper-hi);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(180deg, var(--mhx-key-top), var(--mhx-key-bottom));
+      border: none;
+      border-radius: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.25), 0 1px 3px rgba(60, 36, 20, 0.4);
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+
+      &:is(:hover, :focus-visible) {
+        color: #fff6dc;
+        background: linear-gradient(180deg, var(--mhx-key-hover), var(--mhx-key-top));
+        box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.3), 0 0 10px rgba(212, 175, 55, 0.7);
+      }
+    }
+
+    /* Delete prompt: "Just Delete" warns in dark red ink */
+    &:not(:has(> .window-content > .dialog-content > *)) .dialog-buttons .dialog-button.one:is(:hover, :focus-visible) {
+      color: var(--mhx-npc-rule);
+      background: linear-gradient(to bottom, #f6e2d4 0%, #e6c4b0 100%);
+      border-color: var(--mhx-npc-rule);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 0 6px rgba(117, 43, 43, 0.45);
+    }
+
+    /* ── Single / multi choice list: parchment rows, the picked one
+       washed in gold ─────────────────────────────────────────────────── */
+    & :is(.single-choice-box, .multi-choice-box) {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    /* The template puts <div>s between <tr>s; the parser hoists them out */
+    & :is(.single-choice-box, .multi-choice-box) > .item-to-add {
+      display: none;
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) {
+      width: 100%;
+      margin: 0;
+      border: none;
+      border-collapse: separate;
+      border-spacing: 0 3px;
+      background: none;
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) :is(tbody, tr) {
+      background: none;
+      border: none;
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) td {
+      padding: 0.3em 0.55em;
+      vertical-align: middle;
+      text-align: left;
+      background: var(--mhx-field-bg);
+      border: none;
+      border-top: 1px solid var(--mhx-line-faint);
+      border-bottom: 1px solid var(--mhx-line-faint);
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) td:first-child {
+      width: 1.05em;
+      padding-right: 0.2em;
+      border-left: 2px solid var(--mhx-line-dim);
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) td:last-child {
+      border-right: 1px solid var(--mhx-line-faint);
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) tr:hover td {
+      background: linear-gradient(90deg, rgba(212, 175, 55, 0.16), transparent), var(--mhx-field-bg);
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) tr:has(input:checked) td {
+      background: linear-gradient(90deg, rgba(212, 175, 55, 0.34), rgba(212, 175, 55, 0.1)), var(--mhx-field-bg);
+      border-color: var(--mhx-line-dim);
+    }
+
+    & :is(.single-choice-table, .multi-choice-table) tr:has(input:checked) td:first-child {
+      border-left-color: var(--mhx-item-accent);
+    }
+
+    & .single-choice-item-data {
+      font-family: var(--mhx-font-body);
+      color: var(--mhx-ink);
+    }
+
+    & tr:has(input:checked) .single-choice-item-data {
+      font-weight: 700;
+    }
+
+    & .single-choice-item-data:is([title]:not([title=""])) {
+      cursor: help;
+      text-decoration: underline dotted var(--mhx-line-dim);
+      text-underline-offset: 0.2em;
+    }
+
+    /* ── Themebook selector: a two-column pick list ───────────────────── */
+    & .themebook-selection-dialog {
+      display: block;
+    }
+
+    & #themebook-choices {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(10.5em, 1fr));
+      gap: 3px 0.5em;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    & #themebook-choices > div {
+      display: flex;
+      align-items: center;
+      gap: 0.55em;
+      min-width: 0;
+      padding: 0.3em 0.55em;
+      background: var(--mhx-field-bg);
+      border: 1px solid var(--mhx-line-faint);
+      border-left: 2px solid var(--mhx-line-dim);
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    & #themebook-choices > div:hover {
+      background: linear-gradient(90deg, rgba(212, 175, 55, 0.16), transparent), var(--mhx-field-bg);
+    }
+
+    & #themebook-choices > div:has(input:checked) {
+      background: linear-gradient(90deg, rgba(212, 175, 55, 0.34), rgba(212, 175, 55, 0.1)), var(--mhx-field-bg);
+      border-color: var(--mhx-line-dim);
+      border-left-color: var(--mhx-item-accent);
+    }
+
+    /* Theme kit: last, full width, set apart */
+    & #themebook-choices > div:last-child {
+      grid-column: 1 / -1;
+      margin-top: 0.3em;
+      border-style: dashed solid dashed solid;
+    }
+
+    /* Names, not captions: bold ink in sentence case. (#themebook-choices
+       lifts this over the label caps above.) */
+    & #themebook-choices .themebook-selector-themebook-name {
+      overflow: hidden;
+      font-family: var(--mhx-font-label);
+      font-size: 1em;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: var(--mhx-ink);
+      cursor: pointer;
+    }
+
+    & #themebook-choices > div:has(input:checked) .themebook-selector-themebook-name {
+      color: var(--mhx-effect-dark);
+      text-shadow: 0 0 6px rgba(212, 175, 55, 0.8);
+    }
+
+    & #themebook-choices > div:last-child .themebook-selector-themebook-name {
+      font-style: italic;
+      color: var(--mhx-npc-sub);
+    }
+
+    & .themebook-selection-dialog + hr {
+      display: none;
+    }
+
+    /* ── Status drop: label / field grid (as § 4) ─────────────────────── */
+    & .dialog-content:has(> input.face-danger) {
+      display: grid;
+      grid-template-columns: minmax(7em, max-content) minmax(0, 1fr);
+      align-items: center;
+      gap: 0.45em 0.9em;
+
+      & > * {
+        grid-column: 1 / -1;
+        min-width: 0;
+        margin: 0;
+      }
+
+      & > label {
+        grid-column: 1;
+      }
+
+      & > :is(label + input, input.face-danger + range-picker) {
+        grid-column: 2;
+      }
+
+      & > label + input:is([type=checkbox], [type=radio]) {
+        justify-self: start;
+      }
+
+      & > br {
+        display: none;
+      }
+
+      /* Existing statuses to merge into: highlighted names, sized to
+         the name */
+      & > br + label:has(+ input.status-selector) {
+        justify-self: start;
+        max-width: 100%;
+        font-size: 1em;
+        line-height: 1.35;
+        cursor: default;
+      }
+    }
+
+    /* ── Merge status: heading, name, tier ────────────────────────────── */
+    & .merge-status-dialog {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+
+      /* The NPC HUD's left subtitle (as § 3 and § 4): brown Labrada caps
+         and a 2px dark red rule running right */
+      & > label {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+        font-size: 1.05em;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        color: var(--mhx-npc-sub);
+        text-shadow: 1px 1px 2px rgba(255, 249, 249, 0.9);
+      }
+
+      & > label::after {
+        content: "";
+        flex: 1;
+        height: 2px;
+        opacity: 0.75;
+        background: var(--mhx-npc-rule);
+      }
+
+      & > input.status-name {
+        align-self: flex-start;
+      }
+    }
+
+    /* ── Status + / − : name, hint, tier keys ─────────────────────────── */
+    & .status-merge-dialog {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      align-items: center;
+      gap: 0.45em 0.9em;
+
+      & > * {
+        grid-column: 1 / -1;
+        margin: 0;
+      }
+
+      & > label {
+        grid-column: 1;
+      }
+
+      & > label + input {
+        grid-column: 2;
+      }
+
+      & > .status-add-message {
+        font-style: italic;
+        color: var(--mhx-ink-dim);
+      }
+    }
+
+    /* The tiers 1–6: square parchment keys with heavy Labrada digits (the
+       spectrum sheet's tier radios) that turn leather on hover */
+    &:has(.status-merge-dialog) .dialog-buttons .dialog-button:not(.cancel) {
+      flex: 0 0 2.4em;
+      padding: 0;
+      font-size: 1.1em;
+      font-weight: 800;
+      font-variant: normal;
+      font-variant-numeric: lining-nums;
+      letter-spacing: 0;
+    }
+
+    &:has(.status-merge-dialog) .dialog-buttons .dialog-button:not(.cancel):is(:hover, :focus-visible) {
+      color: var(--mhx-paper-hi);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(180deg, var(--mhx-key-top), var(--mhx-key-bottom));
+      border-color: var(--mhx-key-bottom);
+    }
+
+    /* ── Stop Holding Back / Blaze: a dark red warning note ───────────── */
+    & :is(.SHB-confirm-dialog, .Blaze-dialog) {
+      display: block;
+      margin: 0;
+      line-height: 1.9;
+    }
+
+    & .SHB-warning {
+      margin: 0 0 0.6em;
+      padding: 0.5em 0.8em;
+      font-family: var(--mhx-font-label);
+      font-size: 1.05em;
+      font-weight: 800;
+      line-height: 1.35;
+      letter-spacing: 0.08em;
+      text-align: left;
+      text-transform: uppercase;
+      color: var(--mhx-npc-sub);
+      text-shadow: 1px 1px 2px rgba(255, 249, 249, 0.9);
+      border: none;
+      border-left: 2px solid var(--mhx-npc-rule);
+      background: linear-gradient(90deg, rgba(117, 43, 43, 0.16), transparent 85%);
+
+      & > br {
+        display: none;
+      }
+
+      & > div + div {
+        color: var(--mhx-npc-rule);
+      }
+    }
+
+    & .SHB-choice-label {
+      display: block;
+      margin: 0;
+    }
+
+    & .SHB-choice-label + br {
+      display: none;
+    }
+
+    & .SHB-selector {
+      margin-right: 0.45em;
+    }
+
+    & .Blaze-dialog select {
+      width: 100%;
+    }
   }
 
 }
