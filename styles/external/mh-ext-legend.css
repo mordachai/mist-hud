@@ -282,13 +282,13 @@
   /* Moss-green scrollbars, as on the HUD (--scrollbar-thumb-color). Core
      reads --color-scrollbar; the system's ::-webkit-scrollbar rules are
      ignored once scrollbar-color is set. */
-  :is(#chat, .chat-popout, #chat-notifications, .city.sheet) {
+  :is(#chat, .chat-popout, #chat-notifications, .city.sheet, .city-of-mist.sheet.item) {
     --color-scrollbar: var(--scrollbar-thumb-color, #4f7354);
     --color-scrollbar-track: transparent;
   }
 
-  :is(#chat, .chat-popout, #chat-notifications, .city.sheet),
-  :is(#chat, .chat-popout, #chat-notifications, .city.sheet) * {
+  :is(#chat, .chat-popout, #chat-notifications, .city.sheet, .city-of-mist.sheet.item),
+  :is(#chat, .chat-popout, #chat-notifications, .city.sheet, .city-of-mist.sheet.item) * {
     scrollbar-color: var(--scrollbar-thumb-color, #4f7354) transparent;
   }
 
@@ -302,7 +302,11 @@
      Variants and states set only --mhx-hl (colour) and --mhx-hl-h
      (stroke height); --mhx-hl-bg is rebuilt from them on each element,
      so later rules that reset `background` restore it with
-     var(--mhx-hl-bg). Power and relationship tags stay handwriting (§ 2). */
+     var(--mhx-hl-bg). Power and relationship tags stay handwriting (§ 2).
+     The item sheets (§ 4) put it on the story tag and status name fields;
+     only story tags have the Temporary box, which tells them apart. */
+  .city-of-mist.sheet.item .window-content > form.tag-sheet:has(> input[name="system.temporary"]) > input[name=name],
+  .city-of-mist.sheet.item .window-content > form.status-sheet > input[name=name],
   .chat-message :is(.narrated-story-tag, .narrated-status-name),
   .city.sheet .threat-sheet .gmmove-text :is(.narrated-story-tag, .narrated-status-name),
   .app.dialog .dialog-content > .gmmove-section :is(.narrated-story-tag, .narrated-status-name),
@@ -336,6 +340,7 @@
     box-decoration-break: clone;
   }
 
+  .city-of-mist.sheet.item .window-content > form.status-sheet > input[name=name],
   .chat-message .narrated-status-name,
   .city.sheet .threat-sheet .gmmove-text .narrated-status-name,
   .app.dialog .dialog-content > .gmmove-section .narrated-status-name,
@@ -2634,6 +2639,7 @@
      ──────────────────────────────────────────────────────────────────────── */
 
   .city.sheet,
+  .city-of-mist.sheet.item,
   .app.dialog:has(.dialog-content > .gmmove-section) {
     --mhx-npc-sub:      var(--effects-color1, #724a32);             /* HUD .npc-subtitle-text */
     --mhx-npc-rule:     var(--effects-color3, #752b2b);             /* HUD subtitle rules */
@@ -2651,9 +2657,10 @@
     flex: none;
   }
 
-  /* NPC sheets (threat and limited): a book page (bg3-litm) as the
-     window, stretched so its aged right edge always shows */
-  .city.sheet:has(> .window-content > .threat-sheet) > .window-content {
+  /* NPC sheets (threat and limited) and the PC sheet: a book page
+     (bg3-litm) as the window, stretched so its aged right edge always
+     shows */
+  .city.sheet:has(> .window-content > :is(.threat-sheet, .actor-sheet)) > .window-content {
     background: url(/modules/mist-hud/ui/bg3-litm.webp) center / 100% 100% no-repeat, var(--mhx-paper);
     background-blend-mode: normal;
   }
@@ -2987,7 +2994,8 @@
   /* As the book: the name in heavy Labrada caps over a flat rust band
      (lower part of the line, square ends) that runs on under the HUD's
      red shield, which holds the tier in pale pink. */
-  .city.sheet .threat-sheet {
+  .city.sheet .threat-sheet,
+  .city-of-mist.sheet.item form.spectrum-sheet {
     --mhx-limit-hl:     #d4a08c;
     --mhx-limit-band:   linear-gradient(var(--mhx-limit-hl), var(--mhx-limit-hl));
     --mhx-limit-shield-w: 1.3em;
@@ -3859,6 +3867,958 @@
     align-items: center;
     gap: 0.5em;
     margin: 0;
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     § 4. Item sheets
+     Templates: items/tag, status, gmmove, spectrum, juice, clue,
+     improvement, essence (small sheet, 600×300) and items/themebook,
+     themekit, move (large sheet, 800×1000), plus parts/systemComp.hbs,
+     themebook-questions.hbs, themekit-questions.hbs,
+     themekit-improvements.hbs and move-display.html.
+
+     The window is `.city-of-mist.sheet.item` (actor sheets are
+     `.city.sheet`, so § 2 and § 3 don't reach it). The § 3 tokens
+     (--mhx-npc-*, --mhx-limit-*, --mhx-threat-*) are shared with it.
+
+     Mirrors § 4 of mh-ext-otherscape.css (same grid, same blocks); the
+     look is the threat sheet's (§ 3): the book page (bg3-litm) as the
+     window, the NPC HUD's brown Labrada caps headings with a dark red
+     rule, parchment fields in brown ink with a gold focus.
+
+     The small sheets are flat label / field lists, so they become a
+     two-column grid: label left, field right, anything else full width.
+     The themebook and theme kit bodies use the same grid.
+
+     The names show what the item is, as on the sheets: story tags and
+     statuses in the highlighter (shared block above § 1), power tags in
+     handwriting, a limit on its rust band with the tier in the red
+     shield, a GM move's name on the threat banner over its torn paper.
+
+     The accent (checked boxes) is the leather brown, or the threat
+     sheet's dark red on the threat items (GM move, spectrum).
+     ──────────────────────────────────────────────────────────────────────── */
+
+  .city-of-mist.sheet.item {
+    --mhx-item-accent: var(--mhx-effect);
+    --mhx-field-bg:    rgba(255, 250, 238, 0.7);           /* the PC move bar's select */
+  }
+
+  .city-of-mist.sheet.item:has(:is(.gmmove-sheet, .spectrum-sheet)) {
+    --mhx-item-accent: var(--mhx-npc-rule);
+  }
+
+  /* ── Window body: the book page, as the threat and PC sheets ───────── */
+
+  .city-of-mist.sheet.item .window-content {
+    padding: 0.8em 1.3em 0.9em 1.1em;
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    background: url(/modules/mist-hud/ui/bg3-litm.webp) center / 100% 100% no-repeat, var(--mhx-paper);
+    background-blend-mode: normal;
+  }
+
+  .city-of-mist.sheet.item .window-content > form {
+    font-family: var(--mhx-font-body);
+    color: var(--mhx-ink);
+  }
+
+  .city-of-mist.sheet.item .window-content > form a {
+    color: var(--mhx-ink-dim);
+    text-shadow: none;
+    transition: color 0.15s, text-shadow 0.15s;
+  }
+
+  .city-of-mist.sheet.item .window-content > form a:hover {
+    color: var(--mhx-ink);
+    text-shadow: 0 0 6px rgba(212, 175, 55, 0.8);
+  }
+
+  .city-of-mist.sheet.item .window-content > form a:is(.delete-tag-question, .delete-improvement, .tk-delete-imp, .delete-move-list-element):hover {
+    color: var(--mhx-adventure);
+    text-shadow: none;
+  }
+
+  /* ── Label / field grid ────────────────────────────────────────────── */
+
+  .city-of-mist.sheet.item :is(
+    form.tag-sheet, form.status-sheet, form.gmmove-sheet, form.spectrum-sheet,
+    form.juice-sheet, form.clue-sheet, form.improvement-sheet,
+    .theme-book-sheet > .sheet-body, .theme-kit-sheet > .sheet-body
+  ) {
+    display: grid;
+    grid-template-columns: minmax(7em, max-content) minmax(0, 1fr);
+    align-items: center;
+    align-content: start;
+    gap: 0.45em 0.9em;
+    overflow-y: auto;
+  }
+
+  .city-of-mist.sheet.item :is(
+    form.tag-sheet, form.status-sheet, form.gmmove-sheet, form.spectrum-sheet,
+    form.juice-sheet, form.clue-sheet, form.improvement-sheet,
+    .theme-book-sheet > .sheet-body, .theme-kit-sheet > .sheet-body
+  ) {
+    & > * {
+      grid-column: 1 / -1;
+      min-width: 0;
+      margin: 0;
+    }
+
+    & > label {
+      grid-column: 1;
+    }
+
+    /* A label over a textarea is its heading, so it spans */
+    & > label:has(+ textarea) {
+      grid-column: 1 / -1;
+      margin-bottom: -0.2em;
+    }
+
+    & > label + :is(input, select, .question) {
+      grid-column: 2;
+    }
+
+    & > label + :is(input:not([type=checkbox], [type=number]), select) {
+      width: 100%;
+    }
+
+    & > label + input:is([type=checkbox], [type=number]) {
+      justify-self: start;
+    }
+
+    & > br {
+      display: none;
+    }
+  }
+
+  /* ── Labels: the threat sheet's small brown Labrada caps ──────────── */
+
+  .city-of-mist.sheet.item .window-content > form label {
+    font-family: var(--mhx-font-label);
+    font-size: 0.85em;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-npc-sub);
+    text-shadow: none;
+  }
+
+  /* ── Fields: parchment, brown ink, gold focus (the PC move bar) ───── */
+
+  .city-of-mist.sheet.item .window-content > form :is(input:not([type]), input[type=text], input[type=number], select, textarea) {
+    height: 2em;
+    padding: 0 0.5em;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    font-weight: normal;
+    font-style: normal;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    background: var(--mhx-field-bg);
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 2px;
+    box-shadow: none;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, filter 0.15s;
+  }
+
+  .city-of-mist.sheet.item .window-content > form textarea {
+    height: auto;
+    min-height: 6em;
+    padding: 0.4em 0.55em;
+    line-height: 1.4;
+    resize: vertical;
+  }
+
+  .city-of-mist.sheet.item .window-content > form input[type=number] {
+    width: 5em;
+    font-family: var(--mhx-font-label);
+    font-weight: 700;
+    font-variant-numeric: lining-nums;
+    text-align: center;
+  }
+
+  .city-of-mist.sheet.item .window-content > form :is(input, select, textarea):focus {
+    border-color: var(--mhx-gold-ink);
+    box-shadow: 0 0 6px rgba(212, 175, 55, 0.55);
+  }
+
+  .city-of-mist.sheet.item .window-content > form :is(input, textarea)::placeholder {
+    color: var(--mhx-ink-dim);
+    opacity: 0.55;
+  }
+
+  .city-of-mist.sheet.item .window-content > form select option {
+    color: var(--mhx-ink);
+    background: var(--mhx-paper);
+  }
+
+  /* Checkbox / radio: a parchment square (radio: round) in brown ink
+     that fills with the accent when checked */
+  .city-of-mist.sheet.item .window-content > form input:is([type=checkbox], [type=radio]) {
+    appearance: none;
+    flex: none;
+    width: 1.05em;
+    height: 1.05em;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    border: 1.5px solid var(--mhx-line);
+    border-radius: 2px;
+    background: var(--mhx-field-bg);
+    box-shadow: none;
+    transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+  }
+
+  .city-of-mist.sheet.item .window-content > form input[type=radio] {
+    border-radius: 50%;
+  }
+
+  .city-of-mist.sheet.item .window-content > form input:is([type=checkbox], [type=radio]):hover {
+    box-shadow: 0 0 5px rgba(212, 175, 55, 0.75);
+  }
+
+  .city-of-mist.sheet.item .window-content > form input:is([type=checkbox], [type=radio]):checked {
+    border-color: var(--mhx-item-accent);
+    background: var(--mhx-item-accent);
+    box-shadow: inset 0 0 0 2px var(--mhx-paper-hi);
+  }
+
+  .city-of-mist.sheet.item .window-content > form input:is([type=checkbox], [type=radio]):checked:hover {
+    box-shadow: inset 0 0 0 2px var(--mhx-paper-hi), 0 0 5px rgba(212, 175, 55, 0.75);
+  }
+
+  .city-of-mist.sheet.item .window-content > form input:is([type=checkbox], [type=radio])::before,
+  .city-of-mist.sheet.item .window-content > form input:is([type=checkbox], [type=radio])::after {
+    display: none;
+  }
+
+  .city-of-mist.sheet.item .window-content > form hr {
+    height: 1px;
+    margin: 0.35em 0;
+    border: none;
+    background: linear-gradient(90deg, var(--mhx-line-dim), transparent 85%);
+  }
+
+  /* ── Section headings: the NPC HUD's left subtitle (as § 3) ─────────
+     Brown Labrada caps and a 2px dark red rule running right. */
+
+  .city-of-mist.sheet.item .window-content > form :is(
+    .description-header,
+    .move-list-header,
+    .improvement-name-send,
+    h1:not(.item-name, .charname, .localename)
+  ) {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5em;
+    margin: 0.7em 0 0.15em;
+    padding: 0;
+    font-family: var(--mhx-font-label);
+    font-size: 1.15em;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: 0.1em;
+    text-align: left;
+    text-decoration: none;
+    text-transform: uppercase;
+    color: var(--mhx-npc-sub);
+    text-shadow: 1px 1px 2px rgba(255, 249, 249, 0.9);
+    border: none;
+    background: none;
+  }
+
+  .city-of-mist.sheet.item .window-content > form :is(
+    .description-header,
+    .move-list-header,
+    .improvement-name-send,
+    h1:not(.item-name, .charname, .localename)
+  )::after {
+    content: "";
+    flex: 1;
+    height: 2px;
+    opacity: 0.75;
+    background: var(--mhx-npc-rule);
+  }
+
+  .city-of-mist.sheet.item .window-content > form :is(.description-header, .move-list-header, h1) a {
+    font-size: 0.8em;
+    color: var(--mhx-ink-dim);
+    text-shadow: none;
+  }
+
+  /* The templates close their headings with a stray </p> */
+  .city-of-mist.sheet.item .window-content > form h1 > p:empty {
+    display: none;
+  }
+
+  /* ── Header (themebook, theme kit, move, improvement, essence) ───── */
+
+  .city-of-mist.sheet.item header.sheet-header {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.9em;
+    margin: 0 0 0.5em;
+    padding: 0 0 0.6em;
+    border-bottom: 1px solid var(--mhx-line-faint);
+  }
+
+  /* Corner brackets in brown ink round the art (as the limited sheet) */
+  .city-of-mist.sheet.item header.sheet-header img.profile-img {
+    flex: none;
+    width: 84px;
+    height: 84px;
+    padding: 4px;
+    object-fit: contain;
+    border: none;
+    border-radius: 0;
+    background:
+      linear-gradient(var(--mhx-line), var(--mhx-line)) top left / 12px 1px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) top left / 1px 12px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) bottom right / 12px 1px no-repeat,
+      linear-gradient(var(--mhx-line), var(--mhx-line)) bottom right / 1px 12px no-repeat,
+      var(--mhx-paper);
+    box-shadow: 0 1px 6px rgba(60, 36, 20, 0.35);
+  }
+
+  .city-of-mist.sheet.item header.sheet-header > div {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.35em;
+    min-width: 0;
+  }
+
+  .city-of-mist.sheet.item header.sheet-header h1 {
+    margin: 0;
+    padding: 0;
+    font-size: 1em;
+    border: none;
+  }
+
+  .city-of-mist.sheet.item header.sheet-header input {
+    margin: 0;
+  }
+
+  /* Name: the PC sheet's CCTreasure title, smaller */
+  .city-of-mist.sheet.item .window-content > form header.sheet-header input[name=name] {
+    width: 100%;
+    height: auto;
+    padding: 0 0.1em;
+    font-family: var(--mhx-font-display);
+    font-size: 2em;
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift), -1px 1px 3px rgba(212, 175, 55, 0.45);
+    background: none;
+    border: none;
+    border-bottom: 1px solid transparent;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* Displayed / locale name: the PC sheet's short description */
+  .city-of-mist.sheet.item .window-content > form header.sheet-header input[name="system.locale_name"] {
+    width: 100%;
+    height: 1.8em;
+    padding: 0 0.1em;
+    font-style: italic;
+    color: var(--mhx-ink-dim);
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--mhx-line-faint);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .city-of-mist.sheet.item .window-content > form header.sheet-header input:is([name=name], [name="system.locale_name"]):focus {
+    border-bottom-color: var(--mhx-gold-ink);
+    box-shadow: none;
+  }
+
+  /* Name on the small sheets (juice, clue): bolder ink */
+  .city-of-mist.sheet.item .window-content > form > input[name=name] {
+    font-family: var(--mhx-font-label);
+    font-size: 1.1em;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Tag ──────────────────────────────────────────────────────────── */
+
+  /* Story tag: the gold highlighter (shared block above § 1), sized to
+     the name; the stroke is the field, so focus is a gold underline */
+  .city-of-mist.sheet.item .window-content > form.tag-sheet:has(> input[name="system.temporary"]) > input[name=name],
+  .city-of-mist.sheet.item .window-content > form.status-sheet > input[name=name] {
+    justify-self: start;
+    width: auto;
+    field-sizing: content;
+    min-width: 6em;
+    max-width: 100%;
+    height: auto;
+    font-size: 1.15em;
+    line-height: 1.35;
+  }
+
+  .city-of-mist.sheet.item .window-content > form.tag-sheet:has(> input[name="system.temporary"]) > input[name=name]:focus,
+  .city-of-mist.sheet.item .window-content > form.status-sheet > input[name=name]:focus {
+    box-shadow: 0 2px 0 -1px var(--mhx-gold-ink);
+  }
+
+  /* Power, weakness and other tags: the sheet's handwriting (§ 2) */
+  .city-of-mist.sheet.item .window-content > form.tag-sheet:not(:has(> input[name="system.temporary"])) > input[name=name] {
+    height: auto;
+    padding: 0 0.3em;
+    font-family: var(--mhx-font-hand);
+    font-size: 1.45em;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: normal;
+    color: var(--mhx-tag-text);
+  }
+
+  .city-of-mist.sheet.item form.tag-sheet > .question {
+    padding: 0.3em 0.6em;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    font-style: italic;
+    color: var(--mhx-ink);
+    border-left: 2px solid var(--mhx-line-faint);
+    background: rgba(255, 250, 235, 0.45);
+  }
+
+  .city-of-mist.sheet.item .window-content > form.tag-sheet > .description-header {
+    margin-bottom: -0.2em;
+  }
+
+  .city-of-mist.sheet.item form .creators-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2em 0.6em;
+    font-size: 0.9em;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city-of-mist.sheet.item form .creators-list > div {
+    font-family: var(--mhx-font-label);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-npc-sub);
+  }
+
+  .city-of-mist.sheet.item form .creators-list ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .city-of-mist.sheet.item form .creators-list li {
+    padding: 0 0.45em;
+    color: var(--mhx-ink);
+    border: 1px solid var(--mhx-line-faint);
+    border-radius: 2px;
+    background: rgba(255, 250, 235, 0.45);
+  }
+
+  /* Usage examples / counter-examples / restrictions: three columns,
+     each under the NPC HUD's centred subtitle (caps between rules) */
+  .city-of-mist.sheet.item form.tag-sheet .extra-questions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9em;
+  }
+
+  .city-of-mist.sheet.item form.tag-sheet .extra-questions .title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 0 0.35em;
+    font-family: var(--mhx-font-label);
+    font-size: 0.85em;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--mhx-npc-sub);
+    text-shadow: 1px 1px 2px rgba(255, 249, 249, 0.9);
+  }
+
+  .city-of-mist.sheet.item form.tag-sheet .extra-questions .title::before,
+  .city-of-mist.sheet.item form.tag-sheet .extra-questions .title::after {
+    content: "";
+    flex: 1;
+    height: 2px;
+    opacity: 0.75;
+    background: var(--mhx-npc-rule);
+  }
+
+  .city-of-mist.sheet.item form.tag-sheet .extra-questions ul {
+    display: grid;
+    gap: 0.3em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .city-of-mist.sheet.item form.tag-sheet .extra-questions li {
+    margin: 0;
+  }
+
+  .city-of-mist.sheet.item form.tag-sheet .extra-questions input {
+    width: 100%;
+  }
+
+  /* ── Status ───────────────────────────────────────────────────────── */
+
+  /* Tier boxes (Otherscape / Legend): small squares in brown ink, filled
+     as the PC card's progress circles */
+  .city-of-mist.sheet.item form.status-sheet > .status-tier-circles {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.35em;
+    padding: 0.15em 0;
+  }
+
+  .city-of-mist.sheet.item form.status-sheet .tracker-circle {
+    box-sizing: border-box;
+    width: 1em;
+    height: 1em;
+    min-width: 1em;
+    margin: 0;
+    border: 1.5px solid var(--mhx-line);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+  }
+
+  .city-of-mist.sheet.item form.status-sheet .tracker-circle.filled-circle {
+    background: var(--mhx-line);
+    box-shadow: inset 0 0 0 1.5px var(--mhx-paper-hi);
+  }
+
+  .city-of-mist.sheet.item form.status-sheet .tracker-circle.empty-circle-status {
+    background: var(--mhx-field-bg);
+  }
+
+  .city-of-mist.sheet.item form.status-sheet .tracker-circle:hover {
+    box-shadow: 0 0 5px rgba(212, 175, 55, 0.8);
+  }
+
+  .city-of-mist.sheet.item form.status-sheet .tracker-circle.filled-circle:hover {
+    box-shadow: inset 0 0 0 1.5px var(--mhx-paper-hi), 0 0 5px rgba(212, 175, 55, 0.8);
+  }
+
+  /* ── GM move: the threat sheet's move (§ 3) ───────────────────────── */
+
+  /* Name: the HUD's threat banner, sized to the name */
+  .city-of-mist.sheet.item .window-content > form.gmmove-sheet > input[name=name] {
+    justify-self: start;
+    width: auto;
+    field-sizing: content;
+    min-width: 8em;
+    max-width: 100%;
+    box-sizing: border-box;
+    height: auto;
+    margin-left: -5px;
+    padding: 1px 6px;
+    font-family: var(--mhx-font-label);
+    font-size: 1.05em;
+    font-weight: bold;
+    line-height: 1.35;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    background: none;
+    border: 6px solid transparent;
+    border-block-width: 0;
+    border-radius: 0;
+    border-image: var(--mhx-threat-name) 0 6 0 6 fill / 0 6px 0 6px stretch;
+    box-shadow: none;
+    filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.7));
+  }
+
+  .city-of-mist.sheet.item .window-content > form.gmmove-sheet > input[name=name]:focus {
+    box-shadow: none;
+    filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 4px rgba(212, 175, 55, 0.85));
+  }
+
+  .city-of-mist.sheet.item form.gmmove-sheet > .flex-row-left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4em 0.8em;
+  }
+
+  .city-of-mist.sheet.item form.gmmove-sheet > .flex-row-left > select {
+    width: auto;
+    min-width: 9em;
+  }
+
+  /* Move type: the sheet's marker for it in front of the choice (as
+     § 3: › threat, » special, the limit arrow for intrusions) */
+  .city-of-mist.sheet.item .window-content > form.gmmove-sheet > select[name="system.subtype"]:has(option:is([value=soft], [value=hard], [value=intrusion]):checked) {
+    padding-left: 1.9em;
+    background-position: left 0.55em center;
+    background-size: 0.95em 0.95em;
+    background-repeat: no-repeat;
+  }
+
+  .city-of-mist.sheet.item .window-content > form.gmmove-sheet > select[name="system.subtype"]:has(option[value=soft]:checked) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M5.5 2.5 11 8l-5.5 5.5' fill='none' stroke='%23752b2b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  .city-of-mist.sheet.item .window-content > form.gmmove-sheet > select[name="system.subtype"]:has(option[value=hard]:checked) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 2.5 7.5 8 2 13.5M8.5 2.5 14 8l-5.5 5.5' fill='none' stroke='%23752b2b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  .city-of-mist.sheet.item .window-content > form.gmmove-sheet > select[name="system.subtype"]:has(option[value=intrusion]:checked) {
+    background-image: var(--mhx-limit-arrow);
+  }
+
+  /* Text: the threat's torn paper (bg2-litm) with its soft shadow */
+  .city-of-mist.sheet.item .window-content > form.gmmove-sheet > textarea.gmmove-description {
+    min-height: 9em;
+    padding: 0.95em 1.05em 1em;
+    font-size: 1.05em;
+    line-height: 1.35;
+    color: var(--mhx-ink);
+    background: var(--mhx-threat-art) center / 100% 100% no-repeat;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
+  }
+
+  .city-of-mist.sheet.item .window-content > form.gmmove-sheet > textarea.gmmove-description:focus {
+    box-shadow: none;
+    filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 5px rgba(212, 175, 55, 0.75));
+  }
+
+  /* ── Spectrum (limit): the threat sheet's limit (§ 3) ─────────────────
+     The name in heavy Labrada caps on the flat rust band; the HUD's red
+     shield, holding the chosen max tier, sits on the band's end. The
+     shield is the form's ::after in a third grid column, so it follows
+     the name however long it is; the band runs on under half of it.
+     (.window-content lifts this over the shared grid's :is(), which
+     counts as two classes.) */
+  .city-of-mist.sheet.item .window-content > form.spectrum-sheet {
+    grid-template-columns: minmax(7em, max-content) minmax(0, max-content) minmax(0, 1fr);
+    column-gap: 0.9rem;
+  }
+
+  .city-of-mist.sheet.item .window-content > form.spectrum-sheet > input[name=name] {
+    justify-self: start;
+    width: auto;
+    field-sizing: content;
+    min-width: 8em;
+    max-width: 100%;
+    height: auto;
+    padding: 0 1.05em 0.1em 0.2em;
+    font-family: var(--mhx-font-label);
+    font-size: 1.15em;
+    font-weight: 800;
+    line-height: 1.35;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--mhx-tag-text);
+    background: var(--mhx-limit-band) left 0 bottom 0.12em / 100% 60% no-repeat;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .city-of-mist.sheet.item .window-content > form.spectrum-sheet > input[name=name]:focus {
+    box-shadow: 0 2px 0 -1px var(--mhx-gold-ink);
+  }
+
+  .city-of-mist.sheet.item form.spectrum-sheet::after {
+    grid-row: 1;
+    grid-column: 3;
+    justify-self: start;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--mhx-limit-shield-w);
+    aspect-ratio: 40.68 / 50;
+    margin-left: calc(-0.9rem - var(--mhx-limit-shield-w) * 0.5);
+    padding: 0 0 0.22em;
+    font-family: var(--mhx-font-label);
+    font-size: 1.15rem;
+    font-weight: 800;
+    font-variant-numeric: lining-nums;
+    line-height: 1;
+    color: var(--mhx-limit-tier);
+    pointer-events: none;
+    background: var(--mhx-limit-shield) center / 100% 100% no-repeat;
+    filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.35));
+  }
+
+  /* The tier, as the system prints it (spectrum-values.js) */
+  .city-of-mist.sheet.item form.spectrum-sheet:has(input[name="system.maxTier"][value="1"]:checked)::after   { content: "1"; }
+  .city-of-mist.sheet.item form.spectrum-sheet:has(input[name="system.maxTier"][value="2"]:checked)::after   { content: "2"; }
+  .city-of-mist.sheet.item form.spectrum-sheet:has(input[name="system.maxTier"][value="3"]:checked)::after   { content: "3"; }
+  .city-of-mist.sheet.item form.spectrum-sheet:has(input[name="system.maxTier"][value="4"]:checked)::after   { content: "4"; }
+  .city-of-mist.sheet.item form.spectrum-sheet:has(input[name="system.maxTier"][value="5"]:checked)::after   { content: "5"; }
+  .city-of-mist.sheet.item form.spectrum-sheet:has(input[name="system.maxTier"][value="6"]:checked)::after   { content: "6"; }
+  .city-of-mist.sheet.item form.spectrum-sheet:has(input[name="system.maxTier"][value="999"]:checked)::after { content: "-"; }
+
+  /* Max tier: a row of radios with heavy Labrada digits */
+  .city-of-mist.sheet.item form.spectrum-sheet > span {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3em 0.25em;
+    font-family: var(--mhx-font-label);
+    font-size: 1.05em;
+    font-weight: 800;
+    font-variant-numeric: lining-nums;
+    color: var(--mhx-ink);
+  }
+
+  .city-of-mist.sheet.item form.spectrum-sheet > span > label {
+    margin-right: 0.5em;
+    font-size: 0.8em;
+  }
+
+  .city-of-mist.sheet.item form.spectrum-sheet > span > input[type=radio] {
+    margin-left: 0.7em;
+  }
+
+  /* ── Juice / clue / improvement ───────────────────────────────────── */
+
+  /* Chosen improvement: its description as the tag question's note */
+  .city-of-mist.sheet.item form.improvement-sheet > .improvement-name-send + div {
+    padding: 0.3em 0.6em;
+    font-style: italic;
+    line-height: 1.4;
+    border-left: 2px solid var(--mhx-line-faint);
+    background: rgba(255, 250, 235, 0.45);
+  }
+
+  .city-of-mist.sheet.item form.improvement-sheet > div:last-child:not(:has(*)) {
+    font-family: var(--mhx-font-label);
+    font-size: 0.85em;
+    font-weight: 700;
+    font-variant-numeric: lining-nums;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-npc-sub);
+  }
+
+  /* ── Essence ──────────────────────────────────────────────────────── */
+
+  .city-of-mist.sheet.item form.essence-sheet {
+    gap: 0.45em;
+  }
+
+  .city-of-mist.sheet.item form.essence-sheet header.sheet-header > div > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+  }
+
+  .city-of-mist.sheet.item form.essence-sheet > span {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+  }
+
+  .city-of-mist.sheet.item form.essence-sheet > textarea {
+    flex: 1;
+    min-height: 8em;
+  }
+
+  /* ── Themebook / theme kit rows ───────────────────────────────────── */
+
+  .city-of-mist.sheet.item :is(.theme-book-sheet, .theme-kit-sheet) > .sheet-body > div:first-child {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5em 0.8em;
+  }
+
+  .city-of-mist.sheet.item :is(.theme-book-sheet, .theme-kit-sheet) > .sheet-body > div:first-child select {
+    width: auto;
+    min-width: 10em;
+  }
+
+  .city-of-mist.sheet.item :is(.theme-book-sheet, .theme-kit-sheet) > .sheet-body > div:first-child > div {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  /* systemComp.hbs (dev mode): label beside its select */
+  .city-of-mist.sheet.item .window-content > form div:has(> label + :is(select, b, input.system-name)) {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  /* Tag questions: letter, question, subtag box, trash */
+  .city-of-mist.sheet.item .theme-book-sheet div:has(> input.question-entry) {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0.25em 0;
+  }
+
+  /* The question letter: a Manuscript Antiqua initial in dark red */
+  .city-of-mist.sheet.item .theme-book-sheet .question-letter {
+    flex: none;
+    width: 1.6em;
+    font-family: var(--mhx-font-title);
+    font-size: 1.2em;
+    font-weight: normal;
+    line-height: 1;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--mhx-npc-rule);
+    text-shadow: var(--mhx-lift);
+  }
+
+  .city-of-mist.sheet.item .theme-book-sheet input.question-entry {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+
+  /* Improvements: name, description, uses, effect class, trash */
+  .city-of-mist.sheet.item :is(div.themebook-improvement-entry, .tk-improvement, .tk-tag) {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.4em;
+    margin: 0.25em 0;
+    font-size: 1em;
+  }
+
+  .city-of-mist.sheet.item :is(div.themebook-improvement-entry, .tk-improvement, .tk-tag) > input {
+    min-width: 0;
+    max-width: none;
+  }
+
+  .city-of-mist.sheet.item :is(div.themebook-improvement-entry, .tk-improvement) > :is(.improvement-name, .tk-imp-name) { flex: 2; }
+  .city-of-mist.sheet.item :is(div.themebook-improvement-entry, .tk-improvement) > :is(.improvement-description, .tk-imp-description) { flex: 5; }
+  .city-of-mist.sheet.item :is(div.themebook-improvement-entry, .tk-improvement) > .effect-class { flex: 1.5; width: auto; }
+  .city-of-mist.sheet.item :is(div.themebook-improvement-entry, .tk-improvement) > input.improvement-uses { flex: none; width: 4em; }
+  .city-of-mist.sheet.item .tk-tag > .tk-tagname-entry { flex: 2; }
+  .city-of-mist.sheet.item .tk-tag > .tk-tagname-description { flex: 5; }
+
+  /* Improvement and theme kit tag names: bold ink, as names on the cards */
+  .city-of-mist.sheet.item .window-content > form :is(input.improvement-name, input.tk-imp-name, input.tk-tagname-entry) {
+    font-weight: 700;
+  }
+
+  .city-of-mist.sheet.item :is(.tk-improvement, .themebook-improvement-entry) > a {
+    flex: none;
+    width: auto;
+    max-width: none;
+    padding: 0 0.2em;
+  }
+
+  /* Theme kit: the themebook question each tag answers */
+  .city-of-mist.sheet.item .theme-kit-sheet :is(.power-questions, .weakness-questions) > span {
+    font-family: var(--mhx-font-label);
+    font-size: 0.8em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-npc-sub);
+  }
+
+  .city-of-mist.sheet.item .theme-kit-sheet :is(.power-questions, .weakness-questions) > .question {
+    margin: 0.1em 0 0.15em;
+    font-style: italic;
+    color: var(--mhx-ink);
+  }
+
+  .city-of-mist.sheet.item .theme-kit-sheet .improvements-section > label.themekit-checkbox {
+    margin-right: 0.5em;
+  }
+
+  /* ── Move ─────────────────────────────────────────────────────────────
+     move-display.html never closes its two label.type-header elements
+     (they end in </div>), so the parser nests everything after "Type"
+     inside them. display: contents flattens that back into one column. */
+  .city-of-mist.sheet.item #move-core > section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    margin-top: 0.4em;
+  }
+
+  /* Full size here: the labels nest, and a smaller size would compound
+     into every field inside them */
+  .city-of-mist.sheet.item #move-core label.type-header {
+    display: contents;
+    font-size: 1em;
+  }
+
+  /* The unclosed labels would set everything inside in label caps */
+  .city-of-mist.sheet.item #move-core :is(.move-result-header, .move-list-section, hr ~ label) {
+    font-family: var(--mhx-font-body);
+    font-weight: normal;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+  }
+
+  /* Outcome labels: the small brown caps of the other labels */
+  .city-of-mist.sheet.item #move-core .move-result-header {
+    margin-top: 0.3em;
+    font-family: var(--mhx-font-label);
+    font-size: 0.85em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-npc-sub);
+  }
+
+  .city-of-mist.sheet.item #move-core textarea {
+    min-height: 4.5em;
+  }
+
+  .city-of-mist.sheet.item #move-core .move-conditonal-block {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    margin: 0.25em 0;
+  }
+
+  .city-of-mist.sheet.item #move-core .move-conditonal-block > select {
+    flex: none;
+    width: auto;
+  }
+
+  .city-of-mist.sheet.item #move-core .move-conditonal-block > .move-list-input {
+    flex: 1;
+    min-width: 0;
   }
 
 }
