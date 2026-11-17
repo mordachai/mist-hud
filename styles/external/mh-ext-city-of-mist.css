@@ -3797,29 +3797,34 @@
     color: var(--mhx-ink-dim);
   }
 
-  /* ── Experiment: one scrap per move type (user, 2026-11-17) ──────────
+  /* ── Experiment: one framed card per move type (user, 2026-11-17) ─────
      Each move-type group (its sub-heading and all its bullets) lies on
-     one torn scrap, as a clipping on the page; the moves in it have no
-     scrap of their own, and consequences (submoves) stay with their
-     move. The template has no group wrapper, so the scrap is built from
-     slices of the same art (com_outcome_bg, border-image slices 34 8 50
-     6): every piece draws the art's middle band and sides; the group's
-     first piece (the sub-heading, or a first move with no sub-heading
-     above it) adds the torn top, and its last move (the one before the
-     next sub-heading, or the section's last) adds the torn foot. The
-     pieces touch, so they read as one scrap.
+     one beige card with a ruled frame (com_npc_bg-3, 457×401, frame line
+     ~20px in, rounded corners: border-image slices 24 on every side, at
+     natural size). The moves in it have no card of their own, and
+     consequences (submoves) stay with their move. The template has no
+     group wrapper, so the card is built from slices: every piece draws
+     the art's middle band and side frames; the group's first piece (the
+     sub-heading, or a first move with no sub-heading above it) adds the
+     framed top, and its last move (the one before the next sub-heading,
+     or the section's last) adds the framed foot. The pieces touch, so
+     they read as one card.
      (.sheet-body lifts these over the § 3 sub-heading rule, whose :is()
      counts as three classes.)
      Self-contained: to revert, delete this block and restore the danger
      form's scrap (see the limited sheet rule under "Window"). */
+  .city.sheet .threat-sheet .sheet-body .gm-moves {
+    --mhx-move-card:    url(/modules/mist-hud/ui/com_npc_bg-3.webp);
+  }
+
   .city.sheet .threat-sheet .sheet-body .gm-moves > :is(.gmmove-type-label, .gm-move) {
     margin: 0;
     border-style: solid;
     border-color: transparent;
-    border-width: 0 10px 0 8px;
-    border-image-source: var(--mhx-scrap);
-    border-image-slice: 34 8 50 6 fill;
-    border-image-width: 0 8px 0 6px;
+    border-width: 0 24px 0 24px;
+    border-image-source: var(--mhx-move-card);
+    border-image-slice: 24 fill;
+    border-image-width: 0 24px 0 24px;
     border-image-outset: 0;
     border-image-repeat: stretch;
     background-clip: padding-box;
@@ -3838,18 +3843,18 @@
   .city.sheet .threat-sheet .sheet-body .gm-moves > .gmmove-type-label,
   .city.sheet .threat-sheet .sheet-body .gm-moves > .gm-moves-header + .gm-move {
     margin-top: 0.45em;
-    border-top-width: 16px;
-    border-image-width: 34px 8px 0 6px;
+    border-top-width: 24px;
+    border-image-width: 24px 24px 0 24px;
   }
 
   /* Group foot: the last move before the next sub-heading, or the last */
   .city.sheet .threat-sheet .sheet-body .gm-moves > .gm-move:is(:last-child, :has(+ .gmmove-type-label)) {
-    border-bottom-width: 22px;
-    border-image-width: 0 8px 50px 6px;
+    border-bottom-width: 24px;
+    border-image-width: 0 24px 24px 24px;
   }
 
   .city.sheet .threat-sheet .sheet-body .gm-moves > .gm-moves-header + .gm-move:is(:last-child, :has(+ .gmmove-type-label)) {
-    border-image-width: 34px 8px 50px 6px;
+    border-image-width: 24px;
   }
 
   .city.sheet .threat-sheet .sheet-body .gm-moves > .gm-move::before {
@@ -3957,19 +3962,26 @@
   }
 
   /* ── Story tags / statuses (Moves tab) ────────────────────────────────
-     No card (Phase 1's dark box goes): a Rift sub-heading over a flow of
-     highlights, the controls small beside each. */
+     A spiral notepad page (com_npc_bg-2) pinned beside the moves: a Rift
+     sub-heading over a flow of highlights, the controls small beside
+     each. border-image keeps the ring strip at the top and the torn
+     right edge whatever the page's height; the slices are the art's
+     (471×691), drawn at about 0.6. */
   .city.sheet .threat-sheet .flex-column > .story-tag-box {
+    box-sizing: border-box;
     height: auto;
     min-height: 0;
     margin: 0;
-    padding: 0;
+    padding: 0.2em 0.4em 0.4em;
     overflow: visible;
     color: var(--mhx-ink);
     background: none;
-    border: none;
+    border-style: solid;
+    border-width: 28px 6px 6px 4px;
+    border-image: url(/modules/mist-hud/ui/com_npc_bg-2.webp) 46 10 10 6 fill / 28px 6px 6px 4px stretch;
     border-radius: 0;
     box-shadow: none;
+    filter: drop-shadow(0 1px 3px rgba(20, 16, 12, 0.3));
   }
 
   .city.sheet .threat-sheet .flex-column > .story-tag-box .story-tags-header:first-child,
