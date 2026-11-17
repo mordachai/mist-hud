@@ -1432,9 +1432,13 @@
   /* ── Window ──────────────────────────────────────────────────────────
      The night city: com_sheet_BG (dark violet brush strokes) covers the
      window, so the paper theme cards stand off it. Text that sits on the
-     window itself is re-inked pale in "On the dark window" below. */
+     window itself is re-inked pale in "On the dark window" below. A night
+     wash over the art (heavier at the foot) keeps it behind the cards. */
   .city.sheet:has(> .window-content > :is(.actor-sheet, .crew-sheet)) > .window-content {
-    background: url(/modules/mist-hud/ui/com_sheet_BG.webp) center / cover no-repeat, #1b1030;
+    background:
+      linear-gradient(180deg, rgba(8, 4, 16, 0.5), rgba(8, 4, 16, 0.68)),
+      url(/modules/mist-hud/ui/com_sheet_BG.webp) center / cover no-repeat,
+      #120a20;
   }
 
   /* ── Sheet body ─────────────────────────────────────────────────────── */
@@ -1754,6 +1758,45 @@
     height: var(--theme-card-size);
   }
 
+  /* Card stock, as the core book: each torn card sits inset on a rounded
+     grey paper backing, stained a little by its theme's main colour
+     (plain grey for untyped cards). The outer box keeps the system's
+     size, so the art inside is 12px narrower and shorter and its band /
+     foot strips scale with it (228 / 240). */
+  .city.sheet div.flex-theme-block-flip.flip-card {
+    --mhx-stock-grey: #8f8e8c;
+    --mhx-stock: var(--mhx-stock-grey);
+    box-sizing: border-box;
+    /* Deeper top / bottom: the art's own transparent side edges already
+       widen the side margins by a few px */
+    padding: 9px 6px;
+    border-radius: 10px;
+    background: url(/modules/mist-hud/ui/com_chat_BG_s.webp) center / cover, var(--mhx-stock);
+    background-blend-mode: multiply;
+    box-shadow:
+      inset 0 0 0 1px rgba(40, 30, 20, 0.22),
+      inset 0 0 6px rgba(40, 30, 20, 0.18),
+      0 2px 6px rgba(0, 0, 0, 0.55);
+  }
+
+  .city.sheet div.flex-theme-block-flip.flip-card:has(> .Logos-theme) {
+    --mhx-stock: color-mix(in srgb, var(--mhx-stock-grey) 80%, #b5562b);
+  }
+
+  .city.sheet div.flex-theme-block-flip.flip-card:has(> .Mythos-theme) {
+    --mhx-stock: color-mix(in srgb, var(--mhx-stock-grey) 80%, #8a4fb0);
+  }
+
+  .city.sheet div.flex-theme-block-flip.flip-card:has(> .Mist-theme) {
+    --mhx-stock: color-mix(in srgb, var(--mhx-stock-grey) 80%, #466a81);
+  }
+
+  .city.sheet div.flex-theme-block-flip.flip-card > .flip-card-inner {
+    --theme-card-size: calc(445px - 18px);
+    --mhx-band: calc(34px * 228 / 240);
+    --mhx-foot: calc(37px * 228 / 240);
+  }
+
   .city.sheet .flip-card div.theme-block {
     position: static;
     box-sizing: border-box;
@@ -1776,9 +1819,12 @@
     box-shadow: none;
     backdrop-filter: none;
     clip-path: none;
+    /* The body only (padding box): painted under the foot it would show
+       as a straight edge through the foot's torn gaps. The band strip is
+       drawn by the themebook-name overlay, the foot by ::after. */
     background: var(--mhx-theme-bg) center top / 100% auto no-repeat;
     background-origin: border-box;
-    background-clip: border-box;
+    background-clip: padding-box;
     background-color: transparent;
     background-blend-mode: normal;
   }
@@ -1860,7 +1906,9 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
     border: none;
     border-radius: 0;
-    background: none;
+    /* The art's top strip (the card's own background stops below it) */
+    background: var(--mhx-theme-bg) center top / 100% auto no-repeat;
+    background-origin: border-box;
   }
 
   .city.sheet .flip-card div.Loadout-theme.theme-block > div.themebook-name {
@@ -2661,7 +2709,11 @@
     border: none;
     border-radius: 0;
     box-shadow: none;
+    /* Body only (content box), as the theme cards: the band header draws
+       the top strip, ::after the foot */
     background: var(--mhx-theme-bg) center top / 100% auto no-repeat;
+    background-origin: padding-box;
+    background-clip: content-box;
     background-color: transparent;
   }
 
@@ -2731,6 +2783,8 @@
     right: 0;
     height: var(--mhx-band);
     margin: 0;
+    background: var(--mhx-theme-bg) center top / 100% auto no-repeat;
+    background-origin: border-box;
   }
 
   .city.sheet .flip-card .story-tag-box .status-text-list > .story-tags-header {
@@ -3168,6 +3222,65 @@
   .city.sheet :is(.actor-sheet, .crew-sheet) .move-section select option {
     color: #ece6f2;
     background: #1b1030;
+  }
+
+  /* Name: a lit neon sign, as the tabs: white-pink tube, pink bloom and a
+     hard night shadow beneath (text-fill-color so a system colour can't
+     override it) */
+  .city.sheet .actor-sheet input.character-name,
+  .city.sheet .crew-sheet input#crew-name {
+    -webkit-text-fill-color: #ffe6f5;
+    text-shadow:
+      0 0 2px #ff2aa6,
+      0 0 8px rgba(255, 42, 166, 0.75),
+      0 0 22px rgba(255, 42, 166, 0.4),
+      2px 3px 0 #0c0616;
+  }
+
+  /* Roll bar: bigger picker and a lit neon key for Execute Move, so the
+     roll is the first thing the eye lands on */
+  .city.sheet :is(.actor-sheet, .crew-sheet) .move-section {
+    gap: 0.6em;
+    margin: 0.4em 0 0.7em;
+  }
+
+  .city.sheet :is(.actor-sheet, .crew-sheet) .move-section select {
+    height: 2.4em;
+    min-width: 10.5em;
+    font-size: 1.12em;
+  }
+
+  .city.sheet :is(.actor-sheet, .crew-sheet) button.execute-move-button {
+    height: 2.3em;
+    padding: 0 1.4em;
+    font-size: 1.18em;
+    letter-spacing: 0.07em;
+    color: #ffe6f5;
+    -webkit-text-fill-color: #ffe6f5;
+    text-shadow: 0 1px 1px rgba(30, 0, 20, 0.8);
+    background: linear-gradient(180deg, #9c2a6c, #5e1642);
+    border: 1px solid rgba(255, 108, 196, 0.55);
+    border-radius: 3px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 220, 240, 0.18),
+      0 0 6px rgba(255, 42, 166, 0.3),
+      0 2px 4px rgba(0, 0, 0, 0.6);
+    transition: box-shadow 0.15s, background 0.15s, transform 0.1s;
+  }
+
+  .city.sheet :is(.actor-sheet, .crew-sheet) button.execute-move-button:hover {
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+    background: linear-gradient(180deg, #b8337f, #741b52);
+    border-color: rgba(255, 108, 196, 0.85);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 220, 240, 0.25),
+      0 0 10px rgba(255, 42, 166, 0.55),
+      0 2px 4px rgba(0, 0, 0, 0.6);
+  }
+
+  .city.sheet :is(.actor-sheet, .crew-sheet) button.execute-move-button:active {
+    transform: translateY(1px);
   }
 
   /* Tabs: the themebook's neon sign, solid. Muted pink when off, a
