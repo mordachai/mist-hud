@@ -33,7 +33,8 @@ export function applySystemCSS(system) {
 // listed here can use it (others keep the system's own style).
 
 const EXTERNAL_CSS_MAP = {
-  "otherscape": "/modules/mist-hud/styles/external/mh-ext-otherscape.css",
+  "city-of-mist": "/modules/mist-hud/styles/external/mh-ext-city-of-mist.css",
+  "otherscape":"/modules/mist-hud/styles/external/mh-ext-otherscape.css",
   "legend":     "/modules/mist-hud/styles/external/mh-ext-legend.css",
 };
 

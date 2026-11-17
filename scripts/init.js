@@ -111,6 +111,24 @@ Hooks.on("renderStoryTagWindow", (app) => {
 // the message updates (edit roll, strike out a modifier).
 const ROLL_OUTCOME_CLASSES = ["mh-roll-failure", "mh-roll-partial", "mh-roll-success", "mh-roll-dynamite"];
 
+// Each modifier row gets its kind and sign, which the template doesn't
+// print as classes, so the External Style CSS can colour it:
+// mh-mod-tag | mh-mod-status | mh-mod-other, plus mh-mod-negative when it
+// counts against the roll.
+const MODIFIER_CLASS = /^mh-mod-/;
+
+function markModifiers(roll, html) {
+  const mods = roll.options?.modifiers ?? [];
+  for (const li of html.querySelectorAll(".city-roll .roll-modifiers li[data-modifier-id]")) {
+    const mod = mods.find(m => String(m.id) === li.dataset.modifierId);
+    li.classList.remove(...[...li.classList].filter(c => MODIFIER_CLASS.test(c)));
+    if (!mod) continue;
+    const kind = ["tag", "status"].includes(mod.type) ? mod.type : "other";
+    li.classList.add(`mh-mod-${kind}`);
+    if (Number(mod.amount) < 0) li.classList.add("mh-mod-negative");
+  }
+}
+
 Hooks.on("renderChatMessageHTML", async (message, html) => {
   const roll = message.rolls?.[0];
   if (!roll?.options?.moveId || roll.options.noRoll) return;
@@ -119,6 +137,7 @@ Hooks.on("renderChatMessageHTML", async (message, html) => {
   // .move-text; CSS can't match whitespace-only, so mark it for hiding
   const moveText = html.querySelector(".city-roll .move-text");
   moveText?.classList.toggle("mh-empty", !moveText.textContent.trim() && !moveText.children.length);
+  markModifiers(roll, html);
   await systemReady;
   const CityRoll = sys.CityRoll;
   if (!CityRoll) return;

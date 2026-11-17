@@ -1,0 +1,1218 @@
+/* ==========================================================================
+   Mist HUD — External Style: City of Mist
+   Loaded by settings.js (applyExternalCSS) only while the "Restyle system
+   sheets" setting is on and the active system is City of Mist
+   (getActiveSystem() === "city-of-mist").
+
+   Applies when the system's Visual Style is "External Style" (body.style-custom).
+   Under that style the system still loads city.css and com.css, but every
+   .style-city-of-mist rule stops matching. This file brings those back and
+   then restyles on top.
+
+   Root is `.style-custom` (not `body.style-custom`) so specificity matches the
+   system's `.style-city-of-mist` rules exactly. Everything is nested under it.
+
+   Not ported, because they are unscoped in the system's com.css and still
+   apply under External Style: the :root tokens (--mythos-pink,
+   --mythos-bright, --mythos-text, --mythos-white, --logos-orange,
+   --logos-text, --mist-blue, --mist-text), the Mythos / Logos / Mist
+   theme-block cards (card art, coloured top and bottom borders, glow), the
+   motivation textarea colours, the theme-name-input and input.mythos-name /
+   input.logos-name shadows, the themebook motivation labels, the clue and
+   juice blocks (.clue-reveal, .clue-source, section headers, buttons) and
+   the Mythos / Logos div.themebook-name bands. Phase 2 overrides them where
+   it needs to (none of them is !important). If the system ever scopes
+   them, copy them here.
+
+   Not ported, because they never matched in the system either (the
+   selector is misspelt `.sytle-city-of-mist`): the dialog button rules and
+   the Typewriter font on journal content and sheet tabs.
+
+   Fonts and images live in the system: use absolute /systems/city-of-mist/...
+   paths, never ../ (that resolves against this module). Module art uses
+   /modules/mist-hud/ui/... for the same reason.
+
+   Design language for Phase 2 comes from the City of Mist HUD
+   (styles/mh-city-of-mist.css) and the core book's theme cards, read as
+   grit noir: Rift Bold titles, Averia Serif Libre text, typewriter tag
+   highlights, one charcoal ink and no colour on details (colour comes from the art and the tag
+   highlights only). Its :root tokens are loaded with the HUD for this
+   system, so Phase 2 reads them with fallbacks.
+
+   Section map (mirrors mh-ext-legend.css and mh-ext-otherscape.css):
+     Phase 1  parity port of city-of-mist 4.5.3 styles/com.css
+     Phase 2  § 1 chat cards
+              § 2 PC sheet
+              § 3 threat / crew / limited sheets
+              § 4 item sheets
+              § 5 dialogs
+              § 6 story tag window, scene tags, status tracker, token tooltip
+              § 6b roll and chat dialogs
+              § 7 sidebar and chrome
+   ========================================================================== */
+
+.style-custom {
+
+  /* ────────────────────────────────────────────────────────────────────────
+     Phase 1 — parity port of city-of-mist 4.5.3 styles/com.css
+     Only the `.style-city-of-mist` rules; source order kept so
+     same-specificity ties resolve as before.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  .theme-header {
+    padding: 0;
+    border: none;
+    margin: 0;
+    font-family: 'Rubik';
+    font-weight: bold;
+    font-size: 2.3em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  h1#Theme-header {
+    flex: auto;
+    text-align: center;
+    font-size: 2em;
+    align-self: center;
+    font-weight: bold;
+    font-family: "Fira Sans Extra Condensed";
+    margin: 0;
+  }
+
+  div.theme-name {
+    font-weight: bold;
+    text-align: center;
+    font-size: 2.5em;
+    line-height: 1em;
+    min-height: 1em;
+    font-family: Rift Bold;
+    overflow: hidden;
+    text-transform: uppercase;
+    word-break: break-word;
+    height: auto;
+    padding: 0.2em 0.2em 0.15em 0.2em;
+  }
+
+  input.character-name {
+    font-family: 'Rift Bold';
+    color: white;
+    text-shadow: 0px 0px 1px black, 0px 0px 3px black, 2px 2px var(--logos-orange), 3px 3px var(--logos-orange), 4px 4px var(--mythos-pink), 5px 5px var(--mythos-pink);
+  }
+
+  input#crew-name {
+    font-family: 'Rift Bold';
+    text-shadow: 0px 2px 3px white,
+      0px 2px 4px var(--logos-orange);
+    color: var(--logos-text);
+    border: none;
+  }
+
+  input.danger-name {
+    font-family: 'Rift Bold';
+  }
+
+  .select-move-group {
+    width: 20%;
+    height: 2.3em;
+    font-family: "Rubik";
+    font-weight: bold;
+    font-size: 1.2em;
+    border: 1px solid #3c2145;
+    box-shadow: 0 0 5px var(--mythos-pink), 0 0 2px var(--mythos-pink) inset;
+  }
+
+  .select-move {
+    width: 30%;
+    height: 2.3em;
+    font-family: "Rubik";
+    font-weight: bold;
+    font-size: 1.2em;
+    border: 1px solid #3c2145;
+    box-shadow: 0 0 5px var(--mythos-pink), 0 0 2px var(--mythos-pink) inset;
+  }
+
+  .select-move-group option {
+    font-family: "Rubik";
+    font-weight: bold;
+  }
+
+  .select-group option {
+    font-family: "Rubik";
+    font-weight: bold;
+  }
+
+  .question-letter {
+    font-weight: bold;
+    font-size: larger;
+  }
+
+  /* The system's base64 noise tile, copied verbatim */
+  .status-box,
+  .story-tag-box,
+  .empty-box {
+    background-image: url(data:image/png;base64,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);
+  }
+
+  div.Crew-theme .theme-block,
+  div.Extra-theme .theme-block {
+    color: var(--extra-text);
+    border-radius: 1em;
+    border-bottom: 1em solid var(--extra-grey);
+    border-top: 2em solid var(--extra-grey);
+    background-image: url(/systems/city-of-mist/images/extracardbg.webp);
+    background-color: black;
+    background-position: center;
+    background-size: cover;
+    box-shadow: 0px -5px 0px 10px #686358a6;
+  }
+
+  .loadout-theme-box,
+  .status-box,
+  .story-tag-box {
+    color: var(--options-text);
+    border-radius: 1em;
+    border-bottom: 1em solid var(--options-green);
+    border-top: 1em solid var(--options-green);
+    background-image: url(/systems/city-of-mist/images/extracardbg.webp);
+    background-color: black;
+    background-position: center;
+    background-size: cover;
+    box-shadow: 0px -1px 0px 1px #5f624fa6;
+  }
+
+  .story-tag-window {
+    scrollbar-color: var(--mythos-pink) var(--logos-text);
+  }
+
+  .combatant-name {
+    padding-top: 0.5rem;
+    height: 1.2rem;
+    padding-right: 0.1rem;
+    padding-left: 0.2rem;
+    padding-bottom: 1.4rem;
+    font-size: 135%;
+    text-align: center;
+    background: none;
+    font-family: 'Rift Bold';
+    text-shadow: 0px 2px 3px white,
+      0px 2px 4px var(--logos-orange);
+    color: var(--logos-text);
+  }
+
+  .window-app .story-tag-window {
+    border-top-left-radius: 1em;
+    border-top-right-radius: 1em;
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+    border: none;
+  }
+
+  .scene-tag-window {
+    font-size: 1.1em;
+    line-height: 1.2em;
+    font-family: 'Averia Serif Libre';
+    color: var(--logos-text);
+    border: none;
+    border-top-left-radius: 1em;
+    border-top-right-radius: 1em;
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+    text-align: left;
+  }
+
+  /* Source declares height and color twice; the later ones win, kept as is */
+  .narration-box {
+    text-shadow: 0px 2px 2px var(--mythos-bright),
+      0px 1px 4px var(--mythos-pink);
+    color: var(--mythos-white);
+    height: 100%;
+    font-size: 1.2em;
+    border-style: solid;
+    padding: 5px;
+    border: 1px;
+    transition-duration: 0.2s;
+    height: 100%;
+    color: var(--mythos-text);
+    border-radius: 1em;
+    border-top: 2em solid var(--mythos-pink);
+    background-image: url(/systems/city-of-mist/images/mythoscardbg.webp);
+    background-color: black;
+    background-position: center;
+    background-size: 125%;
+  }
+
+  .story-tags-header {
+    font-weight: bold;
+    font-size: 2em;
+    height: auto;
+    font-family: 'Rubik';
+    text-align: center;
+    font-size: large;
+  }
+
+  .template-name:hover {
+    cursor: pointer;
+    text-shadow: 2px 4px 10px var(--mythos-pink);
+  }
+
+  .danger-templates-label {
+    text-align: center;
+    font-size: 2em;
+    font-family: 'Rift Bold';
+  }
+
+  div.narrated-text {
+    border-radius: 10px;
+    border: 4px groove grey;
+    line-height: 1.5rem;
+    box-sizing: border-box;
+    color: white;
+    font-size: larger;
+    font-weight: bold;
+    padding: 10px;
+    background: linear-gradient(
+      to right,
+      rgba(191, 85, 236, 0.3),
+      rgba(191, 85, 236, 0.6),
+      rgba(191, 85, 236, 0.3)
+    );
+    text-shadow: 3px 3px 3px black;
+    user-select: text;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .city-roll div.actor-name,
+  .city-move div.actor-name {
+    font-size: larger;
+    text-align: center;
+    color: var(--logos-text);
+    font-weight: bold;
+  }
+
+  .city-roll div.move-name,
+  .city-move div.move-name {
+    font-family: 'Rift Bold';
+    font-size: 1.8em;
+    line-height: 1em;
+    font-weight: bold;
+    color: var(--logos-orange);
+    text-align: center;
+  }
+
+  div.roll-total {
+    font-weight: bold;
+    text-align: center;
+    font-size: 1.7em;
+    margin-top: 0.5em;
+    font-family: 'Rubik';
+    color: var(--mythos-pink);
+    text-shadow: 0px 3px 6px var(--mythos-bright);
+  }
+
+  button.execute-move-button {
+    width: 12em;
+    display: inline-block;
+    font-family: "Rubik";
+    font-weight: bold;
+    font-size: large;
+    color: white;
+    background-color: #502c5dbd;
+    padding: 5px 0px;
+    box-shadow: 0 0 5px var(--mythos-pink), 0 0 10px var(--mythos-pink) inset;
+  }
+
+  .gmmove-text {
+    flex-grow: 10;
+    flex-basis: 10px;
+    margin: 4px;
+    padding: 7px;
+    font-family: 'Averia Serif Libre';
+    font-size: 1em;
+    line-height: 1.3em;
+    background: url(/systems/city-of-mist/images/paperbg.webp) repeat;
+    background-size: 300%;
+    border: 2px solid var(--color-border-light-primary);
+    border-top-left-radius: 1em;
+  }
+
+  /* Source block `.style-city-of-mist { … }` (nested) */
+  .default-tags-and-statuses {
+    .list {
+      .list-item {
+        background: linear-gradient(#888, #999);
+      }
+      &.inherited {
+        opacity: 0.75;
+        background: linear-gradient(#777, #888);
+      }
+    }
+  }
+
+  /* ════════════════════════════════════════════════════════════════════════
+     Phase 2 — redesign ("case file": the City of Mist HUD's canvas,
+     typewriter ink, the core book's Mythos / Logos / Mist colours)
+     ════════════════════════════════════════════════════════════════════════ */
+
+  /* ── Shared tokens ─────────────────────────────────────────────────────
+     Built on the HUD palette (mh-city-of-mist.css, mist-hud.css) and the
+     system's unscoped com.css tokens, with fallbacks. Art paths are
+     absolute: these tokens resolve inside this file but are read from
+     rules anywhere in it. */
+  & {
+    --mhx-paper:        #ece5d6;                          /* canvas base */
+    --mhx-paper-hi:     #f5f0e6;
+    --mhx-paper-lo:     #d9cfbb;
+    --mhx-paper-art:    url(/modules/mist-hud/ui/com_chat_BG_s.webp);
+    --mhx-ink:          var(--text-main-color, #352a1d);
+    --mhx-ink-dim:      #6e6253;
+    --mhx-line:         #5b5246;                          /* graphite rule */
+    --mhx-line-dim:     rgba(91, 82, 70, 0.45);
+    --mhx-line-faint:   rgba(91, 82, 70, 0.2);
+    --mhx-lift:         0 1px 0 rgba(255, 252, 245, 0.7); /* letterpress highlight */
+    --mhx-mythos:       var(--mythos-pink, #502c5d);
+    --mhx-mythos-hi:    var(--mythos-bright, #ae4ace);
+    --mhx-logos:        var(--logos-orange, #a85d4b);
+    --mhx-mist:         var(--mist-blue, #28475b);
+    --mhx-blood:        #8b2f2f;
+    --mhx-danger:       var(--destroyed-tag-color, rgba(200, 40, 40, 0.85));
+    --mhx-burned:       #b8541c;
+    --mhx-tag-text:     #f4f1ea;                          /* white on the brush bars */
+    --mhx-storytag:     #f6e58a;                          /* the book's yellow marker */
+    --mhx-status:       #c8e0a0;                          /* the book's green marker */
+    --mhx-negative:     #f2a663;                          /* orange marker: against the roll */
+    --mhx-hl-text:      #1f1b16;
+    --mhx-bar:          url(/modules/mist-hud/ui/select-bar-com-Crew.webp);
+    --mhx-bar-weakness: url(/modules/mist-hud/ui/select-bar-com-weakness.webp);
+    --mhx-font-title:   "Rift Bold", "Fira Sans Extra Condensed", sans-serif;
+    --mhx-font-label:   "Fira Sans Extra Condensed", "Rift Bold", sans-serif;
+    --mhx-font-body:    "Averia Serif Libre", "PT Serif", serif;
+    --mhx-font-tags:    var(--font-family-tags, "Roboto Condensed"), "Fira Sans Extra Condensed", sans-serif;
+    --mhx-font-type:    "Courier Prime", "Courier New", Courier, monospace;
+  }
+
+  /* ── Story tags and statuses: the book's highlighter ───────────────────
+     As in the core book's examples, a story tag or status written into
+     text is set in typewriter italics over a flat marker block: story
+     tags yellow, statuses green. box-decoration-break repeats the block
+     on each line when a name wraps. Variants set only --mhx-hl.
+     Later sections append their selectors to both lists (the story list
+     sets the look; the status list only recolours). */
+  .chat-message :is(.narrated-story-tag, .narrated-status-name) {
+    --mhx-hl: var(--mhx-storytag);
+    margin: 0;
+    padding: 0 0.25em;
+    font-family: var(--mhx-font-type);
+    font-style: italic;
+    font-weight: normal;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-hl-text);
+    text-shadow: none;
+    border: none;
+    border-radius: 1px;
+    box-shadow: none;
+    background: var(--mhx-hl);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .chat-message .narrated-status-name {
+    --mhx-hl: var(--mhx-status);
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     § 1. Chat cards
+     Templates: city-roll.hbs (also used by Mist HUD rolls),
+     parts/move-create-tag-com.hbs, gmmove-chat-description.html,
+     improvement-chat-description.html, chatmessages/downtime*.hbs,
+     narration-box.html, modification-log-post.hbs, parts/clue-reveal.hbs.
+
+     Every card is a sheet of the HUD's canvas (ui/com_chat_BG_s). Roll
+     cards swap the whole card's art by outcome: blood splatter for a
+     miss (com_chat_BG_f, splatter kept at the bottom), pink stains for a
+     partial (com_chat_BG_p, stains kept at the top), plain canvas for a
+     success. Dynamite uses the success art until its own art arrives.
+     No border, stripe or chamfer: a dark hairline and a drop shadow lift
+     the card off the sidebar.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  /* Card shell. Core draws a 2px border in the author's colour (inline
+     style="border-color" on out-of-character messages); `border: none`
+     drops it, colour and all. */
+  .chat-message {
+    --mhx-card-art: var(--mhx-paper-art);
+    --mhx-card-pos: center top;
+    position: relative;
+    margin: 0.4em 0.3em;
+    padding: 0.45em 0.7em 0.7em;
+    font-family: var(--mhx-font-body);
+    font-size: 1em;
+    line-height: 1.3;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    border: none;
+    border-radius: 2px;
+    box-shadow:
+      0 0 0 1px rgba(20, 16, 12, 0.7),
+      0 2px 6px rgba(0, 0, 0, 0.55);
+    /* Light grey base, the art over it at about 70%: a grey wash on top
+       does what a per-layer opacity would, and evens out the three
+       outcome arts. --mhx-card-wash is the art's missing opacity. */
+    --mhx-card-grey: #d9d8d4;
+    --mhx-card-wash: 0.3;
+    background:
+      linear-gradient(rgb(from var(--mhx-card-grey) r g b / var(--mhx-card-wash)), rgb(from var(--mhx-card-grey) r g b / var(--mhx-card-wash))),
+      var(--mhx-card-art) var(--mhx-card-pos) / cover no-repeat,
+      var(--mhx-card-grey);
+    background-blend-mode: normal;
+  }
+
+  /* Roll outcome (classes added by init.js, renderChatMessageHTML): only
+     the card art follows the outcome. Every detail stays in the one
+     charcoal ink (no colour variations in CoM). Dynamite also carries
+     .mh-roll-success, so it takes the success art. */
+  .chat-message.mh-roll-failure {
+    --mhx-card-art: url(/modules/mist-hud/ui/com_chat_BG_f.webp);
+    --mhx-card-pos: center bottom;
+  }
+
+  .chat-message.mh-roll-partial {
+    --mhx-card-art: url(/modules/mist-hud/ui/com_chat_BG_p.webp);
+    --mhx-card-pos: center top;
+  }
+
+  /* Header: the sender in Rift caps over a graphite rule */
+  .chat-message .message-header {
+    flex-wrap: wrap;
+    align-items: baseline;
+    margin-bottom: 0.4em;
+    padding: 0 0 0.2em;
+    border-bottom: 1px solid var(--mhx-line-dim);
+  }
+
+  .chat-message .message-header .message-sender {
+    font-family: var(--mhx-font-title);
+    font-size: 1.2em;
+    font-weight: normal;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+  }
+
+  .chat-message .message-header .message-metadata {
+    font-family: var(--mhx-font-body);
+    font-size: 0.8em;
+    color: var(--mhx-ink-dim);
+  }
+
+  .chat-message .message-header .message-metadata a {
+    color: var(--mhx-ink-dim);
+  }
+
+  .chat-message .message-header .message-metadata a:hover {
+    color: var(--mhx-ink);
+  }
+
+  .chat-message .whisper-to,
+  .chat-message .message-header .flavor-text {
+    flex-basis: 100%;
+    font-family: var(--mhx-font-type);
+    font-size: 0.8em;
+    font-style: italic;
+    color: var(--mhx-ink-dim);
+  }
+
+  .chat-message .message-content {
+    padding: 0;
+    background: none;
+  }
+
+  .chat-message .message-content hr {
+    height: 1px;
+    margin: 0.5em 0;
+    border: none;
+    background: linear-gradient(90deg, transparent, var(--mhx-line-dim), transparent);
+  }
+
+  /* Buttons inside any card: a paper key with a graphite edge, condensed
+     caps; hover inks it charcoal */
+  .chat-message .message-content button {
+    font-family: var(--mhx-font-label);
+    font-size: 0.95em;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+    background: linear-gradient(to bottom, var(--mhx-paper-hi) 0%, var(--mhx-paper-lo) 100%);
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 2px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 1px 2px rgba(30, 24, 18, 0.25);
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+  }
+
+  .chat-message .message-content button:hover:not(:disabled) {
+    color: #fff;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(to bottom, #3a342e 0%, #1f1b17 100%);
+    border-color: #111;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 250, 240, 0.15),
+      0 1px 4px rgba(0, 0, 0, 0.45);
+  }
+
+  .chat-message .message-content input[type=checkbox],
+  .chat-message .message-content input[type=radio] {
+    --checkbox-checked-color: var(--mhx-ink);              /* core's tick */
+    accent-color: var(--mhx-ink);
+  }
+
+  .chat-message .message-content textarea {
+    font-family: var(--mhx-font-type);
+    color: var(--mhx-ink);
+    background: rgba(255, 252, 245, 0.7);
+    border: 1px solid var(--mhx-line-dim);
+    border-radius: 1px;
+  }
+
+  .chat-message .message-content textarea:focus {
+    border-color: var(--mhx-ink);
+    box-shadow: 0 0 4px rgba(31, 27, 23, 0.4);
+  }
+
+  /* ── Roll card (city-roll.hbs) ───────────────────────────────────────── */
+
+  .city-roll,
+  div.city-die-tooltip {
+    color: var(--mhx-ink);
+  }
+
+  .city-roll div.actor-name {
+    font-family: var(--mhx-font-type);
+    font-size: 0.8em;
+    font-weight: bold;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--mhx-ink-dim);
+  }
+
+  /* Move name: the HUD's move face (Rift Bold italic caps), as the HUD's
+     roll title */
+  .city-roll div.move-name {
+    margin: 0.05em 0 0.1em;
+    font-family: var(--mhx-font-title);
+    font-size: 2em;
+    font-weight: normal;
+    font-style: italic;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+  }
+
+  .city-roll .roll-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45em;
+  }
+
+  .city-roll ol.dice-rolls {
+    margin: 0.2em 0 0;
+    padding: 0;
+    gap: 0.4em;
+  }
+
+  /* Dice: paper squares in charcoal ink */
+  .city-roll .dice-rolls .roll {
+    float: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.45em;
+    height: 1.45em;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    font-family: var(--mhx-font-title);
+    font-size: 1.6em;
+    font-weight: normal;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+    background: linear-gradient(to bottom, #fbf8f1 0%, #e7dfcf 100%);
+    border: 1px solid var(--mhx-ink);
+    border-radius: 3px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      inset 0 -2px 3px rgba(91, 82, 70, 0.18),
+      0 1px 2px rgba(30, 24, 18, 0.3);
+  }
+
+  .city-roll ul.roll-modifiers {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3px 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--mhx-font-body);
+    font-size: 0.85em;
+    letter-spacing: normal;
+    text-transform: none;
+    text-shadow: none;
+    color: var(--mhx-ink);
+  }
+
+  .city-roll .roll-modifiers li {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.3em;
+  }
+
+  /* Modifiers: every one is a highlight, no bar art (user, 2026-11-17):
+     typewriter italics on a flat marker block. The colour follows the
+     sign and kind (init.js marks each row): yellow for tags and other
+     bonuses, green for statuses, orange for anything against the roll.
+     The row classes set only --mhx-hl, so .strikeout below still clears
+     the block. */
+  .city-roll .roll-modifiers .name {
+    --mhx-hl: var(--mhx-storytag);
+    display: inline-block;
+    padding: 0 0.3em;
+    font-family: var(--mhx-font-type);
+    font-size: 1.05em;
+    font-style: italic;
+    font-weight: normal;
+    line-height: 1.35;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--mhx-hl-text);
+    text-shadow: none;
+    background: var(--mhx-hl);
+    border: none;
+    border-radius: 1px;
+    transition: filter 0.15s;
+  }
+
+  .city-roll .roll-modifiers li.mh-mod-status .name {
+    --mhx-hl: var(--mhx-status);
+  }
+
+  .city-roll .roll-modifiers li.mh-mod-negative .name {
+    --mhx-hl: var(--mhx-negative);
+  }
+
+  .city-roll .roll-modifiers .name:hover {
+    filter: drop-shadow(0 0 2px rgba(31, 27, 23, 0.6));
+  }
+
+  .city-roll .roll-modifiers .name.strikeout {
+    color: var(--mhx-ink-dim);
+    text-shadow: none;
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+    background: none;
+    opacity: 0.8;
+  }
+
+  .city-roll .roll-modifiers .burns-on-use,
+  .city-roll .roll-modifiers .attention-award {
+    font-family: var(--mhx-font-type);
+    font-size: 0.85em;
+    font-style: italic;
+    color: var(--mhx-ink-dim);
+  }
+
+  .city-roll .roll-modifiers .burns-on-use {
+    color: var(--mhx-ink);
+  }
+
+  /* Total: big Rift figures between two ink rules */
+  .city-roll div.roll-total {
+    position: relative;
+    width: fit-content;
+    min-width: 2.6em;
+    margin: 0.1em auto 0;
+    padding: 0.05em 0.6em 0;
+    font-family: var(--mhx-font-title);
+    font-size: 2.1em;
+    font-weight: normal;
+    line-height: 1.2;
+    text-align: center;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+    border-top: 1px solid var(--mhx-ink);
+    border-bottom: 1px solid var(--mhx-ink);
+    background: linear-gradient(90deg, transparent, rgba(255, 252, 245, 0.6), transparent);
+  }
+
+
+  .city-roll .roll-total .edit-roll {
+    position: absolute;
+    top: 50%;
+    right: -1.2em;
+    transform: translateY(-50%);
+    font-size: 0.4em;
+    color: var(--mhx-ink-dim);
+    text-shadow: none;
+  }
+
+  .city-roll .roll-total .edit-roll:hover {
+    color: var(--mhx-ink);
+  }
+
+  /* Outcome text: the HUD's outcome face, bold, centred */
+  .city-roll .move-text {
+    margin: 0.2em 0 0.35em;
+    font-family: var(--mhx-font-body);
+    font-size: 1.05em;
+    font-weight: 700;
+    text-align: center;
+    color: var(--mhx-ink);
+  }
+
+  /* Outcome panel: the torn paper scrap (ui/com_outcome_bg) behind the
+     outcome text only, stretched to it. No colour under the art, so the
+     torn edges show the card; the drop shadow follows those edges. The
+     rule between the total and the panel goes. */
+  .chat-message:is(.mh-roll-failure, .mh-roll-partial, .mh-roll-success) .city-roll .move-text {
+    margin: 0.5em -0.2em 0.5em;
+    padding: 0.9em 1.2em 1em;
+    background: url(/modules/mist-hud/ui/com_outcome_bg.webp) center / 100% 100% no-repeat;
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.35));
+  }
+
+  .chat-message:is(.mh-roll-failure, .mh-roll-partial, .mh-roll-success) .city-roll > .roll-block + hr {
+    display: none;
+  }
+
+  /* No outcome text (Quick Outcome…): init.js marks the blank .move-text */
+  .city-roll .move-text.mh-empty {
+    display: none;
+  }
+
+  .city-roll ul.move-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .city-roll li.move-list-item,
+  .city-roll li.move-list-bullets {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45em;
+    margin: 0 0 2px;
+    padding: 2px 6px;
+    font-size: 0.95em;
+    font-weight: normal;
+    line-height: 1.25;
+    list-style: none;
+    color: var(--mhx-ink);
+    border-left: 2px solid transparent;
+  }
+
+  .city-roll li.move-list-bullets::before {
+    content: "■";
+    font-size: 0.6em;
+    color: var(--mhx-ink);
+  }
+
+  .city-roll li.move-list-item input.roll-selector-checkbox {
+    flex: none;
+    position: relative;
+    top: 0.1em;
+    accent-color: var(--mhx-ink);
+  }
+
+  .city-roll li.selected.move-list-item {
+    font-weight: 700;
+    background: rgba(31, 27, 23, 0.08);
+    border-left-color: var(--mhx-ink);
+  }
+
+  /* The card's bottom key (+ tags / statuses): a charcoal key */
+  .chat-message .city-roll button.show-effects-list {
+    display: block;
+    width: 100%;
+    margin-top: 0.5em;
+    color: #efe9df;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(180deg, #3a342e, #1f1b17);
+    border: none;
+    border-radius: 2px;
+    box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.12), 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  .chat-message .city-roll button.show-effects-list:hover:not(:disabled) {
+    color: #fff;
+    background: linear-gradient(180deg, #4a433b, #2a2520);
+    border: none;
+    box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.18), 0 1px 5px rgba(0, 0, 0, 0.55);
+  }
+
+  /* Power panel (move-create-tag-com.hbs): two keys, then the created list */
+  .city-roll .move-tag-status-creator {
+    font-size: 0.95em;
+  }
+
+  .city-roll .move-tag-status-creator > button {
+    width: calc(50% - 3px);
+    margin: 0;
+    padding: 3px 0;
+  }
+
+  .city-roll .move-tag-status-creator > button + button {
+    margin-left: 6px;
+  }
+
+  .city-roll .move-tag-status-creator ul {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0.3em 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .city-roll .move-tag-status-creator li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4em;
+    padding: 2px 6px;
+    background: rgba(255, 252, 245, 0.5);
+    border-left: 2px solid var(--mhx-line-dim);
+  }
+
+  .city-roll .move-tag-status-creator .item-control {
+    color: var(--mhx-ink-dim);
+  }
+
+  .city-roll .move-tag-status-creator .item-control:hover {
+    color: var(--mhx-ink);
+  }
+
+  /* ── GM move (gmmove-part.hbs / gmmove-chat-description.html) ─────────── */
+
+  .chat-message .gmmove-name {
+    font-family: var(--mhx-font-title);
+    font-size: 1.5em;
+    font-weight: normal;
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+  }
+
+  .chat-message div.gmmove-description {
+    font-size: 1em;
+    line-height: 1.4;
+    color: var(--mhx-ink);
+  }
+
+  /* The Phase 1 paper panel on .gmmove-text becomes a note on the canvas */
+  .chat-message .gmmove-text {
+    margin: 0.3em 0 0;
+    font-family: var(--mhx-font-body);
+    background: rgba(255, 252, 245, 0.55);
+    border: none;
+    border-left: 2px solid var(--mhx-ink);
+    border-radius: 0;
+  }
+
+  /* ── Improvement (improvement-chat-description.html) ──────────────────── */
+
+  .chat-message .improvement-name-send {
+    font-family: var(--mhx-font-title);
+    font-size: 1.35em;
+    font-weight: normal;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+    background: none;
+  }
+
+  .chat-message .improvement-name-send::before {
+    content: "★ ";
+    font-size: 0.75em;
+    vertical-align: 0.1em;
+    color: var(--mhx-ink);
+  }
+
+  .chat-message div.improvement-description-send {
+    margin-top: 0.25em;
+    font-family: var(--mhx-font-body);
+    color: var(--mhx-ink);
+  }
+
+  /* ── Narration (narration-box.html) ─────────────────────────────────────
+     The Phase 1 Mythos card gives way to the card shell: a typewritten
+     title between ink rules over the narrated text. */
+
+  .chat-message .narration-box {
+    height: auto;
+    padding: 0;
+    font-family: var(--mhx-font-body);
+    font-size: 1.05em;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    border: none;
+    border-radius: 0;
+    background: none;
+  }
+
+  .chat-message .narration-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0 0 0.4em;
+    font-family: var(--mhx-font-type);
+    font-size: 0.9em;
+    font-weight: bold;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+  }
+
+  .chat-message .narration-title::before,
+  .chat-message .narration-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--mhx-ink));
+  }
+
+  .chat-message .narration-title::after {
+    background: linear-gradient(90deg, var(--mhx-ink), transparent);
+  }
+
+  .chat-message .narration-box pre {
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    white-space: normal;
+    color: inherit;
+    background: none;
+    border: none;
+  }
+
+  .chat-message .narrated-text-new {
+    line-height: 1.4;
+  }
+
+  /* ── Clue (parts/clue-reveal.hbs) ───────────────────────────────────────
+     com.css's unscoped Logos card (.clue-reveal) gives way to the card
+     shell. */
+
+  .chat-message .clue-reveal {
+    height: auto;
+    margin: 0;
+    padding: 0;
+    color: var(--mhx-ink);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+  }
+
+  .chat-message .clue-reveal h1.header {
+    margin: 0 0 0.35em;
+    padding: 0 0 0.2em;
+    font-family: var(--mhx-font-title);
+    font-size: 1.8em;
+    font-weight: normal;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+    border: none;
+    border-bottom: 1px solid var(--mhx-line-dim);
+  }
+
+  .chat-message .clue-reveal h2 {
+    margin: 0.4em 0;
+    font-family: var(--mhx-font-label);
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--mhx-ink);
+    border: none;
+  }
+
+  .chat-message .clue-reveal .clue-source,
+  .chat-message .clue-reveal .clue-method {
+    margin-bottom: 0.2em;
+    font-family: var(--mhx-font-body);
+  }
+
+  .chat-message .clue-reveal .clue-source b,
+  .chat-message .clue-reveal .clue-method b,
+  .chat-message .clue-reveal .question-block .header,
+  .chat-message .clue-reveal .answer-block .header,
+  .chat-message .clue-reveal .gm-only.partial-clue label {
+    font-family: var(--mhx-font-type);
+    font-weight: bold;
+    font-size: 0.85em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+  }
+
+  .chat-message .clue-reveal .question-block,
+  .chat-message .clue-reveal .answer-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1em;
+    padding: 0.3em 0.5em;
+    background: rgba(255, 252, 245, 0.5);
+    border-left: 2px solid var(--mhx-ink);
+  }
+
+  .chat-message .clue-reveal .question-part .text {
+    font-family: var(--mhx-font-body);
+    font-style: italic;
+  }
+
+  .chat-message .clue-reveal .answer-part {
+    padding-top: 0.5em;
+    border-top: 1px dashed var(--mhx-line-dim);
+  }
+
+  .chat-message .clue-reveal .answer-part .text {
+    font-family: var(--mhx-font-type);
+    font-size: 1em;
+    color: var(--mhx-ink);
+  }
+
+  .chat-message .clue-reveal .player-only.partial-clue {
+    font-style: italic;
+    color: var(--mhx-ink-dim);
+  }
+
+  .chat-message .clue-reveal .rejected-question {
+    color: var(--mhx-ink);
+  }
+
+  .chat-message .clue-reveal .waiting-msg {
+    font-family: var(--mhx-font-type);
+    font-size: 0.95em;
+    letter-spacing: 0.06em;
+    color: var(--mhx-ink-dim);
+  }
+
+  .chat-message .clue-reveal img.waiting-msg {
+    display: block;
+    margin: 0.3em auto;
+    max-width: 60px;
+    max-height: 60px;
+    opacity: 0.8;
+    border: none;
+  }
+
+  .chat-message .clue-reveal textarea {
+    width: 100%;
+    min-height: 5em;
+    font-size: 0.95em;
+  }
+
+  .chat-message .clue-reveal button {
+    width: calc(50% - 4px);
+    margin: 4px 0 0;
+    padding: 3px 0;
+  }
+
+  .chat-message .clue-reveal button + button {
+    margin-left: 4px;
+  }
+
+  /* ── Downtime (chatmessages/downtime*.hbs) ──────────────────────────────
+     The partials use <tr>/<td> outside a table, so the browser drops those
+     tags: the children land straight in .downtime, two per option. */
+
+  .chat-message .downtime {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 3px 0.5em;
+  }
+
+  .chat-message .downtime .option-name {
+    padding: 2px 6px;
+    font-size: 0.95em;
+    background: rgba(255, 252, 245, 0.5);
+    border-left: 2px solid var(--mhx-ink);
+  }
+
+  .chat-message .downtime .choosers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    justify-content: flex-end;
+  }
+
+  .chat-message .downtime .choosers .name {
+    padding: 0 10px 0 6px;
+    font-family: var(--mhx-font-tags);
+    font-weight: 600;
+    color: var(--mhx-tag-text);
+    background: var(--mhx-bar) center / 100% 100% no-repeat;
+  }
+
+  .chat-message .downtime input[type=radio] {
+    margin: 0;
+    accent-color: var(--mhx-ink);
+  }
+
+  .chat-message .downtime button.submit {
+    grid-column: 1 / -1;
+    margin-top: 0.3em;
+  }
+
+  /* ── Modification log (modification-log-post.hbs) ─────────────────────── */
+
+  .chat-message:has(.log.action) .message-content {
+    font-family: var(--mhx-font-type);
+    font-size: 0.85em;
+    color: var(--mhx-ink-dim);
+  }
+
+  .chat-message .character-name.log {
+    margin-bottom: 0.15em;
+    font-family: var(--mhx-font-title);
+    font-size: 1.2em;
+    font-weight: normal;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--mhx-ink);
+    text-shadow: none;
+  }
+
+  .chat-message .log.action {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--mhx-ink);
+  }
+
+  .chat-message .log.object {
+    font-style: italic;
+    color: var(--mhx-ink);
+  }
+
+}
