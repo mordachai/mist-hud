@@ -805,6 +805,31 @@
     display: none;
   }
 
+  /* Options inside the scrap: with a list after it, the outcome text and
+     the list are one scrap, built from border-image slices of the same art
+     (slices 34 8 50 6, as § 3): the text takes the torn top and the sides,
+     the list the sides and the torn foot. The pieces touch. */
+  .chat-message:is(.mh-roll-failure, .mh-roll-partial, .mh-roll-success) .city-roll .move-text:has(+ ul.move-list > li) {
+    margin-bottom: 0;
+    padding-bottom: 0.45em;
+    background: none;
+    border-image: url(/modules/mist-hud/ui/com_outcome_bg.webp) 34 8 50 6 fill / 14px 4px 0 3px stretch;
+  }
+
+  .chat-message:is(.mh-roll-failure, .mh-roll-partial, .mh-roll-success) .city-roll .move-text + ul.move-list:has(> li) {
+    margin: 0 -0.2em 0.5em;
+    padding: 0.1em 0.9em 1.4em;
+    border-image: url(/modules/mist-hud/ui/com_outcome_bg.webp) 34 8 50 6 fill / 0 4px 20px 3px stretch;
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.35));
+  }
+
+  /* No outcome text but a list: the list is the whole scrap */
+  .chat-message:is(.mh-roll-failure, .mh-roll-partial, .mh-roll-success) .city-roll .move-text.mh-empty + ul.move-list:has(> li) {
+    margin-top: 0.5em;
+    padding-top: 0.8em;
+    border-image-width: 14px 4px 20px 3px;
+  }
+
   /* No outcome text (Quick Outcome…): init.js marks the blank .move-text */
   .city-roll .move-text.mh-empty {
     display: none;
@@ -850,24 +875,30 @@
     border-left-color: var(--mhx-ink);
   }
 
-  /* The card's bottom key (+ tags / statuses): a charcoal key */
+  /* The card's bottom keys (+ tags / statuses, and the power panel's
+     + tag / + status): no key, just the charcoal caps on the card's own
+     background. Hover is a faint charcoal wash. */
+  .chat-message .city-roll :is(button.show-effects-list, .move-tag-status-creator > button) {
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+    background: none;
+    border: none;
+    border-radius: 2px;
+    box-shadow: none;
+  }
+
   .chat-message .city-roll button.show-effects-list {
     display: block;
     width: 100%;
     margin-top: 0.5em;
-    color: #efe9df;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
-    background: linear-gradient(180deg, #3a342e, #1f1b17);
-    border: none;
-    border-radius: 2px;
-    box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.12), 0 1px 3px rgba(0, 0, 0, 0.4);
   }
 
-  .chat-message .city-roll button.show-effects-list:hover:not(:disabled) {
-    color: #fff;
-    background: linear-gradient(180deg, #4a433b, #2a2520);
+  .chat-message .city-roll :is(button.show-effects-list, .move-tag-status-creator > button):hover:not(:disabled) {
+    color: var(--mhx-ink);
+    text-shadow: var(--mhx-lift);
+    background: rgba(31, 27, 23, 0.08);
     border: none;
-    box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.18), 0 1px 5px rgba(0, 0, 0, 0.55);
+    box-shadow: none;
   }
 
   /* Power panel (move-create-tag-com.hbs): the two keys share one row,
