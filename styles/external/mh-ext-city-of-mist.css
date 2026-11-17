@@ -3224,7 +3224,7 @@
      The transparent border is the scrap's margin, so text never runs
      onto the torn edges; the form grows with its content (the window
      scrolls it), so the torn foot always closes the text.
-     (Before the one-scrap-per-move experiment below, the danger sheet's
+     (Before the scrap-per-move-type experiment below, the danger sheet's
      form was this scrap too: to go back, drop `:not(:has(.sheet-tabs))`
      here and delete the experiment block.) */
   .city.sheet .window-content > form.threat-sheet:not(:has(.sheet-tabs)) {
@@ -3797,32 +3797,72 @@
     color: var(--mhx-ink-dim);
   }
 
-  /* ── Experiment: one scrap per move (user, 2026-11-17) ───────────────
-     Each top-level move lies on its own torn scrap, as a clipping on the
-     page; its consequences (submoves) stay on its scrap. The bullet sits
-     inside the scrap's left margin. Self-contained: to revert, delete
-     this block and restore the danger form's scrap (see the limited
-     sheet rule under "Window"). */
-  .city.sheet .threat-sheet .gm-moves > .gm-move {
-    margin: 0 0 0.35em;
-    padding: 0 0.2em 0 1.1em;
+  /* ── Experiment: one scrap per move type (user, 2026-11-17) ──────────
+     Each move-type group (its sub-heading and all its bullets) lies on
+     one torn scrap, as a clipping on the page; the moves in it have no
+     scrap of their own, and consequences (submoves) stay with their
+     move. The template has no group wrapper, so the scrap is built from
+     slices of the same art (com_outcome_bg, border-image slices 34 8 50
+     6): every piece draws the art's middle band and sides; the group's
+     first piece (the sub-heading, or a first move with no sub-heading
+     above it) adds the torn top, and its last move (the one before the
+     next sub-heading, or the section's last) adds the torn foot. The
+     pieces touch, so they read as one scrap.
+     (.sheet-body lifts these over the § 3 sub-heading rule, whose :is()
+     counts as three classes.)
+     Self-contained: to revert, delete this block and restore the danger
+     form's scrap (see the limited sheet rule under "Window"). */
+  .city.sheet .threat-sheet .sheet-body .gm-moves > :is(.gmmove-type-label, .gm-move) {
+    margin: 0;
     border-style: solid;
     border-color: transparent;
-    border-width: 16px 10px 22px 8px;
-    border-image: var(--mhx-scrap) 34 8 50 6 fill / 34px 8px 50px 6px stretch;
+    border-width: 0 10px 0 8px;
+    border-image-source: var(--mhx-scrap);
+    border-image-slice: 34 8 50 6 fill;
+    border-image-width: 0 8px 0 6px;
+    border-image-outset: 0;
+    border-image-repeat: stretch;
     background-clip: padding-box;
   }
 
-  .city.sheet .threat-sheet .gm-moves > .gm-move::before {
+  .city.sheet .threat-sheet .sheet-body .gm-moves > .gm-move {
+    padding: 0.15em 0.2em 0.15em 1.1em;
+  }
+
+  .city.sheet .threat-sheet .sheet-body .gm-moves > .gmmove-type-label {
+    padding: 0 0.2em 0.15em 0.2em;
+  }
+
+  /* Group top: the sub-heading, or a first move under the Moves heading
+     with no sub-heading (entrance moves when there is no intrusion) */
+  .city.sheet .threat-sheet .sheet-body .gm-moves > .gmmove-type-label,
+  .city.sheet .threat-sheet .sheet-body .gm-moves > .gm-moves-header + .gm-move {
+    margin-top: 0.45em;
+    border-top-width: 16px;
+    border-image-width: 34px 8px 0 6px;
+  }
+
+  /* Group foot: the last move before the next sub-heading, or the last */
+  .city.sheet .threat-sheet .sheet-body .gm-moves > .gm-move:is(:last-child, :has(+ .gmmove-type-label)) {
+    border-bottom-width: 22px;
+    border-image-width: 0 8px 50px 6px;
+  }
+
+  .city.sheet .threat-sheet .sheet-body .gm-moves > .gm-moves-header + .gm-move:is(:last-child, :has(+ .gmmove-type-label)) {
+    border-image-width: 34px 8px 50px 6px;
+  }
+
+  .city.sheet .threat-sheet .sheet-body .gm-moves > .gm-move::before {
+    top: 0.15em;
     left: 0.2em;
   }
 
-  .city.sheet .threat-sheet .gm-moves > .gm-move:is(.gmmove-select, .gmmove-edit):hover {
-    background: none;
-    filter: drop-shadow(0 1px 3px rgba(20, 16, 12, 0.45));
+  /* Hover: a faint charcoal wash on the move, inside the scrap */
+  .city.sheet .threat-sheet .sheet-body .gm-moves > .gm-move:is(.gmmove-select, .gmmove-edit):hover {
+    background: rgba(31, 27, 23, 0.07);
   }
 
-  .city.sheet .threat-sheet .gm-moves .submove .gm-move:hover {
+  .city.sheet .threat-sheet .sheet-body .gm-moves .submove .gm-move:hover {
     background: none;
   }
 
