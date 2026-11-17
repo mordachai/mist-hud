@@ -121,7 +121,7 @@
 
 "MistHUD.settings.externalSheetStyle.name": "Reestilizar fichas do sistema (Estilo Externo)",
 
-"MistHUD.settings.externalSheetStyle.hint": "Muda o Estilo Visual do sistema para Estilo Externo e usa o visual deste módulo nas fichas, cartões de chat, diálogos e barra lateral. Mantém o Estilo Externo após trocar o Sistema de Jogo. Vinculado ao Estilo Visual do sistema: escolher Estilo Externo liga esta opção, escolher outro estilo a desliga. Disponível para: Otherscape.",
+"MistHUD.settings.externalSheetStyle.hint": "Muda o Estilo Visual do sistema para Estilo Externo e usa o visual deste módulo nas fichas, cartões de chat, diálogos e barra lateral. Mantém o Estilo Externo após trocar o Sistema de Jogo. Vinculado ao Estilo Visual do sistema: escolher Estilo Externo liga esta opção, escolher outro estilo a desliga. Disponível para: Otherscape, Legend in the Mist.",
 
 "MistHUD.settings.dockSide.left": "Esquerda",
 

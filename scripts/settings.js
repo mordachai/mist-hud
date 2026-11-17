@@ -34,6 +34,7 @@ export function applySystemCSS(system) {
 
 const EXTERNAL_CSS_MAP = {
   "otherscape": "/modules/mist-hud/styles/external/mh-ext-otherscape.css",
+  "legend":     "/modules/mist-hud/styles/external/mh-ext-legend.css",
 };
 
 export function hasExternalStyle(system) {
@@ -47,6 +48,12 @@ function externalStyleEnabled() {
 
 export function applyExternalCSS(system) {
   const cssPath = externalStyleEnabled() ? EXTERNAL_CSS_MAP[system] : undefined;
+  // Titles the system's templates don't print (the threat sheet's Statuses
+  // card): handed to the CSS as localized strings for `content:`.
+  document.documentElement.style.setProperty(
+    "--mhx-label-statuses",
+    JSON.stringify(game.i18n.localize("CityOfMist.terms.statuses"))
+  );
   const existing = document.querySelector("link[data-mh-external]");
   if (existing && cssPath && existing.href.includes(cssPath)) return;
   existing?.remove();
@@ -56,7 +63,7 @@ export function applyExternalCSS(system) {
   link.href = cssPath;
   link.type = "text/css";
   link.dataset.mhExternal = "true";
-  // Stand in for the system's otherscape.css: load before module stylesheets
+  // Stand in for the system's per-system CSS: load before module stylesheets
   // (including our HUD CSS) so the HUD still wins same-specificity ties.
   const firstModuleSheet = document.head.querySelector('link[rel="stylesheet"][href*="modules/"]');
   document.head.insertBefore(link, firstModuleSheet);

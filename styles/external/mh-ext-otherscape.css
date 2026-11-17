@@ -3749,18 +3749,33 @@
     gap: 8px;
   }
 
-  /* Statuses card: the PC card frame, an icon-only band (no title) */
+  /* Statuses card: the PC card frame and the Story Tags card's band. The
+     partial prints no title, so it comes from --mhx-label-statuses, the
+     localized "Statuses" that settings.js (applyExternalCSS) puts on
+     <html>. The icon sits on the left, as on the other cards. */
   .city.sheet .threat-sheet .flex-theme-block.status-box {
     --mhx-theme: var(--mhx-line);
   }
 
   .city.sheet .threat-sheet .flex-theme-block.status-box::before {
-    content: "";
-    display: block;
+    content: var(--mhx-label-statuses, "Statuses");
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
     height: var(--mhx-band);
     margin: 0 -8px 0.4em;
+    padding: 0 38px;
+    font-family: var(--mhx-font-label);
+    font-size: 1.15em;
+    font-weight: normal;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--mhx-bright);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
     background:
-      url(/modules/mist-hud/ui/icons/statuses_icn.svg) center / 23px 23px no-repeat,
+      url(/modules/mist-hud/ui/icons/statuses_icn.svg) left 10px center / 23px 23px no-repeat,
       url(/modules/mist-hud/ui/header-neutral.webp) center / 100% 100% no-repeat;
   }
 

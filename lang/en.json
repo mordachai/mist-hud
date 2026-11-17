@@ -121,7 +121,7 @@
 
 "MistHUD.settings.externalSheetStyle.name": "Restyle System Sheets (External Style)",
 
-"MistHUD.settings.externalSheetStyle.hint": "Switch the system's Visual Style to External Style and use this module's styling for sheets, chat cards, dialogs and the sidebar. Kept on External Style after a Game System change. Linked to the system's Visual Style: choosing External Style turns this on, choosing another style turns it off. Available for: Otherscape.",
+"MistHUD.settings.externalSheetStyle.hint": "Switch the system's Visual Style to External Style and use this module's styling for sheets, chat cards, dialogs and the sidebar. Kept on External Style after a Game System change. Linked to the system's Visual Style: choosing External Style turns this on, choosing another style turns it off. Available for: Otherscape, Legend in the Mist.",
 
 "MistHUD.settings.dockSide.left": "Left",
 
