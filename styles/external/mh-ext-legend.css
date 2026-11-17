@@ -38,6 +38,8 @@
               § 6 story tag window, scene tags, status tracker, token tooltip
               § 6b roll and chat dialogs
               § 7 sidebar and chrome
+     Phase 2 is complete (§ 1 to § 7); what it leaves out is listed at
+     the end of § 7.
    ========================================================================== */
 
 .style-custom {
@@ -422,23 +424,18 @@
      sidebar tab (chat, combat, scenes, actors, items, journal, tables,
      cards, macros, playlists, compendiums, settings, modules' tabs) and
      its popout (popped-out directories are .sidebar-tab themselves; the
-     chat popout isn't). Stopgap until § 7.
-     Layers: darkening wash, fine grain, wider grain bands, base tone. */
+     chat popout isn't). § 7 builds the rest of the sidebar on it.
+     Layers: a darkening wash (deeper toward the bottom, for the
+     parchment text), the plank art (ui/wood_planks.webp: vertical
+     boards) fitted to the panel's width so the seams stay put at any
+     width and repeated down, and the base tone while it loads. */
   .sidebar-tab,
   .chat-sidebar,
   .chat-popout .window-content {
     background:
-      linear-gradient(180deg, rgba(18, 10, 4, 0.35), rgba(18, 10, 4, 0.55)),
-      repeating-linear-gradient(90deg,
-        rgba(0, 0, 0, 0.09) 0 2px,
-        transparent 2px 7px,
-        rgba(255, 214, 160, 0.035) 7px 9px,
-        transparent 9px 16px),
-      repeating-linear-gradient(90deg,
-        transparent 0 37px,
-        rgba(0, 0, 0, 0.14) 37px 39px,
-        transparent 39px 83px),
-      linear-gradient(90deg, #4a2f1b, #3a2414 40%, #452b18 70%, #34200f);
+      linear-gradient(180deg, rgba(18, 10, 4, 0.25), rgba(18, 10, 4, 0.45)),
+      url(/modules/mist-hud/ui/wood_planks.webp) center top / 100% auto repeat-y,
+      #3a2414;
     background-blend-mode: normal;
   }
 
@@ -7562,6 +7559,1182 @@
     }
   }
 
+  /* ────────────────────────────────────────────────────────────────────────
+     § 7. Sidebar and chrome
+     Window chrome (title bar, header buttons, resize handle, frame) of the
+     system windows that § 2 to § 6b restyle: actor sheets (.city.sheet),
+     item sheets, the GM move pop-up, the § 5 and § 6b dialogs, the Scene
+     Tags window and the status tracker; also core DialogV2 dialogs.
+     Other core and module windows keep their own chrome.
+
+     The right sidebar (core v14 markup: templates/sidebar/*), built on
+     § 1's dark wood panels: the tab strip, every tab's panel, directory
+     headers (create buttons, search), directory lists and folders, the
+     placeables tab, playlist volume sliders, the combat tracker, the chat
+     controls and input (also in #chat-notifications, where core moves it
+     while the sidebar is collapsed), the settings tab and the core
+     context menu. § 1 styles the chat cards themselves.
+
+     Mirrors § 7 of mh-ext-otherscape.css (same scope, same selectors).
+     The look is a bound book's: title bars are the HUD's leather strip
+     (header-neutral-litm) with a gold tooled double fillet, the title in
+     CCTreasure on parchment ink after a gold lozenge; threat windows
+     (threat / limited sheets, GM move and spectrum items, the GM move
+     pop-up, Stop Holding Back) take the dark red leather. On the wood:
+     parchment text, gold on hover, the § 5 parchment keys with the
+     confirming one in leather, recessed fields.
+
+     The window list sits in :where(), so the root weighs (0,3,0) with
+     .style-custom: § 6's own Scene Tags header, title and frame (0,4,0+)
+     keep winning, and that window only takes the buttons and the handle.
+     The dialog branches repeat the § 3 / § 5 / § 6b roots: keep them in
+     sync if those change. Each two-:has() branch stays on one line (a
+     line break would be a descendant combinator).
+     ──────────────────────────────────────────────────────────────────────── */
+
+  & {
+    --mhx-leather-art: url(/modules/mist-hud/ui/header-neutral-litm.webp);
+    --mhx-chrome-text: #f1e2c4;                         /* parchment ink on leather */
+    --mhx-chrome-dim:  rgba(241, 226, 196, 0.72);
+    --mhx-tooling:     rgba(212, 175, 55, 0.8);         /* gold fillet */
+    --mhx-wood-text:   #e7d1b1;                         /* as § 1's directories */
+    --mhx-wood-dim:    rgba(231, 209, 177, 0.62);
+    --mhx-wood-line:   rgba(231, 209, 177, 0.14);
+    --mhx-wood-gold:   #e3c46e;                         /* gold that reads on the wood */
+    --mhx-wood-field:  rgba(18, 10, 4, 0.55);
+  }
+
+  /* ── System windows ──────────────────────────────────────────────────── */
+
+  .app.window-app:where(
+    .city.sheet,
+    .city-of-mist.sheet.item,
+    .story-tag-window,
+    [id="city-of-mist-tracker-app"],
+    /* § 3: the GM move pop-up */
+    .dialog:has(.dialog-content > .gmmove-section),
+    /* § 5 */
+    .dialog:has(> .window-content > .dialog-content > :is(.single-choice-box, .multi-choice-box, .themebook-selection-dialog, input.face-danger, .merge-status-dialog, .status-merge-dialog, .SHB-confirm-dialog, .Blaze-dialog)),
+    .dialog:has(> .window-content > .dialog-content > div:only-child:not([class])):has(> .window-content > .dialog-buttons > .dialog-button.yes + .dialog-button.no:last-child),
+    .dialog:not(:has(> .window-content > .dialog-content > *)):has(> .window-content > .dialog-buttons > .dialog-button.one + .dialog-button.two + .dialog-button.cancel:last-child),
+    /* § 6b */
+    .dialog:has(> .window-content > .dialog-content > :is(.roll-dialog, .roll-modifier-dialog, .tag-review, .pc-downtime-selector, .downtime-dialog, textarea.narrator-text)),
+    .dialog:has(> .window-content > .dialog-content > div > :is(.string-input, .number-input, .boolean-input)),
+    .dialog:has(> .window-content > .dialog-content > form .slidecontainer > input.HelpHurt),
+    .dialog:has(> .window-content > .dialog-buttons > .dialog-button.none + .dialog-button:is(.help, .hurt))
+  ),
+  .application.dialog {
+    /* The leather's tint: none (brown), or the threat sheet's dark red */
+    --mhx-chrome-tint: transparent;
+
+    /* ── Frame: a dark leather binding round the page ─────────────────── */
+    border: none;
+    border-radius: 0;
+    background: var(--mhx-effect-dark);
+    box-shadow:
+      0 0 0 1px rgba(40, 22, 10, 0.85),
+      0 8px 26px rgba(20, 10, 4, 0.6);
+
+    /* ── Title bar: the leather strip, a gold double fillet below ─────── */
+    & > .window-header {
+      flex: 0 0 30px;
+      gap: 0.15em;
+      padding: 0 4px 0 10px;
+      font-family: var(--mhx-font-label);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-chrome-text);
+      border: none;
+      background:
+        linear-gradient(90deg, transparent, var(--mhx-tooling) 10%, var(--mhx-tooling) 90%, transparent) left bottom / 100% 1px no-repeat,
+        linear-gradient(90deg, transparent 4%, rgba(212, 175, 55, 0.35) 14%, rgba(212, 175, 55, 0.35) 86%, transparent 96%) left calc(100% - 3px) / 100% 1px no-repeat,
+        linear-gradient(var(--mhx-chrome-tint), var(--mhx-chrome-tint)),
+        var(--mhx-leather-art) center / 100% 100% no-repeat,
+        var(--mhx-effect-dark);
+      box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.16), 0 1px 3px rgba(20, 10, 4, 0.55);
+    }
+
+    & > .window-header .window-title {
+      font-family: var(--mhx-font-display);
+      font-size: 1.25em;
+      font-style: normal;
+      font-weight: normal;
+      line-height: 30px;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      color: var(--mhx-chrome-text);
+      text-shadow: 0 1px 1px rgba(20, 10, 4, 0.75);
+    }
+
+    /* A gold lozenge before the title (not on the Scene Tags window,
+       whose § 6 title is ink on the page) */
+    &:not(.story-tag-window) > .window-header .window-title::before {
+      content: "";
+      display: inline-block;
+      width: 0.36em;
+      height: 0.36em;
+      margin: 0 0.6em 0 0.15em;
+      vertical-align: 0.14em;
+      background: var(--mhx-gold);
+      box-shadow: 0 0 4px rgba(212, 175, 55, 0.7);
+      transform: rotate(45deg);
+    }
+
+    & > .window-header .document-id-link {
+      margin-left: 0.5em;
+      font-size: 0.7em;
+      color: var(--mhx-chrome-dim);
+      text-shadow: none;
+      opacity: 0.6;
+      transition: color 0.15s, opacity 0.15s;
+
+      &:hover {
+        color: var(--mhx-gold);
+        opacity: 1;
+      }
+    }
+
+    /* Header buttons: parchment small caps, gold icon, gold outline on
+       hover; Close turns red leather */
+    & > .window-header .header-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35em;
+      height: 20px;
+      margin: 0 0 0 2px;
+      padding: 0 0.45em;
+      font-family: var(--mhx-font-label);
+      font-size: 0.95em;
+      font-weight: 600;
+      font-variant: small-caps;
+      line-height: 1;
+      letter-spacing: 0.05em;
+      text-transform: lowercase;
+      white-space: nowrap;
+      color: var(--mhx-chrome-dim);
+      text-shadow: 0 1px 1px rgba(20, 10, 4, 0.6);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+      & > i {
+        margin: 0;
+        font-size: 0.85em;
+        color: var(--mhx-wood-gold);
+        transition: color 0.15s, text-shadow 0.15s;
+      }
+
+      &:hover {
+        color: #fff6dc;
+        background: rgba(212, 175, 55, 0.16);
+        border-color: rgba(212, 175, 55, 0.7);
+        box-shadow: 0 0 6px rgba(212, 175, 55, 0.4);
+
+        & > i { text-shadow: 0 0 6px rgba(212, 175, 55, 0.9); }
+      }
+
+      &.close:hover {
+        color: #fff6dc;
+        background: linear-gradient(180deg, #8a3a35, #4f1b1b);
+        border-color: #b4544c;
+        box-shadow: 0 0 6px rgba(139, 38, 53, 0.6);
+
+        & > i {
+          color: #ffd9cf;
+          text-shadow: none;
+        }
+      }
+    }
+
+    /* Resize handle: an ink corner bracket instead of the grey tab */
+    & > .window-resizable-handle {
+      right: 3px;
+      bottom: 3px;
+      width: 14px;
+      height: 14px;
+      padding: 0;
+      border: none;
+      border-radius: 0;
+      background:
+        linear-gradient(var(--mhx-effect), var(--mhx-effect)) right bottom / 100% 2px no-repeat,
+        linear-gradient(var(--mhx-effect), var(--mhx-effect)) right bottom / 2px 100% no-repeat;
+      opacity: 0.55;
+      transition: opacity 0.15s, filter 0.15s;
+
+      & > i { display: none; }
+
+      &:hover {
+        opacity: 1;
+        filter: drop-shadow(0 0 3px var(--mhx-gold));
+      }
+    }
+
+    /* Minimized: the leather strip alone */
+    &.minimized > .window-header {
+      border-bottom: none;
+    }
+  }
+
+  /* Threat windows: the dark red leather (threat and limited sheets, GM
+     move and spectrum items, the GM move pop-up, Stop Holding Back) */
+  .city.sheet:has(> .window-content > .threat-sheet),
+  .city-of-mist.sheet.item:has(:is(.gmmove-sheet, .spectrum-sheet)),
+  .app.dialog:has(.dialog-content > .gmmove-section),
+  .app.dialog:has(> .window-content > .dialog-content > :is(.SHB-confirm-dialog, .Blaze-dialog)) {
+    --mhx-chrome-tint: rgba(117, 43, 43, 0.5);
+  }
+
+  /* ── Core dialogs (DialogV2: confirm / prompt / wait, e.g. End Combat,
+     Delete …, Create … from the sidebar) ─────────────────────────────────
+     The chrome above, and the § 5 body: the book page, brown caps
+     labels, parchment fields, parchment keys with the confirming one
+     (Yes / OK / the default) in leather. The system's `form button`
+     painted the buttons purple. */
+  .application.dialog {
+    --mhx-field-bg:    rgba(255, 250, 238, 0.7);
+    --mhx-key-top:     var(--mhx-effect);
+    --mhx-key-bottom:  var(--mhx-effect-dark);
+    --mhx-key-hover:   #8a5b3e;
+    --color-scrollbar: var(--scrollbar-thumb-color, #4f7354);
+    --color-scrollbar-track: transparent;
+
+    & > .window-header .window-icon {
+      font-size: 0.85em;
+      color: var(--mhx-wood-gold);
+      text-shadow: 0 1px 1px rgba(20, 10, 4, 0.6);
+    }
+
+    /* The icon, when there is one, already leads the title */
+    & > .window-header:has(> .window-icon:not(.hidden)) .window-title::before {
+      display: none;
+    }
+
+    & > .window-content {
+      gap: 0.6em;
+      padding: 0.8em 1.2em 0.9em 1.1em;
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: url(/modules/mist-hud/ui/bg3-litm.webp) center / 100% 100% no-repeat, var(--mhx-paper);
+      background-blend-mode: normal;
+    }
+
+    & .dialog-content {
+      font-family: var(--mhx-font-body);
+      font-size: 1.05em;
+      line-height: 1.4;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+
+      & :is(p, li) { color: var(--mhx-ink); }
+      & :is(strong, b) { color: var(--mhx-effect-dark); }
+
+      & .hint {
+        font-size: 0.9em;
+        color: var(--mhx-ink-dim);
+      }
+    }
+
+    /* Labels and fields (create document, prompts), as § 5 */
+    & .dialog-content :is(label, .form-group > label, legend) {
+      font-family: var(--mhx-font-label);
+      font-size: 0.85em;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-effect);
+      text-shadow: none;
+    }
+
+    & .dialog-content :is(input:not([type]), input[type=text], input[type=search], input[type=number], select, textarea) {
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: var(--mhx-field-bg);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 2px;
+      box-shadow: none;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+
+      &:focus {
+        border-color: var(--mhx-gold-ink);
+        box-shadow: 0 0 6px rgba(212, 175, 55, 0.55);
+      }
+    }
+
+    & .dialog-content select option {
+      color: var(--mhx-ink);
+      background: var(--mhx-paper);
+    }
+
+    & .dialog-content :is(fieldset) {
+      border: 1px solid var(--mhx-line-faint);
+      border-radius: 2px;
+    }
+
+    /* Buttons: the § 5 parchment keys; the confirming one in leather */
+    & .form-footer {
+      gap: 0.5em;
+    }
+
+    & .form-footer button {
+      height: auto;
+      min-height: 2.1em;
+      margin: 0;
+      padding: 0.25em 0.6em;
+      font-family: var(--mhx-font-label);
+      font-size: 1em;
+      font-weight: 600;
+      font-variant: small-caps;
+      line-height: 1.15;
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
+      color: var(--mhx-ink);
+      text-shadow: var(--mhx-lift);
+      background: linear-gradient(to bottom, #f2e6c9 0%, #e2d2a8 100%);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 3px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 2px rgba(60, 36, 20, 0.2);
+      outline: none;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+
+      & > i { color: var(--mhx-effect); }
+
+      &:is(:hover, :focus-visible) {
+        color: var(--mhx-effect-dark);
+        background: linear-gradient(to bottom, #f8eed4 0%, #ead9a8 100%);
+        border-color: var(--mhx-gold-ink);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 6px rgba(212, 175, 55, 0.6);
+      }
+
+      &:is([data-action=yes], [data-action=ok], .default) {
+        font-weight: 700;
+        color: var(--mhx-paper-hi);
+        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+        background: linear-gradient(180deg, var(--mhx-key-top), var(--mhx-key-bottom));
+        border: none;
+        border-radius: 0;
+        box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.25), 0 1px 3px rgba(60, 36, 20, 0.4);
+        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+
+        & > i { color: inherit; }
+
+        &:is(:hover, :focus-visible) {
+          color: #fff6dc;
+          background: linear-gradient(180deg, var(--mhx-key-hover), var(--mhx-key-top));
+          box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.3), 0 0 10px rgba(212, 175, 55, 0.7);
+        }
+      }
+    }
+
+    &, & * {
+      scrollbar-color: var(--scrollbar-thumb-color, #4f7354) transparent;
+    }
+  }
+
+  /* ── AppV2 header keys: core dialogs ────────────────────────────────────
+     Parchment on the leather (Phase 1's `button` look and core's rounded
+     keys go), gold outline on hover, close red leather. The ⋮ controls
+     dropdown on parchment. */
+  .application.dialog > .window-header .header-control {
+    --button-text-color: var(--mhx-chrome-dim);
+    --button-hover-text-color: #fff6dc;
+    --button-size: 22px;
+    color: var(--mhx-chrome-dim);
+    text-shadow: 0 1px 1px rgba(20, 10, 4, 0.6);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    box-shadow: none;
+    transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+    &:hover {
+      color: #fff6dc;
+      background: rgba(212, 175, 55, 0.16);
+      border-color: rgba(212, 175, 55, 0.7);
+      box-shadow: 0 0 6px rgba(212, 175, 55, 0.4);
+    }
+
+    &[data-action=close]:hover {
+      color: #ffd9cf;
+      background: linear-gradient(180deg, #8a3a35, #4f1b1b);
+      border-color: #b4544c;
+      box-shadow: 0 0 6px rgba(139, 38, 53, 0.6);
+    }
+  }
+
+  .application.dialog .controls-dropdown {
+    font-family: var(--mhx-font-label);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    background: var(--mhx-paper-art) center / 100% 100% no-repeat, var(--mhx-paper);
+    border: 1px solid rgba(60, 36, 20, 0.55);
+    border-radius: 2px;
+    box-shadow: 0 8px 20px rgba(20, 10, 4, 0.55);
+
+    & .header-control {
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: transparent;
+      border-radius: 0;
+
+      & > i { color: var(--mhx-effect); }
+
+      &:hover {
+        color: var(--mhx-effect-dark);
+        background: rgba(212, 175, 55, 0.22);
+      }
+    }
+  }
+
+  /* ── Sidebar ─────────────────────────────────────────────────────────── */
+
+  /* Moss scrollbars, as on the HUD */
+  :is(#sidebar, #chat-notifications, #context-menu) {
+    --color-scrollbar: var(--scrollbar-thumb-color, #4f7354);
+    --color-scrollbar-track: transparent;
+  }
+
+  :is(#sidebar, #chat-notifications, #context-menu) * {
+    scrollbar-color: var(--scrollbar-thumb-color, #4f7354) transparent;
+  }
+
+  /* Tab strip: dark wood keys, parchment icons; the open tab is a
+     leather key with a gold icon. Core draws these from --control-*,
+     which it defines on each .ui-control itself, so they are set there
+     (the system's pink frame round the strip goes) */
+  #sidebar-tabs {
+    border: none;
+    box-shadow: none;
+
+    & .ui-control {
+      --control-bg-color: rgba(40, 24, 12, 0.9);
+      --control-border-color: rgba(231, 209, 177, 0.16);
+      --control-icon-color: var(--mhx-wood-dim);
+      --control-hover-bg-color: rgba(74, 47, 27, 0.95);
+      --control-hover-border-color: rgba(212, 175, 55, 0.6);
+      --control-hover-icon-color: #fff2d6;
+      --control-active-bg-color: var(--mhx-effect);
+      --control-active-border-color: var(--mhx-gold);
+      --control-active-icon-color: var(--mhx-wood-gold);
+      border-radius: 2px;
+      color: var(--control-icon-color);
+      text-shadow: 0 1px 1px rgba(20, 10, 4, 0.6);
+      transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+      &:hover {
+        color: var(--control-hover-icon-color);
+        box-shadow: 0 0 6px rgba(212, 175, 55, 0.35);
+      }
+
+      &[aria-pressed=true] {
+        color: var(--control-active-icon-color);
+        text-shadow: 0 0 6px rgba(212, 175, 55, 0.7);
+        background: linear-gradient(180deg, var(--mhx-effect), var(--mhx-effect-dark));
+        box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.2), 0 0 8px rgba(212, 175, 55, 0.4);
+      }
+    }
+
+    & .notification-pip {
+      background: var(--mhx-gold);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--mhx-gold);
+    }
+  }
+
+  /* Every tab's panel: § 1's dark wood, framed as a recessed board;
+     parchment text in the body face (Phase 1 left it dark ink) */
+  #sidebar-content > .sidebar-tab {
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-wood-text);
+    border-radius: 0;
+    box-shadow:
+      0 0 0 1px rgba(20, 10, 4, 0.85),
+      inset 0 0 0 1px rgba(231, 209, 177, 0.08),
+      inset 0 0 22px rgba(10, 5, 2, 0.45);
+  }
+
+  /* ── Directories (actors, items, journal, scenes, tables, cards, macros,
+     playlists, compendiums) ───────────────────────────────────────────── */
+  #sidebar .directory {
+    --sidebar-separator: 1px solid var(--mhx-wood-line);
+    --sidebar-folder-color: rgba(212, 175, 55, 0.4);
+    --sidebar-entry-hover-bg: rgba(212, 175, 55, 0.12);
+    color: var(--mhx-wood-text);
+
+    /* Header buttons: the § 5 parchment keys; Create (the entry) leather */
+    & .action-buttons button {
+      height: auto;
+      min-height: 2em;
+      margin: 0;
+      padding: 0.2em 0.5em;
+      font-family: var(--mhx-font-label);
+      font-size: 1em;
+      font-weight: 600;
+      font-variant: small-caps;
+      line-height: 1.15;
+      white-space: nowrap;
+      letter-spacing: 0.05em;
+      text-transform: lowercase;
+      color: var(--mhx-ink);
+      text-shadow: var(--mhx-lift);
+      background: linear-gradient(to bottom, #f2e6c9 0%, #e2d2a8 100%);
+      border: 1px solid rgba(60, 36, 20, 0.55);
+      border-radius: 3px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 2px rgba(10, 5, 2, 0.4);
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+
+      & > i { color: var(--mhx-effect); }
+
+      &:is(:hover, :focus-visible) {
+        color: var(--mhx-effect-dark);
+        background: linear-gradient(to bottom, #f8eed4 0%, #ead9a8 100%);
+        border-color: var(--mhx-gold-ink);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 8px rgba(212, 175, 55, 0.6);
+      }
+    }
+
+    & .header-actions button.create-entry {
+      font-weight: 700;
+      color: var(--mhx-paper-hi);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(180deg, var(--mhx-effect), var(--mhx-effect-dark));
+      border-color: rgba(212, 175, 55, 0.45);
+      box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.25), 0 1px 3px rgba(10, 5, 2, 0.5);
+
+      & > i { color: var(--mhx-wood-gold); }
+
+      &:is(:hover, :focus-visible) {
+        color: #fff6dc;
+        background: linear-gradient(180deg, #8a5b3e, var(--mhx-effect));
+        border-color: var(--mhx-gold);
+        box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.3), 0 0 10px rgba(212, 175, 55, 0.7);
+      }
+    }
+
+    /* Search: a recessed field in the wood, gold focus; dim icon keys */
+    & .directory-header search input {
+      height: 1.9em;
+      padding: 0 0.5em;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-wood-text);
+      background: var(--mhx-wood-field);
+      border: 1px solid rgba(231, 209, 177, 0.22);
+      border-radius: 2px;
+      box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.5);
+      transition: border-color 0.15s, box-shadow 0.15s;
+
+      &::placeholder {
+        font-family: var(--mhx-font-label);
+        font-style: italic;
+        letter-spacing: 0.02em;
+        text-transform: none;
+        color: var(--mhx-wood-dim);
+        opacity: 0.8;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: rgba(212, 175, 55, 0.8);
+        box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.5), 0 0 6px rgba(212, 175, 55, 0.45);
+      }
+    }
+
+    & :is(.directory-header .inline-control, .folder-header .create-button) {
+      color: var(--mhx-wood-dim);
+      text-shadow: none;
+      background: none;
+      border: none;
+      box-shadow: none;
+      transition: color 0.15s, text-shadow 0.15s;
+
+      &:hover {
+        color: var(--mhx-wood-gold);
+        text-shadow: 0 0 6px rgba(212, 175, 55, 0.7);
+      }
+    }
+
+    /* Rows: faint hairlines; hover = a gold wash with an inset gold rule */
+    & .directory-item {
+      border-top: 1px solid var(--mhx-wood-line);
+    }
+
+    & .directory-item.entry {
+      transition: background 0.15s, box-shadow 0.15s;
+
+      &:hover {
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.03) 70%);
+        box-shadow: inset 2px 0 0 var(--mhx-gold);
+      }
+    }
+
+    & .directory-item .entry-name {
+      font-family: var(--mhx-font-body);
+      font-size: 1.05em;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      text-transform: none;
+      color: var(--mhx-wood-text);
+      text-shadow: 0 1px 1px rgba(10, 5, 2, 0.6);
+    }
+
+    & .directory-item.entry:hover .entry-name {
+      color: #fff2d6;
+    }
+
+    & .directory-item:is(.context, .active)::after {
+      border-color: rgba(212, 175, 55, 0.8);
+      box-shadow: inset 0 0 8px rgba(212, 175, 55, 0.3);
+    }
+
+    & .directory-item img.thumbnail {
+      border-right: 1px solid var(--mhx-wood-line);
+    }
+
+    /* Folders: the user's colour stays (inline), darkened toward the
+       wood; small caps name, gold icon, a rail down the contents */
+    & .directory-item.folder {
+      border-top-color: var(--mhx-wood-line);
+    }
+
+    & .folder-header {
+      font-family: var(--mhx-font-label);
+      font-weight: 700;
+      font-variant: small-caps;
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
+      color: #fff2d6;
+      text-shadow: 0 1px 1px rgba(10, 5, 2, 0.7);
+      background-color: #4a2f1b;
+      background-image: linear-gradient(90deg, rgba(30, 16, 6, 0.25), rgba(30, 16, 6, 0.8));
+      border-bottom: 1px solid rgba(10, 5, 2, 0.6);
+      box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.1);
+
+      & > i { color: var(--mhx-wood-gold); }
+    }
+
+    & .directory-item .subdirectory {
+      border-left-width: 2px;
+    }
+
+    & .directory-item.folder .directory-item {
+      border-left-color: var(--mhx-wood-line);
+    }
+
+    /* Footer buttons (compendium browser, etc.) */
+    & .directory-footer {
+      gap: 6px;
+      padding: 6px 8px;
+    }
+  }
+
+  /* Placeables (v14): sub-tab keys, the filter field and toggles, rows */
+  #sidebar .placeables-sidebar {
+    & > nav.tabs {
+      border-bottom: 1px solid var(--mhx-wood-line);
+    }
+
+    & :is(> nav.tabs .inline-control, search button) {
+      color: var(--mhx-wood-dim);
+      text-shadow: none;
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      box-shadow: none;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+
+      &:hover {
+        color: var(--mhx-wood-gold);
+        text-shadow: 0 0 6px rgba(212, 175, 55, 0.7);
+      }
+
+      &:is(.active, [aria-pressed=true]) {
+        color: var(--mhx-wood-gold);
+        text-shadow: 0 0 6px rgba(212, 175, 55, 0.7);
+        background: linear-gradient(180deg, var(--mhx-effect), var(--mhx-effect-dark));
+        border-color: rgba(212, 175, 55, 0.5);
+      }
+    }
+
+    & search input {
+      height: 1.9em;
+      padding: 0 0.5em;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-wood-text);
+      background: var(--mhx-wood-field);
+      border: 1px solid rgba(231, 209, 177, 0.22);
+      border-radius: 2px;
+      box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.5);
+
+      &::placeholder {
+        font-family: var(--mhx-font-label);
+        font-style: italic;
+        letter-spacing: 0.02em;
+        text-transform: none;
+        color: var(--mhx-wood-dim);
+        opacity: 0.8;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: rgba(212, 175, 55, 0.8);
+        box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.5), 0 0 6px rgba(212, 175, 55, 0.45);
+      }
+    }
+
+    & .placeable-entry {
+      border-top: 1px solid var(--mhx-wood-line);
+      transition: background 0.15s, box-shadow 0.15s;
+
+      &:hover {
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.03) 70%);
+        box-shadow: inset 2px 0 0 var(--mhx-gold);
+      }
+    }
+
+    & .placeable-entry .description {
+      font-family: var(--mhx-font-body);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      text-transform: none;
+      color: var(--mhx-wood-text);
+    }
+
+    & .placeable-entry .controls :is(button, a) {
+      color: var(--mhx-wood-dim);
+      text-shadow: none;
+      background: none;
+      border: none;
+      box-shadow: none;
+
+      &:hover { color: var(--mhx-wood-gold); }
+    }
+  }
+
+  /* Playlists: small caps headers, gold volume sliders (hairline track,
+     a brass knob) */
+  #sidebar .playlists-sidebar {
+    & :is(.global-control, .directory-list) header :is(strong, label, h4) {
+      font-family: var(--mhx-font-label);
+      font-weight: 700;
+      font-variant: small-caps;
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
+      color: var(--mhx-wood-text);
+    }
+
+    & :is(.global-control, .directory-list) button {
+      --button-text-color: var(--mhx-wood-dim);
+      --button-hover-text-color: var(--mhx-wood-gold);
+      background: none;
+      box-shadow: none;
+      text-shadow: none;
+    }
+
+    & input[type=range] {
+      appearance: none;
+      height: 1.1em;
+      background: none;
+      border: none;
+      box-shadow: none;
+      cursor: pointer;
+
+      &::-webkit-slider-runnable-track {
+        height: 2px;
+        background: linear-gradient(90deg, var(--mhx-gold), rgba(212, 175, 55, 0.3));
+        border: none;
+      }
+
+      &::-webkit-slider-thumb {
+        appearance: none;
+        width: 0.8em;
+        height: 0.8em;
+        margin-top: calc(1px - 0.4em);
+        border: 1px solid #7a5a16;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, #f5dc8a, var(--mhx-gold) 55%, #8a6a1c);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+      }
+    }
+  }
+
+  /* ── Chat: controls, input and editor menu (sidebar and the floating
+     input core shows while the chat tab is closed). The system's
+     `form button` paints these purple ─────────────────────────────────── */
+  :is(#chat, #chat-notifications) {
+    & :is(#chat-controls, .jump-to-bottom) .ui-control,
+    & .jump-to-bottom.ui-control {
+      color: var(--mhx-wood-dim);
+      text-shadow: 0 1px 1px rgba(10, 5, 2, 0.6);
+      background: rgba(40, 24, 12, 0.9);
+      border: 1px solid rgba(231, 209, 177, 0.16);
+      border-radius: 2px;
+      box-shadow: none;
+      transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+      &:hover {
+        color: #fff2d6;
+        background: rgba(74, 47, 27, 0.95);
+        border-color: rgba(212, 175, 55, 0.6);
+        box-shadow: 0 0 6px rgba(212, 175, 55, 0.35);
+      }
+
+      &[aria-pressed=true] {
+        color: var(--mhx-wood-gold);
+        text-shadow: 0 0 6px rgba(212, 175, 55, 0.7);
+        background: linear-gradient(180deg, var(--mhx-effect), var(--mhx-effect-dark));
+        border-color: rgba(212, 175, 55, 0.7);
+      }
+    }
+
+    /* Message modes: one joined strip */
+    & #message-modes .ui-control + .ui-control {
+      margin-left: -1px;
+    }
+
+    & #message-modes .ui-control[aria-pressed=true] {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Flush log: red leather on hover */
+    & #chat-controls .control-buttons .ui-control[data-action=flush]:hover {
+      color: #ffd9cf;
+      background: linear-gradient(180deg, #8a3a35, #4f1b1b);
+      border-color: #b4544c;
+      box-shadow: 0 0 6px rgba(139, 38, 53, 0.6);
+    }
+
+    /* The input: a parchment slip on the wood, brown ink, gold focus */
+    & #chat-message {
+      --text-color: var(--mhx-ink);
+      --placeholder-color: var(--mhx-ink-dim);
+      --background-color: var(--mhx-paper);
+      --border-color: rgba(60, 36, 20, 0.55);
+      --menu-background: var(--mhx-paper-hi);
+    }
+
+    & #chat-message > .editor-container {
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      background: var(--mhx-paper-art) center / 100% 100% no-repeat, var(--mhx-paper);
+      border: 1px solid rgba(20, 10, 4, 0.7);
+      border-radius: 2px;
+      box-shadow: inset 0 0 10px rgba(111, 74, 42, 0.25), 0 1px 3px rgba(10, 5, 2, 0.5);
+
+      &:focus-within {
+        border-color: var(--mhx-gold-ink);
+        box-shadow: inset 0 0 10px rgba(111, 74, 42, 0.25), 0 0 8px rgba(212, 175, 55, 0.55);
+      }
+
+      & .editor-content {
+        font-family: var(--mhx-font-body);
+        font-size: 1.05em;
+        letter-spacing: normal;
+        text-transform: none;
+        color: var(--mhx-ink);
+      }
+    }
+
+    & #chat-message > .editor-container:not(:focus-within):has(.editor-content > p:only-child > br:only-child)::after {
+      font-family: var(--mhx-font-hand);
+      font-size: 1.35em;
+      font-style: normal;
+      font-weight: normal;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink-dim);
+      opacity: 0.75;
+    }
+
+    & #chat-message .editor-menu {
+      background: var(--mhx-paper-hi);
+      border: 1px solid var(--mhx-line-faint);
+      border-radius: 2px;
+    }
+
+    & #chat-message .editor-menu button {
+      font-family: var(--mhx-font-label);
+      font-weight: 600;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink-dim);
+      text-shadow: none;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 2px;
+      box-shadow: none;
+
+      &:hover,
+      &.active {
+        color: var(--mhx-effect-dark);
+        background: rgba(212, 175, 55, 0.22);
+        border-color: rgba(168, 123, 28, 0.5);
+      }
+    }
+
+    & #chat-message .editor-menu .pm-dropdown ul {
+      background: var(--mhx-paper);
+      border: 1px solid rgba(60, 36, 20, 0.55);
+      border-radius: 2px;
+      box-shadow: 0 8px 20px rgba(20, 10, 4, 0.55);
+    }
+  }
+
+  /* ── Combat tracker ──────────────────────────────────────────────────── */
+  #sidebar .combat-sidebar {
+    & :is(.combat-tracker-header, .encounter-controls, .combat-controls) button.ui-control,
+    & .combat-control {
+      color: var(--mhx-wood-dim);
+      text-shadow: none;
+      background: transparent;
+      border-color: transparent;
+      border-radius: 2px;
+
+      &:hover {
+        color: var(--mhx-wood-gold);
+        text-shadow: 0 0 6px rgba(212, 175, 55, 0.7);
+      }
+    }
+
+    & .encounter-title,
+    & .encounters h4 {
+      font-family: var(--mhx-font-display);
+      font-weight: normal;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      color: var(--mhx-wood-text);
+      text-shadow: 0 1px 1px rgba(10, 5, 2, 0.7);
+    }
+
+    & .combat-tracker .combatant {
+      color: var(--mhx-wood-text);
+      border-top: 1px solid var(--mhx-wood-line);
+
+      &.active {
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0.22), rgba(212, 175, 55, 0.03) 70%);
+        box-shadow: inset 2px 0 0 var(--mhx-gold);
+      }
+    }
+
+    & .combat-tracker .token-name {
+      font-family: var(--mhx-font-body);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      text-transform: none;
+    }
+
+    & :is(.combat-controls button:not(.ui-control, .inline-control), .encounters button.combat-control-lg) {
+      font-family: var(--mhx-font-label);
+      font-weight: 600;
+      font-variant: small-caps;
+      letter-spacing: 0.05em;
+      text-transform: lowercase;
+      color: var(--mhx-ink);
+      text-shadow: var(--mhx-lift);
+      background: linear-gradient(to bottom, #f2e6c9 0%, #e2d2a8 100%);
+      border: 1px solid rgba(60, 36, 20, 0.55);
+      border-radius: 3px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 2px rgba(10, 5, 2, 0.4);
+
+      &:hover {
+        color: var(--mhx-effect-dark);
+        background: linear-gradient(to bottom, #f8eed4 0%, #ead9a8 100%);
+        border-color: var(--mhx-gold-ink);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 8px rgba(212, 175, 55, 0.6);
+      }
+    }
+  }
+
+  /* ── Settings tab: info card, gold-ruled headings, parchment keys ───── */
+  #sidebar .settings-sidebar {
+    & .info {
+      padding: 0.5em 0.6em;
+      background: rgba(18, 10, 4, 0.4);
+      border: 1px solid var(--mhx-wood-line);
+      border-radius: 2px;
+      box-shadow: inset 0 1px 6px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Core sets 32px, which CCTreasure wraps onto three lines */
+    & .info .title {
+      font-family: var(--mhx-font-display);
+      font-size: 1.35rem;
+      line-height: 1.15;
+      text-wrap: balance;
+      font-style: normal;
+      font-weight: normal;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      color: var(--mhx-wood-gold);
+      text-shadow: 0 1px 1px rgba(10, 5, 2, 0.7);
+      border: none;
+    }
+
+    & .info :is(.subtitle, .label, .value),
+    & .info > div * {
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-wood-text);
+    }
+
+    & .info .label {
+      font-family: var(--mhx-font-label);
+      font-weight: 700;
+      font-variant: small-caps;
+      letter-spacing: 0.05em;
+      text-transform: lowercase;
+      color: var(--mhx-wood-dim);
+    }
+
+    /* The NPC HUD's subtitle on the wood: caps, a gold lozenge, a gold
+       rule running right */
+    & h4.divider {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      margin: 0.6em 0 0.2em;
+      font-family: var(--mhx-font-label);
+      font-size: 1em;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--mhx-wood-text);
+      text-shadow: 0 1px 1px rgba(10, 5, 2, 0.7);
+
+      &::before {
+        content: "";
+        flex: none;
+        width: 0.4em;
+        height: 0.4em;
+        margin: 0 0.1em;
+        background: var(--mhx-gold);
+        box-shadow: 0 0 4px rgba(212, 175, 55, 0.6);
+        border: none;
+        transform: rotate(45deg);
+      }
+
+      &::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        margin: 0;
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0.7), transparent);
+        border: none;
+      }
+    }
+
+    & :is(button, a.button) {
+      gap: 0.6em;
+      height: 2.1em;
+      padding: 0 0.7em;
+      font-family: var(--mhx-font-label);
+      font-size: 1.05em;
+      font-weight: 600;
+      font-variant: small-caps;
+      letter-spacing: 0.05em;
+      text-transform: lowercase;
+      color: var(--mhx-ink);
+      text-shadow: var(--mhx-lift);
+      background: linear-gradient(to bottom, #f2e6c9 0%, #e2d2a8 100%);
+      border: 1px solid rgba(60, 36, 20, 0.55);
+      border-radius: 3px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 2px rgba(10, 5, 2, 0.4);
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+
+      & > i { color: var(--mhx-effect); }
+
+      &:is(:hover, :focus-visible) {
+        color: var(--mhx-effect-dark);
+        background: linear-gradient(to bottom, #f8eed4 0%, #ead9a8 100%);
+        border-color: var(--mhx-gold-ink);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 8px rgba(212, 175, 55, 0.6);
+      }
+    }
+
+    /* Log Out / Return to Setup: red leather on hover */
+    & :is(button[data-action=logout], button[data-action=setup]):is(:hover, :focus-visible) {
+      color: #fff6dc;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(180deg, #8a3a35, #4f1b1b);
+      border-color: #b4544c;
+      box-shadow: 0 0 8px rgba(139, 38, 53, 0.55);
+
+      & > i { color: #ffd9cf; }
+    }
+  }
+
+  /* ── Context menu (directories, chat cards, sheet tags and statuses):
+     a parchment card in brown ink, gold on hover, delete in red ───────── */
+  #context-menu {
+    --background-color: var(--mhx-paper);
+    --border-color: rgba(60, 36, 20, 0.55);
+    --text-color: var(--mhx-ink);
+    --hover-text-color: var(--mhx-effect-dark);
+    --group-separator: var(--mhx-line-dim);
+    --hover-entry-border: rgba(168, 123, 28, 0.5);
+    --hover-entry-background: rgba(212, 175, 55, 0.22);
+    font-family: var(--mhx-font-label);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    border-radius: 2px;
+    box-shadow: 0 8px 22px rgba(20, 10, 4, 0.6);
+    background: var(--mhx-paper-art) center / 100% 100% no-repeat, var(--background-color);
+
+    & li.context-item {
+      font-size: 1em;
+      font-weight: 600;
+      text-shadow: none;
+
+      & > i {
+        color: var(--mhx-effect);
+      }
+
+      &:hover {
+        box-shadow: inset 2px 0 0 var(--mhx-gold-ink);
+      }
+
+      /* Delete: red */
+      &:has(> i:is(.fa-trash, .fa-trash-can)):hover {
+        color: var(--mhx-adventure);
+        background: rgba(139, 38, 53, 0.12);
+        border-color: rgba(139, 38, 53, 0.45);
+        box-shadow: inset 2px 0 0 var(--mhx-adventure);
+
+        & > i { color: var(--mhx-adventure); }
+      }
+    }
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     Phase 2 is complete (§ 1 to § 7). Deliberately left as they are:
+     core and other modules' windows other than DialogV2 dialogs (their
+     title bars, AppV2 windows such as the sidebar pop-outs' frames,
+     journal sheets, settings apps), the Player HUD and NPC HUD header
+     keys (the HUD's own CSS), the scene controls / hotbar / players list
+     / navigation, and core tooltips.
+     ──────────────────────────────────────────────────────────────────────── */
 }
 
 /* § 6b: the roll window's "Wait for MC" and pending Help / Hurt breathe
