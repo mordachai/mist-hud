@@ -2727,8 +2727,9 @@
   }
 
   /* ── Story tags and statuses: the book's highlighter ───────────────────
-     Flat marker blocks in the body serif, upright (as the chat
-     modifiers): yellow story tags, green statuses, salmon for anything
+     Flat marker blocks in the body serif, italic as in the book (the
+     user, 2026-11-17; the chat modifiers stay upright): yellow story
+     tags, green statuses, salmon for anything
      selected against the roll. Selected for the roll: a charcoal rim,
      drawn inset (the system's tag cell is overflow: hidden). No bars on
      this card. */
@@ -2749,7 +2750,7 @@
     padding: 0.05em 0.35em;
     font-family: var(--mhx-font-body);
     font-size: 1.1em;
-    font-style: normal;
+    font-style: italic;
     font-weight: normal;
     line-height: 1.3;
     letter-spacing: normal;
@@ -3180,14 +3181,14 @@
      sheets do not (that block names .actor-sheet and .crew-sheet only).
 
      The danger (threat) sheet stays light (user, 2026-11-17), after the
-     core book's Danger blocks: the whole form is a torn grey-beige paper
-     scrap (ui/com_outcome_bg.webp, the chat outcome scrap, drawn with
-     border-image so the torn edges keep their size) lying on the plain
-     canvas (com_chat_BG_s). The name runs in Rift Bold caps over a heavy
-     black rule with its ★ rating after it, sub-headings are Rift caps,
-     text is the body serif, moves are bullets led by their name in bold,
-     and tags and statuses are the book's flat yellow / green highlights
-     in italics. Grit noir: one charcoal ink, no accent colours.
+     core book's Danger blocks, on the plain canvas (com_chat_BG_s). The
+     name runs in Rift Bold caps over a heavy black rule, sub-headings
+     are Rift caps, text is the body serif, and each move is a bullet led
+     by its name in bold on its own torn grey-beige paper scrap
+     (ui/com_outcome_bg.webp, the chat outcome scrap, drawn with
+     border-image so the torn edges keep their size). Tags and statuses
+     are the book's flat yellow / green highlights in italics. Grit noir:
+     one charcoal ink, no accent colours.
      ──────────────────────────────────────────────────────────────────────── */
 
   .city.sheet .threat-sheet,
@@ -3196,7 +3197,7 @@
     --mhx-black-rule:   #1f1b17;                 /* the book's heavy rule */
   }
 
-  /* ── Window: the plain canvas; the form is the torn scrap on it ────── */
+  /* ── Window: the plain canvas ───────────────────────────────────────── */
 
   .city.sheet:has(> .window-content > .threat-sheet) > .window-content {
     padding: 10px 12px 12px;
@@ -3204,12 +3205,6 @@
     background-blend-mode: normal;
   }
 
-  /* The scrap art is 485×294: its torn top (right half) and bottom edges
-     are the 34px and 50px slices, kept at natural size; the middle
-     stretches to the window. The transparent border is the scrap's
-     margin, so text never runs onto the torn edges. */
-  /* The scrap grows with its content (the window scrolls it), so the
-     torn foot always closes the text. */
   .city.sheet .window-content > form.threat-sheet {
     box-sizing: border-box;
     flex: 1 0 auto;
@@ -3220,11 +3215,23 @@
     text-transform: none;
     color: var(--mhx-ink);
     text-shadow: none;
+    background: none;
+  }
+
+  /* Limited sheet (no tabs, no moves): the whole form is one scrap. The
+     scrap art is 485×294: its torn top (right half) and bottom edges are
+     the 34px and 50px slices, kept at natural size; the middle stretches.
+     The transparent border is the scrap's margin, so text never runs
+     onto the torn edges; the form grows with its content (the window
+     scrolls it), so the torn foot always closes the text.
+     (Before the one-scrap-per-move experiment below, the danger sheet's
+     form was this scrap too: to go back, drop `:not(:has(.sheet-tabs))`
+     here and delete the experiment block.) */
+  .city.sheet .window-content > form.threat-sheet:not(:has(.sheet-tabs)) {
     border-style: solid;
     border-color: transparent;
     border-width: 28px 14px 40px 12px;
     border-image: var(--mhx-scrap) 34 8 50 6 fill / 34px 8px 50px 6px stretch;
-    background: none;
   }
 
   /* Foundry's `.flexcol > * { flex: 1 }` would stretch the header and the
@@ -3392,8 +3399,7 @@
   }
 
   /* Name row: the book's Danger title, Rift Bold caps over a heavy black
-     rule, the ★ rating after the name and the token alias small at the
-     far end */
+     rule, the token alias small at the far end */
   .city.sheet .threat-sheet header .header-row:first-child {
     align-items: center;
     padding-bottom: 0.1em;
@@ -3435,26 +3441,6 @@
     text-transform: uppercase;
     color: var(--mhx-ink-dim);
   }
-
-  /* ★ rating: the danger's size (the "Collective Size" / "Scale" the
-     locked header carries as radios), one star per point. The radios
-     only exist on the locked sheet, so the stars show there. */
-  .city.sheet .threat-sheet header .header-row:first-child::after {
-    order: 1;
-    flex: none;
-    font-family: var(--mhx-font-title);
-    font-size: 1.6em;
-    line-height: 1;
-    letter-spacing: 0.05em;
-    color: var(--mhx-ink);
-  }
-
-  .city.sheet .threat-sheet:has(input[name="system.collectiveSize"][value="1"]:checked) header .header-row:first-child::after { content: "★"; }
-  .city.sheet .threat-sheet:has(input[name="system.collectiveSize"][value="2"]:checked) header .header-row:first-child::after { content: "★★"; }
-  .city.sheet .threat-sheet:has(input[name="system.collectiveSize"][value="3"]:checked) header .header-row:first-child::after { content: "★★★"; }
-  .city.sheet .threat-sheet:has(input[name="system.collectiveSize"][value="4"]:checked) header .header-row:first-child::after { content: "★★★★"; }
-  .city.sheet .threat-sheet:has(input[name="system.collectiveSize"][value="5"]:checked) header .header-row:first-child::after { content: "★★★★★"; }
-  .city.sheet .threat-sheet:has(input[name="system.collectiveSize"][value="6"]:checked) header .header-row:first-child::after { content: "★★★★★★"; }
 
   /* Mythos ♦ Logos: the book's italic line under the title */
   .city.sheet .threat-sheet :is(input.mythos-name, input.logos-name) {
@@ -3811,6 +3797,35 @@
     color: var(--mhx-ink-dim);
   }
 
+  /* ── Experiment: one scrap per move (user, 2026-11-17) ───────────────
+     Each top-level move lies on its own torn scrap, as a clipping on the
+     page; its consequences (submoves) stay on its scrap. The bullet sits
+     inside the scrap's left margin. Self-contained: to revert, delete
+     this block and restore the danger form's scrap (see the limited
+     sheet rule under "Window"). */
+  .city.sheet .threat-sheet .gm-moves > .gm-move {
+    margin: 0 0 0.35em;
+    padding: 0 0.2em 0 1.1em;
+    border-style: solid;
+    border-color: transparent;
+    border-width: 16px 10px 22px 8px;
+    border-image: var(--mhx-scrap) 34 8 50 6 fill / 34px 8px 50px 6px stretch;
+    background-clip: padding-box;
+  }
+
+  .city.sheet .threat-sheet .gm-moves > .gm-move::before {
+    left: 0.2em;
+  }
+
+  .city.sheet .threat-sheet .gm-moves > .gm-move:is(.gmmove-select, .gmmove-edit):hover {
+    background: none;
+    filter: drop-shadow(0 1px 3px rgba(20, 16, 12, 0.45));
+  }
+
+  .city.sheet .threat-sheet .gm-moves .submove .gm-move:hover {
+    background: none;
+  }
+
   /* ── Tags and statuses: the book's italic highlights ──────────────────
      Flat yellow (story tags) and green (statuses) blocks, as on the PC
      sheet, in the body serif italic, as the book prints them in a
@@ -3840,11 +3855,6 @@
   .city.sheet .threat-sheet .gmmove-text .narrated-status-name,
   .app.dialog .dialog-content > .gmmove-section .narrated-status-name {
     --mhx-hl: var(--mhx-status);
-  }
-
-  .city.sheet .threat-sheet .story-tag-box .tag.item-entry span.flex-tag-name,
-  .city.sheet .threat-sheet .story-tag-box span.status-name {
-    font-style: italic;
   }
 
   /* ── Default (starting) tags and statuses ─────────────────────────────
