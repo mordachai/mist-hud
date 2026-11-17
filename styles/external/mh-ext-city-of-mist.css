@@ -9822,6 +9822,231 @@
     }
   }
 
+  /* ════════════════════════════════════════════════════════════════════
+     EXPERIMENT (2026-11-17, approved by the user): the book page.
+     Revert = delete this whole block, down to "END EXPERIMENT".
+
+     Reference: a page of the core book ("Character and Crew Growth"): a
+     torn paper page laid over the dark art of the facing page, the title
+     a pink neon sign on the dark, headings in Rift caps on a yellow
+     highlighter swipe over a heavy black rule, a bigger serif lead.
+
+     Applied to the light windows only: the § 4 item sheets, the § 5 and
+     § 6b dialogs and core DialogV2 (the GM move pop-up keeps its scrap,
+     the danger sheet and the § 6 windows their own art). The roots repeat
+     § 7's lists; :not(#mhx-book) lifts every rule here over § 4 to § 7.
+       - Window: the PC sheet's night (com_sheet_BG under a wash) as one
+         piece behind the title bar and a strip down the left.
+       - Body: the plain canvas starting --mhx-book-gutter in, its left
+         edge torn (an inline SVG strip: white fibre rim, soft shadow on
+         the night), a faint shadow cast by the title bar.
+       - Title: the PC name's lit neon sign (§ 2).
+       - Section headings: the book's heading. The yellow is the story
+         tag marker (an exception to grit noir's no-accent rule: the user
+         is to judge it).
+       - The first paragraph of a core dialog / the confirm text: the
+         book's bigger serif lead.
+     ════════════════════════════════════════════════════════════════════ */
+
+  .app.window-app:where(
+    .city-of-mist.sheet.item,
+    /* § 5 */
+    .dialog:has(> .window-content > .dialog-content > :is(.single-choice-box, .multi-choice-box, .themebook-selection-dialog, input.face-danger, .merge-status-dialog, .status-merge-dialog, .SHB-confirm-dialog, .Blaze-dialog)),
+    .dialog:has(> .window-content > .dialog-content > div:only-child:not([class])):has(> .window-content > .dialog-buttons > .dialog-button.yes + .dialog-button.no:last-child),
+    .dialog:not(:has(> .window-content > .dialog-content > *)):has(> .window-content > .dialog-buttons > .dialog-button.one + .dialog-button.two + .dialog-button.cancel:last-child),
+    /* § 6b */
+    .dialog:has(> .window-content > .dialog-content > :is(.roll-dialog, .roll-modifier-dialog, .tag-review, .pc-downtime-selector, .downtime-dialog, textarea.narrator-text)),
+    .dialog:has(> .window-content > .dialog-content > div > :is(.string-input, .number-input, .boolean-input)),
+    .dialog:has(> .window-content > .dialog-content > form .slidecontainer > input.HelpHurt),
+    .dialog:has(> .window-content > .dialog-buttons > .dialog-button.none + .dialog-button:is(.help, .hurt))
+  ):not(#mhx-book),
+  .application.dialog:not(#mhx-book) {
+    --mhx-book-gutter: 22px;                            /* the night strip left of the page */
+    --mhx-book-torn: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='240'><defs><linearGradient id='f'><stop offset='0.5' stop-color='%23fbf8f2'/><stop offset='1' stop-color='%23f5f0e6' stop-opacity='0'/></linearGradient><filter id='s' x='-1' y='-0.1' width='3' height='1.2'><feDropShadow dx='-1.5' dy='0.5' stdDeviation='1.2' flood-color='%23000' flood-opacity='0.7'/></filter></defs><path d='M18 0 L5 0 L4.3 4 L2.0 7 L2.2 14 L1.9 21 L3.0 28 L4.5 31 L3.2 34 L4.5 41 L2.4 48 L5.9 52 L8.1 59 L5.6 66 L8.3 69 L5.4 72 L3.5 76 L5.3 80 L3.7 87 L2.8 96 L5.5 103 L4.1 107 L6.5 114 L1.9 121 L5.0 125 L4.5 132 L4.8 137 L4.0 143 L7.1 147 L7.0 156 L5.5 159 L5.0 166 L6.6 171 L5.8 176 L2.3 179 L2.7 185 L2.6 190 L4.5 196 L2.0 205 L5.5 212 L3.9 217 L5.7 222 L7.1 229 L7.4 232 L4.8 237 L5 240 L18 240 Z' fill='url(%23f)' filter='url(%23s)'/></svg>");
+
+    /* ── The night: one piece behind the title bar and the strip ───────── */
+    background:
+      linear-gradient(180deg, rgba(10, 6, 16, 0.5), rgba(4, 2, 8, 0.72)),
+      var(--mhx-night-art) 15% 30% / cover no-repeat,
+      var(--mhx-night-base);
+
+    & > .window-header {
+      background: linear-gradient(180deg, rgba(4, 2, 8, 0.5), rgba(4, 2, 8, 0.1));
+      box-shadow: none;
+    }
+
+    /* The title: the PC name's neon sign */
+    & > .window-header .window-title {
+      font-size: 1.3em;
+      letter-spacing: 0.07em;
+      color: #ffe6f5;
+      -webkit-text-fill-color: #ffe6f5;
+      text-shadow:
+        0 0 2px #ff2aa6,
+        0 0 8px rgba(255, 42, 166, 0.75),
+        0 0 18px rgba(255, 42, 166, 0.4),
+        1px 2px 0 #0c0616;
+    }
+
+    /* ── The page: canvas from the gutter on, torn left edge ───────────── */
+    & > .window-content {
+      padding-left: calc(var(--mhx-book-gutter) + 1.1em);
+      background:
+        /* the title bar's shadow on the page */
+        linear-gradient(180deg, rgba(10, 6, 16, 0.28), transparent 7px) var(--mhx-book-gutter) 0 / 100% 100% no-repeat,
+        var(--mhx-book-torn) calc(var(--mhx-book-gutter) - 10px) 0 / 18px 240px repeat-y,
+        var(--mhx-paper-art) var(--mhx-book-gutter) 0 / cover no-repeat,
+        linear-gradient(90deg, transparent var(--mhx-book-gutter), var(--mhx-paper-hi) var(--mhx-book-gutter));
+    }
+
+    /* The title centred in the strip, as the book's sign (user) */
+    & > .window-header .window-title {
+      text-align: center;
+    }
+
+    /* Dialogs carry only Close: centre on the whole bar, padded on both
+       sides so a long title stops short of the key (item sheets, with
+       several keys, keep the title in the space left of them) */
+    &.dialog > .window-header {
+      position: relative;
+    }
+
+    &.dialog > .window-header .window-title {
+      position: absolute;
+      inset: 0 0 auto 0;
+      padding: 0 5.5em;
+      pointer-events: none;
+    }
+
+    /* (the title left the row: push the keys back to the right) */
+    &.dialog > .window-header > .window-title + * {
+      margin-left: auto;
+    }
+
+    /* ── Dialog text a size up (user): labels, fields, number boxes ───── */
+    & .dialog-content label:not(:where(br + label:has(+ input.status-selector))) {
+      font-size: 1em;
+    }
+
+    & .dialog-content :is(input:not([type]), input[type=text], input[type=string], select, textarea):not(:where(.status-name, .status-name-input, .key-name > input, .move-select)) {
+      font-size: 1.1em;
+    }
+
+    & .dialog-content input[type=number]:not(:where(range-picker input)) {
+      height: 2em;
+      width: 3.2em;
+      line-height: normal;
+      font-size: 1.2em;
+    }
+
+    /* ── Headings: the book's, Rift caps on a yellow swipe, heavy rule ─── */
+    & :is(
+      .merge-status-dialog > label,
+      .tag-review > .move-name,
+      .pc-downtime-selector > .header,
+      .downtime-dialog > .gmmove-type-label,
+      .window-content > form :is(.description-header, .move-list-header, .improvement-name-send, h1:not(.item-name, .charname, .localename))
+    ) {
+      width: fit-content;
+      max-width: 100%;
+      padding: 0.14em 0.35em 0.06em 0.2em;
+      font-size: 1.45em;
+      line-height: 1.05;
+      letter-spacing: 0.02em;
+      background: linear-gradient(177deg, transparent 0 12%, var(--mhx-storytag) 15% 92%, transparent 94%) no-repeat;
+      border-bottom: 4px solid var(--mhx-black-rule);
+    }
+
+    /* Make Roll: the move picker is the page's heading (the book's,
+       sized to the move name), its rule replacing the hairline below */
+    & form.roll-modifier-dialog > select.move-select {
+      justify-self: start;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      margin: 0.1em 0 0.35em;
+      padding: 0.12em 1.6em 0.04em 0.2em;
+      font-size: 1.75em;
+      line-height: 1.05;
+      letter-spacing: 0.02em;
+      color: var(--mhx-ink);
+      background:
+        linear-gradient(177deg, transparent 0 12%, var(--mhx-storytag) 15% 92%, transparent 94%) no-repeat;
+      border: none;
+      border-bottom: 4px solid var(--mhx-black-rule);
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    /* Its open list: back to body size (the options inherit the
+       heading's 1.75em), the picked move charcoal, not the OS blue */
+    & form.roll-modifier-dialog > select.move-select option {
+      font-size: 0.6em;
+      letter-spacing: normal;
+      color: var(--mhx-ink);
+      background: var(--mhx-paper-hi);
+    }
+
+    & form.roll-modifier-dialog > select.move-select option:checked {
+      color: var(--mhx-paper-hi);
+      background: var(--mhx-charcoal);
+    }
+
+    & form.roll-modifier-dialog > select.move-select + hr {
+      display: none;
+    }
+
+    /* Roll window: Roll Bonus and Effect become the page's heading, each
+       label + figure on the book's yellow swipe over its heavy rule,
+       instead of § 6b's readout boxes; the rule replaces the hairline */
+    & form.roll-dialog > section.header {
+      grid-template-columns: max-content max-content;
+      justify-content: start;
+      column-gap: 1.4em;
+      margin: 0.1em 0 0.3em;
+    }
+
+    & form.roll-dialog > section.header > div:not([class]) {
+      align-items: baseline;
+      justify-content: flex-start;
+      gap: 0.4em;
+      padding: 0.1em 0.35em 0.02em 0.2em;
+      background:
+        linear-gradient(177deg, transparent 0 12%, var(--mhx-storytag) 15% 92%, transparent 94%) no-repeat;
+      border: none;
+      border-bottom: 4px solid var(--mhx-black-rule);
+      border-radius: 0;
+      box-shadow: none;
+
+      & .dialog-label {
+        font-family: var(--mhx-font-title);
+        font-size: 1.35em;
+        font-weight: normal;
+        letter-spacing: 0.02em;
+        color: var(--mhx-ink);
+      }
+
+      & :is(.roll-bonus, .move-effect) {
+        font-size: 2em;
+        text-shadow: none;
+      }
+    }
+
+    & form.roll-dialog > section.header + hr {
+      display: none;
+    }
+
+    /* ── The lead: the book's bigger serif first paragraph ─────────────── */
+    & > .window-content > .dialog-content > p:first-child,
+    & > .window-content > .dialog-content > div:only-child:not([class]),
+    &:not(:has(> .window-content > .dialog-content > *)) > .window-content > .dialog-content {
+      font-size: 1.2em;
+      line-height: 1.3;
+    }
+  }
+
+  /* ═══ END EXPERIMENT: the book page ═══════════════════════════════════ */
+
   /* ────────────────────────────────────────────────────────────────────────
      Phase 2 is complete (§ 1 to § 7). Deliberately left as they are:
      core and other modules' windows other than DialogV2 dialogs (their
