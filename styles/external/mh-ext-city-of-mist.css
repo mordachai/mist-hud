@@ -2267,6 +2267,21 @@
     font-style: italic;
   }
 
+  /* Power and weakness tags on the theme cards: the band's theme type
+     face, Fira Sans Extra Condensed 400 ITALIC as the band (the upright
+     face draws a different, double-storey "a"), thinner than Roboto
+     Condensed (user, 2026-11-17). The system loads it at 400 and 900
+     only. */
+  .city.sheet .flip-card .theme-block .tag.item-entry span.flex-tag-name,
+  .city.sheet .flip-card .theme-block .tag.item-entry span.flex-tag-name:is(.positive-selected, .negative-selected),
+  .city.sheet .item-selection-context .flip-card .theme-block .tag.item-entry span.flex-tag-name.active-tag:hover {
+    font-family: var(--mhx-font-label);
+    font-size: 1.15em;
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
   .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) .story-tag-location {
     font-family: var(--mhx-font-body);
     font-size: 0.75em;
@@ -2669,11 +2684,19 @@
     box-shadow: 0 0 6px rgba(31, 27, 23, 0.25);
   }
 
+  /* Fira italic, as the band label and the theme card tags (user,
+     2026-11-17). Centred in the box both ways: city.css's height 100%
+     and 50% padding would pin it to the top. */
   .city.sheet .empty-extra-placeholder-text {
-    font-family: var(--mhx-font-type);
-    font-size: 0.9em;
-    font-weight: bold;
-    letter-spacing: 0.08em;
+    height: auto;
+    margin: auto;
+    padding: 0 1em;
+    font-family: var(--mhx-font-label);
+    font-size: 1.05em;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     text-align: center;
   }
@@ -2869,6 +2892,103 @@
     flex: 1;
     height: 1px;
     background: linear-gradient(90deg, var(--mhx-line), transparent);
+  }
+
+  /* ── Clues / Juice card (juice-clues-card.hbs, no Loadout) ─────────────
+     The same neutral card; its h2 title takes the Story Tags band (the
+     card's kind glyph on the left, as the tracking cards: magnifying
+     glass for clues, bolt for juice) and the list keeps the card's
+     10px side padding. */
+  .city.sheet .flip-card .story-tag-box > h2.section-name {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    right: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.35em;
+    height: var(--mhx-band);
+    margin: 0;
+    padding: 0 10px 0 38px;
+    font-family: var(--mhx-font-title);
+    font-size: 19px;
+    font-style: italic;
+    font-weight: normal;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    text-align: left;
+    white-space: nowrap;
+    color: whitesmoke;
+    text-shadow: var(--mist-dark-color, #466a81) 1px 1px, 0 0 4px rgba(0, 0, 0, 0.45);
+    border: none;
+    background: var(--mhx-theme-bg) center top / 100% auto no-repeat;
+    background-origin: border-box;
+  }
+
+  .city.sheet .flip-card .story-tag-box > h2.section-name::before {
+    content: "\f002";
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    width: 21px;
+    transform: translateY(-50%);
+    font: var(--fa-font-solid);
+    font-size: 18px;
+    text-align: center;
+    color: whitesmoke;
+    text-shadow: 1px 0 3px var(--mist-dark-color, #466a81);
+    pointer-events: none;
+  }
+
+  .city.sheet .flip-card .juice-list-section.story-tag-box > h2.section-name::before {
+    content: "\f0e7";
+  }
+
+  .city.sheet .flip-card .story-tag-box > h2.section-name > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+  }
+
+  .city.sheet .flip-card .story-tag-box > h2.section-name > span.flip-button {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .city.sheet .flip-card .story-tag-box > h2.section-name :is(a, span[title] > i) {
+    font-size: 0.72em;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  .city.sheet .flip-card .story-tag-box > h2.section-name a:hover {
+    color: #fff;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  }
+
+  .city.sheet .flip-card .story-tag-box > :is(.clues-list, .juice-list) {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0;
+    padding: 0.3em 10px 0.2em;
+    overflow: hidden auto;
+    scrollbar-width: none;
+  }
+
+  .city.sheet .flip-card .story-tag-box > :is(.clues-list, .juice-list)::-webkit-scrollbar {
+    display: none;
+  }
+
+  .city.sheet .flip-card .story-tag-box > :is(.clues-list, .juice-list) > .flex-row {
+    align-items: center;
+    gap: 0.35em;
+    min-height: 1.5em;
+    margin: 3px 0;
   }
 
   /* ── Story tags and statuses: the book's highlighter ───────────────────
