@@ -6918,9 +6918,19 @@
       text-shadow: 0 0 4px rgba(31, 27, 23, 0.35);
     }
 
+    /* Not selected: a faded highlight and dimmed ink, so the tags and
+       statuses in the roll stand out; hover (above) shows it in full. The
+       row in the :is() lifts it above the row rules' (0,6,1). */
+    & .item-selection-context :is(.tag.item-entry span.flex-tag-name.story-tag, .status-line span.status-name):not(.positive-selected, .negative-selected, .burn-level-2, .burn-level-3, .burn-level-4, :hover) {
+      color: color-mix(in srgb, var(--mhx-hl-text) 60%, transparent);
+      background: color-mix(in srgb, var(--mhx-hl) 40%, transparent);
+    }
+
     /* Selected for the roll, as the § 2 story tag card: bold, a charcoal
-       rim drawn inset; salmon against the roll */
-    & :is(span.flex-tag-name.story-tag, span.status-name):is(.positive-selected, .negative-selected) {
+       rim drawn inset; salmon against the roll. The row in the :is()
+       lifts it above the story tag rule (.tag.item-entry …, (0,6,1)),
+       which otherwise kept selected tags plain yellow. */
+    & :is(.tag.item-entry span.flex-tag-name.story-tag, .status-line span.status-name):is(.positive-selected, .negative-selected) {
       margin: 0;
       padding: 0.05em 0.35em;
       font-weight: bold;
@@ -6931,7 +6941,7 @@
       box-shadow: inset 0 0 0 1.5px var(--mhx-ink);
     }
 
-    & :is(span.flex-tag-name.story-tag, span.status-name).negative-selected {
+    & :is(.tag.item-entry span.flex-tag-name.story-tag, .status-line span.status-name).negative-selected {
       --mhx-hl: var(--mhx-negative);
     }
 
