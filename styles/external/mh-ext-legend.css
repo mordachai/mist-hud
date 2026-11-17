@@ -322,7 +322,9 @@
      The dialogs (§ 5) put it on the status name fields of the drop,
      merge and + / − dialogs, and on the drop dialog's existing statuses.
      § 6 puts it on the Scene Tags window, the status tracker and the
-     token tooltip (the last selector of each list). */
+     token tooltip; § 6b on the roll and tag review chips, the GM
+     downtime moves' text and the tag / status creation name field (the
+     last selectors of each list). */
   .city-of-mist.sheet.item .window-content > form.tag-sheet:has(> input[name="system.temporary"]) > input[name=name],
   .city-of-mist.sheet.item .window-content > form.status-sheet > input[name=name],
   .app.dialog .dialog-content:has(> input.face-danger) > :is(input.status-name, br + label:has(+ input.status-selector)),
@@ -335,7 +337,11 @@
   .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.flex-tag-name.story-tag,
   .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.status-name,
   :is(.app.story-tag-window, .app[id="city-of-mist-tracker-app"], .city-of-mist--tooltip) span.flex-tag-name.story-tag,
-  :is(.app.story-tag-window, .app[id="city-of-mist-tracker-app"], .city-of-mist--tooltip) span.status-name {
+  :is(.app.story-tag-window, .app[id="city-of-mist-tracker-app"], .city-of-mist--tooltip) span.status-name,
+  .app.dialog .dialog-content :is(.modifier-list, .tag-review) span.flex-tag-name.story-tag,
+  .app.dialog .dialog-content :is(.modifier-list, .tag-review) span.status-name,
+  .app.dialog .dialog-content > .downtime-dialog .gmmove-text :is(.narrated-story-tag, .narrated-status-name),
+  .app.dialog .dialog-content > div > .string-input.key-name > input {
     --mhx-hl: var(--mhx-storytag);
     --mhx-hl-h: 72%;
     --mhx-hl-bg:
@@ -372,7 +378,10 @@
   .app.dialog .dialog-content > .gmmove-section .narrated-status-name,
   .city.sheet .threat-sheet .default-tags-and-statuses .list-item :is(input.default-status, .inherited-status),
   .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.status-name,
-  :is(.app.story-tag-window, .app[id="city-of-mist-tracker-app"], .city-of-mist--tooltip) span.status-name {
+  :is(.app.story-tag-window, .app[id="city-of-mist-tracker-app"], .city-of-mist--tooltip) span.status-name,
+  .app.dialog .dialog-content :is(.modifier-list, .tag-review) span.status-name,
+  .app.dialog .dialog-content > .downtime-dialog .gmmove-text .narrated-status-name,
+  .app.dialog .dialog-content > div:has(> .key-tier) > .string-input.key-name > input {
     --mhx-hl: var(--mhx-status);
   }
 
@@ -6285,4 +6294,1278 @@
     }
   }
 
+  /* ────────────────────────────────────────────────────────────────────────
+     § 6b. Roll and chat dialogs
+     The system's V1 Dialogs that aren't opened from a sheet:
+       RollDialog ...................... dialogs/roll-dialog.html
+         (the roll window before a move: Roll Bonus / Effect readouts, the
+         tags and statuses in use, Custom Modifier, Allow Dynamite, the
+         effect slider, Burn Tag)
+       CityDialogs.getRollModifierBox .. dialogs/roll-modification-dialog.html
+         ("Make Roll": the chat card's Edit Roll, GM only)
+       HTMLTools.dynamicDialog ......... (no template) tag / status creation
+         from chat: getTagCreationData, getStatusData
+       CityDialogs.getHelpHurt ......... dialogs/get-help-hurt-initial.hbs
+       CityDialogs.chooseHelpHurt ...... dialogs/get-help-hurt-selector.hbs
+       TagReviewDialog (tagReview) ..... dialogs/tag-review.hbs
+       CityDialogs.downtimePCSelector .. dialogs/pc-downtime-chooser-otherscape.hbs
+         (Legend uses the Otherscape chooser)
+       CityDialogs.downtimeGMMoveDialog  dialogs/downtime-GM-moves.hbs
+       CityDialogs.narratorDialog ...... (no template) the GM narration box
+     GMMoveTextBox is the § 3 GM move pop-up and keeps that look.
+     downtimeGMMoveSelector renders gm-move-chooser.hbs but never shows it.
+
+     Mirrors § 6b of mh-ext-otherscape.css (same root, same structure).
+     Matched by content, as in § 5: a template class, dynamicDialog's
+     .string-input / .number-input / .boolean-input rows, the Help / Hurt
+     slider, or the help prompt's none + help / hurt buttons. § 5's
+     dialogs, the § 3 pop-up, core and other modules never match. Each
+     branch's :has() stays on one line. The root holds its own copies of
+     the § 3 / § 4 / § 5 tokens and the moss scrollbars (those lists
+     don't include it).
+
+     Same language as § 5: the book page (bg3-litm) as the window, small
+     brown Labrada caps labels, parchment fields in brown ink with a gold
+     focus, the NPC HUD's left subtitle as headings, the § 3 pop-up's
+     parchment keys with the confirming one in leather (Hurt in red
+     leather). Readouts are the chat card's heavy Labrada figures. Story
+     tags and statuses are in the highlighter (shared block above § 1);
+     power and weakness tags are the chat card's modifiers: handwriting
+     on the HUD's select bars (§ 1).
+     ──────────────────────────────────────────────────────────────────────── */
+
+  .app.dialog:is(
+    :has(> .window-content > .dialog-content > :is(
+      .roll-dialog, .roll-modifier-dialog, .tag-review,
+      .pc-downtime-selector, .downtime-dialog, textarea.narrator-text
+    )),
+    /* dynamicDialog (tag / status creation) */
+    :has(> .window-content > .dialog-content > div > :is(.string-input, .number-input, .boolean-input)),
+    /* chooseHelpHurt */
+    :has(> .window-content > .dialog-content > form .slidecontainer > input.HelpHurt),
+    /* getHelpHurt (one line: a line break here would be a descendant combinator) */
+    :has(> .window-content > .dialog-buttons > .dialog-button.none + .dialog-button:is(.help, .hurt))
+  ) {
+    --mhx-npc-sub:     var(--effects-color1, #724a32);    /* as § 3 */
+    --mhx-npc-rule:    var(--effects-color3, #752b2b);
+    --mhx-threat-art:  url(/modules/mist-hud/ui/bg2-litm.webp);
+    --mhx-threat-name: url(/modules/mist-hud/ui/litm-threat-name-bg.svg);
+    --mhx-item-accent: var(--mhx-effect);                 /* as § 4 */
+    --mhx-field-bg:    rgba(255, 250, 238, 0.7);
+    /* The confirming key's leather (as § 5) */
+    --mhx-key-top:     var(--mhx-effect);
+    --mhx-key-bottom:  var(--mhx-effect-dark);
+    --mhx-key-hover:   #8a5b3e;
+    /* Review states: approve moss green, query gold, reject the
+       Adventure red */
+    --mhx-ok:          var(--mhx-origin);
+    --mhx-ask:         var(--mhx-gold-ink);
+    --mhx-no:          var(--mhx-adventure);
+    --color-scrollbar:       var(--scrollbar-thumb-color, #4f7354);
+    --color-scrollbar-track: transparent;
+
+    &, & * {
+      scrollbar-color: var(--scrollbar-thumb-color, #4f7354) transparent;
+    }
+
+    /* ── Window body: the book page, as § 5 ───────────────────────────── */
+    & .window-content {
+      gap: 0.6em;
+      padding: 0.8em 1.2em 0.9em 1.1em;
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: url(/modules/mist-hud/ui/bg3-litm.webp) center / 100% 100% no-repeat, var(--mhx-paper);
+      background-blend-mode: normal;
+    }
+
+    & .dialog-content {
+      font-family: var(--mhx-font-body);
+      font-size: 1.05em;
+      line-height: 1.4;
+      color: var(--mhx-ink);
+    }
+
+    & .dialog-content form {
+      margin: 0;
+      font-family: var(--mhx-font-body);
+      color: var(--mhx-ink);
+    }
+
+    /* ── Labels: small brown Labrada caps (as § 5) ────────────────────── */
+    & .dialog-content :is(label, .dialog-label) {
+      font-family: var(--mhx-font-label);
+      font-size: 0.85em;
+      font-weight: 700;
+      font-style: normal;
+      line-height: 1.2;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      text-transform: uppercase;
+      color: var(--mhx-npc-sub);
+      text-shadow: none;
+    }
+
+    /* ── Fields: parchment, brown ink, gold focus (as § 5)
+       The tag / status name field is left to the highlighter (below). */
+    & .dialog-content :is(input:not([type]), input[type=text], input[type=number], select, textarea):not(:where(.key-name > input)) {
+      height: 2em;
+      margin: 0;
+      padding: 0 0.5em;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      font-weight: normal;
+      font-style: normal;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: var(--mhx-field-bg);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 2px;
+      box-shadow: none;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    & .dialog-content input[type=number] {
+      width: 3.6em;
+      padding: 0 0.3em;
+      font-family: var(--mhx-font-label);
+      font-weight: 700;
+      font-variant-numeric: lining-nums;
+      text-align: center;
+    }
+
+    & .dialog-content :is(input, select, textarea):focus {
+      border-color: var(--mhx-gold-ink);
+      box-shadow: 0 0 6px rgba(212, 175, 55, 0.55);
+    }
+
+    & .dialog-content :is(input, textarea)::placeholder {
+      color: var(--mhx-ink-dim);
+      opacity: 0.55;
+    }
+
+    & .dialog-content select option {
+      color: var(--mhx-ink);
+      background: var(--mhx-paper);
+    }
+
+    /* Checkbox / radio: a parchment square (radio: round) in brown ink
+       that fills with the accent when checked (as § 5) */
+    & .dialog-content input:is([type=checkbox], [type=radio]) {
+      appearance: none;
+      flex: none;
+      width: 1.05em;
+      height: 1.05em;
+      margin: 0;
+      padding: 0;
+      vertical-align: -0.15em;
+      cursor: pointer;
+      border: 1.5px solid var(--mhx-line);
+      border-radius: 2px;
+      background: var(--mhx-field-bg);
+      box-shadow: none;
+      transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+    }
+
+    & .dialog-content input[type=radio] {
+      border-radius: 50%;
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio]):hover {
+      box-shadow: 0 0 5px rgba(212, 175, 55, 0.75);
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio]):checked {
+      border-color: var(--mhx-item-accent);
+      background: var(--mhx-item-accent);
+      box-shadow: inset 0 0 0 2px var(--mhx-paper-hi);
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio]):checked:hover {
+      box-shadow: inset 0 0 0 2px var(--mhx-paper-hi), 0 0 5px rgba(212, 175, 55, 0.75);
+    }
+
+    & .dialog-content input:is([type=checkbox], [type=radio])::before,
+    & .dialog-content input:is([type=checkbox], [type=radio])::after {
+      display: none;
+    }
+
+    /* Sliders (effect penalty, Help / Hurt amount): the § 5 tier slider,
+       a brown ink rule and a leather thumb */
+    & .dialog-content input[type=range] {
+      appearance: none;
+      flex: 1;
+      width: auto;
+      min-width: 0;
+      height: 1.2em;
+      margin: 0;
+      opacity: 1;
+      background: none;
+      border: none;
+      box-shadow: none;
+      cursor: pointer;
+    }
+
+    & .dialog-content input[type=range]::-webkit-slider-runnable-track {
+      height: 2px;
+      background: linear-gradient(90deg, var(--mhx-line), var(--mhx-line-faint));
+    }
+
+    & .dialog-content input[type=range]::-webkit-slider-thumb {
+      appearance: none;
+      width: 0.65em;
+      height: 1.15em;
+      margin-top: calc(1px - 0.575em);
+      border: none;
+      border-radius: 2px;
+      background: linear-gradient(180deg, var(--mhx-key-top), var(--mhx-key-bottom));
+      box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.25), 0 1px 2px rgba(60, 36, 20, 0.45);
+    }
+
+    & .dialog-content input[type=range]:is(:hover, :focus)::-webkit-slider-thumb {
+      box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.3), 0 0 6px rgba(212, 175, 55, 0.8);
+    }
+
+    & .dialog-content hr {
+      height: 1px;
+      margin: 0.35em 0;
+      border: none;
+      background: linear-gradient(90deg, var(--mhx-line-dim), transparent 85%);
+    }
+
+    /* ── Buttons: the § 3 pop-up's parchment keys; the confirming one the
+       Execute button's leather (as § 5). They wrap instead of truncating. */
+    & .dialog-buttons {
+      flex: none;
+      gap: 0.5em;
+      margin-top: 0.2em;
+    }
+
+    & .dialog-buttons .dialog-button {
+      height: auto;
+      min-height: 2.1em;
+      margin: 0;
+      padding: 0.25em 0.6em;
+      line-height: 1.15;
+      white-space: normal;
+      font-family: var(--mhx-font-label);
+      font-size: 1em;
+      font-weight: 600;
+      font-variant: small-caps;
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
+      color: var(--mhx-ink);
+      text-shadow: var(--mhx-lift);
+      background: linear-gradient(to bottom, #f2e6c9 0%, #e2d2a8 100%);
+      border: 1px solid var(--mhx-line-dim);
+      border-radius: 3px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 2px rgba(60, 36, 20, 0.2);
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+    }
+
+    & .dialog-buttons .dialog-button:is(:hover, :focus-visible) {
+      color: var(--mhx-effect-dark);
+      background: linear-gradient(to bottom, #f8eed4 0%, #ead9a8 100%);
+      border-color: var(--mhx-gold-ink);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 6px rgba(212, 175, 55, 0.6);
+    }
+
+    /* Confirm / OK / Add / Close / Help; Hurt the same in red leather */
+    & .dialog-buttons .dialog-button:is(.one, .okay, .Okay, .help, .hurt) {
+      font-weight: 700;
+      color: var(--mhx-paper-hi);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(180deg, var(--mhx-key-top), var(--mhx-key-bottom));
+      border: none;
+      border-radius: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.25), 0 1px 3px rgba(60, 36, 20, 0.4);
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+
+      &:is(:hover, :focus-visible) {
+        color: #fff6dc;
+        background: linear-gradient(180deg, var(--mhx-key-hover), var(--mhx-key-top));
+        box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.3), 0 0 10px rgba(212, 175, 55, 0.7);
+      }
+    }
+
+    & .dialog-buttons .dialog-button.hurt {
+      --mhx-key-top:    #8a3a35;    /* as § 5's Stop Holding Back */
+      --mhx-key-bottom: #4f1b1b;
+      --mhx-key-hover:  #a04640;
+    }
+
+    /* Roll window's Confirm while the MC reviews the tags ("Wait for MC"):
+       a pale parchment key that breathes */
+    & .dialog-buttons .dialog-button.one:is(.disabled, :disabled) {
+      cursor: default;
+      color: var(--mhx-ink-dim);
+      text-shadow: var(--mhx-lift);
+      background: linear-gradient(to bottom, #efe3c5 0%, #e0cfa3 100%);
+      box-shadow: inset 0 0 0 1px var(--mhx-line-dim);
+      animation: mhx-dlg-wait 1.6s ease-in-out infinite;
+    }
+
+    /* ── Section headings: the NPC HUD's left subtitle (as § 3 and § 5),
+       brown Labrada caps and a 2px dark red rule running right ───────── */
+    & :is(.tag-review > .move-name, .pc-downtime-selector > .header, .downtime-dialog > .gmmove-type-label) {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      margin: 0;
+      padding: 0;
+      font-family: var(--mhx-font-label);
+      font-size: 1.05em;
+      font-weight: 800;
+      line-height: 1.3;
+      letter-spacing: 0.1em;
+      text-align: left;
+      text-decoration: none;
+      text-transform: uppercase;
+      color: var(--mhx-npc-sub);
+      text-shadow: 1px 1px 2px rgba(255, 249, 249, 0.9);
+      background: none;
+      border: none;
+    }
+
+    & :is(.tag-review > .move-name, .pc-downtime-selector > .header, .downtime-dialog > .gmmove-type-label)::after {
+      content: "";
+      flex: 1;
+      min-width: 1em;
+      height: 2px;
+      opacity: 0.75;
+      background: var(--mhx-npc-rule);
+    }
+
+    /* ── Tag / status chips (roll window, tag review) ─────────────────────
+       Story tags and statuses: the highlighter (shared block above § 1),
+       as wide as their name. Power and other theme tags: the chat card's
+       modifiers, handwriting on the HUD's cream select bar; weakness tags
+       on its pink bar. States only swap --mhx-hl / --mhx-hl-h (stroke)
+       or --mhx-chip-bar (bar). */
+    & :is(.modifier-list, .tag-review) {
+      & span.tag-name-block {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3em;
+        min-width: 0;
+        margin: 0;
+        font-size: 1em;
+      }
+
+      & span.tag-symbols {
+        display: inline-flex;
+        gap: 0.25em;
+        width: auto;
+        min-width: 0;
+        max-width: none;
+        font-size: 0.75em;
+      }
+
+      & span.tag-symbols a,
+      & .status-name-block > a {
+        color: var(--mhx-ink-dim);
+        text-shadow: none;
+      }
+
+      & span.tag-symbols a.power-tag-icon {
+        color: var(--mhx-effect);
+      }
+
+      & span.tag-symbols a:has(> .fa-angle-double-down) {
+        color: var(--adventure-dark-color, #4a1319);
+      }
+
+      /* Type icons go: the chip says which it is. Other markers (power
+         bolt, weakness chevrons, hidden, temporary…) stay. */
+      & span.tag-symbols a:has(> .fa-tag),
+      & .status-name-block > a:has(> .fa-life-ring) {
+        display: none;
+      }
+
+      /* Cell left with only the story tag icon: gone too (one :has(): it
+         can't be nested) */
+      & span.tag-symbols:not(:has(> a > i:not(.fa-tag))) {
+        display: none;
+      }
+
+      /* Wrappers: no highlight of their own (a global .positive-selected
+         rule paints a pale gradient on the .tag inside); the chip has it */
+      & :is(.tag, .status),
+      & .selected-list > .flex-row-center > div:is(.positive-selected, .negative-selected) {
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        background: none;
+        border: none;
+        box-shadow: none;
+      }
+
+      & .status-name-block {
+        display: inline-flex;
+        flex: none;
+        align-items: center;
+        gap: 0.3em;
+        font-size: 1em;
+      }
+
+      /* One line: Chrome sizes the italic names about 1px short, which
+         wraps them (or trips an ellipsis), so they don't wrap and don't
+         clip; the row clips a really long name instead */
+      & :is(span.flex-tag-name, span.status-name) {
+        flex: 0 0 auto;
+        min-width: 0;
+        white-space: nowrap;
+        text-decoration: none;
+        outline: none;
+        box-shadow: none;
+        filter: none;
+        transition: filter 0.15s;
+      }
+
+      /* Story tags and statuses: the stroke at rest (the system's own
+         selection classes on the span don't count here) */
+      & :is(span.flex-tag-name.story-tag, span.status-name) {
+        --mhx-hl-h: 72%;
+        margin: 0;
+        padding: 0 0.3em;
+        font-size: 1.05em;
+        font-weight: 700;
+        line-height: 1.35;
+        color: var(--mhx-tag-text);
+        -webkit-text-fill-color: var(--mhx-tag-text);
+        border-radius: var(--mhx-hl-radius);
+        background: var(--mhx-hl-bg);
+      }
+
+      & span.status-name {
+        --mhx-hl: var(--mhx-status);
+      }
+
+      /* Power and other theme tags: the chat card's modifier bar */
+      & span.flex-tag-name:not(.story-tag) {
+        --mhx-chip-bar: var(--mhx-bar);
+        margin: 0;
+        padding: 0 9px;
+        font-family: var(--mhx-font-hand);
+        font-size: 1.3em;
+        font-weight: 600;
+        font-style: normal;
+        line-height: 1.25;
+        letter-spacing: normal;
+        text-transform: none;
+        color: var(--mhx-tag-text);
+        -webkit-text-fill-color: var(--mhx-tag-text);
+        text-shadow: none;
+        border: none;
+        border-radius: 0;
+        background: var(--mhx-chip-bar) center / 100% 100% no-repeat;
+      }
+
+      & span.flex-tag-name.weakness-tag {
+        --mhx-chip-bar: var(--mhx-bar-weakness);
+        color: var(--adventure-dark-color, #4a1319);
+        -webkit-text-fill-color: var(--adventure-dark-color, #4a1319);
+      }
+
+      & .story-tag-location {
+        font-family: var(--mhx-font-body);
+        font-size: 0.8em;
+        font-style: italic;
+        font-weight: normal;
+        text-transform: none;
+        color: var(--mhx-ink-dim);
+        -webkit-text-fill-color: var(--mhx-ink-dim);
+      }
+
+      /* To burn (burn-level 2–4): the stroke fills the line, or the bar
+         turns to its "to burn" art, with a gold glow (as § 6 and § 2) */
+      & span.flex-tag-name:is(.burn-level-2, .burn-level-3, .burn-level-4) {
+        --mhx-hl-h: 100%;
+        --mhx-chip-bar: var(--mhx-bar-toburn);
+        filter: drop-shadow(0 0 3px var(--mhx-gold));
+      }
+
+      /* Burned: struck-through burned-red text on a faded stroke, or no
+         bar. The system's layered `color: red !important` can't be
+         beaten, so text-fill-color paints the glyphs (as § 6). */
+      & span.flex-tag-name.burn-level-1 {
+        --mhx-hl: color-mix(in srgb, var(--mhx-storytag) 40%, transparent);
+        color: var(--mhx-burned) !important;
+        -webkit-text-fill-color: var(--mhx-burned);
+        text-decoration: line-through;
+        text-decoration-thickness: 1px;
+        text-decoration-color: var(--mhx-burned);
+        filter: none;
+      }
+
+      & span.flex-tag-name.burn-level-1:not(.story-tag) {
+        background: none;
+        opacity: 0.75;
+      }
+
+      & .juice {
+        padding: 0 0.45em;
+        font-family: var(--mhx-font-label);
+        font-size: 0.9em;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--mhx-npc-sub);
+        background: var(--mhx-field-bg);
+        border: 1px solid var(--mhx-line-dim);
+        border-radius: 2px;
+      }
+    }
+
+    /* Status pips (system "tier + circles" display), as in § 6 */
+    & span.status-name .dotStatus {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    & span.status-name .tracker-circle {
+      display: inline-block;
+      box-sizing: border-box;
+      font-size: 0.5em;
+      width: 1em;
+      height: 1em;
+      min-width: 1em;
+      min-height: 0;
+      margin: 0;
+      padding: 0;
+      vertical-align: middle;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      background: none;
+      box-shadow: none;
+    }
+
+    & span.status-name .dotStatus > .tracker-circle:first-of-type {
+      margin-left: 0.4em;
+    }
+
+    & span.status-name .tracker-circle.filled-circle {
+      background: currentColor;
+    }
+
+    /* ── Roll window and Make Roll: label / field grid (as § 5) ───────── */
+    & form:is(.roll-dialog, .roll-modifier-dialog) {
+      display: grid;
+      grid-template-columns: minmax(7em, max-content) minmax(0, 1fr);
+      align-items: center;
+      gap: 0.45em 0.9em;
+
+      & > * {
+        grid-column: 1 / -1;
+        min-width: 0;
+        margin: 0;
+      }
+
+      /* The essence boxes (Otherscape only, empty here) and the effect
+         slider sit in wrappers; their label / field pairs join the grid */
+      & :is(.essence-effects, .essence-effects div, .effect-slider-block) {
+        display: contents;
+      }
+
+      & label {
+        grid-column: 1;
+      }
+
+      & label + :is(input, select) {
+        grid-column: 2;
+      }
+
+      & label + input:is([type=checkbox], [type=radio]) {
+        justify-self: start;
+      }
+
+      & label + input[type=number] {
+        justify-self: start;
+      }
+
+      & > br {
+        display: none;
+      }
+
+      & > hr {
+        margin: 0.1em 0;
+      }
+    }
+
+    /* Make Roll: the move picker is the title row, in the NPC subtitle's
+       brown caps with a dark red edge */
+    & form.roll-modifier-dialog > select.move-select {
+      height: 2.1em;
+      font-family: var(--mhx-font-label);
+      font-size: 1.05em;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-npc-sub);
+      border-left: 2px solid var(--mhx-npc-rule);
+    }
+
+    & form.roll-modifier-dialog > select.move-select option {
+      font-weight: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+    }
+
+    /* Roll window: Roll Bonus and Effect as readout tiles (the chat card's
+       heavy figures), then the tags and statuses in use */
+    & form.roll-dialog > section.header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0.45em 0.5em;
+      margin: 0;
+      padding: 0;
+      background: none;
+      border: none;
+
+      & > div:not([class]) {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.5em;
+        min-width: 0;
+        padding: 0.3em 0.6em 0.35em;
+        background: linear-gradient(90deg, rgba(111, 74, 42, 0.12), transparent 70%), var(--mhx-field-bg);
+        border: 1px solid var(--mhx-line-faint);
+        border-left: 2px solid var(--mhx-line);
+      }
+
+      & > div:not([class]) .dialog-label {
+        font-size: 0.8em;
+        color: var(--mhx-ink-dim);
+      }
+
+      & :is(.roll-bonus, .move-effect) {
+        font-family: var(--mhx-font-label);
+        font-size: 1.55em;
+        font-weight: 800;
+        font-style: italic;
+        font-variant-numeric: lining-nums;
+        line-height: 1;
+        color: var(--mhx-ink);
+        text-shadow: var(--mhx-lift), -1px 1px 2px rgba(212, 175, 55, 0.55);
+      }
+
+      /* Effect: the success gold */
+      & > div:not([class]):has(.move-effect) {
+        border-left-color: var(--mhx-gold-ink);
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0.2), transparent 70%), var(--mhx-field-bg);
+      }
+
+      & .move-effect {
+        color: var(--mhx-gold-ink);
+      }
+
+      & > :is(.modifier-list, .juice-section) {
+        grid-column: 1 / -1;
+      }
+
+      & > .modifier-list:not(:has(.modifier)),
+      & > .juice-section:not(:has(*)) {
+        display: none;
+      }
+    }
+
+    & .modifier-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    & .modifier-list .modifier {
+      overflow: hidden;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 0.45em;
+      min-height: 1.9em;
+      margin: 0;
+      padding: 0.15em 0.5em;
+      text-align: left;
+      background: var(--mhx-field-bg);
+      border: 1px solid var(--mhx-line-faint);
+      border-left: 2px solid var(--mhx-line-dim);
+    }
+
+    & .modifier-list .modifier > .review-icon:not(:has(*)) {
+      display: none;
+    }
+
+    /* Review state: approved green, pending / query gold, rejected red */
+    & .modifier-list .modifier > a {
+      flex: none;
+      width: 1.1em;
+      font-size: 0.85em;
+      text-align: center;
+      color: var(--mhx-ink-dim);
+      text-shadow: none;
+    }
+
+    & .modifier-list .modifier > a.approved {
+      color: var(--mhx-ok);
+    }
+
+    & .modifier-list .modifier > a.clarification-requested {
+      color: var(--mhx-ask);
+    }
+
+    & .modifier-list .modifier > a.rejected {
+      color: var(--mhx-no);
+    }
+
+    & .modifier-list .modifier.approved {
+      border-left-color: var(--mhx-ok);
+    }
+
+    & .modifier-list .modifier:is(.pending, .request-clarification) {
+      border-left-color: var(--mhx-ask);
+    }
+
+    & .modifier-list .modifier.rejected {
+      text-decoration: none;
+      opacity: 0.55;
+      border-left-color: var(--mhx-no);
+    }
+
+    & .modifier-list .modifier.rejected :is(span.flex-tag-name, span.status-name) {
+      text-decoration: line-through;
+      text-decoration-color: var(--mhx-no);
+      text-decoration-thickness: 2px;
+    }
+
+    /* In the roll: the stroke fills the line (the markup doesn't say which
+       way); bars are already full */
+    & .modifier-list .modifier:not(.rejected) :is(span.flex-tag-name.story-tag, span.status-name):not(.burn-level-1) {
+      --mhx-hl-h: 100%;
+    }
+
+    & .juice-section .juice-pending {
+      font-family: var(--mhx-font-label);
+      font-size: 0.85em;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mhx-npc-sub);
+      animation: mhx-dlg-wait 1.2s ease-in-out infinite;
+    }
+
+    /* ── Tag / status creation (dynamicDialog): label / field grid ────── */
+    & .dialog-content:has(> div > :is(.string-input, .number-input, .boolean-input)) {
+      & > br {
+        display: none;
+      }
+
+      & > hr {
+        display: none;
+      }
+
+      & > div {
+        display: grid;
+        grid-template-columns: minmax(6em, max-content) minmax(0, 1fr);
+        align-items: center;
+        gap: 0.45em 0.9em;
+      }
+
+      & > div > :is(.string-input, .number-input, .boolean-input) {
+        display: contents;
+      }
+
+      & label {
+        grid-column: 1;
+      }
+
+      & label + input {
+        grid-column: 2;
+      }
+
+      & label + input:is([type=checkbox], [type=number]) {
+        justify-self: start;
+      }
+
+      /* Category: the system writes its label inside the <select>, where
+         it can't show, so the picker takes the whole row */
+      & > div > select {
+        grid-column: 1 / -1;
+      }
+
+      /* The name field: the highlighter (shared block above § 1), gold
+         for a tag, sage for a status (it has a tier). The stroke is the
+         field, so focus is a gold underline (as § 5). */
+      & > div > .key-name > input {
+        justify-self: start;
+        width: auto;
+        field-sizing: content;
+        min-width: 6em;
+        max-width: 100%;
+        height: auto;
+        font-size: 1.15em;
+        line-height: 1.35;
+        outline: none;
+      }
+
+      & > div > .key-name > input:focus {
+        box-shadow: 0 2px 0 -1px var(--mhx-gold-ink);
+      }
+    }
+
+    /* ── Help / Hurt ──────────────────────────────────────────────────── */
+    /* The prompt: "<PC> is making a roll for <move>" */
+    & .dialog-content > div:only-child:not([class]) {
+      font-size: 1.05em;
+    }
+
+    /* Amount: slider + readout on a parchment strip */
+    & .slidecontainer {
+      display: flex;
+      align-items: center;
+      gap: 0.8em;
+      width: 100%;
+      padding: 0.3em 0.6em;
+      background: var(--mhx-field-bg);
+      border: 1px solid var(--mhx-line-faint);
+      border-left: 2px solid var(--mhx-line);
+    }
+
+    & .slidecontainer > output.HelpHurt {
+      flex: none;
+      min-width: 1.4em;
+      font-family: var(--mhx-font-label);
+      font-size: 1.5em;
+      font-weight: 800;
+      font-style: italic;
+      font-variant-numeric: lining-nums;
+      line-height: 1;
+      text-align: center;
+      color: var(--mhx-ink);
+      text-shadow: var(--mhx-lift), -1px 1px 2px rgba(212, 175, 55, 0.55);
+    }
+
+    /* ── Tag review (MC): selected tags with approve / query / reject,
+       then suggestions ──────────────────────────────────────────────── */
+    /* Two columns of chips + review keys need more than the 400px default */
+    &:has(> .window-content > .dialog-content > .tag-review) {
+      min-width: 33em;
+    }
+
+    & .tag-review {
+      & > .purpose {
+        font-style: italic;
+        color: var(--mhx-ink-dim);
+      }
+
+      & > .move-name {
+        margin-top: 0.4em;
+      }
+
+      & > hr {
+        display: none;
+      }
+
+      & > br {
+        display: none;
+      }
+
+      & > .flex-row {
+        align-items: flex-start;
+        gap: 0.9em;
+        margin-top: 0.5em;
+      }
+
+      & :is(.selected-list, .suggestion-list) {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+      }
+
+      & .center-label {
+        margin: 0 0 0.2em;
+        padding-bottom: 0.15em;
+        font-family: var(--mhx-font-label);
+        font-size: 0.8em;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-align: left;
+        text-decoration: none;
+        text-transform: uppercase;
+        color: var(--mhx-ink-dim);
+        background: linear-gradient(90deg, var(--mhx-line-dim), transparent 85%) left bottom / 100% 1px no-repeat;
+      }
+
+      & :is(.selected-list, .suggestion-list) > .flex-row-center {
+        overflow: hidden;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        gap: 0.45em;
+        min-height: 1.9em;
+        padding: 0.15em 0.4em;
+        background: var(--mhx-field-bg);
+        border: 1px solid var(--mhx-line-faint);
+        border-left: 2px solid var(--mhx-line-dim);
+      }
+
+      & .suggestion-list > .flex-row-center {
+        justify-content: flex-start;
+      }
+
+      & :is(.selected-list, .suggestion-list) .name {
+        cursor: pointer;
+      }
+
+      & :is(.selected-list, .suggestion-list) .name:hover {
+        filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.9));
+      }
+
+      /* Selected list, as the § 6 selected names: the stroke fills the
+         line in the HUD's yellow with a green rim (positive) or its clay
+         with a dark red rim (negative); bars take the § 2 selected bars
+         ("to burn" art for positive, the weakness bar for negative) */
+      & :is(.positive-selected, .negative-selected) :is(span.flex-tag-name.story-tag, span.status-name):not(.burn-level-1) {
+        --mhx-hl-h: 100%;
+        outline-offset: -1px;
+      }
+
+      & .positive-selected :is(span.flex-tag-name.story-tag, span.status-name):not(.burn-level-1) {
+        --mhx-hl: var(--positive-tag-color, #f6e86a);
+        outline: 2px solid var(--positive-tag-borderColor, #03930c);
+        box-shadow: 0 0 5px rgba(212, 175, 55, 0.6);
+      }
+
+      & .negative-selected :is(span.flex-tag-name.story-tag, span.status-name):not(.burn-level-1) {
+        --mhx-hl: var(--negative-tag-color, #c1806c);
+        outline: 2px solid var(--negative-tag-borderColor, #7a0000);
+        box-shadow: 0 0 5px rgba(122, 0, 0, 0.45);
+      }
+
+      & .positive-selected span.flex-tag-name:not(.story-tag):not(.burn-level-1) {
+        --mhx-chip-bar: var(--mhx-bar-toburn);
+        filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.7));
+      }
+
+      & .negative-selected span.flex-tag-name:not(.story-tag):not(.burn-level-1) {
+        --mhx-chip-bar: var(--mhx-bar-weakness);
+        filter: drop-shadow(0 0 3px rgba(122, 0, 0, 0.45));
+      }
+
+      /* Review keys: square parchment keys; the chosen one filled */
+      & .review-icons {
+        display: flex;
+        flex: none;
+        gap: 3px;
+      }
+
+      & .review-icons a.item-control {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.7em;
+        height: 1.7em;
+        font-size: 0.85em;
+        color: var(--mhx-review, var(--mhx-ink-dim));
+        text-shadow: none;
+        background: linear-gradient(to bottom, #f2e6c9 0%, #e2d2a8 100%);
+        border: 1px solid var(--mhx-line-dim);
+        border-radius: 2px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s;
+      }
+
+      & .review-icons a.item-control.approved              { --mhx-review: var(--mhx-ok); }
+      & .review-icons a.item-control.request-clarification { --mhx-review: var(--mhx-ask); }
+      & .review-icons a.item-control.rejected              { --mhx-review: var(--mhx-no); }
+
+      & .review-icons a.item-control:hover {
+        border-color: var(--mhx-review);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 0 5px rgba(212, 175, 55, 0.75);
+      }
+
+      /* Overrides the system's `.item-control.active { font-size: 1.5rem;
+         color: red }` */
+      & .review-icons a.item-control.active {
+        font-size: 0.85em;
+        color: var(--mhx-paper-hi);
+        background: var(--mhx-review);
+        border-color: var(--mhx-review);
+        box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.25), 0 1px 3px rgba(60, 36, 20, 0.4);
+      }
+    }
+
+    /* ── PC downtime: the choices as parchment rows, the picked one washed
+       in gold (as § 5's choice lists) ───────────────────────────────── */
+    & .pc-downtime-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+
+      & > .header {
+        margin-bottom: 0.3em;
+      }
+
+      & > .move-text {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.6em;
+        padding: 0.35em 0.6em;
+        font-weight: normal;
+        color: var(--mhx-ink);
+        background: var(--mhx-field-bg);
+        border: 1px solid var(--mhx-line-faint);
+        border-left: 2px solid var(--mhx-line-dim);
+        transition: background 0.15s, border-color 0.15s;
+      }
+
+      /* The labels point at ids the radios don't have, so clicking the
+         text did nothing: the radio now covers the whole row, invisible,
+         and the row draws its round marker */
+      & > .move-text > input[type=radio] {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+      }
+
+      & > .move-text::before {
+        content: "";
+        flex: none;
+        box-sizing: border-box;
+        width: 1.05em;
+        height: 1.05em;
+        border: 1.5px solid var(--mhx-line);
+        border-radius: 50%;
+        background: var(--mhx-field-bg);
+        transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+      }
+
+      & > .move-text:hover::before {
+        box-shadow: 0 0 5px rgba(212, 175, 55, 0.75);
+      }
+
+      & > .move-text:has(input:checked)::before {
+        border-color: var(--mhx-item-accent);
+        background: var(--mhx-item-accent);
+        box-shadow: inset 0 0 0 2px var(--mhx-paper-hi);
+      }
+
+      & > .move-text:has(input:focus-visible) {
+        outline: 1px solid var(--mhx-gold-ink);
+        outline-offset: -1px;
+      }
+
+      & > .move-text:hover {
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0.16), transparent), var(--mhx-field-bg);
+      }
+
+      & > .move-text:has(input:checked) {
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0.34), rgba(212, 175, 55, 0.1)), var(--mhx-field-bg);
+        border-color: var(--mhx-line-dim);
+        border-left-color: var(--mhx-item-accent);
+      }
+
+      & > .move-text > label {
+        font-family: var(--mhx-font-body);
+        font-size: 1em;
+        font-weight: normal;
+        letter-spacing: normal;
+        line-height: 1.35;
+        text-transform: none;
+        color: var(--mhx-ink);
+      }
+
+      & > .move-text:has(input:checked) > label {
+        font-weight: 700;
+        color: var(--mhx-effect-dark);
+      }
+    }
+
+    /* ── GM downtime moves: one heading per threat, then the § 3 threat
+       move cards (torn paper, the name on the threat banner) ─────────── */
+    & .downtime-dialog {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35em;
+      max-height: 70vh;
+      overflow-y: auto;
+
+      & > .gmmove-type-label:not(:first-child) {
+        margin-top: 0.4em;
+      }
+
+      & .actor-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+
+      & .actor-group > .gm-move {
+        align-items: flex-start;
+        gap: 0.3em;
+        margin: 0 2px 0 0;
+        padding: 0.85em 0.95em 0.95em;
+        font-size: 1em;
+        line-height: 1.3;
+        color: var(--mhx-ink);
+        cursor: pointer;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        clip-path: none;
+        background: var(--mhx-threat-art) center / 100% 100% no-repeat;
+        filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
+        transition: filter 0.15s;
+      }
+
+      & .actor-group > .gm-move:hover {
+        filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 5px rgba(212, 175, 55, 0.75));
+      }
+
+      & .gm-move > .trash-can-flex:not(:has(*)),
+      & .gm-move > div:last-child:not(:has(*)) {
+        display: none;
+      }
+
+      & .gm-move .gmmove-text {
+        flex: 1;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        font-family: var(--mhx-font-body);
+        font-size: 1em;
+        line-height: 1.3;
+        color: var(--mhx-ink);
+        text-shadow: none;
+        background: none;
+        border: none;
+        border-radius: 0;
+        backdrop-filter: none;
+      }
+
+      /* Name: the HUD's threat banner (as § 3) */
+      & .gm-move .gmmove-name {
+        display: block;
+        width: fit-content;
+        max-width: 100%;
+        box-sizing: border-box;
+        margin: 0 0 0.3em -5px;
+        padding: 1px 6px;
+        font-family: var(--mhx-font-label);
+        font-size: 0.95em;
+        font-weight: bold;
+        font-style: normal;
+        line-height: 1.3;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--mhx-ink);
+        text-shadow: none;
+        border: 6px solid transparent;
+        border-block-width: 0;
+        border-image: var(--mhx-threat-name) 0 6 0 6 fill / 0 6px 0 6px stretch;
+        filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.7));
+      }
+
+      & .gm-move .gmmove-section > hr {
+        display: none;
+      }
+
+      & .gm-move div.gmmove-description {
+        font-size: 1.05em;
+        font-weight: 500;
+        line-height: 1.3;
+        color: var(--mhx-ink);
+      }
+
+      /* Header symbols: dark red ink (not the § 3 gutter markers) */
+      & .gm-move .gmmove-description > span[title]:first-child {
+        color: var(--mhx-npc-rule);
+      }
+
+      /* Tags and statuses in the text: the highlighter (shared block
+         above § 1), kept on one line */
+      & .gmmove-text :is(.narrated-story-tag, .narrated-status-name) {
+        white-space: nowrap;
+      }
+
+      & .gmmove-text .narrated-status-name .status-tier {
+        font-style: normal;
+      }
+
+      /* Consequences (submoves): a list on the same paper, no card */
+      & .gm-move .submove {
+        margin: 0.35em 0 0;
+        padding: 0;
+        border: none;
+      }
+
+      & .submove .gm-move {
+        gap: 0.3em;
+        margin: 0;
+        padding: 0;
+        background: none;
+        border: none;
+        box-shadow: none;
+        filter: none;
+      }
+
+      & .submove .gmmove-name {
+        font-size: 0.85em;
+      }
+
+      & .submove div.gmmove-description {
+        font-size: 1em;
+      }
+
+      & .inherited-move .gmmove-text {
+        opacity: 0.75;
+      }
+
+      & .inherited-move .inherit-msg {
+        margin-top: 0.35em;
+        font-family: var(--mhx-font-label);
+        font-size: 0.75em;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-align: left;
+        text-transform: uppercase;
+        color: var(--mhx-ink-dim);
+      }
+    }
+
+    /* ── GM narration: one big parchment page ─────────────────────────── */
+    & .dialog-content:has(> textarea.narrator-text) {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    & .dialog-content > textarea.narrator-text {
+      flex: 1;
+      width: 100%;
+      height: auto;
+      min-height: 12em;
+      padding: 0.6em 0.8em;
+      font-size: 1.5em;
+      line-height: 1.4;
+      resize: none;
+      border-left: 2px solid var(--mhx-line);
+    }
+  }
+
+}
+
+/* § 6b: the roll window's "Wait for MC" and pending Help / Hurt breathe
+   (at top level: @keyframes can't be nested in a style rule) */
+@keyframes mhx-dlg-wait {
+  50% { opacity: 0.45; }
 }
