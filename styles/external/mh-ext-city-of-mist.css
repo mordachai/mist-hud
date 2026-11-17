@@ -754,9 +754,9 @@
     margin: 0.1em auto 0;
     padding: 0.05em 0.6em 0;
     font-family: "Rubik", var(--mhx-font-title);
-    font-size: 1.9em;
+    font-size: 2.4em;
     font-weight: bold;
-    line-height: 1.2;
+    line-height: 1.15;
     text-align: center;
     color: var(--mythos-pink, #502c5d);
     text-shadow: 0 3px 6px var(--mythos-bright, #ae4ace);
@@ -862,17 +862,65 @@
     color: var(--mhx-ink);
   }
 
+  /* Option checkbox: a small box drawn by hand on the note (uneven pen
+     outline, a little crooked) instead of core's 20px Font Awesome square.
+     Checked = a quick pen tick that overshoots the box, drawn as an SVG
+     mask filled with the ink, so it follows --mhx-ink. */
   .city-roll li.move-list-item input.roll-selector-checkbox {
     flex: none;
     position: relative;
-    top: 0.1em;
+    top: 0.12em;
+    width: 12px;
+    height: 12px;
+    margin: 0 0.15em 0 0;
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
     accent-color: var(--mhx-ink);
+    overflow: visible;
   }
 
+  .city-roll li.move-list-item input.roll-selector-checkbox::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
+    font-size: 0;
+    line-height: 0;
+    border: 1.5px solid var(--mhx-ink);
+    border-radius: 1px 3px 2px 4px / 3px 1px 4px 2px;
+    opacity: 0.8;
+    transform: rotate(-3deg);
+    outline: none;
+  }
+
+  .city-roll li.move-list-item input.roll-selector-checkbox:checked::after {
+    content: "";
+    position: absolute;
+    left: -1px;
+    top: -7px;
+    width: 18px;
+    height: 18px;
+    font-size: 0;
+    line-height: 0;
+    border-radius: 0;
+    background: var(--mhx-ink);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 10.5c1.4.4 2.6 1.9 3.6 4.6.3.7.7.7 1 0C8 10.2 11.6 5 16.8 1.2' fill='none' stroke='%23000' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M1.5 10.5c1.4.4 2.6 1.9 3.6 4.6.3.7.7.7 1 0C8 10.2 11.6 5 16.8 1.2' fill='none' stroke='%23000' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+
+  .city-roll li.move-list-item input.roll-selector-checkbox:focus-visible::before {
+    outline: 1px dashed var(--mhx-ink);
+    outline-offset: 2px;
+  }
+
+  /* A picked option: its pen tick and bold text, no wash or edge */
   .city-roll li.selected.move-list-item {
     font-weight: 700;
-    background: rgba(31, 27, 23, 0.08);
-    border-left-color: var(--mhx-ink);
+    background: none;
+    border-left-color: transparent;
   }
 
   /* The card's bottom keys (+ tags / statuses, and the power panel's
@@ -899,6 +947,11 @@
     background: rgba(31, 27, 23, 0.08);
     border: none;
     box-shadow: none;
+  }
+
+  /* No divider above the bottom keys (the power panel's leading rule) */
+  .city-roll > ul.move-list + hr {
+    display: none;
   }
 
   /* Power panel (move-create-tag-com.hbs): the two keys share one row,
