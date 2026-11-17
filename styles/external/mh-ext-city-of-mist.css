@@ -49,7 +49,7 @@
               § 6 story tag window, scene tags, status tracker, token tooltip
               § 6b roll and chat dialogs
               § 7 sidebar and chrome
-     Written so far: § 1 to § 4. The PC and crew sheets sit on the dark
+     Written so far: § 1 to § 4 and § 6. The PC and crew sheets sit on the dark
      window (com_sheet_BG); the danger and limited sheets are a torn paper
      scrap on the plain canvas (com_chat_BG_s), and the item sheets are
      that canvas.
@@ -5279,5 +5279,803 @@
   .city-of-mist.sheet.item #move-core .move-conditonal-block > .move-list-input {
     flex: 1;
     min-width: 0;
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+     § 6. Story tag window, scene tags, status tracker, token tooltip
+     The system's floating tag/status views:
+       StoryTagWindow ....... templates/story-tag-window.hbs
+         (.app.story-tag-window.scene-tag-window: the "Scene Tags" window,
+         with the scene's own tags, one block per combatant and one per
+         actor with showcased items)
+       StatusTrackerWindow .. module/city-status-tracker/tracker.hbs
+         (#city-of-mist-tracker-app, no class of its own; matched with
+         [id=…] so the shared :is() stays at (0,2,0))
+       TokenTooltip ......... module/token-tooltip/tooltip.html
+         (.city-of-mist--tooltip, a bare div on <body>)
+     Every tag and status in them is templates/parts/tag-or-status.hbs.
+
+     Mirrors § 6 of mh-ext-legend.css and mh-ext-otherscape.css (same
+     roots, same row structure). The look is the danger sheet's (§ 3),
+     grit noir on light paper: the plain canvas (com_chat_BG_s) as the
+     window, Rift Bold caps headings over the book's heavy black rule,
+     the body serif, one charcoal ink and no accent colours. The tracker
+     gives each actor the danger's notepad page (com_npc_bg-2); the
+     tooltip is the torn scrap (com_outcome_bg). Story tags and statuses
+     are the flat italic yellow / green highlights of the sheets (§ 2),
+     salmon when selected against the roll; tag rows keep the HUD's
+     layout, the CoM burn flame on the RIGHT of the name. The sheet's
+     story tag card keeps its own § 2 rules.
+
+     The highlight is set here, not in the shared highlighter block above
+     § 1, so this section merges apart from § 5; the block can absorb it
+     later. storyTagContainer-redux.html isn't used by any system JS, so
+     it has no rules here.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  /* ── Shared: rows, burn flames, highlights ──────────────────────────── */
+
+  :is(.app.story-tag-window, .app[id="city-of-mist-tracker-app"], .city-of-mist--tooltip) {
+    --mhx-burn:       url(/modules/mist-hud/ui/icons/burn_com_empty_icn.svg);
+    --mhx-burn-to:    url(/modules/mist-hud/ui/icons/burn_com_active_icn.svg);
+    --mhx-burned-ic:  url(/modules/mist-hud/ui/icons/burn_com_full_icn.svg);
+    --mhx-black-rule: #1f1b17;                      /* the book's heavy rule (§ 3) */
+    --mhx-ink-outline: drop-shadow(0 0 1px rgba(31, 27, 22, 0.9)) drop-shadow(0 0 1px rgba(31, 27, 22, 0.9));
+    --mhx-halo:       drop-shadow(0 0 2px rgba(31, 27, 23, 0.6));
+    --color-scrollbar:       var(--mhx-line);
+    --color-scrollbar-track: transparent;
+
+    &, & * {
+      scrollbar-color: var(--mhx-line) transparent;
+    }
+
+    & :is(ul.tag-or-status-list, ol#city-status-tracker-list) {
+      margin: 0;
+      padding: 0;
+      font-size: 1em;
+      list-style: none;
+    }
+
+    & :is(ul.tag-or-status-list, ol#city-status-tracker-list) li {
+      margin: 0;
+      list-style: none;
+    }
+
+    /* Row icons (markers, delete, + / −): dim charcoal, full ink on
+       hover. Delete uses the outline trash. */
+    & :is(.tag.item-entry, .status-line) a {
+      color: var(--mhx-ink-dim);
+      text-shadow: none;
+      transition: color 0.15s, text-shadow 0.15s;
+    }
+
+    & :is(.tag.item-entry, .status-line) a:hover {
+      color: var(--mhx-black-rule);
+      text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
+    }
+
+    & :is(.tag-delete, .status-delete) i.fa-trash {
+      font-weight: 400;
+    }
+
+    & :is(.tag-delete, .status-delete) i.fa-trash::before {
+      content: "\f2ed";
+    }
+
+    & .flex-trash {
+      flex: none;
+      min-width: 0;
+      padding-right: 0;
+      font-size: 0.75em;
+    }
+
+    & .flex-trash:not(:has(*)) {
+      display: none;
+    }
+
+    /* Status pips (system "tier + circles" display): small square boxes
+       in the name's own ink, filled or hollow, as typed check boxes */
+    & span.status-name .dotStatus {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    & span.status-name .tracker-circle {
+      display: inline-block;
+      box-sizing: border-box;
+      /* The system sets the hollow ones to `1em !important` (layered,
+         unbeatable), so the size comes from font-size instead */
+      font-size: 0.5em;
+      width: 1em;
+      height: 1em;
+      min-width: 1em;
+      min-height: 0;
+      margin: 0;
+      padding: 0;
+      vertical-align: middle;
+      border: 1px solid currentColor;
+      border-radius: 0;
+      background: none;
+      box-shadow: none;
+      transform: none;
+    }
+
+    & span.status-name .dotStatus > .tracker-circle:first-of-type {
+      margin-left: 0.4em;
+    }
+
+    & span.status-name .tracker-circle.filled-circle {
+      background: currentColor;
+    }
+
+    /* Drop the type icons (story tag, status ring), as on the sheets
+       (§ 2). Other markers (hidden, temporary, permanent…) stay. */
+    & .tag.item-entry span.tag-symbols a:has(> .fa-tag),
+    & .status-name-block > a:has(> .fa-life-ring) {
+      display: none;
+    }
+
+    /* (one :has(): it can't be nested) */
+    & .tag.item-entry span.tag-symbols:not(:has(> a > i:not(.fa-tag))) {
+      display: none;
+    }
+
+    /* Tags: name, markers, then the burn flame on the right (the HUD's
+       side) and delete at the far right. The row is as wide as its name. */
+    & .tag.item-entry {
+      position: relative;
+      box-sizing: border-box;
+      width: fit-content;
+      max-width: 100%;
+      align-items: center;
+      gap: 0.3em;
+      min-height: 1.6em;
+      margin: 3px 0;
+      padding: 0 2px;
+      text-align: left;
+      opacity: 1;
+    }
+
+    & .tag.item-entry::before {
+      content: none;
+    }
+
+    & .tag.item-entry div.flex-tag-name {
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+
+    & .tag.item-entry span.tag-name-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35em;
+      max-width: 100%;
+      font-size: 1em;
+    }
+
+    & .tag.item-entry span.tag-symbols {
+      order: 1;
+      width: auto;
+      min-width: 0;
+      max-width: none;
+      font-size: 0.75em;
+    }
+
+    & .tag.item-entry .flex-burn-flame-cell {
+      display: flex;
+      flex: none;
+      order: 1;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      min-width: 14px;
+      max-width: none;
+      margin: 0;
+    }
+
+    & .tag.item-entry:not(:has(.burn-level-2, .burn-level-3, .burn-level-4)) .flex-burn-flame-cell:not(:has(a)) {
+      display: none;
+    }
+
+    & .tag.item-entry .flex-trash {
+      order: 2;
+    }
+
+    /* Story tags and statuses: the flat highlight, italic body serif, as
+       on the sheets (§ 2): yellow story tags, green statuses */
+    & .tag.item-entry span.flex-tag-name.story-tag,
+    & .status-line span.status-name {
+      --mhx-hl: var(--mhx-storytag);
+      flex: 0 1 auto;
+      min-width: 0;
+      max-width: 100%;
+      margin: 0;
+      padding: 0.05em 0.35em;
+      font-family: var(--mhx-font-body);
+      font-size: 1.1em;
+      font-style: italic;
+      font-weight: normal;
+      line-height: 1.3;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-hl-text);
+      text-shadow: none;
+      border: none;
+      border-radius: 1px;
+      outline: none;
+      box-shadow: none;
+      background: var(--mhx-hl);
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+      transition: filter 0.15s, box-shadow 0.15s;
+    }
+
+    & .status-line span.status-name {
+      --mhx-hl: var(--mhx-status);
+    }
+
+    /* Other tags (the tracker can list power tags): the cards' tag face
+       (§ 2), plain ink */
+    & .tag.item-entry span.flex-tag-name:not(.story-tag) {
+      margin: 0;
+      padding: 0 0.2em;
+      font-family: var(--mhx-font-tags);
+      font-size: 1.05em;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 1.3;
+      text-transform: none;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      border-radius: 0;
+      background: none;
+      box-shadow: none;
+    }
+
+    & .tag.item-entry .story-tag-location {
+      font-family: var(--mhx-font-body);
+      font-size: 0.8em;
+      font-style: italic;
+      font-weight: normal;
+      text-transform: none;
+      color: var(--mhx-ink-dim);
+    }
+
+    /* Statuses: + / − right after the name */
+    & div.status-line {
+      display: flex;
+      box-sizing: border-box;
+      width: fit-content;
+      max-width: 100%;
+      align-items: center;
+      gap: 0.25em;
+      margin: 3px 0;
+      padding: 0 2px;
+      text-align: left;
+    }
+
+    & .status-line .status-name-block {
+      display: flex;
+      flex: 0 1 auto;
+      align-items: center;
+      gap: 0.25em;
+      min-width: 0;
+      font-size: 0.85em;
+      text-align: left;
+    }
+
+    & .status-line .status-name-block span.status-name {
+      font-size: 1.3em;
+    }
+
+    & .status-line .plus-minus {
+      flex: none;
+    }
+
+    /* Delete at the far right, as on the tag rows */
+    & .status-line .flex-trash {
+      order: 1;
+    }
+
+    & .status-line .plus-minus-controls {
+      display: inline-flex;
+      gap: 0.35em;
+      font-size: 0.8em;
+    }
+
+    /* Hover while selectable: the system's red / yellow gradient gives
+       way to the highlight with a soft charcoal halo (as § 2) */
+    & .item-selection-context :is(span.flex-tag-name.story-tag, span.status-name):hover:not(.positive-selected):not(.negative-selected) {
+      margin: 0;
+      padding: 0.05em 0.35em;
+      font-weight: normal;
+      color: var(--mhx-hl-text);
+      border-radius: 1px;
+      background: var(--mhx-hl);
+      box-shadow: none;
+      filter: var(--mhx-halo);
+    }
+
+    & .item-selection-context .tag.item-entry span.flex-tag-name:not(.story-tag):hover {
+      text-shadow: 0 0 4px rgba(31, 27, 23, 0.35);
+    }
+
+    /* Selected for the roll, as the § 2 story tag card: bold, a charcoal
+       rim drawn inset; salmon against the roll */
+    & :is(span.flex-tag-name.story-tag, span.status-name):is(.positive-selected, .negative-selected) {
+      margin: 0;
+      padding: 0.05em 0.35em;
+      font-weight: bold;
+      color: var(--mhx-hl-text);
+      outline: none;
+      border-radius: 1px;
+      background: var(--mhx-hl);
+      box-shadow: inset 0 0 0 1.5px var(--mhx-ink);
+    }
+
+    & :is(span.flex-tag-name.story-tag, span.status-name).negative-selected {
+      --mhx-hl: var(--mhx-negative);
+    }
+
+    & .tag.item-entry span.flex-tag-name:not(.story-tag):is(.positive-selected, .negative-selected) {
+      padding: 0 0.3em;
+      font-weight: 700;
+      color: var(--mhx-hl-text);
+      border-radius: 1px;
+      background: var(--mhx-storytag);
+      box-shadow: inset 0 0 0 1.5px var(--mhx-ink);
+    }
+
+    & .tag.item-entry span.flex-tag-name:not(.story-tag).negative-selected {
+      background: var(--mhx-negative);
+    }
+
+    /* To burn (burn-level 2–4): a charcoal rim, and the yellow flame sits
+       in the burn cell (the system leaves it empty) */
+    & .tag.item-entry span.flex-tag-name:is(.burn-level-2, .burn-level-3, .burn-level-4) {
+      -webkit-text-fill-color: var(--mhx-hl-text);
+      text-shadow: none;
+      box-shadow: inset 0 0 0 1.5px var(--mhx-ink);
+    }
+
+    & .tag.item-entry:has(.burn-level-2, .burn-level-3, .burn-level-4) .flex-burn-flame-cell::before {
+      content: "";
+      display: inline-block;
+      width: 14px;
+      height: 20px;
+      background: var(--mhx-burn-to) center / contain no-repeat;
+      filter: var(--mhx-ink-outline);
+    }
+
+    /* Burned: the block fades, struck through in charcoal. The system's
+       layered `color: red !important` can't be beaten, so text-fill-color
+       paints the glyphs (as § 2). */
+    & .tag.item-entry span.flex-tag-name.burn-level-1 {
+      -webkit-text-fill-color: var(--mhx-hl-text);
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+      text-decoration-color: var(--mhx-ink);
+      text-shadow: none;
+      box-shadow: none;
+      filter: none;
+      opacity: 0.55;
+    }
+
+    & .tag.item-entry span.flex-tag-name:not(.story-tag).burn-level-1 {
+      -webkit-text-fill-color: var(--mhx-ink-dim);
+    }
+
+    /* Burn controls: the HUD's CoM flames instead of the glyphs. Empty =
+       the grey flame inked charcoal; hover = the yellow flame with a
+       charcoal edge; burned (unburn control) = the red flame. */
+    & .tag.item-entry :is(.tag-burn, .tag-unburn) {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    & .tag.item-entry :is(.tag-burn, .tag-unburn) i {
+      display: inline-block;
+      vertical-align: middle;
+      width: 14px;
+      height: 20px;
+      background: var(--mhx-burn) center / contain no-repeat;
+      filter: brightness(0.2);
+      opacity: 0.55;
+      transition: opacity 0.15s, filter 0.15s;
+    }
+
+    & .tag.item-entry :is(.tag-burn, .tag-unburn) i::before {
+      content: none;
+    }
+
+    & .tag.item-entry .tag-unburn i {
+      background-image: var(--mhx-burned-ic);
+      filter: none;
+      opacity: 1;
+    }
+
+    & .tag.item-entry .tag-burn:hover i {
+      background-image: var(--mhx-burn-to);
+      filter: var(--mhx-ink-outline);
+      opacity: 1;
+    }
+
+    & .tag.item-entry :is(.tag-burn, .tag-unburn):hover {
+      text-shadow: none;
+    }
+  }
+
+  /* ── Scene Tags window ──────────────────────────────────────────────────
+     The plain canvas; the title is the danger's name (Rift Bold caps over
+     the heavy black rule), "Scene" a heading over a 2px rule, each
+     combatant and showcased actor a Rift caps sub-heading over a hairline. */
+
+  .app.window-app.story-tag-window {
+    padding: 0.3em 0.8em 0.6em 0.8em;
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: 0 0 0 1px var(--mhx-line-faint), 0 6px 20px rgba(20, 16, 12, 0.55);
+    background: var(--mhx-paper-art) center / cover no-repeat, var(--mhx-paper-hi);
+    background-blend-mode: normal;
+
+    & .window-header {
+      padding: 0.2em 0 0.15em;
+      color: var(--mhx-ink);
+      border: none;
+      border-bottom: 4px solid var(--mhx-black-rule);
+      background: none;
+    }
+
+    & .window-header .window-title {
+      font-family: var(--mhx-font-title);
+      font-size: 1.5em;
+      font-style: normal;
+      font-weight: normal;
+      line-height: 1.1;
+      letter-spacing: 0.03em;
+      text-align: left;
+      text-transform: uppercase;
+      color: var(--mhx-ink);
+      text-shadow: none;
+    }
+
+    & .window-header :is(a, button) {
+      color: var(--mhx-ink-dim);
+      text-shadow: none;
+    }
+
+    & .window-header :is(a, button):hover {
+      color: var(--mhx-black-rule);
+      text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
+    }
+
+    & .window-content {
+      color: var(--mhx-ink);
+      background: none;
+    }
+
+    /* The inner div repeats the window's classes */
+    & .window-content > .scene-tag-window {
+      margin: 0.3em 0 0;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      line-height: 1.25;
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+      text-shadow: none;
+    }
+
+    & .scene-tag-content {
+      margin: 0 0.2em 0 0;
+    }
+
+    /* Headings: name on the left, the create links on the right */
+    & :is(.scene-name, .combatant-name) {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4em;
+      height: auto;
+      margin: 0.75em 0 0.3em;
+      padding: 0 0 0.1em;
+      font-size: 1em;
+      text-align: left;
+      text-shadow: none;
+      background: none;
+      border-bottom: 1px solid var(--mhx-line-dim);
+    }
+
+    & .scene-name {
+      margin-top: 0.35em;
+      border-bottom: 2px solid var(--mhx-black-rule);
+    }
+
+    & :is(.scene-name .label, .combatant-name .name) {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: auto;
+      padding: 0;
+      font-family: var(--mhx-font-title);
+      font-size: 1.1em;
+      font-weight: normal;
+      line-height: 1.15;
+      letter-spacing: 0.06em;
+      text-align: left;
+      text-transform: uppercase;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: none;
+    }
+
+    & .scene-name .label {
+      font-size: 1.35em;
+      letter-spacing: 0.03em;
+    }
+
+    /* Combatant names centre the map on the token (right-click: sheet) */
+    & .combatant-name {
+      cursor: pointer;
+    }
+
+    & .combatant-name:hover .name {
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.15em;
+    }
+
+    & :is(.scene-name, .combatant-name) > span:empty {
+      display: none;
+    }
+
+    & :is(.scene-name, .combatant-name) a {
+      font-size: 0.85em;
+      color: var(--mhx-ink-dim);
+      text-shadow: none;
+      transition: color 0.15s, text-shadow 0.15s;
+    }
+
+    & :is(.scene-name, .combatant-name) a:hover {
+      color: var(--mhx-black-rule);
+      text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
+    }
+
+    /* The heading's rule replaces the system's <hr>; the one between
+       combatants and showcased actors becomes a faint rule */
+    & .scene-tags-block > hr {
+      display: none;
+    }
+
+    & .scene-tag-content > hr {
+      height: 1px;
+      margin: 0.9em 0 0.3em;
+      border: none;
+      background: linear-gradient(90deg, transparent, var(--mhx-line-dim) 15%, var(--mhx-line-dim) 85%, transparent);
+    }
+
+    & .scene-tag-content > hr:last-child {
+      display: none;
+    }
+  }
+
+  /* ── Status tracker ─────────────────────────────────────────────────────
+     The plain canvas; each actor is the danger's spiral notepad page
+     (com_npc_bg-2, as § 3's story tag page) pinned to it. border-image
+     keeps the ring strip at the top and the torn right edge at any
+     height; the slices are the art's (471×691), drawn at about 0.6. */
+
+  .app[id="city-of-mist-tracker-app"] {
+    & .window-content {
+      padding: 0.7em 0.9em 0.8em;
+      font-family: var(--mhx-font-body);
+      letter-spacing: normal;
+      text-transform: none;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      background: var(--mhx-paper-art) center / cover no-repeat, var(--mhx-paper-hi);
+      background-blend-mode: normal;
+    }
+
+    & .city-status-tracker {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6em;
+    }
+
+    /* One page per actor: name sub-heading, the two create links on its
+       right, the list under them */
+    & .status-block {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.1em 0.45em;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0.15em 0.5em 0.35em;
+      font-family: var(--mhx-font-body);
+      text-align: left;
+      color: var(--mhx-ink);
+      border-style: solid;
+      border-width: 28px 6px 6px 4px;
+      border-radius: 0;
+      border-image: url(/modules/mist-hud/ui/com_npc_bg-2.webp) 46 10 10 6 fill / 28px 6px 6px 4px stretch;
+      box-shadow: none;
+      background: none;
+      filter: drop-shadow(0 1px 3px rgba(20, 16, 12, 0.3));
+    }
+
+    /* Rift caps over a hairline, the rule running up to the links */
+    & .status-block .actor-name {
+      order: -1;
+      flex: 1 1 0;      /* shrinks and wraps a long name; the links stay on its row */
+      min-width: 0;
+      margin: 0;
+      font-family: var(--mhx-font-title);
+      font-size: 1.15em;
+      font-weight: normal;
+      line-height: 1.2;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      text-transform: uppercase;
+      color: var(--mhx-ink);
+      text-shadow: none;
+      cursor: pointer;
+    }
+
+    & .status-block .actor-name:hover {
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.15em;
+    }
+
+    & .status-block > a {
+      font-size: 0.85em;
+      color: var(--mhx-ink-dim);
+      text-shadow: none;
+      transition: color 0.15s, text-shadow 0.15s;
+    }
+
+    & .status-block > a:hover {
+      color: var(--mhx-black-rule);
+      text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
+    }
+
+    & .status-block ol#city-status-tracker-list {
+      flex: 1 0 100%;
+      width: 100%;
+      margin-top: 0.15em;
+      padding-top: 0.2em;
+      border-top: 1px solid var(--mhx-line-dim);
+    }
+
+    /* The system's tracker CSS gives the burn link `margin: 4px 15px`
+       by id, which pushes the flame out of its 14px slot */
+    & ol#city-status-tracker-list .tag.item-entry :is(.tag-burn, .tag-unburn) {
+      flex: none;
+      margin: 0;
+    }
+
+    /* Actors with nothing on them: a slim, dimmed page */
+    & .status-block:not(:has(ol#city-status-tracker-list > *)) {
+      padding-bottom: 0.15em;
+      opacity: 0.7;
+
+      & ol#city-status-tracker-list {
+        display: none;
+      }
+    }
+  }
+
+  /* ── Token tooltip ──────────────────────────────────────────────────────
+     The torn grey-beige scrap (com_outcome_bg, the danger's and the chat
+     outcome's paper), drawn with border-image so the torn edges keep
+     their shape; its edges are transparent, so the shadow is a
+     drop-shadow that follows the tear. */
+
+  .city-of-mist--tooltip {
+    padding: 0.1em 0.3em 0;
+    font-family: var(--mhx-font-body);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--mhx-ink);
+    text-shadow: none;
+    border-style: solid;
+    border-color: transparent;
+    border-width: 16px 10px 22px 8px;
+    border-radius: 0;
+    border-image: url(/modules/mist-hud/ui/com_outcome_bg.webp) 34 8 50 6 fill / 16px 10px 22px 8px stretch;
+    box-shadow: none;
+    filter: drop-shadow(0 3px 6px rgba(20, 16, 12, 0.55));
+    backdrop-filter: none;
+    background: none;
+
+    & .city-of-mist--name {
+      padding: 0;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
+      font-weight: normal;
+      text-align: left;
+      color: var(--mhx-ink);
+      text-shadow: none;
+    }
+
+    /* Grows with its longest tag or status (one line each) up to a
+       wider cap than core's 250px */
+    & .token-tooltip-container {
+      margin: 0;
+      min-width: 10em;
+      max-width: 420px;
+    }
+
+    & :is(span.status-name, span.flex-tag-name.story-tag) {
+      white-space: nowrap;
+    }
+
+    /* Name row: the danger's name, Rift Bold caps over the heavy black
+       rule, the create links on its right */
+    & .flex-row-center {
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-start;
+      gap: 0.4em;
+      margin: 0 0 0.35em;
+      padding: 0 0 0.1em;
+      border-bottom: 3px solid var(--mhx-black-rule);
+    }
+
+    & .tooltip-token-name {
+      flex: 1 1 auto;
+      min-width: 0;
+      font-family: var(--mhx-font-title);
+      font-size: 1.2em;
+      font-weight: normal;
+      line-height: 1.15;
+      letter-spacing: 0.04em;
+      text-align: left;
+      text-decoration: none;
+      text-transform: uppercase;
+      color: var(--mhx-ink);
+      text-shadow: none;
+    }
+
+    & .flex-row-center a {
+      font-size: 0.85em;
+      color: var(--mhx-ink-dim);
+      text-shadow: none;
+      transition: color 0.15s, text-shadow 0.15s;
+    }
+
+    & .flex-row-center a:hover {
+      color: var(--mhx-black-rule);
+      text-shadow: 0 0 4px rgba(255, 252, 245, 0.9);
+    }
+
+    /* Token is in the Scene Tags window: full ink instead of green */
+    & .fas.green-icon {
+      color: var(--mhx-black-rule);
+      text-shadow: none;
+    }
+
+    /* Statuses, then story tags: one column */
+    & .tool-tip.flex-row {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      flex-basis: auto;
+      max-width: none;
+      margin: 0;
+    }
+
+    & .tool-tip.flex-row:not(:has(*)) {
+      display: none;
+    }
+
+    & .tool-tip.flex-row + .tool-tip.flex-row:has(*) {
+      margin-top: 0.25em;
+    }
   }
 }
