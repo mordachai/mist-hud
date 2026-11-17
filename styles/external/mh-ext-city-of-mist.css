@@ -380,9 +380,9 @@
     --mhx-danger:       var(--destroyed-tag-color, rgba(200, 40, 40, 0.85));
     --mhx-burned:       #b8541c;
     --mhx-tag-text:     #f4f1ea;                          /* white on the brush bars */
-    --mhx-storytag:     #f6e58a;                          /* the book's yellow marker */
-    --mhx-status:       #c8e0a0;                          /* the book's green marker */
-    --mhx-negative:     #f2a663;                          /* orange marker: against the roll */
+    --mhx-storytag:     #fff1a2;                          /* the book's yellow marker */
+    --mhx-status:       #d9e8ae;                          /* the book's green marker */
+    --mhx-negative:     #fbc9ba;                          /* the book's salmon marker: against the roll */
     --mhx-hl-text:      #1f1b16;
     --mhx-bar:          url(/modules/mist-hud/ui/select-bar-com-Crew.webp);
     --mhx-bar-weakness: url(/modules/mist-hud/ui/select-bar-com-weakness.webp);
@@ -459,11 +459,11 @@
     box-shadow:
       0 0 0 1px rgba(20, 16, 12, 0.7),
       0 2px 6px rgba(0, 0, 0, 0.55);
-    /* Light grey base, the art over it at about 70%: a grey wash on top
+    /* Light grey base, the art over it at about 40%: a grey wash on top
        does what a per-layer opacity would, and evens out the three
        outcome arts. --mhx-card-wash is the art's missing opacity. */
     --mhx-card-grey: #d9d8d4;
-    --mhx-card-wash: 0.3;
+    --mhx-card-wash: 0.6;
     background:
       linear-gradient(rgb(from var(--mhx-card-grey) r g b / var(--mhx-card-wash)), rgb(from var(--mhx-card-grey) r g b / var(--mhx-card-wash))),
       var(--mhx-card-art) var(--mhx-card-pos) / cover no-repeat,
@@ -595,29 +595,29 @@
   }
 
   .city-roll div.actor-name {
-    font-family: var(--mhx-font-type);
-    font-size: 0.8em;
+    font-family: var(--mhx-font-body);
+    font-size: larger;
     font-weight: bold;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    letter-spacing: normal;
+    text-transform: none;
     text-align: center;
-    color: var(--mhx-ink-dim);
+    color: var(--logos-text, #48382a);
   }
 
-  /* Move name: the HUD's move face (Rift Bold italic caps), as the HUD's
-     roll title */
+  /* Move name: Rift Bold caps in the system's Logos orange (as the
+     system's own City of Mist roll card) */
   .city-roll div.move-name {
     margin: 0.05em 0 0.1em;
     font-family: var(--mhx-font-title);
     font-size: 2em;
     font-weight: normal;
-    font-style: italic;
+    font-style: normal;
     line-height: 1;
     letter-spacing: 0.01em;
     text-transform: uppercase;
     text-align: center;
-    color: var(--mhx-ink);
-    text-shadow: var(--mhx-lift);
+    color: var(--logos-orange, #a85d4b);
+    text-shadow: none;
   }
 
   .city-roll .roll-block {
@@ -633,7 +633,8 @@
     gap: 0.4em;
   }
 
-  /* Dice: paper squares in charcoal ink */
+  /* Dice: the system's City of Mist dice (grey box, Mythos figure with a
+     bright glow) */
   .city-roll .dice-rolls .roll {
     float: none;
     display: flex;
@@ -644,25 +645,23 @@
     margin: 0;
     padding: 0;
     line-height: 1;
-    font-family: var(--mhx-font-title);
-    font-size: 1.6em;
-    font-weight: normal;
-    color: var(--mhx-ink);
-    text-shadow: var(--mhx-lift);
-    background: linear-gradient(to bottom, #fbf8f1 0%, #e7dfcf 100%);
-    border: 1px solid var(--mhx-ink);
-    border-radius: 3px;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.7),
-      inset 0 -2px 3px rgba(91, 82, 70, 0.18),
-      0 1px 2px rgba(30, 24, 18, 0.3);
+    font-family: "Rubik", var(--mhx-font-title);
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--mythos-pink, #502c5d);
+    text-shadow: 0 2px 4px var(--mythos-bright, #ae4ace);
+    background: #d8d8d8;
+    border: 2px solid #b1b1b1;
+    border-radius: 0.3em;
+    box-shadow: none;
   }
 
+  /* One modifier per line, flush left */
   .city-roll ul.roll-modifiers {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 3px 6px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -675,27 +674,31 @@
   }
 
   .city-roll .roll-modifiers li {
-    display: inline-flex;
+    display: flex;
     flex-wrap: wrap;
     align-items: baseline;
+    justify-content: flex-start;
     gap: 0 0.3em;
+    max-width: 100%;
+    text-align: left;
   }
 
   /* Modifiers: every one is a highlight, no bar art (user, 2026-11-17):
-     typewriter italics on a flat marker block. The colour follows the
+     the body serif on a flat marker block. The colour follows the
      sign and kind (init.js marks each row): yellow for tags and other
-     bonuses, green for statuses, orange for anything against the roll.
+     bonuses, green for statuses, salmon for anything against the roll.
      The row classes set only --mhx-hl, so .strikeout below still clears
      the block. */
   .city-roll .roll-modifiers .name {
     --mhx-hl: var(--mhx-storytag);
     display: inline-block;
-    padding: 0 0.3em;
-    font-family: var(--mhx-font-type);
-    font-size: 1.05em;
-    font-style: italic;
+    padding: 0.05em 0.35em;
+    font-family: var(--mhx-font-body);
+    font-size: 1.15em;
+    font-style: normal;
     font-weight: normal;
-    line-height: 1.35;
+    line-height: 1.3;
+    text-align: left;
     text-transform: none;
     letter-spacing: normal;
     color: var(--mhx-hl-text);
@@ -739,22 +742,22 @@
     color: var(--mhx-ink);
   }
 
-  /* Total: big Rift figures between two ink rules */
+  /* Total: the system's Mythos figure with its glow, between two rules */
   .city-roll div.roll-total {
     position: relative;
     width: fit-content;
     min-width: 2.6em;
     margin: 0.1em auto 0;
     padding: 0.05em 0.6em 0;
-    font-family: var(--mhx-font-title);
-    font-size: 2.1em;
-    font-weight: normal;
+    font-family: "Rubik", var(--mhx-font-title);
+    font-size: 1.9em;
+    font-weight: bold;
     line-height: 1.2;
     text-align: center;
-    color: var(--mhx-ink);
-    text-shadow: var(--mhx-lift);
-    border-top: 1px solid var(--mhx-ink);
-    border-bottom: 1px solid var(--mhx-ink);
+    color: var(--mythos-pink, #502c5d);
+    text-shadow: 0 3px 6px var(--mythos-bright, #ae4ace);
+    border-top: 1px solid #b1b1b1;
+    border-bottom: 1px solid #b1b1b1;
     background: linear-gradient(90deg, transparent, rgba(255, 252, 245, 0.6), transparent);
   }
 
@@ -863,19 +866,25 @@
     box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.18), 0 1px 5px rgba(0, 0, 0, 0.55);
   }
 
-  /* Power panel (move-create-tag-com.hbs): two keys, then the created list */
+  /* Power panel (move-create-tag-com.hbs): the two keys share one row,
+     then the rule and the created list take full rows */
   .city-roll .move-tag-status-creator {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
     font-size: 0.95em;
   }
 
   .city-roll .move-tag-status-creator > button {
-    width: calc(50% - 3px);
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
     margin: 0;
     padding: 3px 0;
   }
 
-  .city-roll .move-tag-status-creator > button + button {
-    margin-left: 6px;
+  .city-roll .move-tag-status-creator > :is(hr, ul) {
+    flex: 0 0 100%;
   }
 
   .city-roll .move-tag-status-creator ul {
