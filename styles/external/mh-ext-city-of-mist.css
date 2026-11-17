@@ -1265,7 +1265,7 @@
      and on the theme-block (themebook subtype); custom properties
      inherit, so the inner one wins. */
   .city.sheet {
-    --theme-card-size:  420px;               /* the system's is 500px */
+    --theme-card-size:  445px;               /* the system's is 500px */
     --mhx-band:         34px;                /* the art's top strip at 240px wide */
     --mhx-foot:         37px;                /* the art's foot strip at 240px wide */
     --mhx-theme-bg:     url(/modules/mist-hud/ui/com_neutral_bg.webp);
@@ -1342,14 +1342,11 @@
   }
 
   /* ── Window ──────────────────────────────────────────────────────────
-     The HUD's canvas (com_chat_BG_s) under a light grey wash, as the
-     chat cards, so the theme cards stand off it. */
+     The night city: com_sheet_BG (dark violet brush strokes) covers the
+     window, so the paper theme cards stand off it. Text that sits on the
+     window itself is re-inked pale in "On the dark window" below. */
   .city.sheet:has(> .window-content > .actor-sheet) > .window-content {
-    background:
-      linear-gradient(rgba(217, 216, 212, 0.45), rgba(217, 216, 212, 0.45)),
-      var(--mhx-paper-art) center top / cover no-repeat,
-      var(--mhx-paper);
-    background-blend-mode: normal;
+    background: url(/modules/mist-hud/ui/com_sheet_BG.webp) center / cover no-repeat, #1b1030;
   }
 
   /* ── Sheet body ─────────────────────────────────────────────────────── */
@@ -1652,7 +1649,7 @@
   }
 
   /* ── Card frame ──────────────────────────────────────────────────────
-     240px wide (the system's), 420px tall (the system's 500, less 80). The art is drawn 100%
+     240px wide (the system's), 445px tall (the system's 500, less 55). The art is drawn 100%
      wide from the top, so its top strip is the band; ::after repaints
      the art's foot (logo) at the bottom. Transparent top and bottom
      borders keep the scrolling content off both strips. */
@@ -1984,7 +1981,7 @@
   .city.sheet .flip-card div.theme-block div.tag-add-icons .tags-header::before,
   .city.sheet .flip-card div.theme-block > ul.tag-list ~ ul.tag-list:has(> li)::before {
     font-family: var(--mhx-font-label);
-    font-size: 19px;
+    font-size: 16px;
     font-style: normal;
     font-weight: 900;
     line-height: 1;
@@ -2994,5 +2991,120 @@
     border: none;
     border-left: 2px solid var(--mhx-ink);
     border-radius: 0;
+  }
+
+  /* ── On the dark window ──────────────────────────────────────────────
+     What sits on the window art itself (header, tabs, section headings,
+     move picker, lock key, empty slots) takes a pale ink; the cards and
+     paper notes keep their charcoal. Rules come last so they override the
+     paper-ink rules above at equal specificity. */
+  .city.sheet .actor-sheet :is(
+    header.sheet-header,
+    nav.sheet-tabs,
+    .section-header,
+    .bio-section-label
+  ) {
+    --mhx-ink:        #ece6f2;
+    --mhx-ink-dim:    rgba(236, 230, 242, 0.65);
+    --mhx-line:       rgba(236, 230, 242, 0.55);
+    --mhx-line-dim:   rgba(236, 230, 242, 0.35);
+    --mhx-line-faint: rgba(236, 230, 242, 0.18);
+    --mhx-lift:       0 1px 2px rgba(0, 0, 0, 0.7);
+  }
+
+  /* Move picker: a smoked-glass field on the dark art */
+  .city.sheet .actor-sheet .move-section select {
+    color: #ece6f2;
+    background: rgba(14, 8, 26, 0.72);
+    border-color: rgba(236, 230, 242, 0.3);
+  }
+
+  .city.sheet .actor-sheet .move-section select:focus {
+    border-color: rgba(236, 230, 242, 0.6);
+    box-shadow: 0 0 4px rgba(236, 230, 242, 0.25);
+  }
+
+  .city.sheet .actor-sheet .move-section select option {
+    color: #ece6f2;
+    background: #1b1030;
+  }
+
+  /* Tabs: the themebook's neon sign, solid. Muted pink when off, a
+     white-pink tube with a pink bloom when active (text-fill-color so a
+     system colour can't override it). */
+  .city.sheet .actor-sheet nav.sheet-tabs {
+    --mhx-neon:      #ff2aa6;
+    --mhx-neon-hi:   #ff6cc4;
+    border-color: rgba(255, 42, 166, 0.3);
+  }
+
+  .city.sheet .actor-sheet nav.sheet-tabs .item {
+    -webkit-text-fill-color: #d9a3c8;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    transition: -webkit-text-fill-color 0.15s, text-shadow 0.15s;
+  }
+
+  .city.sheet .actor-sheet nav.sheet-tabs .item:hover {
+    -webkit-text-fill-color: var(--mhx-neon-hi);
+    text-shadow: 0 0 6px rgba(255, 42, 166, 0.45);
+  }
+
+  .city.sheet .actor-sheet nav.sheet-tabs .item.active {
+    -webkit-text-fill-color: #ffe0f2;
+    text-shadow:
+      0 0 3px var(--mhx-neon),
+      0 0 10px rgba(255, 42, 166, 0.7),
+      0 0 20px rgba(255, 42, 166, 0.35);
+    background: linear-gradient(0deg, rgba(255, 42, 166, 0.14), transparent);
+    border-bottom-color: var(--mhx-neon);
+    box-shadow: 0 3px 6px -3px var(--mhx-neon);
+  }
+
+  /* Lock key: smoked glass with a pale glyph; unlocked, the tube lights */
+  .city.sheet .actor-sheet .pushable {
+    background: linear-gradient(180deg, rgba(48, 32, 72, 0.9), rgba(20, 12, 36, 0.9));
+    border: 1px solid rgba(236, 230, 242, 0.28);
+    box-shadow:
+      inset 0 1px 0 rgba(236, 230, 242, 0.12),
+      0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  .city.sheet .actor-sheet .pushable .front {
+    color: #ece6f2;
+  }
+
+  .city.sheet .actor-sheet .pushable.unlocked {
+    background: linear-gradient(180deg, rgba(70, 18, 60, 0.9), rgba(30, 8, 30, 0.9));
+    border-color: #ff2aa6;
+    box-shadow:
+      inset 0 0 6px rgba(255, 42, 166, 0.35),
+      0 0 8px rgba(255, 42, 166, 0.55);
+  }
+
+  .city.sheet .actor-sheet .pushable.unlocked .front {
+    color: #ff6cc4;
+    text-shadow: 0 0 4px #ff2aa6, 0 0 10px rgba(255, 42, 166, 0.6);
+  }
+
+  /* Placeholders on the dark art: legible but clearly empty */
+  .city.sheet .actor-sheet header.sheet-header input::placeholder {
+    color: rgba(236, 230, 242, 0.5);
+    opacity: 1;
+  }
+
+  /* Empty theme slots: smoked glass with pale dashes */
+  .city.sheet div.flex-theme-block.empty-box {
+    color: rgba(236, 230, 242, 0.6);
+    background: rgba(14, 8, 26, 0.45);
+    border-color: rgba(236, 230, 242, 0.3);
+  }
+
+  .city.sheet div.flex-theme-block.empty-box:hover {
+    border-color: rgba(236, 230, 242, 0.7);
+    box-shadow: 0 0 8px rgba(236, 230, 242, 0.2);
+  }
+
+  .city.sheet .empty-extra-placeholder-text .add-theme {
+    color: #ece6f2;
   }
 }
