@@ -84,6 +84,15 @@
   --mh-cs-title-glow: 0 0 0.6cqw #f0c8ff, 0 0 2cqw #c264f0, 0 0 4.5cqw rgba(150, 50, 200, 0.85);
 }
 
+/* Edit mode: the white Mythos title needs a dark field. */
+.mh-card-sheet .mh-cs-type-mythos textarea.mh-cs-title-input {
+  background: rgba(45, 12, 60, 0.45);
+}
+
+.mh-card-sheet .mh-cs-type-mythos textarea.mh-cs-title-input:is(:hover, :focus) {
+  background: rgba(45, 12, 60, 0.6);
+}
+
 .mh-card-sheet .mh-cs-type-logos .mh-cs-face {
   background-image: url("../../ui/card-sheet/com/logos_theme_bg.webp");
   --mh-cs-ink: #3a2216;
@@ -133,14 +142,41 @@
   background-image: url("../../ui/icons/burn_com_full_icn.svg");
 }
 
+/* The empty flame is light grey (made for the dark HUD): darkened on the cards. */
+.mh-card-sheet .mh-cs-burn.unburned {
+  filter: brightness(0.32);
+  opacity: 0.75;
+}
+
 /* The title may use a little of the side margin (the frame is ~5cqw). */
 .mh-card-sheet .mh-cs-title {
   margin: 0 -3cqw;
 }
 
-/* Rock Salt runs tall: a smaller handwritten line. */
+/* The identity / mystery line in Rock Salt (user, 2026-11-18: bigger). */
 .mh-card-sheet .mh-cs-motivation-text {
-  font-size: 3.9cqw;
-  line-height: 1.6;
-  max-height: calc(3.9cqw * 1.6 * 4 + 0.8em);
+  font-size: 4.8cqw;
+  line-height: 1.55;
+  max-height: calc(4.8cqw * 1.55 * 4 + 0.8em);
+}
+
+/* Track pips: the City of Mist sheet's point shapes (the External Style
+   track boxes, track-com-*.svg), darkened for the light cards. */
+.mh-card-sheet .mh-cs-pip {
+  width: 6.4cqw;
+  height: 6.4cqw;
+  border: none;
+  border-radius: 0;
+  background: url("../../ui/icons/track-com-empty.svg") center / contain no-repeat;
+  filter: brightness(0.2);
+  opacity: 0.8;
+}
+
+.mh-card-sheet .mh-cs-pip.filled {
+  background-image: url("../../ui/icons/track-com-full.svg");
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-pips {
+  gap: 0.6cqw;
 }

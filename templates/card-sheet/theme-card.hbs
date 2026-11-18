@@ -1,15 +1,54 @@
 {{!-- One theme card: front and back faces of the same card (plan § 3).
       Main, crew and extra themes; shared by every game (art, fonts and band
-      positions are per-system CSS). Read-only: no edit mode, selection or
-      tracker buttons yet.
+      positions are per-system CSS).
       Takes: card (themeCard / linkedThemeCard), layer (1 or 2), back (the
       layer is behind: the card is inert under its peek tab).
-      The header band flips the card; the face turned away is inert. --}}
+      The header band flips the card; the face turned away is inert. No
+      control sits in the band.
+      Modes (plan § 6.2, phase 3): card.edit = edit mode (the sheet is
+      unlocked) and this user owns the theme's actor: inputs and edit
+      controls. card.own = this user owns it: the play controls the system
+      sheet also shows when locked (track +, burn, send an improvement to
+      chat, new power tags / improvements while upgrades are unspent).
+      Edit-only markup is only rendered in edit mode, never hidden by CSS. --}}
 {{#*inline "mh-cs-pips"}}
+{{!-- The pips (with − / + in edit mode), the track's name under them, as on
+      the system sheet. --}}
 <div class="mh-cs-track mh-cs-track-{{kind}}">
-  <span class="mh-cs-track-label">{{label}}</span>
+  <div class="mh-cs-track-row">
+  {{#if card.edit}}
+  <button type="button" class="mh-cs-icon-btn mh-cs-track-btn" data-action="removeTrack" data-track="{{kind}}" data-tooltip="{{localize 'MistHUD.cardSheet.removeTrack' name=label}}" aria-label="{{localize 'MistHUD.cardSheet.removeTrack' name=label}}"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
   <span class="mh-cs-pips">{{#each pips}}<span class="mh-cs-pip{{#if filled}} filled{{/if}}"></span>{{/each}}</span>
+  <button type="button" class="mh-cs-icon-btn mh-cs-track-btn" data-action="addTrack" data-track="{{kind}}" data-tooltip="{{localize 'MistHUD.cardSheet.addTrack' name=label}}" aria-label="{{localize 'MistHUD.cardSheet.addTrack' name=label}}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+  {{#if reset}}
+  <button type="button" class="mh-cs-icon-btn mh-cs-track-btn mh-cs-reset-fade" data-action="resetFade" data-tooltip="{{localize 'MistHUD.cardSheet.resetFade'}}" aria-label="{{localize 'MistHUD.cardSheet.resetFade'}}"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i></button>
+  {{/if}}
+  {{else if card.own}}
+  {{!-- Play mode: the pips are the + button, as the system sheet keeps + when locked. --}}
+  <button type="button" class="mh-cs-pips mh-cs-pips-add" data-action="addTrack" data-track="{{kind}}" data-tooltip="{{localize 'MistHUD.cardSheet.addTrack' name=label}}" aria-label="{{localize 'MistHUD.cardSheet.addTrack' name=label}}">{{#each pips}}<span class="mh-cs-pip{{#if filled}} filled{{/if}}"></span>{{/each}}</button>
+  {{else}}
+  <span class="mh-cs-pips">{{#each pips}}<span class="mh-cs-pip{{#if filled}} filled{{/if}}"></span>{{/each}}</span>
+  {{/if}}
+  </div>
+  <span class="mh-cs-track-label">{{label}}</span>
 </div>
+{{/inline}}
+{{#*inline "mh-cs-tag"}}
+<li class="mh-cs-tag mh-cs-{{kind}}-tag {{tag.burnState}}{{#if tag.isTitle}} mh-cs-title-tag{{/if}}{{#if tag.depth}} mh-cs-subtag{{/if}}" data-tag-id="{{tag.id}}" style="--mh-cs-depth: {{tag.depth}}">
+  {{#if burn}}
+  {{#if tag.burnAction}}
+  <button type="button" class="mh-cs-burn {{tag.burnState}}" data-action="burnTag" data-tooltip="{{tag.burnLabel}}" aria-label="{{tag.burnLabel}}"></button>
+  {{else}}
+  <span class="mh-cs-burn {{tag.burnState}}" aria-hidden="true"></span>
+  {{/if}}
+  {{/if}}
+  {{#if tag.edit}}
+  <button type="button" class="mh-cs-tag-name mh-cs-edit-name" data-action="editTag" data-tooltip="{{localize 'MistHUD.cardSheet.editTag'}}">{{tag.name}}</button>
+  <button type="button" class="mh-cs-icon-btn mh-cs-delete" data-action="deleteTag" data-tooltip="{{localize 'MistHUD.cardSheet.deleteTagHint'}}" aria-label="{{localize 'MistHUD.cardSheet.deleteTag'}}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+  {{else}}
+  <span class="mh-cs-tag-name">{{tag.name}}</span>
+  {{/if}}
+</li>
 {{/inline}}
 {{#if card.empty}}
 <article class="mh-cs-card mh-cs-card-empty" data-card-id="{{card.id}}">
@@ -17,56 +56,100 @@
   <div class="mh-cs-card-inner"{{#if back}} inert{{/if}}>
     <section class="mh-cs-face mh-cs-front">
       <p class="mh-cs-empty-text">{{localize "MistHUD.cardSheet.emptySlot"}}</p>
+      {{#if card.canAdd}}
+      <button type="button" class="mh-cs-add-theme" data-action="addTheme"><i class="fa-solid fa-plus" aria-hidden="true"></i> {{localize "CityOfMist.command.addTheme"}}</button>
+      {{/if}}
     </section>
   </div>
 </article>
 {{else}}
-<article class="mh-cs-card mh-cs-theme-card mh-cs-type-{{card.type}}{{#if card.flipped}} flipped{{/if}}{{#if card.extra}} mh-cs-extra-card{{#if card.extra.active}} mh-cs-active-extra{{/if}}{{/if}}" data-card-id="{{card.id}}" data-theme-id="{{card.id}}"{{#if card.ownerId}} data-owner-id="{{card.ownerId}}"{{/if}}>
+<article class="mh-cs-card mh-cs-theme-card mh-cs-type-{{card.type}}{{#if card.flipped}} flipped{{/if}}{{#if card.edit}} mh-cs-editable{{/if}}{{#if card.extra}} mh-cs-extra-card{{#if card.extra.active}} mh-cs-active-extra{{/if}}{{/if}}" data-card-id="{{card.id}}" data-theme-id="{{card.id}}" data-owner-id="{{card.ownerId}}">
   {{> "modules/mist-hud/templates/card-sheet/peek-tab.hbs" layer=layer title=card.title}}
   <div class="mh-cs-card-inner"{{#if back}} inert{{/if}}>
 
     <section class="mh-cs-face mh-cs-front"{{#if card.flipped}} inert{{/if}}>
       {{> "modules/mist-hud/templates/card-sheet/card-band.hbs" title=card.title icon=card.category label=card.themebook}}
       <div class="mh-cs-body">
-        {{#if card.extra}}
-        {{!-- The active extra is the one the system rolls with. --}}
-        <div class="mh-cs-extra-state">
+        {{#if card.topRow}}
+        {{!-- The row under the band: the active-extra state, the owner's
+              sheet, and the theme's edit controls (never in the band). --}}
+        <div class="mh-cs-top-row">
+          {{#if card.extra}}
+          {{!-- The active extra is the one the system rolls with. --}}
           {{#if card.extra.active}}
           <span class="mh-cs-extra-mark"><i class="fa-solid fa-star" aria-hidden="true"></i> {{localize "MistHUD.cardSheet.activeExtra"}}</span>
           {{else if card.extra.canActivate}}
           <button type="button" class="mh-cs-extra-use" data-action="setActiveExtra" data-theme-id="{{card.id}}"><i class="fa-regular fa-star" aria-hidden="true"></i> {{localize "MistHUD.cardSheet.useExtra"}}</button>
           {{/if}}
-          {{#if card.ownerName}}<span class="mh-cs-extra-owner">{{card.ownerName}}</span>{{/if}}
+          {{/if}}
+          {{#if card.ownerName}}
+          {{#if card.canOpenOwner}}
+          <button type="button" class="mh-cs-owner mh-cs-owner-open" data-action="openOwnerSheet" data-tooltip="{{localize 'MistHUD.cardSheet.openOwnerSheet' name=card.ownerName}}"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> {{card.ownerName}}</button>
+          {{else}}
+          <span class="mh-cs-owner">{{card.ownerName}}</span>
+          {{/if}}
+          {{/if}}
+          {{#if card.edit}}
+          <span class="mh-cs-edit-tools">
+            {{#if card.editKit}}
+            <button type="button" class="mh-cs-icon-btn" data-action="editThemekit" data-tooltip="{{localize 'MistHUD.cardSheet.editThemekit'}}" aria-label="{{localize 'MistHUD.cardSheet.editThemekit'}}"><i class="fa-solid fa-pencil" aria-hidden="true"></i></button>
+            {{/if}}
+            {{#if card.editThemebook}}
+            <button type="button" class="mh-cs-icon-btn" data-action="editThemebook" data-tooltip="{{localize 'MistHUD.cardSheet.editThemebook'}}" aria-label="{{localize 'MistHUD.cardSheet.editThemebook'}}"><i class="fa-solid fa-book" aria-hidden="true"></i></button>
+            {{/if}}
+            <button type="button" class="mh-cs-icon-btn mh-cs-delete" data-action="deleteTheme" data-tooltip="{{localize 'MistHUD.cardSheet.deleteTheme'}}" aria-label="{{localize 'MistHUD.cardSheet.deleteTheme'}}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+          </span>
+          {{/if}}
         </div>
         {{/if}}
+        {{#if card.edit}}
+        <textarea class="mh-cs-title mh-cs-title-input" id="{{@root.uid}}-{{card.id}}-name" data-edit="themeName" rows="3" maxlength="52" spellcheck="false" aria-label="{{localize 'MistHUD.cardSheet.themeName'}}" placeholder="{{localize 'MistHUD.cardSheet.themeName'}}">{{card.title}}</textarea>
+        {{else}}
         <h3 class="mh-cs-title" data-fit data-fit-lines="3">{{card.title}}</h3>
+        {{/if}}
         <div class="mh-cs-tracks">
-          {{> mh-cs-pips kind="attention" label=card.attentionLabel pips=card.attention}}
-          {{> mh-cs-pips kind="crack" label=card.crackLabel pips=card.crack}}
+          {{> mh-cs-pips kind="attention" label=card.attentionLabel pips=card.attention card=card}}
+          {{> mh-cs-pips kind="crack" label=card.crackLabel pips=card.crack card=card reset=card.canResetFade}}
         </div>
         <div class="mh-cs-motivation{{#if card.motivationEmpty}} empty{{/if}}">
+          {{#if card.typeToggle}}
+          <button type="button" class="mh-cs-motivation-label mh-cs-type-toggle" data-action="toggleThemeType" data-tooltip="{{localize 'MistHUD.cardSheet.toggleThemeType'}}">{{card.motivationLabel}} <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i></button>
+          {{else}}
           <span class="mh-cs-motivation-label">{{card.motivationLabel}}</span>
+          {{/if}}
+          {{#if card.edit}}
+          <textarea class="mh-cs-motivation-text mh-cs-motivation-input" id="{{@root.uid}}-{{card.id}}-mystery" data-edit="themeField" data-field="mystery" rows="3" aria-label="{{card.motivationLabel}}" placeholder="{{card.motivation}}">{{card.motivationRaw}}</textarea>
+          {{else}}
           <p class="mh-cs-motivation-text">{{card.motivation}}</p>
+          {{/if}}
         </div>
         <div class="mh-cs-scroll">
-          <h4 class="mh-cs-section">{{localize "CityOfMist.terms.powerTags"}}</h4>
+          <h4 class="mh-cs-section">
+            <span class="mh-cs-section-label">{{localize "CityOfMist.terms.powerTags"}}</span>
+            {{#if card.canAddPower}}
+            <button type="button" class="mh-cs-icon-btn" data-action="addTag" data-subtype="power" data-tooltip="{{localize 'MistHUD.cardSheet.addPowerTag'}}" aria-label="{{localize 'MistHUD.cardSheet.addPowerTag'}}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+            {{/if}}
+            {{#if card.edit}}
+            <button type="button" class="mh-cs-icon-btn" data-action="addBonusTag" data-tooltip="{{localize 'MistHUD.cardSheet.addBonusTag'}}" aria-label="{{localize 'MistHUD.cardSheet.addBonusTag'}}"><i class="fa-solid fa-star" aria-hidden="true"></i></button>
+            {{/if}}
+          </h4>
           <ul class="mh-cs-tags mh-cs-power-tags">
             {{#each card.powerTags}}
-            <li class="mh-cs-tag mh-cs-power-tag {{burnState}}{{#if isTitle}} mh-cs-title-tag{{/if}}{{#if depth}} mh-cs-subtag{{/if}}" data-tag-id="{{id}}" style="--mh-cs-depth: {{depth}}">
-              <span class="mh-cs-burn {{burnState}}" aria-hidden="true"></span>
-              <span class="mh-cs-tag-name">{{name}}</span>
-            </li>
+            {{> mh-cs-tag tag=this kind="power" burn=true}}
             {{/each}}
           </ul>
         </div>
         {{!-- Weakness tags sit at the bottom of the card, as in the mockup. --}}
         <div class="mh-cs-weakness">
-          <h4 class="mh-cs-section">{{localize "CityOfMist.terms.weaknessTags"}}</h4>
+          <h4 class="mh-cs-section">
+            <span class="mh-cs-section-label">{{localize "CityOfMist.terms.weaknessTags"}}</span>
+            {{#if card.edit}}
+            <button type="button" class="mh-cs-icon-btn" data-action="addTag" data-subtype="weakness" data-tooltip="{{localize 'MistHUD.cardSheet.addWeaknessTag'}}" aria-label="{{localize 'MistHUD.cardSheet.addWeaknessTag'}}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+            {{/if}}
+          </h4>
           <ul class="mh-cs-tags mh-cs-weakness-tags">
             {{#each card.weaknessTags}}
-            <li class="mh-cs-tag mh-cs-weakness-tag {{burnState}}" data-tag-id="{{id}}">
-              <span class="mh-cs-tag-name">{{name}}</span>
-            </li>
+            {{> mh-cs-tag tag=this kind="weakness" burn=false}}
             {{/each}}
           </ul>
         </div>
@@ -77,14 +160,16 @@
     <section class="mh-cs-face mh-cs-back"{{#unless card.flipped}} inert{{/unless}}>
       {{> "modules/mist-hud/templates/card-sheet/card-band.hbs" title=card.title icon=card.category label=card.themebook}}
       <div class="mh-cs-body">
-        <h4 class="mh-cs-section">{{localize "CityOfMist.terms.improvements"}}</h4>
+        <h4 class="mh-cs-section">
+          <span class="mh-cs-section-label">{{localize "CityOfMist.terms.improvements"}}</span>
+          {{#if card.canAddImprovement}}
+          <button type="button" class="mh-cs-icon-btn" data-action="addImprovement" data-tooltip="{{localize 'MistHUD.cardSheet.addImprovement'}}" aria-label="{{localize 'MistHUD.cardSheet.addImprovement'}}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+          {{/if}}
+        </h4>
         {{#if card.unspent}}<p class="mh-cs-unspent"><i class="fa-solid fa-up-long" aria-hidden="true"></i> {{card.unspentLabel}}</p>{{/if}}
         <ul class="mh-cs-scroll mh-cs-improvements">
           {{#each card.improvements}}
-          <li class="mh-cs-improvement{{#if expended}} expended{{/if}}" data-improvement-id="{{id}}"{{#if description}} data-tooltip="{{description}}"{{/if}}>
-            <span class="mh-cs-imp-name">{{name}}</span>{{#if choice}} <span class="mh-cs-imp-choice">({{choice}})</span>{{/if}}
-            {{#if uses}}<span class="mh-cs-imp-uses">{{uses}}</span>{{/if}}
-          </li>
+          {{> "modules/mist-hud/templates/card-sheet/improvement.hbs" imp=this}}
           {{else}}
           <li class="mh-cs-none">{{localize "MistHUD.cardSheet.noImprovements"}}</li>
           {{/each}}

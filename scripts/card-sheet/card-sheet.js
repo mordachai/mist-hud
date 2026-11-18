@@ -5,16 +5,21 @@
 // truth: reads go through getters.js, writes through document methods, and
 // anything else through system-adapter.js.
 //
-// Phase 2: move bar, layer 1 (the four main themes), layer 2 (character
-// card, crew themes, every extra theme), flip cards, the layer swap, the
-// active-extra switch, and the "Open system sheet" header button. Read-only
-// otherwise (edit mode is phase 3).
+// Move bar, layer 1 (the four main themes), layer 2 (character card, crew
+// themes, every extra theme), flip cards, the layer swap, the active-extra
+// switch, the "Open system sheet" header button, and edit mode (phase 3):
+// the system's lock (`actor.system.locked`; unlocked = edit mode) toggled by
+// a header control, inline inputs saved on change, and the edit actions of
+// edit-actions.js. The window carries data-mode="play" | "edit".
 
 import { MODULE_ID, SETTINGS } from "../constants.js";
-import { buildLayer1Context, buildLayer2Context } from "./card-sheet-context.js";
+import { buildLayer1Context, buildLayer2Context, isEditMode } from "./card-sheet-context.js";
 import { watchFit } from "./card-fit.js";
 import { prepareMoveBar, executeMove } from "./move-bar.js";
-import { openSystemSheet, systemSheetFlips, logModification } from "./system-adapter.js";
+import {
+  openSystemSheet, systemSheetFlips, logModification, creationLocation, statusDrop,
+} from "./system-adapter.js";
+import { EDIT_ACTIONS, changeThemeField, changeActorField } from "./edit-actions.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -30,9 +35,22 @@ export const CARD_SHEET_TEMPLATES = [
   `${TEMPLATE_DIR}/character-card.hbs`,
   `${TEMPLATE_DIR}/card-band.hbs`,
   `${TEMPLATE_DIR}/peek-tab.hbs`,
+  `${TEMPLATE_DIR}/improvement.hbs`,
 ];
 
 const LAYER_PARTS = ["layer1", "layer2"];
+
+/** Everything inside a card that scrolls; its position is kept across re-renders. */
+const SCROLLERS = ".mh-cs-scroll, .mh-cs-weakness-tags, .mh-cs-motivation-text, .mh-cs-title-input, .mh-cs-short-desc, .mh-cs-bu-improvements";
+
+/** Actor fields shown on layer 2 only (the character card): a change re-renders layer 2 alone. */
+const LAYER2_ACTOR_FIELDS = new Set([
+  "name", "system.mythos", "system.logos", "system.short_description", "system.biography",
+  "system.buildup", "system.unspentBU",
+]);
+
+/** Theme fields that change only that theme's card (not the layer order or art). */
+const THEME_TEXT_FIELDS = new Set(["name", "system.mystery"]);
 
 // ── Sheet UI state (client setting, per actor uuid; plan § 6.2) ──────────────
 // { [actorUuid]: { flipped: { [cardId]: true }, front: 1 | 2 } }
@@ -42,24 +60,49 @@ function readUiState(actor) {
   catch { return {}; }
 }
 
-async function writeUiState(actor, change) {
+/**
+ * Change this actor's sheet state. `flipped: { [cardId]: bool }` sets or
+ * clears a card's flip (cleared keys are deleted by hand: in v14
+ * mergeObject leaves a ForcedDeletion object for "-=key", which reads as
+ * truthy); `front` sets the front layer.
+ */
+async function writeUiState(actor, { flipped, front } = {}) {
   let all;
   try { all = foundry.utils.deepClone(game.settings.get(MODULE_ID, SETTINGS.CARD_SHEET_STATE) ?? {}); }
   catch { return; }
-  all[actor.uuid] = foundry.utils.mergeObject(all[actor.uuid] ?? {}, change, { performDeletions: true });
+  const state = all[actor.uuid] ?? {};
+  if (flipped) {
+    const flips = cleanFlips(state.flipped);
+    for (const [cardId, on] of Object.entries(flipped)) {
+      if (on) flips[cardId] = true;
+      else delete flips[cardId];
+    }
+    state.flipped = flips;
+  }
+  if (front !== undefined) state.front = front;
+  all[actor.uuid] = state;
   await game.settings.set(MODULE_ID, SETTINGS.CARD_SHEET_STATE, all);
+}
+
+/** Only the cards really flipped (drops leftovers of the old "-=key" writes). */
+function cleanFlips(flips) {
+  return Object.fromEntries(Object.entries(flips ?? {}).filter(([, on]) => on === true));
 }
 
 export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   static DEFAULT_OPTIONS = {
     classes: ["mh-card-sheet"],
-    // Reference size: four 244 x 620 City of Mist cards (art 473 x 1203) with
-    // 12px gaps, under the 56px band and the 8px gap, plus the back layer's
-    // header bands peeking out above (0.2 card widths = 49px) and 6/12px room
-    // for the shadows. A smaller window scales the cards down (container
-    // queries on the window content).
-    position: { width: 1024, height: 745 },
+    // Reference size (user, 2026-11-18): four ~204 x 520 City of Mist cards
+    // (art 473 x 1203) with 12px gaps, under the 56px band and the 8px gap,
+    // plus the back layer's header bands peeking out above (0.2 card widths
+    // = 41px) and 6/12px room for the shadows. The height sets the card size
+    // (content height − 64 = card width × (1203/473 + 0.2)). A smaller window
+    // scales the cards down (container queries on the window content).
+    position: { width: 880, height: 637 },
     window: { resizable: true },
+    // Every write goes through its own change handler or action; a form
+    // submit (Enter in an input) writes nothing.
+    form: { handler: MistCardSheet.#onSubmitForm, submitOnChange: false, closeOnSubmit: false },
     actions: {
       rollMove:        MistCardSheet.#onRollMove,
       nextMoveGroup:   MistCardSheet.#onNextMoveGroup,
@@ -67,13 +110,16 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       flipCard:        MistCardSheet.#onFlipCard,
       showLayer:       MistCardSheet.#onShowLayer,
       setActiveExtra:  MistCardSheet.#onSetActiveExtra,
+      ...EDIT_ACTIONS,
     },
   };
 
+  // Scroll positions are kept by _preSyncPartState for every list (not only
+  // the first match of a selector, as PARTS.scrollable does).
   static PARTS = {
     moves:  { template: CARD_SHEET_TEMPLATES[0] },
-    layer1: { template: CARD_SHEET_TEMPLATES[1], scrollable: [".mh-cs-scroll"] },
-    layer2: { template: CARD_SHEET_TEMPLATES[2], scrollable: [".mh-cs-scroll"] },
+    layer1: { template: CARD_SHEET_TEMPLATES[1] },
+    layer2: { template: CARD_SHEET_TEMPLATES[2] },
   };
 
   // ── What the system expects of `actor.sheet` ────────────────────────────────
@@ -93,7 +139,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   /** The card sheet's flipped cards: { [cardId]: true } (client setting). */
   get cardFlips() {
-    return readUiState(this.actor).flipped ?? {};
+    return cleanFlips(readUiState(this.actor).flipped);
   }
 
   /** The layer in front: 1 (main themes) or 2 (character, crew, extras). */
@@ -114,10 +160,168 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   #unwatchFit = {};
   #linkedOwners = new Set();
 
+  /** Edit mode: the system's unlocked state (plan § 6.2, "Lock state"). */
+  get editMode() {
+    return isEditMode(this.actor);
+  }
+
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     context.actor = this.actor;
+    // Prefix of the inputs' ids, so the focus survives a re-render.
+    context.uid = this.id;
     return context;
+  }
+
+  // ── Re-rendering only what changed ──────────────────────────────────────────
+  // A document update re-renders the whole sheet. For the changes the card
+  // sheet makes itself (a theme's name or mystery, a tag, an improvement, a
+  // character field), only the layer that shows them is rendered again.
+
+  _configureRenderOptions(options) {
+    if (!options.isFirstRender && !options.parts && options.renderContext) {
+      const parts = this.#partsFor(options.renderContext, options.renderData);
+      if (parts) options.parts = parts;
+    }
+    super._configureRenderOptions(options);
+  }
+
+  /** The parts a document change shows in, or null when unsure (render everything). */
+  #partsFor(renderContext, renderData) {
+    const match = /^(create|update|delete)(item|items)$/i.exec(renderContext);
+    // The changed fields, without the id and the bookkeeping (_stats.modifiedTime…).
+    const changedKeys = change => Object.keys(foundry.utils.flattenObject(change ?? {}))
+      .filter(k => k !== "_id" && !k.startsWith("_stats"));
+    if (renderContext === "updateActor") {
+      const keys = changedKeys(renderData);
+      if (!keys.length) return null;
+      if (keys.every(k => LAYER2_ACTOR_FIELDS.has(k))) return ["layer2"];
+      if (keys.every(k => k === "system.locked")) return LAYER_PARTS;
+      return null;
+    }
+    if (!match || match[1].toLowerCase() === "delete") return null;
+    const changes = Array.isArray(renderData) ? renderData : [renderData];
+    const main = new Set((this.actor.mainThemes ?? []).map(t => t.id));
+    const parts = new Set();
+    for (const change of changes) {
+      const item = this.actor.items.get(change?._id);
+      if (!item) return null;
+      if (item.type === "theme") {
+        // A rename or a new mystery: that card only. Anything else (type,
+        // extra flag) may move it: both layers.
+        const keys = changedKeys(change);
+        if (match[1].toLowerCase() !== "update" || !keys.every(k => THEME_TEXT_FIELDS.has(k))) return null;
+        parts.add(main.has(item.id) ? "layer1" : "layer2");
+      } else if (item.type === "tag" || item.type === "improvement") {
+        const themeId = item.system?.theme_id;
+        parts.add(themeId && main.has(themeId) ? "layer1" : "layer2");
+      } else {
+        // Statuses, juice, clues…: not on the cards yet (the deck is phase 5).
+        return null;
+      }
+    }
+    return parts.size ? [...parts] : null;
+  }
+
+  // ── Focus, typing and scroll positions across a re-render ──────────────────
+  // The core keeps the focused element (by id) and the first match of each
+  // PARTS.scrollable selector. The card sheet also keeps what was typed but
+  // not yet saved in the focused input, its caret, and the scroll position of
+  // every list in every card.
+
+  _preSyncPartState(partId, newElement, priorElement, state) {
+    super._preSyncPartState(partId, newElement, priorElement, state);
+    const focus = priorElement.querySelector(":focus");
+    if (focus?.id && (focus instanceof HTMLInputElement || focus instanceof HTMLTextAreaElement)) {
+      state.mhTyped = {
+        id:     focus.id,
+        typed:  focus.value !== focus.defaultValue ? focus.value : null,
+        start:  focus.selectionStart,
+        end:    focus.selectionEnd,
+      };
+    }
+    state.mhScroll = [];
+    for (const el of priorElement.querySelectorAll(SCROLLERS)) {
+      if (!el.scrollTop && !el.scrollLeft) continue;
+      const key = scrollKey(el);
+      if (key) state.mhScroll.push([key, el.scrollTop, el.scrollLeft]);
+    }
+  }
+
+  _syncPartState(partId, newElement, priorElement, state) {
+    super._syncPartState(partId, newElement, priorElement, state);
+    const typed = state.mhTyped;
+    const input = typed && newElement.querySelector(`#${CSS.escape(typed.id)}`);
+    if (input) {
+      if (typed.typed != null) input.value = typed.typed;
+      try { input.setSelectionRange(typed.start, typed.end); } catch { /* not a text field */ }
+    }
+    if (!state.mhScroll?.length) return;
+    const byKey = new Map([...newElement.querySelectorAll(SCROLLERS)].map(el => [scrollKey(el), el]));
+    for (const [key, top, left] of state.mhScroll) {
+      const el = byKey.get(key);
+      if (el) Object.assign(el, { scrollTop: top, scrollLeft: left });
+    }
+  }
+
+  // ── Inline inputs (edit mode) ───────────────────────────────────────────────
+
+  /**
+   * An inline input changed (on blur, or Enter): save it with the document
+   * method. The theme's name and mystery go to the theme (which may belong
+   * to a crew or a danger); the character card's fields and the biography
+   * editor's save go to the actor.
+   */
+  _onChangeForm(formConfig, event) {
+    const el = event.target;
+    switch (el?.dataset?.edit) {
+      case "themeName":
+      case "themeField":
+        changeThemeField(this, el);
+        return;
+      case "actor":
+        changeActorField(this, el);
+        return;
+    }
+    super._onChangeForm(formConfig, event);
+  }
+
+  static async #onSubmitForm() {}
+
+  // ── Drops ───────────────────────────────────────────────────────────────────
+
+  /**
+   * An item dropped on a card, as the system sheet's _onDropItem: a
+   * themebook or a theme kit becomes a new theme (main or extra, asked for
+   * player characters), a tag a story tag, a status merges into one of the
+   * same name. Anything else is ignored (no raw copy on the actor).
+   */
+  async _onDropItem(event, item) {
+    if (!this.actor.isOwner || !item) return null;
+    const type = item.system?.type ?? item.type;
+    switch (type) {
+      case "themekit": {
+        const where = await creationLocation(this.actor);
+        if (where) await this.actor.addThemeKit(item, where === "extra");
+        return null;
+      }
+      case "themebook": {
+        const tb = await super._onDropItem(event, item);
+        if (!tb) return null;
+        const where = await creationLocation(this.actor);
+        if (where) await this.actor.createNewTheme(`Unnamed ${tb.displayedName ?? ""} Theme`, tb, where === "extra");
+        return tb;
+      }
+      case "tag":
+        await this.actor.createStoryTag(item.name, true);
+        return null;
+      case "status":
+        await statusDrop(this.actor, item.name, { tier: item.tier });
+        return null;
+      default:
+        console.log(`Mist HUD | Card sheet: unsupported drop type ${type}`);
+        return null;
+    }
   }
 
   async _preparePartContext(partId, context, options) {
@@ -145,6 +349,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   async _onRender(context, options) {
     await super._onRender(context, options);
     this.element.dataset.front = String(this.frontLayer);
+    this.#syncLockControl();
     for (const part of LAYER_PARTS) {
       if (options.parts && !options.parts.includes(part)) continue;
       this.#unwatchFit[part]?.();
@@ -165,6 +370,36 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       event.stopPropagation();
       this.#flipCard(band.closest(".mh-cs-card"), { focus: true });
     });
+    // Inline inputs: Enter saves (blur fires "change"; Shift+Enter is a new
+    // line in the mystery), Escape drops what was typed.
+    this.element.addEventListener("keydown", event => {
+      const input = event.target;
+      if (!input?.dataset?.edit || !(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement)) return;
+      if (event.key === "Enter" && !(event.shiftKey && input.dataset.edit === "themeField")) {
+        event.preventDefault();
+        input.blur();
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        input.value = input.defaultValue;
+        input.blur();
+      }
+    });
+  }
+
+  /** The header lock control and data-mode follow the system's lock. */
+  #syncLockControl() {
+    const edit = this.editMode;
+    this.element.dataset.mode = edit ? "edit" : "play";
+    const button = this.element.querySelector(".window-header .mh-cs-lock");
+    if (!button) return;
+    const label = game.i18n.localize(edit ? "MistHUD.cardSheet.lockSheet" : "MistHUD.cardSheet.unlockSheet");
+    button.classList.toggle("fa-lock-open", edit);
+    button.classList.toggle("fa-lock", !edit);
+    button.classList.toggle("active", edit);
+    button.dataset.tooltip = label;
+    button.setAttribute("aria-label", label);
+    button.setAttribute("aria-pressed", String(edit));
   }
 
   _onClose(options) {
@@ -178,17 +413,27 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const frame = await super._renderFrame(options);
     // Which layer is in front, before the first paint (no swap animation on open).
     frame.dataset.front = String(this.frontLayer);
-    if (this.document.isOwner || game.user.isGM) {
-      const label = game.i18n.localize("MistHUD.cardSheet.openSystemSheet");
+    frame.dataset.mode = this.editMode ? "edit" : "play";
+    const header = frame.querySelector(".window-header");
+    const close = header?.querySelector('[data-action="close"]');
+    const addControl = (className, action, label) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "header-control icon fa-solid fa-book-open mh-cs-open-system";
-      button.dataset.action = "openSystemSheet";
+      button.className = `header-control icon fa-solid ${className}`;
+      button.dataset.action = action;
       button.dataset.tooltip = label;
       button.setAttribute("aria-label", label);
-      const close = frame.querySelector('.window-header [data-action="close"]');
       if (close) close.before(button);
-      else frame.querySelector(".window-header")?.append(button);
+      else header?.append(button);
+      return button;
+    };
+    // Play mode ⇄ edit mode: the system's lock (icon kept in sync by #syncLockControl).
+    if (this.document.isOwner) {
+      addControl("fa-lock mh-cs-lock", "toggleLock", game.i18n.localize("MistHUD.cardSheet.unlockSheet"));
+    }
+    if (this.document.isOwner || game.user.isGM) {
+      addControl("fa-book-open mh-cs-open-system", "openSystemSheet",
+        game.i18n.localize("MistHUD.cardSheet.openSystemSheet"));
     }
     return frame;
   }
@@ -286,8 +531,17 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const done = () => card.classList.remove("flipping");
     if (inner) inner.addEventListener("transitionend", done, { once: true });
     setTimeout(done, 1000);
-    await writeUiState(this.actor, { flipped: { [flipped ? cardId : `-=${cardId}`]: flipped || null } });
+    await writeUiState(this.actor, { flipped: { [cardId]: flipped } });
   }
+}
+
+/** Where a scrolling element sits: its card, its face and its place among the face's scrollers. */
+function scrollKey(el) {
+  const card = el.closest("[data-card-id]");
+  const face = el.closest(".mh-cs-face");
+  if (!card || !face) return null;
+  const index = [...face.querySelectorAll(SCROLLERS)].indexOf(el);
+  return `${card.dataset.cardId}|${face.classList.contains("mh-cs-back") ? "back" : "front"}|${index}`;
 }
 
 /** Re-render open card sheets when the system's tag/status selection changes. */

@@ -249,6 +249,10 @@
   --mh-cs-heading-weight: normal;
   --mh-cs-heading-spacing: 0.08em;
   --mh-cs-tag-font: var(--font-family-tags, "Roboto Condensed"), sans-serif;
+  /* Tag text: ~14px on the reference card (204 x 520). It was 5.8cqw on the
+     earlier 244 x 620 card; the card shrank, the tags kept their size (user,
+     2026-11-18), so it scales with the window like everything else. */
+  --mh-cs-tag-size: 6.92cqw;
 }
 
 /* ── Layers (plan § 7) ───────────────────────────────────────────────────────
@@ -511,11 +515,13 @@
   overflow-wrap: anywhere;
 }
 
+/* Attention and crack side by side; each is its pips (with − / + in edit
+   mode) over its name, as on the system sheet. */
 .mh-card-sheet .mh-cs-tracks {
   flex: 0 0 auto;
   display: flex;
   justify-content: space-between;
-  gap: 3cqw;
+  gap: 2cqw;
   font-family: var(--mh-cs-label-font);
   font-size: 4.2cqw;
   text-transform: uppercase;
@@ -523,9 +529,27 @@
 }
 
 .mh-card-sheet .mh-cs-track {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6cqw;
+}
+
+.mh-card-sheet .mh-cs-track-row {
   display: flex;
   align-items: center;
-  gap: 1.5cqw;
+  justify-content: center;
+  gap: 0.8cqw;
+}
+
+.mh-card-sheet .mh-cs-track-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .mh-card-sheet .mh-cs-pips {
@@ -617,7 +641,7 @@
   margin: 0;
   padding: 0.7cqw 0 0.7cqw calc(var(--mh-cs-depth, 0) * 4cqw);
   font-family: var(--mh-cs-tag-font);
-  font-size: 5.8cqw;
+  font-size: var(--mh-cs-tag-size);
   line-height: 1.2;
 }
 
@@ -658,7 +682,7 @@
 }
 
 .mh-card-sheet .mh-cs-weakness-tags {
-  max-height: calc(5.8cqw * 1.2 * 3 + 4.2cqw);
+  max-height: calc(var(--mh-cs-tag-size) * 1.2 * 3 + 4.2cqw);
   overflow-y: auto;
   scrollbar-width: thin;
 }
@@ -745,7 +769,7 @@
 
 /* ── Extra themes: the active one ────────────────────────────────────────── */
 
-.mh-card-sheet .mh-cs-extra-state {
+.mh-card-sheet .mh-cs-top-row {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
@@ -790,7 +814,7 @@
   background: rgba(255, 255, 255, 0.7);
 }
 
-.mh-card-sheet .mh-cs-extra-owner {
+.mh-card-sheet .mh-cs-owner {
   min-width: 0;
   margin-left: auto;
   overflow: hidden;
@@ -938,4 +962,394 @@
   max-width: 100%;
   height: auto;
   border: none;
+}
+
+/* ── Edit mode (phase 3) ─────────────────────────────────────────────────────
+   The system's lock: data-mode="edit" on the window when unlocked. Edit
+   controls are only rendered in edit mode (and for the owner), never hidden
+   here; this section styles them. They sit in the cards, which take pointer
+   events, never in the header band (it flips the card). */
+
+/* The header lock control: lit while the sheet is unlocked. */
+.application.mh-card-sheet.mh-card-sheet > .window-header .mh-cs-lock.active {
+  color: #ffd36a;
+  opacity: 1;
+}
+
+.application.mh-card-sheet.mh-card-sheet[data-mode="edit"] > .window-header {
+  box-shadow: inset 0 0 0 1px rgba(255, 211, 106, 0.55);
+}
+
+/* Buttons inside a card: no core / system button look. The background
+   colour only, so the burn icon keeps its image. */
+.mh-card-sheet .mh-cs-card :is(.mh-cs-icon-btn, .mh-cs-tag-name, .mh-cs-imp-name, .mh-cs-owner-open,
+  .mh-cs-type-toggle, .mh-cs-pips-add) {
+  flex: 0 0 auto;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 1cqw;
+  background-color: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+/* The burn toggle keeps its size and image (.mh-cs-burn); only the button look goes. */
+.mh-card-sheet .mh-cs-card button.mh-cs-burn {
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.mh-card-sheet .mh-cs-card :is(.mh-cs-icon-btn, .mh-cs-tag-name, .mh-cs-imp-name, .mh-cs-owner-open,
+  .mh-cs-type-toggle, .mh-cs-pips-add, .mh-cs-burn):focus-visible {
+  outline: 0.5cqw solid rgba(0, 0, 0, 0.55);
+  outline-offset: 0.3cqw;
+}
+
+/* Small round icon buttons (+, −, trash, pencil…). */
+.mh-card-sheet .mh-cs-card .mh-cs-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 7cqw;
+  height: 7cqw;
+  border-radius: 50%;
+  font-size: 5.4cqw;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-icon-btn:hover,
+.mh-card-sheet .mh-cs-card .mh-cs-icon-btn:focus-visible {
+  background-color: rgba(0, 0, 0, 0.12);
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-delete:hover,
+.mh-card-sheet .mh-cs-card .mh-cs-delete:focus-visible {
+  color: #8d1c16;
+}
+
+/* Section headings with their + buttons at the right. */
+.mh-card-sheet .mh-cs-section {
+  display: flex;
+  align-items: center;
+  gap: 1cqw;
+}
+
+.mh-card-sheet .mh-cs-section-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mh-card-sheet .mh-cs-section .mh-cs-icon-btn {
+  font-size: 5.8cqw;
+  letter-spacing: 0;
+}
+
+/* The row under the band: extra state and owner at the left, edit tools at the right. */
+.mh-card-sheet .mh-cs-edit-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.6cqw;
+  margin-left: auto;
+}
+
+.mh-card-sheet .mh-cs-owner + .mh-cs-edit-tools {
+  margin-left: 0;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-owner-open {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-owner-open:hover,
+.mh-card-sheet .mh-cs-card .mh-cs-owner-open:focus-visible {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* Tags: the name is the edit button; the trash shows up on the row. Core
+   buttons are centred flex boxes: these read as text. */
+.mh-card-sheet .mh-cs-card :is(.mh-cs-tag-name, .mh-cs-imp-name):is(button) {
+  display: block;
+  text-align: left;
+}
+
+/* The reset's `font: inherit` drops the improvement name's bold. */
+.mh-card-sheet .mh-cs-card button.mh-cs-imp-name {
+  font-weight: bold;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-tag .mh-cs-tag-name {
+  flex: 1 1 auto;
+  text-align: left;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-edit-name:hover,
+.mh-card-sheet .mh-cs-card .mh-cs-send-name:hover {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.6cqw;
+}
+
+.mh-card-sheet .mh-cs-tag .mh-cs-delete,
+.mh-card-sheet .mh-cs-improvement .mh-cs-delete {
+  opacity: 0.3;
+}
+
+.mh-card-sheet .mh-cs-tag:hover .mh-cs-delete,
+.mh-card-sheet .mh-cs-tag:focus-within .mh-cs-delete,
+.mh-card-sheet .mh-cs-improvement:hover .mh-cs-delete,
+.mh-card-sheet .mh-cs-improvement:focus-within .mh-cs-delete {
+  opacity: 0.85;
+}
+
+.mh-card-sheet .mh-cs-card button.mh-cs-burn {
+  width: 5cqw;
+  height: 5cqw;
+  border-radius: 50%;
+}
+
+.mh-card-sheet .mh-cs-card button.mh-cs-burn:hover {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+/* Tracks. Play mode: the pips are the + button. Edit mode: − pips + (and
+   the fade reset) over the name. */
+.mh-card-sheet .mh-cs-card .mh-cs-pips-add {
+  display: flex;
+  gap: 1cqw;
+  padding: 0.6cqw;
+  border-radius: 2cqw;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-pips-add:hover {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-track-btn {
+  width: 5cqw;
+  height: 5cqw;
+  font-size: 4cqw;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-type-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.2cqw;
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.2cqw;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-type-toggle:hover {
+  opacity: 1;
+  text-decoration: underline dotted;
+}
+
+.mh-card-sheet .mh-cs-type-toggle i {
+  font-size: 3.2cqw;
+}
+
+/* Inline inputs: a light field with a dashed rule; saved on change. */
+.mh-card-sheet .mh-cs-card :is(input[data-edit], textarea[data-edit]) {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0.6cqw 1.2cqw;
+  border: none;
+  border-bottom: 0.4cqw dashed var(--mh-cs-rule);
+  border-radius: 1.2cqw 1.2cqw 0 0;
+  background: var(--mh-cs-input-bg, rgba(255, 255, 255, 0.32));
+  box-shadow: none;
+  outline: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  resize: none;
+  scrollbar-width: thin;
+}
+
+.mh-card-sheet .mh-cs-card :is(input[data-edit], textarea[data-edit]):hover {
+  background: var(--mh-cs-input-bg-focus, rgba(255, 255, 255, 0.45));
+}
+
+.mh-card-sheet .mh-cs-card :is(input[data-edit], textarea[data-edit]):focus {
+  background: var(--mh-cs-input-bg-focus, rgba(255, 255, 255, 0.6));
+  border-bottom-style: solid;
+}
+
+.mh-card-sheet .mh-cs-card :is(input[data-edit], textarea[data-edit])::placeholder {
+  color: inherit;
+  opacity: 0.45;
+}
+
+/* The theme name: the title's font and case, at a fixed size (3 lines). */
+.mh-card-sheet .mh-cs-card textarea.mh-cs-title-input {
+  height: calc(var(--mh-cs-title-size) * var(--mh-cs-title-input-scale, 0.34) * 1.05 * 3 + 2.4cqw);
+  padding: 1cqw 1.5cqw;
+  font-family: var(--mh-cs-title-font);
+  font-size: calc(var(--mh-cs-title-size) * var(--mh-cs-title-input-scale, 0.34));
+  font-weight: var(--mh-cs-title-weight);
+  line-height: 1.05;
+  text-align: center;
+  text-transform: var(--mh-cs-title-case);
+  color: var(--mh-cs-title-ink, inherit);
+  text-shadow: var(--mh-cs-title-glow, none);
+}
+
+.mh-card-sheet .mh-cs-card input.mh-cs-name-input {
+  height: auto;
+  font-family: var(--mh-cs-title-font);
+  font-size: calc(var(--mh-cs-title-size) * var(--mh-cs-title-input-scale, 0.34));
+  font-weight: var(--mh-cs-title-weight);
+  line-height: 1.2;
+  text-align: center;
+  text-transform: var(--mh-cs-title-case);
+  color: var(--mh-cs-title-ink, inherit);
+  text-shadow: var(--mh-cs-title-glow, none);
+}
+
+.mh-card-sheet .mh-cs-card textarea.mh-cs-motivation-input {
+  /* Three lines of its own (per-system) font size. */
+  height: calc(1em * 1.55 * 3 + 1.2cqw);
+  max-height: none;
+  font-family: var(--mh-cs-hand-font);
+  padding: 0.6cqw 1.2cqw;
+  text-align: center;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-field input.mh-cs-field-input {
+  padding: 0.2cqw 1cqw;
+  font-family: var(--mh-cs-hand-font);
+  font-size: 4.2cqw;
+  line-height: 1.6;
+}
+
+.mh-card-sheet .mh-cs-field dd:has(> input) {
+  flex: 1 1 auto;
+}
+
+.mh-card-sheet .mh-cs-card textarea.mh-cs-short-desc-input {
+  height: calc(4.2cqw * 1.6 * 2 + 1.2cqw);
+  font-family: var(--mh-cs-hand-font);
+  font-size: 4.2cqw;
+  line-height: 1.6;
+}
+
+/* Empty slot: the add-theme button under the text. */
+.mh-card-sheet .mh-cs-card-empty .mh-cs-face {
+  flex-direction: column;
+  gap: 4cqw;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-add-theme {
+  width: auto;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 2cqw 4.5cqw;
+  border: 0.5cqw solid rgba(255, 255, 255, 0.5);
+  border-radius: 4cqw;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: none;
+  color: whitesmoke;
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.8cqw;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-add-theme:hover,
+.mh-card-sheet .mh-cs-card .mh-cs-add-theme:focus-visible {
+  border-color: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* Improvements: the name is a button (edit / post to chat), trash at the end. */
+.mh-card-sheet .mh-cs-improvement .mh-cs-delete {
+  margin-left: auto;
+}
+
+.mh-card-sheet .mh-cs-imp-uses + .mh-cs-delete {
+  margin-left: 0;
+}
+
+/* Character card: build-up track and its improvements. */
+.mh-card-sheet .mh-cs-buildup {
+  flex: 0 0 auto;
+}
+
+.mh-card-sheet .mh-cs-buildup-track {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.2cqw;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mh-card-sheet .mh-cs-subsection {
+  margin: 1.5cqw 0 0.4cqw;
+  padding: 0;
+  border: none;
+  font-family: var(--mh-cs-label-font);
+  font-size: 4cqw;
+  font-weight: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.mh-card-sheet .mh-cs-bu-improvements {
+  max-height: calc(5.4cqw * 1.25 * 3 + 7.2cqw);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* The biography editor (core <prose-mirror>, toggled). */
+.mh-card-sheet .mh-cs-card prose-mirror.mh-cs-biography {
+  display: block;
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 12cqw;
+  overflow-y: auto;
+  border: 0.3cqw dashed var(--mh-cs-rule);
+  border-radius: 1.2cqw;
+  background: var(--mh-cs-input-bg, rgba(255, 255, 255, 0.32));
+}
+
+/* The editor's toolbar wraps on the narrow card, so Save stays in reach. */
+.mh-card-sheet .mh-cs-card prose-mirror .editor-menu {
+  flex-wrap: wrap;
+  height: auto;
+  overflow: visible;
 }

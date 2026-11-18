@@ -520,6 +520,18 @@ export function getThemeImprovements(actor, themeId) {
 }
 
 /**
+ * The character's build-up improvements (City of Mist "moments of
+ * evolution"): improvements not tied to a theme (the system's
+ * `getBuildUpImprovements`), in the same shape as getThemeImprovements.
+ */
+export function getBuildUpImprovements(actor) {
+  if (!actor) return [];
+  return actor.items.contents
+    .filter(i => i.type === "improvement" && !i.system.theme_id)
+    .map(_improvementData);
+}
+
+/**
  * Legend quintessences: improvements bought with the character's own
  * fulfillment, so not tied to a theme (the system's `isBuildUpImprovement`).
  */

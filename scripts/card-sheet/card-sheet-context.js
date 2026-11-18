@@ -2,32 +2,73 @@
 //
 // Layer 1: the character's four main themes as two-sided cards.
 // Layer 2: the character card, the crew theme(s) and every extra theme.
-// Read-only (edit mode is phase 3). Shared by every game; what differs per
-// game (art, fonts, labels, character card fields) comes from the system's
-// own terms, CHARACTER_CARD below and the per-system CSS.
+// Edit mode (phase 3) is the system's unlocked state (`actor.system.locked`
+// false). Every card says what this user may do on it: `edit` = the edit
+// controls, `own` = the play controls the system sheet also shows when
+// locked. Shared by every game; what differs per game (art, fonts, labels,
+// character card fields) comes from the system's own terms, CHARACTER_CARD
+// below and the per-system CSS.
 
 import { getActiveSystem } from "../constants.js";
 import {
   getThemesAndTags, getMysteryFromTheme, getThemeImprovements,
-  getCrewThemes, getAllExtraThemes,
+  getCrewThemes, getAllExtraThemes, getBuildUpImprovements,
 } from "../getters.js";
+import { gameTerms } from "./system-adapter.js";
 
 /** Layer 1 always shows four slots, like the system sheet (mainFourThemes). */
 const MAIN_SLOTS = 4;
 
 const pips = track => (track ?? []).map(v => ({ filled: !!v }));
 
-const tagView = t => ({
-  id:        t.id,
-  name:      t.tagName,
-  burnState: t.burnState,
-  burned:    t.burnState === "burned",
-  depth:     t.depth ?? 0,
-  isTitle:   !!t.isTitle,
-  crispy:    !!t.crispy,
-});
+/** Edit mode: the system's unlocked state. */
+export const isEditMode = actor => !actor?.system?.locked;
 
-function improvementView(imp) {
+/**
+ * What this user may do on a card whose data belongs to `owner` (the
+ * character, a crew, a danger): `own` = the play controls (attention +,
+ * burn, send an improvement to chat…), `edit` = the edit controls too.
+ */
+function permissions(actor, owner) {
+  const own = !!owner?.isOwner;
+  return { own, edit: own && isEditMode(actor) };
+}
+
+/**
+ * One tag. `burnAction`: "burn" (an unburned power tag), "unburn" (a burned
+ * one), or null (weakness tags, or no ownership). The system sheet shows
+ * burning in play mode only; the card sheet shows it in both.
+ */
+function tagView(t, owner, perms) {
+  const doc = owner?.items.get(t.id);
+  let burnAction = null;
+  if (perms.own && doc) {
+    if (t.burnState !== "unburned") burnAction = "unburn";
+    else if (doc.isBurnable) burnAction = "burn";
+  }
+  const burnLabel = burnAction === "burn"
+    ? game.i18n.format("MistHUD.cardSheet.burnTitle", { name: t.tagName })
+    : burnAction === "unburn" ? game.i18n.localize("MistHUD.cardSheet.unburnTitle") : "";
+  return {
+    id:        t.id,
+    name:      t.tagName,
+    burnState: t.burnState,
+    burned:    t.burnState === "burned",
+    depth:     t.depth ?? 0,
+    isTitle:   !!t.isTitle,
+    crispy:    !!t.crispy,
+    burnAction,
+    burnLabel,
+    edit:      perms.edit,
+  };
+}
+
+/**
+ * One improvement. In edit mode its name opens the edit dialog and it can be
+ * deleted; in play mode (owner) its name posts it to chat, as on the system
+ * sheet.
+ */
+function improvementView(imp, perms) {
   const uses = imp.uses ?? {};
   return {
     id:          imp.id,
@@ -36,6 +77,34 @@ function improvementView(imp) {
     description: imp.description,
     uses:        uses.max > 0 ? `${uses.current ?? 0}/${uses.max}` : "",
     expended:    !!uses.expended,
+    edit:        perms.edit,
+    send:        perms.own && !perms.edit,
+  };
+}
+
+/**
+ * Theme-level controls (main and linked themes): the theme type toggle, the
+ * themebook / theme kit edit buttons, fade reset, adding tags and
+ * improvements. Like the system sheet, new power tags and improvements are
+ * offered whenever there are unspent upgrades, locked or not; weakness and
+ * bonus tags only in edit mode.
+ */
+function themeControls(actor, theme, perms, unspent, crack) {
+  const tbOrKit = theme?.getThemebookOrTK?.() ?? null;
+  const isKit = !!tbOrKit?.isThemeKit?.();
+  let customThemebook = false;
+  try { customThemebook = !!theme?.hasCustomThemebook?.(); } catch { customThemebook = false; }
+  let typeToggle = false;
+  try { typeToggle = !!tbOrKit?.canHaveVariableThemeType?.(); } catch { typeToggle = false; }
+  return {
+    ...perms,
+    typeToggle:        perms.edit && typeToggle,
+    // A player character's theme kit: the MC only (CitySheet._editThemeKit).
+    editKit:           perms.edit && isKit && (game.user.isGM || !actor.isPC?.()),
+    editThemebook:     perms.edit && customThemebook,
+    canResetFade:      perms.edit && unspent > 0 && (crack ?? []).some(Boolean),
+    canAddPower:       perms.own && unspent > 0,
+    canAddImprovement: perms.own && unspent > 0,
   };
 }
 
@@ -50,9 +119,13 @@ function themeCard(actor, t, flips) {
   const theme = actor.items.get(t.id);
   const motivation = theme?.system?.mystery ?? "";
   const unspent = t.unspent_upgrades || 0;
+  const perms = permissions(actor, actor);
   return {
     id:              t.id,
     empty:           false,
+    ownerId:         actor.id,
+    ...themeControls(actor, theme, perms, unspent, info.crack),
+    topRow:          perms.edit,
     flipped:         !!flips[t.id],
     // Picks the background art in the per-system CSS (mythos, logos, mist…)
     type:            String(t.category ?? "default").toLowerCase(),
@@ -61,14 +134,15 @@ function themeCard(actor, t, flips) {
     title:           t.themeName,
     motivationLabel: info.prefix,
     motivation:      motivation || info.mysteryText,
+    motivationRaw:   motivation,
     motivationEmpty: !motivation,
     attentionLabel:  info.attentionLabel,
     crackLabel:      info.crackLabel,
     attention:       pips(info.attention),
     crack:           pips(info.crack),
-    powerTags:       (t.powerTags ?? []).map(tagView),
-    weaknessTags:    (t.weaknessTags ?? []).map(tagView),
-    improvements:    getThemeImprovements(actor, t.id).map(improvementView),
+    powerTags:       (t.powerTags ?? []).map(tag => tagView(tag, actor, perms)),
+    weaknessTags:    (t.weaknessTags ?? []).map(tag => tagView(tag, actor, perms)),
+    improvements:    getThemeImprovements(actor, t.id).map(imp => improvementView(imp, perms)),
     unspent,
     unspentLabel:    unspent > 0 ? game.i18n.format("MistHUD.cardSheet.unspentUpgrades", { count: unspent }) : "",
   };
@@ -85,9 +159,13 @@ function linkedThemeCard(t, flips, actor) {
   const owner = game.actors.get(t.actorId);
   const isExtra = t.category === "Extra";
   const unspent = t.unspent_upgrades || 0;
+  const perms = permissions(actor, owner);
+  const theme = owner?.items.get(t.id);
+  const canOpenOwner = !!owner && owner.id !== actor.id && owner.testUserPermission(game.user, "OBSERVER");
   return {
     id:              t.id,
     empty:           false,
+    ...themeControls(actor, theme, perms, unspent, t.crack),
     flipped:         !!flips[t.id],
     // Crew and extra themes use the extras art, whatever their themebook type.
     type:            isExtra ? "extra" : "crew",
@@ -96,16 +174,21 @@ function linkedThemeCard(t, flips, actor) {
     title:           t.name,
     ownerId:         t.actorId,
     ownerName:       owner && owner.id !== actor.id ? owner.name : "",
+    // The crew's / danger's own sheet (CityCharacterSheet.openOwnerSheet).
+    canOpenOwner,
+    // The row under the band: the extra's state, the owner's sheet, the edit controls.
+    topRow:          isExtra || canOpenOwner || perms.edit,
     motivationLabel: t.prefix,
     motivation:      t.mysteryText,
+    motivationRaw:   t.mystery ?? "",
     motivationEmpty: !t.mystery,
     attentionLabel:  t.attentionLabel,
     crackLabel:      t.crackLabel,
     attention:       pips(t.attention),
     crack:           pips(t.crack),
-    powerTags:       (t.powerTags ?? []).map(tagView),
-    weaknessTags:    (t.weaknessTags ?? []).map(tagView),
-    improvements:    owner ? getThemeImprovements(owner, t.id).map(improvementView) : [],
+    powerTags:       (t.powerTags ?? []).map(tag => tagView(tag, owner, perms)),
+    weaknessTags:    (t.weaknessTags ?? []).map(tag => tagView(tag, owner, perms)),
+    improvements:    owner ? getThemeImprovements(owner, t.id).map(imp => improvementView(imp, perms)) : [],
     unspent,
     unspentLabel:    unspent > 0 ? game.i18n.format("MistHUD.cardSheet.unspentUpgrades", { count: unspent }) : "",
     extra:           isExtra ? { active: !!t.active, canActivate: !t.active && actor.isOwner } : null,
@@ -126,6 +209,8 @@ const CHARACTER_CARD = {
       { key: "logos",  label: "CityOfMist.terms.logos" },
     ],
     helpHurt: true,
+    // The build-up track and the improvements bought with it (system.buildup, unspentBU).
+    buildUp: true,
   },
 };
 
@@ -158,9 +243,26 @@ function crewmates(actor) {
     }));
 }
 
+/** The build-up track, its unspent improvements and the improvements bought with it. */
+function buildUpView(actor, perms) {
+  const sys = actor.system ?? {};
+  const terms = gameTerms();
+  const unspent = Number(sys.unspentBU) || 0;
+  return {
+    label:             terms.buildUpPoints,
+    improvementsLabel: terms.evolution,
+    pips:              pips(sys.buildup),
+    unspent,
+    unspentLabel:      unspent > 0 ? game.i18n.format("MistHUD.cardSheet.unspentBuildUp", { count: unspent }) : "",
+    canAdd:            perms.own && unspent > 0,
+    improvements:      getBuildUpImprovements(actor).map(imp => improvementView(imp, perms)),
+  };
+}
+
 async function characterCard(actor, flips, storyTags) {
   const config = CHARACTER_CARD[getActiveSystem()] ?? {};
   const sys = actor.system ?? {};
+  const perms = permissions(actor, actor);
   const TextEditor = foundry.applications.ux.TextEditor.implementation;
   const biography = sys.biography
     ? await TextEditor.enrichHTML(sys.biography, { secrets: actor.isOwner, relativeTo: actor })
@@ -168,6 +270,8 @@ async function characterCard(actor, flips, storyTags) {
   return {
     id:          "character",
     character:   true,
+    ownerId:     actor.id,
+    ...perms,
     type:        "character",
     flipped:     !!flips.character,
     category:    "Character",
@@ -190,6 +294,8 @@ async function characterCard(actor, flips, storyTags) {
     })),
     shortDescription: sys.short_description ?? "",
     biography,
+    biographyRaw: sys.biography ?? "",
+    buildUp:     config.buildUp ? buildUpView(actor, perms) : null,
   };
 }
 
@@ -228,6 +334,8 @@ export function buildLayer1Context(actor, flips = {}) {
     .filter(id => byId.has(id))
     .slice(0, MAIN_SLOTS)
     .map(id => themeCard(actor, byId.get(id), flips));
-  while (cards.length < MAIN_SLOTS) cards.push({ id: `empty-${cards.length}`, empty: true });
+  // An empty slot adds a theme (the system sheet offers it locked or not).
+  const canAdd = !!actor.isOwner;
+  while (cards.length < MAIN_SLOTS) cards.push({ id: `empty-${cards.length}`, empty: true, canAdd });
   return { activeSystem: getActiveSystem(), cards };
 }
