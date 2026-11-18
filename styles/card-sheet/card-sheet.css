@@ -449,7 +449,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--mh-cs-label-font);
-  font-size: 6.4cqw;
+  font-size: 7cqw;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -532,7 +532,7 @@
   justify-content: space-between;
   gap: 2cqw;
   font-family: var(--mh-cs-label-font);
-  font-size: 4.2cqw;
+  font-size: 5.4cqw;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -585,7 +585,7 @@
 .mh-card-sheet .mh-cs-motivation-label {
   display: block;
   font-family: var(--mh-cs-label-font);
-  font-size: 4.2cqw;
+  font-size: 5.4cqw;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   opacity: 0.8;
@@ -767,7 +767,7 @@
   flex: 0 0 auto;
   margin: 0;
   font-family: var(--mh-cs-label-font);
-  font-size: 4.4cqw;
+  font-size: 5.2cqw;
   letter-spacing: 0.04em;
 }
 
@@ -785,7 +785,7 @@
   padding: 1.2cqw 0;
   border-bottom: 0.3cqw dotted var(--mh-cs-rule);
   font-family: var(--mh-cs-tag-font);
-  font-size: 5.4cqw;
+  font-size: 6.2cqw;
   line-height: 1.25;
 }
 
@@ -795,7 +795,7 @@
 
 .mh-card-sheet .mh-cs-imp-uses {
   margin-left: auto;
-  font-size: 4cqw;
+  font-size: 4.8cqw;
   opacity: 0.8;
 }
 
@@ -805,7 +805,7 @@
 
 .mh-card-sheet .mh-cs-none {
   font-family: var(--mh-cs-tag-font);
-  font-size: 4.6cqw;
+  font-size: 5.4cqw;
   font-style: italic;
   opacity: 0.6;
 }
@@ -851,9 +851,16 @@
   gap: 2cqw;
   min-height: 7cqw;
   font-family: var(--mh-cs-label-font);
-  font-size: 4.2cqw;
+  font-size: 5.2cqw;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+/* The extra's state stays on one line; the owner's name gives way (ellipsis). */
+.mh-card-sheet .mh-cs-extra-mark,
+.mh-card-sheet .mh-cs-extra-use {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .mh-card-sheet .mh-cs-extra-mark {
@@ -939,7 +946,7 @@
 .mh-card-sheet .mh-cs-field dt {
   flex: 0 0 auto;
   font-family: var(--mh-cs-label-font);
-  font-size: 4.2cqw;
+  font-size: 5.2cqw;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   opacity: 0.8;
@@ -950,7 +957,7 @@
   margin: 0;
   overflow-wrap: anywhere;
   font-family: var(--mh-cs-tag-font);
-  font-size: 5.2cqw;
+  font-size: 6cqw;
   line-height: 1.3;
 }
 
@@ -959,7 +966,7 @@
 }
 
 .mh-card-sheet .mh-cs-field dd.mh-cs-hand {
-  font-size: 4.2cqw;
+  font-size: 5cqw;
   line-height: 1.6;
 }
 
@@ -979,7 +986,7 @@
   gap: 2cqw;
   padding: 0.8cqw 0;
   font-family: var(--mh-cs-tag-font);
-  font-size: 5.2cqw;
+  font-size: 6cqw;
 }
 
 .mh-card-sheet .mh-cs-crewmate-name {
@@ -993,7 +1000,7 @@
 .mh-card-sheet .mh-cs-juice {
   flex: 0 0 auto;
   font-family: var(--mh-cs-label-font);
-  font-size: 4cqw;
+  font-size: 5cqw;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -1003,7 +1010,7 @@
   min-width: 4.6cqw;
   padding: 0 0.8cqw;
   border-radius: 1cqw;
-  font-size: 4.6cqw;
+  font-size: 5.6cqw;
   text-align: center;
   color: white;
 }
@@ -1018,13 +1025,13 @@
 .mh-card-sheet .mh-cs-short-desc {
   flex: 0 0 auto;
   margin: 0 0 1cqw;
-  font-size: 4.2cqw;
+  font-size: 5cqw;
   line-height: 1.6;
 }
 
 .mh-card-sheet .mh-cs-biography {
   font-family: var(--mh-cs-tag-font);
-  font-size: 4.8cqw;
+  font-size: 5.6cqw;
   line-height: 1.35;
 }
 
@@ -1101,10 +1108,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 7cqw;
-  height: 7cqw;
+  width: 8cqw;
+  height: 8cqw;
   border-radius: 50%;
-  font-size: 5.4cqw;
+  font-size: 6.4cqw;
   line-height: 1;
   opacity: 0.7;
 }
@@ -1133,7 +1140,7 @@
 }
 
 .mh-card-sheet .mh-cs-section .mh-cs-icon-btn {
-  font-size: 5.8cqw;
+  font-size: 6.6cqw;
   letter-spacing: 0;
 }
 
@@ -1150,6 +1157,8 @@
 }
 
 .mh-card-sheet .mh-cs-card .mh-cs-owner-open {
+  flex: 0 1 auto;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1223,7 +1232,7 @@
 .mh-card-sheet .mh-cs-card .mh-cs-track-btn {
   width: 5cqw;
   height: 5cqw;
-  font-size: 4cqw;
+  font-size: 5cqw;
 }
 
 .mh-card-sheet .mh-cs-card .mh-cs-type-toggle {
@@ -1231,7 +1240,7 @@
   align-items: center;
   gap: 1.2cqw;
   font-family: var(--mh-cs-label-font);
-  font-size: 4.2cqw;
+  font-size: 5.4cqw;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   opacity: 0.8;
@@ -1243,7 +1252,7 @@
 }
 
 .mh-card-sheet .mh-cs-type-toggle i {
-  font-size: 3.2cqw;
+  font-size: 4cqw;
 }
 
 /* Inline inputs: a light field with a dashed rule; saved on change. */
@@ -1320,7 +1329,7 @@
 .mh-card-sheet .mh-cs-card .mh-cs-field input.mh-cs-field-input {
   padding: 0.2cqw 1cqw;
   font-family: var(--mh-cs-hand-font);
-  font-size: 4.2cqw;
+  font-size: 5cqw;
   line-height: 1.6;
 }
 
@@ -1331,7 +1340,7 @@
 .mh-card-sheet .mh-cs-card textarea.mh-cs-short-desc-input {
   height: calc(4.2cqw * 1.6 * 2 + 1.2cqw);
   font-family: var(--mh-cs-hand-font);
-  font-size: 4.2cqw;
+  font-size: 5cqw;
   line-height: 1.6;
 }
 
@@ -1385,7 +1394,7 @@
   align-items: center;
   gap: 2cqw;
   font-family: var(--mh-cs-label-font);
-  font-size: 4.2cqw;
+  font-size: 5cqw;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -1395,7 +1404,7 @@
   padding: 0;
   border: none;
   font-family: var(--mh-cs-label-font);
-  font-size: 4cqw;
+  font-size: 5cqw;
   font-weight: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
