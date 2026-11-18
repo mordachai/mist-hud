@@ -997,28 +997,32 @@
   white-space: nowrap;
 }
 
-.mh-card-sheet .mh-cs-juice {
-  flex: 0 0 auto;
-  font-family: var(--mh-cs-label-font);
-  font-size: 5cqw;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.mh-card-sheet .mh-cs-juice b {
-  display: inline-block;
-  min-width: 4.6cqw;
-  padding: 0 0.8cqw;
-  border-radius: 1cqw;
-  font-size: 5.6cqw;
+/* Help and Hurt: two columns, named once in the Crew heading; each
+   crewmate shows plain numbers (user, 2026-11-18: no colours, no repeated
+   words). A zero is dimmed. */
+.mh-card-sheet .mh-cs-juice-col {
+  flex: 0 0 9cqw;
   text-align: center;
-  color: white;
 }
 
-.mh-card-sheet .mh-cs-help b { background: #3f7d3a; }
-.mh-card-sheet .mh-cs-hurt b { background: #9b2f2a; }
+/* Same gap as the crewmate rows, so the numbers sit under their headers. */
+.mh-card-sheet .mh-cs-crew-head {
+  gap: 2cqw;
+}
 
-.mh-card-sheet .mh-cs-juice.zero {
+.mh-card-sheet .mh-cs-crew-head .mh-cs-juice-col {
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.6cqw;
+  font-weight: normal;
+  letter-spacing: 0.04em;
+}
+
+.mh-card-sheet .mh-cs-crewmate .mh-cs-juice-col {
+  font-weight: bold;
+}
+
+.mh-card-sheet .mh-cs-crewmate .mh-cs-juice-col.zero {
+  font-weight: normal;
   opacity: 0.45;
 }
 
