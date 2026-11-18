@@ -276,6 +276,13 @@
     transition: ease-in, top, 0.2s;
 }
 
+/* Folded: the portrait slides right (ends 44px into the header), so the
+   name starts past it. The header's 30px above beats the base sheet's
+   folded padding, so it is restated here. */
+:is(#mist-hud, .player-hud).minimized .window-header {
+    padding-left: 56px;
+}
+
 :is(#npc-hud, .application.npc-hud).minimized .mh-token-image {
     top: -52px;
     left: -55px;

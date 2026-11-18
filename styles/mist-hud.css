@@ -284,7 +284,7 @@ overflow: visible !important;
   height: 50px;
   overflow: visible; /* Allow overflow */
   min-width: fit-content;
-  padding-left: 40px;
+  padding-left: 48px; /* clears the folded portrait (ends 35px in) */
   justify-content: flex-start;
   gap: 10px;
 }
