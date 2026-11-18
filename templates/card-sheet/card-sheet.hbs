@@ -1,0 +1,13 @@
+{{!-- Phase 0: raw data dump. The card layers and the tags-deck replace this in phases 1–5. --}}
+<section class="mh-cs-dump">
+  <header class="mh-cs-dump-head">
+    <h2>{{actor.name}}</h2>
+    <span>{{activeSystem}} · {{#if locked}}locked{{else}}unlocked{{/if}}</span>
+  </header>
+  {{#each sections}}
+  <details class="mh-cs-dump-section" open>
+    <summary>{{label}} <span class="mh-cs-count">({{count}})</span></summary>
+    <pre>{{json}}</pre>
+  </details>
+  {{/each}}
+</section>

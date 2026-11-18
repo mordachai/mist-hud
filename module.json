@@ -45,12 +45,17 @@
     "scripts/player-hud.js",
     "scripts/npc-hud.js",
     "scripts/mh-dice.js",
+    "scripts/card-sheet/system-adapter.js",
+    "scripts/card-sheet/move-bar.js",
+    "scripts/card-sheet/card-sheet-context.js",
+    "scripts/card-sheet/card-sheet.js",
     "scripts/init.js"
   ],
   "styles": [
     "styles/mist-hud.css",
     "styles/mh-npc-hud.css",
-    "styles/npc-influence-manager.css"
+    "styles/npc-influence-manager.css",
+    "styles/card-sheet/card-sheet.css"
   ],
   "socket": true,
 

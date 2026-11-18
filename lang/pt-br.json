@@ -300,6 +300,18 @@
 
 "MistHUD.essence-burned": "Essência queimada (clique para restaurar)",
 "MistHUD.essence-burn": "Queimar essência",
-"MistHUD.essence.undefined": "<p class='mh-essence-text'>A Essência não está definida para este personagem.</p>"
+"MistHUD.essence.undefined": "<p class='mh-essence-text'>A Essência não está definida para este personagem.</p>",
+
+"MistHUD.cardSheet.label": "Ficha de Cartas do Mist HUD",
+"MistHUD.cardSheet.openSystemSheet": "Abrir ficha do sistema",
+"MistHUD.cardSheet.dump.themes": "Temas",
+"MistHUD.cardSheet.dump.crew": "Temas da equipe",
+"MistHUD.cardSheet.dump.extras": "Temas extras",
+"MistHUD.cardSheet.dump.statuses": "Status",
+"MistHUD.cardSheet.dump.storyTags": "Tags de história",
+"MistHUD.cardSheet.dump.juice": "Juice",
+"MistHUD.cardSheet.dump.helpHurt": "Ajuda / Atrapalhar",
+"MistHUD.cardSheet.dump.clues": "Pistas",
+"MistHUD.cardSheet.dump.selection": "Tags e status selecionados (sistema)"
 
 }

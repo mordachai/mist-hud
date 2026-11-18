@@ -11,6 +11,7 @@ import { BonusManager }              from "./bonus-manager.js";
 import { StatusScreen }              from "./status-screen.js";
 import { openNPCInfluenceManager }   from "./npc-influence.js";
 import { TokenStatusNotification, TokenTagNotification } from "./notifications.js";
+import { MistCardSheet, CARD_SHEET_TEMPLATES, refreshCardSheets } from "./card-sheet/card-sheet.js";
 
 // ── Initial load guard ────────────────────────────────────────────────────────
 // Prevents HUDs from opening during the brief "game loading" window.
@@ -165,6 +166,21 @@ function _refreshPowerPreviews() {
 }
 Hooks.on("TagOrStatusSelected",     _refreshPowerPreviews);
 Hooks.on("TagOrStatusSelectChange", _refreshPowerPreviews);
+
+// ── Card sheet (docs/card-sheet-plan.md) ─────────────────────────────────────
+// An alternative character sheet, picked per actor in the Sheet selector; the
+// system sheet stays the default.
+Hooks.once("init", () => {
+  foundry.documents.collections.Actors.registerSheet(MODULE_ID, MistCardSheet, {
+    types:       ["character"],
+    makeDefault: false,
+    label:       "MistHUD.cardSheet.label",
+  });
+  foundry.applications.handlebars.loadTemplates(CARD_SHEET_TEMPLATES);
+});
+// It shows the system's selection, so it follows it.
+Hooks.on("TagOrStatusSelected",     refreshCardSheets);
+Hooks.on("TagOrStatusSelectChange", refreshCardSheets);
 
 // The system flips an already selected item (invert-click on a selected tag)
 // without firing any hook. Announce it, so the NPC HUD, the influence viewer
