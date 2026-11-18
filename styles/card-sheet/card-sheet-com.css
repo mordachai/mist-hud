@@ -2,10 +2,30 @@
    Injected at runtime by settings.js (applyCardSheetCSS) when City of Mist is
    the active game; not in module.json. Every rule is rooted under .mh-card-sheet. */
 
-/* Rock Salt, the same face as the External Style (mh-ext-city-of-mist.css). */
+/* Rock Salt, the same face as the External Style (mh-ext-city-of-mist.css):
+   the handwritten fields (identity / mystery). */
 @font-face {
   font-family: "MHX Marker";
   src: url(/systems/city-of-mist/fonts/RockSalt.ttf) format("truetype");
+  font-display: swap;
+}
+
+/* Theme titles: big serif capitals. Averia Serif Libre Bold (shipped by the
+   system) was picked over PT Serif Bold: heavier and rougher, closer to the
+   inked titles of the mockup. */
+@font-face {
+  font-family: "MH Card Serif";
+  src: url(/systems/city-of-mist/fonts/averiaseriflibre-bold.woff2) format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* Section headings (POWER TAGS, WEAKNESS TAGS), heavy condensed capitals as
+   in the mockup. */
+@font-face {
+  font-family: "MH Card Heading";
+  src: url(/systems/city-of-mist/fonts/fira-sans-extra-condensed-v5-latin-900.woff2) format("woff2");
+  font-weight: 900;
   font-display: swap;
 }
 
@@ -23,7 +43,15 @@
   --mh-cs-body-top: 22cqw;
   --mh-cs-body-bottom: 22cqw;
   --mh-cs-inset: 9cqw;
-  --mh-cs-title-font: "MHX Marker", "Rock Salt", cursive;
+  --mh-cs-title-font: "MH Card Serif", "Averia Serif Libre", Georgia, serif;
+  --mh-cs-title-size: 24cqw;
+  --mh-cs-title-lh: 0.98;
+  --mh-cs-title-h: 48cqw;
+  --mh-cs-title-case: uppercase;
+  --mh-cs-heading-font: "MH Card Heading", "Fira Sans Extra Condensed", sans-serif;
+  --mh-cs-heading-size: 6.4cqw;
+  --mh-cs-heading-weight: 900;
+  --mh-cs-heading-spacing: 0.02em;
   --mh-cs-hand-font: "MHX Marker", "Rock Salt", cursive;
 }
 
@@ -87,11 +115,12 @@
   background-image: url("../../ui/icons/burn_com_full_icn.svg");
 }
 
-/* Rock Salt runs tall: a looser title and a smaller handwritten line. */
+/* The title may use a little of the side margin (the frame is ~5cqw). */
 .mh-card-sheet .mh-cs-title {
-  line-height: 1.45;
+  margin: 0 -3cqw;
 }
 
+/* Rock Salt runs tall: a smaller handwritten line. */
 .mh-card-sheet .mh-cs-motivation-text {
   font-size: 3.9cqw;
   line-height: 1.6;

@@ -1,11 +1,12 @@
 {{!-- One theme card: front and back faces of the same card (plan § 3).
       Shared by every game; art, fonts and band positions are per-system CSS.
-      Read-only in phase 1: no edit mode, selection or tracker buttons yet. --}}
+      Read-only: no edit mode, selection or tracker buttons yet.
+      The header band flips the card (click, Enter or Space), like the system
+      sheet; the face that is turned away is inert. --}}
 {{#*inline "mh-cs-band"}}
-<header class="mh-cs-band mh-cs-band-top">
-  <span class="mh-cs-type-icon {{card.category}}" data-tooltip="{{card.category}}" aria-hidden="true"></span>
+<header class="mh-cs-band mh-cs-band-top" data-action="flipCard" role="button" tabindex="0" aria-label="{{localize 'MistHUD.cardSheet.flip' name=card.title}}">
+  <span class="mh-cs-type-icon {{card.category}}" aria-hidden="true"></span>
   <span class="mh-cs-themebook">{{card.themebook}}</span>
-  <button type="button" class="mh-cs-flip" data-action="flipCard" data-tooltip="{{localize 'MistHUD.cardSheet.flip'}}" aria-label="{{localize 'MistHUD.cardSheet.flip'}}"><i class="fa-solid fa-rotate"></i></button>
 </header>
 {{/inline}}
 {{#*inline "mh-cs-pips"}}
@@ -26,10 +27,10 @@
 <article class="mh-cs-card mh-cs-theme-card mh-cs-type-{{card.type}}{{#if card.flipped}} flipped{{/if}}" data-card-id="{{card.id}}" data-theme-id="{{card.id}}">
   <div class="mh-cs-card-inner">
 
-    <section class="mh-cs-face mh-cs-front">
+    <section class="mh-cs-face mh-cs-front"{{#if card.flipped}} inert{{/if}}>
       {{> mh-cs-band card=card}}
       <div class="mh-cs-body">
-        <h3 class="mh-cs-title" data-fit>{{card.title}}</h3>
+        <h3 class="mh-cs-title" data-fit data-fit-lines="3">{{card.title}}</h3>
         <div class="mh-cs-tracks">
           {{> mh-cs-pips kind="attention" label=card.attentionLabel pips=card.attention}}
           {{> mh-cs-pips kind="crack" label=card.crackLabel pips=card.crack}}
@@ -48,11 +49,13 @@
             </li>
             {{/each}}
           </ul>
+        </div>
+        {{!-- Weakness tags sit at the bottom of the card, as in the mockup. --}}
+        <div class="mh-cs-weakness">
           <h4 class="mh-cs-section">{{localize "CityOfMist.terms.weaknessTags"}}</h4>
           <ul class="mh-cs-tags mh-cs-weakness-tags">
             {{#each card.weaknessTags}}
             <li class="mh-cs-tag mh-cs-weakness-tag {{burnState}}" data-tag-id="{{id}}">
-              <i class="mh-cs-weak-icon fa-solid fa-anchor" aria-hidden="true"></i>
               <span class="mh-cs-tag-name">{{name}}</span>
             </li>
             {{/each}}
@@ -62,7 +65,7 @@
       <footer class="mh-cs-band mh-cs-band-bottom"></footer>
     </section>
 
-    <section class="mh-cs-face mh-cs-back">
+    <section class="mh-cs-face mh-cs-back"{{#unless card.flipped}} inert{{/unless}}>
       {{> mh-cs-band card=card}}
       <div class="mh-cs-body">
         <h4 class="mh-cs-section">{{localize "CityOfMist.terms.improvements"}}</h4>

@@ -45,10 +45,10 @@ async function writeUiState(actor, change) {
 export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   static DEFAULT_OPTIONS = {
     classes: ["mh-card-sheet"],
-    // Reference size: four 291 x 740 City of Mist cards (art 473 x 1203) with
+    // Reference size: four 244 x 620 City of Mist cards (art 473 x 1203) with
     // 12px gaps, under the 56px band, plus 6/12px room for the shadows.
     // A smaller window scales the cards down (container queries).
-    position: { width: 1212, height: 816 },
+    position: { width: 1024, height: 696 },
     window: { resizable: true },
     actions: {
       rollMove:        MistCardSheet.#onRollMove,
@@ -116,6 +116,21 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     }
   }
 
+  /** Once per window: Enter / Space on a card's header band flips it (the
+   *  click goes through the flipCard action). */
+  _onFirstRender(context, options) {
+    super._onFirstRender(context, options);
+    this.element.addEventListener("keydown", event => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const band = event.target.closest?.('[data-action="flipCard"]');
+      if (!band || event.repeat) return;
+      // Keep Space from reaching the core keybindings (pause).
+      event.preventDefault();
+      event.stopPropagation();
+      this.#flipCard(band.closest(".mh-cs-card"), { focus: true });
+    });
+  }
+
   _onClose(options) {
     this.#unwatchFit?.();
     this.#unwatchFit = null;
@@ -164,15 +179,28 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     openSystemSheet(this.actor);
   }
 
-  /** Flip one card in place (no re-render) and remember it for this actor. */
-  static async #onFlipCard(event, target) {
-    const card = target.closest(".mh-cs-card");
+  /** Click on a card's header band: flip that card. */
+  static #onFlipCard(event, target) {
+    return this.#flipCard(target.closest(".mh-cs-card"));
+  }
+
+  /**
+   * Flip one card in place (no re-render) and remember it for this actor.
+   * The face turned away is made inert (no clicks, no tab stop); from the
+   * keyboard, the focus follows to the header band of the face now showing.
+   */
+  async #flipCard(card, { focus = false } = {}) {
     const cardId = card?.dataset.cardId;
     if (!cardId) return;
     const flipped = !card.classList.contains("flipped");
     // will-change only while the card turns (plan § 7)
     card.classList.add("flipping");
     card.classList.toggle("flipped", flipped);
+    const front = card.querySelector(".mh-cs-front");
+    const back = card.querySelector(".mh-cs-back");
+    front?.toggleAttribute("inert", flipped);
+    back?.toggleAttribute("inert", !flipped);
+    if (focus) (flipped ? back : front)?.querySelector('[data-action="flipCard"]')?.focus();
     const inner = card.querySelector(".mh-cs-card-inner");
     const done = () => card.classList.remove("flipping");
     if (inner) inner.addEventListener("transitionend", done, { once: true });

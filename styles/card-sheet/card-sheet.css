@@ -231,8 +231,18 @@
   --mh-cs-band-ink: whitesmoke;   /* band text */
   --mh-cs-rule: rgba(0, 0, 0, 0.35);
   --mh-cs-title-font: serif;
+  --mh-cs-title-size: 14cqw;      /* before fitting */
+  --mh-cs-title-lh: 1.05;
+  --mh-cs-title-h: 34cqw;         /* room for 3 lines once fitted */
+  --mh-cs-title-weight: bold;
+  --mh-cs-title-spacing: normal;
+  --mh-cs-title-case: none;
   --mh-cs-hand-font: serif;       /* handwritten fields (identity / mystery) */
   --mh-cs-label-font: "Rift Bold", "Rift", sans-serif;
+  --mh-cs-heading-font: var(--mh-cs-label-font);   /* POWER TAGS, WEAKNESS TAGS… */
+  --mh-cs-heading-size: 4.6cqw;
+  --mh-cs-heading-weight: normal;
+  --mh-cs-heading-spacing: 0.08em;
   --mh-cs-tag-font: var(--font-family-tags, "Roboto Condensed"), sans-serif;
 }
 
@@ -342,28 +352,20 @@
   text-transform: uppercase;
 }
 
-.mh-card-sheet .mh-cs-flip {
-  flex: 0 0 auto;
-  width: 8cqw;
-  height: 8cqw;
-  min-height: 0;
-  margin: 0;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: none;
-  box-shadow: none;
-  color: inherit;
-  font-size: 4.6cqw;
-  line-height: 1;
-  opacity: 0.7;
+/* The header band flips the card (click, Enter, Space), like the system sheet. */
+.mh-card-sheet .mh-cs-band-top[data-action="flipCard"] {
   cursor: pointer;
+  border-radius: 1.5cqw;
+  outline: none;
+  transition: background-color 0.15s ease;
 }
 
-.mh-card-sheet .mh-cs-flip:hover,
-.mh-card-sheet .mh-cs-flip:focus-visible {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.15);
+.mh-card-sheet .mh-cs-band-top[data-action="flipCard"]:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.mh-card-sheet .mh-cs-band-top[data-action="flipCard"]:focus-visible {
+  box-shadow: 0 0 0 0.6cqw rgba(255, 255, 255, 0.85);
 }
 
 /* ── Body ────────────────────────────────────────────────────────────────── */
@@ -380,24 +382,43 @@
   min-height: 0;
 }
 
-/* Fitted by card-fit.js through --mh-fit; "safe" keeps any overflow at the
-   bottom, where it can be measured. */
+/* The theme title: starts large and is shrunk by card-fit.js (--mh-fit) until
+   it fits the box in at most 3 lines (data-fit-lines). Words are never
+   broken, so a long word shrinks the text instead. "safe" keeps any
+   overflow at the bottom, where it can be measured. */
 .mh-card-sheet .mh-cs-title {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: safe center;
-  height: 28cqw;
+  height: var(--mh-cs-title-h);
   margin: 0;
   padding: 0;
   border: none;
   overflow: hidden;
   font-family: var(--mh-cs-title-font);
-  font-size: calc(8.5cqw * var(--mh-fit, 1));
-  font-weight: normal;
-  line-height: 1.3;
+  font-size: calc(var(--mh-cs-title-size) * var(--mh-fit, 1));
+  font-weight: var(--mh-cs-title-weight);
+  line-height: var(--mh-cs-title-lh);
+  letter-spacing: var(--mh-cs-title-spacing);
   text-align: center;
+  text-transform: var(--mh-cs-title-case);
+  text-wrap: balance;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
   color: inherit;
+}
+
+/* Too long even at the smallest size (card-fit.js): 3 lines, then an ellipsis. */
+.mh-card-sheet .mh-cs-title[data-fit-clamped] {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  height: auto;
+  max-height: var(--mh-cs-title-h);
+  overflow-wrap: anywhere;
 }
 
 .mh-card-sheet .mh-cs-tracks {
@@ -478,10 +499,11 @@
   padding: 0 0 0.6cqw;
   border: none;
   border-bottom: 0.4cqw solid var(--mh-cs-rule);
-  font-family: var(--mh-cs-label-font);
-  font-size: 4.6cqw;
-  font-weight: normal;
-  letter-spacing: 0.08em;
+  font-family: var(--mh-cs-heading-font);
+  font-size: var(--mh-cs-heading-size);
+  font-weight: var(--mh-cs-heading-weight);
+  line-height: 1.05;
+  letter-spacing: var(--mh-cs-heading-spacing);
   text-transform: uppercase;
   color: inherit;
 }
@@ -539,12 +561,16 @@
   opacity: 0.6;
 }
 
-.mh-card-sheet .mh-cs-weak-icon {
+/* Weakness tags: pinned to the bottom of the body; a long list scrolls. */
+.mh-card-sheet .mh-cs-weakness {
   flex: 0 0 auto;
-  width: 5cqw;
-  font-size: 4.2cqw;
-  text-align: center;
-  opacity: 0.75;
+  margin-top: auto;
+}
+
+.mh-card-sheet .mh-cs-weakness-tags {
+  max-height: calc(5.8cqw * 1.2 * 3 + 4.2cqw);
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 /* ── Back: improvements ──────────────────────────────────────────────────── */

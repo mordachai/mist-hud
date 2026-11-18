@@ -305,7 +305,7 @@
 
 "MistHUD.cardSheet.label": "Mist HUD Card Sheet",
 "MistHUD.cardSheet.openSystemSheet": "Open system sheet",
-"MistHUD.cardSheet.flip": "Flip card",
+"MistHUD.cardSheet.flip": "Flip card: {name}",
 "MistHUD.cardSheet.emptySlot": "Empty theme slot",
 "MistHUD.cardSheet.noImprovements": "No improvements yet",
 "MistHUD.cardSheet.unspentUpgrades": "Unspent upgrades: {count}"

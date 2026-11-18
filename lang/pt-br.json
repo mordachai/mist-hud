@@ -305,7 +305,7 @@
 
 "MistHUD.cardSheet.label": "Ficha de Cartas do Mist HUD",
 "MistHUD.cardSheet.openSystemSheet": "Abrir ficha do sistema",
-"MistHUD.cardSheet.flip": "Virar carta",
+"MistHUD.cardSheet.flip": "Virar carta: {name}",
 "MistHUD.cardSheet.emptySlot": "Espaço de tema vazio",
 "MistHUD.cardSheet.noImprovements": "Nenhuma melhoria ainda",
 "MistHUD.cardSheet.unspentUpgrades": "Melhorias não usadas: {count}"
