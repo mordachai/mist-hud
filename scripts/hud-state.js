@@ -111,23 +111,55 @@ export function getReceivedBonusRows(actor) {
   return rows;
 }
 
-/**
- * NPC influence for the threat tokens on the current scene, read from the
- * cache the GM broadcasts (globalThis.activeNpcInfluences). One row per token,
- * unlinked tokens keyed by token id, linked ones by actor id.
- * @returns {object[]} "modifier" rows for CityRoll
- */
-export function getNpcInfluenceRows() {
-  const cache = globalThis.activeNpcInfluences || {};
-  const rows  = [];
-  for (const token of canvas?.tokens?.placeables ?? []) {
-    if (token.actor?.type !== "threat") continue;
-    const influence = (!token.document.actorLink && cache[token.id]) || cache[token.actor.id];
-    const amount    = Number(influence?.totalInfluence) || 0;
-    if (!amount) continue;
-    rows.push(_modifierRow(`mist-hud-npc-${token.id}`, token.name || influence.npcName || "NPC", amount));
+// ── Threat tags/statuses: the system's selection is the only state ───────────
+// The NPC HUD, the influence viewer, the system's token tooltip and the sheets
+// all read and write SelectedTagsAndStatus. It lives in this client only (not
+// saved, not shared), exactly like the system's own selection.
+
+/** -1, 0 or 1: how `item` (tag or status) is selected in this client. */
+export function getSelectionDirection(item) {
+  const sts = globalThis.SelectedTagsAndStatus;
+  if (!sts || !item?.parent) return 0;
+  try {
+    return sts.getActivatedDirection(item.id, item.parent.tokenId ?? "") ?? 0;
+  } catch (e) {
+    return 0;
   }
-  return rows;
+}
+
+/**
+ * Select `item` in `direction` (1 or -1), or clear it (0), through the system.
+ * @returns {boolean} true when the selection now has that direction (false if
+ *   the system refused it, or an open roll/review dialog took the item instead)
+ */
+export function setSelectionDirection(item, direction) {
+  const sts = globalThis.SelectedTagsAndStatus;
+  if (!sts || !item?.parent) return false;
+  const current = getSelectionDirection(item);
+  if (current === direction) return true;
+  if (current !== 0) sts.removeSelectedItem(item.id, item.parent.tokenId ?? "");
+  if (direction === 0) return true;
+  if (!sts.checkValidityForSelect(item, direction)) return false;
+  return sts.activateSelectedItem(item, direction) && getSelectionDirection(item) === direction;
+}
+
+/**
+ * Influence of one threat in this client: the sum of its selected tags (±1)
+ * and statuses (±tier), as the system will put them in the roll.
+ * @returns {{tagInfluence: number, statusInfluence: number, totalInfluence: number}}
+ */
+export function selectionInfluence(actor) {
+  const out = { tagInfluence: 0, statusInfluence: 0, totalInfluence: 0 };
+  if (!actor) return out;
+  const tokenId = actor.tokenId ?? "";
+  for (const row of getSystemSelection()) {
+    if (row.ownerId !== actor.id || (row.tokenId || "") !== tokenId) continue;
+    const amount = Number(row.amount) || 0;
+    if (row.type === "tag") out.tagInfluence += amount;
+    else out.statusInfluence += amount;
+  }
+  out.totalInfluence = out.tagInfluence + out.statusInfluence;
+  return out;
 }
 
 export class HUDState {
@@ -273,7 +305,7 @@ export class HUDState {
     if (modifiers) {
       const bonusRows = getReceivedBonusRows(actor);
       usedBonuses = bonusRows.length > 0;
-      list.push(...bonusRows, ...getNpcInfluenceRows());
+      list.push(...bonusRows);
     }
 
     return { list, burnIds, extraBurn, usedBonuses };

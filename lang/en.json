@@ -183,17 +183,12 @@
 
 "MistHUD.notify.gmOnlyViewer": "Only the GM can open the NPC Influence Manager.",
 
-"MistHUD.notify.gmOnlySync": "Only the GM can synchronize NPC influences.",
 
-"MistHUD.notify.gmOnlySyncAll": "Only the GM can synchronize all NPC influences.",
 
-"MistHUD.notify.syncError": "Error synchronizing influences.",
 
 "MistHUD.notify.gameNotReady": "Game not initialized.",
 
-"MistHUD.notify.influenceEmitted": "NPC influence from {name} updated and emitted to players.",
 
-"MistHUD.notify.syncedNpcs": "Synchronized influences for {count} NPCs.",
 
 "MistHUD.notify.addedStatusToScene": "Added status \"{name}\" to scene.",
 
@@ -269,9 +264,7 @@
 
 "MistHUD.influence.total": "Total",
 
-"MistHUD.influence.syncScene": "Sync Scene",
 
-"MistHUD.influence.syncSceneHint": "Synchronize all NPCs in the current scene",
 
 "MistHUD.influence.refresh": "Refresh",
 

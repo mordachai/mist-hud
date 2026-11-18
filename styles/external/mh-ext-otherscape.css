@@ -131,7 +131,7 @@
   }
 
   #settings button,
-  .button,
+  .button:not(.ui-control),
   .directory .action-buttons button {
     font-family: "Orbitron";
     color: var(--green-OS-text);

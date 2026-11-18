@@ -13,15 +13,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
   margin-bottom: 10px;
   padding-bottom: 10px;
   border-bottom: 1px solid #ccc;
+}
+
+.npc-influence-manager .influence-info {
+  min-width: 0;
 }
 
 .npc-influence-manager .influence-info h2,
 .npc-influence-manager .influence-info h3 {
   margin: 0;
   line-height: 1.5;
+  white-space: nowrap;
 }
 
 .npc-influence-manager  h2,
@@ -38,7 +44,11 @@
 }
 
 .npc-influence-manager .controls button {
-color: #bc8383;
+  color: #bc8383;
+  width: auto;
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .npc-influence-manager .controls button:hover {
@@ -58,15 +68,27 @@ color: #bc8383;
 }
 
 .npc-influence-manager .tabs .item {
-  padding: 8px 15px;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 3px 6px;
   text-align: center;
   cursor: pointer;
   border: 1px solid transparent;
-  border-bottom: none;
+  border-bottom: 2px solid transparent;
   border-radius: 3px 3px 0 0;
-  margin-right: 5px;
+  margin: 0 0 -1px 0;
   background: rgba(0, 0, 0, 0.05);
   color: #969696;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  line-height: 1.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.npc-influence-manager .tabs .item:hover {
+  color: whitesmoke;
 }
 
 .npc-influence-manager .npc-tags,
@@ -78,12 +100,12 @@ color: #bc8383;
 }
 
 .npc-influence-manager .tabs .item.active {
-  background: #fff;
-  border-color: #ddd;
-  border-bottom: 1px solid #fff;
-  margin-bottom: -1px;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  border-bottom-color: #4ef7b6;
   font-weight: bold;
-  color: darkblue;
+  color: whitesmoke;
+  text-shadow: none;
 }
 
 .npc-influence-manager .content .tab {
@@ -187,7 +209,13 @@ color: #bc8383;
 }
 
 .npc-influence-manager .influence-value.total-influence {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  padding-right: 0;
   font-size: 22px;
+  white-space: nowrap;
 }
 
 .npc-influence-manager .influence-value.positive {

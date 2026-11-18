@@ -33,18 +33,12 @@ Hooks.once("ready", () => {
     if (!game.user.isGM && own?.type === "character" && own.isOwner && _openOnSelect()) openHud(own);
   }, 2000);
 
-  // Register socket listener for NPC influence data
+  // Drops relayed to the GM (see "Drag-and-drop" below)
   game.socket.on(SOCKET_NAME, data => {
-    if (data?.type === "npcInfluence") {
-      globalThis.activeNpcInfluences ??= {};
-      globalThis.activeNpcInfluences[data.data.npcId] = data.data;
-    } else if (data?.type === "dropAction" && _dropHandlers[data.action]) {
+    if (data?.type === "dropAction" && _dropHandlers[data.action]) {
       _dropHandlers[data.action](data);
     }
   });
-
-  // Pre-initialise NPC influence cache
-  globalThis.activeNpcInfluences ??= {};
 });
 
 // ── Opening the HUDs ──────────────────────────────────────────────────────────
@@ -171,6 +165,22 @@ function _refreshPowerPreviews() {
 }
 Hooks.on("TagOrStatusSelected",     _refreshPowerPreviews);
 Hooks.on("TagOrStatusSelectChange", _refreshPowerPreviews);
+
+// The system flips an already selected item (invert-click on a selected tag)
+// without firing any hook. Announce it, so the NPC HUD, the influence viewer
+// and the power preview follow every selection change.
+Hooks.once("init", () => {
+  const sts = globalThis.SelectedTagsAndStatus;
+  if (!sts?.toggleSelectedItem || sts._mhToggleWrapped) return;
+  const original = sts.toggleSelectedItem;
+  sts.toggleSelectedItem = function (tagOrStatus, direction = 1) {
+    const wasSelected = this.getActivatedDirection(tagOrStatus?.id, tagOrStatus?.parent?.tokenId ?? "") !== 0;
+    const result = original.call(this, tagOrStatus, direction);
+    if (wasSelected && result) Hooks.callAll("TagOrStatusSelectChange");
+    return result;
+  };
+  sts._mhToggleWrapped = true;
+});
 
 // ── External Style: Scene Tags window fits its content ───────────────────────
 // The system opens it at a fixed 400×500. Under our External Style it opens
@@ -376,7 +386,7 @@ Hooks.on("getSceneControlButtons", controls => {
   tokenControls.tools["statusScreen"] = {
     name:    "statusScreen",
     title:   "MistHUD.window.statusScreen",
-    icon:    "fas fa-list",
+    icon:    "fa-solid fa-list",
     button:  true,
     visible: true,
     onChange: () => StatusScreen.open(),
@@ -386,7 +396,7 @@ Hooks.on("getSceneControlButtons", controls => {
     tokenControls.tools["npcInfluenceManager"] = {
       name:    "npcInfluenceManager",
       title:   "MistHUD.window.influenceViewer",
-      icon:    "fas fa-skull",
+      icon:    "fa-solid fa-skull",
       button:  true,
       visible: true,
       onChange: () => openNPCInfluenceManager(),
@@ -437,9 +447,6 @@ async function _createDroppedItem(actor, kind, drop) {
     return item;
   }
   const [item] = await actor.createEmbeddedDocuments("Item", [_storyTagItemData(drop)]);
-  if (drop.cssClass === "positive" || drop.cssClass === "negative") {
-    await item.setFlag(MODULE_ID, "tagState", drop.cssClass);
-  }
   return item;
 }
 

@@ -5,14 +5,13 @@
       <h2>{{localize "MistHUD.influence.total"}}: <span class="influence-value total-influence {{#if totalInfluence}}{{#if (lt totalInfluence 0)}}negative{{else}}positive{{/if}}{{/if}}"><i class="fa-solid fa-skull"></i> {{totalInfluence}}</span></h2>
     </div>
     <div class="controls">
-      <button type="button" class="sync-all-npcs" data-action="syncAll" title="{{localize "MistHUD.influence.syncSceneHint"}}"><i class="fas fa-sync"></i> {{localize "MistHUD.influence.syncScene"}}</button>
       <button type="button" class="refresh-ui" data-action="refresh" title="{{localize "MistHUD.influence.refreshHint"}}"><i class="fas fa-redo"></i> {{localize "MistHUD.influence.refresh"}}</button>
     </div>
   </header>
   
   <nav class="tabs">
-    <a class="item {{#if tabActive}}active{{/if}}" data-action="tab" data-tab="active"><i class="fas fa-bolt"></i> {{localize "MistHUD.influence.tabActive"}} ({{activeSceneNpcs.length}})</a>
-    <a class="item {{#if tabAll}}active{{/if}}" data-action="tab" data-tab="all"><i class="fas fa-users"></i> {{localize "MistHUD.influence.tabAll"}} ({{sceneNpcs.length}})</a>
+    <a class="item {{#if tabActive}}active{{/if}}" data-action="switchTab" data-tab="active"><i class="fas fa-bolt"></i> {{localize "MistHUD.influence.tabActive"}} ({{activeSceneNpcs.length}})</a>
+    <a class="item {{#if tabAll}}active{{/if}}" data-action="switchTab" data-tab="all"><i class="fas fa-users"></i> {{localize "MistHUD.influence.tabAll"}} ({{sceneNpcs.length}})</a>
   </nav>
   
   <section class="content">

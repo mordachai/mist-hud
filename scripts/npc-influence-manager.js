@@ -1,10 +1,14 @@
 // npc-influence-manager.js — GM window listing the influence of every threat
-// in the current scene (ApplicationV2).
+// in the current scene (ApplicationV2). Influence is read from the system's
+// tag/status selection (SelectedTagsAndStatus), the same state the NPC HUD,
+// the token tooltip and the sheets show.
+
+import { getSelectionDirection, selectionInfluence } from "./hud-state.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-const MODULE_SOCKET = "module.mist-hud";
-const FLAG_SCOPE    = "mist-hud";
+/** "positive" / "negative" / "neutral" for a selection direction. */
+const directionState = d => (d > 0 ? "positive" : d < 0 ? "negative" : "neutral");
 
 export class NPCInfluenceManager extends HandlebarsApplicationMixin(ApplicationV2) {
   static WINDOW_ID = "npc-influence-manager";
@@ -15,10 +19,9 @@ export class NPCInfluenceManager extends HandlebarsApplicationMixin(ApplicationV
     window:  { title: "MistHUD.window.influenceViewer", resizable: true, minimizable: true },
     position: { width: 450, height: "auto" },
     actions: {
-      syncAll:    NPCInfluenceManager._onSyncAll,
       refresh:    NPCInfluenceManager._onRefresh,
       focusToken: NPCInfluenceManager._onFocusToken,
-      tab:        NPCInfluenceManager._onTab,
+      switchTab:  NPCInfluenceManager._onTab,
     },
   };
 
@@ -29,7 +32,7 @@ export class NPCInfluenceManager extends HandlebarsApplicationMixin(ApplicationV
   /** Currently shown tab ("active" | "all"); survives re-renders. */
   #tab = "active";
 
-  // ── Live refresh (hooks/socket are registered once, never removed) ─────────
+  // ── Live refresh (hooks are registered once, never removed) ───────────────
 
   static _handlersInitialized = false;
   static _refreshTimer = null;
@@ -55,28 +58,19 @@ export class NPCInfluenceManager extends HandlebarsApplicationMixin(ApplicationV
     const isThreatItem = item => item?.parent?.type === "threat" && ["tag", "status"].includes(item.type);
     const refresh = () => NPCInfluenceManager.refreshSoon();
 
-    Hooks.on("updateNpcInfluence", refresh);
+    // Selection changes from anywhere (NPC HUD, sheets, token tooltip, scene tags window)
+    Hooks.on("TagOrStatusSelected", refresh);
+    Hooks.on("TagOrStatusSelectChange", refresh);
 
-    Hooks.on("updateItem", (item, changes) => {
-      if (!isThreatItem(item)) return;
-      const flags = changes.flags?.[FLAG_SCOPE];
-      const sys   = changes.system;
-      if (flags?.tagState || flags?.statusType
-          || sys?.burn_state !== undefined || sys?.burned !== undefined
-          || sys?.tier !== undefined) refresh();
-    });
+    // Burned tags drop out of the selection; renamed/retiered/new/deleted items show here
+    Hooks.on("updateItem", item => { if (isThreatItem(item)) refresh(); });
     Hooks.on("createItem", item => { if (isThreatItem(item)) refresh(); });
     Hooks.on("deleteItem", item => { if (isThreatItem(item)) refresh(); });
 
+    // Collective size badge
     Hooks.on("updateActor", (actor, changes) => {
       if (actor?.type !== "threat" || !changes.system) return;
       if (changes.system.collectiveSize !== undefined || changes.system.scale !== undefined) refresh();
-    });
-
-    game.socket?.on(MODULE_SOCKET, message => {
-      if (["npcInfluence", "refreshNpcInfluences", "updateCollectiveSize"].includes(message?.type)) {
-        NPCInfluenceManager.refreshSoon(100);
-      }
     });
   }
 
@@ -109,7 +103,7 @@ export class NPCInfluenceManager extends HandlebarsApplicationMixin(ApplicationV
 
     for (const token of tokens) {
       const actor = token.actor;
-      const infl  = this._calculateTokenInfluence(token);
+      const infl  = selectionInfluence(actor);
       total += Number(infl.totalInfluence) || 0;
 
       // A linked actor can have several tokens; list it once.
@@ -124,13 +118,13 @@ export class NPCInfluenceManager extends HandlebarsApplicationMixin(ApplicationV
       const tags = actor.items.filter(i => i.type === "tag").map(tag => ({
         id: tag.id,
         name: tag.name,
-        state: tag.getFlag(FLAG_SCOPE, "tagState") || "neutral",
-        isBurned: tag.system?.burn_state === 1 || !!tag.system?.burned,
+        state: directionState(getSelectionDirection(tag)),
+        isBurned: tag.isBurned?.() ?? false,
       }));
       const statuses = actor.items.filter(i => i.type === "status").map(status => ({
         id: status.id,
         name: status.name,
-        state: status.getFlag(FLAG_SCOPE, "statusType") || status.system?.specialType || "neutral",
+        state: directionState(getSelectionDirection(status)),
         tier: Number(status.system?.tier) || 1,
       }));
 
@@ -167,50 +161,6 @@ export class NPCInfluenceManager extends HandlebarsApplicationMixin(ApplicationV
     };
   }
 
-  /**
-   * Influence of one token, computed from its current items. Also refreshes
-   * globalThis.activeNpcInfluences (read by the player HUD at roll time).
-   */
-  _calculateTokenInfluence(token) {
-    const actor = token?.actor;
-    if (!actor) return { tagInfluence: 0, statusInfluence: 0, totalInfluence: 0 };
-
-    let tagInfluence = 0;
-    for (const tag of actor.items.filter(i => i.type === "tag")) {
-      const state = tag.getFlag(FLAG_SCOPE, "tagState") || "neutral";
-      if (state === "positive") tagInfluence += 1;
-      else if (state === "negative") tagInfluence -= 1;
-    }
-
-    const collectiveSize = Number(actor.system?.collectiveSize || actor.system?.scale || 0);
-    let statusInfluence = 0;
-    for (const status of actor.items.filter(i => i.type === "status")) {
-      const type = status.getFlag(FLAG_SCOPE, "statusType") || status.system?.specialType || "neutral";
-      if (type === "neutral") continue;
-      const tier = (Number(status.system?.tier) || 1) + collectiveSize;
-      if (type === "positive") statusInfluence += tier;
-      else if (type === "negative") statusInfluence -= tier;
-    }
-
-    const totalInfluence = tagInfluence + statusInfluence;
-
-    if (globalThis.activeNpcInfluences) {
-      const linked = token.document?.actorLink ?? false;
-      globalThis.activeNpcInfluences[linked ? actor.id : token.id] = {
-        npcId: actor.id,
-        npcName: linked ? actor.name : (token.name || actor.name),
-        tokenId: token.id,
-        tokenName: token.name,
-        actorLink: linked,
-        tagInfluence,
-        statusInfluence,
-        totalInfluence,
-      };
-    }
-
-    return { tagInfluence, statusInfluence, totalInfluence };
-  }
-
   // ── Actions (`this` is the app instance) ───────────────────────────────────
 
   static _onTab(_event, target) {
@@ -224,21 +174,6 @@ export class NPCInfluenceManager extends HandlebarsApplicationMixin(ApplicationV
 
   static _onRefresh() {
     this.render();
-  }
-
-  static async _onSyncAll() {
-    if (!game.user?.isGM) {
-      ui.notifications.warn(game.i18n.localize("MistHUD.notify.gmOnlySync"));
-      return;
-    }
-    try {
-      const { syncSceneInfluences } = await import("./npc-hud.js");
-      await syncSceneInfluences();
-    } catch (error) {
-      console.error("NPC Influence Manager | Failed to sync influences:", error);
-      ui.notifications.error(game.i18n.localize("MistHUD.notify.syncError"));
-    }
-    if (this.rendered) this.render();
   }
 
   /** Select a token and pan to it. */

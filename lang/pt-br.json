@@ -183,17 +183,12 @@
 
 "MistHUD.notify.gmOnlyViewer": "Apenas o Mestre pode abrir o Gerenciador de Influência de NPCs.",
 
-"MistHUD.notify.gmOnlySync": "Apenas o Mestre pode sincronizar as influências dos NPCs.",
 
-"MistHUD.notify.gmOnlySyncAll": "Apenas o Mestre pode sincronizar todas as influências dos NPCs.",
 
-"MistHUD.notify.syncError": "Erro ao sincronizar as influências.",
 
 "MistHUD.notify.gameNotReady": "O jogo não foi inicializado.",
 
-"MistHUD.notify.influenceEmitted": "A influência do NPC {name} foi atualizada e enviada aos jogadores.",
 
-"MistHUD.notify.syncedNpcs": "Influências sincronizadas para {count} NPCs.",
 
 "MistHUD.notify.addedStatusToScene": "Status \"{name}\" adicionado à cena.",
 
@@ -269,9 +264,7 @@
 
 "MistHUD.influence.total": "Total",
 
-"MistHUD.influence.syncScene": "Sincronizar Cena",
 
-"MistHUD.influence.syncSceneHint": "Sincroniza todos os NPCs da cena atual",
 
 "MistHUD.influence.refresh": "Atualizar",
 

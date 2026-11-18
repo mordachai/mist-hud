@@ -37,7 +37,7 @@ ui/              Button/icon images
 - `getters.js` — canonical source for extracting actor/item data (themes, tags, statuses, improvements)
 - `notifications.js` — drop/status notifications
 - `bonus-manager.js` — GM-mediated Help/Hurt bonuses
-- `npc-helpers.js`, `npc-influence.js`, `npc-influence-manager.js` — NPC data, influence cache, GM influence viewer
+- `npc-helpers.js`, `npc-influence.js`, `npc-influence-manager.js` — NPC data, GM influence viewer (reads the system's tag selection)
 - `status-screen.js` — status browser/importer
 - `player-hud.js` — player HUD (`PlayerHUD`, ApplicationV2 + Handlebars mixin), `getOrCreateHud(actor)`
 - `npc-hud.js` — NPC/threat HUD, `syncSceneInfluences()`
@@ -58,7 +58,9 @@ actor.getFlag('mist-hud', 'received-bonuses')
 
 **Hook-Based Reactivity** — HUDs re-render on `controlToken`, `updateActor`, `createItem`, `updateItem`, `deleteItem` hooks (`init.js`).
 
-**Socket Communication** — GM-mediated bonuses, NPC influences and drops from non-owners use `game.socket.on("module.mist-hud", ...)` so players can't spoof values.
+**Socket Communication** — GM-mediated bonuses and drops from non-owners use `game.socket.on("module.mist-hud", ...)` so players can't spoof values.
+
+**System is the source of truth** — Tag/status selection, burning and item data belong to the city-of-mist system. Read and write them through its helpers (`SelectedTagsAndStatus`, `tag.burnTag()`, …) instead of keeping module flags; the NPC HUD, the influence viewer, the token tooltip and the sheets all show `SelectedTagsAndStatus` (client-local, like the system's own selection).
 
 **Multi-System Support** — Three systems (city-of-mist, otherscape, legend) share one codebase. System-specific behavior lives in `move-layout.js` (move config) and `settings.js` (CSS injection). Use `game.system.id` to branch when needed.
 

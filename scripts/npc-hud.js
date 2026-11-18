@@ -1,35 +1,9 @@
 import { initializeAccordions, parseMoveText, registerNpcHelpers } from './npc-helpers.js';
 import { detectActiveSystem } from './settings.js';
 import { attachFoldBehaviour, scheduleFold, cancelFold } from './hud-fold.js';
+import { getSelectionDirection, setSelectionDirection, selectionInfluence } from './hud-state.js';
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
-
-globalThis.activeNpcInfluences = globalThis.activeNpcInfluences || {};
-
-// Add hooks to handle NPC and item lifecycle events
-Hooks.on('deleteActor', (actor, options, userId) => {
-// Only GMs should broadcast deletions
-if (!game.user.isGM) return;
-
-// Check if this is an NPC that might have influence
-if (actor.type === 'threat') {
-    // If this NPC had influence in the global cache, remove it
-    if (globalThis.activeNpcInfluences[actor.id]) {
-    // Emit deletion message
-    game.socket.emit('module.mist-hud', {
-        type: 'npcInfluence',
-        action: 'delete',
-        npcId: actor.id,
-        npcName: actor.name
-    });
-    
-    // Remove from local cache too
-    delete globalThis.activeNpcInfluences[actor.id];
-    
-    logger.debug(`NPC ${actor.name} deleted, removed influence`);
-    }
-}
-});
 
 // Global registry of open NPC HUD windows. Each HUD is stored under two keys:
 // its token id (one HUD per token) and its actor id (points at the most
@@ -61,28 +35,12 @@ function hudsUsingTemplate(templateActor) {
   });
 }
 
-/**
- * Compute and broadcast the influence of one threat without opening a window.
- * Uses the open HUD for that actor if there is one, otherwise a throwaway
- * instance that is never rendered or registered.
- */
-function emitInfluenceFor(actor, token = null) {
-  if (!game.user.isGM) return;
-  if (!actor || actor.type !== 'threat') return;
-
-  const open = hudsForActor(actor);
-  if (open.length) {
-    open[0].emitNpcInfluence();
-    return;
-  }
-
-  const headless = new NpcHUD();
-  headless.actor = actor;
-  headless.token = token ?? actor.token?.object ?? null;
-  headless.emitNpcInfluence();
+/** "positive" / "negative" / "" for a selection direction (1 / -1 / 0). */
+function directionClass(direction) {
+  if (direction > 0) return 'positive';
+  if (direction < 0) return 'negative';
+  return '';
 }
-
-
 
 // Simple logging helper - won't break existing code
 const logger = {
@@ -241,10 +199,8 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
             // Prepare additional data (story tags, statuses)
             this._prepareAdditionalData(data);
     
-            const tagInfluence = this.calculateNpcTagInfluence();
-            const statusInfluence = this.calculateNpcStatusInfluence();
-            const totalInfluence = tagInfluence + statusInfluence;
-    
+            const { tagInfluence, statusInfluence, totalInfluence } = selectionInfluence(this.actor);
+
             const collective = this.getCollectiveSize();
             data.collectiveSize = collective.value;
 
@@ -268,9 +224,7 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
             data.tagInfluence = tagInfluence;
             data.statusInfluence = statusInfluence;
             data.totalInfluence = totalInfluence;
-            data.influentialTags = this.influentialTags || [];
-            data.influentialStatuses = this.influentialStatuses || [];
-            
+
             return data;
         } catch (error) {
             console.error("Error in NpcHUD _prepareContext:", error);
@@ -548,8 +502,8 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         this.actor.items
           .filter((item) => item.type === 'status')
           .forEach((status) => {
-            // Determine the status type (flag or system default)
-            const statusType = status.getFlag('mist-hud', 'statusType') || status.system.specialType || 'neutral';
+            // Selected for or against in the system's selection
+            const statusType = directionClass(getSelectionDirection(status)) || 'neutral';
             const key = `${status.name}-${status.system.tier}`;
             if (!statusMap.has(key)) {
               const baseTier = Number(status.system.tier) || 1;
@@ -576,32 +530,15 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
           return null;
         }
         
-        // Determine the burn state: 0 (normal) or 1 (burned)
-        const burnState = tagItem.system.burn_state === 1 ? 1 : 0;
-        
-        // Get the tag's positive/negative flag from the "mist-hud" namespace.
-        // Defaults to "neutral" if not set.
-        const tagFlag = tagItem.getFlag('mist-hud', 'tagState') || 'neutral';
-      
-        // Determine the appropriate CSS class based on the burn state and flag.
-        let cssClass = '';
-        if (burnState === 1) {
-          cssClass = 'burned';
-        } else {
-          // Use the flag to determine the visual modifier.
-          if (tagFlag === 'negative') {
-            cssClass = 'negative';
-          } else if (tagFlag === 'positive') {
-            cssClass = 'positive';
-          } else {
-            cssClass = ''; // neutral state, no extra class
-          }
-        }
-        
+        // Burned (system test), else selected for/against in the system's selection
+        const burned = tagItem.isBurned?.() ?? (!!tagItem.system.burned && tagItem.system.burn_state !== 0);
+        const tagFlag = burned ? 'neutral' : (directionClass(getSelectionDirection(tagItem)) || 'neutral');
+        const cssClass = burned ? 'burned' : (tagFlag === 'neutral' ? '' : tagFlag);
+
         return {
           id: tagId,
           tagName: tagItem.name,
-          burnState,  // 0 for normal, 1 for burned
+          burnState: burned ? 1 : 0,
           cssClass,
           tagFlag,    // "neutral", "negative", or "positive"
           permanent: tagItem.system.permanent || false,
@@ -640,210 +577,50 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         return storyTags;
     }
 
-    // Generic method to toggle states of tag/status items
-    async _toggleItemState(element, itemType, flagName, states, systemProperty = null) {
-        const itemId = itemType === 'tag' ? element.data('id') : element.data('status-id');
-        
-        if (!itemId) {
-            logger.error(`No item ID found for ${itemType}`);
-            return;
-        }
-        
-        const actor = this.actor;
-        if (!actor) {
-            logger.error(`No actor found in _toggle${itemType}State`);
-            return;
-        }
-        
-        const item = actor.items.get(itemId);
-        if (!item) {
-            logger.error(`${itemType} with ID ${itemId} not found`);
-            return;
-        }
-        
-        // Get current state
-        const currentState = item.getFlag('mist-hud', flagName) || states[0];
-        const stateIndex = states.indexOf(currentState);
-        const newState = states[(stateIndex + 1) % states.length];
-        
-        try {
-            // Update flag
-            await item.setFlag('mist-hud', flagName, newState);
-            
-            // Update system property if provided
-            if (systemProperty) {
-                const updateData = {};
-                updateData[systemProperty] = newState;
-                await item.update(updateData);
-            }
-            
-            // Special handling for burned state if needed
-            if (itemType === 'tag' && newState === 'burned') {
-                await item.update({
-                    "system.burn_state": 1,
-                    "system.burned": true
-                });
-            } else if (itemType === 'tag') {
-                await item.update({
-                    "system.burn_state": 0,
-                    "system.burned": false
-                });
-            }
-            
-            // Re-render
-            this.render();
-        } catch (error) {
-            logger.error(`Error updating ${itemType} state:`, error);
-        }
-    }
-    
-    // Modified _toggleTagState to emit influence after tag state change
+    /**
+     * Click on a story tag. Cycle: neutral → negative → positive → burned → neutral.
+     * Selection goes through the system's SelectedTagsAndStatus and burning
+     * through the system's tag.burnTag(), so the token tooltip, the sheets and
+     * the influence viewer all show the same state.
+     */
     async _toggleTagState(tagElement) {
-        console.log("Toggling tag state for element:", tagElement);
-        // Retrieve the tag ID and corresponding tag item.
-        const tagId = tagElement.data('id');
-        const actor = this.actor;
-        if (!actor) {
-            console.error("No actor found in _toggleTagState");
-            return;
-        }
-        const tagItem = actor.items.get(tagId);
-        if (!tagItem) {
-            console.error(`Tag with ID ${tagId} not found`);
-            return;
-        }
-        
-        // Get the current flag value (defaulting to "neutral")
-        let currentFlag = tagItem.getFlag('mist-hud', 'tagState') || 'neutral';
-        // Also, check if the tag is burned
-        let isBurned = tagItem.system.burn_state === 1;
-        console.log(`Current tag flag: ${currentFlag}, isBurned: ${isBurned}`);
-        
-        // Determine the new state in the cycle: neutral → negative → positive → burned → neutral.
-        let newState;
-        if (isBurned) {
-            newState = 'neutral';
-        } else if (currentFlag === 'neutral') {
-            newState = 'negative';
-        } else if (currentFlag === 'negative') {
-            newState = 'positive';
-        } else if (currentFlag === 'positive') {
-            newState = 'burned';
-        }
-        console.log(`New state determined: ${newState}`);
-        
-        // Update the DOM: remove existing state classes and add the appropriate one.
-        tagElement.removeClass('negative positive burned');
-        if (newState === 'negative') {
-            tagElement.addClass('negative');
-        } else if (newState === 'positive') {
-            tagElement.addClass('positive');
-        } else if (newState === 'burned') {
-            tagElement.addClass('burned');
-        }
-        console.log("Updated DOM classes:", tagElement.attr('class'));
-        
-        // Update the tag item accordingly.
+        const tag = this.actor?.items.get(tagElement.data('id'));
+        if (!tag) return;
+
         try {
-            if (newState === 'negative') {
-            console.log("Setting state to negative");
-            await tagItem.setFlag('mist-hud', 'tagState', 'negative');
-            await tagItem.update({
-                "system.burn_state": 0,
-                "system.burned": false
-            });
-            } else if (newState === 'positive') {
-            console.log("Setting state to positive");
-            await tagItem.setFlag('mist-hud', 'tagState', 'positive');
-            await tagItem.update({
-                "system.burn_state": 0,
-                "system.burned": false
-            });
-            } else if (newState === 'burned') {
-            console.log("Setting state to burned");
-            await tagItem.setFlag('mist-hud', 'tagState', 'neutral'); // clear the flag when burned
-            await tagItem.update({
-                "system.burn_state": 1,
-                "system.burned": true
-            });
-            } else if (newState === 'neutral') {
-            console.log("Setting state to neutral");
-            await tagItem.setFlag('mist-hud', 'tagState', 'neutral');
-            await tagItem.update({
-                "system.burn_state": 0,
-                "system.burned": false
-            });
+            if (tag.isBurned()) {
+                await tag.burnTag(0);
+            } else {
+                const direction = getSelectionDirection(tag);
+                if (direction === 0) setSelectionDirection(tag, -1);
+                else if (direction < 0) setSelectionDirection(tag, 1);
+                else {
+                    setSelectionDirection(tag, 0);
+                    await tag.burnTag(1);
+                }
             }
-            console.log("Tag update successful for tag ID:", tagId);
-            
-            // After tag state is updated, recalculate and emit NPC influence
-            this.emitNpcInfluence();
-            
         } catch (error) {
             console.error("Error updating tag state:", error);
         }
-        
-        // Re-render the HUD to reflect the change.
-        this.render();
+        this._afterSelectionChange();
     }
 
-    // Modified _toggleStatusState to emit influence after status state change
+    /** Click on a status. Cycle: neutral → negative → positive → neutral (system selection). */
     async _toggleStatusState(statusElement) {
-        console.log("Toggling status state for element:", statusElement);
-        // Retrieve the status ID and corresponding status item.
-        const statusId = statusElement.data('status-id');
-        const actor = this.actor;
-        if (!actor) {
-            console.error("No actor found in _toggleStatusState");
-            return;
-        }
-        const statusItem = actor.items.get(statusId);
-        if (!statusItem) {
-            console.error(`Status item with ID ${statusId} not found`);
-            return;
-        }
-        
-        // Get the current type from the flag (falling back to system field or "neutral")
-        const currentType = statusItem.getFlag('mist-hud', 'statusType') || statusItem.system.specialType || 'neutral';
-        console.log("Current status type (from flag or system):", currentType);
-        
-        let newType;
-        // Cycle: neutral → negative → positive → neutral.
-        if (currentType === 'neutral') {
-            newType = 'negative';
-        } else if (currentType === 'negative') {
-            newType = 'positive';
-        } else if (currentType === 'positive') {
-            newType = 'neutral';
-        }
-        console.log("New status type determined:", newType);
-        
-        // Update the DOM: update the data attribute and adjust CSS classes.
-        statusElement.attr('data-status-type', newType);
-        // Remove any extra state classes, but keep the base "npc-status"
-        statusElement.removeClass('negative positive neutral');
-        if (newType !== 'neutral') {
-            statusElement.addClass(newType);
-        }
-        console.log("Updated element classes:", statusElement.attr('class'));
-        
-        // Save the new state in the status document by updating the flag and optionally the system field.
-        try {
-            await statusItem.setFlag('mist-hud', 'statusType', newType);
-            // Optionally update system.specialType as well (if needed for other parts of your system)
-            await statusItem.update({ "system.specialType": newType });
-            console.log(`Status item ${statusId} updated to: ${newType}`);
-            
-            // After status state is updated, recalculate and emit NPC influence
-            this.emitNpcInfluence();
-            
-        } catch (error) {
-            console.error("Error updating status item:", error);
-        }
-        
-        // Re-render the HUD to reflect the change
+        const status = this.actor?.items.get(statusElement.data('status-id'));
+        if (!status) return;
+
+        const direction = getSelectionDirection(status);
+        setSelectionDirection(status, direction === 0 ? -1 : direction < 0 ? 1 : 0);
+        this._afterSelectionChange();
+    }
+
+    /** The system's sheets do not listen to selection changes: redraw this actor's open sheet. */
+    _afterSelectionChange() {
         this.render();
-    }                
+        const sheet = this.actor?.sheet;
+        if (sheet?.rendered) sheet.render(false);
+    }
 
     _onRender(context, options) {
         super._onRender(context, options);
@@ -908,7 +685,6 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
                     tag.sheet.render(true);
                 }
                 this.render();
-                this.emitNpcInfluence();
             });
 
             //For NPC Statuses
@@ -938,7 +714,6 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
                     status.sheet.render(true);
                 }
                 this.render();
-                this.emitNpcInfluence();
             }); 
             
             // STATUSES AND STORY TAGS DRAGGABLE    
@@ -1016,8 +791,6 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
             // Create NPC Story Tag
             html.find('.create-npc-tag').on("click", async (event) => {
                 await this._createStoryTagFromHUD(event);
-                // Recalculate and emit NPC influence after creating new tag
-                this.emitNpcInfluence();
             });
     
             // Right-click (contextmenu) to delete an NPC Story Tag
@@ -1035,11 +808,10 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
                 if (!actor) {
                     console.error("Actor not found on NPC HUD.");
                     return;
-                }               
-                
+                }
+
                 try {
                     await actor.deleteEmbeddedDocuments("Item", [tagId]);
-                    this.emitNpcInfluence();
                     this.render();
                 } catch (error) {
                     console.error("Error deleting tag:", error);
@@ -1049,8 +821,6 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
             // Create NPC Status
             html.find('.create-npc-status').on("click", async (event) => {
                 await this._createStatusFromHUD(event);
-                // Recalculate and emit NPC influence after creating new status
-                this.emitNpcInfluence();
             });
     
             // Right-click (contextmenu) to delete an NPC Status
@@ -1082,17 +852,10 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
                 try {
                     // Delete the status
                     await actor.deleteEmbeddedDocuments("Item", [statusId]);
-                    this.emitNpcInfluence();
                     this.render();
                 } catch (error) {
                     console.error("Error deleting status:", error);
                 }
-            });
-
-            html.find('.npc-refresh-influence').on('click', (event) => {
-                event.preventDefault();
-                this.emitNpcInfluence();
-                ui.notifications.info(game.i18n.format("MistHUD.notify.influenceEmitted", { name: this.actor.name }));
             });
 
             // Clicking a segment sets the collective size
@@ -1117,133 +880,6 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         } catch (error) {
             console.error("Error in NpcHUD _onRender:", error);
         }
-    }
-
-    // Calculate NPC Influence from Story Tags
-    calculateNpcTagInfluence() {
-        if (!this.actor) return 0;
-        
-        // Get all story tags
-        const storyTags = this.getStoryTags();
-        
-        // Filter for positive and negative tags only
-        const influentialTags = storyTags.filter(tag => 
-            tag.tagFlag === 'positive' || tag.tagFlag === 'negative');
-        
-        // Calculate the total influence value
-        // Positive tags = +1, Negative tags = -1
-        let totalInfluence = 0;
-        
-        influentialTags.forEach(tag => {
-            if (tag.tagFlag === 'positive') {
-                totalInfluence += 1;
-            } else if (tag.tagFlag === 'negative') {
-                totalInfluence -= 1;
-            }
-        });
-        
-        // Store the influentialTags for reference
-        this.influentialTags = influentialTags;
-        
-        return totalInfluence;
-    }
-
-    // Calculate NPC Influence from Statuses
-    calculateNpcStatusInfluence() {
-        if (!this.actor) return 0;
-        
-        // Get all statuses
-        const statuses = this.getActorStatuses();
-        
-        // Filter for positive and negative statuses only
-        const influentialStatuses = statuses.filter(status => 
-            status.statusType === 'positive' || status.statusType === 'negative');
-        
-        // Calculate the total influence value
-        // The influence value is the tier of the status
-        // Positive status adds the tier value, negative status subtracts it
-        let totalInfluence = 0;
-        
-        influentialStatuses.forEach(status => {
-            if (status.statusType === 'positive') {
-                totalInfluence += status.statusTier;
-            } else if (status.statusType === 'negative') {
-                totalInfluence -= status.statusTier;
-            }
-        });
-        
-        // Store the influentialStatuses for reference
-        this.influentialStatuses = influentialStatuses;
-        
-        return totalInfluence;
-    }
-
-    // Calculate total NPC Influence (tags + statuses)
-    calculateTotalNpcInfluence() {
-        const tagInfluence = this.calculateNpcTagInfluence();
-        const statusInfluence = this.calculateNpcStatusInfluence();
-        
-        console.log(`Tag Influence: ${tagInfluence}, Status Influence: ${statusInfluence}`);
-        return tagInfluence + statusInfluence;
-    }
-
-    // Emit combined NPC Influence to connected players
-    emitNpcInfluence() {
-        if (!this.actor) return;
-        
-        // Calculate current influence values
-        const tagInfluence = this.calculateNpcTagInfluence();
-        const statusInfluence = this.calculateNpcStatusInfluence();
-        const totalInfluence = tagInfluence + statusInfluence;
-        
-        // Get actor ID for reference
-        const npcId = this.actor.id;
-        const npcName = this.actor.name;
-        
-        // Create influence data object with token awareness
-        const influenceData = {
-            npcId,
-            npcName,
-            // If this HUD is associated with a token, add token data
-            tokenId: this.token ? this.token.id : null,
-            tokenName: this.token ? this.token.name : null,
-            actorLink: this.token ? this.token.document.actorLink : true,
-            tagInfluence,
-            statusInfluence,
-            totalInfluence,
-            influentialTags: this.influentialTags || [],
-            influentialStatuses: this.influentialStatuses || [],
-            timestamp: Date.now()
-        };
-        
-        // Store the current influence value in the actor's flags (for GM reference)
-        this.actor.setFlag('mist-hud', 'npcInfluence', influenceData)
-        .then(() => {
-          console.log(`NPC influence updated for ${npcName}: ${totalInfluence}`);
-          
-          // Update global cache
-          if (this.token && !this.token.document.actorLink) {
-            globalThis.activeNpcInfluences[this.token.id] = influenceData;
-          } else {
-            globalThis.activeNpcInfluences[npcId] = influenceData;
-          }
-          
-          // Emit via socket to all connected players
-          game.socket.emit('module.mist-hud', {
-            type: 'npcInfluence',
-            data: influenceData
-          });
-          
-          // Notify clients of change (only if GM)
-          if (game.user.isGM) {
-            game.socket.emit('module.mist-hud', {
-              type: 'npcInfluenceUpdated'
-            });
-          }
-        })
-        .catch(error => {
-          console.error("Error updating NPC influence flag:", error);
-        });
     }
 
     async _onFirstRender(context, options) {
@@ -1430,56 +1066,6 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
 }
 
-Hooks.on('canvasReady', async () => {
-    // Only GM should recalculate and broadcast all influences
-    if (game.user.isGM) {
-        // Find all threat-type NPCs in the current scene
-        const sceneTokenIds = canvas.tokens.placeables
-            .filter(t => t.actor && t.actor.type === 'threat')
-            .map(t => t.id);
-            
-        // Find all corresponding HUDs
-        for (const tokenId of sceneTokenIds) {
-            const token = canvas.tokens.get(tokenId);
-            if (!token || !token.actor) continue;
-            
-            // Calculate and emit influence without opening a window
-            emitInfluenceFor(token.actor, token);
-
-            // Add a small delay to prevent socket congestion
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        
-        logger.debug(`Synchronized influences for ${sceneTokenIds.length} NPCs in scene`);
-    }
-});
-
-// Add a method to sync all influences (can be called manually if needed)
-export async function syncAllNpcInfluences() {
-    if (!game.user.isGM) {
-        ui.notifications.warn(game.i18n.localize("MistHUD.notify.gmOnlySyncAll"));
-        return;
-    }
-    
-    // Find all NPC-type actors
-    const npcActors = game.actors.filter(a => a.type === 'threat');
-    
-    let counter = 0;
-    
-    // Process each actor
-    for (const actor of npcActors) {
-        // Emit influence data without opening a window
-        emitInfluenceFor(actor);
-        counter++;
-        
-        // Add a small delay to prevent socket congestion
-        await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    
-    ui.notifications.info(game.i18n.format("MistHUD.notify.syncedNpcs", { count: counter }));
-    return counter;
-}
-
 // Add a method to handle scene tags (can be integrated into your NpcHUD class)
 async function handleSceneTag(tagElement) {
     console.log("handleSceneTag called for element:", tagElement);
@@ -1551,26 +1137,6 @@ async function handleSceneTag(tagElement) {
     }
 }
 
-// Add a command that can be run from the console
-globalThis.syncAllNpcInfluences = syncAllNpcInfluences;
-
-/**
- * Recompute and broadcast the influence of every threat token on the current
- * scene, without opening any window. GM only.
- * @returns {Promise<number>} number of tokens synchronised
- */
-export async function syncSceneInfluences() {
-    if (!game.user?.isGM || !canvas?.tokens) return 0;
-    let count = 0;
-    for (const token of canvas.tokens.placeables) {
-        if (token.actor?.type !== 'threat') continue;
-        emitInfluenceFor(token.actor, token);
-        count++;
-        await new Promise(resolve => setTimeout(resolve, 50)); // avoid socket congestion
-    }
-    return count;
-}
-
 // Register Handlebars helpers (once, from npc-helpers.js)
 Hooks.once("init", () => {
     registerNpcHelpers();
@@ -1626,66 +1192,18 @@ Hooks.on('canvasReady', () => {
     }
 });
 
-// Handle tag/status creation
-Hooks.on('createItem', (item, options, userId) => {
-    // Only process if this is a tag or status on an NPC
-    if (!item.parent || item.parent.type !== 'threat') return;
-    if (!['tag', 'status'].includes(item.type)) return;
-    
-    // Get the parent NPC
-    const npc = item.parent;
-    
-    // Find the matching HUD instance
-    // Recalculate and emit the new influence values (works with or without an open HUD)
-    emitInfluenceFor(npc);
-});
+// Selection changes (this HUD, the system's sheets, token tooltip, scene tags
+// window) redraw every open NPC HUD. Debounced: one click can fire several hooks.
+let _selectionRenderTimer = null;
+function _rerenderNpcHudsSoon() {
+    clearTimeout(_selectionRenderTimer);
+    _selectionRenderTimer = setTimeout(() => {
+        for (const hud of allNpcHuds()) if (hud.rendered) hud.render();
+    }, 50);
+}
+Hooks.on("TagOrStatusSelected",     _rerenderNpcHudsSoon);
+Hooks.on("TagOrStatusSelectChange", _rerenderNpcHudsSoon);
 
-// Handle tag/status deletion
-Hooks.on('deleteItem', (item, options, userId) => {
-    // Only process if this is a tag or status on an NPC
-    if (!item.parent || item.parent.type !== 'threat') return;
-    if (!['tag', 'status'].includes(item.type)) return;
-    
-    // Get the parent NPC
-    const npc = item.parent;
-    
-    // Find the matching HUD instance
-    // Recalculate and emit the new influence values (works with or without an open HUD)
-    emitInfluenceFor(npc);
-});
-
-// Handle modifications to tag/status properties
-Hooks.on('updateItem', (item, changes, options, userId) => {
-    // Only process if this is a tag or status on an NPC
-    if (!item.parent || item.parent.type !== 'threat') return;
-    if (!['tag', 'status'].includes(item.type)) return;
-    
-    // Get the parent NPC
-    const npc = item.parent;
-    
-    // Check if any relevant fields were changed
-    const relevantChanges = [
-        'system.burn_state', 
-        'system.burned', 
-        'system.tier', 
-        'system.specialType'
-    ];
-    
-    // Check for flag changes
-    const hasFlagChanges = !!(changes.flags?.['mist-hud']?.tagState
-        || changes.flags?.['mist-hud']?.statusType);
-         
-    // Check if any system changes affect influence
-    const hasSystemChanges = Object.keys(changes.system || {})
-        .some(key => relevantChanges.includes(`system.${key}`));
-    
-    // Only emit if relevant changes were made
-    if (hasFlagChanges || hasSystemChanges) {
-        // Find the matching HUD instance
-        // Recalculate and emit the new influence values (works with or without an open HUD)
-        emitInfluenceFor(npc);
-    }
-});
 globalThis.npcHudRegistry = npcHudRegistry;
 export default NpcHUD;
 //export { NpcHUD };
