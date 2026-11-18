@@ -1,19 +1,31 @@
 // move-bar.js — the card sheet's row of move buttons.
 //
-// Look and grouping are the HUD's (organizeMoves, getMoveAbbreviation, the
-// group chevron); the click is the system sheet's roll path (plan § 6.1),
-// through system-adapter.js. PlayerHUD._executeMove is not used.
+// Look and grouping come from the HUD (organizeMoves, the HUD's move button
+// art, getMoveAbbreviation for moves without art); the click is the system
+// sheet's roll path (plan § 6.1), through system-adapter.js.
+// PlayerHUD._executeMove is not used.
 
 import { getActiveSystem } from "../constants.js";
-import { organizeMoves, getMoveAbbreviation } from "../move-layout.js";
+import { organizeMoves, getMoveAbbreviation, getMoveImageSrc } from "../move-layout.js";
 import { getMoves, rollMove } from "./system-adapter.js";
 
-const GROUP_LABELS = {
-  core:    "CityOfMist.terms.coreMoves",
-  session: "MistHUD.hud.moveGroup.session",
-  special: "MistHUD.hud.specialMoves",
-  shb:     "CityOfMist.terms.shb",
-};
+/**
+ * The card sheet has three move groups: Core, Special, SHB. Special joins
+ * the HUD's "session" page (Monologue, Flashback, Downtime, Session End) and
+ * its "special" page, in that order.
+ */
+const GROUPS = [
+  { key: "core",    from: ["core"],             label: "CityOfMist.terms.coreMoves" },
+  { key: "special", from: ["session", "special"], label: "MistHUD.hud.specialMoves" },
+  { key: "shb",     from: ["shb"],              label: "CityOfMist.terms.shb" },
+];
+
+function _button(move) {
+  const abbr = getMoveAbbreviation(move);
+  // Text buttons are round: long abbreviations (MONOLOGUE) get smaller text.
+  const size = abbr.length > 7 ? "xs" : abbr.length > 4 ? "s" : "";
+  return { id: move.id, name: move.name, abbr, size, imgSrc: getMoveImageSrc(move) };
+}
 
 /**
  * Template context for move-bar.hbs.
@@ -21,24 +33,23 @@ const GROUP_LABELS = {
  * @param {number} groupIndex  which group is showing (wraps around)
  */
 export async function prepareMoveBar(actor, groupIndex = 0) {
-  const groups = organizeMoves(await getMoves(), m => actor.canUseMove?.(m) ?? true);
-  const current = groups.length ? ((groupIndex % groups.length) + groups.length) % groups.length : 0;
-  const label = g => game.i18n.localize(GROUP_LABELS[g.key] ?? g.key);
+  const pages = organizeMoves(await getMoves(), m => actor.canUseMove?.(m) ?? true);
+  const groups = GROUPS
+    .map(g => ({ ...g, moves: g.from.flatMap(k => pages.find(p => p.key === k)?.moves ?? []) }))
+    .filter(g => g.moves.length);
+  const n = groups.length;
+  const current = n ? ((groupIndex % n) + n) % n : 0;
+  const label = g => game.i18n.localize(g.label);
   return {
     groups: groups.map((g, i) => ({
       key:   g.key,
       label: label(g),
       shown: i === current,
-      moves: g.moves.map(m => {
-        const abbr = getMoveAbbreviation(m);
-        // Round buttons: long abbreviations (MONOLOGUE, SESSIONEND) get smaller text.
-        const size = abbr.length > 7 ? "xs" : abbr.length > 4 ? "s" : "";
-        return { id: m.id, name: m.name, abbr, size };
-      }),
+      moves: g.moves.map(_button),
     })),
     current,
-    multipleGroups: groups.length > 1,
-    nextLabel: groups.length > 1 ? label(groups[(current + 1) % groups.length]) : "",
+    multipleGroups: n > 1,
+    nextLabel: n > 1 ? label(groups[(current + 1) % n]) : "",
   };
 }
 

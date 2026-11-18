@@ -2,7 +2,11 @@
   {{#each moveBar.groups}}
   <div class="mh-cs-move-group mh-cs-move-group-{{key}}{{#unless shown}} hidden{{/unless}}" data-label="{{label}}">
     {{#each moves}}
+    {{#if imgSrc}}
+    <button type="button" class="mh-cs-move mh-cs-move-img" data-action="rollMove" data-move-id="{{id}}" data-tooltip="{{name}}" aria-label="{{name}}"><img src="{{imgSrc}}" alt=""></button>
+    {{else}}
     <button type="button" class="mh-cs-move{{#if size}} mh-cs-move-{{size}}{{/if}}" data-action="rollMove" data-move-id="{{id}}" data-tooltip="{{name}}" aria-label="{{name}}">{{abbr}}</button>
+    {{/if}}
     {{/each}}
   </div>
   {{/each}}

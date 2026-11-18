@@ -56,6 +56,31 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
+/* The HUD's move art (rounded-square tiles): the image is the button. */
+.mh-card-sheet .mh-cs-move.mh-cs-move-img {
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  opacity: 0.85;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.mh-card-sheet .mh-cs-move.mh-cs-move-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: none;
+}
+
+.mh-card-sheet .mh-cs-move.mh-cs-move-img:hover,
+.mh-card-sheet .mh-cs-move.mh-cs-move-img:focus-visible {
+  opacity: 1;
+  background: none;
+  box-shadow: #04e6fb 0 0 3px;
+}
+
 .mh-card-sheet .mh-cs-move-toggle {
   flex: 0 0 auto;
   width: 28px;
