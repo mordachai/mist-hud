@@ -10,6 +10,8 @@
 // missing file would stop the whole module from loading. A failure is
 // reported once, the card sheet itself keeps working (the move bar does not).
 
+import { getSelectionDirection, setSelectionDirection } from "../hud-state.js";
+
 const SYSTEM_FILES = {
   CityRoll:              "city-roll.js",
   CityHelpers:           "city-helpers.js",
@@ -312,6 +314,51 @@ export async function themeDeleteChoice(themeName) {
 /** The system's current tag/status selection (this client only). */
 export function getSystemSelection() {
   return globalThis.SelectedTagsAndStatus?.getPlayerActivatedTagsAndStatus?.() ?? [];
+}
+
+/** The system's selection class: the loaded module, or the global it also sets. */
+const selectionApi = () => api.SelectedTagsAndStatus ?? globalThis.SelectedTagsAndStatus ?? null;
+
+/**
+ * Whether the system lets this tag be selected at all: the system sheet binds
+ * selection on `.name:not(.burned-tag)`, and `burned-tag` is any burn_state
+ * above 0 (to burn or burned).
+ */
+export function isTagSelectable(tag) {
+  return !!tag && !(Number(tag.system?.burn_state) > 0);
+}
+
+/**
+ * Click on a tag name, as the system sheet's SelectedTagsAndStatus
+ * ._selectTagHandler (system 4.5.3): the direction is the tag's default one
+ * (power and the character's story tags +1, weakness −1), reversed on a right
+ * click; the same direction again clears it, the other one switches it.
+ * The system's checks run first (loadout not loaded, linked tags), so a
+ * refused click leaves the selection as it was; an open roll or tag review
+ * dialog may take the tag instead (preTagOrStatusSelected), as on the system
+ * sheet. Plays the system's tag on / off sound.
+ * @param {Item}    tag
+ * @param {Actor}   owner     the tag's actor (the character, a crew, a danger)
+ * @param {boolean} invert    right click
+ * @returns {number|null} the tag's direction now (1, -1, 0), or null if refused
+ */
+export function toggleTagSelection(tag, owner, invert = false) {
+  const sts = selectionApi();
+  if (!sts || !isTagSelectable(tag)) return null;
+  let direction = sts.getDefaultTagDirection(tag, owner) || -1;
+  if (invert) direction *= -1;
+  const target = getSelectionDirection(tag) === direction ? 0 : direction;
+  if (target !== 0 && !sts.checkValidityForSelect(tag, target)) return null;
+  if (!setSelectionDirection(tag, target)) return null;
+  playTagSound(target !== 0);
+  return target;
+}
+
+/** The system's tag on / off sound; not awaited (it waits for the browser's audio unlock). */
+function playTagSound(on) {
+  const helpers = api.CityHelpers;
+  try { void (on ? helpers?.playTagOn?.() : helpers?.playTagOff?.())?.catch?.(() => {}); }
+  catch { /* no sound */ }
 }
 
 // ── "Open system sheet" fallback (plan § 6.2, route 3) ───────────────────────

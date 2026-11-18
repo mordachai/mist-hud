@@ -34,7 +34,7 @@
 </div>
 {{/inline}}
 {{#*inline "mh-cs-tag"}}
-<li class="mh-cs-tag mh-cs-{{kind}}-tag {{tag.burnState}}{{#if tag.isTitle}} mh-cs-title-tag{{/if}}{{#if tag.depth}} mh-cs-subtag{{/if}}" data-tag-id="{{tag.id}}" style="--mh-cs-depth: {{tag.depth}}">
+<li class="mh-cs-tag mh-cs-{{kind}}-tag {{tag.burnState}}{{#if tag.isTitle}} mh-cs-title-tag{{/if}}{{#if tag.depth}} mh-cs-subtag{{/if}}{{#if tag.selection}} mh-cs-selected mh-cs-selected-{{tag.selection}}{{/if}}" data-tag-id="{{tag.id}}" style="--mh-cs-depth: {{tag.depth}}">
   {{#if burn}}
   {{#if tag.burnAction}}
   <button type="button" class="mh-cs-burn {{tag.burnState}}" data-action="burnTag" data-tooltip="{{tag.burnLabel}}" aria-label="{{tag.burnLabel}}"></button>
@@ -46,7 +46,7 @@
   <button type="button" class="mh-cs-tag-name mh-cs-edit-name" data-action="editTag" data-tooltip="{{localize 'MistHUD.cardSheet.editTag'}}">{{tag.name}}</button>
   <button type="button" class="mh-cs-icon-btn mh-cs-delete" data-action="deleteTag" data-tooltip="{{localize 'MistHUD.cardSheet.deleteTagHint'}}" aria-label="{{localize 'MistHUD.cardSheet.deleteTag'}}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
   {{else}}
-  <span class="mh-cs-tag-name">{{tag.name}}</span>
+  {{> "modules/mist-hud/templates/card-sheet/tag-name.hbs" tag=tag}}
   {{/if}}
 </li>
 {{/inline}}

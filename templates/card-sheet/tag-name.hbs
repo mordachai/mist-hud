@@ -1,0 +1,12 @@
+{{!-- A tag's name in play mode (plan § 6.1, phase 4): the button that selects
+      it for the next roll in the system's selection (click: its default
+      direction, right-click: reversed, the same click again clears it).
+      Burned tags (any burn state) are plain text, as on the system sheet.
+      The id keeps the focus across the re-render a selection triggers.
+      Takes: tag (tagView / a story tag, with selectable, selection,
+      selectionLabel, noSelect). --}}
+{{#if tag.selectable}}
+<button type="button" class="mh-cs-tag-name mh-cs-select-name" id="{{@root.uid}}-tag-{{tag.id}}" data-action="selectTag" aria-pressed="{{#if tag.selection}}true{{else}}false{{/if}}" data-tooltip="{{#if tag.selectionLabel}}{{tag.selectionLabel}}<br>{{/if}}{{localize 'MistHUD.cardSheet.selectTag'}}"><span class="mh-cs-tag-text">{{tag.name}}</span></button>
+{{else}}
+<span class="mh-cs-tag-name"{{#if tag.noSelect}} data-tooltip="{{localize 'MistHUD.cardSheet.burnedNoSelect'}}"{{/if}}>{{tag.name}}</span>
+{{/if}}

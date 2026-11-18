@@ -253,6 +253,15 @@
      earlier 244 x 620 card; the card shrank, the tags kept their size (user,
      2026-11-18), so it scales with the window like everything else. */
   --mh-cs-tag-size: 6.92cqw;
+  /* Selected tags (play mode): the highlight behind the name, its rim, and
+     the +1 / −1 mark at the end of the row. Per-system CSS sets its own. */
+  --mh-cs-sel-pos: rgba(70, 150, 80, 0.35);
+  --mh-cs-sel-neg: rgba(190, 60, 50, 0.35);
+  --mh-cs-sel-ink: inherit;
+  --mh-cs-sel-rim: inset 0 0 0 0.4cqw rgba(0, 0, 0, 0.45);
+  --mh-cs-sel-mark-pos: #1f6b2a;
+  --mh-cs-sel-mark-neg: #9b2018;
+  --mh-cs-sel-hover: rgba(0, 0, 0, 0.08);
 }
 
 /* ── Layers (plan § 7) ───────────────────────────────────────────────────────
@@ -600,10 +609,12 @@
   opacity: 0.55;
 }
 
-/* Long lists scroll inside the face; the card keeps its size. */
+/* Long lists scroll inside the face; the card keeps its size. Up and down
+   only: never a horizontal scrollbar (user, 2026-11-18). */
 .mh-card-sheet .mh-cs-scroll {
   flex: 1 1 auto;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: thin;
 }
@@ -675,6 +686,68 @@
   opacity: 0.6;
 }
 
+/* ── Selecting tags for a roll (play mode, phase 4) ─────────────────────────
+   The name is a button (tag-name.hbs) laid out as text: the highlight hugs
+   the name (.mh-cs-tag-text), the +1 / −1 mark sits at the end of the row.
+   Burned tags can't be selected and keep their strike-through. */
+
+.mh-card-sheet .mh-cs-card .mh-cs-tag .mh-cs-select-name {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 1.5cqw;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/* No negative margin: it overflows the tag list sideways (a scrollbar). */
+.mh-card-sheet .mh-cs-tag-text {
+  min-width: 0;
+  padding: 0 0.8cqw;
+  border-radius: 0.6cqw;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-select-name:hover .mh-cs-tag-text {
+  background-color: var(--mh-cs-sel-hover);
+}
+
+.mh-card-sheet .mh-cs-tag.mh-cs-selected .mh-cs-tag-text {
+  color: var(--mh-cs-sel-ink);
+  font-weight: bold;
+  box-shadow: var(--mh-cs-sel-rim);
+}
+
+.mh-card-sheet .mh-cs-tag.mh-cs-selected-positive .mh-cs-tag-text,
+.mh-card-sheet .mh-cs-card .mh-cs-selected-positive .mh-cs-select-name:hover .mh-cs-tag-text {
+  background-color: var(--mh-cs-sel-pos);
+}
+
+.mh-card-sheet .mh-cs-tag.mh-cs-selected-negative .mh-cs-tag-text,
+.mh-card-sheet .mh-cs-card .mh-cs-selected-negative .mh-cs-select-name:hover .mh-cs-tag-text {
+  background-color: var(--mh-cs-sel-neg);
+}
+
+.mh-card-sheet .mh-cs-tag.mh-cs-selected .mh-cs-select-name::after {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-family: var(--mh-cs-label-font);
+  font-size: 5.4cqw;
+  font-style: normal;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.mh-card-sheet .mh-cs-tag.mh-cs-selected-positive .mh-cs-select-name::after {
+  content: "+1";
+  color: var(--mh-cs-sel-mark-pos);
+}
+
+.mh-card-sheet .mh-cs-tag.mh-cs-selected-negative .mh-cs-select-name::after {
+  content: "−1";
+  color: var(--mh-cs-sel-mark-neg);
+}
+
 /* Weakness tags: pinned to the bottom of the body; a long list scrolls. */
 .mh-card-sheet .mh-cs-weakness {
   flex: 0 0 auto;
@@ -683,6 +756,7 @@
 
 .mh-card-sheet .mh-cs-weakness-tags {
   max-height: calc(var(--mh-cs-tag-size) * 1.2 * 3 + 4.2cqw);
+  overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: thin;
 }

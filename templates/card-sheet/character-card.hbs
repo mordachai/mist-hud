@@ -55,9 +55,9 @@
           <h4 class="mh-cs-section">{{localize "CityOfMist.terms.storyTags"}}</h4>
           <ul class="mh-cs-tags mh-cs-story-tags">
             {{#each card.storyTags}}
-            <li class="mh-cs-tag mh-cs-story-tag {{burnState}}{{#if temporary}} temporary{{/if}}{{#if permanent}} permanent{{/if}}" data-tag-id="{{id}}">
+            <li class="mh-cs-tag mh-cs-story-tag {{burnState}}{{#if temporary}} temporary{{/if}}{{#if permanent}} permanent{{/if}}{{#if selection}} mh-cs-selected mh-cs-selected-{{selection}}{{/if}}" data-tag-id="{{id}}">
               <span class="mh-cs-burn {{burnState}}" aria-hidden="true"></span>
-              <span class="mh-cs-tag-name">{{name}}</span>
+              {{> "modules/mist-hud/templates/card-sheet/tag-name.hbs" tag=this}}
             </li>
             {{else}}
             <li class="mh-cs-none">{{localize "MistHUD.cardSheet.noStoryTags"}}</li>

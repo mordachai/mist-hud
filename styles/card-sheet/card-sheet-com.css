@@ -180,3 +180,88 @@
 .mh-card-sheet .mh-cs-pips {
   gap: 0.6cqw;
 }
+
+/* ── Selected tags (play mode): the City of Mist marker bars ───────────────
+   The same brush-stroke bars the HUD and the External Style sheet put behind
+   a selected tag (ui/select-bar-com-*.webp): the card's theme type for +1,
+   the red weakness bar for -1. The bar lies behind the whole row (flame
+   included), the name turns white, as on the External Style sheet. Hovering
+   a tag shows its default direction's bar faintly. */
+.mh-card-sheet .mh-cs-card {
+  --mh-cs-sel-bar: url("../../ui/select-bar-com-Crew.webp");
+  --mh-cs-sel-bar-neg: url("../../ui/select-bar-com-weakness.webp");
+}
+
+.mh-card-sheet .mh-cs-type-mythos { --mh-cs-sel-bar: url("../../ui/select-bar-com-Mythos.webp"); }
+.mh-card-sheet .mh-cs-type-logos  { --mh-cs-sel-bar: url("../../ui/select-bar-com-Logos.webp"); }
+.mh-card-sheet .mh-cs-type-mist   { --mh-cs-sel-bar: url("../../ui/select-bar-com-Mist.webp"); }
+
+.mh-card-sheet .mh-cs-tag {
+  position: relative;
+  isolation: isolate;
+}
+
+.mh-card-sheet .mh-cs-tag::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--mh-cs-sel-bar) left center / 100% 100% no-repeat;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+/* A weakness tag's default direction is -1: its hover shows the red bar. */
+.mh-card-sheet .mh-cs-weakness-tag::before,
+.mh-card-sheet .mh-cs-tag.mh-cs-selected-negative::before {
+  background-image: var(--mh-cs-sel-bar-neg);
+}
+
+.mh-card-sheet .mh-cs-weakness-tag.mh-cs-selected-positive::before {
+  background-image: var(--mh-cs-sel-bar);
+}
+
+.mh-card-sheet .mh-cs-tag:has(> .mh-cs-select-name:hover)::before {
+  opacity: 0.35;
+}
+
+.mh-card-sheet .mh-cs-tag.mh-cs-selected::before {
+  opacity: 1;
+}
+
+/* No highlighter on the text itself: the bar is the mark. */
+.mh-card-sheet .mh-cs-tag .mh-cs-tag-text,
+.mh-card-sheet .mh-cs-card .mh-cs-select-name:hover .mh-cs-tag-text,
+.mh-card-sheet .mh-cs-tag.mh-cs-selected .mh-cs-tag-text {
+  background: none;
+  box-shadow: none;
+}
+
+.mh-card-sheet .mh-cs-tag.mh-cs-selected .mh-cs-tag-text {
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.55);
+}
+
+.mh-card-sheet .mh-cs-tag.mh-cs-selected .mh-cs-select-name::after {
+  padding-right: 1.5cqw;
+  font-family: var(--mh-cs-heading-font);
+  font-weight: 900;
+  font-size: 5.8cqw;
+}
+
+/* The mark sits where the bar fades out: the card's ink, not white
+   (--mh-cs-ink is set on the face, so it is read here, not on the card). */
+.mh-card-sheet .mh-cs-tag.mh-cs-selected-positive .mh-cs-select-name::after {
+  color: var(--mh-cs-ink, #1f1b16);
+}
+
+.mh-card-sheet .mh-cs-tag.mh-cs-selected-negative .mh-cs-select-name::after {
+  color: #8d1c16;
+}
+
+/* On the dark bar, the flame shows in its own light colours. */
+.mh-card-sheet .mh-cs-tag.mh-cs-selected .mh-cs-burn.unburned {
+  filter: none;
+  opacity: 0.9;
+}

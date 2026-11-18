@@ -10,7 +10,9 @@
 // switch, the "Open system sheet" header button, and edit mode (phase 3):
 // the system's lock (`actor.system.locked`; unlocked = edit mode) toggled by
 // a header control, inline inputs saved on change, and the edit actions of
-// edit-actions.js. The window carries data-mode="play" | "edit".
+// edit-actions.js. The window carries data-mode="play" | "edit". Play mode
+// (phase 4): clicking a tag name selects it in the system's selection
+// (play-actions.js), and a selection change re-renders both layers.
 
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { buildLayer1Context, buildLayer2Context, isEditMode } from "./card-sheet-context.js";
@@ -20,6 +22,7 @@ import {
   openSystemSheet, systemSheetFlips, logModification, creationLocation, statusDrop,
 } from "./system-adapter.js";
 import { EDIT_ACTIONS, changeThemeField, changeActorField } from "./edit-actions.js";
+import { PLAY_ACTIONS } from "./play-actions.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -36,6 +39,7 @@ export const CARD_SHEET_TEMPLATES = [
   `${TEMPLATE_DIR}/card-band.hbs`,
   `${TEMPLATE_DIR}/peek-tab.hbs`,
   `${TEMPLATE_DIR}/improvement.hbs`,
+  `${TEMPLATE_DIR}/tag-name.hbs`,
 ];
 
 const LAYER_PARTS = ["layer1", "layer2"];
@@ -111,6 +115,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       showLayer:       MistCardSheet.#onShowLayer,
       setActiveExtra:  MistCardSheet.#onSetActiveExtra,
       ...EDIT_ACTIONS,
+      ...PLAY_ACTIONS,
     },
   };
 
@@ -544,12 +549,17 @@ function scrollKey(el) {
   return `${card.dataset.cardId}|${face.classList.contains("mh-cs-back") ? "back" : "front"}|${index}`;
 }
 
-/** Re-render open card sheets when the system's tag/status selection changes. */
-export function refreshCardSheets() {
+/**
+ * Re-render open card sheets when the system's tag/status selection changes
+ * (TagOrStatusSelected / TagOrStatusSelectChange). One click can fire both
+ * hooks (switching a tag's direction removes it, then selects it again), so
+ * the renders are gathered into one.
+ */
+export const refreshCardSheets = foundry.utils.debounce(() => {
   for (const app of foundry.applications.instances.values()) {
     if (app instanceof MistCardSheet && app.rendered) app.render({ parts: LAYER_PARTS });
   }
-}
+}, 20);
 
 /**
  * Re-render layer 2 of open card sheets that show a theme of this actor (a

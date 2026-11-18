@@ -14,7 +14,8 @@ import {
   getThemesAndTags, getMysteryFromTheme, getThemeImprovements,
   getCrewThemes, getAllExtraThemes, getBuildUpImprovements,
 } from "../getters.js";
-import { gameTerms } from "./system-adapter.js";
+import { gameTerms, isTagSelectable } from "./system-adapter.js";
+import { getSelectionDirection } from "../hud-state.js";
 
 /** Layer 1 always shows four slots, like the system sheet (mainFourThemes). */
 const MAIN_SLOTS = 4;
@@ -60,6 +61,25 @@ function tagView(t, owner, perms) {
     burnAction,
     burnLabel,
     edit:      perms.edit,
+    ...selectionView(doc, perms.edit),
+  };
+}
+
+/**
+ * How a tag is selected for the next roll (play mode, plan § 6.1): the
+ * system's selection, in this client. Anyone who sees the card may select
+ * (as on the system sheet: a crew theme's tags belong to the crew actor).
+ * Burned tags (any burn_state) can't be selected, as on the system sheet.
+ */
+function selectionView(doc, edit) {
+  const selectable = !edit && isTagSelectable(doc);
+  const direction = doc ? getSelectionDirection(doc) : 0;
+  return {
+    selectable,
+    noSelect:  !edit && !!doc && !selectable,
+    selection: direction > 0 ? "positive" : direction < 0 ? "negative" : "",
+    selectionLabel: direction > 0 ? game.i18n.localize("MistHUD.cardSheet.selectedPositive")
+      : direction < 0 ? game.i18n.localize("MistHUD.cardSheet.selectedNegative") : "",
   };
 }
 
@@ -291,6 +311,7 @@ async function characterCard(actor, flips, storyTags) {
       burnState: t.burnState,
       temporary: !!t.temporary,
       permanent: !!t.permanent,
+      ...selectionView(actor.items.get(t.id), perms.edit),
     })),
     shortDescription: sys.short_description ?? "",
     biography,
