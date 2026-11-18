@@ -1,0 +1,8 @@
+{{!-- Layer 1: the four main themes (plan § 2). --}}
+<section class="mh-cs-layer mh-cs-layer1" data-system="{{activeSystem}}">
+  <div class="mh-cs-cards">
+    {{#each cards}}
+    {{> "modules/mist-hud/templates/card-sheet/theme-card.hbs" card=this}}
+    {{/each}}
+  </div>
+</section>

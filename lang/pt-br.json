@@ -124,6 +124,7 @@
 "MistHUD.settings.autoFoldDelay.name": "Recolher HUDs ociosos (segundos)",
 "MistHUD.settings.autoFoldDelay.hint": "Recolhe o HUD até o cabeçalho depois de tantos segundos sem o ponteiro sobre ele. Clique no cabeçalho ou no retrato recolhido para expandir. 0 desativa.",
 "MistHUD.settings.hudPositions.name": "Posições salvas dos HUDs",
+"MistHUD.settings.cardSheetState.name": "Layout da ficha de cartas (cartas viradas)",
 "MistHUD.keybindings.toggleHud.name": "Mostrar / recolher o Mist HUD",
 "MistHUD.keybindings.toggleHud.hint": "Abre ou expande o HUD do token selecionado (ou do seu personagem) e o recolhe quando já está à mostra.",
 "MistHUD.settings.autoDiceSet.name": "Conjunto de dados automático no Dice So Nice",
@@ -304,14 +305,9 @@
 
 "MistHUD.cardSheet.label": "Ficha de Cartas do Mist HUD",
 "MistHUD.cardSheet.openSystemSheet": "Abrir ficha do sistema",
-"MistHUD.cardSheet.dump.themes": "Temas",
-"MistHUD.cardSheet.dump.crew": "Temas da equipe",
-"MistHUD.cardSheet.dump.extras": "Temas extras",
-"MistHUD.cardSheet.dump.statuses": "Status",
-"MistHUD.cardSheet.dump.storyTags": "Tags de história",
-"MistHUD.cardSheet.dump.juice": "Juice",
-"MistHUD.cardSheet.dump.helpHurt": "Ajuda / Atrapalhar",
-"MistHUD.cardSheet.dump.clues": "Pistas",
-"MistHUD.cardSheet.dump.selection": "Tags e status selecionados (sistema)"
+"MistHUD.cardSheet.flip": "Virar carta",
+"MistHUD.cardSheet.emptySlot": "Espaço de tema vazio",
+"MistHUD.cardSheet.noImprovements": "Nenhuma melhoria ainda",
+"MistHUD.cardSheet.unspentUpgrades": "Melhorias não usadas: {count}"
 
 }

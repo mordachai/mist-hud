@@ -28,6 +28,28 @@ export function applySystemCSS(system) {
   document.head.appendChild(link);
 }
 
+// ── Card sheet art (MistCardSheet) ────────────────────────────────────────────
+// Per-system card backgrounds and fonts, injected like the system CSS. A
+// system without an entry gets the shared card-sheet.css only.
+
+const CARD_SHEET_CSS_MAP = {
+  "city-of-mist": "/modules/mist-hud/styles/card-sheet/card-sheet-com.css",
+};
+
+export function applyCardSheetCSS(system) {
+  const cssPath = CARD_SHEET_CSS_MAP[system];
+  const existing = document.querySelector("link[data-mh-card-sheet]");
+  if (existing && cssPath && existing.href.includes(cssPath)) return;
+  existing?.remove();
+  if (!cssPath) return;
+  const link = document.createElement("link");
+  link.rel  = "stylesheet";
+  link.href = cssPath;
+  link.type = "text/css";
+  link.dataset.mhCardSheet = "true";
+  document.head.appendChild(link);
+}
+
 // ── External Style (system Visual Style "custom") ─────────────────────────────
 // Sheet/chat/sidebar restyle for the system's "External Style (requires Module)"
 // visual style. Each file is rooted under body.style-custom, and only systems
@@ -110,6 +132,7 @@ export async function detectActiveSystem() {
   const system = getActiveSystem();
   applySystemCSS(system ?? null);
   applyExternalCSS(system ?? null);
+  applyCardSheetCSS(system ?? null);
   return system ?? null;
 }
 
@@ -250,6 +273,12 @@ Hooks.once("init", () => {
   // Where each character's HUD was left ({ [hudKey]: { left, top } })
   game.settings.register(MODULE_ID, SETTINGS.HUD_POSITIONS, {
     name: K("hudPositions.name"),
+    scope: "client", config: false, type: Object, default: {},
+  });
+
+  // Card sheet UI state per actor ({ [actorUuid]: { flipped: { [cardId]: true } } })
+  game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_STATE, {
+    name: K("cardSheetState.name"),
     scope: "client", config: false, type: Object, default: {},
   });
 

@@ -1,0 +1,99 @@
+/* card-sheet-com.css — City of Mist art, fonts and colours for the card sheet.
+   Injected at runtime by settings.js (applyCardSheetCSS) when City of Mist is
+   the active game; not in module.json. Every rule is rooted under .mh-card-sheet. */
+
+/* Rock Salt, the same face as the External Style (mh-ext-city-of-mist.css). */
+@font-face {
+  font-family: "MHX Marker";
+  src: url(/systems/city-of-mist/fonts/RockSalt.ttf) format("truetype");
+  font-display: swap;
+}
+
+/* The art is 473 x 1203: header band y 25-90, body y ~95-1105, footer band
+   (City of Mist logo) y 1112-1180, ~22 px frame. In card widths (cqw):
+   1 px of art = 100 / 473 cqw. */
+.mh-card-sheet {
+  --mh-cs-aspect: 473 / 1203;
+  --mh-cs-radius: 4.4cqw;
+  --mh-cs-band-top: 5.3cqw;
+  --mh-cs-band-h: 13.7cqw;
+  --mh-cs-band-inset: 7.5cqw;
+  --mh-cs-footer-bottom: 4.9cqw;
+  --mh-cs-footer-h: 14.4cqw;
+  --mh-cs-body-top: 22cqw;
+  --mh-cs-body-bottom: 22cqw;
+  --mh-cs-inset: 9cqw;
+  --mh-cs-title-font: "MHX Marker", "Rock Salt", cursive;
+  --mh-cs-hand-font: "MHX Marker", "Rock Salt", cursive;
+}
+
+/* ── Backgrounds by themebook type (the extras art for any other type) ──── */
+
+.mh-card-sheet .mh-cs-theme-card .mh-cs-face {
+  background-color: transparent;
+  background-image: url("../../ui/card-sheet/com/extras_theme_bg.webp");
+  --mh-cs-ink: #2a2a2a;
+  --mh-cs-rule: rgba(40, 40, 40, 0.35);
+}
+
+.mh-card-sheet .mh-cs-type-mythos .mh-cs-face {
+  background-image: url("../../ui/card-sheet/com/mythos_theme_bg.webp");
+  --mh-cs-ink: #2c1733;
+  --mh-cs-rule: rgba(70, 30, 80, 0.4);
+}
+
+.mh-card-sheet .mh-cs-type-logos .mh-cs-face {
+  background-image: url("../../ui/card-sheet/com/logos_theme_bg.webp");
+  --mh-cs-ink: #3a2216;
+  --mh-cs-rule: rgba(165, 75, 40, 0.45);
+}
+
+.mh-card-sheet .mh-cs-type-mist .mh-cs-face {
+  background-image: url("../../ui/card-sheet/com/mist_theme_bg.webp");
+  --mh-cs-ink: #1e1f22;
+  --mh-cs-rule: rgba(20, 20, 25, 0.35);
+}
+
+/* ── Type icons in the header band (the HUD's icons) ────────────────────── */
+
+.mh-card-sheet .mh-cs-type-icon.Mythos {
+  background-image: url("../../ui/icons/mythos_icn.svg");
+}
+
+.mh-card-sheet .mh-cs-type-icon.Logos {
+  background-image: url("../../ui/icons/logos_icn.svg");
+}
+
+.mh-card-sheet .mh-cs-type-icon.Mist {
+  background-image: url("../../ui/icons/mist_icn.svg");
+}
+
+.mh-card-sheet .mh-cs-type-icon.Crew,
+.mh-card-sheet .mh-cs-type-icon.Extra {
+  background-image: url("../../ui/icons/crew_icn.svg");
+}
+
+/* ── Burn icons (the HUD's City of Mist set) ─────────────────────────────── */
+
+.mh-card-sheet .mh-cs-burn {
+  background-image: url("../../ui/icons/burn_com_empty_icn.svg");
+}
+
+.mh-card-sheet .mh-cs-burn.toBurn {
+  background-image: url("../../ui/icons/burn_com_active_icn.svg");
+}
+
+.mh-card-sheet .mh-cs-burn.burned {
+  background-image: url("../../ui/icons/burn_com_full_icn.svg");
+}
+
+/* Rock Salt runs tall: a looser title and a smaller handwritten line. */
+.mh-card-sheet .mh-cs-title {
+  line-height: 1.45;
+}
+
+.mh-card-sheet .mh-cs-motivation-text {
+  font-size: 3.9cqw;
+  line-height: 1.6;
+  max-height: calc(3.9cqw * 1.6 * 4 + 0.8em);
+}

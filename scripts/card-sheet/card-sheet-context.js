@@ -1,64 +1,89 @@
 // card-sheet-context.js — render context of the card sheet, built from getters.js.
 //
-// Phase 0: a raw dump of what the cards will show (themes, crew, extras,
-// statuses, story tags, juice, clues) plus the system's current selection,
-// so the data paths and the roll selection can be checked before any card
-// is drawn.
+// Phase 1: layer 1, the character's four main themes as two-sided cards
+// (read-only). Shared by every game; what differs per game (art, fonts,
+// labels) comes from the system's own terms and the per-system CSS.
 
 import { getActiveSystem } from "../constants.js";
-import {
-  getThemesAndTags, getCrewThemes, getExtraThemes, getActorStatuses, getJuiceAndClues,
-} from "../getters.js";
-import { getSystemSelection } from "./system-adapter.js";
+import { getThemesAndTags, getMysteryFromTheme, getThemeImprovements } from "../getters.js";
 
-const tagNames = tags => (tags ?? []).map(t => `${t.tagName}${t.burnState !== "unburned" ? ` [${t.burnState}]` : ""}`);
+/** Layer 1 always shows four slots, like the system sheet (mainFourThemes). */
+const MAIN_SLOTS = 4;
 
-const theme = t => ({
-  id: t.id,
-  name: t.themeName ?? t.name,
-  themebook: t.localizedThemebookName,
-  category: t.category,
-  owner: t.crewName,
-  power: tagNames(t.powerTags),
-  weakness: tagNames(t.weaknessTags),
-  unspent_upgrades: t.unspent_upgrades,
+const pips = track => (track ?? []).map(v => ({ filled: !!v }));
+
+const tagView = t => ({
+  id:        t.id,
+  name:      t.tagName,
+  burnState: t.burnState,
+  burned:    t.burnState === "burned",
+  depth:     t.depth ?? 0,
+  isTitle:   !!t.isTitle,
+  crispy:    !!t.crispy,
 });
 
-/**
- * @param {Actor} actor
- * @returns {{activeSystem: string, locked: boolean, sections: object[]}}
- */
-export function buildDumpContext(actor) {
-  const { themes, storyTags } = getThemesAndTags(actor);
-  const crew   = getCrewThemes(actor);
-  const extras = getExtraThemes(actor);
-  const { helpItems, hurtItems, clueItems, juiceItems } = getJuiceAndClues(actor);
-
-  const section = (key, rows) => ({
-    key,
-    label: game.i18n.localize(`MistHUD.cardSheet.dump.${key}`),
-    count: rows.length,
-    json:  JSON.stringify(rows, null, 2),
-  });
-
+function improvementView(imp) {
+  const uses = imp.uses ?? {};
   return {
-    activeSystem: getActiveSystem(),
-    locked: !!actor.system.locked,
-    sections: [
-      section("themes", themes.map(theme)),
-      section("crew", crew.map(theme)),
-      section("extras", extras.map(theme)),
-      section("statuses", getActorStatuses(actor).map(s => ({ id: s.id, name: s.name, tier: s.tier }))),
-      section("storyTags", storyTags.map(t => ({ id: t.id, name: t.tagName, burnState: t.burnState }))),
-      section("juice", juiceItems.map(j => ({ id: j.id, name: j.name, amount: j.amount }))),
-      section("helpHurt", [
-        ...helpItems.map(h => ({ type: "help", target: h.target.name, amount: h.amount })),
-        ...hurtItems.map(h => ({ type: "hurt", target: h.target.name, amount: h.amount })),
-      ]),
-      section("clues", clueItems.map(c => ({ id: c.id, name: c.name, amount: c.amount, partial: c.partial }))),
-      section("selection", getSystemSelection().map(r => ({
-        name: r.name, type: r.type, amount: r.amount, owner: game.actors.get(r.ownerId)?.name ?? r.ownerId,
-      }))),
-    ],
+    id:          imp.id,
+    name:        imp.name,
+    choice:      imp.choiceItem,
+    description: imp.description,
+    uses:        uses.max > 0 ? `${uses.current ?? 0}/${uses.max}` : "",
+    expended:    !!uses.expended,
   };
+}
+
+/**
+ * One theme card (front and back faces).
+ * @param {Actor}  actor
+ * @param {object} t      one entry of getThemesAndTags().themes
+ * @param {object} flips  { [cardId]: true } for the cards showing their back
+ */
+function themeCard(actor, t, flips) {
+  const info = getMysteryFromTheme(actor, t.id);
+  const theme = actor.items.get(t.id);
+  const motivation = theme?.system?.mystery ?? "";
+  const unspent = t.unspent_upgrades || 0;
+  return {
+    id:              t.id,
+    empty:           false,
+    flipped:         !!flips[t.id],
+    // Picks the background art in the per-system CSS (mythos, logos, mist…)
+    type:            String(t.category ?? "default").toLowerCase(),
+    category:        t.category,
+    themebook:       t.themebookLabel,
+    title:           t.themeName,
+    motivationLabel: info.prefix,
+    motivation:      motivation || info.mysteryText,
+    motivationEmpty: !motivation,
+    attentionLabel:  info.attentionLabel,
+    crackLabel:      info.crackLabel,
+    attention:       pips(info.attention),
+    crack:           pips(info.crack),
+    powerTags:       (t.powerTags ?? []).map(tagView),
+    weaknessTags:    (t.weaknessTags ?? []).map(tagView),
+    improvements:    getThemeImprovements(actor, t.id).map(improvementView),
+    unspent,
+    unspentLabel:    unspent > 0 ? game.i18n.format("MistHUD.cardSheet.unspentUpgrades", { count: unspent }) : "",
+  };
+}
+
+/**
+ * Layer 1: the four main themes in the system's order (actor.mainThemes:
+ * sorted by theme type, without extras or the loadout), padded with empty
+ * slots.
+ * @param {Actor}  actor
+ * @param {object} flips  { [cardId]: true }
+ */
+export function buildLayer1Context(actor, flips = {}) {
+  const { themes } = getThemesAndTags(actor);
+  const byId = new Map(themes.map(t => [t.id, t]));
+  const order = actor.mainThemes?.map(th => th.id) ?? themes.map(t => t.id);
+  const cards = order
+    .filter(id => byId.has(id))
+    .slice(0, MAIN_SLOTS)
+    .map(id => themeCard(actor, byId.get(id), flips));
+  while (cards.length < MAIN_SLOTS) cards.push({ id: `empty-${cards.length}`, empty: true });
+  return { activeSystem: getActiveSystem(), cards };
 }

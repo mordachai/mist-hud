@@ -124,6 +124,7 @@
 "MistHUD.settings.autoFoldDelay.name": "Fold Idle HUDs (seconds)",
 "MistHUD.settings.autoFoldDelay.hint": "Fold a HUD down to its header after this many seconds without the pointer over it. Click the folded header or portrait to unfold it. 0 turns this off.",
 "MistHUD.settings.hudPositions.name": "Saved HUD positions",
+"MistHUD.settings.cardSheetState.name": "Card sheet layout (flipped cards)",
 "MistHUD.keybindings.toggleHud.name": "Show / Fold Mist HUD",
 "MistHUD.keybindings.toggleHud.hint": "Opens or unfolds the HUD of the selected token (or of your own character), and folds it when it is already showing.",
 "MistHUD.settings.autoDiceSet.name": "Automatic Dice So Nice Dice Set",
@@ -304,14 +305,9 @@
 
 "MistHUD.cardSheet.label": "Mist HUD Card Sheet",
 "MistHUD.cardSheet.openSystemSheet": "Open system sheet",
-"MistHUD.cardSheet.dump.themes": "Themes",
-"MistHUD.cardSheet.dump.crew": "Crew themes",
-"MistHUD.cardSheet.dump.extras": "Extra themes",
-"MistHUD.cardSheet.dump.statuses": "Statuses",
-"MistHUD.cardSheet.dump.storyTags": "Story tags",
-"MistHUD.cardSheet.dump.juice": "Juice",
-"MistHUD.cardSheet.dump.helpHurt": "Help / Hurt",
-"MistHUD.cardSheet.dump.clues": "Clues",
-"MistHUD.cardSheet.dump.selection": "Selected tags and statuses (system)"
+"MistHUD.cardSheet.flip": "Flip card",
+"MistHUD.cardSheet.emptySlot": "Empty theme slot",
+"MistHUD.cardSheet.noImprovements": "No improvements yet",
+"MistHUD.cardSheet.unspentUpgrades": "Unspent upgrades: {count}"
 
 }

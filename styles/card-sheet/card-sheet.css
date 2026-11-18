@@ -98,34 +98,410 @@
   background: rgba(255, 255, 255, 0.4);
 }
 
-/* ── Phase 0 data dump ───────────────────────────────────────────────────── */
+/* ── Card geometry ───────────────────────────────────────────────────────────
+   Card-relative sizes are in cqw of the card (each card is an inline-size
+   container), so the cards scale with the window and never grow. The
+   per-system file sets the art's ratio and where its bands sit; these
+   defaults have zero specificity (:where), so it wins whatever the load order. */
 
-.mh-card-sheet .mh-cs-dump {
+:where(.mh-card-sheet) {
+  --mh-cs-aspect: 1 / 2;          /* card width / height (per system: the art's ratio) */
+  --mh-cs-gap: 12px;
+  --mh-cs-radius: 4cqw;
+  --mh-cs-band-top: 5cqw;         /* header band */
+  --mh-cs-band-h: 14cqw;
+  --mh-cs-band-inset: 7cqw;
+  --mh-cs-footer-bottom: 5cqw;    /* footer band */
+  --mh-cs-footer-h: 14cqw;
+  --mh-cs-body-top: 21cqw;        /* body, between the bands */
+  --mh-cs-body-bottom: 21cqw;
+  --mh-cs-inset: 8cqw;
+  --mh-cs-ink: #222;              /* body text */
+  --mh-cs-band-ink: whitesmoke;   /* band text */
+  --mh-cs-rule: rgba(0, 0, 0, 0.35);
+  --mh-cs-title-font: serif;
+  --mh-cs-hand-font: serif;       /* handwritten fields (identity / mystery) */
+  --mh-cs-label-font: "Rift Bold", "Rift", sans-serif;
+  --mh-cs-tag-font: var(--font-family-tags, "Roboto Condensed"), sans-serif;
+}
+
+/* ── Layer 1 ─────────────────────────────────────────────────────────────── */
+
+.mh-card-sheet .mh-cs-layer {
+  flex: 1 1 auto;
+  min-height: 0;
+  container-type: size;
+  container-name: mh-cs-layer;
+}
+
+.mh-card-sheet .mh-cs-cards {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--mh-cs-gap);
+  height: 100%;
+}
+
+/* ── Card + flip ─────────────────────────────────────────────────────────── */
+
+.mh-card-sheet .mh-cs-card {
+  flex: 0 0 auto;
+  /* Four across, or as tall as the layer allows, whichever is smaller. */
+  width: min(calc((100cqw - 3 * var(--mh-cs-gap)) / 4), calc(100cqh * (var(--mh-cs-aspect))));
+  aspect-ratio: var(--mh-cs-aspect);
+  container-type: inline-size;
+  container-name: mh-cs-card;
+  perspective: 1600px;
+}
+
+.mh-card-sheet .mh-cs-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease;
+}
+
+.mh-card-sheet .mh-cs-card.flipped .mh-cs-card-inner {
+  transform: rotateY(180deg);
+}
+
+.mh-card-sheet .mh-cs-card.flipping .mh-cs-card-inner {
+  will-change: transform;
+}
+
+.mh-card-sheet .mh-cs-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--mh-cs-radius);
+  background: #d8d4cc center / 100% 100% no-repeat;
+  box-shadow: 0 0.8cqw 3cqw rgba(0, 0, 0, 0.55);
+  color: var(--mh-cs-ink);
+}
+
+.mh-card-sheet .mh-cs-back {
+  transform: rotateY(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mh-card-sheet .mh-cs-card-inner { transition: none; }
+}
+
+/* ── Bands ───────────────────────────────────────────────────────────────── */
+
+.mh-card-sheet .mh-cs-band {
+  position: absolute;
+  left: var(--mh-cs-band-inset);
+  right: var(--mh-cs-band-inset);
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  color: var(--mh-cs-band-ink);
+}
+
+.mh-card-sheet .mh-cs-band-top {
+  top: var(--mh-cs-band-top);
+  height: var(--mh-cs-band-h);
+}
+
+.mh-card-sheet .mh-cs-band-bottom {
+  bottom: var(--mh-cs-footer-bottom);
+  height: var(--mh-cs-footer-h);
+}
+
+.mh-card-sheet .mh-cs-type-icon {
+  flex: 0 0 auto;
+  width: 7cqw;
+  height: 7cqw;
+  background: center / contain no-repeat;
+}
+
+.mh-card-sheet .mh-cs-themebook {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--mh-cs-label-font);
+  font-size: 6.4cqw;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mh-card-sheet .mh-cs-flip {
+  flex: 0 0 auto;
+  width: 8cqw;
+  height: 8cqw;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+  font-size: 4.6cqw;
+  line-height: 1;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.mh-card-sheet .mh-cs-flip:hover,
+.mh-card-sheet .mh-cs-flip:focus-visible {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+
+.mh-card-sheet .mh-cs-body {
+  position: absolute;
+  top: var(--mh-cs-body-top);
+  bottom: var(--mh-cs-body-bottom);
+  left: var(--mh-cs-inset);
+  right: var(--mh-cs-inset);
+  display: flex;
+  flex-direction: column;
+  gap: 2cqw;
+  min-height: 0;
+}
+
+/* Fitted by card-fit.js through --mh-fit; "safe" keeps any overflow at the
+   bottom, where it can be measured. */
+.mh-card-sheet .mh-cs-title {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+  height: 28cqw;
+  margin: 0;
+  padding: 0;
+  border: none;
+  overflow: hidden;
+  font-family: var(--mh-cs-title-font);
+  font-size: calc(8.5cqw * var(--mh-fit, 1));
+  font-weight: normal;
+  line-height: 1.3;
+  text-align: center;
+  color: inherit;
+}
+
+.mh-card-sheet .mh-cs-tracks {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 3cqw;
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.2cqw;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mh-card-sheet .mh-cs-track {
+  display: flex;
+  align-items: center;
+  gap: 1.5cqw;
+}
+
+.mh-card-sheet .mh-cs-pips {
+  display: flex;
+  gap: 1cqw;
+}
+
+.mh-card-sheet .mh-cs-pip {
+  width: 3.8cqw;
+  height: 3.8cqw;
+  border: 0.5cqw solid currentColor;
+  border-radius: 50%;
+}
+
+.mh-card-sheet .mh-cs-pip.filled {
+  background: currentColor;
+}
+
+.mh-card-sheet .mh-cs-motivation {
+  flex: 0 0 auto;
+  text-align: center;
+}
+
+.mh-card-sheet .mh-cs-motivation-label {
+  display: block;
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.2cqw;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+/* The padding holds glyphs that reach past the line box (handwritten fonts),
+   so a short line does not scroll. */
+.mh-card-sheet .mh-cs-motivation-text {
+  margin: 0;
+  padding: 0.4em 0;
+  max-height: calc(4.4cqw * 1.45 * 4 + 0.8em);
+  overflow-y: auto;
+  font-family: var(--mh-cs-hand-font);
+  font-size: 4.4cqw;
+  line-height: 1.45;
+  scrollbar-width: thin;
+}
+
+.mh-card-sheet .mh-cs-motivation.empty .mh-cs-motivation-text {
+  font-style: italic;
+  opacity: 0.55;
+}
+
+/* Long lists scroll inside the face; the card keeps its size. */
+.mh-card-sheet .mh-cs-scroll {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-width: thin;
 }
 
-.mh-card-sheet .mh-cs-dump-head {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-}
-
-.mh-card-sheet .mh-cs-dump-head h2 {
-  margin: 0;
+.mh-card-sheet .mh-cs-section {
+  margin: 1.5cqw 0 1cqw;
+  padding: 0 0 0.6cqw;
   border: none;
+  border-bottom: 0.4cqw solid var(--mh-cs-rule);
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.6cqw;
+  font-weight: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: inherit;
 }
 
-.mh-card-sheet .mh-cs-dump-section summary {
-  cursor: pointer;
+.mh-card-sheet .mh-cs-section:first-child {
+  margin-top: 0;
+}
+
+/* ── Tags ────────────────────────────────────────────────────────────────── */
+
+.mh-card-sheet .mh-cs-tags {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mh-card-sheet .mh-cs-tag {
+  display: flex;
+  align-items: center;
+  gap: 1.6cqw;
+  margin: 0;
+  padding: 0.7cqw 0 0.7cqw calc(var(--mh-cs-depth, 0) * 4cqw);
+  font-family: var(--mh-cs-tag-font);
+  font-size: 5.8cqw;
+  line-height: 1.2;
+}
+
+.mh-card-sheet .mh-cs-tag-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mh-card-sheet .mh-cs-title-tag .mh-cs-tag-name {
   font-weight: bold;
 }
 
-.mh-card-sheet .mh-cs-dump-section pre {
-  margin: 4px 0 8px;
-  max-height: 260px;
-  overflow: auto;
-  font-size: 11px;
-  white-space: pre-wrap;
+.mh-card-sheet .mh-cs-burn {
+  flex: 0 0 auto;
+  width: 5cqw;
+  height: 5cqw;
+  background: url("../../ui/icons/burn_neutral_empty.svg") center / contain no-repeat;
 }
+
+.mh-card-sheet .mh-cs-burn.toBurn {
+  background-image: url("../../ui/icons/burn_neutral_toburn.svg");
+}
+
+.mh-card-sheet .mh-cs-burn.burned {
+  background-image: url("../../ui/icons/burn_neutral_burned.svg");
+}
+
+.mh-card-sheet .mh-cs-tag.burned .mh-cs-tag-name {
+  text-decoration: line-through;
+  text-decoration-thickness: 0.5cqw;
+  opacity: 0.6;
+}
+
+.mh-card-sheet .mh-cs-weak-icon {
+  flex: 0 0 auto;
+  width: 5cqw;
+  font-size: 4.2cqw;
+  text-align: center;
+  opacity: 0.75;
+}
+
+/* ── Back: improvements ──────────────────────────────────────────────────── */
+
+.mh-card-sheet .mh-cs-unspent {
+  flex: 0 0 auto;
+  margin: 0;
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.4cqw;
+  letter-spacing: 0.04em;
+}
+
+.mh-card-sheet .mh-cs-improvements {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mh-card-sheet .mh-cs-improvement {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 1.5cqw;
+  padding: 1.2cqw 0;
+  border-bottom: 0.3cqw dotted var(--mh-cs-rule);
+  font-family: var(--mh-cs-tag-font);
+  font-size: 5.4cqw;
+  line-height: 1.25;
+}
+
+.mh-card-sheet .mh-cs-imp-name {
+  font-weight: bold;
+}
+
+.mh-card-sheet .mh-cs-imp-uses {
+  margin-left: auto;
+  font-size: 4cqw;
+  opacity: 0.8;
+}
+
+.mh-card-sheet .mh-cs-improvement.expended {
+  opacity: 0.5;
+}
+
+.mh-card-sheet .mh-cs-none {
+  font-family: var(--mh-cs-tag-font);
+  font-size: 4.6cqw;
+  font-style: italic;
+  opacity: 0.6;
+}
+
+/* ── Empty slot ──────────────────────────────────────────────────────────── */
+
+.mh-card-sheet .mh-cs-card-empty .mh-cs-face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0.6cqw dashed rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.mh-card-sheet .mh-cs-empty-text {
+  margin: 0 8cqw;
+  font-family: var(--mh-cs-label-font);
+  font-size: 5cqw;
+  text-align: center;
+  text-transform: uppercase;
+}
+

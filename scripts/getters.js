@@ -468,17 +468,30 @@ function _groupImprovements(items, themeMap, grouped = {}) {
     if (!grouped[key]) {
       grouped[key] = { themebookName: key, themeType: theme.themeType, improvements: [] };
     }
-    grouped[key].improvements.push({
-      id:          item.id,
-      name:        _loc(item.name),
-      description: _loc(item.system.description) || "",
-      effect_class: item.system.effect_class || null,
-      theme_id:    item.system.theme_id || null,
-      choiceItem:  _loc(item.system.choice_item) || null,
-      uses:        item.system.uses || { max: 0, current: 0, expended: false },
-    });
+    grouped[key].improvements.push(_improvementData(item));
   }
   return grouped;
+}
+
+function _improvementData(item) {
+  return {
+    id:          item.id,
+    name:        _loc(item.name),
+    description: _loc(item.system.description) || "",
+    effect_class: item.system.effect_class || null,
+    theme_id:    item.system.theme_id || null,
+    choiceItem:  _loc(item.system.choice_item) || null,
+    uses:        item.system.uses || { max: 0, current: 0, expended: false },
+  };
+}
+
+/** One theme's improvements (getImprovements groups by themebook name, which
+ *  merges two themes of the same themebook). */
+export function getThemeImprovements(actor, themeId) {
+  if (!actor || !themeId) return [];
+  return actor.items.contents
+    .filter(i => i.type === "improvement" && i.system.theme_id === themeId)
+    .map(_improvementData);
 }
 
 /**

@@ -5,19 +5,42 @@
 // truth: reads go through getters.js, writes through document methods, and
 // anything else through system-adapter.js.
 //
-// Phase 0: move bar + raw data dump + "Open system sheet" header button.
+// Phase 1: move bar + layer 1 (the four main themes as flip cards, read-only)
+// + "Open system sheet" header button.
 
-import { buildDumpContext } from "./card-sheet-context.js";
+import { MODULE_ID, SETTINGS } from "../constants.js";
+import { buildLayer1Context } from "./card-sheet-context.js";
+import { watchFit } from "./card-fit.js";
 import { prepareMoveBar, executeMove } from "./move-bar.js";
 import { openSystemSheet, systemSheetFlips } from "./system-adapter.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
 
+const TEMPLATE_DIR = "modules/mist-hud/templates/card-sheet";
+
+/** Every card sheet template and partial, preloaded in init.js. */
 export const CARD_SHEET_TEMPLATES = [
-  "modules/mist-hud/templates/card-sheet/move-bar.hbs",
-  "modules/mist-hud/templates/card-sheet/card-sheet.hbs",
+  `${TEMPLATE_DIR}/move-bar.hbs`,
+  `${TEMPLATE_DIR}/layer1.hbs`,
+  `${TEMPLATE_DIR}/theme-card.hbs`,
 ];
+
+// ── Sheet UI state (client setting, per actor uuid; plan § 6.2) ──────────────
+// { [actorUuid]: { flipped: { [cardId]: true } } }
+
+function readUiState(actor) {
+  try { return game.settings.get(MODULE_ID, SETTINGS.CARD_SHEET_STATE)?.[actor.uuid] ?? {}; }
+  catch { return {}; }
+}
+
+async function writeUiState(actor, change) {
+  let all;
+  try { all = foundry.utils.deepClone(game.settings.get(MODULE_ID, SETTINGS.CARD_SHEET_STATE) ?? {}); }
+  catch { return; }
+  all[actor.uuid] = foundry.utils.mergeObject(all[actor.uuid] ?? {}, change, { performDeletions: true });
+  await game.settings.set(MODULE_ID, SETTINGS.CARD_SHEET_STATE, all);
+}
 
 export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   static DEFAULT_OPTIONS = {
@@ -28,12 +51,13 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       rollMove:        MistCardSheet.#onRollMove,
       nextMoveGroup:   MistCardSheet.#onNextMoveGroup,
       openSystemSheet: MistCardSheet.#onOpenSystemSheet,
+      flipCard:        MistCardSheet.#onFlipCard,
     },
   };
 
   static PARTS = {
-    moves: { template: CARD_SHEET_TEMPLATES[0] },
-    body:  { template: CARD_SHEET_TEMPLATES[1], scrollable: [".mh-cs-dump"] },
+    moves:  { template: CARD_SHEET_TEMPLATES[0] },
+    layer1: { template: CARD_SHEET_TEMPLATES[1], scrollable: [".mh-cs-scroll"] },
   };
 
   // ── What the system expects of `actor.sheet` ────────────────────────────────
@@ -41,6 +65,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   //  - CityDB / CityHelpers refresh a character's sheet when its crew or
   //    extra changes, only if `actor.sheet._state > 0` (V1 render state);
   //  - the setFlipped template helper reads `actor.sheet.flipped[n]`.
+  // The card sheet's own flip state is `cardFlips` (below), not `flipped`.
 
   get _state() {
     return this.state;
@@ -50,17 +75,48 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     return systemSheetFlips(this.actor);
   }
 
+  /** The card sheet's flipped cards: { [cardId]: true } (client setting). */
+  get cardFlips() {
+    return readUiState(this.actor).flipped ?? {};
+  }
+
   /** Which move group the chevron is showing (client UI state, kept across renders). */
   #moveGroup = 0;
   #rolling = false;
+  #unwatchFit = null;
 
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     context.actor = this.actor;
-    context.moveBar = await prepareMoveBar(this.actor, this.#moveGroup);
-    this.#moveGroup = context.moveBar.current;
-    Object.assign(context, buildDumpContext(this.actor));
     return context;
+  }
+
+  async _preparePartContext(partId, context, options) {
+    context = await super._preparePartContext(partId, context, options);
+    switch (partId) {
+      case "moves":
+        context.moveBar = await prepareMoveBar(this.actor, this.#moveGroup);
+        this.#moveGroup = context.moveBar.current;
+        break;
+      case "layer1":
+        Object.assign(context, buildLayer1Context(this.actor, this.cardFlips));
+        break;
+    }
+    return context;
+  }
+
+  async _onRender(context, options) {
+    await super._onRender(context, options);
+    if (options.parts?.includes("layer1") ?? true) {
+      this.#unwatchFit?.();
+      this.#unwatchFit = watchFit(this.element.querySelector(".mh-cs-layer1"));
+    }
+  }
+
+  _onClose(options) {
+    this.#unwatchFit?.();
+    this.#unwatchFit = null;
+    super._onClose(options);
   }
 
   /** Header button: "Open system sheet", for actions the card sheet does not have yet. */
@@ -92,7 +148,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     } finally {
       this.#rolling = false;
       // The system clears its selection without a hook; show the empty selection.
-      if (this.rendered) this.render({ parts: ["body"] });
+      if (this.rendered) this.render({ parts: ["layer1"] });
     }
   }
 
@@ -104,11 +160,27 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   static #onOpenSystemSheet() {
     openSystemSheet(this.actor);
   }
+
+  /** Flip one card in place (no re-render) and remember it for this actor. */
+  static async #onFlipCard(event, target) {
+    const card = target.closest(".mh-cs-card");
+    const cardId = card?.dataset.cardId;
+    if (!cardId) return;
+    const flipped = !card.classList.contains("flipped");
+    // will-change only while the card turns (plan § 7)
+    card.classList.add("flipping");
+    card.classList.toggle("flipped", flipped);
+    const inner = card.querySelector(".mh-cs-card-inner");
+    const done = () => card.classList.remove("flipping");
+    if (inner) inner.addEventListener("transitionend", done, { once: true });
+    setTimeout(done, 1000);
+    await writeUiState(this.actor, { flipped: { [flipped ? cardId : `-=${cardId}`]: flipped || null } });
+  }
 }
 
 /** Re-render open card sheets when the system's tag/status selection changes. */
 export function refreshCardSheets() {
   for (const app of foundry.applications.instances.values()) {
-    if (app instanceof MistCardSheet && app.rendered) app.render({ parts: ["body"] });
+    if (app instanceof MistCardSheet && app.rendered) app.render({ parts: ["layer1"] });
   }
 }

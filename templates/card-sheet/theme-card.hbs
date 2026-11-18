@@ -1,0 +1,86 @@
+{{!-- One theme card: front and back faces of the same card (plan § 3).
+      Shared by every game; art, fonts and band positions are per-system CSS.
+      Read-only in phase 1: no edit mode, selection or tracker buttons yet. --}}
+{{#*inline "mh-cs-band"}}
+<header class="mh-cs-band mh-cs-band-top">
+  <span class="mh-cs-type-icon {{card.category}}" data-tooltip="{{card.category}}" aria-hidden="true"></span>
+  <span class="mh-cs-themebook">{{card.themebook}}</span>
+  <button type="button" class="mh-cs-flip" data-action="flipCard" data-tooltip="{{localize 'MistHUD.cardSheet.flip'}}" aria-label="{{localize 'MistHUD.cardSheet.flip'}}"><i class="fa-solid fa-rotate"></i></button>
+</header>
+{{/inline}}
+{{#*inline "mh-cs-pips"}}
+<div class="mh-cs-track mh-cs-track-{{kind}}">
+  <span class="mh-cs-track-label">{{label}}</span>
+  <span class="mh-cs-pips">{{#each pips}}<span class="mh-cs-pip{{#if filled}} filled{{/if}}"></span>{{/each}}</span>
+</div>
+{{/inline}}
+{{#if card.empty}}
+<article class="mh-cs-card mh-cs-card-empty" data-card-id="{{card.id}}">
+  <div class="mh-cs-card-inner">
+    <section class="mh-cs-face mh-cs-front">
+      <p class="mh-cs-empty-text">{{localize "MistHUD.cardSheet.emptySlot"}}</p>
+    </section>
+  </div>
+</article>
+{{else}}
+<article class="mh-cs-card mh-cs-theme-card mh-cs-type-{{card.type}}{{#if card.flipped}} flipped{{/if}}" data-card-id="{{card.id}}" data-theme-id="{{card.id}}">
+  <div class="mh-cs-card-inner">
+
+    <section class="mh-cs-face mh-cs-front">
+      {{> mh-cs-band card=card}}
+      <div class="mh-cs-body">
+        <h3 class="mh-cs-title" data-fit>{{card.title}}</h3>
+        <div class="mh-cs-tracks">
+          {{> mh-cs-pips kind="attention" label=card.attentionLabel pips=card.attention}}
+          {{> mh-cs-pips kind="crack" label=card.crackLabel pips=card.crack}}
+        </div>
+        <div class="mh-cs-motivation{{#if card.motivationEmpty}} empty{{/if}}">
+          <span class="mh-cs-motivation-label">{{card.motivationLabel}}</span>
+          <p class="mh-cs-motivation-text">{{card.motivation}}</p>
+        </div>
+        <div class="mh-cs-scroll">
+          <h4 class="mh-cs-section">{{localize "CityOfMist.terms.powerTags"}}</h4>
+          <ul class="mh-cs-tags mh-cs-power-tags">
+            {{#each card.powerTags}}
+            <li class="mh-cs-tag mh-cs-power-tag {{burnState}}{{#if isTitle}} mh-cs-title-tag{{/if}}{{#if depth}} mh-cs-subtag{{/if}}" data-tag-id="{{id}}" style="--mh-cs-depth: {{depth}}">
+              <span class="mh-cs-burn {{burnState}}" aria-hidden="true"></span>
+              <span class="mh-cs-tag-name">{{name}}</span>
+            </li>
+            {{/each}}
+          </ul>
+          <h4 class="mh-cs-section">{{localize "CityOfMist.terms.weaknessTags"}}</h4>
+          <ul class="mh-cs-tags mh-cs-weakness-tags">
+            {{#each card.weaknessTags}}
+            <li class="mh-cs-tag mh-cs-weakness-tag {{burnState}}" data-tag-id="{{id}}">
+              <i class="mh-cs-weak-icon fa-solid fa-anchor" aria-hidden="true"></i>
+              <span class="mh-cs-tag-name">{{name}}</span>
+            </li>
+            {{/each}}
+          </ul>
+        </div>
+      </div>
+      <footer class="mh-cs-band mh-cs-band-bottom"></footer>
+    </section>
+
+    <section class="mh-cs-face mh-cs-back">
+      {{> mh-cs-band card=card}}
+      <div class="mh-cs-body">
+        <h4 class="mh-cs-section">{{localize "CityOfMist.terms.improvements"}}</h4>
+        {{#if card.unspent}}<p class="mh-cs-unspent"><i class="fa-solid fa-up-long" aria-hidden="true"></i> {{card.unspentLabel}}</p>{{/if}}
+        <ul class="mh-cs-scroll mh-cs-improvements">
+          {{#each card.improvements}}
+          <li class="mh-cs-improvement{{#if expended}} expended{{/if}}" data-improvement-id="{{id}}"{{#if description}} data-tooltip="{{description}}"{{/if}}>
+            <span class="mh-cs-imp-name">{{name}}</span>{{#if choice}} <span class="mh-cs-imp-choice">({{choice}})</span>{{/if}}
+            {{#if uses}}<span class="mh-cs-imp-uses">{{uses}}</span>{{/if}}
+          </li>
+          {{else}}
+          <li class="mh-cs-none">{{localize "MistHUD.cardSheet.noImprovements"}}</li>
+          {{/each}}
+        </ul>
+      </div>
+      <footer class="mh-cs-band mh-cs-band-bottom"></footer>
+    </section>
+
+  </div>
+</article>
+{{/if}}
