@@ -45,7 +45,10 @@ async function writeUiState(actor, change) {
 export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   static DEFAULT_OPTIONS = {
     classes: ["mh-card-sheet"],
-    position: { width: 900, height: 760 },
+    // Reference size: four 291 x 740 City of Mist cards (art 473 x 1203) with
+    // 12px gaps, under the 56px band, plus 6/12px room for the shadows.
+    // A smaller window scales the cards down (container queries).
+    position: { width: 1212, height: 816 },
     window: { resizable: true },
     actions: {
       rollMove:        MistCardSheet.#onRollMove,
@@ -182,5 +185,14 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 export function refreshCardSheets() {
   for (const app of foundry.applications.instances.values()) {
     if (app instanceof MistCardSheet && app.rendered) app.render({ parts: ["layer1"] });
+  }
+}
+
+/** Re-render open card sheets once the system's database is in (themebooks
+ *  and moves): a sheet opened right after the world loads renders before
+ *  CityDB has them, with no move bar and no theme types. */
+export function refreshCardSheetsOnDBLoad() {
+  for (const app of foundry.applications.instances.values()) {
+    if (app instanceof MistCardSheet && app.rendered) app.render();
   }
 }

@@ -11,7 +11,7 @@ import { BonusManager }              from "./bonus-manager.js";
 import { StatusScreen }              from "./status-screen.js";
 import { openNPCInfluenceManager }   from "./npc-influence.js";
 import { TokenStatusNotification, TokenTagNotification } from "./notifications.js";
-import { MistCardSheet, CARD_SHEET_TEMPLATES, refreshCardSheets } from "./card-sheet/card-sheet.js";
+import { MistCardSheet, CARD_SHEET_TEMPLATES, refreshCardSheets, refreshCardSheetsOnDBLoad } from "./card-sheet/card-sheet.js";
 
 // ── Initial load guard ────────────────────────────────────────────────────────
 // Prevents HUDs from opening during the brief "game loading" window.
@@ -181,6 +181,9 @@ Hooks.once("init", () => {
 // It shows the system's selection, so it follows it.
 Hooks.on("TagOrStatusSelected",     refreshCardSheets);
 Hooks.on("TagOrStatusSelectChange", refreshCardSheets);
+// The system loads its themebooks and moves after "ready"; a sheet open by
+// then has neither yet.
+Hooks.on("cityDBLoaded", refreshCardSheetsOnDBLoad);
 
 // The system flips an already selected item (invert-click on a selected tag)
 // without firing any hook. Announce it, so the NPC HUD, the influence viewer

@@ -2,25 +2,136 @@
    Every rule is rooted under .mh-card-sheet so the sheet looks the same
    whatever Visual Style is chosen. Per-system art goes in card-sheet-{com,os,litm}.css. */
 
-.mh-card-sheet .window-content {
+/* ── Frameless, floating sheet (plan § 7) ────────────────────────────────────
+   No window background, border, shadow or title: only the cards, the top
+   band and (later) the deck show over the canvas. The window header is the
+   band: a dark translucent strip that is the drag handle and holds the
+   header controls at the right. The move bar row is laid over it (content
+   pulled up by the band's height); the move bar lets pointer events through
+   except on its buttons, so pressing an empty part of the band reaches the
+   header and drags the sheet. Empty areas of the window are click-through.
+   The doubled class beats the core, system and External Style window themes. */
+
+.mh-card-sheet {
+  --mh-cs-band-row: 56px;
+}
+
+.application.mh-card-sheet.mh-card-sheet {
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  outline: none;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.application.mh-card-sheet.mh-card-sheet::before,
+.application.mh-card-sheet.mh-card-sheet::after {
+  display: none;
+}
+
+.application.mh-card-sheet.mh-card-sheet > .window-header {
+  position: relative;
+  z-index: 0;
+  flex: 0 0 var(--mh-cs-band-row);
+  height: var(--mh-cs-band-row);
+  margin: 0;
+  padding: 0 10px;
+  gap: 4px;
+  border: none;
+  border-radius: calc(var(--mh-cs-band-row) / 2);
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: none;
+  color: whitesmoke;
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.application.mh-card-sheet.mh-card-sheet > .window-header:active {
+  cursor: grabbing;
+}
+
+/* No title text; it stays in the DOM for screen readers. */
+.application.mh-card-sheet.mh-card-sheet > .window-header .window-title {
+  flex: 1 1 auto;
+  visibility: hidden;
+}
+
+.application.mh-card-sheet.mh-card-sheet > .window-header .window-icon {
+  display: none;
+}
+
+/* Header controls: small floating icons at the right of the band. */
+.application.mh-card-sheet.mh-card-sheet > .window-header .header-control {
+  position: relative;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+  color: whitesmoke;
+  font-size: 13px;
+  opacity: 0.75;
+  text-shadow: 0 0 3px #000;
+}
+
+.application.mh-card-sheet.mh-card-sheet > .window-header .header-control:hover,
+.application.mh-card-sheet.mh-card-sheet > .window-header .header-control:focus-visible {
+  opacity: 1;
+}
+
+.application.mh-card-sheet.mh-card-sheet > .window-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 8px;
+  /* Pull the content up over the band, so the move bar sits in it. */
+  margin-top: calc(-1 * var(--mh-cs-band-row));
+  /* Room for the cards' shadows. */
+  padding: 0 6px 12px;
   overflow: hidden;
+  border: none;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  color: inherit;
+  pointer-events: none;
 }
 
-/* ── Move bar (HUD look, horizontal) ─────────────────────────────────────── */
+.application.mh-card-sheet.mh-card-sheet > .window-resize-handle {
+  opacity: 0.25;
+  pointer-events: auto;
+}
+
+.application.mh-card-sheet.mh-card-sheet > .window-resize-handle:hover {
+  opacity: 0.8;
+}
+
+/* What can be clicked: the cards and the buttons. */
+.mh-card-sheet .mh-cs-card,
+.mh-card-sheet .mh-cs-move,
+.mh-card-sheet .mh-cs-move-toggle {
+  pointer-events: auto;
+}
+
+/* ── Move bar (HUD look, horizontal, inside the band) ────────────────────── */
 
 .mh-card-sheet .mh-cs-move-bar {
-  flex: 0 0 auto;
+  flex: 0 0 var(--mh-cs-band-row);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 6px 10px;
-  background-color: #191919d7;
-  border-radius: 24px;
+  /* Keep clear of the header controls at the right of the band. */
+  padding: 0 110px;
+  background: none;
+  pointer-events: none;
 }
 
 .mh-card-sheet .mh-cs-move-group {
