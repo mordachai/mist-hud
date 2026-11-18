@@ -6,7 +6,7 @@
   --text-tag-color: #322924;
   --text-hud-main-color: #d7e5f5; 
   --text-hud-subtitles-color: #ffa900;
-  --text-status-color: #ecf5f4;
+  --text-status-color: var(--com-hl-text);
   --outcome-text-color: #3d2911;
   --effects-color1:#1b190e;
   --effects-color2:rgb(245,245,245);
@@ -19,9 +19,11 @@
   --destroyed-tag-color: rgba(255, 40, 40, 0.825);
   --spectrum-color:#dc9c67;
   --limit-color: #ae295b;
-  --status-color: rgb(102 31 131);
-  --storytag-color: rgb(63, 81, 161);
-  --storytag-text-color: whitesmoke;
+  /* Story tags and statuses: the core book's highlights (see "Book
+     highlights" below) */
+  --status-color: var(--com-hl-status);
+  --storytag-color: var(--com-hl-tag);
+  --storytag-text-color: var(--com-hl-text);
   --divider-roll-color: rgba(255, 255, 255, 0.3);
   --divider-color1: rgba(255, 255, 255, 0.3);
   --roll-shadow-color:#d542b7;
@@ -633,4 +635,352 @@ input[type="checkbox"].hurt-toggle {
    indented per level (getters.js getPowerTags, --mh-tag-depth) */
 .mh-tags .mh-power-tag.mh-nested-tag {
   margin-left: calc(var(--mh-tag-depth, 1) * 18px);
+}
+
+/* ── Statuses MC Screen (status-screen.js) ─────────────────────────────
+   Grit noir: the plain canvas under the night title bar with the neon
+   sign title (the book-page windows), one charcoal ink for everything
+   else: Rift caps over a heavy black rule, flat outlined keys, underline
+   tabs and hairline rows instead of grey stripes. mist-hud.css reads the
+   variables (its rules are layered !important). Always on, as the NPC
+   HUD. */
+#status-screen {
+  --mh-status-screen-frame: url('../ui/com_chat_BG_s.webp') center / cover no-repeat, #ece5d6;
+  --mh-status-screen-header:
+    linear-gradient(rgba(18, 10, 32, 0.55), rgba(18, 10, 32, 0.55)),
+    url('../ui/com_sheet_BG.webp') center / cover no-repeat,
+    #120a20;
+  --mh-status-screen-bg: transparent;
+  --scrollbar-thumb-color: rgba(91, 82, 70, 0.55);
+  --mh-ss-ink:   #352a1d;
+  --mh-ss-dim:   #6e6253;
+  --mh-ss-rule:  #1f1b16;
+  --mh-ss-line-dim:   rgba(91, 82, 70, 0.45);
+  --mh-ss-line-faint: rgba(91, 82, 70, 0.2);
+  --mh-ss-wash:  rgba(53, 42, 29, 0.08);
+  border: none;
+  border-radius: 0;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+#status-screen .window-header {
+  border: none;
+}
+
+#status-screen .window-header .window-title {
+  font-family: "Rift Bold", "Rift", sans-serif;
+  font-size: 1.3em;
+  font-weight: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffe6f5;
+  text-shadow: 0 0 4px #ff2aa6, 0 0 10px rgba(255, 42, 166, 0.55);
+}
+
+#status-screen .window-header .header-control {
+  color: #ece6f2;
+}
+
+#status-screen .window-content {
+  border: none;
+}
+
+#status-screen .status-screen-header {
+  box-sizing: border-box;
+  width: auto;
+  margin: 10px 14px 2px;
+  padding: 0;
+  border: none;
+}
+
+/* "Statuses List": the danger's name, Rift caps over the heavy rule */
+#status-screen .statuses-screen-title {
+  flex: 0 1 auto;
+  padding: 0 0 2px;
+  font-family: "Rift Bold", "Rift", sans-serif;
+  font-size: 1.6rem;
+  font-weight: normal;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mh-ss-rule);
+  text-shadow: none;
+  border-bottom: 4px solid var(--mh-ss-rule);
+}
+
+/* Sample / Import / Reset: flat charcoal keys, a faint wash on hover */
+#status-screen .status-screen-header button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  width: auto;
+  max-width: none;
+  height: 26px;
+  margin: 0;
+  padding: 0 10px;
+  font-family: "Fira Sans Extra Condensed", "Barlow Condensed", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mh-ss-ink);
+  text-shadow: none;
+  border: 1px solid var(--mh-ss-line-dim);
+  border-radius: 0;
+  background: rgba(255, 252, 245, 0.35);
+  box-shadow: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+#status-screen .status-screen-header button i {
+  margin: 0;
+  color: var(--mh-ss-ink);
+}
+
+#status-screen .status-screen-header button:hover {
+  border-color: var(--mh-ss-rule);
+  background: var(--mh-ss-wash);
+}
+
+/* Category tabs: heavy condensed caps over one hairline, the open one in
+   full ink on a black underline */
+#status-screen .status-tabs {
+  box-sizing: border-box;
+  width: auto;
+  margin: 8px 14px 0;
+  padding: 0;
+  gap: 2px;
+  background: linear-gradient(var(--mh-ss-line-faint), var(--mh-ss-line-faint)) left bottom / 100% 1px no-repeat;
+}
+
+#status-screen .status-tab {
+  height: auto;
+  margin: 0;
+  padding: 7px 6px 5px;
+  font-family: "Fira Sans Extra Condensed", "Barlow Condensed", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  color: var(--mh-ss-dim);
+  text-shadow: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  outline: none;
+  background: none;
+  box-shadow: none;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+#status-screen .status-tab:hover {
+  color: var(--mh-ss-ink);
+  border-bottom-color: var(--mh-ss-line-dim);
+  background: var(--mh-ss-wash);
+}
+
+#status-screen .status-tab.active {
+  font-weight: 900;
+  color: var(--mh-ss-rule);
+  border: none;
+  border-bottom: 3px solid var(--mh-ss-rule);
+  background: none;
+}
+
+#status-screen .status-tab-content {
+  padding: 0 0 4px;
+}
+
+/* Status families: hairline rows, no stripes; the name in Rift caps, the
+   scale in the book's green highlights (Book highlights below) */
+#status-screen .status-category-list,
+#status-screen .status-category-list.tab-content {
+  margin: 4px 14px;
+  padding: 0;
+  gap: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+}
+
+#status-screen .status-category-list:not(.tab-content) {
+  padding: 4px 6px 4px 8px;
+  border-bottom: 1px solid var(--mh-ss-line-faint);
+}
+
+#status-screen .status-group-container {
+  box-sizing: border-box;
+  gap: 8px;
+  padding: 5px 8px;
+  font-family: "Rift Bold", "Rift", sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mh-ss-ink);
+  border: none;
+  border-bottom: 1px solid var(--mh-ss-line-faint);
+  border-radius: 0;
+  background: none;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+#status-screen :is(.status-group-container, .status-category-list:not(.tab-content)):hover {
+  border-color: var(--mh-ss-line-faint);
+  background: var(--mh-ss-wash);
+  box-shadow: inset 2px 0 var(--mh-ss-rule);
+}
+
+#status-screen :is(.status-group-container, .status-category-list) ul {
+  gap: 5px;
+  font-size: 0.9rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+/* ==========================================================================
+   Book highlights: story tags in yellow, statuses in green, as in the
+   City of Mist core book and on the External Style sheets / Scene Tags
+   window: a flat marker stroke (no edge), italic body serif, dark ink.
+     rest ...... the highlight
+     positive .. bold, with an inset charcoal rim
+     negative .. the book's salmon, bold, rim
+     burned .... faded and struck through
+   Every HUD: Player HUD, NPC HUD (lists and move-text mentions) and the
+   Statuses MC Screen. Theme power / weakness / loadout tags keep their bars.
+   ========================================================================== */
+:root {
+  --com-hl-tag:    #fff1a2;
+  --com-hl-status: #d9e8ae;
+  --com-hl-neg:    #fbc9ba;
+  --com-hl-text:   #1f1b16;
+  --com-hl-rim:    inset 0 0 0 1.5px #1f1b16;
+  --com-hl-font:   "Averia Serif Libre", "PT Serif", serif;
+}
+
+/* ── Player HUD: story tags ─────────────────────────────────────────────
+   The highlight sits on the text; the row loses its selection bar. */
+.mh-story-tag.selected,
+.mh-story-tag.selected.toBurn,
+.mh-story-tag.inverted.selected {
+  background: none;
+  text-shadow: none;
+}
+
+.mh-story-tag .mh-tag-text {
+  justify-self: start;
+  width: fit-content;
+  padding: 0.05em 0.35em;
+  font-family: var(--com-hl-font);
+  font-size: 1.05em;
+  font-style: italic;
+  font-weight: normal;
+  text-transform: none;
+  color: var(--com-hl-text);
+  text-shadow: none;
+  border-radius: 1px;
+  background: var(--com-hl-tag);
+}
+
+.mh-story-tag.selected .mh-tag-text {
+  font-weight: bold;
+  box-shadow: var(--com-hl-rim);
+}
+
+.mh-story-tag.selected:is(.inverted, :has(> .mh-story-toggle.inverted)) .mh-tag-text {
+  background: var(--com-hl-neg);
+}
+
+.mh-story-tag.burned .mh-tag-text {
+  color: rgba(31, 27, 22, 0.6);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  opacity: 0.55;
+}
+
+/* ── Player HUD: statuses ───────────────────────────────────────────── */
+.mh-status {
+  padding: 0.1em 0.4em;
+  font-family: var(--com-hl-font);
+  font-style: italic;
+  font-weight: normal;
+  line-height: 1.2;
+  text-transform: none;
+  color: var(--com-hl-text);
+  text-shadow: none;
+  border: none;
+  border-radius: 1px;
+  background: var(--com-hl-status);
+}
+
+.mh-status.positive {
+  font-weight: bold;
+  border: none;
+  background: var(--com-hl-status);
+  box-shadow: var(--com-hl-rim);
+}
+
+.mh-status.negative {
+  font-weight: bold;
+  color: var(--com-hl-text);
+  border: none;
+  background: var(--com-hl-neg);
+  box-shadow: var(--com-hl-rim);
+}
+
+/* ── NPC HUD (lists and move-text mentions) and the Statuses MC Screen ─ */
+.npc-story-tag,
+.npc-story-tag.neutral,
+.npc-story-tag-moves,
+.npc-status,
+.npc-status.neutral,
+.npc-status-moves {
+  padding: 0 0.3em;
+  font-family: var(--com-hl-font);
+  font-style: italic;
+  font-weight: normal;
+  text-transform: none;
+  color: var(--com-hl-text);
+  text-shadow: none;
+  border: none;
+  border-radius: 1px;
+}
+
+.npc-story-tag,
+.npc-story-tag.neutral,
+.npc-story-tag-moves {
+  background: var(--com-hl-tag);
+}
+
+.npc-status,
+.npc-status.neutral,
+.npc-status-moves {
+  background: var(--com-hl-status);
+}
+
+:is(.npc-story-tag, .npc-status, .npc-story-tag-moves, .npc-status-moves):hover {
+  text-shadow: none;
+  filter: drop-shadow(0 0 3px rgba(255, 252, 245, 0.55));
+}
+
+:is(.npc-story-tag, .npc-status):is(.positive, .negative) {
+  margin: 0;
+  font-weight: bold;
+  border: none;
+  border-radius: 1px;
+  box-shadow: var(--com-hl-rim);
+}
+
+:is(.npc-story-tag, .npc-status).negative {
+  background: var(--com-hl-neg);
+}
+
+:is(.npc-story-tag, .npc-status).burned {
+  opacity: 0.55;
+  color: rgba(31, 27, 22, 0.6);
+  box-shadow: none;
+  text-decoration-line: line-through;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
 }

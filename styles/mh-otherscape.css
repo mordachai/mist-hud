@@ -1319,3 +1319,219 @@ color: var(--mythosOS-verylight-color);
 .mh-tags .mh-power-tag.mh-nested-tag {
   margin-left: calc(var(--mh-tag-depth, 1) * 18px);
 }
+
+/* ── Statuses MC Screen (status-screen.js) ─────────────────────────────
+   The Scene Tags window's glass: navy panel over the system's OS art, a
+   cyan edge on the left, glowing caps headings, dim keys that light cyan,
+   underline tabs and hairline rows instead of grey stripes. The panel is
+   painted on the whole window (mist-hud.css reads the variables, its
+   rules are layered !important). Always on, as the NPC HUD. */
+#status-screen {
+  --mh-status-screen-frame:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+    linear-gradient(90deg, rgba(0, 222, 246, 0.1), transparent 1.5em),
+    linear-gradient(90deg, rgba(1, 6, 16, 0.55), transparent 55%),
+    linear-gradient(180deg, rgba(29, 45, 59, 0.92), rgba(3, 13, 33, 0.88)),
+    url(/systems/city-of-mist/images/OS-BG.webp) center / cover no-repeat;
+  --mh-status-screen-header: linear-gradient(90deg, rgba(0, 222, 246, 0.32), transparent 85%) left bottom / 100% 1px no-repeat;
+  --mh-status-screen-bg: transparent;
+  --scrollbar-thumb-color: rgba(0, 222, 246, 0.5);
+  --mh-ss-line:  #00def6;
+  --mh-ss-dim:   rgba(0, 222, 246, 0.32);
+  --mh-ss-faint: rgba(0, 222, 246, 0.14);
+  --mh-ss-glow:  0 0 4px rgba(0, 222, 246, 0.75), 0 0 10px rgba(0, 123, 191, 0.6);
+  --mh-ss-text:  #d7e5f5;
+  --mh-ss-dimtext: #b4b9c0;
+  border: none;
+  border-left: 2px solid var(--mh-ss-line);
+  border-radius: 0;
+  box-shadow: 0 0 0 1px var(--mh-ss-faint), 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+#status-screen .window-header {
+  border: none;
+}
+
+#status-screen .window-header .window-title {
+  font-family: var(--font-family-move, "SDGlitch"), "Orbitron", sans-serif;
+  font-size: 1.35em;
+  font-style: italic;
+  font-weight: normal;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #f5f5f5;
+  text-shadow: var(--mh-ss-glow);
+}
+
+#status-screen .window-content {
+  border: none;
+}
+
+#status-screen .status-screen-header {
+  box-sizing: border-box;
+  width: auto;
+  margin: 6px 10px 2px;
+  padding: 2px 0 6px;
+  border: none;
+  background: linear-gradient(90deg, var(--mh-ss-dim), transparent 85%) left bottom / 100% 1px no-repeat;
+}
+
+/* "Statuses List": the Scene Tags "■ Scene" heading */
+#status-screen .statuses-screen-title {
+  padding-left: 16px;
+  font-family: var(--font-family-main1, "Rift"), "Rajdhani", sans-serif;
+  font-size: 1.45rem;
+  font-weight: normal;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #f5f5f5;
+  text-shadow: var(--mh-ss-glow);
+  background: linear-gradient(var(--mh-ss-line), var(--mh-ss-line)) left 0 top calc(50% - 0.05em) / 7px 7px no-repeat;
+}
+
+/* Sample / Import / Reset: dim keys with a chamfered corner, cyan when
+   hovered (Reset turns red: it throws the imported list away) */
+#status-screen .status-screen-header button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  width: auto;
+  max-width: none;
+  height: 26px;
+  margin: 0;
+  padding: 0 12px 0 10px;
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.62rem;
+  font-weight: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mh-ss-text);
+  text-shadow: none;
+  border: 1px solid var(--mh-ss-dim);
+  border-radius: 0;
+  background: rgba(3, 13, 33, 0.55);
+  box-shadow: none;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%);
+  transition: color 0.15s, border-color 0.15s, background 0.15s, text-shadow 0.15s;
+}
+
+#status-screen .status-screen-header button i {
+  margin: 0;
+  color: var(--mh-ss-line);
+}
+
+#status-screen .status-screen-header button:hover {
+  color: #f5f5f5;
+  text-shadow: var(--mh-ss-glow);
+  border-color: var(--mh-ss-line);
+  background: rgba(0, 222, 246, 0.12);
+}
+
+#status-screen .status-screen-header button.mh-reset-json:hover {
+  text-shadow: 0 0 6px rgba(226, 56, 58, 0.7);
+  border-color: #e2383a;
+  background: rgba(226, 56, 58, 0.14);
+}
+
+#status-screen .status-screen-header button.mh-reset-json:hover i {
+  color: #ff6b6d;
+}
+
+/* Category tabs: flat labels over one hairline, the open one lit with a
+   cyan underline */
+#status-screen .status-tabs {
+  box-sizing: border-box;
+  width: auto;
+  margin: 4px 10px 0;
+  padding: 0;
+  gap: 2px;
+  background: linear-gradient(var(--mh-ss-faint), var(--mh-ss-faint)) left bottom / 100% 1px no-repeat;
+}
+
+#status-screen .status-tab {
+  height: auto;
+  margin: 0;
+  padding: 9px 6px 7px;
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.66rem;
+  font-weight: normal;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  color: var(--mh-ss-dimtext);
+  text-shadow: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  outline: none;
+  background: none;
+  box-shadow: none;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+#status-screen .status-tab:hover {
+  color: var(--mh-ss-text);
+  border-bottom-color: var(--mh-ss-dim);
+  background: linear-gradient(0deg, rgba(0, 222, 246, 0.08), transparent);
+}
+
+#status-screen .status-tab.active {
+  font-weight: normal;
+  color: #f5f5f5;
+  text-shadow: var(--mh-ss-glow);
+  border: none;
+  border-bottom: 2px solid var(--mh-ss-line);
+  background: linear-gradient(0deg, rgba(0, 222, 246, 0.2), transparent);
+}
+
+#status-screen .status-tab-content {
+  padding: 0 0 4px;
+}
+
+/* Status families: hairline rows, no stripes; the name in caps, the
+   scale in the book's green chips (.npc-status above) */
+#status-screen .status-category-list,
+#status-screen .status-category-list.tab-content {
+  margin: 4px 10px;
+  padding: 0;
+  gap: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+}
+
+#status-screen .status-category-list:not(.tab-content) {
+  padding: 4px 6px 4px 10px;
+  border-bottom: 1px solid var(--mh-ss-faint);
+}
+
+#status-screen .status-group-container {
+  box-sizing: border-box;
+  gap: 8px;
+  padding: 5px 8px 5px 10px;
+  font-family: var(--font-family-main1, "Rift"), "Rajdhani", sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mh-ss-text);
+  border: none;
+  border-bottom: 1px solid var(--mh-ss-faint);
+  border-radius: 0;
+  background: none;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+#status-screen :is(.status-group-container, .status-category-list:not(.tab-content)):hover {
+  border-color: var(--mh-ss-faint);
+  background: linear-gradient(90deg, rgba(0, 222, 246, 0.12), transparent 70%);
+  box-shadow: inset 2px 0 var(--mh-ss-line);
+}
+
+#status-screen :is(.status-group-container, .status-category-list) ul {
+  gap: 5px;
+  font-size: 0.9rem;
+  letter-spacing: normal;
+  text-transform: none;
+}

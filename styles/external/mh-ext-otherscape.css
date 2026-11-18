@@ -5694,11 +5694,13 @@
       filter: drop-shadow(0 0 3px lime);
     }
 
-    /* Statuses: the book's green, as wide as the text, + / − after it */
+    /* Statuses: the book's green, as wide as the text, + / − after it,
+       delete at the far right (the row spans the list, so it lines up
+       with the tag rows' delete) */
     & div.status-line {
       display: flex;
       box-sizing: border-box;
-      width: fit-content;
+      width: auto;
       max-width: 100%;
       align-items: center;
       gap: 0.25em;
@@ -5771,6 +5773,11 @@
 
     & .status-line .plus-minus {
       flex: none;
+    }
+
+    & .status-line .flex-trash {
+      order: 1;
+      margin: 0 0 0 auto;
     }
 
     & .status-line .plus-minus-controls {

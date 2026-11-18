@@ -5856,6 +5856,11 @@
       flex: none;
     }
 
+    /* Delete at the far right, after + / −, as on the tag rows */
+    & .status-line .flex-trash {
+      order: 1;
+    }
+
     & .status-line .plus-minus-controls {
       display: inline-flex;
       gap: 0.3em;

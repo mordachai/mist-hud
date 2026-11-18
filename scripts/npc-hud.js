@@ -810,6 +810,15 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
                     return;
                 }
 
+                // Right-click sits next to click-to-select: confirm before
+                // deleting, as the player HUD does.
+                const name = Handlebars.escapeExpression(actor.items.get(tagId)?.name ?? "");
+                const ok = await foundry.applications.api.DialogV2.confirm({
+                    window: { title: game.i18n.localize("MistHUD.hud.deleteTag") },
+                    content: `<p>${game.i18n.format("MistHUD.hud.deleteTagConfirm", { tag: name })}</p>`,
+                });
+                if (!ok) return;
+
                 try {
                     await actor.deleteEmbeddedDocuments("Item", [tagId]);
                     this.render();

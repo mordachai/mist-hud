@@ -1656,3 +1656,213 @@
   padding-right: 7px;
   column-gap: 6px;
 }
+
+/* ── Statuses MC Screen (status-screen.js) ─────────────────────────────
+   The NPC HUD's parchment and title strip, brown ink: Labrada caps over
+   the dark red rule of the Scene Tags headings, flat outlined keys,
+   underline tabs and hairline rows instead of grey stripes. mist-hud.css
+   reads the variables (its rules are layered !important). Always on, as
+   the NPC HUD. */
+#status-screen {
+  --mh-status-screen-frame: url('../ui/litm_hud2_BG.webp') center / 100% 100% no-repeat, #efe7d6;
+  --mh-status-screen-header: var(--hud-bg-color) center / cover no-repeat;
+  --mh-status-screen-bg: transparent;
+  --scrollbar-thumb-color: rgba(111, 74, 42, 0.55);
+  --mh-ss-ink:   #3c2414;
+  --mh-ss-dim:   #6b5b4d;
+  --mh-ss-line:  #6f4a2a;
+  --mh-ss-line-dim:   rgba(111, 74, 42, 0.45);
+  --mh-ss-line-faint: rgba(111, 74, 42, 0.22);
+  --mh-ss-red:   #752b2b;
+  --mh-ss-gold:  rgba(212, 175, 55, 0.18);
+  border: 1px solid var(--effects-color1, #724a32);
+  border-radius: 4px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55);
+}
+
+#status-screen .window-header {
+  border: none;
+  border-bottom: 1px solid var(--mh-ss-line-dim);
+}
+
+#status-screen .window-header .window-title {
+  font-family: var(--font-family-titles, "CCTreasure"), serif;
+  font-size: 1.3em;
+  font-weight: normal;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--effects-color2, #4f311d);
+  text-shadow: 0 1px 0 rgba(255, 250, 235, 0.6);
+}
+
+#status-screen .window-header .header-control {
+  color: var(--effects-color2, #4f311d);
+}
+
+#status-screen .window-content {
+  border: none;
+}
+
+#status-screen .status-screen-header {
+  box-sizing: border-box;
+  width: auto;
+  margin: 8px 12px 2px;
+  padding: 0 0 6px;
+  border: none;
+  background: linear-gradient(90deg, var(--mh-ss-red), color-mix(in srgb, var(--mh-ss-red) 40%, transparent) 70%, transparent) left bottom / 100% 2px no-repeat;
+}
+
+#status-screen .statuses-screen-title {
+  padding-left: 0;
+  font-family: var(--font-family-main1, "Labrada"), serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mh-ss-ink);
+  text-shadow: 0 1px 0 rgba(255, 250, 235, 0.75);
+}
+
+/* Sample / Import / Reset: flat keys outlined in brown ink */
+#status-screen .status-screen-header button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  width: auto;
+  max-width: none;
+  height: 26px;
+  margin: 0;
+  padding: 0 10px;
+  font-family: var(--font-family-main1, "Labrada"), serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mh-ss-ink);
+  text-shadow: none;
+  border: 1px solid var(--mh-ss-line-dim);
+  border-radius: 2px;
+  background: rgba(255, 250, 235, 0.35);
+  box-shadow: none;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+#status-screen .status-screen-header button i {
+  margin: 0;
+  color: var(--mh-ss-line);
+}
+
+#status-screen .status-screen-header button:hover {
+  border-color: var(--mh-ss-line);
+  background: var(--mh-ss-gold);
+}
+
+#status-screen .status-screen-header button.mh-reset-json:hover {
+  color: var(--mh-ss-red);
+  border-color: var(--mh-ss-red);
+  background: rgba(117, 43, 43, 0.1);
+}
+
+#status-screen .status-screen-header button.mh-reset-json:hover i {
+  color: var(--mh-ss-red);
+}
+
+/* Category tabs: small caps over one hairline, the open one in full ink
+   on the dark red underline */
+#status-screen .status-tabs {
+  box-sizing: border-box;
+  width: auto;
+  margin: 4px 12px 0;
+  padding: 0;
+  gap: 2px;
+  background: linear-gradient(var(--mh-ss-line-faint), var(--mh-ss-line-faint)) left bottom / 100% 1px no-repeat;
+}
+
+#status-screen .status-tab {
+  height: auto;
+  margin: 0;
+  padding: 8px 6px 6px;
+  font-family: var(--font-family-main1, "Labrada"), serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  color: var(--mh-ss-dim);
+  text-shadow: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  outline: none;
+  background: none;
+  box-shadow: none;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+#status-screen .status-tab:hover {
+  color: var(--mh-ss-ink);
+  border-bottom-color: var(--mh-ss-line-dim);
+  background: linear-gradient(0deg, var(--mh-ss-gold), transparent);
+}
+
+#status-screen .status-tab.active {
+  font-weight: 800;
+  color: var(--mh-ss-ink);
+  border: none;
+  border-bottom: 2px solid var(--mh-ss-red);
+  background: linear-gradient(0deg, var(--mh-ss-gold), transparent);
+}
+
+#status-screen .status-tab-content {
+  padding: 0 0 4px;
+}
+
+/* Status families: hairline rows, no stripes; the name in Labrada caps,
+   the scale in the HUD's sage chips */
+#status-screen .status-category-list,
+#status-screen .status-category-list.tab-content {
+  margin: 4px 12px;
+  padding: 0;
+  gap: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+}
+
+#status-screen .status-category-list:not(.tab-content) {
+  padding: 4px 6px 4px 10px;
+  border-bottom: 1px solid var(--mh-ss-line-faint);
+}
+
+#status-screen .status-group-container {
+  box-sizing: border-box;
+  gap: 8px;
+  padding: 5px 8px 5px 10px;
+  font-family: var(--font-family-main1, "Labrada"), serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mh-ss-ink);
+  border: none;
+  border-bottom: 1px solid var(--mh-ss-line-faint);
+  border-radius: 0;
+  background: none;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+#status-screen :is(.status-group-container, .status-category-list:not(.tab-content)):hover {
+  border-color: var(--mh-ss-line-faint);
+  background: linear-gradient(90deg, var(--mh-ss-gold), transparent 70%);
+  box-shadow: inset 2px 0 var(--mh-ss-line);
+}
+
+#status-screen :is(.status-group-container, .status-category-list) ul {
+  gap: 5px;
+  font-size: 0.9rem;
+  font-weight: normal;
+  letter-spacing: normal;
+  text-transform: none;
+}
