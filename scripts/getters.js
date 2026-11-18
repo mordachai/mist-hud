@@ -542,7 +542,19 @@ export function getThemeTypeCounts(themes) {
   return counts;
 }
 
-export function getEssence(themes) {
+/** The system's essence systemName → HUD CSS class / lang key suffix. */
+const ESSENCE_CLASS = {
+  Nexus: "nexus", Spiritualist: "spiritualist", Cyborg: "cyborg",
+  Transhuman: "transhuman", Real: "real", Avatar: "avatar-conduit",
+  Conduit: "avatar-conduit", Singularity: "singularity",
+};
+
+/**
+ * The actor's essence as the system's sheet shows it (`actor.essence`, set
+ * automatically from the themes or chosen on the sheet). The chart image is
+ * still drawn from the theme mix.
+ */
+export function getEssence(actor, themes) {
   const counts = getThemeTypeCounts(themes);
   const { Self, Noise, Mythos } = counts;
   const total = Self + Noise + Mythos;
@@ -558,12 +570,8 @@ export function getEssence(themes) {
     imageName = "com.webp";
   }
 
-  if (Self > 0 && Noise > 0 && Mythos > 0) return { essence: "Nexus",           className: "nexus",           imageName };
-  if (Self > 0 && Mythos > 0)               return { essence: "Spiritualist",    className: "spiritualist",    imageName };
-  if (Self > 0 && Noise > 0)                return { essence: "Cyborg",          className: "cyborg",          imageName };
-  if (Mythos > 0 && Noise > 0)              return { essence: "Transhuman",      className: "transhuman",      imageName };
-  if (Self > 0)                             return { essence: "Real",            className: "real",            imageName };
-  if (Mythos > 0)                           return { essence: "Avatar/Conduit",  className: "avatar-conduit",  imageName };
-  if (Noise > 0)                            return { essence: "Singularity",     className: "singularity",     imageName };
-  return { essence: "Undefined", className: "undefined", imageName };
+  const item = actor?.essence;
+  const className = ESSENCE_CLASS[item?.system?.systemName];
+  if (!item || !className) return { essence: "Undefined", className: "undefined", imageName };
+  return { essence: item.localizedName ?? item.name, className, imageName };
 }

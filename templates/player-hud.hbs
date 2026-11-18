@@ -325,10 +325,13 @@
     <div class="mh-panel-content">
 
       {{#if isOtherscape}}
-        <div class="section otherscape">
+        <div class="section otherscape{{#if essenceBurned}} mh-essence-burned{{/if}}">
           <div class="mh-theme-name mh-theme-name-neutral mh-essence-title">
             <div>Essence:</div>
             <div class="mh-essence-title {{essenceClass}}">{{essence}}</div>
+            {{#if essenceBurned}}
+              <span class="mh-essence-burn burn-icon burned" data-tooltip="{{localize "MistHUD.essence-burned"}}"></span>
+            {{/if}}
           </div>
           <div class="mh-essence-chart {{essenceClass}}">
             <img src="modules/mist-hud/ui/essences/{{essenceImage}}" alt="{{essence}}" />

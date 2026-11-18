@@ -800,6 +800,24 @@ color: var(--mythosOS-verylight-color);
   border: none;
 }
 
+/* Essence burned on the sheet: struck-through name, burn mark, faded body. */
+.mh-essence-burn.burn-icon.burned {
+  background-image: url("../ui/icons/burn_neutral_burned.svg");
+  margin-left: 8px;
+}
+
+.mh-essence-burned .mh-essence-title.mh-essence-title:not(.mh-theme-name) {
+  text-decoration-line: line-through;
+  text-decoration-color: rgb(235, 235, 235);
+  text-decoration-thickness: 2px;
+}
+
+.mh-essence-burned .mh-essence-chart,
+.mh-essence-burned .mh-essence-text,
+.mh-essence-burned .mh-essence-subheader {
+  opacity: 0.45;
+}
+
 /*Roll icons*/
 .mhr-icon.Self {
   background-image: url('../ui/icons/self_os_icn.svg');

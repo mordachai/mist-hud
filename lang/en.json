@@ -294,6 +294,7 @@
 
 "MistHUD.essence.singularity": "<p class='mh-essence-text'>Psychological effects and intangible or unmeasurable mythical effects do not affect you. You can interface with ALL information, regardless of medium, and may roll with Noise to search it and, if it is recorded information, to manipulate it.</p>",
 
+"MistHUD.essence-burned": "Essence burned",
 "MistHUD.essence.undefined": "<p class='mh-essence-text'>Essence is not defined for this character.</p>"
 
 }

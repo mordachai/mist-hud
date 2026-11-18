@@ -313,7 +313,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
 
     // ── System-specific data ──────────────────────────────────────────────────
     let helpItems = [], hurtItems = [], clueItems = [], juiceItems = [];
-    let essence, essenceClass, essenceImage, essenceText;
+    let essence, essenceClass, essenceImage, essenceText, essenceBurned = false;
     // CoM: HUD background tone, the Mythos/Logos/Mist theme colours weighted
     // by how many themes of each the character has (CSS var --mh-tone).
     let comTone = null;
@@ -325,11 +325,13 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       comTone = blendThemeTone(counts);
     } else if (isOtherscape) {
       const themeItems  = this.actor.items.contents.filter(i => i.type === "theme");
-      const essenceData = getEssence(themeItems);
+      const essenceData = getEssence(this.actor, themeItems);
       if (essenceData?.essence) {
         essence      = essenceData.essence;
         essenceClass = essenceData.className;
         essenceImage = essenceData.imageName;
+        // Burned on the sheet (system.essence.isBurned).
+        essenceBurned = !!this.actor.isEssenceBurned;
         // Static, module-owned HTML from the lang files (safe to render unescaped).
         essenceText  = new Handlebars.SafeString(
           game.i18n.localize(`MistHUD.essence.${essenceData.className}`));
@@ -391,7 +393,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       statuses,
       helpItems, hurtItems, clueItems, juiceItems,
       helpHurtMessages: helpHurtMessages.length ? helpHurtMessages : null,
-      essence, essenceClass, essenceImage, essenceText,
+      essence, essenceClass, essenceImage, essenceText, essenceBurned,
       comTone,
       improvements,
       hasImprovements: improvements.length > 0,
