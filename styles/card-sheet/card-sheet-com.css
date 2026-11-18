@@ -57,9 +57,9 @@
   --mh-cs-hand-font: "MHX Marker", "Rock Salt", cursive;
 }
 
-/* ── Backgrounds by themebook type ──────────────────────────────────────────
-   The extras art for every other card: extra and crew themes, the character
-   card, and any other theme type. */
+/* ── Backgrounds by card type ───────────────────────────────────────────────
+   Every card keeps its own type class (mh-cs-type-<type>). Default: the
+   extras art, for any theme type without its own image. */
 
 .mh-card-sheet .mh-cs-theme-card .mh-cs-face,
 .mh-card-sheet .mh-cs-character-card .mh-cs-face {
@@ -68,6 +68,12 @@
   --mh-cs-ink: #2a2a2a;
   --mh-cs-rule: rgba(40, 40, 40, 0.35);
 }
+
+/* Extras, crew themes and the character card use the extras art (user,
+   2026-11-18). A card's own image later is one line here. */
+.mh-card-sheet .mh-cs-type-extra .mh-cs-face     { background-image: url("../../ui/card-sheet/com/extras_theme_bg.webp"); }
+.mh-card-sheet .mh-cs-type-crew .mh-cs-face      { background-image: url("../../ui/card-sheet/com/extras_theme_bg.webp"); }
+.mh-card-sheet .mh-cs-type-character .mh-cs-face { background-image: url("../../ui/card-sheet/com/extras_theme_bg.webp"); }
 
 .mh-card-sheet .mh-cs-type-mythos .mh-cs-face {
   background-image: url("../../ui/card-sheet/com/mythos_theme_bg.webp");
