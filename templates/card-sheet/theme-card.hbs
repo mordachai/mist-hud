@@ -1,14 +1,10 @@
 {{!-- One theme card: front and back faces of the same card (plan § 3).
-      Shared by every game; art, fonts and band positions are per-system CSS.
-      Read-only: no edit mode, selection or tracker buttons yet.
-      The header band flips the card (click, Enter or Space), like the system
-      sheet; the face that is turned away is inert. --}}
-{{#*inline "mh-cs-band"}}
-<header class="mh-cs-band mh-cs-band-top" data-action="flipCard" role="button" tabindex="0" aria-label="{{localize 'MistHUD.cardSheet.flip' name=card.title}}">
-  <span class="mh-cs-type-icon {{card.category}}" aria-hidden="true"></span>
-  <span class="mh-cs-themebook">{{card.themebook}}</span>
-</header>
-{{/inline}}
+      Main, crew and extra themes; shared by every game (art, fonts and band
+      positions are per-system CSS). Read-only: no edit mode, selection or
+      tracker buttons yet.
+      Takes: card (themeCard / linkedThemeCard), layer (1 or 2), back (the
+      layer is behind: the card is inert under its peek tab).
+      The header band flips the card; the face turned away is inert. --}}
 {{#*inline "mh-cs-pips"}}
 <div class="mh-cs-track mh-cs-track-{{kind}}">
   <span class="mh-cs-track-label">{{label}}</span>
@@ -17,19 +13,32 @@
 {{/inline}}
 {{#if card.empty}}
 <article class="mh-cs-card mh-cs-card-empty" data-card-id="{{card.id}}">
-  <div class="mh-cs-card-inner">
+  {{> "modules/mist-hud/templates/card-sheet/peek-tab.hbs" layer=layer title=(localize "MistHUD.cardSheet.emptySlot")}}
+  <div class="mh-cs-card-inner"{{#if back}} inert{{/if}}>
     <section class="mh-cs-face mh-cs-front">
       <p class="mh-cs-empty-text">{{localize "MistHUD.cardSheet.emptySlot"}}</p>
     </section>
   </div>
 </article>
 {{else}}
-<article class="mh-cs-card mh-cs-theme-card mh-cs-type-{{card.type}}{{#if card.flipped}} flipped{{/if}}" data-card-id="{{card.id}}" data-theme-id="{{card.id}}">
-  <div class="mh-cs-card-inner">
+<article class="mh-cs-card mh-cs-theme-card mh-cs-type-{{card.type}}{{#if card.flipped}} flipped{{/if}}{{#if card.extra}} mh-cs-extra-card{{#if card.extra.active}} mh-cs-active-extra{{/if}}{{/if}}" data-card-id="{{card.id}}" data-theme-id="{{card.id}}"{{#if card.ownerId}} data-owner-id="{{card.ownerId}}"{{/if}}>
+  {{> "modules/mist-hud/templates/card-sheet/peek-tab.hbs" layer=layer title=card.title}}
+  <div class="mh-cs-card-inner"{{#if back}} inert{{/if}}>
 
     <section class="mh-cs-face mh-cs-front"{{#if card.flipped}} inert{{/if}}>
-      {{> mh-cs-band card=card}}
+      {{> "modules/mist-hud/templates/card-sheet/card-band.hbs" title=card.title icon=card.category label=card.themebook}}
       <div class="mh-cs-body">
+        {{#if card.extra}}
+        {{!-- The active extra is the one the system rolls with. --}}
+        <div class="mh-cs-extra-state">
+          {{#if card.extra.active}}
+          <span class="mh-cs-extra-mark"><i class="fa-solid fa-star" aria-hidden="true"></i> {{localize "MistHUD.cardSheet.activeExtra"}}</span>
+          {{else if card.extra.canActivate}}
+          <button type="button" class="mh-cs-extra-use" data-action="setActiveExtra" data-theme-id="{{card.id}}"><i class="fa-regular fa-star" aria-hidden="true"></i> {{localize "MistHUD.cardSheet.useExtra"}}</button>
+          {{/if}}
+          {{#if card.ownerName}}<span class="mh-cs-extra-owner">{{card.ownerName}}</span>{{/if}}
+        </div>
+        {{/if}}
         <h3 class="mh-cs-title" data-fit data-fit-lines="3">{{card.title}}</h3>
         <div class="mh-cs-tracks">
           {{> mh-cs-pips kind="attention" label=card.attentionLabel pips=card.attention}}
@@ -66,7 +75,7 @@
     </section>
 
     <section class="mh-cs-face mh-cs-back"{{#unless card.flipped}} inert{{/unless}}>
-      {{> mh-cs-band card=card}}
+      {{> "modules/mist-hud/templates/card-sheet/card-band.hbs" title=card.title icon=card.category label=card.themebook}}
       <div class="mh-cs-body">
         <h4 class="mh-cs-section">{{localize "CityOfMist.terms.improvements"}}</h4>
         {{#if card.unspent}}<p class="mh-cs-unspent"><i class="fa-solid fa-up-long" aria-hidden="true"></i> {{card.unspentLabel}}</p>{{/if}}

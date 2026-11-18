@@ -1,0 +1,5 @@
+{{!-- Over the top of a card while its layer is behind: only the header
+      bands of the back layer show, and clicking one brings the layer to
+      the front. Hidden (not focusable) while the layer is in front.
+      Takes: layer (1 or 2), title. --}}
+<button type="button" class="mh-cs-peek-tab" data-action="showLayer" data-layer="{{layer}}" aria-label="{{localize 'MistHUD.cardSheet.showLayer' name=title}}"></button>

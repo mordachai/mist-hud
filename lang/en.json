@@ -308,6 +308,14 @@
 "MistHUD.cardSheet.flip": "Flip card: {name}",
 "MistHUD.cardSheet.emptySlot": "Empty theme slot",
 "MistHUD.cardSheet.noImprovements": "No improvements yet",
-"MistHUD.cardSheet.unspentUpgrades": "Unspent upgrades: {count}"
+"MistHUD.cardSheet.unspentUpgrades": "Unspent upgrades: {count}",
+"MistHUD.cardSheet.characterCard": "Character Card",
+"MistHUD.cardSheet.player": "Player",
+"MistHUD.cardSheet.crew": "Crew",
+"MistHUD.cardSheet.noCrewmates": "No crewmates",
+"MistHUD.cardSheet.noStoryTags": "No story tags",
+"MistHUD.cardSheet.activeExtra": "Active extra",
+"MistHUD.cardSheet.useExtra": "Use this extra",
+"MistHUD.cardSheet.showLayer": "Bring to front: {name}"
 
 }

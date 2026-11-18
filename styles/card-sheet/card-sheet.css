@@ -102,6 +102,9 @@
   backdrop-filter: none;
   color: inherit;
   pointer-events: none;
+  /* The two card layers are laid out against the content's size. */
+  container-type: size;
+  container-name: mh-cs-content;
 }
 
 .application.mh-card-sheet.mh-card-sheet > .window-resize-handle {
@@ -113,7 +116,8 @@
   opacity: 0.8;
 }
 
-/* What can be clicked: the cards and the buttons. */
+/* What can be clicked: the cards and the buttons (the back layer's cards
+   only show their peek tabs, the rest is clipped away). */
 .mh-card-sheet .mh-cs-card,
 .mh-card-sheet .mh-cs-move,
 .mh-card-sheet .mh-cs-move-toggle {
@@ -217,6 +221,7 @@
 
 :where(.mh-card-sheet) {
   --mh-cs-aspect: 1 / 2;          /* card width / height (per system: the art's ratio) */
+  --mh-cs-peek: 0.2;              /* back layer showing above the front one, in card widths (its header band) */
   --mh-cs-gap: 12px;
   --mh-cs-radius: 4cqw;
   --mh-cs-band-top: 5cqw;         /* header band */
@@ -246,29 +251,113 @@
   --mh-cs-tag-font: var(--font-family-tags, "Roboto Condensed"), sans-serif;
 }
 
-/* ── Layer 1 ─────────────────────────────────────────────────────────────── */
+/* ── Layers (plan § 7) ───────────────────────────────────────────────────────
+   Both layers are absolutely placed in the window content (the size
+   container), under the band row. The front layer sits one peek lower; the
+   back layer stays at the top, darker, behind it and clipped to its header
+   bands, which take the clicks (peek tabs) and bring it to the front. The
+   swap animates transform, clip-path and z-index; data-front on the window
+   says which layer is in front.
+   The card width is the largest that fits four across, and the card plus
+   the peek in the height. These vars use cq units of the window content, so
+   they are only used on the layers and on the cards themselves (inside a
+   card, cqw is the card). */
 
 .mh-card-sheet .mh-cs-layer {
-  flex: 1 1 auto;
-  min-height: 0;
-  container-type: size;
-  container-name: mh-cs-layer;
+  --mh-cs-stage-top: calc(var(--mh-cs-band-row) + 8px);
+  --mh-cs-card-w: min(
+    calc((100cqw - 3 * var(--mh-cs-gap)) / 4),
+    calc((100cqh - var(--mh-cs-stage-top)) / (1 / (var(--mh-cs-aspect)) + var(--mh-cs-peek))));
+  --mh-cs-peek-h: calc(var(--mh-cs-card-w) * var(--mh-cs-peek));
+  position: absolute;
+  top: var(--mh-cs-stage-top);
+  left: 6px;
+  right: 6px;
+  height: calc(var(--mh-cs-card-w) / (var(--mh-cs-aspect)));
+  z-index: 1;
+  pointer-events: none;
+  /* Back: at the top, darker, only the header bands showing. */
+  transform: translateY(0);
+  clip-path: inset(-40px -40px calc(100% - var(--mh-cs-peek-h)) -40px);
+  filter: brightness(0.72) saturate(0.85);
+  transition: transform 0.45s ease, clip-path 0.45s ease, filter 0.45s ease, z-index 0.45s step-end;
+}
+
+/* Front: one peek lower, on top, all of it showing. */
+.mh-card-sheet:not([data-front="2"]) .mh-cs-layer1,
+.mh-card-sheet[data-front="2"] .mh-cs-layer2 {
+  z-index: 2;
+  transform: translateY(var(--mh-cs-peek-h));
+  clip-path: inset(-40px -40px -40px -40px);
+  filter: none;
+  transition: transform 0.45s ease, clip-path 0.45s ease, filter 0.45s ease, z-index 0.45s step-start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mh-card-sheet .mh-cs-layer,
+  .mh-card-sheet:not([data-front="2"]) .mh-cs-layer1,
+  .mh-card-sheet[data-front="2"] .mh-cs-layer2 { transition: none; }
 }
 
 .mh-card-sheet .mh-cs-cards {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: var(--mh-cs-gap);
   height: 100%;
+}
+
+/* A layer with more cards than fit four across (layer 2: character, crew,
+   every extra) fans out: the cards overlap just enough to fit the width
+   (--mh-cs-n = number of cards); a hovered or focused card comes on top. */
+.mh-card-sheet .mh-cs-card + .mh-cs-card {
+  margin-left: min(var(--mh-cs-gap),
+    calc((100cqw - var(--mh-cs-n, 4) * var(--mh-cs-card-w)) / max(var(--mh-cs-n, 4) - 1, 1)));
+}
+
+.mh-card-sheet .mh-cs-card:hover,
+.mh-card-sheet .mh-cs-card:focus-within {
+  z-index: 3;
+}
+
+/* ── Peek tabs: the back layer's header bands ────────────────────────────── */
+
+.mh-card-sheet .mh-cs-peek-tab {
+  display: none;
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(var(--mh-cs-peek) * 100cqw);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--mh-cs-radius) var(--mh-cs-radius) 0 0;
+  background: none;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.mh-card-sheet:not([data-front="2"]) .mh-cs-layer2 .mh-cs-peek-tab,
+.mh-card-sheet[data-front="2"] .mh-cs-layer1 .mh-cs-peek-tab {
+  display: block;
+}
+
+.mh-card-sheet .mh-cs-peek-tab:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.mh-card-sheet .mh-cs-peek-tab:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 0.8cqw rgba(255, 255, 255, 0.85);
 }
 
 /* ── Card + flip ─────────────────────────────────────────────────────────── */
 
 .mh-card-sheet .mh-cs-card {
+  position: relative;
   flex: 0 0 auto;
-  /* Four across, or as tall as the layer allows, whichever is smaller. */
-  width: min(calc((100cqw - 3 * var(--mh-cs-gap)) / 4), calc(100cqh * (var(--mh-cs-aspect))));
+  width: var(--mh-cs-card-w);
   aspect-ratio: var(--mh-cs-aspect);
   container-type: inline-size;
   container-name: mh-cs-card;
@@ -361,7 +450,7 @@
 }
 
 .mh-card-sheet .mh-cs-band-top[data-action="flipCard"]:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1));
 }
 
 .mh-card-sheet .mh-cs-band-top[data-action="flipCard"]:focus-visible {
@@ -642,3 +731,210 @@
   text-transform: uppercase;
 }
 
+/* ── Character card icon (no SVG yet) ───────────────────────────────────── */
+
+.mh-card-sheet .mh-cs-type-icon.Character::before {
+  content: "\f21b"; /* user-secret */
+  display: block;
+  font: var(--fa-font-solid);
+  font-size: 5.6cqw;
+  line-height: 7cqw;
+  text-align: center;
+}
+
+/* ── Extra themes: the active one ────────────────────────────────────────── */
+
+.mh-card-sheet .mh-cs-extra-state {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqw;
+  min-height: 7cqw;
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.2cqw;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mh-card-sheet .mh-cs-extra-mark {
+  padding: 0.6cqw 2.4cqw;
+  border-radius: 4cqw;
+  background: #c8a440;
+  color: #1d1a12;
+  box-shadow: 0 0 2cqw rgba(255, 214, 90, 0.7);
+}
+
+.mh-card-sheet .mh-cs-extra-use {
+  flex: 0 0 auto;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0.6cqw 2.4cqw;
+  border: 0.4cqw solid currentColor;
+  border-radius: 4cqw;
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.mh-card-sheet .mh-cs-extra-use:hover,
+.mh-card-sheet .mh-cs-extra-use:focus-visible {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.mh-card-sheet .mh-cs-extra-owner {
+  min-width: 0;
+  margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.75;
+}
+
+/* The active extra glows; the others are a little dimmer. */
+.mh-card-sheet .mh-cs-active-extra .mh-cs-face {
+  box-shadow:
+    0 0 0 0.9cqw #e2bd4f,
+    0 0 5cqw rgba(255, 210, 80, 0.75),
+    0 0.8cqw 3cqw rgba(0, 0, 0, 0.55);
+}
+
+.mh-card-sheet .mh-cs-extra-card:not(.mh-cs-active-extra) .mh-cs-card-inner {
+  filter: saturate(0.7) brightness(0.93);
+}
+
+/* ── Character card ──────────────────────────────────────────────────────── */
+
+.mh-card-sheet .mh-cs-character-name {
+  height: calc(var(--mh-cs-title-h) * 0.75);
+}
+
+.mh-card-sheet .mh-cs-fields {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2cqw;
+  margin: 0;
+}
+
+.mh-card-sheet .mh-cs-field {
+  display: flex;
+  align-items: baseline;
+  gap: 2cqw;
+  padding-bottom: 0.6cqw;
+  border-bottom: 0.3cqw dotted var(--mh-cs-rule);
+}
+
+.mh-card-sheet .mh-cs-field dt,
+.mh-card-sheet .mh-cs-field dd {
+  color: inherit;
+}
+
+.mh-card-sheet .mh-cs-field dt {
+  flex: 0 0 auto;
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.2cqw;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.mh-card-sheet .mh-cs-field dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--mh-cs-tag-font);
+  font-size: 5.2cqw;
+  line-height: 1.3;
+}
+
+.mh-card-sheet .mh-cs-hand {
+  font-family: var(--mh-cs-hand-font);
+}
+
+.mh-card-sheet .mh-cs-field dd.mh-cs-hand {
+  font-size: 4.2cqw;
+  line-height: 1.6;
+}
+
+.mh-card-sheet .mh-cs-hand.empty {
+  opacity: 0.5;
+}
+
+.mh-card-sheet .mh-cs-crewmates {
+  margin: 0 0 1cqw;
+  padding: 0;
+  list-style: none;
+}
+
+.mh-card-sheet .mh-cs-crewmate {
+  display: flex;
+  align-items: baseline;
+  gap: 2cqw;
+  padding: 0.8cqw 0;
+  font-family: var(--mh-cs-tag-font);
+  font-size: 5.2cqw;
+}
+
+.mh-card-sheet .mh-cs-crewmate-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mh-card-sheet .mh-cs-juice {
+  flex: 0 0 auto;
+  font-family: var(--mh-cs-label-font);
+  font-size: 4cqw;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mh-card-sheet .mh-cs-juice b {
+  display: inline-block;
+  min-width: 4.6cqw;
+  padding: 0 0.8cqw;
+  border-radius: 1cqw;
+  font-size: 4.6cqw;
+  text-align: center;
+  color: white;
+}
+
+.mh-card-sheet .mh-cs-help b { background: #3f7d3a; }
+.mh-card-sheet .mh-cs-hurt b { background: #9b2f2a; }
+
+.mh-card-sheet .mh-cs-juice.zero {
+  opacity: 0.45;
+}
+
+.mh-card-sheet .mh-cs-short-desc {
+  flex: 0 0 auto;
+  margin: 0 0 1cqw;
+  font-size: 4.2cqw;
+  line-height: 1.6;
+}
+
+.mh-card-sheet .mh-cs-biography {
+  font-family: var(--mh-cs-tag-font);
+  font-size: 4.8cqw;
+  line-height: 1.35;
+}
+
+.mh-card-sheet .mh-cs-biography p {
+  margin: 0 0 2cqw;
+}
+
+.mh-card-sheet .mh-cs-biography img {
+  max-width: 100%;
+  height: auto;
+  border: none;
+}

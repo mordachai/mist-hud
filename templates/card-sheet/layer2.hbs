@@ -1,0 +1,14 @@
+{{!-- Layer 2: the character card, the crew theme(s) and every extra theme
+      (plan § 2). It can hold more cards than layer 1: they fan out
+      (overlap) to fit the width. --}}
+<section class="mh-cs-layer mh-cs-layer2" data-layer="2" data-system="{{activeSystem}}" style="--mh-cs-n: {{cards.length}}">
+  <div class="mh-cs-cards">
+    {{#each cards}}
+    {{#if character}}
+    {{> "modules/mist-hud/templates/card-sheet/character-card.hbs" card=this layer=2 back=@root.back}}
+    {{else}}
+    {{> "modules/mist-hud/templates/card-sheet/theme-card.hbs" card=this layer=2 back=@root.back}}
+    {{/if}}
+    {{/each}}
+  </div>
+</section>

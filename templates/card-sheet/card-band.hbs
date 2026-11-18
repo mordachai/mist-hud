@@ -1,0 +1,8 @@
+{{!-- A card's header band (theme and character cards). Clicking it, or
+      Enter / Space, flips the card, like the system sheet. Nothing else in
+      the band takes the click.
+      Takes: title (for the aria-label), icon (type icon class), label. --}}
+<header class="mh-cs-band mh-cs-band-top" data-action="flipCard" role="button" tabindex="0" aria-label="{{localize 'MistHUD.cardSheet.flip' name=title}}">
+  <span class="mh-cs-type-icon {{icon}}" aria-hidden="true"></span>
+  <span class="mh-cs-themebook">{{label}}</span>
+</header>

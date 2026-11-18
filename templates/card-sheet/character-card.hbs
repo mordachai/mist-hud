@@ -1,0 +1,74 @@
+{{!-- The character card (layer 2, plan § 2–3).
+      Front: name, player, the game's character fields (City of Mist: Mythos,
+      Logos), the Crew block with Help/Hurt per crewmate, and story tags.
+      Back: the short description, then the biography (enriched).
+      Uses the extras card art (per-system CSS). Read-only.
+      Takes: card (characterCard), layer, back. --}}
+<article class="mh-cs-card mh-cs-character-card mh-cs-type-character{{#if card.flipped}} flipped{{/if}}" data-card-id="{{card.id}}">
+  {{> "modules/mist-hud/templates/card-sheet/peek-tab.hbs" layer=layer title=card.title}}
+  <div class="mh-cs-card-inner"{{#if back}} inert{{/if}}>
+
+    <section class="mh-cs-face mh-cs-front"{{#if card.flipped}} inert{{/if}}>
+      {{> "modules/mist-hud/templates/card-sheet/card-band.hbs" title=card.title icon=card.category label=card.themebook}}
+      <div class="mh-cs-body">
+        <h3 class="mh-cs-title mh-cs-character-name" data-fit data-fit-lines="2">{{card.title}}</h3>
+        <dl class="mh-cs-fields">
+          {{#if card.player}}
+          <div class="mh-cs-field mh-cs-field-player">
+            <dt>{{localize "MistHUD.cardSheet.player"}}</dt>
+            <dd>{{card.player}}</dd>
+          </div>
+          {{/if}}
+          {{#each card.fields}}
+          <div class="mh-cs-field mh-cs-field-{{key}}">
+            <dt>{{label}}</dt>
+            <dd class="mh-cs-hand{{#unless value}} empty{{/unless}}">{{#if value}}{{value}}{{else}}—{{/if}}</dd>
+          </div>
+          {{/each}}
+        </dl>
+        <div class="mh-cs-scroll">
+          {{#if card.helpHurt}}
+          <h4 class="mh-cs-section">{{localize "MistHUD.cardSheet.crew"}}</h4>
+          <ul class="mh-cs-crewmates">
+            {{#each card.crewmates}}
+            <li class="mh-cs-crewmate" data-actor-id="{{id}}">
+              <span class="mh-cs-crewmate-name">{{name}}</span>
+              <span class="mh-cs-juice mh-cs-help{{#unless help}} zero{{/unless}}">{{localize "CityOfMist.terms.help"}} <b>{{help}}</b></span>
+              <span class="mh-cs-juice mh-cs-hurt{{#unless hurt}} zero{{/unless}}">{{localize "CityOfMist.terms.hurt"}} <b>{{hurt}}</b></span>
+            </li>
+            {{else}}
+            <li class="mh-cs-none">{{localize "MistHUD.cardSheet.noCrewmates"}}</li>
+            {{/each}}
+          </ul>
+          {{/if}}
+          <h4 class="mh-cs-section">{{localize "CityOfMist.terms.storyTags"}}</h4>
+          <ul class="mh-cs-tags mh-cs-story-tags">
+            {{#each card.storyTags}}
+            <li class="mh-cs-tag mh-cs-story-tag {{burnState}}{{#if temporary}} temporary{{/if}}{{#if permanent}} permanent{{/if}}" data-tag-id="{{id}}">
+              <span class="mh-cs-burn {{burnState}}" aria-hidden="true"></span>
+              <span class="mh-cs-tag-name">{{name}}</span>
+            </li>
+            {{else}}
+            <li class="mh-cs-none">{{localize "MistHUD.cardSheet.noStoryTags"}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      </div>
+      <footer class="mh-cs-band mh-cs-band-bottom"></footer>
+    </section>
+
+    <section class="mh-cs-face mh-cs-back"{{#unless card.flipped}} inert{{/unless}}>
+      {{> "modules/mist-hud/templates/card-sheet/card-band.hbs" title=card.title icon=card.category label=card.themebook}}
+      <div class="mh-cs-body">
+        <h4 class="mh-cs-section">{{localize "CityOfMist.terms.short_desc"}}</h4>
+        <p class="mh-cs-short-desc mh-cs-hand{{#unless card.shortDescription}} empty{{/unless}}">{{#if card.shortDescription}}{{card.shortDescription}}{{else}}—{{/if}}</p>
+        <h4 class="mh-cs-section">{{localize "CityOfMist.terms.biography"}}</h4>
+        <div class="mh-cs-scroll mh-cs-biography">
+          {{#if card.biography}}{{{card.biography}}}{{else}}<p class="mh-cs-none">—</p>{{/if}}
+        </div>
+      </div>
+      <footer class="mh-cs-band mh-cs-band-bottom"></footer>
+    </section>
+
+  </div>
+</article>

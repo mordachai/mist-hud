@@ -55,9 +55,12 @@
   --mh-cs-hand-font: "MHX Marker", "Rock Salt", cursive;
 }
 
-/* ── Backgrounds by themebook type (the extras art for any other type) ──── */
+/* ── Backgrounds by themebook type ──────────────────────────────────────────
+   The extras art for every other card: extra and crew themes, the character
+   card, and any other theme type. */
 
-.mh-card-sheet .mh-cs-theme-card .mh-cs-face {
+.mh-card-sheet .mh-cs-theme-card .mh-cs-face,
+.mh-card-sheet .mh-cs-character-card .mh-cs-face {
   background-color: transparent;
   background-image: url("../../ui/card-sheet/com/extras_theme_bg.webp");
   --mh-cs-ink: #2a2a2a;

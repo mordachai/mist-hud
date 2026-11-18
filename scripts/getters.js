@@ -217,6 +217,30 @@ export function getExtraThemes(actor) {
   return [_linkedThemeData(theme, theme.parent, "Extra")];
 }
 
+/**
+ * Every extra theme the character can use, not only the active one: the list
+ * the system's extra selector cycles through (`allLinkedExtraThemes`: the
+ * character's own extra themes and the themes of dangers its players own).
+ * Each entry has the HUD data of getExtraThemes plus `active` (the extra the
+ * system rolls with, `activeExtra`).
+ */
+export function getAllExtraThemes(actor) {
+  if (!actor) return [];
+  let list = [];
+  try { list = actor.allLinkedExtraThemes ?? []; } catch { list = []; }
+  const activeId = actor.activeExtra?.id ?? null;
+  return list
+    .filter(theme => theme?.parent)
+    .map(theme => ({ ..._linkedThemeData(theme, theme.parent, "Extra"), active: theme.id === activeId }));
+}
+
+/** The themebook's display name: its locale name, else its name, else the theme's. */
+function _themebookLabel(tb, theme) {
+  return (tb?.system?.locale_name
+      ? game.i18n.localize(tb.system.locale_name.replace(/^#/, "")) : "")
+    || tb?.name || theme.system.themebook_name || theme.name;
+}
+
 /** HUD data for a theme that belongs to another actor (crew or extra). */
 function _linkedThemeData(theme, owner, category) {
   const system = getActiveSystem();
@@ -254,6 +278,7 @@ function _linkedThemeData(theme, owner, category) {
     category,
     unspent_upgrades:     theme.system.unspent_upgrades || 0,
     localizedThemebookName: tb?.name ?? theme.name,
+    themebookLabel:       _themebookLabel(tb, theme),
     prefix, attentionLabel, crackLabel,
     ..._trackExtras(theme),
     activeSystem:         system,

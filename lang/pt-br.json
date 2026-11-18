@@ -308,6 +308,14 @@
 "MistHUD.cardSheet.flip": "Virar carta: {name}",
 "MistHUD.cardSheet.emptySlot": "Espaço de tema vazio",
 "MistHUD.cardSheet.noImprovements": "Nenhuma melhoria ainda",
-"MistHUD.cardSheet.unspentUpgrades": "Melhorias não usadas: {count}"
+"MistHUD.cardSheet.unspentUpgrades": "Melhorias não usadas: {count}",
+"MistHUD.cardSheet.characterCard": "Ficha do Personagem",
+"MistHUD.cardSheet.player": "Jogador",
+"MistHUD.cardSheet.crew": "Equipe",
+"MistHUD.cardSheet.noCrewmates": "Nenhum companheiro de equipe",
+"MistHUD.cardSheet.noStoryTags": "Nenhuma tag de história",
+"MistHUD.cardSheet.activeExtra": "Extra ativo",
+"MistHUD.cardSheet.useExtra": "Usar este extra",
+"MistHUD.cardSheet.showLayer": "Trazer para a frente: {name}"
 
 }

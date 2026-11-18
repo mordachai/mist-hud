@@ -113,6 +113,25 @@ async function runMoveEffects(actor, move) {
   }
 }
 
+// ── Change log ───────────────────────────────────────────────────────────────
+
+/**
+ * Add an entry to the system's change log (the GM's modification log), as
+ * the system sheet's handlers do after their writes.
+ * @param {Actor}  actor
+ * @param {string} message  already localized
+ * @param {Item}   [object] the item the change is about
+ */
+export async function logModification(actor, message, object = null) {
+  const sys = await systemApi();
+  if (!sys) return;
+  try {
+    await sys.CityHelpers.modificationLog(actor, message, object);
+  } catch (e) {
+    console.warn("Mist HUD | Card sheet: change log entry failed:", e);
+  }
+}
+
 // ── Selection ────────────────────────────────────────────────────────────────
 
 /** The system's current tag/status selection (this client only). */
