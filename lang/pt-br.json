@@ -214,6 +214,8 @@
 "MistHUD.hud.relationships.otherscape": "Relacionamentos da Equipe",
 "MistHUD.hud.relationships.legend": "Irmandade",
 "MistHUD.hud.quintessence": "Quintessência",
+"MistHUD.hud.quintessenceUses": "Clique num círculo cheio para gastar um uso, num vazio para devolvê-lo",
+"MistHUD.hud.quintessenceUsesLeft": "Usos restantes: {left}/{max}",
 "MistHUD.hud.createRelationship": "Criar Tag de Relacionamento",
 "MistHUD.hud.addRelationship": "Adicionar relacionamento",
 "MistHUD.hud.newRelationship": "Novo Relacionamento",

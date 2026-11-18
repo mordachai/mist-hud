@@ -495,6 +495,9 @@ export function getQuintessences(actor) {
       description: _loc(item.system.description) || "",
       choiceItem:  _loc(item.system.choice_item) || null,
       uses:        item.system.uses || { max: 0, current: 0, expended: false },
+      // One pip per use: filled while left, hollow once spent.
+      pips:        Array.from({ length: Math.max(0, item.system.uses?.max ?? 0) },
+                     (_, n) => ({ spent: n >= (item.system.uses?.current ?? 0) })),
     }));
 }
 

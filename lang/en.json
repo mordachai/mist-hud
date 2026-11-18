@@ -214,6 +214,8 @@
 "MistHUD.hud.relationships.otherscape": "Crew Relationships",
 "MistHUD.hud.relationships.legend": "Fellowship",
 "MistHUD.hud.quintessence": "Quintessence",
+"MistHUD.hud.quintessenceUses": "Click a filled pip to spend a use, a hollow one to give it back",
+"MistHUD.hud.quintessenceUsesLeft": "Uses left: {left}/{max}",
 "MistHUD.hud.createRelationship": "Create Relationship Tag",
 "MistHUD.hud.addRelationship": "Add relationship",
 "MistHUD.hud.newRelationship": "New Relationship",

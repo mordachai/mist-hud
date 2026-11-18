@@ -334,8 +334,15 @@
               <div class="mh-title-container">
                 <span class="item-name">
                   <i class="fa-solid fa-star mh-improvement-star"></i>
-                  <span>{{name}}{{#if (gt uses.max 0)}} - {{uses.current}}/{{uses.max}}{{/if}}</span>
+                  <span>{{name}}</span>
                 </span>
+                {{#if pips.length}}
+                  <span class="mh-quint-uses" data-tooltip="{{localize "MistHUD.hud.quintessenceUses"}}">
+                    {{#each pips}}
+                      <i class="mh-quint-pip {{#if spent}}spent fa-regular{{else}}fa-solid{{/if}} fa-circle"></i>
+                    {{/each}}
+                  </span>
+                {{/if}}
               </div>
               {{#if description}}
                 <div class="item-description">{{description}}</div>

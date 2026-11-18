@@ -1092,6 +1092,33 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       await this.actor.setEssenceBurn(!this.actor.isEssenceBurned);
     });
 
+    // Legend quintessence uses: a filled pip spends one use (and posts the
+    // quintessence to chat, like the sheet), a hollow pip gives one back.
+    html.find(".mh-quint-pip").on("click", async ev => {
+      ev.stopPropagation();
+      if (!this.actor.isOwner) return;
+      const id  = ev.currentTarget.closest(".mh-quintessence")?.dataset.id;
+      const imp = this.actor.items.get(id);
+      if (!imp) return;
+      if (ev.currentTarget.classList.contains("spent")) {
+        const max = imp.system.uses?.max ?? 0;
+        const current = Math.min(max, (imp.system.uses?.current ?? 0) + 1);
+        await imp.update({ "system.uses.current": current, "system.uses.expended": current <= 0 });
+        return;
+      }
+      if (imp.getImprovementUses() <= 0) return;
+      await imp.decrementImprovementUses();
+      const left = imp.getImprovementUses();
+      const body = await foundry.applications.handlebars.renderTemplate(
+        "systems/city-of-mist/templates/improvement-chat-description.html",
+        { improvement: imp, data: imp.system });
+      await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+        content: `${body}<div class="mh-quint-uses-left">${
+          game.i18n.format("MistHUD.hud.quintessenceUsesLeft", { left, max: imp.system.uses.max })}</div>`,
+      });
+    });
+
     // Relationship tags: header "+" (no character) or an open slot (that character)
     html.find(".mh-create-relationship").on("click", ev => {
       ev.stopPropagation();

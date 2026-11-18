@@ -1866,3 +1866,31 @@
   letter-spacing: normal;
   text-transform: none;
 }
+
+/* Legend quintessences (HUD side panel): use pips beside the name. */
+.mh-quintessence .mh-title-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.mh-quint-uses {
+  display: inline-flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.mh-quint-pip {
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: var(--text-main-color);
+}
+
+.mh-quint-pip.spent {
+  opacity: 0.5;
+}
+
+.mh-quint-pip:hover {
+  filter: drop-shadow(0 0 2px var(--origin-light-color));
+}
