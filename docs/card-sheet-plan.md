@@ -1,6 +1,6 @@
 # Card Sheet — design plan
 
-Drafted 2026-11-18, revised the same day with the user's answers. Status: **phase 0 done** (2026-11-18): skeleton sheet, move bar on the system roll path, action map (§ 6.2). **Phase 1 done** (2026-11-18): City of Mist layer 1, the four main themes as read-only flip cards with the user's art and title fitting. **Phase 2 done** (2026-11-18): 244 × 620 cards, flip by the header band, condensed sans theme titles with glow; layer 2 (character card, crew themes, every extra), the active-extra switch and the layer swap. **Phase 3 done** (2026-11-18, b46a524): edit mode (the system's lock), every theme / character card edit through the action map, cards resized to 204 × 520 with the tag text kept at its size. **Phase 4 done** (2026-11-18, 780e1fe, e1b0e03): play mode, tags selected for rolls through the system's selection with the City of Mist marker bars; bigger small fonts.
+Drafted 2026-11-18, revised the same day with the user's answers. Status: **phase 0 done** (2026-11-18): skeleton sheet, move bar on the system roll path, action map (§ 6.2). **Phase 1 done** (2026-11-18): City of Mist layer 1, the four main themes as read-only flip cards with the user's art and title fitting. **Phase 2 done** (2026-11-18): 244 × 620 cards, flip by the header band, condensed sans theme titles with glow; layer 2 (character card, crew themes, every extra), the active-extra switch and the layer swap. **Phase 3 done** (2026-11-18, b46a524): edit mode (the system's lock), every theme / character card edit through the action map, cards resized to 204 × 520 with the tag text kept at its size. **Phase 4 done** (2026-11-18, 780e1fe, e1b0e03): play mode, tags selected for rolls through the system's selection with the City of Mist marker bars; bigger small fonts. **Phase 5 done** (2026-11-18): the tags-deck (City of Mist), every card edited on the card itself, the detachable deck window, the roll modifier total by the move bar.
 
 An alternative character sheet for the city-of-mist system (City of Mist, Otherscape, Legend in the Mist).
 It has two layers of flip cards, a **tags-deck** behind them, and a bar of move buttons.
@@ -44,7 +44,24 @@ From front to back:
 
 The deck is part of the sheet but can be **detached** into its own floating window, and attached again.
 
-**Swapping layers.** The layer behind sits higher and shows only its header bands. Clicking a band brings that layer to the front. Clicking the deck fans it open in front of everything.
+**The deck's views (user, 2026-11-18, phase 5).**
+- **At rest (stack):** every card cascaded behind the layers at their right, grouped by type (statuses, story tags, juice, clues). Each covered card shows its red band with **its name written over the printed title**; the last card shows whole. A toolbar under it: the count per type, spread, detach.
+- **Brought forward:** clicking a card brings it forward, big, in front of the layers, to work on; "Back to the deck", Esc or a click beside it sends it back.
+- **Spread** (the plan's fan-out): a button lays every card out in front of the sheet, one column per type, with the create buttons in the column headers.
+- **Everything is done on the card itself, no system dialogs** (user):
+  - the name on the TAG line is a field;
+  - a new card starts blank with its name focused (empty or Esc deletes it);
+  - clicking a box sets the status (or the amount); − / + change one tier (one point);
+  - the other fields are small fields under the name: clue source and method on one row, partial, temporary / permanent, the Help/Hurt target picker;
+  - delete, use a clue and burn ask "Sure?" on the button itself (right-click deletes at once).
+- **Selected cards** are lifted (in the stack) and tinted, green + / red −, with the ±value on the band.
+
+**Roll modifier total (user, phase 5).** Next to the move buttons: what the selection adds to the next roll, counted as the system's roll counts it (tags add up; only the highest positive and the lowest negative status count). A client setting picks what it adds up:
+- **Just the cards** (default): the deck's selected statuses and story tags;
+- **Tags + cards**: two values;
+- **All together**.
+
+**Swapping layers.** The layer behind sits higher and shows only its header bands. Clicking a band brings that layer to the front.
 
 **Move bar** (mockup 6). A row of move buttons using **the HUD's move button art** (`getMoveImageSrc`; a round text button with the abbreviation only for a move without art). A chevron at the end cycles through **three groups: Core, Special, SHB**. Special merges the HUD's session page (Monologue, Flashback, Downtime, Session End) and its special page, in that order. Done in phase 0. Clicking a button works **like the system sheet, not like the HUD**: it opens the system's roll dialog with the selected tags and statuses, and the player confirms there (see § 6.1).
 
@@ -94,7 +111,8 @@ scripts/card-sheet/
   card-sheet-context.js  builds the render context, using getters.js
   system-adapter.js      the ONLY file that calls system internals (CityDialogs, CityHelpers, …)
   card-fit.js            fits titles and tag lists to a fixed card size
-  tags-deck.js           the deck part, plus the detached TagsDeck window (ApplicationV2)
+  tags-deck.js           the deck part (context, actions, modifier totals), plus the detached TagsDeck window (ApplicationV2)
+  ui-state.js            the sheet's client UI state (flips, front layer, deck detached / position)
   move-bar.js            move buttons + Core/Cinematic switch (HUD look, system sheet roll path)
 templates/card-sheet/
   layer1.hbs             PART "layer1": the four main theme cards (one template per PART; no root template)
@@ -103,7 +121,9 @@ templates/card-sheet/
   character-card.hbs     the character card (front and back)
   card-band.hbs          a card's header band (flips the card)
   peek-tab.hbs           the back layer's clickable header band
-  tags-deck.hbs, deck-card.hbs
+  tags-deck.hbs          PART "deck": the stack, its toolbar, the forward card and the spread view
+  deck-columns.hbs       the spread columns (also the TagsDeck window's part)
+  deck-card.hbs          one tracking card (stack / spread / worked on)
   move-bar.hbs
 styles/card-sheet/
   card-sheet.css         layout, layers, flip, deck, move bar (in module.json "styles")
@@ -137,7 +157,7 @@ Consequences:
 
 ### 6.2 Writes: system APIs to use
 
-Every write calls a documented method on the document. The sheet's own UI state (which layer is in front, which cards are flipped, whether the deck is detached and where) goes in a **client setting** keyed by actor uuid, like `hudPositions`.
+Every write calls a documented method on the document (or a plain `item.update` of the item's own field when the system has no method, such as a clue's source). The sheet's own UI state (which layer is in front, which cards are flipped, whether the deck is detached and where) goes in a **client setting** keyed by actor uuid, like `hudPositions`.
 
 | Action | API (verified in system 4.5.3) |
 |---|---|
@@ -198,6 +218,8 @@ Many system handlers end with `CityHelpers.modificationLog(actor, …)` (the GM'
 | `_activeExtraChange` (`.active-extra-drop-down`) | set the active extra | Doc | `actor.setExtraThemeId(id)` (not a raw `update`) | 2 |
 | `openOwnerSheet` (`.non-char-theme-name`), `openThemeName` (right-click `.themebook-name`) | open the crew / danger sheet | Doc | `owner.sheet.render(true)` | 2 |
 
+**Phase 5 (done).** The tags-deck rows below are built in `scripts/card-sheet/tags-deck.js`, **with no system dialog** (user, 2026-11-18). The card's own fields, boxes and "Sure?" buttons replace `CityDialogs.itemEditDialog`, `CityHelpers.itemDialog`, `_statusAddSubDialog` and `HTMLTools.confirmBox`. What is kept from the system: its creation methods, `addStatus` / `subtractStatus`, `setBoxesChecked`, `spendClue`, `deleteTag`, and the change-log entries (`logModification`, with the system's own texts). A new card is logged "Created" when it is named, and deleted when left without a name (the system's cancel). Drops of system draggables keep the system's status-drop dialog (merge / create).
+
 **Character card, tags-deck and loadout (phases 2, 5–7)**
 
 | System handler (selector) | What it does | Route | Card sheet call | Phase |
@@ -206,7 +228,7 @@ Many system handlers end with `CityHelpers.modificationLog(actor, …)` (the GM'
 | `HTMLHandlers.statusEdit` (`.item-edit-context .status .name`) | edit status | Adapter | `CityDialogs.itemEditDialog(status)` | 5 |
 | `HTMLHandlers.statusAdd` / `statusSubtract` (`.status-add`, `.status-subtract`) | add / subtract tiers | Adapter + Doc | `CityHelpers._statusAddSubDialog(status, title, "addition" / "subtraction")` → `status.addStatus(amt, { newName, tier })` / `status.subtractStatus(amt, newName)` | 5 |
 | `HTMLHandlers.deleteStatus` (`.status-delete`, right-click = no confirm) | delete status | Adapter + Doc | `HTMLTools.confirmBox` → `actor.deleteStatus(id)` | 5 |
-| `SelectedTagsAndStatus.selectStatusHandler` (`.item-selection-context .status .name`) | select a status ± | Adapter | `setSelectionDirection(status, ±1 / 0)` | 5 |
+| `SelectedTagsAndStatus.selectStatusHandler` (`.item-selection-context .status .name`) | select a status ± | Adapter | `toggleStatusSelection(status, invert)` in the adapter (default −1, right click +1, the same click clears; `checkValidityForSelect`, `setSelectionDirection`), action `selectDeckCard`; **built in phase 5** | 5 |
 | `_createStoryTag` (middle-click `.story-tags-header`), `HTMLHandlers.createStoryTag` (`.create-story-tag`) | new story tag + edit dialog | Doc + Adapter | `actor.createStoryTag()` → `CityDialogs.itemEditDialog(tag)` → `deleteTag` on cancel | 5 |
 | `_createClue` (`.create-clue`) | new clue + dialog, deleted if cancelled | Doc + Adapter | `actor.createNewClue({ name })` → `CityHelpers.itemDialog(clue)` → `deleteClue` on cancel | 5 |
 | `_clueEdit` (`.clue-name`, middle-click; `.clue-list-section .clue-name`) | edit clue | Adapter | `CityHelpers.itemDialog(clue)` | 5 |
@@ -231,7 +253,7 @@ Many system handlers end with `CityHelpers.modificationLog(actor, …)` (the GM'
 | `monologue` / `sessionEnd` / `flashback` / `downtime` (move effects) | attention for the monologue, refresh abilities, spend flashback; downtime is empty in 4.5.3 | Adapter | run on `Object.create(CityCharacterSheet.prototype, { actor })`, **phase 0** | 0 |
 | `_onDropItem`: themebook / themekit | create a theme, main or extra | Adapter + Doc | `HTMLTools.singleChoiceBox` (main / extra, PCs only) → `actor.createNewTheme(name, tb, isExtra)` / `actor.addThemeKit(tk, isExtra)` | 3 |
 | `_onDropItem`: tag / status / essence | story tag / status merge / Otherscape essence | Doc + Adapter | `actor.createStoryTag(name, true)`; `DragAndDrop.statusDrop(actor, name, { tier })`; `actor.setEssence(item)` | 5/6 |
-| `DragAndDrop.addDragFunctionality` + `_dragDropEvent` (`drop` on the sheet) | system draggable tags/statuses (from chat, scene tags) dropped on the sheet | Adapter | `DragAndDrop.addDragFunctionality(html)` and `DragAndDrop.dropDraggableOnActor(dragging, actor)` | 5 |
+| `DragAndDrop.addDragFunctionality` + `_dragDropEvent` (`drop` on the sheet) | system draggable tags/statuses (from chat, scene tags) dropped on the sheet | Adapter | `addDragFunctionality(element)` and `dropDraggableOnActor(dragging, actor)` in the adapter. The drop is caught in the capture phase, before the sheet's DragDrop (the system patches `DragDrop._handleDrop` to drop on the canvas token under the pointer); **built in phase 5** | 5 |
 | `_openTutorial` (`.open-tutorial`) | open the system tutorial | Adapter | `CityDB.openTutorial()` | 8 (or drop it) |
 | `contextMenu.attachToContainer` | right-click menu container | — | no options are ever set on character sheets (only `city-threat-sheet.js` calls `show`): nothing to map | — |
 | `_scrollSheet` | keep the scroll position | — | AppV2 `scrollable` in PARTS | 0 |
@@ -252,7 +274,7 @@ No handler is left out: anything the card sheet does not have yet is reached thr
   - the **top band** is the window header: one row holding the move bar and the small header controls (⋮ menu, copy UUID, "Open system sheet", ×) at the right, on a dark translucent background (`rgba(0,0,0,0.45)`, rounded) so the user sees where to grab it. It is the **drag handle**: the move bar row is laid over the header and lets pointer events through except on its buttons, so pressing an empty part of the band drags the sheet and the buttons still click;
   - empty parts of the window are **click-through** (`pointer-events: none` on the window, content and containers; `auto` on cards, buttons, controls, header and the faint resize handle);
   - the rules use `.application.mh-card-sheet.mh-card-sheet` to beat the core, system and External Style window themes. Checked with and without External Style.
-- **Card size.** Reference size (user, 2026-11-18, revised twice the same day): a theme card is **520 px tall × ~204 px wide** at the sheet's default window size (880 × 637: four cards, 12 px gaps, the 56 px band, the back layer's 41 px peek, room for shadows). The tag text kept its size from the earlier 620 px card (~14 px): `--mh-cs-tag-size: 6.92cqw`. A smaller window scales the cards down. The cards keep the ratio of the card art, not the mockups: the City of Mist theme art is **473 × 1203** (`--mh-cs-aspect: 473 / 1203`). Each per-system CSS file sets the ratio and where the art's bands sit, as CSS variables in card widths (`cqw`); the shared defaults are under `:where(.mh-card-sheet)` so the per-system file always wins.
+- **Card size.** Reference size (user, 2026-11-18, revised twice the same day): a theme card is **520 px tall × ~204 px wide** at the sheet's default window size (880 × 637: four cards, 12 px gaps, the 56 px band, the back layer's 41 px peek, room for shadows). **Since phase 5 it is 1062 × 637:** the deck takes 0.96 card widths at the right (`--mh-cs-deck-k`), and the layers and the deck are one group centred in the window content (`--mh-cs-stage-left`, `--mh-cs-row-w`). The tag text kept its size from the earlier 620 px card (~14 px): `--mh-cs-tag-size: 6.92cqw`. A smaller window scales the cards down. The cards keep the ratio of the card art, not the mockups: the City of Mist theme art is **473 × 1203** (`--mh-cs-aspect: 473 / 1203`). Each per-system CSS file sets the ratio and where the art's bands sit, as CSS variables in card widths (`cqw`); the shared defaults are under `:where(.mh-card-sheet)` so the per-system file always wins.
   - City of Mist art: header band y 25–90, body y ~95–1105, footer band (logo) y 1112–1180, ~22 px frame. Background by themebook subtype (`mythos`, `logos`, `mist`; `extras_theme_bg.webp` for any other type).
   - The window is resizable. The window content is a size container; the card width is the largest that fits four across, and one card plus the peek (`--mh-cs-peek`, 0.2 card widths) in the height. Each card is an inline-size container and everything inside is in `cqw`.
 - **Text fitting.** `card-fit.js` shrinks any `[data-fit]` element (the title) through a `--mh-fit` factor until it fits; `data-fit-lines="3"` also caps the line count (the theme title; 2 for the character's name). The base size is large, so a short title fills the space and a long one gets smaller; words never break, so a long word shrinks the text too. A title still too long at the smallest size is clamped to 3 lines with an ellipsis and a tooltip. It refits when a web font finishes loading and when a layer changes size. Long tag or improvement lists, and a long identity/mystery, scroll inside the face, so the card never grows.
@@ -264,13 +286,22 @@ No handler is left out: anything the card sheet does not have yet is reached thr
   - Layer 2 can hold more cards than layer 1 (character + crew + every extra). It **fans out**: the cards overlap just enough to fit the width, and a hovered or focused card comes on top.
 - **tags-deck.**
   - A stack of ticket cards peeking out at the right, with a small count per type.
+  - **Built in phase 5**, with the measurements below. The part's root is `display: contents`. The deck sits behind the layers (z-index 0); the forward card and the spread view sit in an overlay above them (z-index 10).
   - **Every deck card is the City of Mist tracking card** (`ui/card-sheet/com/trackingCard.webp`, 490 × 320). Two things go on top of the art, at fixed positions:
-    - **The 16 pips.** The white strip (about x 30–462, y 85–170 in image pixels) has 16 slanted cells. The tier numbers sit in cells 1, 2, 4, 7, 11 and 16 (tier 5 = OUT, tier 6 = MC); the cells between them are blank. A pip is drawn in each filled cell. For a status: tier *t* fills cells 1 to C(t) (C = 1, 2, 4, 7, 11, 16), plus its `pips` towards the next tier. For a clue or juice: `amount` cells. Check this against the system's status model (`tier`, `pips`, `addStatus`) before building it. Measure the exact cell positions as percentages of the image, so they scale with the card.
-    - **The type marker, top right.** Four round icons in the red band (about x 318–460, y 22–58), left to right: **clue** (magnifier), **juice** (jar), **tag** (tag), **status** (first-aid case). The card's type is marked on its icon; the other three stay dimmed.
-  - The name goes on the TAG line. Legend and Otherscape get their own deck card art in phases 6 and 7.
+    - **The 16 pips.** The white strip (about x 30–462, y 85–170 in image pixels) has 16 slanted cells. The tier numbers sit in cells 1, 2, 4, 7, 11 and 16 (tier 5 = OUT, tier 6 = MC); the cells between them are blank. A pip is drawn in each filled cell. For a status: tier *t* fills cells 1 to C(t) (C = 1, 2, 4, 7, 11, 16), plus its `pips` towards the next tier. For a clue or juice: `amount` cells. **Checked in phase 5:**
+      - this is exactly the system's `status.boxesChecked` (classic model), and `setBoxesChecked` is its inverse;
+      - in the mist-engine model (`statusAdditionSystem`), one box per tier (`StatusMath.statusBoxesME`) is shown in the box of that tier's number;
+      - measured on the 490 × 320 art: the strip is y 84–171, with 16 slanted cells (the lines lean ~5.7°, `skewX(-5.7deg)`). The separators are at x 31, 77.5, 117, 136.5, 174, 191.5, 211, 247.5, 267, 285.5, 305, 341.5, 361.5, 378, 395.5, 414 and 461; cells 5, 8 and 12 are the shaded narrow ones. The positions are in `card-sheet-com.css`.
+    - **The type marker, top right.** Four round icons in the red band (centres x 332 / 368.5 / 405 / 441, y 37.5, 32 px), left to right: **clue** (magnifier), **juice** (jar), **tag** (tag), **status** (first-aid case). The card's type is ringed on its icon; the other three are dimmed.
+  - The name goes on the TAG line (field x 128–462, y 192–252), at the tag text size. It is also written on the red band over the printed title (x 18–312, y 15–63), so the cascade shows it. The footer band (y 268–302) holds the controls strip. Legend and Otherscape get their own deck card art in phases 6 and 7.
   - Click to fan it out, grouped as statuses / story tags / juice / clues.
   - Selected cards are lifted and tinted: green for positive, red for negative.
-  - A detach button opens the **TagsDeck** window. While it is open, the sheet shows a placeholder where the deck was.
+  - A detach button opens the **TagsDeck** window:
+    - frameless like the sheet, with a small dark band that holds attach and ×;
+    - it shows the spread columns, and every card is worked on in place;
+    - its position is kept per actor.
+  - While the window is open, the sheet shows a dashed placeholder where the deck was. Clicking it, the window's attach control or its × attaches the deck again.
+  - A deck left detached reopens with its sheet; closing the sheet closes the window.
 - **Rendering.**
   - Use ApplicationV2 PARTS (`moves`, `layer1`, `layer2`, `deck`). A selection change re-renders only what changed.
   - Keep `will-change` on a card only while it flips.
@@ -323,6 +354,26 @@ Each phase ends with a commit and a check in Foundry (localhost:30014, user `cla
    - Select ±.
    - Fan-out.
    - Detach and attach the deck window.
+   - *Done 2026-11-18.*
+     - **Files:** `tags-deck.js`, `ui-state.js`, `tags-deck.hbs`, `deck-columns.hbs`, `deck-card.hbs`; `getDeckItems` in `getters.js`; adapter `toggleStatusSelection`, `statusBoxes`, `setStatusBoxes`, `addDragFunctionality`, `dropDraggableOnActor`; the client setting `cardSheetModifierTotal`.
+     - **User decisions this phase:** every card cascaded with its name on the band; bring forward / send back; the spread button; everything on the card (no system dialogs); small fields under the name; "Sure?" on the button; the modifier total as a setting (default: the cards).
+     - **Checked in Foundry** as Player2 on Lily Chow:
+       - the stack, the forward card, the spread view;
+       - create: blank name, typed + Enter; an empty name or Esc deletes the card;
+       - boxes and − / + against the system's classic status math;
+       - selecting a status (− / +) and a story tag, with the totals in the three modes;
+       - temporary, partial, source, rename, the Help target picker;
+       - using a clue (the system's clue card in chat);
+       - "Sure?" delete and right-click delete;
+       - edit mode (the lock);
+       - detach, attach, ×, and reopening with the sheet;
+       - a system draggable status dropped on the deck;
+       - phases 1–4 still working.
+     - **Not checked:**
+       - a GM client (clue use is refused for the GM, as in the system);
+       - the mist-engine status model;
+       - change-log entries (`loggedActions` is off in this world);
+       - keyboard-only use of the negative direction.
 6. **Legend in the Mist** (after City of Mist works well; needs the Legend card art).
    - Origin/Adventure/Greatness.
    - Quintessences.
