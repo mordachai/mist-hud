@@ -70,8 +70,9 @@ function tagView(t, owner, perms) {
  * system's selection, in this client. Anyone who sees the card may select
  * (as on the system sheet: a crew theme's tags belong to the crew actor).
  * Burned tags (any burn_state) can't be selected, as on the system sheet.
+ * Also used for the deck's statuses and story tags (tags-deck.js).
  */
-function selectionView(doc, edit) {
+export function selectionView(doc, edit) {
   const selectable = !edit && isTagSelectable(doc);
   const direction = doc ? getSelectionDirection(doc) : 0;
   return {

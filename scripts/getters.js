@@ -603,6 +603,51 @@ export function getJuiceAndClues(actor) {
   return { helpItems, hurtItems, clueItems, juiceItems };
 }
 
+// ── tags-deck (card sheet) ────────────────────────────────────────────────────
+
+/**
+ * Everything the card sheet's tags-deck shows, one row per item, in the
+ * actor's item order: statuses, story tags, juice (Help and Hurt included,
+ * not summed per target) and clues. Each row keeps its document (`item`)
+ * for the system's selection and document methods.
+ * @returns {{statuses: object[], storyTags: object[], juice: object[], clues: object[]}}
+ */
+export function getDeckItems(actor) {
+  const empty = { statuses: [], storyTags: [], juice: [], clues: [] };
+  if (!actor) return empty;
+  const items = actor.items.contents;
+  const shown = i => {
+    try { return String(i.displayedName ?? i.name); } catch { return i.name; }
+  };
+  return {
+    statuses: items.filter(i => i.type === "status").map(i => ({
+      id: i.id, item: i, name: shown(i),
+      tier:        Number(i.system.tier) || 0,
+      pips:        Number(i.system.pips) || 0,
+      temporary:   !!i.system.temporary,
+      permanent:   !!i.system.permanent,
+      specialType: i.system.specialType ?? "",
+    })),
+    storyTags: items.filter(i => i.type === "tag" && i.system?.subtype === "story").map(i => ({
+      id: i.id, item: i, name: shown(i),
+      burnState: applyBurnState(actor, i.id, "story").burnState,
+      temporary: !!i.system.temporary,
+      permanent: !!i.system.permanent,
+    })),
+    juice: items.filter(i => i.type === "juice").map(i => ({
+      id: i.id, item: i, name: shown(i),
+      amount:  Number(i.system.amount) || 0,
+      subtype: i.system.subtype ?? "",
+      target:  game.actors.get(i.system.targetCharacterId)?.name ?? "",
+    })),
+    clues: items.filter(i => i.type === "clue").map(i => ({
+      id: i.id, item: i, name: shown(i),
+      amount:  Number(i.system.amount) || 0,
+      partial: !!i.system.partial,
+    })),
+  };
+}
+
 // ── Essence (Otherscape) ──────────────────────────────────────────────────────
 
 /** Counts themes per themebook category (Self/Noise/Mythos/Logos/Mist). */

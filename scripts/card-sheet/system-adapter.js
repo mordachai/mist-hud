@@ -126,12 +126,14 @@ async function runMoveEffects(actor, move) {
  * @param {Actor}  actor
  * @param {string} message  already localized
  * @param {Item}   [object] the item the change is about
+ * @param {string} [after]  the text the system adds after the item (amounts, tiers)
  */
-export async function logModification(actor, message, object = null) {
+export async function logModification(actor, message, object = null, after) {
   const sys = await systemApi();
   if (!sys) return;
   try {
-    await sys.CityHelpers.modificationLog(actor, message, object);
+    if (after === undefined) await sys.CityHelpers.modificationLog(actor, message, object);
+    else await sys.CityHelpers.modificationLog(actor, message, object, after);
   } catch (e) {
     console.warn("Mist HUD | Card sheet: change log entry failed:", e);
   }
@@ -268,6 +270,117 @@ export async function statusDrop(actor, name, options) {
   const sys = await systemApi();
   if (!sys) return;
   return sys.DragAndDrop.statusDrop(actor, name, options);
+}
+
+// ── tags-deck (phase 5) ──────────────────────────────────────────────────────
+
+/**
+ * A click on box `box` (1-based) of a status card, in the system's status
+ * model:
+ *  - classic: the status gets that many boxes checked (the system's
+ *    `status.setBoxesChecked`: tier and pips); clicking the last checked
+ *    box unchecks it, but a status keeps at least one box (delete removes it);
+ *  - mist-engine: only the boxes holding a tier number count; that tier's
+ *    box is toggled (StatusMath.binaryToggle), unless it was the last one.
+ * @param {Item}     status
+ * @param {number}   box        1-based
+ * @param {number[]} tierBoxes  the box holding each tier's number
+ * @returns {Promise<boolean>} true when the status changed
+ */
+export async function setStatusBoxes(status, box, tierBoxes) {
+  const mistEngine = api.CitySettings?.isOtherscapeStatuses?.() ?? false;
+  const math = globalThis.StatusMath;
+  if (mistEngine && math?.binaryToggle) {
+    const index = tierBoxes.indexOf(box);
+    if (index < 0) return false;
+    const { tier, pips } = math.binaryToggle(status.system, index);
+    if (!tier) return false;
+    await status.update({ "system.tier": tier, "system.pips": pips });
+    return true;
+  }
+  const current = Number(status.boxesChecked) || 0;
+  const target = Math.max(1, box === current ? box - 1 : box);
+  if (target === current) return false;
+  await status.setBoxesChecked(target);
+  return true;
+}
+
+/**
+ * Which tier boxes of a status are checked, in the system's status model:
+ *  - classic (City of Mist): the boxes fill in a row, `status.boxesChecked`
+ *    of them (tier t = 1, 2, 4, 7, 11, 16 boxes, plus its pips);
+ *  - mist-engine (the statusAdditionSystem setting): one box per tier, each
+ *    on or off (StatusMath.statusBoxesME), shown in the box of that tier's
+ *    number.
+ * @param {Item}     status
+ * @param {number[]} tierBoxes  the box (1-based) holding each tier's number, e.g. [1, 2, 4, 7, 11, 16]
+ * @returns {boolean[]} one entry per box (tierBoxes.at(-1) boxes)
+ */
+export function statusBoxes(status, tierBoxes) {
+  const total = tierBoxes.at(-1) ?? 0;
+  const boxes = new Array(total).fill(false);
+  if (!status) return boxes;
+  const mistEngine = api.CitySettings?.isOtherscapeStatuses?.() ?? false;
+  const math = globalThis.StatusMath;
+  if (mistEngine && math?.statusBoxesME) {
+    math.statusBoxesME(status.system).forEach((on, i) => {
+      if (on && tierBoxes[i]) boxes[tierBoxes[i] - 1] = true;
+    });
+    return boxes;
+  }
+  const checked = Math.min(total, Math.max(0, Number(status.boxesChecked) || 0));
+  for (let i = 0; i < checked; i++) boxes[i] = true;
+  return boxes;
+}
+
+/**
+ * Click on a status, as the system's SelectedTagsAndStatus._statusSelect
+ * (system 4.5.3): a status's default direction is −1 (it hinders), +1 on a
+ * right click; the same direction again clears it, the other one switches
+ * it. The system counts a selected status as ±tier. The system's checks run
+ * first; an open roll or review dialog may take the status instead.
+ * @param {Item}    status
+ * @param {boolean} invert  right click
+ * @returns {number|null} the status's direction now (1, -1, 0), or null if refused
+ */
+export function toggleStatusSelection(status, invert = false) {
+  const sts = selectionApi();
+  if (!sts || !status) return null;
+  const direction = invert ? 1 : -1;
+  const target = getSelectionDirection(status) === direction ? 0 : direction;
+  if (target !== 0 && !sts.checkValidityForSelect(status, target)) return null;
+  if (!setSelectionDirection(status, target)) return null;
+  playTagSound(target !== 0);
+  return target;
+}
+
+/**
+ * Draggable tags and statuses (chat cards, scene tags…; the system marks
+ * them `.draggable` and adds `.dragging` while they move), as the system
+ * sheet's DragAndDrop.addDragFunctionality(html): makes `.draggable`
+ * elements inside `element` draggable the system's way.
+ */
+export async function addDragFunctionality(element) {
+  const sys = await systemApi();
+  if (!sys || !element) return;
+  sys.DragAndDrop.addDragFunctionality($(element));
+}
+
+/** The system draggable being dragged right now (`.dragging`), if exactly one. */
+export function currentSystemDraggable() {
+  const dragging = $(document).find(".dragging");
+  return dragging.length === 1 ? dragging : null;
+}
+
+/**
+ * Drop a system draggable on the actor (CitySheet._dragDropEvent →
+ * DragAndDrop.dropDraggableOnActor): a tag becomes a story tag, a status is
+ * created or merged through the system's status drop dialog.
+ */
+export async function dropDraggableOnActor(dragging, actor) {
+  const sys = await systemApi();
+  if (!sys) return;
+  return sys.DragAndDrop.dropDraggableOnActor(dragging, actor);
 }
 
 /**

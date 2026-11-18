@@ -1,0 +1,25 @@
+{{!-- The tags-deck spread out: one column per type (statuses, story tags,
+      juice, clues), each with its create buttons. Used in the sheet's spread
+      view and as the detached TagsDeck window's part.
+      Takes: deck (tags-deck.js buildDeckContext). --}}
+<div class="mh-cs-deck-columns" data-system-mode="{{#if deck.edit}}edit{{else}}play{{/if}}">
+  {{#each deck.groups}}
+  <section class="mh-cs-deck-column mh-cs-deck-column-{{kind}}">
+    <h3 class="mh-cs-deck-column-head">
+      <i class="fa-solid {{icon}}" aria-hidden="true"></i>
+      <span class="mh-cs-deck-column-label">{{label}}</span>
+      <span class="mh-cs-deck-column-count">{{cards.length}}</span>
+      {{#each creates}}
+      <button type="button" class="mh-cs-deck-create" data-action="createDeckItem" data-kind="{{../kind}}" data-subtype="{{subtype}}" data-tooltip="{{label}}" aria-label="{{label}}"><i class="fa-solid {{icon}}" aria-hidden="true"></i></button>
+      {{/each}}
+    </h3>
+    <div class="mh-cs-deck-list">
+      {{#each cards}}
+      {{> "modules/mist-hud/templates/card-sheet/deck-card.hbs" card=this work=@root.work}}
+      {{else}}
+      <p class="mh-cs-deck-none">{{empty}}</p>
+      {{/each}}
+    </div>
+  </section>
+  {{/each}}
+</div>

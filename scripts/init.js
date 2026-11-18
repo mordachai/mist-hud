@@ -11,7 +11,8 @@ import { BonusManager }              from "./bonus-manager.js";
 import { StatusScreen }              from "./status-screen.js";
 import { openNPCInfluenceManager }   from "./npc-influence.js";
 import { TokenStatusNotification, TokenTagNotification } from "./notifications.js";
-import { MistCardSheet, CARD_SHEET_TEMPLATES, refreshCardSheets, refreshCardSheetsOnDBLoad, refreshCardSheetsForOwner } from "./card-sheet/card-sheet.js";
+import { MistCardSheet, CARD_SHEET_TEMPLATES, refreshCardSheets, refreshCardSheetsOnDBLoad, refreshCardSheetsForOwner, refreshCardSheetTotals } from "./card-sheet/card-sheet.js";
+import { refreshDeckWindow } from "./card-sheet/tags-deck.js";
 
 // ── Initial load guard ────────────────────────────────────────────────────────
 // Prevents HUDs from opening during the brief "game loading" window.
@@ -190,6 +191,14 @@ Hooks.on("updateActor", actor => refreshCardSheetsForOwner(actor));
 for (const hook of ["createItem", "updateItem", "deleteItem"]) {
   Hooks.on(hook, item => refreshCardSheetsForOwner(item.parent));
 }
+// The detached tags-deck window is not the actor's sheet: it follows the
+// actor's items (statuses, story tags, juice, clues) and its lock itself.
+Hooks.on("updateActor", actor => refreshDeckWindow(actor));
+for (const hook of ["createItem", "updateItem", "deleteItem"]) {
+  Hooks.on(hook, item => refreshDeckWindow(item.parent));
+}
+// The roll modifier total by the move bar (client setting).
+Hooks.on("mistHudCardSheetTotals", refreshCardSheetTotals);
 
 // The system flips an already selected item (invert-click on a selected tag)
 // without firing any hook. Announce it, so the NPC HUD, the influence viewer

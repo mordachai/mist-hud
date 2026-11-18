@@ -33,6 +33,7 @@ export const SETTINGS = {
   AUTO_FOLD_DELAY:             "autoFoldDelay",
   HUD_POSITIONS:               "hudPositions",
   CARD_SHEET_STATE:            "cardSheetState",
+  CARD_SHEET_MOD_TOTAL:        "cardSheetModifierTotal",
 };
 
 export const SOCKET_NAME = "module.mist-hud";

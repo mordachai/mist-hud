@@ -1,0 +1,985 @@
+// tags-deck.js — the card sheet's tags-deck (plan § 2, § 7; phase 5).
+//
+// What the character picks up during play, one tracking card per item:
+// statuses, story tags, juice (Help/Hurt included) and clues (City of Mist;
+// Legend and Otherscape get statuses and story tags only). The deck has
+// three views on the sheet:
+//   - "stack":  every card cascaded behind the layers, at the right of the
+//               sheet; only the red bands show (with the card's name), the
+//               last card shows whole. Clicking a card brings it forward.
+//   - "focus":  one card brought forward, big, in front of the layers, to
+//               work on; "Back to the deck" (or Esc, or a click outside)
+//               sends it back.
+//   - "spread": every card laid out in front of the sheet, one column per
+//               type, with the create buttons in the column headers.
+// The deck can be detached into its own frameless window (TagsDeck, below),
+// which always shows the spread columns, every card worked on in place;
+// the sheet then shows a placeholder.
+//
+// Everything is done on the card itself (user, 2026-11-18), no system
+// dialogs: the name on the TAG line is a field, a new card starts blank,
+// clicking a box sets the status (or the amount), − / + change one tier
+// with the system's status math, the other fields (Help/Hurt target, clue
+// source / method / partial, temporary / permanent) are small fields under
+// the name, and delete / use / burn ask "sure?" on the button itself.
+//
+// The system stays the source of truth: reads come from getters.js
+// (getDeckItems), writes go through document methods (createNewStatus,
+// addStatus, setBoxesChecked, spendClue, deleteTag…) and system-adapter.js,
+// with the system sheet's change-log entries. Every action handler is an
+// ApplicationV2 action: `this` is the MistCardSheet or the TagsDeck window,
+// both of which have `actor`, `editMode`, `renderDeck()` and the deck's UI
+// state (deckView, deckFocus, deckNew, deckArmed).
+
+import { MODULE_ID, SETTINGS, getActiveSystem } from "../constants.js";
+import { getDeckItems } from "../getters.js";
+import { isEditMode, selectionView } from "./card-sheet-context.js";
+import {
+  logModification, statusBoxes, setStatusBoxes, toggleStatusSelection, toggleTagSelection,
+  isTagSelectable, getSystemSelection, addDragFunctionality, currentSystemDraggable,
+  dropDraggableOnActor,
+} from "./system-adapter.js";
+import { once } from "./edit-actions.js";
+import { writeUiState, deckState } from "./ui-state.js";
+
+const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
+
+const L = (key, data) => (data ? game.i18n.format(key, data) : game.i18n.localize(key));
+
+const TEMPLATE_DIR = "modules/mist-hud/templates/card-sheet";
+
+/** The deck's templates (added to CARD_SHEET_TEMPLATES in card-sheet.js). */
+export const DECK_TEMPLATES = {
+  part:    `${TEMPLATE_DIR}/tags-deck.hbs`,
+  columns: `${TEMPLATE_DIR}/deck-columns.hbs`,
+  card:    `${TEMPLATE_DIR}/deck-card.hbs`,
+};
+
+// ── What goes in the deck, per game ──────────────────────────────────────────
+
+/** The deck's card types, in display order. */
+const DECK_KINDS = {
+  "city-of-mist": ["status", "tag", "juice", "clue"],
+};
+const DEFAULT_KINDS = ["status", "tag"];
+
+const KIND_INFO = {
+  status: { label: "CityOfMist.terms.statuses",  icon: "fa-kit-medical", empty: "MistHUD.cardSheet.deck.noStatuses" },
+  tag:    { label: "CityOfMist.terms.storyTags", icon: "fa-tag",         empty: "MistHUD.cardSheet.noStoryTags" },
+  juice:  { label: "CityOfMist.terms.juice",     icon: "fa-jar",         empty: "MistHUD.cardSheet.deck.noJuice" },
+  clue:   { label: "CityOfMist.terms.clues",     icon: "fa-magnifying-glass", empty: "MistHUD.cardSheet.deck.noClues" },
+};
+
+/** The create buttons of each column (the system sheet's create-* links). */
+const CREATES = {
+  status: [{ subtype: "", icon: "fa-plus", label: "MistHUD.cardSheet.deck.createStatus" }],
+  tag:    [{ subtype: "", icon: "fa-plus", label: "MistHUD.cardSheet.deck.createStoryTag" }],
+  juice:  [
+    { subtype: "",     icon: "fa-plus",       label: "MistHUD.cardSheet.deck.createJuice" },
+    { subtype: "help", icon: "fa-handshake",  label: "MistHUD.cardSheet.deck.createHelp" },
+    { subtype: "hurt", icon: "fa-hands-bound", label: "MistHUD.cardSheet.deck.createHurt" },
+  ],
+  clue:   [{ subtype: "", icon: "fa-plus", label: "MistHUD.cardSheet.deck.createClue" }],
+};
+
+/** The type marker's icons on the card art, left to right (plan § 7). */
+const MARKER_ORDER = ["clue", "juice", "tag", "status"];
+
+/**
+ * The tracking card's boxes: the box (1-based) holding each tier's number
+ * (tier 1–6; tier 5 = OUT, tier 6 = MC). The last one is the box count.
+ */
+const TIER_BOXES = [1, 2, 4, 7, 11, 16];
+const BOX_COUNT = TIER_BOXES.at(-1);
+
+/** Fill the first `amount` boxes (clues, juice). */
+const amountBoxes = amount => Array.from({ length: BOX_COUNT }, (_, i) => i < amount);
+
+/** How long a "sure?" button stays armed. */
+const ARM_MS = 3000;
+
+// ── Render context ───────────────────────────────────────────────────────────
+
+/**
+ * The controls of a deck card, as the system sheet offers them: a status's
+ * − / + and delete for its owner in both modes; clue and juice − / + in
+ * both modes, their delete only unlocked; a story tag's delete in both
+ * modes, burn while locked; "use" on a clue (players only, checked on
+ * click). Delete, use and burn ask "sure?" on the button (`armed`).
+ */
+function cardTools(kind, row, own, edit, armedKey) {
+  if (!own) return [];
+  const tool = (action, icon, label, extra = {}) => ({
+    action, icon, label: L(label), ...extra,
+    armed: armedKey === `${row.id}:${action}`,
+    sure: L("MistHUD.cardSheet.deck.sure"),
+  });
+  const step = () => [
+    tool("stepDeckCard", "fa-minus", kind === "status" ? "MistHUD.cardSheet.deck.subtractTier" : "MistHUD.cardSheet.deck.subtractOne", { step: -1 }),
+    tool("stepDeckCard", "fa-plus", kind === "status" ? "MistHUD.cardSheet.deck.addTier" : "MistHUD.cardSheet.deck.addOne", { step: 1 }),
+  ];
+  const del = label => tool("deleteDeckCard", "fa-trash", label, { danger: true, confirm: true });
+  const tools = [];
+  switch (kind) {
+    case "status":
+      tools.push(...step());
+      if (!row.specialType) tools.push(del("MistHUD.cardSheet.deck.deleteHint"));
+      break;
+    case "tag":
+      if (!edit) {
+        if (row.burnState === "unburned" && row.item?.isBurnable) {
+          tools.push(tool("burnDeckTag", "fa-fire", "MistHUD.cardSheet.burnTitle", { confirm: true }));
+        } else if (row.burnState !== "unburned") {
+          tools.push(tool("burnDeckTag", "fa-rotate-left", "MistHUD.cardSheet.unburnTitle", { confirm: true }));
+        }
+      }
+      tools.push(del("MistHUD.cardSheet.deck.deleteHint"));
+      break;
+    case "clue":
+      tools.push(...step());
+      if (row.amount > 0) tools.push(tool("useClue", "fa-magnifying-glass", "MistHUD.cardSheet.deck.useClue", { confirm: true }));
+      if (edit) tools.push(del("MistHUD.cardSheet.deck.delete"));
+      break;
+    case "juice":
+      tools.push(...step());
+      if (edit) tools.push(del("MistHUD.cardSheet.deck.delete"));
+      break;
+  }
+  // The tooltip of an armed button says what the next click does.
+  for (const t of tools) if (t.armed) t.label = L("MistHUD.cardSheet.deck.sureHint", { action: t.label });
+  return tools;
+}
+
+/** The characters a Help / Hurt may point at: the other player characters, plus its current target. */
+function helpTargets(actor, current) {
+  return game.actors
+    .filter(a => a.type === "character" && a.id !== actor.id && (a.hasPlayerOwner || a.id === current))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(a => ({ id: a.id, name: a.name, selected: a.id === current }));
+}
+
+/** A small on / off field under the name (temporary, permanent, partial). */
+const flag = (field, label, on) => ({ field, label: L(label), on: !!on });
+
+/** One deck card. */
+function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
+  const info = KIND_INFO[kind];
+  const isNew = row.id === newId;
+  const card = {
+    id:        row.id,
+    kind,
+    kindLabel: L(info.label),
+    name:      row.name,
+    rawName:   row.item?.name ?? row.name,
+    isNew,
+    own,
+    // The fields (name, the small fields) are inputs in edit mode and on a
+    // new card; on a card worked on (brought forward, the deck window) too.
+    editable:  own && (edit || isNew),
+    badge:     "",
+    boxes:     amountBoxes(0),
+    boxEdit:   own,
+    markers:   MARKER_ORDER.map(key => ({ key, on: key === kind })),
+    tools:     cardTools(kind, row, own, edit, armedKey),
+    flags:     [],
+    texts:     [],
+    target:    null,
+    notes:     [],
+    selectable: false,
+    selection: "",
+    mark:      "",
+  };
+  switch (kind) {
+    case "status": {
+      const sel = selectionView(row.item, edit);
+      Object.assign(card, sel, {
+        badge: String(row.tier),
+        boxes: statusBoxes(row.item, TIER_BOXES),
+        flags: [flag("temporary", "CityOfMist.terms.temporary", row.temporary),
+                flag("permanent", "CityOfMist.terms.permanent", row.permanent)],
+        mark:  sel.selection ? `${sel.selection === "positive" ? "+" : "−"}${row.tier}` : "",
+      });
+      break;
+    }
+    case "tag": {
+      const sel = selectionView(row.item, edit);
+      Object.assign(card, sel, {
+        burned:    row.burnState === "burned",
+        burnState: row.burnState,
+        boxEdit:   false,
+        flags: [flag("temporary", "CityOfMist.terms.temporary", row.temporary),
+                flag("permanent", "CityOfMist.terms.permanent", row.permanent)],
+        mark:  sel.selection ? (sel.selection === "positive" ? "+1" : "−1") : "",
+      });
+      break;
+    }
+    case "juice": {
+      const helpHurt = row.subtype === "help" || row.subtype === "hurt";
+      Object.assign(card, {
+        name:  helpHurt ? `${L(`CityOfMist.terms.${row.subtype}`)} → ${row.target || "?"}` : row.name,
+        badge: String(row.amount),
+        boxes: amountBoxes(row.amount),
+        // Help / Hurt: who it is for, instead of a name.
+        target: helpHurt ? {
+          label:   L(`CityOfMist.terms.${row.subtype}`),
+          name:    row.target || "?",
+          options: helpTargets(actor, row.item?.system?.targetCharacterId),
+        } : null,
+      });
+      break;
+    }
+    case "clue":
+      Object.assign(card, {
+        badge: String(row.amount),
+        boxes: amountBoxes(row.amount),
+        flags: [flag("partial", "MistHUD.cardSheet.deck.partial", row.partial)],
+        texts: [
+          { field: "source", value: row.item?.system?.source ?? "", placeholder: L("CityOfMist.terms.clueSource") },
+          { field: "method", value: row.item?.system?.method ?? "", placeholder: L("CityOfMist.terms.clueMethod") },
+        ],
+      });
+      break;
+  }
+  // Shown as text when the fields are not editable.
+  card.notes = [
+    ...card.flags.filter(f => f.on).map(f => f.label),
+    ...card.texts.map(t => t.value).filter(Boolean),
+  ];
+  card.hasFields = card.flags.length > 0 || card.texts.length > 0;
+  // Play mode: a status's or a story tag's name selects it (left: its
+  // default direction, right: reversed), as on the system sheet.
+  if (card.selectable) {
+    card.selectTooltip = (card.selectionLabel ? `${card.selectionLabel}<br>` : "")
+      + L(kind === "status" ? "MistHUD.cardSheet.deck.selectStatus" : "MistHUD.cardSheet.selectTag");
+  } else if (card.noSelect) {
+    card.selectTooltip = L("MistHUD.cardSheet.burnedNoSelect");
+  }
+  card.focusLabel = L("MistHUD.cardSheet.deck.bringForward", { name: card.name });
+  card.namePlaceholder = L("MistHUD.cardSheet.deck.namePlaceholder");
+  card.boxLabel = L(kind === "status" ? "MistHUD.cardSheet.deck.boxStatus" : "MistHUD.cardSheet.deck.boxAmount");
+  return card;
+}
+
+const ROWS = {
+  status: deck => deck.statuses,
+  tag:    deck => deck.storyTags,
+  juice:  deck => deck.juice,
+  clue:   deck => deck.clues,
+};
+
+/**
+ * The deck's render context.
+ * @param {Actor}  actor
+ * @param {object} [options]
+ * @param {"stack"|"focus"|"spread"} [options.view]
+ * @param {string}  [options.focusId]  the card brought forward ("focus")
+ * @param {boolean} [options.inWindow] the detached window (always spread)
+ * @param {string}  [options.newId]    a card just created (blank name, focused)
+ * @param {string}  [options.armed]    "<itemId>:<action>" of a button asking "sure?"
+ */
+export function buildDeckContext(actor, { view = "stack", focusId = null, inWindow = false, newId = null, armed = null } = {}) {
+  const own = !!actor?.isOwner;
+  const edit = own && isEditMode(actor);
+  const items = getDeckItems(actor);
+  const kinds = DECK_KINDS[getActiveSystem()] ?? DEFAULT_KINDS;
+  const groups = kinds.map(kind => {
+    const info = KIND_INFO[kind];
+    return {
+      kind,
+      icon:    info.icon,
+      label:   L(info.label),
+      empty:   L(info.empty),
+      creates: own ? CREATES[kind].map(c => ({ ...c, label: L(c.label) })) : [],
+      cards:   ROWS[kind](items).map(row => deckCard(actor, kind, row, { own, edit, newId, armedKey: armed })),
+    };
+  });
+  const cards = groups.flatMap(g => g.cards);
+  const focus = view === "focus" ? cards.find(c => c.id === focusId) ?? null : null;
+  const shown = inWindow ? "spread" : focus ? "focus" : view === "spread" ? "spread" : "stack";
+  return {
+    view:     shown,
+    spread:   shown === "spread",
+    inWindow,
+    detached: !inWindow && deckState(actor).detached,
+    own,
+    edit,
+    groups,
+    cards,
+    focus,
+    counts:   groups.map(g => ({ kind: g.kind, icon: g.icon, label: g.label, count: g.cards.length })),
+  };
+}
+
+// ── Roll modifier totals (near the move buttons) ─────────────────────────────
+
+/** Is this selection row one of the character's deck cards (a status or a story tag of its own)? */
+function isDeckRow(actor, row) {
+  if (row.ownerId !== actor.id) return false;
+  if (row.type === "status") return true;
+  return row.type === "tag" && actor.items.get(row.id)?.system?.subtype === "story";
+}
+
+/**
+ * What a list of selected rows adds to a roll, counted as the system's roll
+ * does (CityRoll, system 4.5.3): every tag (and juice / modifier) adds its
+ * amount; of the statuses only the highest positive and the lowest negative
+ * count.
+ */
+function rollValue(rows) {
+  let total = 0;
+  let maxPos = 0;
+  let minNeg = 0;
+  for (const row of rows) {
+    const amount = Number(row.amount) || 0;
+    if (row.type === "status") {
+      if (amount > maxPos) maxPos = amount;
+      if (amount < minNeg) minNeg = amount;
+    } else {
+      total += amount;
+    }
+  }
+  return total + maxPos + minNeg;
+}
+
+const signed = n => (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : "0");
+
+/**
+ * The totals shown next to the move bar for this actor's sheet, per the
+ * client setting: "cards" (the selected deck cards only, default), "split"
+ * (the other selected tags, then the deck cards) or "all" (the whole
+ * selection, as the roll counts it).
+ * @returns {{label: string, value: string, sign: string}[]}
+ */
+export function selectionTotals(actor) {
+  let mode = "cards";
+  try { mode = game.settings.get(MODULE_ID, SETTINGS.CARD_SHEET_MOD_TOTAL) ?? "cards"; } catch { /* default */ }
+  const rows = getSystemSelection();
+  const cards = rows.filter(r => isDeckRow(actor, r));
+  const others = rows.filter(r => !isDeckRow(actor, r));
+  const entry = (label, n) => ({ label: L(label), value: signed(n), sign: n > 0 ? "positive" : n < 0 ? "negative" : "zero" });
+  switch (mode) {
+    case "all":   return [entry("MistHUD.cardSheet.total.all", rollValue(rows))];
+    case "split": return [entry("MistHUD.cardSheet.total.tags", rollValue(others)), entry("MistHUD.cardSheet.total.cards", rollValue(cards))];
+    default:      return [entry("MistHUD.cardSheet.total.cards", rollValue(cards))];
+  }
+}
+
+// ── Actions ──────────────────────────────────────────────────────────────────
+
+/** The deck item a control sits on (deck items always belong to the sheet's actor). */
+function itemAt(app, target) {
+  const id = target.closest("[data-item-id]")?.dataset.itemId;
+  return id ? app.actor.items.get(id) ?? null : null;
+}
+
+/** The actor, if this user may change it; warns otherwise. */
+function ownedActor(app) {
+  if (!app.actor?.isOwner) {
+    ui.notifications.warn(L("MistHUD.cardSheet.notOwner"));
+    return null;
+  }
+  return app.actor;
+}
+
+/** "Tier-pips" of a status, as the system's edit log writes it. */
+const statusString = s => `${s.name}-${s.system.tier}${+s.system.pips ? `.${s.system.pips}` : ""}`;
+
+/**
+ * The on-card "sure?": the first click arms the button (red, "Sure?") for
+ * three seconds, the second one goes through. Right click goes through at
+ * once where the system skips its confirmation (delete).
+ * @returns {boolean} true when the action should run now
+ */
+function confirmed(app, event, target, { rightClickSkips = false } = {}) {
+  if (rightClickSkips && event.button === 2) return true;
+  const id = target.closest("[data-item-id]")?.dataset.itemId;
+  const key = `${id}:${target.dataset.action}`;
+  if (app.deckArmed?.key === key && app.deckArmed.until > Date.now()) {
+    app.deckArmed = null;
+    return true;
+  }
+  app.deckArmed = { key, until: Date.now() + ARM_MS };
+  app.renderDeck({ keepView: true });
+  setTimeout(() => {
+    if (app.deckArmed?.key !== key) return;
+    app.deckArmed = null;
+    if (app.rendered) app.renderDeck({ keepView: true });
+  }, ARM_MS);
+  return false;
+}
+
+/** Click on a card of the stack (or a band in the spread): bring it forward. */
+function focusDeckCard(event, target) {
+  const id = target.closest("[data-item-id]")?.dataset.itemId;
+  if (!id || !this.isMistCardSheet) return;
+  this.deckView = "focus";
+  this.deckFocus = id;
+  this.renderDeck();
+}
+
+/** Back to the stack (the forward card goes back, the spread closes). */
+function closeDeckView() {
+  if (this.deckView === "stack") return;
+  this.deckView = "stack";
+  this.deckFocus = null;
+  this.renderDeck();
+}
+
+/** The toolbar's spread button: lay every card out in front of the sheet, or put them back. */
+function spreadDeck() {
+  this.deckView = this.deckView === "spread" ? "stack" : "spread";
+  this.deckFocus = null;
+  this.renderDeck();
+}
+
+/**
+ * Select a status or a story tag for the next roll (play mode), as the
+ * system sheet: left click = the default direction (a status −1, the
+ * character's story tag +1), right click = reversed, the same click again
+ * clears it.
+ */
+function selectDeckCard(event, target) {
+  if (this.editMode) return;
+  const item = itemAt(this, target);
+  if (!item) return;
+  event.preventDefault();
+  const invert = event.button === 2;
+  if (item.type === "status") toggleStatusSelection(item, invert);
+  else if (item.type === "tag" && isTagSelectable(item)) toggleTagSelection(item, this.actor, invert);
+}
+
+/**
+ * New status / story tag / juice / clue, with the system's own creation
+ * methods (HTMLHandlers.createStatus / createStoryTag,
+ * CityActorSheet._createClue / _createJuiceOfType), but no dialog: the new
+ * card shows up with an empty name field, focused. Naming it logs
+ * "Created"; leaving the name empty (or Esc) deletes it again.
+ */
+async function createDeckItem(event, target) {
+  const actor = ownedActor(this);
+  if (!actor) return;
+  const kind = target.dataset.kind;
+  const subtype = target.dataset.subtype ?? "";
+  await once(this, async () => {
+    let created = null;
+    switch (kind) {
+      case "status": created = await actor.createNewStatus("Unnamed Status"); break;
+      case "tag":    created = await actor.createStoryTag(); break;
+      case "clue":   created = await actor.createNewClue({ name: "Unnamed Clue" }); break;
+      case "juice": {
+        // The system's own base names (CityActorSheet._createHelp / _createHurt).
+        const base = subtype === "help" ? "Help" : subtype === "hurt" ? "hurt" : "Unnamed Juice";
+        created = await actor.createNewJuice(base, subtype);
+        break;
+      }
+    }
+    if (!created?.id) return;
+    // Help / Hurt has no name to type: it is logged now, its target picked on the card.
+    if (kind === "juice" && subtype) {
+      await logModification(actor, "Created", actor.items.get(created.id), `${created.system?.amount ?? 1}`);
+      return;
+    }
+    this.deckNew = created.id;
+    this.renderDeck({ keepView: true });
+  });
+}
+
+/**
+ * Click on a box: a status is set to that many boxes checked (the system's
+ * setBoxesChecked; one box per tier in the mist-engine model), a clue or
+ * juice to that amount. Clicking the last checked box unchecks it.
+ */
+async function setDeckBoxes(event, target) {
+  const item = itemAt(this, target);
+  const actor = ownedActor(this);
+  if (!item || !actor) return;
+  const box = Number(target.dataset.box) + 1;
+  if (!(box >= 1)) return;
+  await once(this, async () => {
+    if (item.type === "status") {
+      const before = statusString(item);
+      if (await setStatusBoxes(item, box, TIER_BOXES)) {
+        await logModification(actor, "Edited", item, `${before} edited --> ${statusString(item)})`);
+      }
+    } else if (item.type === "clue" || item.type === "juice") {
+      const amount = Number(item.system.amount) || 0;
+      const next = box === amount ? box - 1 : box;
+      await item.update({ "system.amount": next });
+    }
+  });
+}
+
+/**
+ * − / + on a card: a status loses or gains one tier with the system's status
+ * math (status.subtractStatus / addStatus, which log it; down to tier 0
+ * removes it, as in the system); a clue or juice one point.
+ */
+async function stepDeckCard(event, target) {
+  const item = itemAt(this, target);
+  const actor = ownedActor(this);
+  const step = Number(target.dataset.step);
+  if (!item || !actor || !step) return;
+  await once(this, async () => {
+    if (item.type === "status") {
+      if (step > 0) await item.addStatus(1, { newName: item.name });
+      else await item.subtractStatus(1);
+    } else if (item.type === "clue" || item.type === "juice") {
+      const amount = Math.max(0, (Number(item.system.amount) || 0) + step);
+      await item.update({ "system.amount": amount });
+    }
+  });
+}
+
+/** The small on / off fields under the name: temporary, permanent (statuses, story tags), partial (clues). */
+async function toggleDeckFlag(event, target) {
+  const item = itemAt(this, target);
+  const field = target.dataset.field;
+  if (!item || !ownedActor(this) || !["temporary", "permanent", "partial"].includes(field)) return;
+  await item.update({ [`system.${field}`]: !item.system[field] });
+}
+
+/**
+ * Delete a deck card, after "sure?" on the button (right click on a status
+ * or a story tag: at once, as the system sheet's delete). Logged as the
+ * system sheet does.
+ */
+async function deleteDeckCard(event, target) {
+  const item = itemAt(this, target);
+  const actor = ownedActor(this);
+  if (!item || !actor) return;
+  if (!confirmed(this, event, target, { rightClickSkips: item.type === "status" || item.type === "tag" })) return;
+  await once(this, async () => {
+    switch (item.type) {
+      case "status":
+        await logModification(actor, "Deleted", item, `tier ${item.system.tier}`);
+        await actor.deleteStatus(item.id);
+        break;
+      case "tag":
+        // actor.deleteTag logs it.
+        await actor.deleteTag(item.id, { removeImprovement: false });
+        break;
+      case "clue":
+        await actor.deleteClue(item.id);
+        await logModification(actor, "Removed", item);
+        break;
+      case "juice":
+        await actor.deleteJuice(item.id);
+        await logModification(actor, "Removed", item);
+        break;
+    }
+  });
+}
+
+/** Spend a clue (CityActorSheet._useClue): players only, after "sure?" on the button. */
+async function useClue(event, target) {
+  const clue = itemAt(this, target);
+  if (clue?.type !== "clue" || !ownedActor(this)) return;
+  if (game.user.isGM) {
+    ui.notifications.warn(L("MistHUD.cardSheet.deck.cluePlayersOnly"));
+    return;
+  }
+  if (!confirmed(this, event, target)) return;
+  await once(this, () => clue.spendClue());
+}
+
+/** Burn / unburn a story tag (HTMLHandlers.burnTag / unburnTag), after "sure?" on the button. */
+async function burnDeckTag(event, target) {
+  const tag = itemAt(this, target);
+  const actor = ownedActor(this);
+  if (tag?.type !== "tag" || !actor) return;
+  if (!confirmed(this, event, target)) return;
+  await once(this, async () => {
+    if (Number(tag.system.burn_state) === 0) {
+      if (!tag.isBurnable) return;
+      await actor.burnTag(tag.id);
+      await logModification(actor, "Burned", tag);
+    } else {
+      await actor.burnTag(tag.id, 0);
+      await logModification(actor, "Unburned", tag);
+    }
+  });
+}
+
+/** Detach the deck into its own window; the sheet shows a placeholder. */
+async function detachDeck() {
+  const actor = this.actor;
+  this.deckView = "stack";
+  this.deckFocus = null;
+  await writeUiState(actor, { deck: { detached: true } });
+  openDeckWindow(actor);
+  refreshDeckParts(actor);
+}
+
+/** Attach the deck again (the placeholder, or the window's attach control). */
+async function attachDeckAction() {
+  await attachDeck(this.actor);
+}
+
+/** Every deck action, for MistCardSheet and TagsDeck (`this` is the app). */
+export const DECK_ACTIONS = {
+  focusDeckCard,
+  closeDeckView,
+  spreadDeck,
+  selectDeckCard: { handler: selectDeckCard, buttons: [0, 2] },
+  createDeckItem,
+  setDeckBoxes,
+  stepDeckCard,
+  toggleDeckFlag,
+  // Right-click deletes a status or a story tag at once, like the system sheet.
+  deleteDeckCard: { handler: deleteDeckCard, buttons: [0, 2] },
+  useClue,
+  burnDeckTag,
+  detachDeck,
+  attachDeck: attachDeckAction,
+};
+
+// ── The fields on a card (name, Help/Hurt target, clue source / method) ─────
+
+/**
+ * A field of a deck card changed (Enter or leaving it). The name: renamed
+ * (a status or clue / juice logged as the system's edit dialog does); a new
+ * card is logged as created, or deleted again when left empty.
+ */
+async function changeDeckField(app, input) {
+  const item = itemAt(app, input);
+  const actor = app.actor;
+  if (!item || !actor?.isOwner) return;
+  const field = input.dataset.deckField;
+  const value = input.value ?? "";
+  switch (field) {
+    case "name": {
+      const name = value.trim();
+      const isNew = app.deckNew === item.id;
+      if (!name) {
+        if (isNew) await dropNewCard(app, item);
+        else input.value = item.name;
+        return;
+      }
+      if (isNew) app.deckNew = null;
+      if (name === item.name && !isNew) return;
+      const before = item.type === "status" ? statusString(item) : `${item.name} (${item.system.amount})`;
+      await item.update({ name });
+      if (isNew) {
+        const after = item.type === "status" ? `tier  ${item.system.tier}`
+          : item.type === "clue" ? `${item.system.amount}${item.system.partial ? ", partial" : ""}`
+          : item.type === "juice" ? `${item.system.amount}` : undefined;
+        await logModification(actor, "Created", item, after);
+      } else if (item.type === "status") {
+        await logModification(actor, "Edited", item, `${before} edited --> ${statusString(item)})`);
+      } else if (item.type === "clue" || item.type === "juice") {
+        await logModification(actor, "Edited", item, `${before} edited --> ${item.name} (${item.system.amount})`);
+      }
+      return;
+    }
+    case "source":
+    case "method":
+      if (value !== (item.system[field] ?? "")) await item.update({ [`system.${field}`]: value });
+      return;
+    case "target":
+      if (value !== (item.system.targetCharacterId ?? "")) await item.update({ "system.targetCharacterId": value });
+      return;
+  }
+}
+
+/** A new card left without a name: it goes away again (as the system deletes a cancelled one). */
+async function dropNewCard(app, item) {
+  if (app.deckNew !== item.id) return;
+  app.deckNew = null;
+  await item.delete();
+}
+
+// ── Shared listeners (sheet and window) ──────────────────────────────────────
+
+/**
+ * Once per window: the card fields (change, Enter, Esc, leaving a new
+ * card's empty name), and system draggables (chat statuses and tags, scene
+ * tags) dropped on the window, which go to the actor the system's way
+ * (CitySheet._dragDropEvent). The drop is caught before the sheet's own
+ * DragDrop, which the system patches to drop on the canvas token under the
+ * pointer. The sheet also gets Esc / a click beside the cards to close its
+ * focus or spread view.
+ * @param {ApplicationV2} app  the sheet or the deck window
+ */
+export function bindDeckListeners(app, { views = true } = {}) {
+  const el = app.element;
+  if (views) bindViewListeners(app);
+  el.addEventListener("change", event => {
+    const input = event.target.closest?.("[data-deck-field]");
+    if (input) void changeDeckField(app, input);
+  });
+  el.addEventListener("keydown", event => {
+    const input = event.target.closest?.("input[data-deck-field]");
+    if (!input) return;
+    if (event.key === "Enter") {
+      event.preventDefault();
+      input.blur();
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      const item = itemAt(app, input);
+      if (input.dataset.deckField === "name" && item && app.deckNew === item.id) {
+        void dropNewCard(app, item);
+        return;
+      }
+      input.value = input.defaultValue;
+      input.blur();
+    }
+  });
+  // A new card's name left empty (no "change" fires for an unchanged empty field).
+  el.addEventListener("focusout", event => {
+    const input = event.target.closest?.('input[data-deck-field="name"]');
+    if (!input || input.value.trim()) return;
+    setTimeout(() => {
+      if (!input.isConnected || document.activeElement === input) return;
+      const item = itemAt(app, input);
+      if (item && app.deckNew === item.id) void dropNewCard(app, item);
+    }, 0);
+  });
+  el.addEventListener("dragover", event => {
+    if (currentSystemDraggable()) event.preventDefault();
+  }, { capture: true });
+  el.addEventListener("drop", event => {
+    const dragging = currentSystemDraggable();
+    if (!dragging) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (app.actor?.isOwner) void dropDraggableOnActor(dragging, app.actor);
+  }, { capture: true });
+}
+
+/**
+ * Esc while a sheet shows a card forward or the spread deck: back to the
+ * stack. Caught on the window (capture), before the core's Esc, which would
+ * close the sheet (the focus is often outside it after a re-render).
+ */
+let escapeBound = false;
+function bindEscape() {
+  if (escapeBound) return;
+  escapeBound = true;
+  window.addEventListener("keydown", event => {
+    if (event.key !== "Escape" || event.repeat) return;
+    if (event.target.closest?.("input, textarea, select, prose-mirror, [contenteditable]")) return;
+    const app = [...foundry.applications.instances.values()]
+      .filter(a => a.isMistCardSheet && a.rendered && a.deckView && a.deckView !== "stack")
+      .sort((a, b) => (Number(b.element?.style.zIndex) || 0) - (Number(a.element?.style.zIndex) || 0))[0];
+    if (!app) return;
+    event.preventDefault();
+    event.stopPropagation();
+    app.deckView = "stack";
+    app.deckFocus = null;
+    app.renderDeck();
+  }, { capture: true });
+}
+
+/** Esc, or a click beside the cards, closes the focus / spread view (the sheet only). */
+function bindViewListeners(app) {
+  const el = app.element;
+  bindEscape();
+  el.addEventListener("click", event => {
+    if (!event.target.matches?.(".mh-cs-deck-overlay, .mh-cs-deck-overlay > .mh-cs-deck-columns, .mh-cs-deck-column, .mh-cs-deck-list, .mh-cs-deck-focus")) return;
+    if (app.deckView === "stack") return;
+    app.deckView = "stack";
+    app.deckFocus = null;
+    app.renderDeck();
+  });
+}
+
+/**
+ * After the deck renders: a new card's name field takes the focus; on the
+ * sheet, while a card is forward or the deck is spread, the focus moves
+ * into it (its "Back to the deck" button) unless it already is in the sheet.
+ */
+export function focusDeckView(app) {
+  if (app.deckNew) {
+    const input = app.element.querySelector(`[data-item-id="${app.deckNew}"] input[data-deck-field="name"]`);
+    if (input) {
+      input.focus({ preventScroll: false });
+      return;
+    }
+  }
+  if (!app.deckView || app.deckView === "stack") return;
+  if (app.element.contains(document.activeElement) && document.activeElement !== app.element) return;
+  app.element.querySelector(".mh-cs-deck-back, .mh-cs-deck-close")?.focus({ preventScroll: true });
+}
+
+/** After each render: system draggables inside the window (DragAndDrop.addDragFunctionality). */
+export function deckRendered(app) {
+  void addDragFunctionality(app.element);
+}
+
+// ── Detached window ──────────────────────────────────────────────────────────
+
+const windowId = actor => `mh-tags-deck-${actor.uuid.replaceAll(".", "-")}`;
+
+/** The open deck window of this actor, if any. */
+export function deckWindowFor(actor) {
+  return foundry.applications.instances.get(windowId(actor)) ?? null;
+}
+
+/** Open (or bring up) this actor's deck window. */
+export function openDeckWindow(actor) {
+  const existing = deckWindowFor(actor);
+  if (existing) {
+    existing.render({ force: true });
+    existing.bringToFront?.();
+    return existing;
+  }
+  const app = new TagsDeck({ actor });
+  app.render({ force: true });
+  return app;
+}
+
+/** Attach the deck again: the window closes, the sheets show the deck. */
+export async function attachDeck(actor) {
+  await writeUiState(actor, { deck: { detached: false } });
+  const win = deckWindowFor(actor);
+  if (win) await win.close({ keepState: true });
+  refreshDeckParts(actor);
+}
+
+/** Re-render the deck part of this actor's open card sheets. */
+function refreshDeckParts(actor) {
+  for (const app of foundry.applications.instances.values()) {
+    if (app.rendered && app.isMistCardSheet && app.actor?.uuid === actor.uuid) app.render({ parts: ["deck"] });
+  }
+}
+
+/** Re-render this actor's open deck window (its items or lock changed). */
+export function refreshDeckWindow(actor) {
+  if (!actor) return;
+  const win = deckWindowFor(actor);
+  if (win?.rendered) win.render();
+}
+
+/** Re-render every open deck window (the selection changed). */
+export function refreshAllDeckWindows() {
+  for (const app of foundry.applications.instances.values()) {
+    if (app instanceof TagsDeck && app.rendered) app.render();
+  }
+}
+
+/**
+ * The detached tags-deck: a frameless floating window (like the sheet) with
+ * a small dark band as drag handle, holding the attach and close controls.
+ * It always shows the spread columns, every card worked on in place.
+ * Closing it attaches the deck again. Its position is kept per actor
+ * (cardSheetState).
+ */
+export class TagsDeck extends HandlebarsApplicationMixin(ApplicationV2) {
+  static DEFAULT_OPTIONS = {
+    classes: ["mh-card-sheet", "mh-cs-deck-window"],
+    position: { width: 900, height: 560 },
+    window: { resizable: true, minimizable: false },
+    actions: { ...DECK_ACTIONS },
+  };
+
+  static PARTS = {
+    deck: { template: DECK_TEMPLATES.columns },
+  };
+
+  #actor;
+  #keepState = false;
+
+  /** The window always shows the spread columns. */
+  deckView = "spread";
+  deckFocus = null;
+  /** A card just created (blank name, focused). */
+  deckNew = null;
+  /** A button asking "sure?": { key, until }. */
+  deckArmed = null;
+
+  /** @param {{actor: Actor}} options  (the actor is kept apart: AppV2 deep-merges its options) */
+  constructor({ actor, ...options } = {}) {
+    const saved = deckState(actor).position;
+    super({
+      ...options,
+      id: windowId(actor),
+      ...(saved ? { position: { ...saved } } : {}),
+    });
+    this.#actor = actor;
+  }
+
+  get actor() {
+    return this.#actor;
+  }
+
+  get title() {
+    return L("MistHUD.cardSheet.deck.windowTitle", { name: this.#actor?.name ?? "" });
+  }
+
+  get editMode() {
+    return isEditMode(this.#actor);
+  }
+
+  renderDeck() {
+    this.deckView = "spread";
+    this.deckFocus = null;
+    return this.render();
+  }
+
+  async _prepareContext(options) {
+    const context = await super._prepareContext(options);
+    context.uid = this.id;
+    // Every card in the window is worked on in place (like a card brought forward).
+    context.work = true;
+    context.deck = buildDeckContext(this.#actor, {
+      inWindow: true,
+      newId:    this.deckNew,
+      armed:    this.deckArmed?.until > Date.now() ? this.deckArmed.key : null,
+    });
+    return context;
+  }
+
+  async _renderFrame(options) {
+    const frame = await super._renderFrame(options);
+    frame.dataset.mode = this.editMode ? "edit" : "play";
+    const header = frame.querySelector(".window-header");
+    const close = header?.querySelector('[data-action="close"]');
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "header-control icon fa-solid fa-right-to-bracket mh-cs-deck-attach";
+    button.dataset.action = "attachDeck";
+    const label = L("MistHUD.cardSheet.deck.attach");
+    button.dataset.tooltip = label;
+    button.setAttribute("aria-label", label);
+    if (close) close.before(button);
+    else header?.append(button);
+    return frame;
+  }
+
+  _onFirstRender(context, options) {
+    super._onFirstRender(context, options);
+    bindDeckListeners(this, { views: false });
+  }
+
+  async _onRender(context, options) {
+    await super._onRender(context, options);
+    this.element.dataset.mode = this.editMode ? "edit" : "play";
+    deckRendered(this);
+    focusDeckView(this);
+  }
+
+  setPosition(position) {
+    const result = super.setPosition(position);
+    this.#savePosition();
+    return result;
+  }
+
+  #savePosition = foundry.utils.debounce(() => {
+    if (!this.rendered || !this.#actor) return;
+    const { left, top, width, height } = this.position;
+    void writeUiState(this.#actor, { deck: { position: { left, top, width, height } } });
+  }, 500);
+
+  async close(options = {}) {
+    this.#keepState = !!options.keepState;
+    return super.close(options);
+  }
+
+  /** Closed by its × (not by attach, or by its sheet closing): the deck goes back to the sheet. */
+  _onClose(options) {
+    super._onClose(options);
+    if (this.#keepState || !this.#actor) return;
+    void writeUiState(this.#actor, { deck: { detached: false } }).then(() => refreshDeckParts(this.#actor));
+  }
+}

@@ -24,7 +24,7 @@ const L = (key, data) => (data ? game.i18n.format(key, data) : game.i18n.localiz
 /** One dialog flow at a time per sheet: a second click while a dialog is open does nothing. */
 const busy = new WeakSet();
 
-async function once(sheet, fn) {
+export async function once(sheet, fn) {
   if (busy.has(sheet)) return;
   busy.add(sheet);
   try {
@@ -236,6 +236,11 @@ export async function addBonusTag(event, target) {
 export async function editTag(event, target) {
   const ctx = cardOf(this, target);
   const tag = ctx.owner && tagOf(ctx.owner, target);
+  await editTagItem(tag);
+}
+
+/** HTMLHandlers.tagEdit on one tag (theme cards and the deck's story tags). */
+export async function editTagItem(tag) {
   if (!tag) return;
   if (!tag.isOwner) {
     ui.notifications.error(L("CityOfMist.error.dontOwnTag"));
@@ -256,6 +261,12 @@ export async function editTag(event, target) {
 export async function deleteTag(event, target) {
   const ctx = cardOf(this, target);
   const tag = ctx.owner && tagOf(ctx.owner, target);
+  await deleteTagItem(this, ctx.owner, tag, { skipConfirm: event.button === 2 });
+}
+
+/** HTMLHandlers.deleteTag on one tag (theme cards and the deck's story tags). */
+export async function deleteTagItem(sheet, owner, tag, { skipConfirm = false } = {}) {
+  const ctx = { owner };
   if (!tag) return;
   if (!tag.isOwner) {
     ui.notifications.error(L("CityOfMist.error.dontOwnTag"));
@@ -265,8 +276,7 @@ export async function deleteTag(event, target) {
     ui.notifications.warn(L("MistHUD.cardSheet.deleteSubtagsFirst"));
     return;
   }
-  const skipConfirm = event.button === 2;
-  await once(this, async () => {
+  await once(sheet, async () => {
     if (!skipConfirm && !await confirmBox(L("MistHUD.cardSheet.deleteTag"),
       L("MistHUD.cardSheet.confirm.deleteTag", { name: tag.name }))) return;
     let removeImprovement = false;
@@ -285,8 +295,14 @@ export async function deleteTag(event, target) {
 export async function burnTag(event, target) {
   const ctx = ownedOwner(this, target);
   const tag = ctx && tagOf(ctx.owner, target);
-  if (!tag) return;
-  await once(this, async () => {
+  await burnTagItem(this, ctx?.owner, tag);
+}
+
+/** Burn / unburn one tag after the system's confirmation (theme cards and the deck's story tags). */
+export async function burnTagItem(sheet, owner, tag) {
+  if (!tag || !owner?.isOwner) return;
+  const ctx = { owner };
+  await once(sheet, async () => {
     if (Number(tag.system.burn_state) === 0) {
       if (!tag.isBurnable) return;
       if (!await confirmBox(L("MistHUD.cardSheet.burnTitle", { name: tag.name }),

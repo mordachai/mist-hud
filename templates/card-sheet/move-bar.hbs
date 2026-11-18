@@ -1,4 +1,10 @@
 <nav class="mh-cs-move-bar">
+  {{!-- What the selection adds to the next roll (setting: deck cards, tags + cards, or all). --}}
+  <div class="mh-cs-totals" aria-live="polite">
+    {{#each moveBar.totals}}
+    <span class="mh-cs-total mh-cs-total-{{sign}}" data-tooltip="{{label}}"><span class="mh-cs-total-label">{{label}}</span><span class="mh-cs-total-value">{{value}}</span></span>
+    {{/each}}
+  </div>
   {{#each moveBar.groups}}
   <div class="mh-cs-move-group mh-cs-move-group-{{key}}{{#unless shown}} hidden{{/unless}}" data-label="{{label}}">
     {{#each moves}}

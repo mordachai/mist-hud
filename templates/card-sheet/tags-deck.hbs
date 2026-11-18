@@ -1,0 +1,49 @@
+{{!-- PART "deck": the tags-deck (plan § 2, § 7; phase 5).
+      At rest every card is cascaded behind the layers at the right of the
+      sheet (only the red bands show, the last card whole), with a toolbar
+      under it: the count per type, spread, detach. Clicking a card brings it
+      forward; the spread button lays them all out by type. While the deck
+      is detached (its own window), a placeholder stands in its place.
+      Takes: deck (tags-deck.js buildDeckContext), uid. --}}
+<section class="mh-cs-deck-part" data-view="{{deck.view}}">
+  {{#if deck.detached}}
+  <button type="button" class="mh-cs-deck mh-cs-deck-placeholder" data-action="attachDeck" data-tooltip="{{localize 'MistHUD.cardSheet.deck.attach'}}">
+    <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+    <span>{{localize "MistHUD.cardSheet.deck.detachedHere"}}</span>
+  </button>
+  {{else}}
+  <div class="mh-cs-deck" style="--n: {{deck.cards.length}}">
+    <div class="mh-cs-deck-stack">
+      {{#each deck.cards}}
+      {{> "modules/mist-hud/templates/card-sheet/deck-card.hbs" card=this stack=true index=@index}}
+      {{else}}
+      <button type="button" class="mh-cs-deck-empty" data-action="spreadDeck">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+        <span>{{localize "MistHUD.cardSheet.deck.empty"}}</span>
+      </button>
+      {{/each}}
+    </div>
+    <div class="mh-cs-deck-toolbar">
+      {{#each deck.counts}}
+      <span class="mh-cs-deck-count" data-tooltip="{{label}}" aria-label="{{label}}: {{count}}"><i class="fa-solid {{icon}}" aria-hidden="true"></i>{{count}}</span>
+      {{/each}}
+      <button type="button" class="mh-cs-deck-btn" data-action="spreadDeck" data-tooltip="{{localize 'MistHUD.cardSheet.deck.spread'}}" aria-label="{{localize 'MistHUD.cardSheet.deck.spread'}}" aria-pressed="{{#if deck.spread}}true{{else}}false{{/if}}"><i class="fa-solid fa-table-columns" aria-hidden="true"></i></button>
+      <button type="button" class="mh-cs-deck-btn" data-action="detachDeck" data-tooltip="{{localize 'MistHUD.cardSheet.deck.detach'}}" aria-label="{{localize 'MistHUD.cardSheet.deck.detach'}}"><i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i></button>
+    </div>
+  </div>
+
+  {{#if deck.focus}}
+  <div class="mh-cs-deck-overlay mh-cs-deck-overlay-focus">
+    <div class="mh-cs-deck-focus">
+      {{> "modules/mist-hud/templates/card-sheet/deck-card.hbs" card=deck.focus big=true work=true}}
+      <button type="button" class="mh-cs-deck-back" data-action="closeDeckView"><i class="fa-solid fa-arrow-turn-down" aria-hidden="true"></i> {{localize "MistHUD.cardSheet.deck.backToDeck"}}</button>
+    </div>
+  </div>
+  {{else if deck.spread}}
+  <div class="mh-cs-deck-overlay mh-cs-deck-overlay-spread" data-scroll-key="deck-spread">
+    <button type="button" class="mh-cs-deck-close" data-action="closeDeckView" data-tooltip="{{localize 'MistHUD.cardSheet.deck.backToDeck'}}" aria-label="{{localize 'MistHUD.cardSheet.deck.backToDeck'}}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    {{> "modules/mist-hud/templates/card-sheet/deck-columns.hbs" deck=deck}}
+  </div>
+  {{/if}}
+  {{/if}}
+</section>

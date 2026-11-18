@@ -8,6 +8,7 @@
 import { getActiveSystem } from "../constants.js";
 import { organizeMoves, getMoveAbbreviation, getMoveImageSrc } from "../move-layout.js";
 import { getMoves, rollMove } from "./system-adapter.js";
+import { selectionTotals } from "./tags-deck.js";
 
 /**
  * The card sheet has three move groups: Core, Special, SHB. Special joins
@@ -48,6 +49,8 @@ export async function prepareMoveBar(actor, groupIndex = 0) {
       moves: g.moves.map(_button),
     })),
     current,
+    // What the selection adds to a roll (the tags-deck's totals setting).
+    totals: selectionTotals(actor),
     multipleGroups: n > 1,
     nextLabel: n > 1 ? label(groups[(current + 1) % n]) : "",
   };

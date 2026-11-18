@@ -265,3 +265,82 @@
   filter: none;
   opacity: 0.9;
 }
+
+/* ── tags-deck: the City of Mist tracking card (plan § 7, phase 5) ─────────
+   trackingCard.webp is 490 x 320. Measured on the art, in % of the card:
+   red band y 15-63 (title "TRACKING CARD" x 18-312, covered by the card's
+   name), the four type icons centred at x 332 / 368.5 / 405 / 441, y 37.5,
+   32 px wide (clue, juice, tag, status); the box strip y 84-171, 16 slanted
+   cells (the tier numbers in cells 1, 2, 4, 7, 11, 16); the TAG field x
+   128-462, y 192-252; the footer band y 268-302. */
+.mh-card-sheet {
+  --mh-cs-deck-aspect: 490 / 320;
+  --mh-cs-deck-hw: 0.6531;
+  --mh-cs-deck-step: 0.2;
+  --mh-cs-deck-band-x: 3.7%;  --mh-cs-deck-band-y: 4.7%;  --mh-cs-deck-band-w: 60%;  --mh-cs-deck-band-h: 15%;
+  --mh-cs-deck-pips-y: 26.25%; --mh-cs-deck-pips-h: 27.2%;
+  --mh-cs-deck-name-x: 26.1%; --mh-cs-deck-name-y: 58.6%; --mh-cs-deck-name-w: 68.2%; --mh-cs-deck-name-h: 23.6%;
+  --mh-cs-deck-foot-x: 4.5%;  --mh-cs-deck-foot-y: 83.75%; --mh-cs-deck-foot-w: 91%; --mh-cs-deck-foot-h: 10.6%;
+  /* The band's own red, a little darker at the bottom, as printed. */
+  --mh-cs-deck-band-bg: linear-gradient(#9a5c40, #8a4c33);
+  --mh-cs-deck-ink: #2b2622;
+  /* A box is checked with a dark red marker; the printed numbers show through. */
+  --mh-cs-deck-fill: rgba(128, 28, 16, 0.7);
+}
+
+.mh-card-sheet .mh-cs-deck-face {
+  background-image: url("../../ui/card-sheet/com/trackingCard.webp");
+  border-radius: 3.2cqw;
+}
+
+/* The name on the band: the same condensed capitals as the printed title. */
+.mh-card-sheet .mh-cs-deck-band {
+  font-family: "MH Card Title", "Rift Bold", "Rift", sans-serif;
+  font-size: 7.8cqw;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 0 1.2cqw rgba(60, 20, 10, 0.45);
+  text-shadow: 0 0.2cqw 0.4cqw rgba(0, 0, 0, 0.35);
+}
+
+/* The type marker, over the printed icons. */
+.mh-card-sheet .mh-cs-deck-marker {
+  top: calc(11.72% - 5%);
+  width: 6.53%;
+  height: 10%;
+}
+
+.mh-card-sheet .mh-cs-deck-marker-clue   { left: calc(67.76% - 3.27%); }
+.mh-card-sheet .mh-cs-deck-marker-juice  { left: calc(75.2% - 3.27%); }
+.mh-card-sheet .mh-cs-deck-marker-tag    { left: calc(82.65% - 3.27%); }
+.mh-card-sheet .mh-cs-deck-marker-status { left: calc(90% - 3.27%); }
+
+/* The 16 boxes, each on its slanted cell of the strip (centre line y 127). */
+.mh-card-sheet .mh-cs-deck-pips {
+  display: block;
+  left: 0;
+  right: 0;
+}
+
+.mh-card-sheet .mh-cs-deck-pip {
+  position: absolute;
+  top: 3%;
+  bottom: 3%;
+  transform: skewX(-5.7deg);
+}
+
+.mh-card-sheet .mh-cs-deck-pip:nth-child(1)  { left: 6.29%;  width: 8.73%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(2)  { left: 15.92%; width: 7.16%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(3)  { left: 23.98%; width: 3.08%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(4)  { left: 27.96%; width: 6.76%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(5)  { left: 35.61%; width: 2.67%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(6)  { left: 39.18%; width: 3.08%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(7)  { left: 43.16%; width: 6.55%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(8)  { left: 50.61%; width: 3.08%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(9)  { left: 54.59%; width: 2.88%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(10) { left: 58.37%; width: 3.08%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(11) { left: 62.35%; width: 6.55%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(12) { left: 69.8%;  width: 3.18%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(13) { left: 73.88%; width: 2.47%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(14) { left: 77.24%; width: 2.67%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(15) { left: 80.82%; width: 2.88%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(16) { left: 84.59%; width: 8.84%; }

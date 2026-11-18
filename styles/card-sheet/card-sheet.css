@@ -262,6 +262,21 @@
   --mh-cs-sel-mark-pos: #1f6b2a;
   --mh-cs-sel-mark-neg: #9b2018;
   --mh-cs-sel-hover: rgba(0, 0, 0, 0.08);
+  /* tags-deck (phase 5): the room it takes at the right of the layers, in
+     card widths, and its tracking cards. The per-system file sets the
+     card art's ratio and where its band, boxes, name line and footer sit
+     (in % of the card). */
+  --mh-cs-deck-k: 0.96;
+  --mh-cs-deck-aspect: 490 / 320;
+  --mh-cs-deck-hw: 0.6531;        /* height / width of a tracking card */
+  --mh-cs-deck-step: 0.205;       /* how much of a card shows in the stack, in card heights */
+  --mh-cs-deck-band-x: 4%;   --mh-cs-deck-band-y: 4.5%;  --mh-cs-deck-band-w: 60%;  --mh-cs-deck-band-h: 15%;
+  --mh-cs-deck-pips-y: 26%;  --mh-cs-deck-pips-h: 27%;
+  --mh-cs-deck-name-x: 26%;  --mh-cs-deck-name-y: 60%;  --mh-cs-deck-name-w: 68%;  --mh-cs-deck-name-h: 19%;
+  --mh-cs-deck-foot-x: 4.5%; --mh-cs-deck-foot-y: 83.5%; --mh-cs-deck-foot-w: 91%; --mh-cs-deck-foot-h: 11%;
+  --mh-cs-deck-band-bg: #7a3b26;
+  --mh-cs-deck-ink: #2a2a2a;
+  --mh-cs-deck-fill: rgba(120, 30, 18, 0.72);
 }
 
 /* ── Layers (plan § 7) ───────────────────────────────────────────────────────
@@ -277,16 +292,26 @@
    they are only used on the layers and on the cards themselves (inside a
    card, cqw is the card). */
 
-.mh-card-sheet .mh-cs-layer {
+/* The stage: the layers and the tags-deck at their right are one group,
+   centred in the window content. The deck takes --mh-cs-deck-k card widths
+   (its tracking cards are one card wide and tuck a little under the last
+   card). These vars are only used on the layers, the deck and its overlay
+   (all children of the window content, the size container). */
+.mh-card-sheet :is(.mh-cs-layer, .mh-cs-deck, .mh-cs-deck-overlay) {
   --mh-cs-stage-top: calc(var(--mh-cs-band-row) + 8px);
   --mh-cs-card-w: min(
-    calc((100cqw - 3 * var(--mh-cs-gap)) / 4),
+    calc((100cqw - 3 * var(--mh-cs-gap)) / (4 + var(--mh-cs-deck-k))),
     calc((100cqh - var(--mh-cs-stage-top)) / (1 / (var(--mh-cs-aspect)) + var(--mh-cs-peek))));
   --mh-cs-peek-h: calc(var(--mh-cs-card-w) * var(--mh-cs-peek));
+  --mh-cs-row-w: calc(4 * var(--mh-cs-card-w) + 3 * var(--mh-cs-gap));
+  --mh-cs-stage-left: calc(6px + (100cqw - var(--mh-cs-row-w) - var(--mh-cs-deck-k) * var(--mh-cs-card-w)) / 2);
+}
+
+.mh-card-sheet .mh-cs-layer {
   position: absolute;
   top: var(--mh-cs-stage-top);
-  left: 6px;
-  right: 6px;
+  left: var(--mh-cs-stage-left);
+  width: var(--mh-cs-row-w);
   height: calc(var(--mh-cs-card-w) / (var(--mh-cs-aspect)));
   z-index: 1;
   pointer-events: none;
@@ -323,7 +348,7 @@
    (--mh-cs-n = number of cards); a hovered or focused card comes on top. */
 .mh-card-sheet .mh-cs-card + .mh-cs-card {
   margin-left: min(var(--mh-cs-gap),
-    calc((100cqw - var(--mh-cs-n, 4) * var(--mh-cs-card-w)) / max(var(--mh-cs-n, 4) - 1, 1)));
+    calc((var(--mh-cs-row-w) - var(--mh-cs-n, 4) * var(--mh-cs-card-w)) / max(var(--mh-cs-n, 4) - 1, 1)));
 }
 
 .mh-card-sheet .mh-cs-card:hover,
@@ -1439,4 +1464,770 @@
   flex-wrap: wrap;
   height: auto;
   overflow: visible;
+}
+
+/* ── Roll modifier totals, next to the move buttons (phase 5) ──────────────
+   What the selection adds to the next roll (setting: the deck cards, tags
+   + cards, or all together). Text only: the band stays a drag handle. */
+
+.mh-card-sheet .mh-cs-totals {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 4px;
+  margin-right: 6px;
+  pointer-events: none;
+}
+
+.mh-card-sheet .mh-cs-total {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  color: whitesmoke;
+  font-family: var(--mh-cs-label-font);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mh-card-sheet .mh-cs-total-value {
+  font-size: 19px;
+  font-weight: bold;
+  letter-spacing: 0;
+}
+
+.mh-card-sheet .mh-cs-total-positive .mh-cs-total-value { color: #8fe39d; }
+.mh-card-sheet .mh-cs-total-negative .mh-cs-total-value { color: #ff8a7a; }
+.mh-card-sheet .mh-cs-total-zero { opacity: 0.6; }
+
+/* ── tags-deck (plan § 7, phase 5) ───────────────────────────────────────────
+   The part's root takes no room (display: contents): the deck, its
+   toolbar and its overlays are placed against the window content, like
+   the layers. At rest the deck is a stack of tracking cards, one card wide,
+   at the right of the layers and behind them; every card shows its red band
+   (with its name), the last one whole. --mh-cs-n = number of cards. */
+
+.mh-card-sheet .mh-cs-deck-part {
+  display: contents;
+}
+
+.mh-card-sheet .mh-cs-deck {
+  position: absolute;
+  z-index: 0;
+  top: var(--mh-cs-stage-top);
+  left: calc(var(--mh-cs-stage-left) + var(--mh-cs-row-w) - (1 - var(--mh-cs-deck-k)) * var(--mh-cs-card-w));
+  width: var(--mh-cs-card-w);
+  height: calc(var(--mh-cs-card-w) / (var(--mh-cs-aspect)) + var(--mh-cs-peek-h));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.mh-card-sheet .mh-cs-deck-stack {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  container-type: size;
+  container-name: mh-cs-deck-stack;
+}
+
+/* In the stack: card i sits i steps down, in front of the ones before it.
+   A step shows the card's band; a long deck closes up to fit. */
+.mh-card-sheet .mh-cs-deck-stack > .mh-cs-deck-card {
+  --mh-cs-deck-card-h: calc(100cqw * var(--mh-cs-deck-hw));
+  --mh-cs-deck-stack-step: min(
+    calc(var(--mh-cs-deck-card-h) * var(--mh-cs-deck-step)),
+    calc((100cqh - var(--mh-cs-deck-card-h)) / max(var(--mh-cs-n, 1) - 1, 1)));
+  position: absolute;
+  left: 0;
+  top: calc(var(--i, 0) * var(--mh-cs-deck-stack-step));
+  z-index: calc(var(--i, 0) + 1);
+  width: 100%;
+}
+
+.mh-card-sheet .mh-cs-deck-stack > .mh-cs-deck-card:is(:hover, :focus-within) .mh-cs-deck-face {
+  filter: brightness(1.06);
+}
+
+/* The toolbar under the stack: the count per type, spread, detach. */
+.mh-card-sheet .mh-cs-deck-toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.45);
+  color: whitesmoke;
+  font-family: var(--mh-cs-label-font);
+  font-size: 13px;
+  pointer-events: auto;
+}
+
+.mh-card-sheet .mh-cs-deck-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  opacity: 0.85;
+}
+
+.mh-card-sheet .mh-cs-deck-count i {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.mh-card-sheet .mh-cs-deck-count + .mh-cs-deck-btn {
+  margin-left: auto;
+}
+
+/* ── Deck buttons: no core / system button look ──────────────────────────── */
+
+.mh-card-sheet :is(.mh-cs-deck-hit, .mh-cs-deck-name, .mh-cs-deck-tool, .mh-cs-deck-btn,
+  .mh-cs-deck-create, .mh-cs-deck-back, .mh-cs-deck-close, .mh-cs-deck-placeholder, .mh-cs-deck-empty,
+  .mh-cs-deck-band-name, .mh-cs-deck-flag, .mh-cs-deck-input) {
+  flex: 0 0 auto;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.mh-card-sheet :is(.mh-cs-deck-hit, .mh-cs-deck-name, .mh-cs-deck-tool, .mh-cs-deck-btn,
+  .mh-cs-deck-create, .mh-cs-deck-back, .mh-cs-deck-close, .mh-cs-deck-placeholder, .mh-cs-deck-empty,
+  .mh-cs-deck-band-name, .mh-cs-deck-flag, .mh-cs-deck-pip):focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 1px;
+}
+
+.mh-card-sheet .mh-cs-deck-btn,
+.mh-card-sheet .mh-cs-deck-create {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.mh-card-sheet .mh-cs-deck-btn:hover,
+.mh-card-sheet .mh-cs-deck-create:hover,
+.mh-card-sheet .mh-cs-deck-btn[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.2);
+  opacity: 1;
+}
+
+/* ── A tracking card ─────────────────────────────────────────────────────────
+   The art (per-system CSS) with its parts drawn over it at measured places,
+   in % of the card; text in cqw of the card (an inline-size container). */
+
+.mh-card-sheet .mh-cs-deck-card {
+  position: relative;
+  aspect-ratio: var(--mh-cs-deck-aspect);
+  container-type: inline-size;
+  container-name: mh-cs-deck-card;
+  pointer-events: auto;
+  transition: translate 0.2s ease;
+}
+
+.mh-card-sheet .mh-cs-deck-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 3.5cqw;
+  background: #ddd6c8 center / 100% 100% no-repeat;
+  box-shadow: 0 0.6cqw 2.4cqw rgba(0, 0, 0, 0.55);
+  color: var(--mh-cs-deck-ink);
+}
+
+/* The name on the red band, over the printed title; the tier / amount and
+   the selection mark at its end. */
+.mh-card-sheet .mh-cs-deck-band {
+  position: absolute;
+  left: var(--mh-cs-deck-band-x);
+  top: var(--mh-cs-deck-band-y);
+  width: var(--mh-cs-deck-band-w);
+  height: var(--mh-cs-deck-band-h);
+  display: flex;
+  align-items: center;
+  gap: 1.6cqw;
+  padding: 0 2cqw;
+  border-radius: 1cqw;
+  background: var(--mh-cs-deck-band-bg);
+  color: #fff;
+  font-family: var(--mh-cs-label-font);
+  font-size: 7.4cqw;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.mh-card-sheet .mh-cs-deck-band-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mh-card-sheet .mh-cs-deck-badge {
+  flex: 0 0 auto;
+  font-size: 8.6cqw;
+  opacity: 0.95;
+}
+
+.mh-card-sheet .mh-cs-deck-mark {
+  flex: 0 0 auto;
+  padding: 0.4cqw 1.4cqw;
+  border-radius: 1.6cqw;
+  font-size: 6cqw;
+  letter-spacing: 0;
+}
+
+/* The type marker: the card's own icon lit, the three others dimmed. */
+.mh-card-sheet .mh-cs-deck-markers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mh-card-sheet .mh-cs-deck-marker {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(60, 22, 12, 0.6);
+}
+
+.mh-card-sheet .mh-cs-deck-marker.on {
+  background: none;
+  box-shadow: 0 0 0 0.6cqw #fff, 0 0 2.4cqw 0.6cqw rgba(255, 220, 150, 0.9);
+}
+
+/* The 16 boxes: shared fallback is a plain row; the per-system file puts
+   each one on its cell of the art. Live boxes (not in the stack) are
+   buttons: a click sets the status (or the amount) up to that box. */
+.mh-card-sheet .mh-cs-deck-pips {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: var(--mh-cs-deck-pips-y);
+  height: var(--mh-cs-deck-pips-h);
+  display: flex;
+  gap: 0.6cqw;
+  pointer-events: none;
+}
+
+.mh-card-sheet .mh-cs-deck-pip {
+  flex: 1 1 0;
+}
+
+.mh-card-sheet .mh-cs-deck-pip.filled {
+  background: var(--mh-cs-deck-fill);
+  mix-blend-mode: multiply;
+}
+
+.mh-card-sheet .mh-cs-deck-pips-live {
+  pointer-events: auto;
+}
+
+.mh-card-sheet button.mh-cs-deck-pip {
+  min-width: 0;
+  min-height: 0;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.mh-card-sheet button.mh-cs-deck-pip.filled {
+  background-color: var(--mh-cs-deck-fill);
+}
+
+.mh-card-sheet button.mh-cs-deck-pip:hover {
+  background-color: rgba(128, 28, 16, 0.25);
+  mix-blend-mode: multiply;
+}
+
+.mh-card-sheet button.mh-cs-deck-pip.filled:hover {
+  background-color: rgba(128, 28, 16, 0.5);
+}
+
+/* The TAG line: the name (keeps the tag text size) and, under it, a row of
+   small fields (temporary / permanent / partial, a clue's source and
+   method) or their values as notes. */
+.mh-card-sheet .mh-cs-deck-name-line {
+  position: absolute;
+  left: var(--mh-cs-deck-name-x);
+  top: var(--mh-cs-deck-name-y);
+  width: var(--mh-cs-deck-name-w);
+  height: var(--mh-cs-deck-name-h);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.6cqw;
+  min-width: 0;
+  font-family: var(--mh-cs-tag-font);
+  font-size: var(--mh-cs-tag-size);
+  line-height: 1.15;
+}
+
+.mh-card-sheet .mh-cs-deck-name-main {
+  display: flex;
+  align-items: center;
+  gap: 1.2cqw;
+  min-width: 0;
+}
+
+.mh-card-sheet .mh-cs-deck-target-label {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.mh-card-sheet .mh-cs-deck-fields {
+  display: flex;
+  align-items: center;
+  gap: 1.2cqw;
+  min-width: 0;
+  font-size: 4.4cqw;
+  line-height: 1.2;
+}
+
+.mh-card-sheet .mh-cs-deck-flag {
+  flex: 0 0 auto;
+  padding: 0.2cqw 1.2cqw;
+  border-radius: 2cqw;
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.2cqw;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.45;
+  box-shadow: inset 0 0 0 0.3cqw currentColor;
+}
+
+.mh-card-sheet .mh-cs-deck-flag.on {
+  opacity: 1;
+  background: rgba(40, 30, 25, 0.85);
+  color: #fff;
+  box-shadow: none;
+}
+
+.mh-card-sheet .mh-cs-deck-flag:hover {
+  opacity: 0.85;
+}
+
+/* Fields on the card: written on the line, no box. */
+.mh-card-sheet .mh-cs-deck-input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  padding: 0 1cqw;
+  border-bottom: 0.3cqw dotted rgba(0, 0, 0, 0.35);
+  border-radius: 0;
+  outline: none;
+  cursor: text;
+}
+
+.mh-card-sheet .mh-cs-deck-input:hover,
+.mh-card-sheet .mh-cs-deck-input:focus {
+  background: rgba(255, 255, 255, 0.55);
+  border-bottom-color: rgba(0, 0, 0, 0.6);
+}
+
+.mh-card-sheet .mh-cs-deck-input::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+  font-style: italic;
+}
+
+.mh-card-sheet select.mh-cs-deck-input {
+  cursor: pointer;
+}
+
+.mh-card-sheet .mh-cs-deck-small {
+  font-size: 4.4cqw;
+}
+
+/* A new card: its name field stands out until it is named. */
+.mh-card-sheet .mh-cs-deck-new .mh-cs-deck-name-main .mh-cs-deck-input {
+  background: rgba(255, 245, 200, 0.75);
+}
+
+.mh-card-sheet .mh-cs-deck-name {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 1cqw;
+  border-radius: 1cqw;
+}
+
+.mh-card-sheet button.mh-cs-deck-name {
+  display: block;
+  font-size: inherit;
+  text-align: left;
+}
+
+.mh-card-sheet button.mh-cs-deck-name:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.mh-card-sheet .mh-cs-deck-note {
+  flex: 0 0 auto;
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.6cqw;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.mh-card-sheet .mh-cs-deck-card.burned .mh-cs-deck-name {
+  text-decoration: line-through;
+  text-decoration-thickness: 0.5cqw;
+  opacity: 0.6;
+}
+
+/* The controls: a strip over the footer band, on hover or focus (always
+   on the card brought forward). */
+.mh-card-sheet .mh-cs-deck-tools {
+  position: absolute;
+  left: var(--mh-cs-deck-foot-x);
+  top: var(--mh-cs-deck-foot-y);
+  width: var(--mh-cs-deck-foot-w);
+  height: var(--mh-cs-deck-foot-h);
+  display: flex;
+  align-items: center;
+  gap: 1cqw;
+  padding: 0 1.4cqw;
+  border-radius: 1.4cqw;
+  background: rgba(38, 18, 10, 0.88);
+  color: #f3eadf;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.mh-card-sheet .mh-cs-deck-card:is(:hover, :focus-within) .mh-cs-deck-tools,
+.mh-card-sheet .mh-cs-deck-big .mh-cs-deck-tools {
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-deck-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 8cqw;
+  height: 8cqw;
+  border-radius: 50%;
+  font-size: 5cqw;
+  opacity: 0.85;
+}
+
+.mh-card-sheet .mh-cs-deck-tool:hover,
+.mh-card-sheet .mh-cs-deck-tool:focus-visible {
+  background: rgba(255, 255, 255, 0.18);
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-deck-tool.mh-cs-delete {
+  margin-left: auto;
+}
+
+.mh-card-sheet .mh-cs-deck-tool.mh-cs-delete:hover {
+  color: #ff8a7a;
+}
+
+/* "Sure?": the first click arms the button, the second one goes through. */
+.mh-card-sheet .mh-cs-deck-tool.armed {
+  width: auto;
+  gap: 1cqw;
+  padding: 0 2cqw;
+  border-radius: 4cqw;
+  background: #b23526;
+  color: #fff;
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-deck-sure {
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.4cqw;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* The band name as a button: selects (a card worked on) or brings the card forward (spread). */
+.mh-card-sheet button.mh-cs-deck-band-name {
+  display: block;
+  text-align: left;
+  border-radius: 0.8cqw;
+}
+
+.mh-card-sheet button.mh-cs-deck-band-name:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.6cqw;
+}
+
+/* The stack's cards are one button each: bring the card forward. */
+.mh-card-sheet .mh-cs-deck-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  border-radius: 3.5cqw;
+}
+
+/* ── Selected cards: lifted and tinted (green +, red −) ─────────────────── */
+
+/* Lifted in the stack (in a list it would cover the card above). */
+.mh-card-sheet .mh-cs-deck-stack > .mh-cs-deck-card.mh-cs-selected {
+  translate: 0 -2.4cqw;
+}
+
+.mh-card-sheet .mh-cs-deck-card.mh-cs-selected .mh-cs-deck-face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.mh-card-sheet .mh-cs-deck-card.mh-cs-selected-positive .mh-cs-deck-face {
+  box-shadow: 0 0 0 0.8cqw #3fae5a, 0 0.6cqw 3.4cqw rgba(63, 174, 90, 0.85);
+}
+
+.mh-card-sheet .mh-cs-deck-card.mh-cs-selected-positive .mh-cs-deck-face::after {
+  background: rgba(70, 175, 95, 0.3);
+}
+
+.mh-card-sheet .mh-cs-deck-card.mh-cs-selected-negative .mh-cs-deck-face {
+  box-shadow: 0 0 0 0.8cqw #c8402f, 0 0.6cqw 3.4cqw rgba(200, 64, 47, 0.85);
+}
+
+.mh-card-sheet .mh-cs-deck-card.mh-cs-selected-negative .mh-cs-deck-face::after {
+  background: rgba(205, 70, 50, 0.3);
+}
+
+.mh-card-sheet .mh-cs-selected-positive .mh-cs-deck-mark { background: #2f8f47; }
+.mh-card-sheet .mh-cs-selected-negative .mh-cs-deck-mark { background: #b23526; }
+
+/* ── Empty deck, detached placeholder ────────────────────────────────────── */
+
+.mh-card-sheet :is(.mh-cs-deck-empty, .mh-cs-deck-placeholder) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px dashed rgba(255, 255, 255, 0.45);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 255, 255, 0.75);
+  font-family: var(--mh-cs-label-font);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-transform: uppercase;
+  pointer-events: auto;
+}
+
+.mh-card-sheet .mh-cs-deck-empty {
+  position: absolute;
+  inset: 0 0 auto;
+  width: 100%;
+  aspect-ratio: var(--mh-cs-deck-aspect);
+}
+
+.mh-card-sheet .mh-cs-deck.mh-cs-deck-placeholder {
+  height: calc(var(--mh-cs-card-w) * var(--mh-cs-deck-hw));
+  padding: 0 12px;
+}
+
+.mh-card-sheet :is(.mh-cs-deck-empty, .mh-cs-deck-placeholder):hover {
+  border-color: rgba(255, 255, 255, 0.8);
+  color: #fff;
+}
+
+/* ── In front of the sheet: a card brought forward, or the spread deck ───── */
+
+.mh-card-sheet .mh-cs-deck-overlay {
+  position: absolute;
+  z-index: 10;
+  top: var(--mh-cs-stage-top);
+  left: 6px;
+  right: 6px;
+  bottom: 12px;
+  border-radius: 14px;
+  background: rgba(8, 6, 4, 0.72);
+  pointer-events: auto;
+}
+
+.mh-card-sheet .mh-cs-deck-focus {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.mh-card-sheet .mh-cs-deck-focus > .mh-cs-deck-card {
+  width: min(48cqw, calc((100cqh - var(--mh-cs-stage-top) - 90px) / var(--mh-cs-deck-hw)));
+}
+
+.mh-card-sheet .mh-cs-deck-back,
+.mh-card-sheet .mh-cs-deck-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.55);
+  color: whitesmoke;
+  font-family: var(--mh-cs-label-font);
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.mh-card-sheet .mh-cs-deck-back:hover,
+.mh-card-sheet .mh-cs-deck-close:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.mh-card-sheet .mh-cs-deck-overlay-spread {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 12px;
+}
+
+.mh-card-sheet .mh-cs-deck-overlay-spread > .mh-cs-deck-close {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  float: right;
+  width: 30px;
+  height: 30px;
+  margin: 0 0 6px 10px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+/* ── Spread columns (the sheet's spread view and the detached window) ───── */
+
+.mh-card-sheet .mh-cs-deck-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.mh-card-sheet .mh-cs-deck-column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mh-card-sheet .mh-cs-deck-column-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 4px 6px 4px 10px;
+  border: none;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.55);
+  color: whitesmoke;
+  font-family: var(--mh-cs-label-font);
+  font-size: 14px;
+  font-weight: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mh-card-sheet .mh-cs-deck-column-head > i {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.mh-card-sheet .mh-cs-deck-column-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mh-card-sheet .mh-cs-deck-column-count {
+  opacity: 0.7;
+}
+
+.mh-card-sheet .mh-cs-deck-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mh-card-sheet .mh-cs-deck-list > .mh-cs-deck-card {
+  width: 100%;
+}
+
+.mh-card-sheet .mh-cs-deck-none {
+  margin: 0;
+  padding: 6px 10px;
+  color: rgba(255, 255, 255, 0.65);
+  font-family: var(--mh-cs-tag-font);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* ── The detached deck window: frameless like the sheet ──────────────────── */
+
+.application.mh-card-sheet.mh-cs-deck-window {
+  --mh-cs-band-row: 34px;
+}
+
+.application.mh-card-sheet.mh-cs-deck-window > .window-header .window-title {
+  visibility: visible;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--mh-cs-label-font);
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.application.mh-card-sheet.mh-cs-deck-window > .window-content {
+  margin-top: 6px;
+  padding: 4px 6px 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  container-type: inline-size;
+  pointer-events: auto;
 }

@@ -13,8 +13,10 @@
 // edit-actions.js. The window carries data-mode="play" | "edit". Play mode
 // (phase 4): clicking a tag name selects it in the system's selection
 // (play-actions.js), and a selection change re-renders both layers.
+// The tags-deck (phase 5, tags-deck.js): the "deck" part, a stack of
+// tracking cards at the right of the layers, which can be detached into its
+// own window.
 
-import { MODULE_ID, SETTINGS } from "../constants.js";
 import { buildLayer1Context, buildLayer2Context, isEditMode } from "./card-sheet-context.js";
 import { watchFit } from "./card-fit.js";
 import { prepareMoveBar, executeMove } from "./move-bar.js";
@@ -23,6 +25,11 @@ import {
 } from "./system-adapter.js";
 import { EDIT_ACTIONS, changeThemeField, changeActorField } from "./edit-actions.js";
 import { PLAY_ACTIONS } from "./play-actions.js";
+import { readUiState, writeUiState, cleanFlips, deckState } from "./ui-state.js";
+import {
+  DECK_TEMPLATES, DECK_ACTIONS, buildDeckContext, bindDeckListeners, deckRendered, focusDeckView,
+  openDeckWindow, deckWindowFor, refreshAllDeckWindows,
+} from "./tags-deck.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -40,12 +47,18 @@ export const CARD_SHEET_TEMPLATES = [
   `${TEMPLATE_DIR}/peek-tab.hbs`,
   `${TEMPLATE_DIR}/improvement.hbs`,
   `${TEMPLATE_DIR}/tag-name.hbs`,
+  DECK_TEMPLATES.part,
+  DECK_TEMPLATES.columns,
+  DECK_TEMPLATES.card,
 ];
 
 const LAYER_PARTS = ["layer1", "layer2"];
 
-/** Everything inside a card that scrolls; its position is kept across re-renders. */
-const SCROLLERS = ".mh-cs-scroll, .mh-cs-weakness-tags, .mh-cs-motivation-text, .mh-cs-title-input, .mh-cs-short-desc, .mh-cs-bu-improvements";
+/** What a selection change shows in: both layers, the deck, and the totals by the move bar. */
+const SELECTION_PARTS = ["moves", "layer1", "layer2", "deck"];
+
+/** Everything inside a card that scrolls (and the deck's spread view); its position is kept across re-renders. */
+const SCROLLERS = ".mh-cs-scroll, .mh-cs-weakness-tags, .mh-cs-motivation-text, .mh-cs-title-input, .mh-cs-short-desc, .mh-cs-bu-improvements, [data-scroll-key]";
 
 /** Actor fields shown on layer 2 only (the character card): a change re-renders layer 2 alone. */
 const LAYER2_ACTOR_FIELDS = new Set([
@@ -56,42 +69,7 @@ const LAYER2_ACTOR_FIELDS = new Set([
 /** Theme fields that change only that theme's card (not the layer order or art). */
 const THEME_TEXT_FIELDS = new Set(["name", "system.mystery"]);
 
-// ── Sheet UI state (client setting, per actor uuid; plan § 6.2) ──────────────
-// { [actorUuid]: { flipped: { [cardId]: true }, front: 1 | 2 } }
-
-function readUiState(actor) {
-  try { return game.settings.get(MODULE_ID, SETTINGS.CARD_SHEET_STATE)?.[actor.uuid] ?? {}; }
-  catch { return {}; }
-}
-
-/**
- * Change this actor's sheet state. `flipped: { [cardId]: bool }` sets or
- * clears a card's flip (cleared keys are deleted by hand: in v14
- * mergeObject leaves a ForcedDeletion object for "-=key", which reads as
- * truthy); `front` sets the front layer.
- */
-async function writeUiState(actor, { flipped, front } = {}) {
-  let all;
-  try { all = foundry.utils.deepClone(game.settings.get(MODULE_ID, SETTINGS.CARD_SHEET_STATE) ?? {}); }
-  catch { return; }
-  const state = all[actor.uuid] ?? {};
-  if (flipped) {
-    const flips = cleanFlips(state.flipped);
-    for (const [cardId, on] of Object.entries(flipped)) {
-      if (on) flips[cardId] = true;
-      else delete flips[cardId];
-    }
-    state.flipped = flips;
-  }
-  if (front !== undefined) state.front = front;
-  all[actor.uuid] = state;
-  await game.settings.set(MODULE_ID, SETTINGS.CARD_SHEET_STATE, all);
-}
-
-/** Only the cards really flipped (drops leftovers of the old "-=key" writes). */
-function cleanFlips(flips) {
-  return Object.fromEntries(Object.entries(flips ?? {}).filter(([, on]) => on === true));
-}
+// The sheet's own UI state (flips, front layer, the deck) is in ui-state.js.
 
 export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   static DEFAULT_OPTIONS = {
@@ -102,7 +80,9 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     // = 41px) and 6/12px room for the shadows. The height sets the card size
     // (content height − 64 = card width × (1203/473 + 0.2)). A smaller window
     // scales the cards down (container queries on the window content).
-    position: { width: 880, height: 637 },
+    // Phase 5: the tags-deck takes 0.96 of a card width at the right of the
+    // layers (12 + 3 × 12 + 4.96 × 204 ≈ 1060).
+    position: { width: 1062, height: 637 },
     window: { resizable: true },
     // Every write goes through its own change handler or action; a form
     // submit (Enter in an input) writes nothing.
@@ -116,6 +96,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       setActiveExtra:  MistCardSheet.#onSetActiveExtra,
       ...EDIT_ACTIONS,
       ...PLAY_ACTIONS,
+      ...DECK_ACTIONS,
     },
   };
 
@@ -125,7 +106,26 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     moves:  { template: CARD_SHEET_TEMPLATES[0] },
     layer1: { template: CARD_SHEET_TEMPLATES[1] },
     layer2: { template: CARD_SHEET_TEMPLATES[2] },
+    deck:   { template: DECK_TEMPLATES.part },
   };
+
+  /** For tags-deck.js, which can't import this class (it is imported by it). */
+  get isMistCardSheet() {
+    return true;
+  }
+
+  /** The deck's view on this sheet: "stack", "focus" (one card forward) or "spread". */
+  deckView = "stack";
+  /** The card brought forward ("focus"). */
+  deckFocus = null;
+  /** A deck card just created (blank name, focused). */
+  deckNew = null;
+  /** A deck button asking "sure?": { key, until }. */
+  deckArmed = null;
+
+  renderDeck() {
+    return this.render({ parts: ["deck"] });
+  }
 
   // ── What the system expects of `actor.sheet` ────────────────────────────────
   // The system treats `actor.sheet` as its own V1 sheet in two places:
@@ -201,7 +201,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       const keys = changedKeys(renderData);
       if (!keys.length) return null;
       if (keys.every(k => LAYER2_ACTOR_FIELDS.has(k))) return ["layer2"];
-      if (keys.every(k => k === "system.locked")) return LAYER_PARTS;
+      if (keys.every(k => k === "system.locked")) return [...LAYER_PARTS, "deck"];
       return null;
     }
     if (!match || match[1].toLowerCase() === "delete") return null;
@@ -220,8 +220,15 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       } else if (item.type === "tag" || item.type === "improvement") {
         const themeId = item.system?.theme_id;
         parts.add(themeId && main.has(themeId) ? "layer1" : "layer2");
+        // Story tags are on the character card and in the deck.
+        if (item.type === "tag" && item.system?.subtype === "story") parts.add("deck");
+      } else if (item.type === "status" || item.type === "clue") {
+        parts.add("deck");
+      } else if (item.type === "juice") {
+        // Help and Hurt are also summed per crewmate on the character card.
+        parts.add("deck");
+        parts.add("layer2");
       } else {
-        // Statuses, juice, clues…: not on the cards yet (the deck is phase 5).
         return null;
       }
     }
@@ -279,6 +286,8 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
    */
   _onChangeForm(formConfig, event) {
     const el = event.target;
+    // The deck's card fields are saved by tags-deck.js (its own listener).
+    if (el?.dataset?.deckField) return;
     switch (el?.dataset?.edit) {
       case "themeName":
       case "themeField":
@@ -347,6 +356,19 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         context.back = this.frontLayer !== 2;
         break;
       }
+      case "deck":
+        context.deck = buildDeckContext(this.actor, {
+          view:    this.deckView,
+          focusId: this.deckFocus,
+          newId:   this.deckNew,
+          armed:   this.deckArmed?.until > Date.now() ? this.deckArmed.key : null,
+        });
+        // A card brought forward that is gone (deleted, spent): back to the stack.
+        if (context.deck.view === "stack") {
+          this.deckView = "stack";
+          this.deckFocus = null;
+        }
+        break;
     }
     return context;
   }
@@ -354,7 +376,12 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   async _onRender(context, options) {
     await super._onRender(context, options);
     this.element.dataset.front = String(this.frontLayer);
+    this.element.dataset.deck = this.deckView;
     this.#syncLockControl();
+    if (!options.parts || options.parts.includes("deck")) {
+      deckRendered(this);
+      focusDeckView(this);
+    }
     for (const part of LAYER_PARTS) {
       if (options.parts && !options.parts.includes(part)) continue;
       this.#unwatchFit[part]?.();
@@ -366,6 +393,11 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
    *  click goes through the flipCard action). */
   _onFirstRender(context, options) {
     super._onFirstRender(context, options);
+    // The deck: Esc / a click beside the cards closes its focus or spread
+    // view; system draggables dropped on the sheet go to the actor.
+    bindDeckListeners(this);
+    // A deck left detached opens its window again with the sheet.
+    if (deckState(this.actor).detached) openDeckWindow(this.actor);
     this.element.addEventListener("keydown", event => {
       if (event.key !== "Enter" && event.key !== " ") return;
       const band = event.target.closest?.('[data-action="flipCard"]');
@@ -410,6 +442,15 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   _onClose(options) {
     for (const unwatch of Object.values(this.#unwatchFit)) unwatch?.();
     this.#unwatchFit = {};
+    // The detached deck closes with its sheet, and stays detached for next time.
+    void deckWindowFor(this.actor)?.close({ keepState: true });
+    this.deckView = "stack";
+    this.deckFocus = null;
+    this.deckArmed = null;
+    // A new deck card never named goes away, as if its name was left empty.
+    const unnamed = this.deckNew && this.actor.items.get(this.deckNew);
+    this.deckNew = null;
+    if (unnamed?.isOwner) void unnamed.delete();
     super._onClose(options);
   }
 
@@ -454,7 +495,8 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     } finally {
       this.#rolling = false;
       // The system clears its selection without a hook; show the empty selection.
-      if (this.rendered) this.render({ parts: LAYER_PARTS });
+      if (this.rendered) this.render({ parts: SELECTION_PARTS });
+      refreshAllDeckWindows();
     }
   }
 
@@ -542,6 +584,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
 /** Where a scrolling element sits: its card, its face and its place among the face's scrollers. */
 function scrollKey(el) {
+  if (el.dataset.scrollKey) return el.dataset.scrollKey;
   const card = el.closest("[data-card-id]");
   const face = el.closest(".mh-cs-face");
   if (!card || !face) return null;
@@ -557,9 +600,17 @@ function scrollKey(el) {
  */
 export const refreshCardSheets = foundry.utils.debounce(() => {
   for (const app of foundry.applications.instances.values()) {
-    if (app instanceof MistCardSheet && app.rendered) app.render({ parts: LAYER_PARTS });
+    if (app instanceof MistCardSheet && app.rendered) app.render({ parts: SELECTION_PARTS });
   }
+  refreshAllDeckWindows();
 }, 20);
+
+/** The modifier-total setting changed: re-render the move bar of open card sheets. */
+export function refreshCardSheetTotals() {
+  for (const app of foundry.applications.instances.values()) {
+    if (app instanceof MistCardSheet && app.rendered) app.render({ parts: ["moves"] });
+  }
+}
 
 /**
  * Re-render layer 2 of open card sheets that show a theme of this actor (a

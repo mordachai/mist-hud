@@ -282,6 +282,20 @@ Hooks.once("init", () => {
     scope: "client", config: false, type: Object, default: {},
   });
 
+  // Card sheet: the roll modifier total shown by the move buttons (tags-deck)
+  game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_MOD_TOTAL, {
+    name: K("cardSheetModifierTotal.name"),
+    hint: K("cardSheetModifierTotal.hint"),
+    scope: "client", config: true, type: String,
+    choices: {
+      cards: K("cardSheetModifierTotal.cards"),
+      split: K("cardSheetModifierTotal.split"),
+      all:   K("cardSheetModifierTotal.all"),
+    },
+    default: "cards",
+    onChange: () => Hooks.callAll("mistHudCardSheetTotals"),
+  });
+
   // Status collection storage
   game.settings.register(MODULE_ID, SETTINGS.IMPORTED_STATUS_COLLECTION, {
     name: K("importedStatusCollection.name"),
