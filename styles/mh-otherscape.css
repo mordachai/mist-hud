@@ -801,9 +801,17 @@ color: var(--mythosOS-verylight-color);
 }
 
 /* Essence burned on the sheet: struck-through name, burn mark, faded body. */
+.mh-essence-burn.burn-icon {
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.mh-essence-burn.burn-icon.unburned {
+  background-image: url("../ui/icons/burn_neutral_empty.svg");
+}
+
 .mh-essence-burn.burn-icon.burned {
   background-image: url("../ui/icons/burn_neutral_burned.svg");
-  margin-left: 8px;
 }
 
 .mh-essence-burned .mh-essence-title.mh-essence-title:not(.mh-theme-name) {

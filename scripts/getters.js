@@ -481,6 +481,23 @@ function _groupImprovements(items, themeMap, grouped = {}) {
   return grouped;
 }
 
+/**
+ * Legend quintessences: improvements bought with the character's own
+ * fulfillment, so not tied to a theme (the system's `isBuildUpImprovement`).
+ */
+export function getQuintessences(actor) {
+  if (!actor) return [];
+  return actor.items.contents
+    .filter(i => i.type === "improvement" && !i.system.theme_id)
+    .map(item => ({
+      id:          item.id,
+      name:        item.displayedName ?? _loc(item.name),
+      description: _loc(item.system.description) || "",
+      choiceItem:  _loc(item.system.choice_item) || null,
+      uses:        item.system.uses || { max: 0, current: 0, expended: false },
+    }));
+}
+
 // ── Juice & Clues (City of Mist) ─────────────────────────────────────────────
 
 export function getJuiceAndClues(actor) {

@@ -324,14 +324,38 @@
     <span class="mh-panel-badge"></span>
     <div class="mh-panel-content">
 
+      {{#if quintessences.length}}
+        <div class="section legends mh-quintessences">
+          <div class="mh-theme-name title-effect">
+            <i class="fa-solid fa-sun"></i> {{localize "MistHUD.hud.quintessence"}}
+          </div>
+          {{#each quintessences}}
+            <div class="improvement-container mh-quintessence{{#if uses.expended}} expended{{/if}}" data-id="{{id}}">
+              <div class="mh-title-container">
+                <span class="item-name">
+                  <i class="fa-solid fa-star mh-improvement-star"></i>
+                  <span>{{name}}{{#if (gt uses.max 0)}} - {{uses.current}}/{{uses.max}}{{/if}}</span>
+                </span>
+              </div>
+              {{#if description}}
+                <div class="item-description">{{description}}</div>
+              {{/if}}
+              {{#if choiceItem}}
+                <div class="item-choice"><i class="fa-solid fa-right"></i> {{choiceItem}}</div>
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
+        <hr class="panel-divider mh-fade-divider" />
+      {{/if}}
+
       {{#if isOtherscape}}
         <div class="section otherscape{{#if essenceBurned}} mh-essence-burned{{/if}}">
           <div class="mh-theme-name mh-theme-name-neutral mh-essence-title">
             <div>Essence:</div>
             <div class="mh-essence-title {{essenceClass}}">{{essence}}</div>
-            {{#if essenceBurned}}
-              <span class="mh-essence-burn burn-icon burned" data-tooltip="{{localize "MistHUD.essence-burned"}}"></span>
-            {{/if}}
+            <span class="mh-essence-burn burn-icon {{#if essenceBurned}}burned{{else}}unburned{{/if}} clickable"
+                  data-tooltip="{{#if essenceBurned}}{{localize "MistHUD.essence-burned"}}{{else}}{{localize "MistHUD.essence-burn"}}{{/if}}"></span>
           </div>
           <div class="mh-essence-chart {{essenceClass}}">
             <img src="modules/mist-hud/ui/essences/{{essenceImage}}" alt="{{essence}}" />

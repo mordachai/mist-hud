@@ -16,7 +16,7 @@ import { organizeMoves, getMoveAbbreviation, getMoveImageSrc } from "./move-layo
 import {
   getMysteryFromTheme, getCrewThemes, getExtraThemes, getThemesAndTags,
   getImprovements, getCrewImprovements, getActorStatuses,
-  getJuiceAndClues, getEssence, getThemeTypeCounts, getLoadoutTags, getAllLoadoutTags, getLoadoutWeaknessTags, getRelationshipTags,
+  getJuiceAndClues, getEssence, getQuintessences, getThemeTypeCounts, getLoadoutTags, getAllLoadoutTags, getLoadoutWeaknessTags, getRelationshipTags,
 } from "./getters.js";
 import { BonusManager } from "./bonus-manager.js";
 import { attachFoldBehaviour, scheduleFold, cancelFold } from "./hud-fold.js";
@@ -394,6 +394,7 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       helpItems, hurtItems, clueItems, juiceItems,
       helpHurtMessages: helpHurtMessages.length ? helpHurtMessages : null,
       essence, essenceClass, essenceImage, essenceText, essenceBurned,
+      quintessences:   isLegend ? getQuintessences(this.actor) : [],
       comTone,
       improvements,
       hasImprovements: improvements.length > 0,
@@ -1082,6 +1083,13 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         content: `<p>${game.i18n.format("MistHUD.hud.deleteTagConfirm", { tag: name })}</p>`,
       });
       if (ok) await this.actor.deleteTag(id);
+    });
+
+    // Otherscape essence: burn / restore it on the sheet (system.essence.isBurned).
+    html.find(".mh-essence-burn").on("click", async ev => {
+      ev.stopPropagation();
+      if (!this.actor.isOwner) return;
+      await this.actor.setEssenceBurn(!this.actor.isEssenceBurned);
     });
 
     // Relationship tags: header "+" (no character) or an open slot (that character)

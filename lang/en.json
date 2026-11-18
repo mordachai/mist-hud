@@ -213,6 +213,7 @@
 "MistHUD.hud.deleteTagConfirm": "Delete the tag <strong>{tag}</strong>?",
 "MistHUD.hud.relationships.otherscape": "Crew Relationships",
 "MistHUD.hud.relationships.legend": "Fellowship",
+"MistHUD.hud.quintessence": "Quintessence",
 "MistHUD.hud.createRelationship": "Create Relationship Tag",
 "MistHUD.hud.addRelationship": "Add relationship",
 "MistHUD.hud.newRelationship": "New Relationship",
@@ -294,7 +295,8 @@
 
 "MistHUD.essence.singularity": "<p class='mh-essence-text'>Psychological effects and intangible or unmeasurable mythical effects do not affect you. You can interface with ALL information, regardless of medium, and may roll with Noise to search it and, if it is recorded information, to manipulate it.</p>",
 
-"MistHUD.essence-burned": "Essence burned",
+"MistHUD.essence-burned": "Essence burned (click to restore)",
+"MistHUD.essence-burn": "Burn essence",
 "MistHUD.essence.undefined": "<p class='mh-essence-text'>Essence is not defined for this character.</p>"
 
 }
