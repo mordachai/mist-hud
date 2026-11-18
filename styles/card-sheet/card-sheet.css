@@ -254,10 +254,11 @@
 /* ── Layers (plan § 7) ───────────────────────────────────────────────────────
    Both layers are absolutely placed in the window content (the size
    container), under the band row. The front layer sits one peek lower; the
-   back layer stays at the top, darker, behind it and clipped to its header
-   bands, which take the clicks (peek tabs) and bring it to the front. The
-   swap animates transform, clip-path and z-index; data-front on the window
-   says which layer is in front.
+   back layer stays at the top, darker, whole, behind it: its header bands
+   peek out above the front layer. A back card takes clicks only through
+   its peek tab and comes to the front with its layer. The swap animates
+   transform, filter and z-index; data-front on the window says which layer
+   is in front.
    The card width is the largest that fits four across, and the card plus
    the peek in the height. These vars use cq units of the window content, so
    they are only used on the layers and on the cards themselves (inside a
@@ -276,21 +277,19 @@
   height: calc(var(--mh-cs-card-w) / (var(--mh-cs-aspect)));
   z-index: 1;
   pointer-events: none;
-  /* Back: at the top, darker, only the header bands showing. */
+  /* Back: at the top, darker, behind the front layer. */
   transform: translateY(0);
-  clip-path: inset(-40px -40px calc(100% - var(--mh-cs-peek-h)) -40px);
   filter: brightness(0.72) saturate(0.85);
-  transition: transform 0.45s ease, clip-path 0.45s ease, filter 0.45s ease, z-index 0.45s step-end;
+  transition: transform 0.45s ease, filter 0.45s ease, z-index 0.45s step-end;
 }
 
-/* Front: one peek lower, on top, all of it showing. */
+/* Front: one peek lower, on top. */
 .mh-card-sheet:not([data-front="2"]) .mh-cs-layer1,
 .mh-card-sheet[data-front="2"] .mh-cs-layer2 {
   z-index: 2;
   transform: translateY(var(--mh-cs-peek-h));
-  clip-path: inset(-40px -40px -40px -40px);
   filter: none;
-  transition: transform 0.45s ease, clip-path 0.45s ease, filter 0.45s ease, z-index 0.45s step-start;
+  transition: transform 0.45s ease, filter 0.45s ease, z-index 0.45s step-start;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -319,20 +318,21 @@
   z-index: 3;
 }
 
-/* ── Peek tabs: the back layer's header bands ────────────────────────────── */
+/* ── Peek tabs: over each card of the back layer ─────────────────────────────
+   They cover the whole card, so whatever shows of it (the header band above
+   the front layer) brings its layer to the front. */
 
 .mh-card-sheet .mh-cs-peek-tab {
   display: none;
   position: absolute;
   z-index: 5;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
-  height: calc(var(--mh-cs-peek) * 100cqw);
+  height: 100%;
   margin: 0;
   padding: 0;
   border: none;
-  border-radius: var(--mh-cs-radius) var(--mh-cs-radius) 0 0;
+  border-radius: var(--mh-cs-radius);
   background: none;
   box-shadow: none;
   cursor: pointer;
@@ -344,7 +344,7 @@
 }
 
 .mh-card-sheet .mh-cs-peek-tab:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .mh-card-sheet .mh-cs-peek-tab:focus-visible {
@@ -492,11 +492,12 @@
   letter-spacing: var(--mh-cs-title-spacing);
   text-align: center;
   text-transform: var(--mh-cs-title-case);
+  color: var(--mh-cs-title-ink, inherit);
+  text-shadow: var(--mh-cs-title-glow, none);
   text-wrap: balance;
   overflow-wrap: normal;
   word-break: normal;
   hyphens: manual;
-  color: inherit;
 }
 
 /* Too long even at the smallest size (card-fit.js): 3 lines, then an ellipsis. */

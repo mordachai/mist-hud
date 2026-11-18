@@ -10,12 +10,11 @@
   font-display: swap;
 }
 
-/* Theme titles: big serif capitals. Averia Serif Libre Bold (shipped by the
-   system) was picked over PT Serif Bold: heavier and rougher, closer to the
-   inked titles of the mockup. */
+/* Theme titles: big condensed sans capitals with a glow, as in the mockup
+   (Rift Bold, shipped by the system). */
 @font-face {
-  font-family: "MH Card Serif";
-  src: url(/systems/city-of-mist/fonts/averiaseriflibre-bold.woff2) format("woff2");
+  font-family: "MH Card Title";
+  src: url(/systems/city-of-mist/fonts/Rift-Bold-webfont.woff2) format("woff2");
   font-weight: 700;
   font-display: swap;
 }
@@ -43,10 +42,13 @@
   --mh-cs-body-top: 22cqw;
   --mh-cs-body-bottom: 22cqw;
   --mh-cs-inset: 9cqw;
-  --mh-cs-title-font: "MH Card Serif", "Averia Serif Libre", Georgia, serif;
-  --mh-cs-title-size: 24cqw;
-  --mh-cs-title-lh: 0.98;
-  --mh-cs-title-h: 48cqw;
+  --mh-cs-title-font: "MH Card Title", "Rift Bold", "Rift", sans-serif;
+  --mh-cs-title-size: 34cqw;
+  --mh-cs-title-lh: 0.86;
+  --mh-cs-title-h: 62cqw;
+  --mh-cs-title-spacing: 0.01em;
+  /* A soft light halo on the dark titles; Mythos titles glow (below). */
+  --mh-cs-title-glow: 0 0 1.2cqw rgba(255, 255, 255, 0.7), 0 0 3cqw rgba(255, 255, 255, 0.45);
   --mh-cs-title-case: uppercase;
   --mh-cs-heading-font: "MH Card Heading", "Fira Sans Extra Condensed", sans-serif;
   --mh-cs-heading-size: 6.4cqw;
@@ -71,6 +73,9 @@
   background-image: url("../../ui/card-sheet/com/mythos_theme_bg.webp");
   --mh-cs-ink: #2c1733;
   --mh-cs-rule: rgba(70, 30, 80, 0.4);
+  /* White titles with a violet glow, as in the mockup. */
+  --mh-cs-title-ink: #fdf7ff;
+  --mh-cs-title-glow: 0 0 0.6cqw #f0c8ff, 0 0 2cqw #c264f0, 0 0 4.5cqw rgba(150, 50, 200, 0.85);
 }
 
 .mh-card-sheet .mh-cs-type-logos .mh-cs-face {
@@ -85,7 +90,11 @@
   --mh-cs-rule: rgba(20, 20, 25, 0.35);
 }
 
-/* ── Type icons in the header band (the HUD's icons) ────────────────────── */
+/* ── Type icons in the header band (the HUD's icons), at the right ──────── */
+
+.mh-card-sheet .mh-cs-band-top .mh-cs-type-icon {
+  order: 2;
+}
 
 .mh-card-sheet .mh-cs-type-icon.Mythos {
   background-image: url("../../ui/icons/mythos_icn.svg");
