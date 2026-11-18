@@ -6,8 +6,10 @@
 //   GM receives socket → updateActorBonuses() → writes actor flag → syncUI to all clients
 //   All clients update checkboxes + HUD re-renders via updateActor hook
 
-import { SOCKET_NAME } from "./constants.js";
-import { playerHudRegistry, hudsForActorId } from "./hud-state.js";
+import { SOCKET_NAME, MODULE_ID, FLAG_KEYS } from "./constants.js";
+import {
+  playerHudRegistry, hudsForActorId, bonusActorFor, bonusOfferKey, juiceFor, splitJuice,
+} from "./hud-state.js";
 
 /** @type {Map<string, boolean>} key: `${giverId}-${targetId}-${type}` */
 const _checkboxStates = new Map();
@@ -22,6 +24,9 @@ export class BonusManager {
   static init() {
     if (_initialized) return;
     _registerSocketListener();
+    // A roll from the system sheet goes through the system's roll dialog: add
+    // the HUD offers there too.
+    Hooks.on("renderRollDialog", dialog => void _offerToSheetRoll(dialog));
     if (game.user.isGM) {
       Hooks.on("deleteToken", tokenDoc => {
         if (tokenDoc.actor) _handleTokenDeletion(tokenDoc);
@@ -148,32 +153,41 @@ function _registerSocketListener() {
 async function _updateActorBonuses(targetId, giverId, bonusType, amount, active) {
   if (!game.user.isGM) return;
   const target = game.actors.get(targetId);
-  if (!target) return;
+  if (!target || !["help", "hurt"].includes(bonusType)) return;
+  const path = `${FLAG_KEYS.RECEIVED_BONUSES}.${bonusOfferKey(giverId, bonusType)}`;
 
-  const current = foundry.utils.deepClone(target.getFlag("mist-hud", "received-bonuses") || {});
-
-  if (active) {
-    current[giverId] = {
-      type: bonusType,
-      amount: parseInt(amount),
-      timestamp: Date.now(),
-      sceneId: game.scenes.current?.id ?? "unknown",
-    };
-  } else {
-    delete current[giverId];
+  if (!active) {
+    if (target.getFlag(MODULE_ID, path) !== undefined) await target.unsetFlag(MODULE_ID, path);
+    return;
   }
 
-  if (Object.keys(current).length === 0) {
-    await target.unsetFlag("mist-hud", "received-bonuses");
-  } else {
-    await target.setFlag("mist-hud", "received-bonuses", current);
+  // The giver can offer at most the juice they hold toward this target
+  // (the system's CityActor.getHelpHurtFor); the GM checks it, not the player.
+  const giver = game.actors.get(giverId);
+  const juice = juiceFor(giver, bonusType, targetId);
+  const max   = juice.reduce((acc, j) => acc + (Number(j.system.amount) || 0), 0);
+  const used  = Math.min(max, Math.max(0, parseInt(amount) || 0));
+  if (used <= 0) {
+    if (target.getFlag(MODULE_ID, path) !== undefined) await target.unsetFlag(MODULE_ID, path);
+    return;
   }
+
+  await target.setFlag(MODULE_ID, path, {
+    giverId,
+    type:      bonusType,
+    amount:    used,
+    juice:     splitJuice(juice, used),
+    timestamp: Date.now(),
+    sceneId:   game.scenes.current?.id ?? "unknown",
+  });
 }
 
 async function _clearActorBonuses(actorId) {
   if (!game.user.isGM) return;
   const actor = game.actors.get(actorId);
-  if (actor) await actor.unsetFlag("mist-hud", "received-bonuses");
+  if (actor?.getFlag(MODULE_ID, FLAG_KEYS.RECEIVED_BONUSES) !== undefined) {
+    await actor.unsetFlag(MODULE_ID, FLAG_KEYS.RECEIVED_BONUSES);
+  }
 }
 
 function _notifyTargetOwner(targetId) {
@@ -191,6 +205,50 @@ function _updateCheckboxUI(giverId, targetId, bonusType, checked) {
   ).forEach(el => { el.checked = checked; });
 }
 
+// ── Sheet rolls (the system's RollDialog) ─────────────────────────────────────
+
+/** Roll dialogs that already got the HUD offers. */
+const _offeredDialogs = new WeakSet();
+
+/**
+ * Put the offers the rolling character holds into the system's roll dialog,
+ * through the dialog's own RollDialog.activateHelpHurt (the same call the
+ * system makes when a player answers its Help/Hurt request). The dialog then
+ * hands them to CityRoll, which spends the juice after the roll. Confirming
+ * the dialog uses up the offers.
+ */
+async function _offerToSheetRoll(dialog) {
+  if (!dialog?.actor || typeof dialog.activateHelpHurt !== "function") return;
+  if (_offeredDialogs.has(dialog)) return;
+  _offeredDialogs.add(dialog);
+
+  const target = bonusActorFor(dialog.actor);
+  const offers = Object.entries(target?.getFlag(MODULE_ID, FLAG_KEYS.RECEIVED_BONUSES) || {});
+  if (!offers.length) return;
+
+  const submit = dialog.submit;
+  dialog.submit = function (button, ...rest) {
+    if (button && button === this.data?.buttons?.one) BonusManager.clearBonuses(target.id);
+    return submit.call(this, button, ...rest);
+  };
+
+  // Let the dialog finish its first render before changing its list.
+  await new Promise(resolve => setTimeout(resolve, 0));
+  for (const [key, offer] of offers) {
+    const type   = offer?.type === "hurt" ? "hurt" : "help";
+    const giver  = game.actors.get(offer?.giverId ?? key);
+    const held   = juiceFor(giver, type, target.id)
+      .reduce((acc, j) => acc + (Number(j.system.amount) || 0), 0);
+    const amount = Math.min(held, Math.abs(Number(offer?.amount)) || 0);
+    if (!giver || amount <= 0) continue;
+    try {
+      await dialog.activateHelpHurt(giver, amount, type === "help" ? 1 : -1, target.id);
+    } catch (e) {
+      console.warn(`Mist HUD | Could not add ${type} from ${giver.name} to the roll:`, e);
+    }
+  }
+}
+
 // ── Cleanup helpers ───────────────────────────────────────────────────────────
 
 async function _handleTokenDeletion(tokenDoc) {
@@ -200,14 +258,10 @@ async function _handleTokenDeletion(tokenDoc) {
 
   // Remove all bonuses given by this actor
   for (const actor of game.actors) {
-    const bonuses = foundry.utils.deepClone(actor.getFlag("mist-hud", "received-bonuses") || {});
-    if (bonuses[actorId]) {
-      delete bonuses[actorId];
-      if (Object.keys(bonuses).length === 0) {
-        await actor.unsetFlag("mist-hud", "received-bonuses");
-      } else {
-        await actor.setFlag("mist-hud", "received-bonuses", bonuses);
-      }
+    const offers = actor.getFlag(MODULE_ID, FLAG_KEYS.RECEIVED_BONUSES) || {};
+    for (const [key, offer] of Object.entries(offers)) {
+      if ((offer?.giverId ?? key) !== actorId) continue;
+      await actor.unsetFlag(MODULE_ID, `${FLAG_KEYS.RECEIVED_BONUSES}.${key}`);
     }
   }
 
@@ -222,5 +276,5 @@ async function _verifySceneBonuses() {
 
 // ── Legacy export for backward compatibility ──────────────────────────────────
 export function getReceivedBonuses(actor) {
-  return actor?.getFlag("mist-hud", "received-bonuses") || {};
+  return actor?.getFlag(MODULE_ID, FLAG_KEYS.RECEIVED_BONUSES) || {};
 }

@@ -1,6 +1,6 @@
 // getters.js — Actor data extraction for the player HUD template context
 import { getActiveSystem, MODULE_ID, FLAG_KEYS } from "./constants.js";
-import { isTagBurned } from "./hud-state.js";
+import { isTagBurned, bonusOfferKey } from "./hud-state.js";
 // Kept slim: uses system actor methods where possible.
 
 // ── Tag burn state ────────────────────────────────────────────────────────────
@@ -506,11 +506,11 @@ export function getQuintessences(actor) {
 export function getJuiceAndClues(actor) {
   if (!actor) return { helpItems: [], hurtItems: [], clueItems: [], juiceItems: [] };
   const items        = actor.items.contents;
-  // A help/hurt checkbox is "on" when the target currently holds a bonus from
-  // this actor. The target's GM-written `received-bonuses` flag is the single
+  // A help/hurt checkbox is "on" when the target currently holds this actor's
+  // offer. The target's GM-written `received-bonuses` flag is the single
   // source of truth, so the state survives re-renders and clears with the roll.
-  const givenTo = (targetId, type) =>
-    game.actors.get(targetId)?.getFlag("mist-hud", "received-bonuses")?.[actor.id]?.type === type;
+  const offerTo = (targetId, type) => game.actors.get(targetId)
+    ?.getFlag(MODULE_ID, FLAG_KEYS.RECEIVED_BONUSES)?.[bonusOfferKey(actor.id, type)];
 
   const resolve = (id) => {
     const a = game.actors.get(id);
@@ -519,19 +519,24 @@ export function getJuiceAndClues(actor) {
              : null;
   };
 
-  const helpItems = items
-    .filter(i => i.type === "juice" && i.system?.subtype === "help")
-    .map(i => { const t = resolve(i.system.targetCharacterId); return t
-      ? { id: i.id, actorId: actor.id, amount: i.system.amount, target: t,
-          active: givenTo(t.id, "help") } : null; })
-    .filter(Boolean);
-
-  const hurtItems = items
-    .filter(i => i.type === "juice" && i.system?.subtype === "hurt")
-    .map(i => { const t = resolve(i.system.targetCharacterId); return t
-      ? { id: i.id, actorId: actor.id, amount: i.system.amount, target: t,
-          active: givenTo(t.id, "hurt") } : null; })
-    .filter(Boolean);
+  // One row per target, its points summed over every juice item toward that
+  // character (the system's CityActor.getHelpHurtFor).
+  const byTarget = type => {
+    const rows = new Map();
+    for (const i of items.filter(i => i.type === "juice" && i.system?.subtype === type)) {
+      const t = resolve(i.system.targetCharacterId);
+      if (!t) continue;
+      const row = rows.get(t.id) ?? { id: i.id, actorId: actor.id, target: t, amount: 0 };
+      row.amount += Number(i.system.amount) || 0;
+      rows.set(t.id, row);
+    }
+    return [...rows.values()].map(row => {
+      const offer = offerTo(row.target.id, type);
+      return { ...row, active: !!offer, offered: offer ? Number(offer.amount) || 0 : 0 };
+    });
+  };
+  const helpItems = byTarget("help");
+  const hurtItems = byTarget("hurt");
 
   const clueItems = items
     .filter(i => i.type === "clue")

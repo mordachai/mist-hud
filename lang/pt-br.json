@@ -164,6 +164,7 @@
 "MistHUD.notify.noGMForDrop": "Nenhum Mestre está online, então o item não pode ser adicionado a um token que não é seu.",
 
 "MistHUD.notify.bonusPartiesUnknown": "Mist HUD: não foi possível determinar quem dá e quem recebe o bônus.",
+"MistHUD.hud.helpHurtAmount": "{type} {target}: quantos pontos (máx. {max})?",
 
 "MistHUD.notify.systemLoadFailed": "Mist HUD: não foi possível carregar {files} do sistema City of Mist. O HUD não pode rolar nem editar itens até o módulo ser atualizado para esta versão do sistema.",
 

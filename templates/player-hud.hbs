@@ -449,20 +449,20 @@
           {{#each helpItems}}
             <div class="relationship-item">
               <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
-              <span class="item-name">{{this.target.name}} (+{{this.amount}})</span>
+              <span class="item-name">{{this.target.name}} (+{{#if this.active}}{{this.offered}}/{{/if}}{{this.amount}})</span>
               <input type="checkbox" class="help-toggle"
                 data-id="{{this.id}}" data-actor-id="{{actorId}}"
-                data-target-id="{{this.target.id}}" data-amount="{{this.amount}}"
+                data-target-id="{{this.target.id}}" data-target-name="{{this.target.name}}" data-amount="{{this.amount}}"
                 {{#if this.active}}checked{{/if}}>
             </div>
           {{/each}}
           {{#each hurtItems}}
             <div class="relationship-item">
               <img src="{{this.target.tokenImage}}" alt="{{this.target.name}}" class="token-image" />
-              <span class="item-name">{{this.target.name}} (-{{this.amount}})</span>
+              <span class="item-name">{{this.target.name}} (-{{#if this.active}}{{this.offered}}/{{/if}}{{this.amount}})</span>
               <input type="checkbox" class="hurt-toggle"
                 data-id="{{this.id}}" data-actor-id="{{actorId}}"
-                data-target-id="{{this.target.id}}" data-amount="{{this.amount}}"
+                data-target-id="{{this.target.id}}" data-target-name="{{this.target.name}}" data-amount="{{this.amount}}"
                 {{#if this.active}}checked{{/if}}>
             </div>
           {{/each}}

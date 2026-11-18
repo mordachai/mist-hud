@@ -339,9 +339,9 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     }
 
     // ── Received bonuses ──────────────────────────────────────────────────────
-    const receivedBonuses = bonusActorFor(this.actor)?.getFlag(MODULE_ID, "received-bonuses") || {};
-    const helpHurtMessages = Object.entries(receivedBonuses).flatMap(([giverId, bonus]) => {
-      const giverActor = game.actors.get(giverId);
+    const receivedBonuses = bonusActorFor(this.actor)?.getFlag(MODULE_ID, FLAG_KEYS.RECEIVED_BONUSES) || {};
+    const helpHurtMessages = Object.entries(receivedBonuses).flatMap(([key, bonus]) => {
+      const giverActor = game.actors.get(bonus?.giverId ?? key);
       if (!giverActor) return [];
       return [{
         type:       bonus.type,
@@ -593,17 +593,21 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
         if (crewId) tagActor = game.actors.get(crewId) ?? this.actor;
       }
 
+      const tagItem = tagActor.items.get(tagId);
       const current = burnEl.classList.contains("burned") ? "burned"
                     : burnEl.classList.contains("toBurn")  ? "toBurn"
                     : "unburned";
-      // Relationship tags are single-use (burned when invoked) and so cannot be
-      // burned for Power (Otherscape p.75/122, Legend p.158): the toggle only
-      // marks them spent or restores them, it never offers "to burn".
-      const noBurnForPower = tagEl.classList.contains("mh-relationship-tag");
-      const next = current === "burned"            ? "unburned"
-                 : current === "toBurn"            ? "burned"
-                 : noBurnForPower                  ? "burned"
-                 : "toBurn";
+      // The system's rules, the same for every tag (relationship tags included):
+      // the sheet's flame marks any tag burned, but its roll dialog only offers
+      // "burn for Power" for a tag that is not crispy (single-use) and not a
+      // weakness (RollDialog.refreshHTML burnableTags). A crispy tag therefore
+      // goes straight to burned, like on the sheet.
+      const canBurnForPower = !!tagItem && !tagItem.system.crispy
+        && tagItem.system.subtype !== "weakness";
+      const next = current === "burned" ? "unburned"
+                 : current === "toBurn" ? "burned"
+                 : canBurnForPower      ? "toBurn"
+                 : "burned";
 
       burnEl.classList.remove("unburned", "toBurn", "burned");
       burnEl.classList.add(next);
@@ -623,7 +627,6 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       // Persist burn state to actor DB. "Burned" must satisfy the system's
       // CityItem.isBurned() (burned && burn_state != 0); "toBurn" is the HUD's
       // marker (burned false, burn_state 1) that the roll turns into a real burn.
-      const tagItem = tagActor.items.get(tagId);
       if (tagItem) {
         await tagItem.update({
           "system.burned":     next === "burned",
@@ -1141,19 +1144,44 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     html.find(".juice-container").on("dblclick",     ev => this._editJuice(ev));
 
     // Help / Hurt checkboxes
-    html.find(".help-toggle, .hurt-toggle").on("change", ev => {
+    html.find(".help-toggle, .hurt-toggle").on("change", async ev => {
       const t = ev.currentTarget;
       if (!t.dataset.actorId || !t.dataset.targetId) {
         ui.notifications.warn(game.i18n.localize("MistHUD.notify.bonusPartiesUnknown"));
         t.checked = !t.checked;
         return;
       }
-      BonusManager.applyBonus(
-        t.dataset.actorId, t.dataset.targetId,
-        t.classList.contains("help-toggle") ? "help" : "hurt",
-        Number(t.dataset.amount), t.checked
-      );
+      const type = t.classList.contains("help-toggle") ? "help" : "hurt";
+      const max  = Number(t.dataset.amount) || 0;
+      let amount = max;
+      // Like the system's Help/Hurt dialog: choose how many points to give.
+      if (t.checked && max > 1) {
+        amount = await this._askHelpHurtAmount(type, t.dataset.targetName, max);
+        if (!amount) { t.checked = false; return; }
+      }
+      if (t.checked && amount <= 0) { t.checked = false; return; }
+      BonusManager.applyBonus(t.dataset.actorId, t.dataset.targetId, type, amount, t.checked);
     });
+  }
+
+  /**
+   * Ask how many Help/Hurt points to give (1..max).
+   * @returns {Promise<number>} 0 when cancelled
+   */
+  async _askHelpHurtAmount(type, targetName, max) {
+    const label = game.i18n.format("MistHUD.hud.helpHurtAmount", {
+      type: game.i18n.localize(type === "help" ? "CityOfMist.terms.help" : "CityOfMist.terms.hurt"),
+      target: Handlebars.escapeExpression(targetName ?? ""),
+      max,
+    });
+    const value = await foundry.applications.api.DialogV2.prompt({
+      window:  { title: game.i18n.localize(type === "help" ? "CityOfMist.terms.help" : "CityOfMist.terms.hurt") },
+      content: `<p>${label}</p><input type="number" name="amount" min="1" max="${max}" step="1" value="${max}" autofocus>`,
+      ok:      { callback: (_ev, button) => button.form.elements.amount.valueAsNumber },
+      rejectClose: false,
+    });
+    const n = Math.floor(Number(value) || 0);
+    return n > 0 ? Math.min(n, max) : 0;
   }
 
   async _createStoryTag() {

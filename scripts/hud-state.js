@@ -2,7 +2,7 @@
 // Does NOT persist to actor flags (ephemeral within a session).
 // When a re-render happens, the HUD restores visual state from this registry.
 
-import { MODULE_ID } from "./constants.js";
+import { MODULE_ID, FLAG_KEYS } from "./constants.js";
 
 // ── HUD keys ─────────────────────────────────────────────────────────────────
 // A HUD (and its selection state) belongs to one token's actor. Linked tokens
@@ -86,27 +86,79 @@ export function isTagBurned(tag) {
   return !!tag?.system?.burned && tag.system.burn_state !== 0;
 }
 
-function _modifierRow(id, name, amount) {
-  return { id, name, amount, ownerId: null, tagId: null, type: "modifier", strikeout: false };
+// ── Help / Hurt (City of Mist juice) ─────────────────────────────────────────
+// The system's model: the giver owns juice items (subtype "help"/"hurt",
+// system.targetCharacterId, system.amount points). A roll carries one row per
+// juice item used (type "juice", subtype help/hurt, id = juice id, ownerId =
+// giver, amount ±points); after the roll CityRoll spends those points itself
+// (#spendHelpHurt). The HUD only records the giver's offer in a GM-written
+// flag on the target, keyed per giver and type, until the target rolls.
+
+/** Key of one offer in the target's `received-bonuses` flag (no dots: it is a flag path). */
+export function bonusOfferKey(giverId, type) {
+  return `${giverId}_${type}`;
+}
+
+/** The giver's juice items of `type` toward `targetId` that still have points (system's helpPoints/hurtPoints). */
+export function juiceFor(giver, type, targetId) {
+  const items = type === "hurt" ? giver?.hurtPoints : giver?.helpPoints;
+  return (items ?? []).filter(j => j.targets(targetId) && (Number(j.system.amount) || 0) > 0);
 }
 
 /**
- * Help/hurt bonuses other players granted to this actor (GM-written flag).
- * @returns {object[]} "modifier" rows for CityRoll
+ * Take `amount` points from `items` in order, like the system's roll dialog
+ * (RollDialog.activateHelpHurt).
+ * @returns {{id: string, name: string, used: number}[]}
+ */
+export function splitJuice(items, amount) {
+  const out = [];
+  let left = Math.max(0, Number(amount) || 0);
+  for (const item of items) {
+    if (left <= 0) break;
+    const used = Math.min(left, Number(item.system.amount) || 0);
+    if (used <= 0) continue;
+    left -= used;
+    out.push({ id: item.id, name: item.displayedName ?? item.name, used });
+  }
+  return out;
+}
+
+/** One juice row in the format of SelectedTagsAndStatus.toActivatedTagFormat(). */
+function _juiceRow(giverId, hurt, { id, name, used }) {
+  return {
+    name, id,
+    amount:      hurt ? -used : used,
+    ownerId:     giverId,
+    tagId:       undefined,
+    type:        "juice",
+    description: "",
+    subtype:     hurt ? "hurt" : "help",
+    strikeout:   false,
+    review:      "approved",
+    tokenId:     "",
+    crispy:      false,
+  };
+}
+
+/**
+ * Help/hurt other players offered this actor (GM-written flag), as the
+ * system's juice rows, so CityRoll adds them and spends the points.
+ * @returns {object[]}
  */
 export function getReceivedBonusRows(actor) {
-  const bonuses = bonusActorFor(actor)?.getFlag(MODULE_ID, "received-bonuses") || {};
+  const target = bonusActorFor(actor);
+  const offers = target?.getFlag(MODULE_ID, FLAG_KEYS.RECEIVED_BONUSES) || {};
   const rows = [];
-  for (const [giverId, bonus] of Object.entries(bonuses)) {
-    const amount = Math.abs(Number(bonus?.amount)) || 0;
-    if (!amount) continue;
-    const hurt  = bonus.type === "hurt";
-    const giver = game.actors.get(giverId)?.name ?? "?";
-    rows.push(_modifierRow(
-      `mist-hud-${hurt ? "hurt" : "help"}-${giverId}`,
-      `${hurt ? "Hurt" : "Help"} (${giver})`,
-      hurt ? -amount : amount,
-    ));
+  for (const [key, offer] of Object.entries(offers)) {
+    const giverId = offer?.giverId ?? key; // older flags were keyed by giver id
+    const hurt    = offer?.type === "hurt";
+    const giver   = game.actors.get(giverId);
+    // Split the offer over the giver's juice as it is now; a player who cannot
+    // see the giver uses the split the GM saved with the offer.
+    const parts = giver
+      ? splitJuice(juiceFor(giver, offer?.type, target.id), offer?.amount)
+      : (offer?.juice ?? []);
+    for (const part of parts) rows.push(_juiceRow(giverId, hurt, part));
   }
   return rows;
 }
@@ -304,7 +356,9 @@ export class HUDState {
     let usedBonuses = false;
     if (modifiers) {
       const bonusRows = getReceivedBonusRows(actor);
-      usedBonuses = bonusRows.length > 0;
+      // Clear every offer after the roll, also one whose juice is gone by now.
+      usedBonuses = bonusRows.length > 0
+        || !foundry.utils.isEmpty(bonusActorFor(actor)?.getFlag(MODULE_ID, FLAG_KEYS.RECEIVED_BONUSES) ?? {});
       list.push(...bonusRows);
     }
 

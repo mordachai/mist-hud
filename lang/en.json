@@ -164,6 +164,7 @@
 "MistHUD.notify.noGMForDrop": "No GM is online, so the item cannot be added to a token you do not own.",
 
 "MistHUD.notify.bonusPartiesUnknown": "Mist HUD: Cannot determine the bonus parties.",
+"MistHUD.hud.helpHurtAmount": "{type} {target}: how many points (max {max})?",
 
 "MistHUD.notify.systemLoadFailed": "Mist HUD: could not load {files} from the City of Mist system. The HUD cannot roll or edit items until the module is updated for this system version.",
 
