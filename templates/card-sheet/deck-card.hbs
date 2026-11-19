@@ -10,8 +10,10 @@
         small fields are inputs; the band name selects it (play mode).
       Boxes set the status (or the amount); the controls sit in a strip over
       the footer band (hover / focus; always on a card brought forward).
+      A status or story tag card is a system draggable (card.drag): it drops
+      on any sheet, token or HUD as the system's chat statuses and tags do.
       Takes: card (tags-deck.js deckCard), stack, work, big, index. --}}
-<article class="mh-cs-deck-card mh-cs-deck-kind-{{card.kind}}{{#if card.selection}} mh-cs-selected mh-cs-selected-{{card.selection}}{{/if}}{{#if card.burned}} burned{{/if}}{{#if big}} mh-cs-deck-big{{/if}}{{#if card.isNew}} mh-cs-deck-new{{/if}}" data-item-id="{{card.id}}" data-kind="{{card.kind}}" style="--i: {{index}}">
+<article class="mh-cs-deck-card mh-cs-deck-kind-{{card.kind}}{{#if card.selection}} mh-cs-selected mh-cs-selected-{{card.selection}}{{/if}}{{#if card.burned}} burned{{/if}}{{#if big}} mh-cs-deck-big{{/if}}{{#if card.isNew}} mh-cs-deck-new{{/if}}{{#if card.drag}} draggable{{/if}}" data-item-id="{{card.id}}" data-kind="{{card.kind}}" style="--i: {{index}}"{{#if card.drag}} draggable="true" data-draggable-type="{{card.drag.type}}" data-name="{{card.drag.name}}" data-options="{{card.drag.options}}" data-source-actor="{{card.drag.source}}"{{/if}}>
   <div class="mh-cs-deck-face">
     <div class="mh-cs-deck-band">
       {{#if stack}}
@@ -42,17 +44,7 @@
     {{/if}}
     <div class="mh-cs-deck-name-line">
       <div class="mh-cs-deck-name-main">
-        {{#if card.target}}
-        <span class="mh-cs-deck-target-label">{{card.target.label}} →</span>
         {{#if (and (or work card.editable) (not stack))}}
-        <select class="mh-cs-deck-name mh-cs-deck-input" id="{{@root.uid}}-deck-{{card.id}}-target" data-deck-field="target" aria-label="{{card.target.label}}">
-          <option value="">—</option>
-          {{#each card.target.options}}<option value="{{id}}"{{#if selected}} selected{{/if}}>{{name}}</option>{{/each}}
-        </select>
-        {{else}}
-        <span class="mh-cs-deck-name">{{card.target.name}}</span>
-        {{/if}}
-        {{else if (and (or work card.editable) (not stack))}}
         <input type="text" class="mh-cs-deck-name mh-cs-deck-input" id="{{@root.uid}}-deck-{{card.id}}-name" data-deck-field="name" value="{{#unless card.isNew}}{{card.rawName}}{{/unless}}" placeholder="{{card.namePlaceholder}}" spellcheck="false" aria-label="{{card.namePlaceholder}}">
         {{else if (and card.selectable (not stack))}}
         <button type="button" class="mh-cs-deck-name" id="{{@root.uid}}-deck-{{card.id}}" data-action="selectDeckCard" aria-pressed="{{#if card.selection}}true{{else}}false{{/if}}" data-tooltip="{{card.selectTooltip}}">{{card.name}}</button>

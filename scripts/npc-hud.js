@@ -1,6 +1,7 @@
 import { initializeAccordions, parseMoveText, registerNpcHelpers } from './npc-helpers.js';
 import { detectActiveSystem } from './settings.js';
 import { attachFoldBehaviour, scheduleFold, cancelFold } from './hud-fold.js';
+import { bindDropTarget } from './drop-relay.js';
 import { getSelectionDirection, setSelectionDirection, selectionInfluence } from './hud-state.js';
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
@@ -894,6 +895,9 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
     async _onFirstRender(context, options) {
         await super._onFirstRender(context, options);
         attachFoldBehaviour(this);
+        // Deck cards and system draggables (chat statuses, tags) dropped on the
+        // HUD go to its actor, the system's way (non-owners ask a GM).
+        bindDropTarget(this.element, () => this.actor);
     }
 
     async maximize() {

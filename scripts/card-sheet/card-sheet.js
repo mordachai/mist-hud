@@ -24,6 +24,7 @@ import {
   openSystemSheet, systemSheetFlips, logModification, creationLocation, statusDrop,
 } from "./system-adapter.js";
 import { EDIT_ACTIONS, changeThemeField, changeActorField } from "./edit-actions.js";
+import { CHARACTER_ACTIONS, changeHelpHurt } from "./character-actions.js";
 import { PLAY_ACTIONS } from "./play-actions.js";
 import { readUiState, writeUiState, cleanFlips, deckState } from "./ui-state.js";
 import {
@@ -95,6 +96,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       showLayer:       MistCardSheet.#onShowLayer,
       setActiveExtra:  MistCardSheet.#onSetActiveExtra,
       ...EDIT_ACTIONS,
+      ...CHARACTER_ACTIONS,
       ...PLAY_ACTIONS,
       ...DECK_ACTIONS,
     },
@@ -120,6 +122,8 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   deckFocus = null;
   /** A deck card just created (blank name, focused). */
   deckNew = null;
+  /** Where deckNew's name field is: "deck" or "character" (a story tag made on the character card). */
+  deckNewOrigin = "deck";
   /** A deck button asking "sure?": { key, until }. */
   deckArmed = null;
 
@@ -296,6 +300,9 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       case "actor":
         changeActorField(this, el);
         return;
+      case "helpHurt":
+        changeHelpHurt(this, el);
+        return;
     }
     super._onChangeForm(formConfig, event);
   }
@@ -350,7 +357,9 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         context.back = this.frontLayer !== 1;
         break;
       case "layer2": {
-        const layer2 = await buildLayer2Context(this.actor, this.cardFlips);
+        const layer2 = await buildLayer2Context(this.actor, this.cardFlips, {
+          newStoryTag: this.deckNewOrigin === "character" ? this.deckNew : null,
+        });
         this.#linkedOwners = new Set(layer2.owners);
         Object.assign(context, layer2);
         context.back = this.frontLayer !== 2;
@@ -450,6 +459,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     // A new deck card never named goes away, as if its name was left empty.
     const unnamed = this.deckNew && this.actor.items.get(this.deckNew);
     this.deckNew = null;
+    this.deckNewOrigin = "deck";
     if (unnamed?.isOwner) void unnamed.delete();
     super._onClose(options);
   }

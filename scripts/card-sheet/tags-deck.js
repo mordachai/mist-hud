@@ -1,7 +1,8 @@
 // tags-deck.js — the card sheet's tags-deck (plan § 2, § 7; phase 5).
 //
 // What the character picks up during play, one tracking card per item:
-// statuses, story tags, juice (Help/Hurt included) and clues (City of Mist;
+// statuses, story tags, juice and clues (City of Mist; Help and Hurt are
+// juice too, but they live on the character card, fixes 2026-11-19;
 // Legend and Otherscape get statuses and story tags only). The deck has
 // three views on the sheet:
 //   - "stack":  every card cascaded behind the layers, at the right of the
@@ -19,8 +20,8 @@
 // Everything is done on the card itself (user, 2026-11-18), no system
 // dialogs: the name on the TAG line is a field, a new card starts blank,
 // clicking a box sets the status (or the amount), − / + change one tier
-// with the system's status math, the other fields (Help/Hurt target, clue
-// source / method / partial, temporary / permanent) are small fields under
+// with the system's status math, the other fields (clue source / method /
+// partial, temporary / permanent) are small fields under
 // the name, and delete / use / burn ask "sure?" on the button itself.
 //
 // The system stays the source of truth: reads come from getters.js
@@ -36,9 +37,9 @@ import { getDeckItems } from "../getters.js";
 import { isEditMode, selectionView } from "./card-sheet-context.js";
 import {
   logModification, statusBoxes, setStatusBoxes, toggleStatusSelection, toggleTagSelection,
-  isTagSelectable, getSystemSelection, addDragFunctionality, currentSystemDraggable,
-  dropDraggableOnActor,
+  isTagSelectable, getSystemSelection, addDragFunctionality,
 } from "./system-adapter.js";
+import { bindDropTarget } from "../drop-relay.js";
 import { once } from "./edit-actions.js";
 import { writeUiState, deckState } from "./ui-state.js";
 
@@ -74,11 +75,7 @@ const KIND_INFO = {
 const CREATES = {
   status: [{ subtype: "", icon: "fa-plus", label: "MistHUD.cardSheet.deck.createStatus" }],
   tag:    [{ subtype: "", icon: "fa-plus", label: "MistHUD.cardSheet.deck.createStoryTag" }],
-  juice:  [
-    { subtype: "",     icon: "fa-plus",       label: "MistHUD.cardSheet.deck.createJuice" },
-    { subtype: "help", icon: "fa-handshake",  label: "MistHUD.cardSheet.deck.createHelp" },
-    { subtype: "hurt", icon: "fa-hands-bound", label: "MistHUD.cardSheet.deck.createHurt" },
-  ],
+  juice:  [{ subtype: "", icon: "fa-plus", label: "MistHUD.cardSheet.deck.createJuice" }],
   clue:   [{ subtype: "", icon: "fa-plus", label: "MistHUD.cardSheet.deck.createClue" }],
 };
 
@@ -92,8 +89,31 @@ const MARKER_ORDER = ["clue", "juice", "tag", "status"];
 const TIER_BOXES = [1, 2, 4, 7, 11, 16];
 const BOX_COUNT = TIER_BOXES.at(-1);
 
-/** Fill the first `amount` boxes (clues, juice). */
-const amountBoxes = amount => Array.from({ length: BOX_COUNT }, (_, i) => i < amount);
+/**
+ * The boxes a clue or juice amount fills: the same mapping as a status
+ * without pips (fixes 2026-11-19). Amount n fills boxes 1 to C(n), the box
+ * printed "n" (C = TIER_BOXES); 6 or more fills them all. The stored amount
+ * is not changed.
+ */
+const amountFill = amount => {
+  const n = Math.max(0, Math.trunc(Number(amount) || 0));
+  return n ? TIER_BOXES[Math.min(n, TIER_BOXES.length) - 1] : 0;
+};
+const amountBoxes = amount => {
+  const filled = amountFill(amount);
+  return Array.from({ length: BOX_COUNT }, (_, i) => i < filled);
+};
+
+/**
+ * A click on box `box` (1-based) of a clue or juice: the highest number
+ * printed at or before it (box 7 → 4, box 5 → 3). Clicking the last filled
+ * tier box again lowers the amount by one.
+ */
+function amountForBox(box, current) {
+  const amount = Math.max(0, Math.trunc(Number(current) || 0));
+  if (amount > 0 && box === amountFill(amount)) return amount - 1;
+  return TIER_BOXES.filter(b => b <= box).length;
+}
 
 /** How long a "sure?" button stays armed. */
 const ARM_MS = 3000;
@@ -101,11 +121,12 @@ const ARM_MS = 3000;
 // ── Render context ───────────────────────────────────────────────────────────
 
 /**
- * The controls of a deck card, as the system sheet offers them: a status's
- * − / + and delete for its owner in both modes; clue and juice − / + in
- * both modes, their delete only unlocked; a story tag's delete in both
- * modes, burn while locked; "use" on a clue (players only, checked on
- * click). Delete, use and burn ask "sure?" on the button (`armed`).
+ * The controls of a deck card, for its owner: − / + on a status, clue or
+ * juice; a trash on every card in both modes (fixes 2026-11-19; not on a
+ * collective status, which the system keeps in step with the collective
+ * size); burn on a story tag while locked; "use" on a clue (players only,
+ * checked on click). Delete, use and burn ask "sure?" on the button
+ * (`armed`).
  */
 function cardTools(kind, row, own, edit, armedKey) {
   if (!own) return [];
@@ -138,11 +159,11 @@ function cardTools(kind, row, own, edit, armedKey) {
     case "clue":
       tools.push(...step());
       if (row.amount > 0) tools.push(tool("useClue", "fa-magnifying-glass", "MistHUD.cardSheet.deck.useClue", { confirm: true }));
-      if (edit) tools.push(del("MistHUD.cardSheet.deck.delete"));
+      tools.push(del("MistHUD.cardSheet.deck.delete"));
       break;
     case "juice":
       tools.push(...step());
-      if (edit) tools.push(del("MistHUD.cardSheet.deck.delete"));
+      tools.push(del("MistHUD.cardSheet.deck.delete"));
       break;
   }
   // The tooltip of an armed button says what the next click does.
@@ -150,12 +171,24 @@ function cardTools(kind, row, own, edit, armedKey) {
   return tools;
 }
 
-/** The characters a Help / Hurt may point at: the other player characters, plus its current target. */
-function helpTargets(actor, current) {
-  return game.actors
-    .filter(a => a.type === "character" && a.id !== actor.id && (a.hasPlayerOwner || a.id === current))
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map(a => ({ id: a.id, name: a.name, selected: a.id === current }));
+/**
+ * A status or story tag card is a system draggable (fixes 2026-11-19): the
+ * same data the system's chat statuses and tags carry
+ * (DragAndDrop.htmlDraggableStatus / htmlDraggableTag), so it drops on any
+ * sheet, token or HUD the system's way (drop-relay.js). A card not named
+ * yet is not draggable.
+ */
+function dragData(actor, kind, row, isNew) {
+  if (isNew || !row.item || (kind !== "status" && kind !== "tag")) return null;
+  const options = kind === "status"
+    ? { tier: Math.max(1, Number(row.tier) || 0) }
+    : { temporary: !!row.temporary, permanent: !!row.permanent };
+  return {
+    type:    kind,
+    name:    row.item.name,
+    options: JSON.stringify(options),
+    source:  actor.uuid,
+  };
 }
 
 /** A small on / off field under the name (temporary, permanent, partial). */
@@ -183,7 +216,6 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
     tools:     cardTools(kind, row, own, edit, armedKey),
     flags:     [],
     texts:     [],
-    target:    null,
     notes:     [],
     selectable: false,
     selection: "",
@@ -213,21 +245,12 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
       });
       break;
     }
-    case "juice": {
-      const helpHurt = row.subtype === "help" || row.subtype === "hurt";
+    case "juice":
       Object.assign(card, {
-        name:  helpHurt ? `${L(`CityOfMist.terms.${row.subtype}`)} → ${row.target || "?"}` : row.name,
         badge: String(row.amount),
         boxes: amountBoxes(row.amount),
-        // Help / Hurt: who it is for, instead of a name.
-        target: helpHurt ? {
-          label:   L(`CityOfMist.terms.${row.subtype}`),
-          name:    row.target || "?",
-          options: helpTargets(actor, row.item?.system?.targetCharacterId),
-        } : null,
       });
       break;
-    }
     case "clue":
       Object.assign(card, {
         badge: String(row.amount),
@@ -257,13 +280,17 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
   card.focusLabel = L("MistHUD.cardSheet.deck.bringForward", { name: card.name });
   card.namePlaceholder = L("MistHUD.cardSheet.deck.namePlaceholder");
   card.boxLabel = L(kind === "status" ? "MistHUD.cardSheet.deck.boxStatus" : "MistHUD.cardSheet.deck.boxAmount");
+  card.drag = dragData(actor, kind, row, isNew);
   return card;
 }
+
+/** Help and Hurt are on the character card, not in the deck. */
+const isHelpHurt = row => row.subtype === "help" || row.subtype === "hurt";
 
 const ROWS = {
   status: deck => deck.statuses,
   tag:    deck => deck.storyTags,
-  juice:  deck => deck.juice,
+  juice:  deck => deck.juice.filter(row => !isHelpHurt(row)),
   clue:   deck => deck.clues,
 };
 
@@ -454,40 +481,36 @@ function selectDeckCard(event, target) {
  * CityActorSheet._createClue / _createJuiceOfType), but no dialog: the new
  * card shows up with an empty name field, focused. Naming it logs
  * "Created"; leaving the name empty (or Esc) deletes it again.
+ * The character card's story tag "+" uses it too (data-origin="character"):
+ * the new tag's name field is then on the character card.
  */
 async function createDeckItem(event, target) {
   const actor = ownedActor(this);
   if (!actor) return;
   const kind = target.dataset.kind;
-  const subtype = target.dataset.subtype ?? "";
+  const onCharacter = kind === "tag" && target.dataset.origin === "character" && this.isMistCardSheet;
   await once(this, async () => {
     let created = null;
     switch (kind) {
       case "status": created = await actor.createNewStatus("Unnamed Status"); break;
       case "tag":    created = await actor.createStoryTag(); break;
       case "clue":   created = await actor.createNewClue({ name: "Unnamed Clue" }); break;
-      case "juice": {
-        // The system's own base names (CityActorSheet._createHelp / _createHurt).
-        const base = subtype === "help" ? "Help" : subtype === "hurt" ? "hurt" : "Unnamed Juice";
-        created = await actor.createNewJuice(base, subtype);
-        break;
-      }
+      case "juice":  created = await actor.createNewJuice("Unnamed Juice"); break;
     }
     if (!created?.id) return;
-    // Help / Hurt has no name to type: it is logged now, its target picked on the card.
-    if (kind === "juice" && subtype) {
-      await logModification(actor, "Created", actor.items.get(created.id), `${created.system?.amount ?? 1}`);
-      return;
-    }
     this.deckNew = created.id;
-    this.renderDeck({ keepView: true });
+    this.deckNewOrigin = onCharacter ? "character" : "deck";
+    // A story tag shows on the character card too.
+    if (kind === "tag" && this.isMistCardSheet) this.render({ parts: ["layer2", "deck"] });
+    else this.renderDeck({ keepView: true });
   });
 }
 
 /**
  * Click on a box: a status is set to that many boxes checked (the system's
- * setBoxesChecked; one box per tier in the mist-engine model), a clue or
- * juice to that amount. Clicking the last checked box unchecks it.
+ * setBoxesChecked; one box per tier in the mist-engine model; clicking the
+ * last checked box unchecks it), a clue or juice to the highest number
+ * printed at or before the box (amountForBox).
  */
 async function setDeckBoxes(event, target) {
   const item = itemAt(this, target);
@@ -502,9 +525,8 @@ async function setDeckBoxes(event, target) {
         await logModification(actor, "Edited", item, `${before} edited --> ${statusString(item)})`);
       }
     } else if (item.type === "clue" || item.type === "juice") {
-      const amount = Number(item.system.amount) || 0;
-      const next = box === amount ? box - 1 : box;
-      await item.update({ "system.amount": next });
+      const next = amountForBox(box, item.system.amount);
+      if (next !== (Number(item.system.amount) || 0)) await item.update({ "system.amount": next });
     }
   });
 }
@@ -633,7 +655,7 @@ export const DECK_ACTIONS = {
   attachDeck: attachDeckAction,
 };
 
-// ── The fields on a card (name, Help/Hurt target, clue source / method) ─────
+// ── The fields on a card (name, clue source / method) ──────────────────────
 
 /**
  * A field of a deck card changed (Enter or leaving it). The name: renamed
@@ -658,6 +680,9 @@ async function changeDeckField(app, input) {
       if (isNew) app.deckNew = null;
       if (name === item.name && !isNew) return;
       const before = item.type === "status" ? statusString(item) : `${item.name} (${item.system.amount})`;
+      // Named with its default name: no update, so no re-render; the name
+      // field still has to go (on the character card for a story tag).
+      if (isNew && name === item.name && app.isMistCardSheet) app.render({ parts: ["layer2", "deck"] });
       await item.update({ name });
       if (isNew) {
         const after = item.type === "status" ? `tier  ${item.system.tier}`
@@ -674,9 +699,6 @@ async function changeDeckField(app, input) {
     case "source":
     case "method":
       if (value !== (item.system[field] ?? "")) await item.update({ [`system.${field}`]: value });
-      return;
-    case "target":
-      if (value !== (item.system.targetCharacterId ?? "")) await item.update({ "system.targetCharacterId": value });
       return;
   }
 }
@@ -735,15 +757,25 @@ export function bindDeckListeners(app, { views = true } = {}) {
       if (item && app.deckNew === item.id) void dropNewCard(app, item);
     }, 0);
   });
-  el.addEventListener("dragover", event => {
-    if (currentSystemDraggable()) event.preventDefault();
+  // System draggables dropped here go to the actor (a deck card of this
+  // actor does nothing); non-owners ask a GM (drop-relay.js).
+  bindDropTarget(el, () => app.actor);
+  // A deck card dragged out: the browser needs some data to start the drag
+  // (Firefox). Capture phase: the system's own dragstart stops the event at
+  // the card. On the sheet, the core's DragDrop then puts the item there.
+  el.addEventListener("dragstart", event => {
+    const card = event.target.closest?.(".mh-cs-deck-card.draggable");
+    if (!card || !event.dataTransfer) return;
+    event.dataTransfer.setData("text/plain", card.dataset.name ?? "");
   }, { capture: true });
-  el.addEventListener("drop", event => {
-    const dragging = currentSystemDraggable();
-    if (!dragging) return;
-    event.preventDefault();
-    event.stopPropagation();
-    if (app.actor?.isOwner) void dropDraggableOnActor(dragging, app.actor);
+  // A draggable card can't have its text fields selected with the mouse:
+  // the card stops being draggable while a field is pressed.
+  el.addEventListener("pointerdown", event => {
+    if (!event.target.closest?.("input, select, textarea")) return;
+    const card = event.target.closest(".mh-cs-deck-card[draggable='true']");
+    if (!card) return;
+    card.draggable = false;
+    window.addEventListener("pointerup", () => { card.draggable = true; }, { once: true });
   }, { capture: true });
 }
 

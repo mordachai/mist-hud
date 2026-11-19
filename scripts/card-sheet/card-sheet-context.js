@@ -242,26 +242,25 @@ const playerNames = actor => game.users
   .join(", ");
 
 /**
- * Help and Hurt this character holds for each crewmate: the other player
- * characters, plus anyone a Help/Hurt of theirs points at.
+ * Help and Hurt this character holds, one line per crewmate a Help or Hurt
+ * of theirs points at (the "+" next to the Crew title adds one; fixes
+ * 2026-11-19). A Help / Hurt with no target yet gets a "?" line.
  */
 function crewmates(actor) {
-  const amount = (kind, id) => {
-    try { return actor.getHelpHurtFor(kind, id) ?? 0; } catch { return 0; }
-  };
-  const targets = new Set(actor.items
-    .filter(i => i.isJuice?.() && (i.isHelp?.() || i.isHurt?.()))
-    .map(i => i.system.targetCharacterId)
-    .filter(Boolean));
-  return game.actors
-    .filter(a => a.type === "character" && a.id !== actor.id && (a.hasPlayerOwner || targets.has(a.id)))
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map(a => ({
-      id:   a.id,
-      name: a.name,
-      help: amount("help", a.id),
-      hurt: amount("hurt", a.id),
-    }));
+  const juice = actor.items.filter(i => i.type === "juice"
+    && (i.system?.subtype === "help" || i.system?.subtype === "hurt"));
+  const amount = (kind, id) => juice
+    .filter(i => i.system.subtype === kind && (i.system.targetCharacterId ?? "") === id)
+    .reduce((sum, i) => sum + (Number(i.system.amount) || 0), 0);
+  const ids = [...new Set(juice.map(i => i.system.targetCharacterId ?? ""))];
+  return ids
+    .map(id => ({
+      id,
+      name: game.actors.get(id)?.name ?? "?",
+      help: amount("help", id),
+      hurt: amount("hurt", id),
+    }))
+    .sort((a, b) => (a.id ? 0 : 1) - (b.id ? 0 : 1) || a.name.localeCompare(b.name));
 }
 
 /** The build-up track, its unspent improvements and the improvements bought with it. */
@@ -280,7 +279,7 @@ function buildUpView(actor, perms) {
   };
 }
 
-async function characterCard(actor, flips, storyTags) {
+async function characterCard(actor, flips, storyTags, newStoryTag) {
   const config = CHARACTER_CARD[getActiveSystem()] ?? {};
   const sys = actor.system ?? {};
   const perms = permissions(actor, actor);
@@ -306,12 +305,16 @@ async function characterCard(actor, flips, storyTags) {
     })),
     helpHurt:    !!config.helpHurt,
     crewmates:   config.helpHurt ? crewmates(actor) : [],
+    // Story tags: "+" for the owner (both modes; the new tag's name is a
+    // field here), edit and delete in edit mode, as on the theme cards.
     storyTags:   storyTags.map(t => ({
       id:        t.id,
       name:      t.tagName,
       burnState: t.burnState,
       temporary: !!t.temporary,
       permanent: !!t.permanent,
+      isNew:     !!newStoryTag && t.id === newStoryTag,
+      edit:      perms.edit,
       ...selectionView(actor.items.get(t.id), perms.edit),
     })),
     shortDescription: sys.short_description ?? "",
@@ -326,15 +329,17 @@ async function characterCard(actor, flips, storyTags) {
  * theme (the active one marked).
  * @param {Actor}  actor
  * @param {object} flips  { [cardId]: true }
+ * @param {object} [options]
+ * @param {string} [options.newStoryTag]  a story tag just made from the character card (its name is a field)
  * @returns {Promise<{activeSystem: string, cards: object[], owners: string[]}>}
  *   owners: ids of the other actors whose themes are shown (crew, dangers),
  *   so the sheet can re-render when they change.
  */
-export async function buildLayer2Context(actor, flips = {}) {
+export async function buildLayer2Context(actor, flips = {}, { newStoryTag = null } = {}) {
   const { storyTags } = getThemesAndTags(actor);
   const linked = [...getCrewThemes(actor), ...getAllExtraThemes(actor)];
   const cards = [
-    await characterCard(actor, flips, storyTags),
+    await characterCard(actor, flips, storyTags, newStoryTag),
     ...linked.map(t => linkedThemeCard(t, flips, actor)),
   ];
   const owners = [...new Set(linked.map(t => t.actorId).filter(id => id && id !== actor.id))];

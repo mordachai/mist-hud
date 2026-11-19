@@ -13,6 +13,7 @@ import { openNPCInfluenceManager }   from "./npc-influence.js";
 import { TokenStatusNotification, TokenTagNotification } from "./notifications.js";
 import { MistCardSheet, CARD_SHEET_TEMPLATES, refreshCardSheets, refreshCardSheetsOnDBLoad, refreshCardSheetsForOwner, refreshCardSheetTotals } from "./card-sheet/card-sheet.js";
 import { refreshDeckWindow } from "./card-sheet/tags-deck.js";
+import { bindCanvasRelay } from "./drop-relay.js";
 
 // ── Initial load guard ────────────────────────────────────────────────────────
 // Prevents HUDs from opening during the brief "game loading" window.
@@ -439,6 +440,10 @@ Hooks.on("getSceneControlButtons", controls => {
 });
 
 // ── Drag-and-drop: status / story-tag onto tokens ─────────────────────────────
+// System draggables (deck cards, chat statuses and tags) dropped on a token
+// this user does not own: relayed to a GM (drop-relay.js).
+Hooks.on("canvasReady", () => bindCanvasRelay());
+
 // Players may drop a status or story tag on a token they do not own. Creating
 // the item needs permission on that actor, so those drops are relayed to a GM
 // over the module socket (same idea as the help/hurt "bonusAction" handlers).
@@ -480,7 +485,11 @@ async function _createDroppedItem(actor, kind, drop) {
     const [item] = await actor.createEmbeddedDocuments("Item", [_statusItemData(drop)]);
     return item;
   }
-  const [item] = await actor.createEmbeddedDocuments("Item", [_storyTagItemData(drop)]);
+  // Like the system's createStoryTag(name, true): no second story tag of the same name.
+  const data = _storyTagItemData(drop);
+  const same = actor.items.find(i => i.type === "tag" && i.system?.subtype === "story" && i.name === data.name);
+  if (same) return same;
+  const [item] = await actor.createEmbeddedDocuments("Item", [data]);
   return item;
 }
 
@@ -490,8 +499,10 @@ const _dropHandlers = {
     if (!game.user.isGM || game.user.id !== game.users.activeGM?.id) return;
     try {
       if (!["status", "story-tag"].includes(data.kind)) return;
-      const tokenDoc = await fromUuid(String(data.tokenUuid));
-      const actor = tokenDoc?.actor;
+      // A token (canvas drops) or an actor (drop-relay.js: deck cards and
+      // system draggables dropped on a HUD, sheet or token the sender does not own).
+      const doc = await fromUuid(String(data.tokenUuid ?? data.actorUuid));
+      const actor = doc instanceof Actor ? doc : doc?.actor;
       if (!actor) return;
       await _createDroppedItem(actor, data.kind, data.drop ?? {});
     } catch (e) {

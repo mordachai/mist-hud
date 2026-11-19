@@ -20,6 +20,7 @@ import {
 } from "./getters.js";
 import { BonusManager } from "./bonus-manager.js";
 import { attachFoldBehaviour, scheduleFold, cancelFold } from "./hud-fold.js";
+import { bindDropTarget } from "./drop-relay.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -1461,6 +1462,9 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
   async _onFirstRender(context, options) {
     await super._onFirstRender(context, options);
     attachFoldBehaviour(this);
+    // Deck cards and system draggables (chat statuses, tags) dropped on the
+    // HUD go to its actor, the system's way (non-owners ask a GM).
+    bindDropTarget(this.element, () => this.actor);
   }
 
   /** Keep the loadout popup attached to its header when the HUD moves, and remember where it is. */

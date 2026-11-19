@@ -39,30 +39,57 @@
         </dl>
         <div class="mh-cs-scroll">
           {{#if card.helpHurt}}
-          {{!-- Help and Hurt are columns: named once in the heading, plain numbers per crewmate. --}}
+          {{!-- Help and Hurt are columns: named once in the heading, one line
+                per crewmate a Help / Hurt points at. The owner adds one with
+                "+", types the numbers, and (edit mode) deletes a line. --}}
           <h4 class="mh-cs-section mh-cs-crew-head">
             <span class="mh-cs-section-label">{{localize "MistHUD.cardSheet.crew"}}</span>
+            {{#if card.own}}
+            <button type="button" class="mh-cs-icon-btn mh-cs-add-help-hurt" data-action="addHelpHurt" data-tooltip="{{localize 'MistHUD.cardSheet.helpHurt.addTitle'}}" aria-label="{{localize 'MistHUD.cardSheet.helpHurt.addTitle'}}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+            {{/if}}
             <span class="mh-cs-juice-col">{{localize "CityOfMist.terms.help"}}</span>
             <span class="mh-cs-juice-col">{{localize "CityOfMist.terms.hurt"}}</span>
+            {{#if card.edit}}<span class="mh-cs-juice-trash-col" aria-hidden="true"></span>{{/if}}
           </h4>
           <ul class="mh-cs-crewmates">
             {{#each card.crewmates}}
             <li class="mh-cs-crewmate" data-actor-id="{{id}}">
               <span class="mh-cs-crewmate-name">{{name}}</span>
+              {{#if ../card.own}}
+              <input type="number" class="mh-cs-juice-col mh-cs-juice-input mh-cs-help{{#unless help}} zero{{/unless}}" id="{{@root.uid}}-help-{{id}}" data-edit="helpHurt" data-kind="help" value="{{help}}" min="0" step="1" aria-label="{{localize 'CityOfMist.terms.help'}}: {{name}}">
+              <input type="number" class="mh-cs-juice-col mh-cs-juice-input mh-cs-hurt{{#unless hurt}} zero{{/unless}}" id="{{@root.uid}}-hurt-{{id}}" data-edit="helpHurt" data-kind="hurt" value="{{hurt}}" min="0" step="1" aria-label="{{localize 'CityOfMist.terms.hurt'}}: {{name}}">
+              {{else}}
               <span class="mh-cs-juice-col mh-cs-help{{#unless help}} zero{{/unless}}" aria-label="{{localize 'CityOfMist.terms.help'}} {{help}}">{{help}}</span>
               <span class="mh-cs-juice-col mh-cs-hurt{{#unless hurt}} zero{{/unless}}" aria-label="{{localize 'CityOfMist.terms.hurt'}} {{hurt}}">{{hurt}}</span>
+              {{/if}}
+              {{#if ../card.edit}}
+              <button type="button" class="mh-cs-icon-btn mh-cs-delete" data-action="deleteHelpHurt" data-tooltip="{{localize 'MistHUD.cardSheet.helpHurt.deleteHint'}}" aria-label="{{localize 'MistHUD.cardSheet.helpHurt.deleteTitle'}}: {{name}}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+              {{/if}}
             </li>
             {{else}}
-            <li class="mh-cs-none">{{localize "MistHUD.cardSheet.noCrewmates"}}</li>
+            <li class="mh-cs-none">{{localize "MistHUD.cardSheet.noHelpHurt"}}</li>
             {{/each}}
           </ul>
           {{/if}}
-          <h4 class="mh-cs-section">{{localize "CityOfMist.terms.storyTags"}}</h4>
+          <h4 class="mh-cs-section mh-cs-story-head">
+            <span class="mh-cs-section-label">{{localize "CityOfMist.terms.storyTags"}}</span>
+            {{#if card.own}}
+            <button type="button" class="mh-cs-icon-btn" data-action="createDeckItem" data-kind="tag" data-origin="character" data-tooltip="{{localize 'MistHUD.cardSheet.deck.createStoryTag'}}" aria-label="{{localize 'MistHUD.cardSheet.deck.createStoryTag'}}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+            {{/if}}
+          </h4>
           <ul class="mh-cs-tags mh-cs-story-tags">
             {{#each card.storyTags}}
-            <li class="mh-cs-tag mh-cs-story-tag {{burnState}}{{#if temporary}} temporary{{/if}}{{#if permanent}} permanent{{/if}}{{#if selection}} mh-cs-selected mh-cs-selected-{{selection}}{{/if}}" data-tag-id="{{id}}">
+            <li class="mh-cs-tag mh-cs-story-tag {{burnState}}{{#if temporary}} temporary{{/if}}{{#if permanent}} permanent{{/if}}{{#if selection}} mh-cs-selected mh-cs-selected-{{selection}}{{/if}}" data-tag-id="{{id}}" data-item-id="{{id}}">
               <span class="mh-cs-burn {{burnState}}" aria-hidden="true"></span>
+              {{#if isNew}}
+              {{!-- A story tag just made here: its name is typed in place (tags-deck.js changeDeckField). --}}
+              <input type="text" class="mh-cs-tag-name mh-cs-story-tag-input" id="{{@root.uid}}-story-{{id}}" data-deck-field="name" value="" placeholder="{{localize 'MistHUD.cardSheet.deck.namePlaceholder'}}" spellcheck="false" aria-label="{{localize 'MistHUD.cardSheet.deck.namePlaceholder'}}">
+              {{else if edit}}
+              <button type="button" class="mh-cs-tag-name mh-cs-edit-name" data-action="editTag" data-tooltip="{{localize 'MistHUD.cardSheet.editTag'}}">{{name}}</button>
+              <button type="button" class="mh-cs-icon-btn mh-cs-delete" data-action="deleteTag" data-tooltip="{{localize 'MistHUD.cardSheet.deleteTagHint'}}" aria-label="{{localize 'MistHUD.cardSheet.deleteTag'}}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+              {{else}}
               {{> "modules/mist-hud/templates/card-sheet/tag-name.hbs" tag=this}}
+              {{/if}}
             </li>
             {{else}}
             <li class="mh-cs-none">{{localize "MistHUD.cardSheet.noStoryTags"}}</li>

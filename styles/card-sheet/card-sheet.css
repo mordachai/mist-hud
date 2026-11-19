@@ -1799,11 +1799,6 @@
   min-width: 0;
 }
 
-.mh-card-sheet .mh-cs-deck-target-label {
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
-
 .mh-card-sheet .mh-cs-deck-fields {
   display: flex;
   align-items: center;
@@ -2230,4 +2225,75 @@
   scrollbar-width: thin;
   container-type: inline-size;
   pointer-events: auto;
+}
+
+/* ── Character card: Help / Hurt and story tags made in place (fixes
+   2026-11-19, phase 1; behaviour only, the look comes in later phases) ── */
+
+/* The Crew title's "+" sits right after the title, the columns stay at the right. */
+.mh-card-sheet .mh-cs-crew-head .mh-cs-section-label {
+  flex: 0 1 auto;
+}
+
+.mh-card-sheet .mh-cs-crew-head .mh-cs-add-help-hurt {
+  margin-right: auto;
+}
+
+/* Lines with a trash (edit mode): the heading keeps the same room at the right. */
+.mh-card-sheet .mh-cs-juice-trash-col {
+  flex: 0 0 8cqw;
+}
+
+/* The Help / Hurt numbers are fields that look like the plain numbers. */
+.mh-card-sheet .mh-cs-card input.mh-cs-juice-input {
+  width: 9cqw;
+  height: auto;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  border-bottom: 0.3cqw solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: bold;
+  text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.mh-card-sheet .mh-cs-card input.mh-cs-juice-input::-webkit-inner-spin-button,
+.mh-card-sheet .mh-cs-card input.mh-cs-juice-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.mh-card-sheet .mh-cs-card input.mh-cs-juice-input:hover,
+.mh-card-sheet .mh-cs-card input.mh-cs-juice-input:focus {
+  border-bottom-color: rgba(0, 0, 0, 0.45);
+  outline: none;
+}
+
+.mh-card-sheet .mh-cs-card input.mh-cs-juice-input.zero:not(:focus) {
+  font-weight: normal;
+  opacity: 0.45;
+}
+
+/* A story tag just made on the character card: its name is typed in place. */
+.mh-card-sheet .mh-cs-card input.mh-cs-story-tag-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: auto;
+  padding: 0 0.6cqw;
+  border: none;
+  border-bottom: 0.3cqw solid rgba(0, 0, 0, 0.45);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.35);
+  color: inherit;
+  font: inherit;
+}
+
+/* Deck cards can be dragged out onto a sheet, a token or a HUD. */
+.mh-card-sheet .mh-cs-deck-card[draggable="true"] {
+  -webkit-user-drag: element;
 }
