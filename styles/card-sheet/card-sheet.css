@@ -169,27 +169,47 @@
   pointer-events: none;
 }
 
-/* The Portrait button (fixes phase 4): a white square, as in the mockup;
-   an outline only while the portrait is hidden. */
+/* The Portrait button (fixes phase 4): a miniature of the actor's portrait
+   in a white frame (the mockup's white square), shaped like the current
+   mode: square for the Portrait, tall (340 × 500) for the Hero Shot, and
+   faded, grey, with a dashed frame while the portrait is hidden. */
 .mh-card-sheet .mh-cs-portrait-toggle {
   flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   margin: 0 6px 0 0;
   padding: 0;
+  overflow: hidden;
   border: 2px solid #fff;
   border-radius: 6px;
-  background: #fff;
-  color: #141414;
-  font-size: 14px;
-  line-height: 1;
+  background: #111;
   cursor: pointer;
+  transition: width 0.2s ease, height 0.2s ease, opacity 0.2s ease;
+}
+
+.mh-card-sheet .mh-cs-portrait-toggle img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: none;
+  object-fit: cover;
+  object-position: top center;
+  pointer-events: none;
+}
+
+.mh-card-sheet .mh-cs-portrait-toggle[data-mode="hero"] {
+  width: 30px;
+  height: 44px;
 }
 
 .mh-card-sheet .mh-cs-portrait-toggle[data-mode="hide"] {
-  background: transparent;
-  color: #fff;
-  opacity: 0.8;
+  border-style: dashed;
+  opacity: 0.7;
+}
+
+.mh-card-sheet .mh-cs-portrait-toggle[data-mode="hide"] img {
+  filter: grayscale(1) brightness(0.7);
 }
 
 .mh-card-sheet .mh-cs-portrait-toggle:hover,

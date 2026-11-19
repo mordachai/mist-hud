@@ -199,6 +199,10 @@ What the code does today, checked before planning:
 > - Mask: client setting **Card Sheet: Hero Shot Mask** with None / Misty (default) / Dissolving / Jagged. It uses `ui/card-sheet/portrait-masks/<name>.webp`, fixed names, with `mask-mode: luminance` and `mask-size: 100% 100%`, on the Hero Shot only. The image is loaded first, and the mask is set only once it loads. A missing file shows the portrait unmasked. Checked by pointing the setting at a file that does not exist. A change of the setting applies at once and checks the files again (so swapped files are picked up; a page reload also does it).
 > - Checked: the bar and the move bar have the same position and width; the Hero Shot is 340 × 500 with Misty and with Jagged; the Portrait is 256 × 256; the cards stay in place through Hide → Portrait → Hero → Hide (window 1098 / 1366 / 1450); reopening keeps the mode; the spread view and a card brought forward inside the fitted overlay; the tilt setting on and off.
 > - Not checked: a real mouse drag of the window by the shorter bar (the bar is still the core header, so dragging should work as before); a window much smaller or larger than the default; Dissolving; a player client; Firefox; the detached deck window (its rules are left out of the bar changes). The Portrait button's tooltip reads "Portrait: Portrait. Click: Hero Shot" in the middle state.
+>
+> **Phase 4 follow-up (user, 2026-11-19): done, not tested here (the user tests).**
+> - The Portrait button is a miniature of the actor's portrait (cover, top centre) in a white frame. It is square for Portrait, tall for Hero Shot (30 × 44), and grey, faded and dashed while the portrait is hidden. It follows a change of the actor's image.
+> - The mask selector also goes in the Sheet Settings that phase 5 builds.
 
 **Phase 5: Settings and dialogs**
 - Text move buttons on the card sheet (two rows) through the existing `useTextButtons` setting, or a sheet-only one.

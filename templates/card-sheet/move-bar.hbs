@@ -1,6 +1,7 @@
 <nav class="mh-cs-move-bar">
-  {{!-- Portrait: cycles Hide / Portrait / Hero Shot (fixes phase 4). --}}
-  <button type="button" class="mh-cs-portrait-toggle" data-action="cyclePortrait" data-mode="{{portrait.mode}}" data-tooltip="{{portrait.tooltip}}" aria-label="{{portrait.tooltip}}"><i class="fa-solid {{portrait.icon}}"></i></button>
+  {{!-- Portrait: cycles Hide / Portrait / Hero Shot (fixes phase 4); a
+        miniature of the actor's portrait, shaped like the current mode. --}}
+  <button type="button" class="mh-cs-portrait-toggle" data-action="cyclePortrait" data-mode="{{portrait.mode}}" data-tooltip="{{portrait.tooltip}}" aria-label="{{portrait.tooltip}}"><img src="{{portrait.img}}" alt=""></button>
   {{!-- What the selection adds to the next roll (setting: deck cards, tags + cards, or all). --}}
   <div class="mh-cs-totals" aria-live="polite">
     {{#each moveBar.totals}}

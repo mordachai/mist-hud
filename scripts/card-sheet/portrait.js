@@ -28,7 +28,6 @@ export const PORTRAIT_COLUMN = {
   hero:     { k: 340 / REF_CARD_W, gap: 12 },
 };
 
-const ICONS = { hide: "fa-user-slash", portrait: "fa-user", hero: "fa-image-portrait" };
 const LABELS = { hide: "portraitHide", portrait: "portraitPortrait", hero: "portraitHero" };
 
 const MASK_DIR = "modules/mist-hud/ui/card-sheet/portrait-masks";
@@ -47,7 +46,6 @@ export function portraitContext(actor) {
     shown:   mode !== "hide",
     img:     actor.img,
     name:    actor.name,
-    icon:    ICONS[mode],
     tooltip: game.i18n.format("MistHUD.cardSheet.portraitButton", { mode: label(mode), next: label(nextPortraitMode(mode)) }),
   };
 }

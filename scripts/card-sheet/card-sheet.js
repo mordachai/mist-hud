@@ -245,7 +245,8 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       if (keys.every(k => LAYER2_ACTOR_FIELDS.has(k) || PORTRAIT_ACTOR_FIELDS.has(k))) {
         const parts = [];
         if (keys.some(k => LAYER2_ACTOR_FIELDS.has(k))) parts.push("layer2");
-        if (keys.some(k => PORTRAIT_ACTOR_FIELDS.has(k))) parts.push("portrait");
+        // The portrait, and the Portrait button's miniature in the move bar.
+        if (keys.some(k => PORTRAIT_ACTOR_FIELDS.has(k))) parts.push("portrait", "moves");
         return parts;
       }
       if (keys.every(k => k === "system.locked")) return [...LAYER_PARTS, "deck"];
