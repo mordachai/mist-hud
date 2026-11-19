@@ -36,6 +36,9 @@ export const SETTINGS = {
   CARD_SHEET_MOD_TOTAL:        "cardSheetModifierTotal",
   CARD_SHEET_TILT:             "cardSheetTilt",
   CARD_SHEET_PORTRAIT_MASK:    "cardSheetPortraitMask",
+  CARD_SHEET_TEXT_BUTTONS:     "cardSheetTextButtons",
+  HUD_FOR_PCS:                 "hudForPCs",
+  HUD_FOR_NPCS:                "hudForNPCs",
 };
 
 export const SOCKET_NAME = "module.mist-hud";

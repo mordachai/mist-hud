@@ -39,6 +39,7 @@ import {
   DECK_TEMPLATES, DECK_ACTIONS, buildDeckContext, bindDeckListeners, deckRendered, focusDeckView,
   openDeckWindow, deckWindowFor, refreshAllDeckWindows,
 } from "./tags-deck.js";
+import { SheetSettingsForm } from "../settings-forms.js";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -110,6 +111,8 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       rollMove:        MistCardSheet.#onRollMove,
       nextMoveGroup:   MistCardSheet.#onNextMoveGroup,
       openSystemSheet: MistCardSheet.#onOpenSystemSheet,
+      openSheetSettings: () => SheetSettingsForm.open(),
+      openHud:         MistCardSheet.#onOpenHud,
       flipCard:        MistCardSheet.#onFlipCard,
       showLayer:       MistCardSheet.#onShowLayer,
       setActiveExtra:  MistCardSheet.#onSetActiveExtra,
@@ -552,6 +555,13 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       addControl("fa-book-open mh-cs-open-system", "openSystemSheet",
         game.i18n.localize("MistHUD.cardSheet.openSystemSheet"));
     }
+    // Fixes phase 5: the HUD (closes the sheet; the HUD's header has the
+    // matching "open sheet" button) and the Sheet Settings form.
+    if (this.document.isOwner) {
+      addControl("fa-square-user mh-cs-open-hud", "openHud", game.i18n.localize("MistHUD.cardSheet.openHud"));
+    }
+    addControl("fa-gear mh-cs-sheet-settings", "openSheetSettings",
+      game.i18n.localize("MistHUD.settingsForm.sheet.title"));
     return frame;
   }
 
@@ -578,6 +588,14 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   static #onOpenSystemSheet() {
     openSystemSheet(this.actor);
+  }
+
+  /** Header button: close the sheet and show the actor's HUD (init.js opens it). */
+  static async #onOpenHud() {
+    const actor = this.actor;
+    const token = this.token?.object ?? null;
+    await this.close();
+    Hooks.callAll("mistHudOpenHud", actor, token);
   }
 
   /**

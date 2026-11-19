@@ -1,4 +1,4 @@
-<nav class="mh-cs-move-bar">
+<nav class="mh-cs-move-bar{{#if moveBar.text}} mh-cs-move-bar-text{{/if}}">
   {{!-- Portrait: cycles Hide / Portrait / Hero Shot (fixes phase 4); a
         miniature of the actor's portrait, shaped like the current mode. --}}
   <button type="button" class="mh-cs-portrait-toggle" data-action="cyclePortrait" data-mode="{{portrait.mode}}" data-tooltip="{{portrait.tooltip}}" aria-label="{{portrait.tooltip}}"><img src="{{portrait.img}}" alt=""></button>
@@ -11,7 +11,10 @@
   {{#each moveBar.groups}}
   <div class="mh-cs-move-group mh-cs-move-group-{{key}}{{#unless shown}} hidden{{/unless}}" data-label="{{label}}">
     {{#each moves}}
-    {{#if imgSrc}}
+    {{#if @root.moveBar.text}}
+    {{!-- Sheet Settings: text move buttons (fixes phase 5), two rows. --}}
+    <button type="button" class="mh-cs-move mh-cs-move-text" data-action="rollMove" data-move-id="{{id}}" data-tooltip="{{name}}" aria-label="{{name}}"><span>{{name}}</span></button>
+    {{else if imgSrc}}
     <button type="button" class="mh-cs-move mh-cs-move-img" data-action="rollMove" data-move-id="{{id}}" data-tooltip="{{name}}" aria-label="{{name}}"><img src="{{imgSrc}}" alt=""></button>
     {{else}}
     <button type="button" class="mh-cs-move{{#if size}} mh-cs-move-{{size}}{{/if}}" data-action="rollMove" data-move-id="{{id}}" data-tooltip="{{name}}" aria-label="{{name}}">{{abbr}}</button>

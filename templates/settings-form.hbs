@@ -1,0 +1,28 @@
+{{!-- The HUD Settings / Sheet Settings forms (fixes phase 5,
+      scripts/settings-forms.js). One form group per client setting, in the
+      core settings look. Takes: intro, fields [{ key, id, name, hint, value,
+      checkbox | options | range | text }]. --}}
+<section class="mh-settings-form-body">
+  {{#if intro}}<p class="hint mh-settings-form-intro">{{intro}}</p>{{/if}}
+  {{#each fields}}
+  <div class="form-group">
+    <label for="{{id}}">{{name}}</label>
+    <div class="form-fields">
+      {{#if checkbox}}
+      <input type="checkbox" id="{{id}}" name="{{key}}" {{checked value}}>
+      {{else if options}}
+      <select id="{{id}}" name="{{key}}">
+        {{#each options}}
+        <option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+      {{else if range}}
+      <range-picker id="{{id}}" name="{{key}}" value="{{value}}" min="{{range.min}}" max="{{range.max}}" step="{{range.step}}"></range-picker>
+      {{else}}
+      <input type="text" id="{{id}}" name="{{key}}" value="{{value}}">
+      {{/if}}
+    </div>
+    {{#if hint}}<p class="hint">{{hint}}</p>{{/if}}
+  </div>
+  {{/each}}
+</section>

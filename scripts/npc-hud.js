@@ -2,6 +2,7 @@ import { initializeAccordions, parseMoveText, registerNpcHelpers } from './npc-h
 import { detectActiveSystem } from './settings.js';
 import { attachFoldBehaviour, scheduleFold, cancelFold } from './hud-fold.js';
 import { bindDropTarget } from './drop-relay.js';
+import { HudSettingsForm } from './settings-forms.js';
 import { getSelectionDirection, setSelectionDirection, selectionInfluence } from './hud-state.js';
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 import { CityDialogs } from "/systems/city-of-mist/module/city-dialogs.js";
@@ -66,13 +67,27 @@ export class NpcHUD extends HandlebarsApplicationMixin(ApplicationV2) {
             positioned: true,
             resizable: false,
             minimizable: true,
-            title: "MistHUD.window.npcHud"
+            title: "MistHUD.window.npcHud",
+            // The ⋮ menu: the HUD Settings form (fixes phase 5).
+            controls: [{
+                icon: "fa-solid fa-gear",
+                label: "MistHUD.settingsForm.hud.title",
+                action: "openHudSettings",
+            }],
         },
         position: { width: 310, height: 'auto', left: 950, top: 120 },
         actions: {
             openSheet: NpcHUD.#onOpenSheet,
+            openHudSettings: () => HudSettingsForm.open(),
         },
     };
+
+    /** Close every open NPC HUD (the "HUD for NPCs" setting turned off). */
+    static closeAll() {
+        for (const hud of allNpcHuds()) {
+            if (hud.rendered) void hud.close();
+        }
+    }
 
     /** Header button: open the actor's sheet and close the HUD. */
     static async #onOpenSheet(event) {

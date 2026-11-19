@@ -3,6 +3,7 @@
 
 import { MODULE_ID, SETTINGS, getActiveSystem } from "./constants.js";
 import { rescheduleAllFolds } from "./hud-fold.js";
+import { HudSettingsForm, SheetSettingsForm } from "./settings-forms.js";
 
 export { MODULE_ID };
 
@@ -137,14 +138,182 @@ export async function detectActiveSystem() {
 }
 
 // ── Settings registration ─────────────────────────────────────────────────────
+// Grouped (fixes phase 5):
+//  - HUD Settings (client): a form of its own (settings-forms.js), opened from
+//    the core list and the HUDs' ⋮ menu. The two "show the HUD" toggles are
+//    also in the core list.
+//  - Sheet Settings (client): a form of its own, opened from the core list and
+//    the card sheet's header.
+//  - World (GM): in the core list.
+//  - Dice (client): in the core list.
+// Settings with no UI (state kept for the user) come last.
 
 Hooks.once("init", () => {
   const K = key => `MistHUD.settings.${key}`;
 
-  game.settings.register(MODULE_ID, SETTINGS.ROLL_IS_DYNAMITE, {
-    name: K("rollIsDynamite.name"),
-    hint: K("rollIsDynamite.hint"),
+  // ── Menus ───────────────────────────────────────────────────────────────────
+
+  game.settings.registerMenu(MODULE_ID, "hudSettings", {
+    name:  "MistHUD.settingsForm.hud.title",
+    label: "MistHUD.settingsForm.hud.button",
+    hint:  "MistHUD.settingsForm.hud.hint",
+    icon:  "fa-solid fa-square-user",
+    type:  HudSettingsForm,
+    restricted: false,
+  });
+
+  game.settings.registerMenu(MODULE_ID, "sheetSettings", {
+    name:  "MistHUD.settingsForm.sheet.title",
+    label: "MistHUD.settingsForm.sheet.button",
+    hint:  "MistHUD.settingsForm.sheet.hint",
+    icon:  "fa-solid fa-id-card",
+    type:  SheetSettingsForm,
+    restricted: false,
+  });
+
+  // ── HUD Settings (client) ───────────────────────────────────────────────────
+
+  // Show the HUD for player characters / for NPCs and dangers, per user. Off:
+  // selecting a token of that kind no longer opens its HUD, and the open ones
+  // close; on again, the selected token's HUD opens. Also in the core list.
+  game.settings.register(MODULE_ID, SETTINGS.HUD_FOR_PCS, {
+    name: K("hudForPCs.name"),
+    hint: K("hudForPCs.hint"),
+    scope: "client", config: true, type: Boolean, default: true,
+    onChange: enabled => Hooks.callAll("mistHudVisibility", "pc", enabled),
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.HUD_FOR_NPCS, {
+    name: K("hudForNPCs.name"),
+    hint: K("hudForNPCs.hint"),
+    scope: "client", config: true, type: Boolean, default: true,
+    onChange: enabled => Hooks.callAll("mistHudVisibility", "npc", enabled),
+  });
+
+  // When selecting a token opens its HUD. Per user; "auto" = players yes, GM no.
+  game.settings.register(MODULE_ID, SETTINGS.OPEN_ON_SELECT, {
+    name: K("openOnSelect.name"),
+    hint: K("openOnSelect.hint"),
+    scope: "client", config: false, type: String,
+    choices: {
+      auto:   K("openOnSelect.auto"),
+      always: K("openOnSelect.always"),
+      never:  K("openOnSelect.never"),
+    },
+    default: "auto",
+  });
+
+  // Fold (minimize) a HUD after this many seconds without interaction; 0 = never
+  game.settings.register(MODULE_ID, SETTINGS.AUTO_FOLD_DELAY, {
+    name: K("autoFoldDelay.name"),
+    hint: K("autoFoldDelay.hint"),
+    scope: "client", config: false, type: Number,
+    range: { min: 0, max: 60, step: 5 },
+    default: 15,
+    onChange: () => rescheduleAllFolds(),
+  });
+
+  // Player HUD two-column ("wide") layout; also toggled from the HUD header
+  game.settings.register(MODULE_ID, SETTINGS.WIDE_LAYOUT, {
+    name: K("wideLayout.name"),
+    hint: K("wideLayout.hint"),
     scope: "client", config: false, type: Boolean, default: false,
+    onChange: () => Hooks.callAll("mistHudWideLayout"),
+  });
+
+  // The HUD's move buttons: text abbreviations instead of the move art
+  game.settings.register(MODULE_ID, SETTINGS.USE_TEXT_BUTTONS, {
+    name: K("useTextButtons.name"),
+    hint: K("useTextButtons.hint"),
+    scope: "client", config: false, type: Boolean, default: false,
+    onChange: () => Hooks.callAll("mistHudTextButtons"),
+  });
+
+  // ── Sheet Settings (client) ─────────────────────────────────────────────────
+  // Their onChange fires hooks that init.js handles (no circular import of the sheet).
+
+  // Card sheet: each sheet card tilted a little (−2°…+2°, the same angle
+  // every time), for a tabletop feel (fixes phase 4).
+  game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_TILT, {
+    name: K("cardSheetTilt.name"),
+    hint: K("cardSheetTilt.hint"),
+    scope: "client", config: false, type: Boolean, default: true,
+    onChange: () => Hooks.callAll("mistHudCardSheetLook"),
+  });
+
+  // Card sheet: the mask on the Hero Shot portrait. The files are
+  // ui/card-sheet/portrait-masks/<name>.webp (white = shown, black = hidden).
+  game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_PORTRAIT_MASK, {
+    name: K("cardSheetPortraitMask.name"),
+    hint: K("cardSheetPortraitMask.hint"),
+    scope: "client", config: false, type: String,
+    choices: {
+      none:       K("cardSheetPortraitMask.none"),
+      misty:      K("cardSheetPortraitMask.misty"),
+      dissolving: K("cardSheetPortraitMask.dissolving"),
+      jagged:     K("cardSheetPortraitMask.jagged"),
+    },
+    default: "misty",
+    onChange: () => Hooks.callAll("mistHudCardSheetLook"),
+  });
+
+  // Card sheet: the move bar shows the moves' names (two rows) instead of
+  // their art. The sheet's own setting: the HUD keeps useTextButtons.
+  game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_TEXT_BUTTONS, {
+    name: K("cardSheetTextButtons.name"),
+    hint: K("cardSheetTextButtons.hint"),
+    scope: "client", config: false, type: Boolean, default: false,
+    onChange: () => Hooks.callAll("mistHudCardSheetMoves"),
+  });
+
+  // Card sheet: the roll modifier total shown by the move buttons (tags-deck)
+  game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_MOD_TOTAL, {
+    name: K("cardSheetModifierTotal.name"),
+    hint: K("cardSheetModifierTotal.hint"),
+    scope: "client", config: false, type: String,
+    choices: {
+      cards: K("cardSheetModifierTotal.cards"),
+      split: K("cardSheetModifierTotal.split"),
+      all:   K("cardSheetModifierTotal.all"),
+    },
+    default: "cards",
+    onChange: () => Hooks.callAll("mistHudCardSheetTotals"),
+  });
+
+  // ── World (GM, core list) ───────────────────────────────────────────────────
+
+  // Restyle system sheets/chat through the system's "External Style" visual style
+  game.settings.register(MODULE_ID, SETTINGS.EXTERNAL_SHEET_STYLE, {
+    name: K("externalSheetStyle.name"),
+    hint: K("externalSheetStyle.hint"),
+    scope: "world", config: true, type: Boolean, default: false,
+    onChange: async enabled => {
+      applyExternalCSS(getActiveSystem());
+      if (!isActiveGM()) return;
+      if (enabled) await enforceExternalStyle();
+      // Turned off: drop back to the system's own style, unless the GM already
+      // picked another style by hand.
+      else if (getVisualStyle() === "custom") await setVisualStyle("base");
+    },
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_STATUS_NOTIFICATIONS, {
+    name: K("statusNotifications.name"),
+    hint: K("statusNotifications.hint"),
+    scope: "world", config: true, type: Boolean, default: true,
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_TAG_NOTIFICATIONS, {
+    name: K("tagNotifications.name"),
+    hint: K("tagNotifications.hint"),
+    scope: "world", config: true, type: Boolean, default: true,
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.ENABLE_STATUS_TABS, {
+    name: K("statusTabs.name"),
+    hint: K("statusTabs.hint"),
+    scope: "world", config: true, type: Boolean, default: true,
+    onChange: () => ui.notifications.info(game.i18n.localize("MistHUD.notify.statusTabsChanged")),
   });
 
   game.settings.register(MODULE_ID, SETTINGS.NPC_ACCORDION_STATE, {
@@ -167,42 +336,13 @@ Hooks.once("init", () => {
     },
   });
 
-  game.settings.register(MODULE_ID, SETTINGS.LAST_SELECTED_TAB, {
-    name: K("lastSelectedTab.name"),
-    scope: "client", config: false, type: String, default: "",
-  });
-
-  game.settings.register(MODULE_ID, SETTINGS.ENABLE_STATUS_NOTIFICATIONS, {
-    name: K("statusNotifications.name"),
-    hint: K("statusNotifications.hint"),
-    scope: "world", config: true, type: Boolean, default: true,
-  });
-
-  game.settings.register(MODULE_ID, SETTINGS.ENABLE_TAG_NOTIFICATIONS, {
-    name: K("tagNotifications.name"),
-    hint: K("tagNotifications.hint"),
-    scope: "world", config: true, type: Boolean, default: true,
-  });
-
-  game.settings.register(MODULE_ID, SETTINGS.USE_TEXT_BUTTONS, {
-    name: K("useTextButtons.name"),
-    hint: K("useTextButtons.hint"),
-    scope: "client", config: true, type: Boolean, default: false,
-    onChange: () => ui.notifications.info(game.i18n.localize("MistHUD.notify.buttonsChanged")),
-  });
-
-  game.settings.register(MODULE_ID, SETTINGS.ENABLE_STATUS_TABS, {
-    name: K("statusTabs.name"),
-    hint: K("statusTabs.hint"),
-    scope: "world", config: true, type: Boolean, default: true,
-    onChange: () => ui.notifications.info(game.i18n.localize("MistHUD.notify.statusTabsChanged")),
-  });
-
   game.settings.register(MODULE_ID, SETTINGS.DEBUG_MODE, {
     name: K("debugMode.name"),
     hint: K("debugMode.hint"),
     scope: "world", config: true, type: Boolean, default: false,
   });
+
+  // ── Dice (client, core list) ────────────────────────────────────────────────
 
   // Dice So Nice: pick the dice set for the active system automatically
   game.settings.register(MODULE_ID, SETTINGS.AUTO_DICE_SET, {
@@ -211,22 +351,20 @@ Hooks.once("init", () => {
     scope: "client", config: true, type: Boolean, default: true,
   });
 
-  // Restyle system sheets/chat through the system's "External Style" visual style
-  game.settings.register(MODULE_ID, SETTINGS.EXTERNAL_SHEET_STYLE, {
-    name: K("externalSheetStyle.name"),
-    hint: K("externalSheetStyle.hint"),
-    scope: "world", config: true, type: Boolean, default: false,
-    onChange: async enabled => {
-      applyExternalCSS(getActiveSystem());
-      if (!isActiveGM()) return;
-      if (enabled) await enforceExternalStyle();
-      // Turned off: drop back to the system's own style, unless the GM already
-      // picked another style by hand.
-      else if (getVisualStyle() === "custom") await setVisualStyle("base");
-    },
+  // ── No UI (state) ───────────────────────────────────────────────────────────
+
+  game.settings.register(MODULE_ID, SETTINGS.ROLL_IS_DYNAMITE, {
+    name: K("rollIsDynamite.name"),
+    hint: K("rollIsDynamite.hint"),
+    scope: "client", config: false, type: Boolean, default: false,
   });
 
-  // Layout settings (client-side, no config UI — set programmatically)
+  game.settings.register(MODULE_ID, SETTINGS.LAST_SELECTED_TAB, {
+    name: K("lastSelectedTab.name"),
+    scope: "client", config: false, type: String, default: "",
+  });
+
+  // Not read anywhere (the HUD only floats); kept so stored values stay valid.
   game.settings.register(MODULE_ID, SETTINGS.LAYOUT_MODE, {
     name: K("layoutMode.name"),
     scope: "client", config: false, type: String,
@@ -241,35 +379,6 @@ Hooks.once("init", () => {
     default: "left",
   });
 
-  // Player HUD two-column ("wide") layout, toggled from the HUD header
-  game.settings.register(MODULE_ID, SETTINGS.WIDE_LAYOUT, {
-    name: K("wideLayout.name"),
-    scope: "client", config: false, type: Boolean, default: false,
-  });
-
-  // When selecting a token opens its HUD. Per user; "auto" = players yes, GM no.
-  game.settings.register(MODULE_ID, SETTINGS.OPEN_ON_SELECT, {
-    name: K("openOnSelect.name"),
-    hint: K("openOnSelect.hint"),
-    scope: "client", config: true, type: String,
-    choices: {
-      auto:   K("openOnSelect.auto"),
-      always: K("openOnSelect.always"),
-      never:  K("openOnSelect.never"),
-    },
-    default: "auto",
-  });
-
-  // Fold (minimize) a HUD after this many seconds without interaction; 0 = never
-  game.settings.register(MODULE_ID, SETTINGS.AUTO_FOLD_DELAY, {
-    name: K("autoFoldDelay.name"),
-    hint: K("autoFoldDelay.hint"),
-    scope: "client", config: true, type: Number,
-    range: { min: 0, max: 60, step: 5 },
-    default: 15,
-    onChange: () => rescheduleAllFolds(),
-  });
-
   // Where each character's HUD was left ({ [hudKey]: { left, top } })
   game.settings.register(MODULE_ID, SETTINGS.HUD_POSITIONS, {
     name: K("hudPositions.name"),
@@ -280,45 +389,6 @@ Hooks.once("init", () => {
   game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_STATE, {
     name: K("cardSheetState.name"),
     scope: "client", config: false, type: Object, default: {},
-  });
-
-  // Card sheet: the roll modifier total shown by the move buttons (tags-deck)
-  game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_MOD_TOTAL, {
-    name: K("cardSheetModifierTotal.name"),
-    hint: K("cardSheetModifierTotal.hint"),
-    scope: "client", config: true, type: String,
-    choices: {
-      cards: K("cardSheetModifierTotal.cards"),
-      split: K("cardSheetModifierTotal.split"),
-      all:   K("cardSheetModifierTotal.all"),
-    },
-    default: "cards",
-    onChange: () => Hooks.callAll("mistHudCardSheetTotals"),
-  });
-
-  // Card sheet: each sheet card tilted a little (−2°…+2°, the same angle
-  // every time), for a tabletop feel (fixes phase 4).
-  game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_TILT, {
-    name: K("cardSheetTilt.name"),
-    hint: K("cardSheetTilt.hint"),
-    scope: "client", config: true, type: Boolean, default: true,
-    onChange: () => Hooks.callAll("mistHudCardSheetLook"),
-  });
-
-  // Card sheet: the mask on the Hero Shot portrait. The files are
-  // ui/card-sheet/portrait-masks/<name>.webp (white = shown, black = hidden).
-  game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_PORTRAIT_MASK, {
-    name: K("cardSheetPortraitMask.name"),
-    hint: K("cardSheetPortraitMask.hint"),
-    scope: "client", config: true, type: String,
-    choices: {
-      none:       K("cardSheetPortraitMask.none"),
-      misty:      K("cardSheetPortraitMask.misty"),
-      dissolving: K("cardSheetPortraitMask.dissolving"),
-      jagged:     K("cardSheetPortraitMask.jagged"),
-    },
-    default: "misty",
-    onChange: () => Hooks.callAll("mistHudCardSheetLook"),
   });
 
   // Status collection storage

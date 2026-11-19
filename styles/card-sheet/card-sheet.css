@@ -163,8 +163,8 @@
   justify-content: flex-start;
   gap: 6px;
   /* The Portrait button at the left; keep clear of the header controls at
-     the right of the bar. */
-  padding: 0 150px 0 12px;
+     the right of the bar (lock, system sheet, HUD, Sheet Settings, ⋮, ×). */
+  padding: 0 200px 0 12px;
   background: none;
   pointer-events: none;
 }
@@ -274,6 +274,44 @@
   opacity: 1;
   background: none;
   box-shadow: #04e6fb 0 0 3px;
+}
+
+/* Text move buttons (Sheet Settings, fixes phase 5): the moves' names, in
+   two rows so long names fit in the bar. A column's buttons share its width;
+   a name too long for the room left is cut with an ellipsis (the tooltip
+   has it whole). */
+.mh-card-sheet .mh-cs-move-bar-text .mh-cs-move-group {
+  flex: 0 1 auto;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: repeat(2, 22px);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(44px, max-content);
+  gap: 4px;
+  align-content: center;
+}
+
+.mh-card-sheet .mh-cs-move-bar-text .mh-cs-move-group.hidden {
+  display: none;
+}
+
+.mh-card-sheet .mh-cs-move.mh-cs-move-text {
+  width: auto;
+  min-width: 0;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 11px;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.mh-card-sheet .mh-cs-move.mh-cs-move-text span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mh-card-sheet .mh-cs-move-toggle {

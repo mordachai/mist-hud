@@ -21,6 +21,7 @@ import {
 import { BonusManager } from "./bonus-manager.js";
 import { attachFoldBehaviour, scheduleFold, cancelFold } from "./hud-fold.js";
 import { bindDropTarget } from "./drop-relay.js";
+import { HudSettingsForm } from "./settings-forms.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -149,26 +150,27 @@ export class PlayerHUD extends HandlebarsApplicationMixin(ApplicationV2) {
       positioned:  true,
       resizable:   false,
       minimizable: true,
+      // The ⋮ menu: the HUD Settings form (fixes phase 5).
+      controls: [{
+        icon:   "fa-solid fa-gear",
+        label:  "MistHUD.settingsForm.hud.title",
+        action: "openHudSettings",
+      }],
     },
     position: { width: "auto", height: "auto", left: 200, top: 120 },
     actions: {
-      openSheet:  PlayerHUD.#onOpenSheet,
-      toggleWide: PlayerHUD.#onToggleWide,
+      openSheet:       PlayerHUD.#onOpenSheet,
+      toggleWide:      PlayerHUD.#onToggleWide,
+      openHudSettings: () => HudSettingsForm.open(),
     },
   };
 
-  /** Header button: switch between the one-column and the two-column layout. */
+  /** Header button: switch between the one-column and the two-column layout
+   *  (the setting's onChange applies it to every open HUD: applyWideLayoutAll). */
   static async #onToggleWide(event) {
     event.preventDefault();
     const wide = !game.settings.get(MODULE_ID, SETTINGS.WIDE_LAYOUT);
     await game.settings.set(MODULE_ID, SETTINGS.WIDE_LAYOUT, wide);
-    // The layout is one setting for every HUD this user has open
-    for (const hud of playerHudRegistry.values()) {
-      if (!hud.rendered) continue;
-      hud._applyWideLayout($(hud.element));
-      // Re-clamp to the viewport: the window doubles in width.
-      hud.setPosition();
-    }
   }
 
   /** Apply the stored layout to the window and its header toggle. */
@@ -1519,6 +1521,23 @@ export function openHud(actor) {
     hud.bringToFront();
   }
   return hud;
+}
+
+/** The wide-layout setting changed: every HUD this user has open follows. */
+export function applyWideLayoutAll() {
+  for (const hud of playerHudRegistry.values()) {
+    if (!hud.rendered) continue;
+    hud._applyWideLayout($(hud.element));
+    // Re-clamp to the viewport: the window doubles in width.
+    hud.setPosition();
+  }
+}
+
+/** Close every open player HUD (the "HUD for player characters" setting turned off). */
+export function closeAllHuds() {
+  for (const hud of [...playerHudRegistry.values()]) {
+    if (hud.rendered) void hud.close();
+  }
 }
 
 /**

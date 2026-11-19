@@ -4,7 +4,7 @@
 // Other files export classes/functions; this file wires them to Foundry events.
 
 import { MODULE_ID, SETTINGS, SOCKET_NAME, getActiveSystem } from "./constants.js";
-import { playerHudRegistry, openHud, toggleHud, sys, systemReady } from "./player-hud.js";
+import { playerHudRegistry, openHud, toggleHud, sys, systemReady, applyWideLayoutAll, closeAllHuds } from "./player-hud.js";
 import { NpcHUD } from "./npc-hud.js";
 import { hudKey } from "./hud-state.js";
 import { BonusManager }              from "./bonus-manager.js";
@@ -34,7 +34,7 @@ Hooks.once("ready", () => {
   setTimeout(() => {
     _gameJustLoaded = false;
     const own = game.user.character;
-    if (!game.user.isGM && own?.type === "character" && own.isOwner && _openOnSelect()) openHud(own);
+    if (!game.user.isGM && own?.type === "character" && own.isOwner && _openOnSelect("pc")) openHud(own);
   }, 2000);
 
   // Drops relayed to the GM (see "Drag-and-drop" below)
@@ -50,8 +50,17 @@ Hooks.once("ready", () => {
 // They open from: selecting a token (per-user setting), the token's right-click
 // menu, the sheet header, or the keyboard shortcut.
 
-/** "openOnSelect": auto = players yes, GM no. */
-function _openOnSelect() {
+/** Whether this user shows HUDs of this kind ("pc" / "npc"; client settings,
+ *  fixes phase 5). Off: no HUD of that kind opens by itself. */
+function _hudEnabled(kind) {
+  if (kind === "pc")  return game.settings.get(MODULE_ID, SETTINGS.HUD_FOR_PCS) !== false;
+  if (kind === "npc") return game.settings.get(MODULE_ID, SETTINGS.HUD_FOR_NPCS) !== false;
+  return false;
+}
+
+/** "openOnSelect": auto = players yes, GM no; and the HUD kind must be shown. */
+function _openOnSelect(kind) {
+  if (!_hudEnabled(kind)) return false;
   const mode = game.settings.get(MODULE_ID, SETTINGS.OPEN_ON_SELECT);
   if (mode === "always") return true;
   if (mode === "never")  return false;
@@ -76,9 +85,28 @@ function _openHudFor(actor, token = null) {
 Hooks.on("controlToken", (token, controlled) => {
   if (_gameJustLoaded || !controlled) return;
   // Only when exactly one token is selected (not while box-selecting a group)
-  if (canvas.tokens.controlled.length !== 1 || !_openOnSelect()) return;
+  if (canvas.tokens.controlled.length !== 1) return;
+  if (!_openOnSelect(_hudKind(token.actor))) return;
   _openHudFor(token.actor, token);
 });
+
+// "HUD for player characters" / "HUD for NPCs" changed (client settings,
+// fixes phase 5): off closes the open HUDs of that kind; on opens the HUD of
+// the selected token, as selecting it would.
+Hooks.on("mistHudVisibility", (kind, enabled) => {
+  if (!enabled) {
+    if (kind === "pc")  closeAllHuds();
+    if (kind === "npc") NpcHUD.closeAll();
+    return;
+  }
+  const controlled = canvas.tokens?.controlled ?? [];
+  if (controlled.length !== 1) return;
+  const token = controlled[0];
+  if (_hudKind(token.actor) === kind && _openOnSelect(kind)) _openHudFor(token.actor, token);
+});
+
+// The card sheet's "HUD" header button (it closes the sheet first).
+Hooks.on("mistHudOpenHud", (actor, token) => _openHudFor(actor, token ?? actor?.getActiveTokens?.()[0] ?? null));
 
 // Token right-click menu: "Mist HUD" button
 Hooks.on("renderTokenHUD", (app, html) => {
@@ -160,6 +188,10 @@ function _rerenderAllHUDs() {
 }
 Hooks.once("cityDBLoaded", _rerenderAllHUDs);
 Hooks.once("movesLoaded",  _rerenderAllHUDs);
+// HUD Settings (fixes phase 5): text move buttons re-render the HUDs, the
+// wide layout is applied in place.
+Hooks.on("mistHudTextButtons", _rerenderAllHUDs);
+Hooks.on("mistHudWideLayout",  applyWideLayoutAll);
 
 // ── System selection (scene tags window, sheets) feeds the power preview ─────
 function _refreshPowerPreviews() {
@@ -205,8 +237,10 @@ for (const hook of ["createItem", "updateItem", "deleteItem"]) {
 Hooks.on("updateItem", (item, change) => {
   if (item.type === "status" && foundry.utils.hasProperty(change, "system.tier")) syncSelectedStatusTier(item);
 });
-// The roll modifier total by the move bar (client setting).
+// The roll modifier total by the move bar, and its text move buttons (client
+// settings): the move bar re-renders.
 Hooks.on("mistHudCardSheetTotals", refreshCardSheetTotals);
+Hooks.on("mistHudCardSheetMoves",  refreshCardSheetTotals);
 // The card tilt and the Hero Shot mask (client settings).
 Hooks.on("mistHudCardSheetLook", refreshCardSheetLook);
 

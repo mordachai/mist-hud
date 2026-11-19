@@ -5,7 +5,7 @@
 // sheet's roll path (plan § 6.1), through system-adapter.js.
 // PlayerHUD._executeMove is not used.
 
-import { getActiveSystem } from "../constants.js";
+import { MODULE_ID, SETTINGS, getActiveSystem } from "../constants.js";
 import { organizeMoves, getMoveAbbreviation, getMoveImageSrc } from "../move-layout.js";
 import { getMoves, rollMove } from "./system-adapter.js";
 import { selectionTotals } from "./tags-deck.js";
@@ -41,7 +41,10 @@ export async function prepareMoveBar(actor, groupIndex = 0) {
   const n = groups.length;
   const current = n ? ((groupIndex % n) + n) % n : 0;
   const label = g => game.i18n.localize(g.label);
+  // Sheet Settings (fixes phase 5): the moves' names in two rows instead of their art.
+  const text = game.settings.get(MODULE_ID, SETTINGS.CARD_SHEET_TEXT_BUTTONS) === true;
   return {
+    text,
     groups: groups.map((g, i) => ({
       key:   g.key,
       label: label(g),
