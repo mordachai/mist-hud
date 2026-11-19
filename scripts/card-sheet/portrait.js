@@ -119,14 +119,22 @@ function lookOn(key) {
 
 /**
  * The sheet's look switches as data attributes on the window (the CSS keys
- * on them): the tilt, and the tag line tints (2026-11-19, approved): a band
- * of the card's theme colour behind each tag line, in alternating shades.
+ * on them): the tilt, the tag line tints (2026-11-19, approved): a band
+ * of the card's theme colour behind each tag line, in alternating shades,
+ * and the header bar's position (data-bar="top" | "bottom").
  * @param {HTMLElement} el  the sheet's window (or its frame, before the first paint)
  */
 export function applyLookFlags(el) {
   if (!el) return;
   el.dataset.tilt    = tiltOn() ? "on" : "off";
   el.dataset.tints   = lookOn(SETTINGS.CARD_SHEET_TAG_TINTS) ? "on" : "off";
+  el.dataset.bar     = barPosition();
+}
+
+/** Where the sheet's header bar sits: "top" (default) or "bottom" (client setting). */
+function barPosition() {
+  try { return game.settings.get(MODULE_ID, SETTINGS.CARD_SHEET_BAR_POSITION) === "bottom" ? "bottom" : "top"; }
+  catch { return "top"; }
 }
 
 /** A card's angle in degrees, −2…+2, always the same for the same id (FNV-1a hash). */

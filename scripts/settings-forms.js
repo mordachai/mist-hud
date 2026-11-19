@@ -140,6 +140,7 @@ export class SheetSettingsForm extends MistSettingsForm {
   static INTRO = "MistHUD.settingsForm.sheet.intro";
 
   static KEYS = [
+    SETTINGS.CARD_SHEET_BAR_POSITION,
     SETTINGS.CARD_SHEET_TILT,
     SETTINGS.CARD_SHEET_PORTRAIT_MASK,
     SETTINGS.CARD_SHEET_TEXT_BUTTONS,

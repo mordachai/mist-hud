@@ -480,17 +480,40 @@
    units). */
 .mh-card-sheet :is(.mh-cs-layer, .mh-cs-deck, .mh-cs-deck-overlay, .mh-cs-move-bar, .mh-cs-portrait-part),
 .application.mh-card-sheet:not(.mh-cs-deck-window) > .window-header {
-  --mh-cs-stage-top: calc(var(--mh-cs-band-row) + 8px);
+  /* The room the header bar takes from the height: the band and its gap. */
+  --mh-cs-band-space: calc(var(--mh-cs-band-row) + 8px);
+  --mh-cs-stage-top: var(--mh-cs-band-space);
   --mh-cs-group-k: calc(4 + var(--mh-cs-deck-k) + var(--mh-cs-back-shift) + var(--mh-cs-portrait-k));
   --mh-cs-card-w: min(
     calc((var(--mh-cs-cw, 100cqw) - 2 * var(--mh-cs-edge) - 3 * var(--mh-cs-gap) - var(--mh-cs-portrait-gap)) / var(--mh-cs-group-k)),
-    calc((var(--mh-cs-ch, 100cqh) - var(--mh-cs-stage-top)) / (1 / (var(--mh-cs-aspect)) + var(--mh-cs-peek))));
+    calc((var(--mh-cs-ch, 100cqh) - var(--mh-cs-band-space)) / (1 / (var(--mh-cs-aspect)) + var(--mh-cs-peek))));
   --mh-cs-peek-h: calc(var(--mh-cs-card-w) * var(--mh-cs-peek));
   --mh-cs-row-w: calc(4 * var(--mh-cs-card-w) + 3 * var(--mh-cs-gap));
   --mh-cs-group-left: calc(6px + (var(--mh-cs-cw, 100cqw)
     - var(--mh-cs-group-k) * var(--mh-cs-card-w) - 3 * var(--mh-cs-gap) - var(--mh-cs-portrait-gap)) / 2);
   --mh-cs-stage-left: calc(var(--mh-cs-group-left) + var(--mh-cs-portrait-gap)
     + (var(--mh-cs-portrait-k) + var(--mh-cs-back-shift)) * var(--mh-cs-card-w));
+}
+
+/* Sheet Settings "Header Bar Position: Bottom" (user, 2026-11-19): the bar
+   (portrait button, moves, notes, window controls) under the cards. The
+   cards keep their size: the stage starts 6 px down (room for the tilted
+   corners) and the band reaches into the content's 12 px bottom padding
+   (it is the window's header, outside the clipped content). */
+.mh-card-sheet[data-bar="bottom"]:not(.mh-cs-deck-window) :is(.mh-cs-layer, .mh-cs-deck, .mh-cs-deck-overlay, .mh-cs-move-bar, .mh-cs-portrait-part),
+.application.mh-card-sheet[data-bar="bottom"]:not(.mh-cs-deck-window) > .window-header {
+  --mh-cs-stage-top: 6px;
+  --mh-cs-bar-top: calc(var(--mh-cs-stage-top) + var(--mh-cs-card-w) / (var(--mh-cs-aspect)) + var(--mh-cs-peek-h) + 8px);
+}
+
+.application.mh-card-sheet.mh-card-sheet[data-bar="bottom"]:not(.mh-cs-deck-window) > .window-header,
+.mh-card-sheet[data-bar="bottom"]:not(.mh-cs-deck-window) .mh-cs-move-bar {
+  top: var(--mh-cs-bar-top);
+}
+
+/* Minimised, the window is its header only: back to the top. */
+.application.mh-card-sheet.mh-card-sheet[data-bar="bottom"].minimized > .window-header {
+  top: 0;
 }
 
 /* The portrait column's width, by mode (portrait.js PORTRAIT_COLUMN): the
@@ -2676,7 +2699,7 @@
 }
 
 .mh-card-sheet .mh-cs-deck-focus > .mh-cs-deck-card {
-  width: min(calc(var(--mh-cs-row-w) * 0.58), calc((100cqh - var(--mh-cs-stage-top) - 90px) / var(--mh-cs-deck-hw)));
+  width: min(calc(var(--mh-cs-row-w) * 0.58), calc((100cqh - var(--mh-cs-band-space) - 90px) / var(--mh-cs-deck-hw)));
 }
 
 .mh-card-sheet .mh-cs-deck-back,

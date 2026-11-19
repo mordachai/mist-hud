@@ -241,6 +241,20 @@ Hooks.once("init", () => {
     onChange: () => Hooks.callAll("mistHudCardSheetLook"),
   });
 
+  // Card sheet: the header bar (portrait button, moves, window controls)
+  // above the cards or below them (user, 2026-11-19).
+  game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_BAR_POSITION, {
+    name: K("cardSheetBarPosition.name"),
+    hint: K("cardSheetBarPosition.hint"),
+    scope: "client", config: false, type: String,
+    choices: {
+      top:    K("cardSheetBarPosition.top"),
+      bottom: K("cardSheetBarPosition.bottom"),
+    },
+    default: "top",
+    onChange: () => Hooks.callAll("mistHudCardSheetLook"),
+  });
+
   // Card sheet: the mask on the Hero Shot portrait. The files are
   // ui/card-sheet/portrait-masks/<name>.webp (white = shown, black = hidden).
   game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_PORTRAIT_MASK, {
