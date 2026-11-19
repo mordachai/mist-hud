@@ -6,6 +6,7 @@
 //       deck:    { detached: bool, position: { left, top, width, height },
 //                  hidden: bool (tucked behind the layers), top: itemId (the
 //                  card last brought forward, in front of the stack) },
+//       portrait: "hide" | "portrait" | "hero",   the portrait at the left
 //   } }
 // Shared by MistCardSheet and the detached TagsDeck window.
 
@@ -26,9 +27,9 @@ export function cleanFlips(flips) {
  * clears a card's flip (cleared keys are deleted by hand: in v14
  * mergeObject leaves a ForcedDeletion object for "-=key", which reads as
  * truthy); `front` sets the front layer; `deck` merges into the deck state
- * (detached, position).
+ * (detached, position); `portrait` sets the portrait mode.
  */
-export async function writeUiState(actor, { flipped, front, deck } = {}) {
+export async function writeUiState(actor, { flipped, front, deck, portrait } = {}) {
   let all;
   try { all = foundry.utils.deepClone(game.settings.get(MODULE_ID, SETTINGS.CARD_SHEET_STATE) ?? {}); }
   catch { return; }
@@ -42,6 +43,7 @@ export async function writeUiState(actor, { flipped, front, deck } = {}) {
     state.flipped = flips;
   }
   if (front !== undefined) state.front = front;
+  if (portrait !== undefined) state.portrait = portrait;
   if (deck) state.deck = { ...(state.deck ?? {}), ...deck };
   all[actor.uuid] = state;
   await game.settings.set(MODULE_ID, SETTINGS.CARD_SHEET_STATE, all);
@@ -56,4 +58,13 @@ export function deckState(actor) {
     hidden:   deck.hidden === true,
     top:      typeof deck.top === "string" ? deck.top : null,
   };
+}
+
+/** The portrait modes, in the order the header bar's Portrait button cycles them. */
+export const PORTRAIT_MODES = ["hide", "portrait", "hero"];
+
+/** This actor's portrait mode at the left of the sheet: "hide" (default), "portrait" or "hero". */
+export function portraitMode(actor) {
+  const mode = readUiState(actor).portrait;
+  return PORTRAIT_MODES.includes(mode) ? mode : "hide";
 }

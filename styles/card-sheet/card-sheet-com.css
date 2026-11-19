@@ -84,6 +84,15 @@
   --mh-cs-title-glow: 0 0 0.6cqw #f0c8ff, 0 0 2cqw #c264f0, 0 0 4.5cqw rgba(150, 50, 200, 0.85);
 }
 
+/* The name under the portrait / Hero Shot (fixes phase 4): the Mythos
+   title's white and violet glow (in em, so it follows the fitted size), with
+   a dark shadow under it for the artwork behind. */
+.mh-card-sheet .mh-cs-portrait-name {
+  --mh-cs-portrait-name-ink: #fdf7ff;
+  --mh-cs-portrait-name-glow: 0 0 0.02em #f0c8ff, 0 0 0.06em #c264f0, 0 0 0.13em rgba(150, 50, 200, 0.85),
+    0 0.03em 0.14em rgba(0, 0, 0, 0.9);
+}
+
 /* Edit mode: the white Mythos title needs a dark field. */
 .mh-card-sheet .mh-cs-type-mythos textarea.mh-cs-title-input {
   background: rgba(45, 12, 60, 0.45);

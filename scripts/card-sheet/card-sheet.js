@@ -16,6 +16,10 @@
 // The tags-deck (phase 5, tags-deck.js): the "deck" part, a stack of
 // tracking cards at the right of the layers, which can be detached into its
 // own window.
+// Fixes phase 4 (portrait.js): the header bar spans the theme cards only,
+// the Portrait button cycles a portrait / Hero Shot at the left (part
+// "portrait"), the sheet cards are tilted a little, and the back layer is
+// offset sideways from the front one (CSS).
 
 import { buildLayer1Context, buildLayer2Context, isEditMode } from "./card-sheet-context.js";
 import { watchFit } from "./card-fit.js";
@@ -26,7 +30,11 @@ import {
 import { EDIT_ACTIONS, changeThemeField, changeActorField } from "./edit-actions.js";
 import { CHARACTER_ACTIONS, changeHelpHurt } from "./character-actions.js";
 import { PLAY_ACTIONS } from "./play-actions.js";
-import { readUiState, writeUiState, cleanFlips, deckState } from "./ui-state.js";
+import { readUiState, writeUiState, cleanFlips, deckState, portraitMode } from "./ui-state.js";
+import {
+  PORTRAIT_COLUMN, REF_CARD_W, nextPortraitMode, portraitContext, applyPortraitMask, clearMaskChecks,
+  tiltOn, applyCardTilts,
+} from "./portrait.js";
 import {
   DECK_TEMPLATES, DECK_ACTIONS, buildDeckContext, bindDeckListeners, deckRendered, focusDeckView,
   openDeckWindow, deckWindowFor, refreshAllDeckWindows,
@@ -51,7 +59,10 @@ export const CARD_SHEET_TEMPLATES = [
   DECK_TEMPLATES.part,
   DECK_TEMPLATES.columns,
   DECK_TEMPLATES.card,
+  `${TEMPLATE_DIR}/portrait.hbs`,
 ];
+
+const PORTRAIT_TEMPLATE = `${TEMPLATE_DIR}/portrait.hbs`;
 
 const LAYER_PARTS = ["layer1", "layer2"];
 
@@ -61,11 +72,15 @@ const SELECTION_PARTS = ["moves", "layer1", "layer2", "deck"];
 /** Everything inside a card that scrolls (and the deck's spread view); its position is kept across re-renders. */
 const SCROLLERS = ".mh-cs-scroll, .mh-cs-weakness-tags, .mh-cs-motivation-text, .mh-cs-title-input, .mh-cs-short-desc, .mh-cs-bu-improvements, [data-scroll-key]";
 
-/** Actor fields shown on layer 2 only (the character card): a change re-renders layer 2 alone. */
+/** Actor fields shown on layer 2 only (the character card): a change re-renders layer 2 alone
+ *  (and the portrait, for the name). */
 const LAYER2_ACTOR_FIELDS = new Set([
   "name", "system.mythos", "system.logos", "system.short_description", "system.biography",
   "system.buildup", "system.unspentBU",
 ]);
+
+/** Actor fields the portrait shows. */
+const PORTRAIT_ACTOR_FIELDS = new Set(["name", "img"]);
 
 /** Theme fields that change only that theme's card (not the layer order or art). */
 const THEME_TEXT_FIELDS = new Set(["name", "system.mystery"]);
@@ -82,8 +97,11 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     // (content height − 64 = card width × (1203/473 + 0.2)). A smaller window
     // scales the cards down (container queries on the window content).
     // Phase 5: the tags-deck takes 0.96 of a card width at the right of the
-    // layers (12 + 3 × 12 + 4.96 × 204 ≈ 1060).
-    position: { width: 1062, height: 637 },
+    // layers. Fixes phase 4: the back layer is offset 0.1 card width to the
+    // left, and 8 px each side leave room for the tilted cards
+    // (12 + 16 + 3 × 12 + 5.06 × 204 ≈ 1096). The portrait column widens
+    // the window (_initializeApplicationOptions).
+    position: { width: 1098, height: 637 },
     window: { resizable: true },
     // Every write goes through its own change handler or action; a form
     // submit (Enter in an input) writes nothing.
@@ -95,6 +113,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       flipCard:        MistCardSheet.#onFlipCard,
       showLayer:       MistCardSheet.#onShowLayer,
       setActiveExtra:  MistCardSheet.#onSetActiveExtra,
+      cyclePortrait:   MistCardSheet.#onCyclePortrait,
       ...EDIT_ACTIONS,
       ...CHARACTER_ACTIONS,
       ...PLAY_ACTIONS,
@@ -106,6 +125,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   // the first match of a selector, as PARTS.scrollable does).
   static PARTS = {
     moves:  { template: CARD_SHEET_TEMPLATES[0] },
+    portrait: { template: PORTRAIT_TEMPLATE },
     layer1: { template: CARD_SHEET_TEMPLATES[1] },
     layer2: { template: CARD_SHEET_TEMPLATES[2] },
     deck:   { template: DECK_TEMPLATES.part },
@@ -153,6 +173,11 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     return cleanFlips(readUiState(this.actor).flipped);
   }
 
+  /** The portrait at the left: "hide", "portrait" or "hero" (client UI state, per actor). */
+  get portraitMode() {
+    return portraitMode(this.actor);
+  }
+
   /** The layer in front: 1 (main themes) or 2 (character, crew, extras). */
   get frontLayer() {
     return readUiState(this.actor).front === 2 ? 2 : 1;
@@ -174,6 +199,17 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   /** Edit mode: the system's unlocked state (plan § 6.2, "Lock state"). */
   get editMode() {
     return isEditMode(this.actor);
+  }
+
+  /** The window opens wide enough for this actor's portrait column (at the reference card size). */
+  _initializeApplicationOptions(options) {
+    options = super._initializeApplicationOptions(options);
+    const actor = options.document;
+    const column = actor ? PORTRAIT_COLUMN[portraitMode(actor)] : null;
+    if (column?.k && options.position?.width === MistCardSheet.DEFAULT_OPTIONS.position.width) {
+      options.position.width += Math.round(column.k * REF_CARD_W + column.gap);
+    }
+    return options;
   }
 
   async _prepareContext(options) {
@@ -206,7 +242,12 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if (renderContext === "updateActor") {
       const keys = changedKeys(renderData);
       if (!keys.length) return null;
-      if (keys.every(k => LAYER2_ACTOR_FIELDS.has(k))) return ["layer2"];
+      if (keys.every(k => LAYER2_ACTOR_FIELDS.has(k) || PORTRAIT_ACTOR_FIELDS.has(k))) {
+        const parts = [];
+        if (keys.some(k => LAYER2_ACTOR_FIELDS.has(k))) parts.push("layer2");
+        if (keys.some(k => PORTRAIT_ACTOR_FIELDS.has(k))) parts.push("portrait");
+        return parts;
+      }
       if (keys.every(k => k === "system.locked")) return [...LAYER_PARTS, "deck"];
       return null;
     }
@@ -353,6 +394,10 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       case "moves":
         context.moveBar = await prepareMoveBar(this.actor, this.#moveGroup);
         this.#moveGroup = context.moveBar.current;
+        context.portrait = portraitContext(this.actor);
+        break;
+      case "portrait":
+        context.portrait = portraitContext(this.actor);
         break;
       case "layer1":
         Object.assign(context, buildLayer1Context(this.actor, this.cardFlips));
@@ -390,16 +435,22 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     await super._onRender(context, options);
     this.element.dataset.front = String(this.frontLayer);
     this.element.dataset.deck = this.deckView;
+    this.element.dataset.portrait = this.portraitMode;
+    this.element.dataset.tilt = tiltOn() ? "on" : "off";
     this.#syncLockControl();
+    if (!options.parts || options.parts.some(p => LAYER_PARTS.includes(p))) applyCardTilts(this.element);
+    if (!options.parts || options.parts.includes("portrait")) void applyPortraitMask(this.element);
     if (!options.parts || options.parts.includes("deck")) {
       deckRendered(this);
       focusDeckView(this);
     }
-    // Fitted text: the theme titles, and the deck cards' names (fixes phase 2).
-    for (const part of [...LAYER_PARTS, "deck"]) {
+    // Fitted text: the theme titles, the deck cards' names (fixes phase 2)
+    // and the name under the portrait (fixes phase 4).
+    const fitRoots = { deck: ".mh-cs-deck-part", portrait: ".mh-cs-portrait-part" };
+    for (const part of [...LAYER_PARTS, "deck", "portrait"]) {
       if (options.parts && !options.parts.includes(part)) continue;
       this.#unwatchFit[part]?.();
-      this.#unwatchFit[part] = watchFit(this.element.querySelector(part === "deck" ? ".mh-cs-deck-part" : `.mh-cs-${part}`));
+      this.#unwatchFit[part] = watchFit(this.element.querySelector(fitRoots[part] ?? `.mh-cs-${part}`));
     }
   }
 
@@ -476,6 +527,9 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     // Which layer is in front, before the first paint (no swap animation on open).
     frame.dataset.front = String(this.frontLayer);
     frame.dataset.mode = this.editMode ? "edit" : "play";
+    // The portrait column and the tilt, before the first paint (the layout depends on them).
+    frame.dataset.portrait = this.portraitMode;
+    frame.dataset.tilt = tiltOn() ? "on" : "off";
     const header = frame.querySelector(".window-header");
     const close = header?.querySelector('[data-action="close"]');
     const addControl = (className, action, label) => {
@@ -523,6 +577,24 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
 
   static #onOpenSystemSheet() {
     openSystemSheet(this.actor);
+  }
+
+  /**
+   * The header bar's Portrait button: Hide → Portrait → Hero Shot → Hide.
+   * The window grows or shrinks at its left by the portrait column's width
+   * (at the current card size), so the cards stay where they are.
+   */
+  static async #onCyclePortrait() {
+    const from = this.portraitMode;
+    const to = nextPortraitMode(from);
+    const cardW = this.element.querySelector(".mh-cs-layer .mh-cs-card")?.offsetWidth || REF_CARD_W;
+    const delta = Math.round((PORTRAIT_COLUMN[to].k - PORTRAIT_COLUMN[from].k) * cardW
+      + PORTRAIT_COLUMN[to].gap - PORTRAIT_COLUMN[from].gap);
+    await writeUiState(this.actor, { portrait: to });
+    this.element.dataset.portrait = to;
+    const { left, width } = this.position;
+    this.setPosition({ width: width + delta, left: Math.max(0, left - delta) });
+    await this.render({ parts: ["moves", "portrait"] });
   }
 
   /**
@@ -650,5 +722,18 @@ export function refreshCardSheetsForOwner(owner) {
 export function refreshCardSheetsOnDBLoad() {
   for (const app of foundry.applications.instances.values()) {
     if (app instanceof MistCardSheet && app.rendered) app.render();
+  }
+}
+
+/**
+ * The card tilt or the Hero Shot mask setting changed: open card sheets
+ * follow at once (the mask files are checked again, they may have been swapped).
+ */
+export function refreshCardSheetLook() {
+  clearMaskChecks();
+  for (const app of foundry.applications.instances.values()) {
+    if (!(app instanceof MistCardSheet) || !app.rendered) continue;
+    app.element.dataset.tilt = tiltOn() ? "on" : "off";
+    void applyPortraitMask(app.element);
   }
 }

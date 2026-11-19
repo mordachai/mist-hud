@@ -1,0 +1,12 @@
+{{!-- PART "portrait": the actor's image at the left of the sheet (fixes
+      phase 4). Cycled by the Portrait button at the left of the header bar
+      (move-bar.hbs): hidden, Portrait (256 × 256) or Hero Shot (340 × 500,
+      masked by portrait.js), the character name under it. --}}
+<section class="mh-cs-portrait-part" data-mode="{{portrait.mode}}">
+  {{#if portrait.shown}}
+  <figure class="mh-cs-portrait mh-cs-portrait-{{portrait.mode}}">
+    <div class="mh-cs-portrait-frame"><img src="{{portrait.img}}" alt="{{portrait.name}}"></div>
+    <figcaption class="mh-cs-portrait-name" data-fit data-fit-lines="2">{{portrait.name}}</figcaption>
+  </figure>
+  {{/if}}
+</section>

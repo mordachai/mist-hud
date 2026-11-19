@@ -107,6 +107,30 @@
   container-name: mh-cs-content;
 }
 
+/* The sheet's header bar spans the theme cards only (fixes phase 4): the
+   left stays open for the portrait, the right for the tags-deck. The window
+   is a size container, so the bar is placed with the same stage geometry as
+   the layers (see "The stage" below), in the window's own units: the
+   content box is the window less its 6 px side and 12 px bottom padding.
+   The content is no longer pulled up over the bar: the bar is out of the
+   flow, at the top of the window. Not the detached deck window. */
+.application.mh-card-sheet.mh-card-sheet:not(.mh-cs-deck-window) {
+  container-type: size;
+}
+
+.application.mh-card-sheet.mh-card-sheet:not(.mh-cs-deck-window) > .window-header {
+  --mh-cs-cw: calc(100cqw - 12px);
+  --mh-cs-ch: calc(100cqh - 12px);
+  position: absolute;
+  top: 0;
+  left: var(--mh-cs-stage-left);
+  width: var(--mh-cs-row-w);
+}
+
+.application.mh-card-sheet.mh-card-sheet:not(.mh-cs-deck-window) > .window-content {
+  margin-top: 0;
+}
+
 .application.mh-card-sheet.mh-card-sheet > .window-resize-handle {
   opacity: 0.25;
   pointer-events: auto;
@@ -120,22 +144,58 @@
    only show their peek tabs, the rest is clipped away). */
 .mh-card-sheet .mh-cs-card,
 .mh-card-sheet .mh-cs-move,
-.mh-card-sheet .mh-cs-move-toggle {
+.mh-card-sheet .mh-cs-move-toggle,
+.mh-card-sheet .mh-cs-portrait-toggle {
   pointer-events: auto;
 }
 
 /* ── Move bar (HUD look, horizontal, inside the band) ────────────────────── */
 
 .mh-card-sheet .mh-cs-move-bar {
-  flex: 0 0 var(--mh-cs-band-row);
+  /* Over the header bar (fixes phase 4: the theme cards' width). */
+  position: absolute;
+  top: 0;
+  left: var(--mh-cs-stage-left);
+  width: var(--mh-cs-row-w);
+  height: var(--mh-cs-band-row);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 6px;
-  /* Keep clear of the header controls at the right of the band. */
-  padding: 0 110px;
+  /* The Portrait button at the left; keep clear of the header controls at
+     the right of the bar. */
+  padding: 0 150px 0 12px;
   background: none;
   pointer-events: none;
+}
+
+/* The Portrait button (fixes phase 4): a white square, as in the mockup;
+   an outline only while the portrait is hidden. */
+.mh-card-sheet .mh-cs-portrait-toggle {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  margin: 0 6px 0 0;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  background: #fff;
+  color: #141414;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.mh-card-sheet .mh-cs-portrait-toggle[data-mode="hide"] {
+  background: transparent;
+  color: #fff;
+  opacity: 0.8;
+}
+
+.mh-card-sheet .mh-cs-portrait-toggle:hover,
+.mh-card-sheet .mh-cs-portrait-toggle:focus-visible {
+  opacity: 1;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
 }
 
 .mh-card-sheet .mh-cs-move-group {
@@ -267,6 +327,13 @@
      card art's ratio and where its band, boxes, name line and footer sit
      (in % of the card). */
   --mh-cs-deck-k: 0.96;
+  /* Fixes phase 4: the back layer sits this many card widths to the left of
+     the front one; room at each side of the group for the tilted cards; the
+     portrait column at the left (card widths, set by data-portrait). */
+  --mh-cs-back-shift: 0.1;
+  --mh-cs-edge: 8px;
+  --mh-cs-portrait-k: 0;
+  --mh-cs-portrait-gap: 0px;
   --mh-cs-deck-aspect: 490 / 320;
   --mh-cs-deck-hw: 0.6531;        /* height / width of a tracking card */
   --mh-cs-deck-step: 0.205;       /* how much of a card shows in the stack, in card heights */
@@ -298,19 +365,41 @@
    they are only used on the layers and on the cards themselves (inside a
    card, cqw is the card). */
 
-/* The stage: the layers and the tags-deck at their right are one group,
-   centred in the window content. The deck takes --mh-cs-deck-k card widths
-   (its tracking cards are one card wide and tuck a little under the last
-   card). These vars are only used on the layers, the deck and its overlay
-   (all children of the window content, the size container). */
-.mh-card-sheet :is(.mh-cs-layer, .mh-cs-deck, .mh-cs-deck-overlay) {
+/* The stage: the portrait (fixes phase 4), the layers and the tags-deck at
+   their right are one group, centred in the window content. The deck takes
+   --mh-cs-deck-k card widths (its tracking cards are one card wide and tuck
+   a little under the last card); the back layer's offset
+   (--mh-cs-back-shift) and the portrait column (--mh-cs-portrait-k + gap)
+   are in the group too. These vars are only used on the layers, the deck,
+   its overlay, the move bar and the portrait (children of the window
+   content, the size container: --mh-cs-cw / -ch default to its 100cqw /
+   100cqh), and on the window's header bar (which sets them in the window's
+   units). */
+.mh-card-sheet :is(.mh-cs-layer, .mh-cs-deck, .mh-cs-deck-overlay, .mh-cs-move-bar, .mh-cs-portrait-part),
+.application.mh-card-sheet:not(.mh-cs-deck-window) > .window-header {
   --mh-cs-stage-top: calc(var(--mh-cs-band-row) + 8px);
+  --mh-cs-group-k: calc(4 + var(--mh-cs-deck-k) + var(--mh-cs-back-shift) + var(--mh-cs-portrait-k));
   --mh-cs-card-w: min(
-    calc((100cqw - 3 * var(--mh-cs-gap)) / (4 + var(--mh-cs-deck-k))),
-    calc((100cqh - var(--mh-cs-stage-top)) / (1 / (var(--mh-cs-aspect)) + var(--mh-cs-peek))));
+    calc((var(--mh-cs-cw, 100cqw) - 2 * var(--mh-cs-edge) - 3 * var(--mh-cs-gap) - var(--mh-cs-portrait-gap)) / var(--mh-cs-group-k)),
+    calc((var(--mh-cs-ch, 100cqh) - var(--mh-cs-stage-top)) / (1 / (var(--mh-cs-aspect)) + var(--mh-cs-peek))));
   --mh-cs-peek-h: calc(var(--mh-cs-card-w) * var(--mh-cs-peek));
   --mh-cs-row-w: calc(4 * var(--mh-cs-card-w) + 3 * var(--mh-cs-gap));
-  --mh-cs-stage-left: calc(6px + (100cqw - var(--mh-cs-row-w) - var(--mh-cs-deck-k) * var(--mh-cs-card-w)) / 2);
+  --mh-cs-group-left: calc(6px + (var(--mh-cs-cw, 100cqw)
+    - var(--mh-cs-group-k) * var(--mh-cs-card-w) - 3 * var(--mh-cs-gap) - var(--mh-cs-portrait-gap)) / 2);
+  --mh-cs-stage-left: calc(var(--mh-cs-group-left) + var(--mh-cs-portrait-gap)
+    + (var(--mh-cs-portrait-k) + var(--mh-cs-back-shift)) * var(--mh-cs-card-w));
+}
+
+/* The portrait column's width, by mode (portrait.js PORTRAIT_COLUMN): the
+   nominal sizes at the reference card (204 px), scaled with the cards. */
+.mh-card-sheet[data-portrait="portrait"] {
+  --mh-cs-portrait-k: calc(256 / 204);
+  --mh-cs-portrait-gap: 12px;
+}
+
+.mh-card-sheet[data-portrait="hero"] {
+  --mh-cs-portrait-k: calc(340 / 204);
+  --mh-cs-portrait-gap: 12px;
 }
 
 .mh-card-sheet .mh-cs-layer {
@@ -321,8 +410,9 @@
   height: calc(var(--mh-cs-card-w) / (var(--mh-cs-aspect)));
   z-index: 1;
   pointer-events: none;
-  /* Back: at the top, darker, behind the front layer. */
-  transform: translateY(0);
+  /* Back: at the top, darker, behind the front layer, and offset to the
+     left (fixes phase 4), so a full back row is not hidden by the front one. */
+  transform: translate(calc(-1 * var(--mh-cs-back-shift) * var(--mh-cs-card-w)), 0);
   filter: brightness(0.72) saturate(0.85);
   transition: transform 0.45s ease, filter 0.45s ease, z-index 0.45s step-end;
 }
@@ -331,7 +421,7 @@
 .mh-card-sheet:not([data-front="2"]) .mh-cs-layer1,
 .mh-card-sheet[data-front="2"] .mh-cs-layer2 {
   z-index: 2;
-  transform: translateY(var(--mh-cs-peek-h));
+  transform: translate(0, var(--mh-cs-peek-h));
   filter: none;
   transition: transform 0.45s ease, filter 0.45s ease, z-index 0.45s step-start;
 }
@@ -360,6 +450,111 @@
 .mh-card-sheet .mh-cs-card:hover,
 .mh-card-sheet .mh-cs-card:focus-within {
   z-index: 3;
+}
+
+/* Each sheet card a little tilted, −2°…+2° (fixes phase 4): the angle comes
+   from the card's id (portrait.js), so it never changes; the client setting
+   "Tilted Cards" sets data-tilt. */
+.mh-card-sheet[data-tilt="on"] .mh-cs-layer .mh-cs-card {
+  rotate: var(--mh-cs-tilt, 0deg);
+}
+
+/* ── Portrait / Hero Shot (fixes phase 4) ────────────────────────────────────
+   At the left of the layers, from the top of the window, behind them. The
+   column is an inline-size container: inside it, cqw is the portrait's
+   width (340 px Hero Shot, 256 px Portrait at the reference card size).
+   The image fills its frame (cover), anchored top centre so heads stay in;
+   the Hero Shot frame may be masked (portrait.js adds .mh-cs-masked once
+   the mask image is known to load). Click-through, like the empty window. */
+
+.mh-card-sheet .mh-cs-portrait-part {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: var(--mh-cs-group-left);
+  width: calc(var(--mh-cs-portrait-k) * var(--mh-cs-card-w));
+  pointer-events: none;
+  container-type: inline-size;
+  container-name: mh-cs-portrait;
+}
+
+.mh-card-sheet .mh-cs-portrait-part[data-mode="hide"] {
+  display: none;
+}
+
+.mh-card-sheet .mh-cs-portrait {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+}
+
+.mh-card-sheet .mh-cs-portrait-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.mh-card-sheet .mh-cs-portrait-portrait .mh-cs-portrait-frame {
+  border-radius: 4cqw;
+  box-shadow: 0 2cqw 6cqw rgba(0, 0, 0, 0.6);
+}
+
+.mh-card-sheet .mh-cs-portrait-hero .mh-cs-portrait-frame {
+  aspect-ratio: 340 / 500;
+}
+
+.mh-card-sheet .mh-cs-portrait-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: none;
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* The mask image: white shows, black hides, stretched to the frame. */
+.mh-card-sheet .mh-cs-portrait-frame.mh-cs-masked {
+  mask-mode: luminance;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+/* The character name under the image, in the Mythos theme title's style
+   (per-system ink and glow: --mh-cs-portrait-name-ink / -glow). Fitted by
+   card-fit.js to two lines at most. On the Hero Shot it rises over the
+   image's faded bottom, as in the mockup. */
+.mh-card-sheet .mh-cs-portrait-name {
+  height: calc(24cqw * 0.92 * 2 + 2cqw);
+  margin: 2cqw 0 0;
+  padding: 0 2cqw;
+  overflow: hidden;
+  color: var(--mh-cs-portrait-name-ink, #fff);
+  font-family: var(--mh-cs-title-font);
+  font-size: calc(24cqw * var(--mh-fit, 1));
+  font-style: normal;
+  font-weight: var(--mh-cs-title-weight);
+  line-height: 0.92;
+  letter-spacing: var(--mh-cs-title-spacing);
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: var(--mh-cs-portrait-name-glow, 0 0 0.06em #fff, 0 0.03em 0.12em rgba(0, 0, 0, 0.85));
+  overflow-wrap: normal;
+}
+
+.mh-card-sheet .mh-cs-portrait-hero .mh-cs-portrait-name {
+  position: relative;
+  margin-top: -16cqw;
+}
+
+.mh-card-sheet .mh-cs-portrait-name[data-fit-clamped] {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
 }
 
 /* ── Peek tabs: over each card of the back layer ─────────────────────────────
@@ -2298,21 +2493,23 @@
 
 /* ── In front of the sheet: a card brought forward, or the spread deck ───── */
 
+/* Over the sheet cards only (both layers, the back one's offset included),
+   darker (fixes phase 4). */
 .mh-card-sheet .mh-cs-deck-overlay {
   position: absolute;
   z-index: 10;
-  top: var(--mh-cs-stage-top);
-  left: 6px;
-  right: 6px;
-  bottom: 12px;
+  top: calc(var(--mh-cs-stage-top) - 8px);
+  left: calc(var(--mh-cs-stage-left) - var(--mh-cs-back-shift) * var(--mh-cs-card-w) - 8px);
+  width: calc(var(--mh-cs-row-w) + var(--mh-cs-back-shift) * var(--mh-cs-card-w) + 16px);
+  height: calc(var(--mh-cs-card-w) / (var(--mh-cs-aspect)) + var(--mh-cs-peek-h) + 16px);
   border-radius: 14px;
-  background: rgba(8, 6, 4, 0.72);
+  background: rgba(6, 4, 3, 0.9);
   pointer-events: auto;
 }
 
 /* A card brought forward: a darker backdrop, to set it apart. */
 .mh-card-sheet .mh-cs-deck-overlay-focus {
-  background: rgba(4, 3, 2, 0.92);
+  background: rgba(4, 3, 2, 0.95);
   backdrop-filter: blur(3px);
 }
 
@@ -2375,7 +2572,7 @@
 }
 
 .mh-card-sheet .mh-cs-deck-focus > .mh-cs-deck-card {
-  width: min(48cqw, calc((100cqh - var(--mh-cs-stage-top) - 90px) / var(--mh-cs-deck-hw)));
+  width: min(calc(var(--mh-cs-row-w) * 0.58), calc((100cqh - var(--mh-cs-stage-top) - 90px) / var(--mh-cs-deck-hw)));
 }
 
 .mh-card-sheet .mh-cs-deck-back,

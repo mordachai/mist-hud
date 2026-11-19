@@ -11,7 +11,7 @@ import { BonusManager }              from "./bonus-manager.js";
 import { StatusScreen }              from "./status-screen.js";
 import { openNPCInfluenceManager }   from "./npc-influence.js";
 import { TokenStatusNotification, TokenTagNotification } from "./notifications.js";
-import { MistCardSheet, CARD_SHEET_TEMPLATES, refreshCardSheets, refreshCardSheetsOnDBLoad, refreshCardSheetsForOwner, refreshCardSheetTotals } from "./card-sheet/card-sheet.js";
+import { MistCardSheet, CARD_SHEET_TEMPLATES, refreshCardSheets, refreshCardSheetsOnDBLoad, refreshCardSheetsForOwner, refreshCardSheetTotals, refreshCardSheetLook } from "./card-sheet/card-sheet.js";
 import { refreshDeckWindow } from "./card-sheet/tags-deck.js";
 import { syncSelectedStatusTier } from "./card-sheet/system-adapter.js";
 import { bindCanvasRelay } from "./drop-relay.js";
@@ -207,6 +207,8 @@ Hooks.on("updateItem", (item, change) => {
 });
 // The roll modifier total by the move bar (client setting).
 Hooks.on("mistHudCardSheetTotals", refreshCardSheetTotals);
+// The card tilt and the Hero Shot mask (client settings).
+Hooks.on("mistHudCardSheetLook", refreshCardSheetLook);
 
 // The system flips an already selected item (invert-click on a selected tag)
 // without firing any hook. Announce it, so the NPC HUD, the influence viewer

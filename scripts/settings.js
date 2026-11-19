@@ -296,6 +296,31 @@ Hooks.once("init", () => {
     onChange: () => Hooks.callAll("mistHudCardSheetTotals"),
   });
 
+  // Card sheet: each sheet card tilted a little (−2°…+2°, the same angle
+  // every time), for a tabletop feel (fixes phase 4).
+  game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_TILT, {
+    name: K("cardSheetTilt.name"),
+    hint: K("cardSheetTilt.hint"),
+    scope: "client", config: true, type: Boolean, default: true,
+    onChange: () => Hooks.callAll("mistHudCardSheetLook"),
+  });
+
+  // Card sheet: the mask on the Hero Shot portrait. The files are
+  // ui/card-sheet/portrait-masks/<name>.webp (white = shown, black = hidden).
+  game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_PORTRAIT_MASK, {
+    name: K("cardSheetPortraitMask.name"),
+    hint: K("cardSheetPortraitMask.hint"),
+    scope: "client", config: true, type: String,
+    choices: {
+      none:       K("cardSheetPortraitMask.none"),
+      misty:      K("cardSheetPortraitMask.misty"),
+      dissolving: K("cardSheetPortraitMask.dissolving"),
+      jagged:     K("cardSheetPortraitMask.jagged"),
+    },
+    default: "misty",
+    onChange: () => Hooks.callAll("mistHudCardSheetLook"),
+  });
+
   // Status collection storage
   game.settings.register(MODULE_ID, SETTINGS.IMPORTED_STATUS_COLLECTION, {
     name: K("importedStatusCollection.name"),

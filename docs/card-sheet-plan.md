@@ -114,6 +114,7 @@ scripts/card-sheet/
   tags-deck.js           the deck part (context, actions, modifier totals), plus the detached TagsDeck window (ApplicationV2)
   ui-state.js            the sheet's client UI state (flips, front layer, deck detached / position)
   move-bar.js            move buttons + Core/Cinematic switch (HUD look, system sheet roll path)
+  portrait.js            the portrait / Hero Shot at the left (mode, mask check) and the cards' tilt (fixes phase 4)
 templates/card-sheet/
   layer1.hbs             PART "layer1": the four main theme cards (one template per PART; no root template)
   layer2.hbs             PART "layer2": character card, crew themes, every extra
@@ -124,7 +125,8 @@ templates/card-sheet/
   tags-deck.hbs          PART "deck": the stack, its toolbar, the forward card and the spread view
   deck-columns.hbs       the spread columns (also the TagsDeck window's part)
   deck-card.hbs          one tracking card (stack / spread / worked on)
-  move-bar.hbs
+  move-bar.hbs           also the Portrait button (fixes phase 4)
+  portrait.hbs           PART "portrait": the portrait / Hero Shot and the name under it (fixes phase 4)
 styles/card-sheet/
   card-sheet.css         layout, layers, flip, deck, move bar (in module.json "styles")
   card-sheet-{com,os,litm}.css   art, fonts and colours per system (injected like applySystemCSS)
