@@ -237,16 +237,28 @@
   margin: 0 -3cqw;
 }
 
-/* The identity / mystery line in Rock Salt (user, 2026-11-18: bigger;
-   fixes phase 3: darker, bolder, 2px larger, label included). Rock Salt
-   has one weight: the bold is drawn with a thin stroke of the same ink. */
+/* Character card: the Mythos and Logos names in Rock Salt, 1px smaller than
+   the field placeholder (user, 2026-11-19). The base `.mh-cs-field dd` rule
+   outranks `.mh-cs-hand`, so the face is set here again. The edit-mode
+   placeholder keeps the field size. */
+.mh-card-sheet .mh-cs-field dd.mh-cs-hand,
+.mh-card-sheet .mh-cs-card .mh-cs-field input.mh-cs-field-input {
+  font-family: var(--mh-cs-hand-font);
+  font-size: calc(7.4cqw - 1px);
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-field input.mh-cs-field-input::placeholder {
+  font-size: 7.4cqw;
+}
+
+/* The identity / mystery line in Rock Salt, as the character card's Mythos
+   and Logos names (user, 2026-11-19): same size, no stroke, the card's own
+   ink. */
 .mh-card-sheet .mh-cs-motivation-text {
-  font-size: 5.8cqw;
+  font-size: 5.8cqw ;
   /* Under 1.55 Rock Salt's tall glyph boxes overflow by 1px: a scrollbar. */
   line-height: 1.55;
   max-height: calc(5.8cqw * 1.55 * 4 + 0.8em);
-  color: var(--mh-cs-motivation-ink, #000);
-  -webkit-text-stroke: 0.18cqw currentColor;
 }
 
 .mh-card-sheet .mh-cs-motivation-label {
@@ -254,10 +266,6 @@
   font-size: 6.4cqw;
   font-weight: bold;
   opacity: 1;
-}
-
-.mh-card-sheet .mh-cs-card textarea.mh-cs-motivation-input {
-  color: var(--mh-cs-motivation-ink, #000);
 }
 
 /* Track pips: the City of Mist sheet's point shapes (the External Style
@@ -753,6 +761,18 @@
   color: var(--mh-cs-dlg-ink, #2a2a2a);
   font-size: 15px;
   line-height: 1.4;
+}
+
+/* The Description: half the height it had when it shared the window's
+   free space (about 190px at the default size; user, 2026-11-19). It does
+   not grow with the window, only with its text. */
+.application.mh-cs-notes .mh-cs-notes-description,
+.application.mh-cs-notes .mh-cs-notes-description :is(prose-mirror.mh-cs-notes-editor, .mh-cs-notes-text) {
+  flex: 0 0 auto;
+}
+
+.application.mh-cs-notes .mh-cs-notes-description :is(prose-mirror.mh-cs-notes-editor, .mh-cs-notes-text) {
+  min-height: 6.4em;
 }
 
 .application.mh-cs-notes prose-mirror.mh-cs-notes-editor .editor-menu {

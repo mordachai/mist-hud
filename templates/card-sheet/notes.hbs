@@ -6,7 +6,7 @@
       mcNotes null for players), journal { label, entries [{ id, question,
       answer }], own }. --}}
 {{#*inline "mhCsNoteField"}}
-<section class="mh-cs-notes-section">
+<section class="mh-cs-notes-section{{#if cls}} {{cls}}{{/if}}">
   <h4 class="mh-cs-imp-dialog-heading">{{note.label}}</h4>
   {{#if note.editable}}
   <prose-mirror class="mh-cs-notes-editor" name="{{note.field}}" data-field="{{note.field}}" value="{{note.raw}}" toggled>{{{note.html}}}</prose-mirror>
@@ -16,7 +16,7 @@
 </section>
 {{/inline}}
 <div class="mh-cs-notes-body">
-  {{> mhCsNoteField note=description}}
+  {{> mhCsNoteField note=description cls="mh-cs-notes-description"}}
 
   <section class="mh-cs-notes-section mh-cs-clue-journal">
     <h4 class="mh-cs-imp-dialog-heading">{{journal.label}}</h4>
