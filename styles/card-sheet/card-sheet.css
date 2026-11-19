@@ -2392,11 +2392,22 @@
   padding: 12px;
 }
 
+/* The full view's close button: in its top-right corner, as on the spread deck. */
+.mh-card-sheet .mh-cs-deck-overlay-focus > .mh-cs-deck-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+}
+
 .mh-card-sheet .mh-cs-deck-overlay-spread > .mh-cs-deck-close {
   position: sticky;
   top: 0;
   z-index: 3;
   float: right;
+}
+
+.mh-card-sheet .mh-cs-deck-overlay > .mh-cs-deck-close {
   width: 30px;
   height: 30px;
   margin: 0 0 6px 10px;

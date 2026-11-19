@@ -3,7 +3,7 @@
       sheet (only the red bands show, the last card whole: the one last
       brought forward), hanging from a toolbar on top of it (fixes phase 2):
       the count per type, + (a blank card of a type, forward), spread,
-      detach, hide. Hidden, the deck is tucked behind the layers: only its
+      hide (chevron left; right to unhide). Hidden, the deck is tucked behind the layers: only its
       unhide button and a strip of the cards show. Clicking a card brings it
       forward; the spread button lays them all out by type. While the deck
       is detached (its own window), a placeholder stands in its place.
@@ -31,8 +31,9 @@
       </details>
       {{/if}}
       <button type="button" class="mh-cs-deck-btn{{#unless deck.adds.length}} mh-cs-deck-push{{/unless}}" data-action="spreadDeck" data-tooltip="{{localize 'MistHUD.cardSheet.deck.spread'}}" aria-label="{{localize 'MistHUD.cardSheet.deck.spread'}}" aria-pressed="{{#if deck.spread}}true{{else}}false{{/if}}"><i class="fa-solid fa-table-columns" aria-hidden="true"></i></button>
-      <button type="button" class="mh-cs-deck-btn" data-action="detachDeck" data-tooltip="{{localize 'MistHUD.cardSheet.deck.detach'}}" aria-label="{{localize 'MistHUD.cardSheet.deck.detach'}}"><i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i></button>
-      <button type="button" class="mh-cs-deck-btn mh-cs-deck-hide" data-action="toggleDeckHidden" data-tooltip="{{deck.hideLabel}}" aria-label="{{deck.hideLabel}}" aria-pressed="{{#if deck.hidden}}true{{else}}false{{/if}}"><i class="fa-solid {{#if deck.hidden}}fa-eye{{else}}fa-eye-slash{{/if}}" aria-hidden="true"></i></button>
+      {{!-- The detach button (detachDeck) is off the toolbar for now: the
+            action and the deck window stay, for a later use on the HUD. --}}
+      <button type="button" class="mh-cs-deck-btn mh-cs-deck-hide" data-action="toggleDeckHidden" data-tooltip="{{deck.hideLabel}}" aria-label="{{deck.hideLabel}}" aria-pressed="{{#if deck.hidden}}true{{else}}false{{/if}}"><i class="fa-solid {{#if deck.hidden}}fa-chevron-right{{else}}fa-chevron-left{{/if}}" aria-hidden="true"></i></button>
     </div>
     <div class="mh-cs-deck-stack">
       {{#each deck.stack}}
@@ -48,6 +49,7 @@
 
   {{#if deck.focus}}
   <div class="mh-cs-deck-overlay mh-cs-deck-overlay-focus">
+    <button type="button" class="mh-cs-deck-close" data-action="closeDeckView" data-tooltip="{{localize 'MistHUD.cardSheet.deck.backToDeck'}}" aria-label="{{localize 'MistHUD.cardSheet.deck.backToDeck'}}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
     <div class="mh-cs-deck-focus">
       {{> "modules/mist-hud/templates/card-sheet/deck-card.hbs" card=deck.focus big=true work=true}}
       <div class="mh-cs-deck-focus-actions">

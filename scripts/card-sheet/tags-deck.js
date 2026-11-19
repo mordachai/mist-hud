@@ -537,8 +537,21 @@ async function focusDeckCard(event, target) {
   this.renderDeck();
 }
 
-/** Back to the stack (the forward card goes back, the spread closes, a blank card is dropped). */
+/**
+ * Back to the stack (the forward card goes back, the spread closes). A blank
+ * card with a name typed is made first (a typed name is a card); left
+ * unnamed, it is dropped.
+ */
 export function backToStack(app) {
+  const draft = app.deckDraft;
+  if (draft) {
+    const name = String(draftInput(app)?.value ?? draft.name ?? "").trim();
+    if (draft.creating || name) {
+      draft.leave = true;
+      if (!draft.creating) void createFromDraft(app, name);
+      return;
+    }
+  }
   if (app.deckView === "stack" && !app.deckDraft) return;
   app.deckView = "stack";
   app.deckFocus = null;
@@ -574,7 +587,8 @@ function draftDeckCard(event, target) {
 /** A type marker of the blank card: that type. What was typed is kept. */
 function draftDeckKind(event, target) {
   const kind = target.dataset.kind;
-  if (!this.deckDraft || !KIND_INFO[kind]) return;
+  this.deckPicking = false;
+  if (!this.deckDraft || this.deckDraft.creating || !KIND_INFO[kind]) return;
   const input = draftInput(this);
   if (input) this.deckDraft.name = input.value;
   this.deckDraft.kind = kind;
@@ -589,39 +603,50 @@ function createDeckDraft() {
 const draftInput = app => app.element?.querySelector(`[data-item-id="${DRAFT_ID}"] input[data-deck-field="name"]`) ?? null;
 
 /**
- * The blank card is named: the item is made with the system's own creation
- * methods (as createDeckItem), logged "Created", and brought forward (and to
- * the front of the stack) to be set: its boxes, toggles, a clue's source.
+ * The blank card is named (Enter, "Create", or leaving its name field with a
+ * name typed): the item is made with the system's own creation methods (as
+ * createDeckItem), logged "Created", and brought forward (and to the front
+ * of the stack) to be set: its boxes, toggles, a clue's source. Left on the
+ * way out (backToStack: draft.leave), it goes to the stack instead.
+ * @param {object} [options]
+ * @param {boolean} [options.quiet]  no warning when the name is empty
  */
-async function createFromDraft(app, typed) {
+async function createFromDraft(app, typed, { quiet = false } = {}) {
   const draft = app.deckDraft;
   const actor = ownedActor(app);
-  if (!draft || !actor) return;
+  if (!draft || draft.creating || !actor) return;
   const name = String(typed ?? draft.name ?? "").trim();
   if (!name) {
+    if (quiet) return;
     ui.notifications.warn(L("MistHUD.cardSheet.deck.nameFirst"));
     draftInput(app)?.focus();
     return;
   }
-  await once(app, async () => {
-    let created = null;
-    switch (draft.kind) {
-      case "status": created = await actor.createNewStatus(name); break;
-      case "tag":    created = await actor.createStoryTag(name); break;
-      case "clue":   created = await actor.createNewClue({ name }); break;
-      case "juice":  created = await actor.createNewJuice(name); break;
-    }
-    if (!created?.id) return;
-    const after = created.type === "status" ? `tier  ${created.system.tier}`
-      : created.type === "clue" || created.type === "juice" ? `${created.system.amount}` : undefined;
-    await logModification(actor, "Created", created, after);
-    app.deckDraft = null;
-    app.deckView = "focus";
-    app.deckFocus = created.id;
-    await writeUiState(actor, { deck: { top: created.id } });
-    if (created.type === "tag") app.render({ parts: ["layer2", "deck"] });
-    else app.renderDeck();
-  });
+  draft.name = name;
+  draft.creating = true;
+  try {
+    await once(app, async () => {
+      let created = null;
+      switch (draft.kind) {
+        case "status": created = await actor.createNewStatus(name); break;
+        case "tag":    created = await actor.createStoryTag(name); break;
+        case "clue":   created = await actor.createNewClue({ name }); break;
+        case "juice":  created = await actor.createNewJuice(name); break;
+      }
+      if (!created?.id) return;
+      const after = created.type === "status" ? `tier  ${created.system.tier}`
+        : created.type === "clue" || created.type === "juice" ? `${created.system.amount}` : undefined;
+      await logModification(actor, "Created", created, after);
+      if (app.deckDraft === draft) app.deckDraft = null;
+      app.deckView = draft.leave ? "stack" : "focus";
+      app.deckFocus = draft.leave ? null : created.id;
+      await writeUiState(actor, { deck: { top: created.id } });
+      if (created.type === "tag") app.render({ parts: ["layer2", "deck"] });
+      else app.renderDeck();
+    });
+  } finally {
+    draft.creating = false;
+  }
 }
 
 /** The toolbar's spread button: lay every card out in front of the sheet, or put them back. */
@@ -838,9 +863,13 @@ export const DECK_ACTIONS = {
  * card is logged as created, or deleted again when left empty.
  */
 async function changeDeckField(app, input) {
-  // The blank card: what was typed is only kept (Enter or "Create" makes it).
+  // The blank card: a typed name makes the card (not everyone sees the
+  // buttons below it), unless a type marker is being clicked: the type
+  // changes first, and the card is made when the name is left again.
   if (input.closest(`[data-item-id="${DRAFT_ID}"]`)) {
-    if (app.deckDraft && input.dataset.deckField === "name") app.deckDraft.name = input.value ?? "";
+    if (!app.deckDraft || input.dataset.deckField !== "name") return;
+    app.deckDraft.name = input.value ?? "";
+    if (!app.deckPicking) void createFromDraft(app, input.value, { quiet: true });
     return;
   }
   const item = itemAt(app, input);
@@ -958,6 +987,13 @@ export function bindDeckListeners(app, { views = true } = {}) {
     const card = event.target.closest?.(".mh-cs-deck-card.draggable");
     if (!card || !event.dataTransfer) return;
     event.dataTransfer.setData("text/plain", card.dataset.name ?? "");
+  }, { capture: true });
+  // A type marker of the blank card pressed: its name field's "change"
+  // (fired before the click) keeps the name without making the card yet.
+  el.addEventListener("pointerdown", event => {
+    if (!event.target.closest?.(".mh-cs-deck-markers-pick")) return;
+    app.deckPicking = true;
+    window.addEventListener("pointerup", () => setTimeout(() => { app.deckPicking = false; }, 300), { once: true });
   }, { capture: true });
   // A draggable card can't have its text fields selected with the mouse:
   // the card stops being draggable while a field is pressed.

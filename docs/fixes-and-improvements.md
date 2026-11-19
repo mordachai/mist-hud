@@ -155,6 +155,12 @@ What the code does today, checked before planning:
 > - Selected cards: outline only (green / red ring), no colour overlay.
 > - The card last brought forward stays at the front of the stack (`deck.top` in the client UI state).
 > - Toolbar eye: hide / unhide. Hidden, the deck slides 0.8 card widths behind the layers; only the unhide button and a strip of the cards show (`deck.hidden`).
+>
+> **Second follow-up (user, 2026-11-19): done, not tested here (the user tests).**
+> - The detach button is off the deck toolbar; `detachDeck`, the deck window and the "detached here" placeholder stay in code (maybe for the HUD later).
+> - A blank card is made as soon as its name is left with something typed (blur, Enter, Esc, the close / back buttons, a click beside it); a click on a type marker first changes the type and keeps the name. Left empty, it is still dropped.
+> - Hide / unhide is a chevron: left hides, right unhides.
+> - The full view has a round × close button in its top-right corner, as the spread deck.
 
 **Phase 3: Sheet cards (look)**
 - The new card art: Mist fonts white, theme name white with a strong glow, shifted up on Mythos and Mist (not Logos yet); Motivation darker, bolder, +2 px.
