@@ -2,8 +2,9 @@
       Edit mode: the name opens the edit dialog, the trash deletes it.
       Play mode (owner): the name posts it to chat and spends a use, as on
       the system sheet. Otherwise plain text.
-      Takes: imp (improvementView). --}}
-<li class="mh-cs-improvement{{#if imp.expended}} expended{{/if}}" data-improvement-id="{{imp.id}}"{{#if imp.description}} data-tooltip="{{imp.description}}"{{/if}}>
+      Takes: imp (improvementView), desc (show the description under the
+      name: the theme cards' back; elsewhere it is the row's tooltip). --}}
+<li class="mh-cs-improvement{{#if imp.expended}} expended{{/if}}" data-improvement-id="{{imp.id}}"{{#unless desc}}{{#if imp.description}} data-tooltip="{{imp.description}}"{{/if}}{{/unless}}>
   {{#if imp.edit}}
   <button type="button" class="mh-cs-imp-name mh-cs-edit-name" data-action="editImprovement">{{imp.name}}</button>
   {{else if imp.send}}
@@ -16,4 +17,5 @@
   {{#if imp.edit}}
   <button type="button" class="mh-cs-icon-btn mh-cs-delete" data-action="deleteImprovement" data-tooltip="{{localize 'CityOfMist.command.deleteImprovement'}}" aria-label="{{localize 'CityOfMist.command.deleteImprovement'}}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
   {{/if}}
+  {{#if desc}}{{#if imp.description}}<p class="mh-cs-imp-desc">{{imp.description}}</p>{{/if}}{{/if}}
 </li>

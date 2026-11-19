@@ -170,6 +170,17 @@ What the code does today, checked before planning:
 - Improvements on the card back: description under the title.
 - Improvement dialogs in the new module look.
 
+> **Phase 3 status: done (2026-11-19). A quick look in Foundry as claude-gm (Lily Chow); the user tests the rest.**
+> - The new art (Mythos, Mist, extras) is **227 × 579** (Logos is still the old 473 × 1203). Its top band is narrower: y 10–32 = 4.4–14.1 cqw. On every card but Logos the band label sits in it and the body starts 4.4 cqw higher (`--mh-cs-body-top` 17.6 cqw), so the theme name moves up. Extras and crew cards move up too: they use the new extras art ("all but Logos").
+> - Mist: the art is dark, so every font is white (ink, band, rules, motivation, track labels, pips unfiltered, dark edit fields). The theme name is white with a strong white glow.
+> - Motivation: Rock Salt 5.8 cqw (was 4.8, about +2 px), black, drawn bolder with a thin stroke of its own ink (the font has one weight). The label is bold, 6.4 cqw and fully opaque. Line height stays 1.55: below that, Rock Salt overflows by 1 px and a scrollbar shows.
+> - Burn flames: at the right end of the row (after the trash in edit mode), 5.4 × 7.4 cqw (was 5 × 5), centred on the first line of the name (the row aligns to the top). Empty: `com_burn_empty.svg` with `drop-shadow(0 0 1px #000)`. Burned: `com_burned_<mythos|logos|mist|extras>.svg` with a 2 px glow in the card's colour (white on Mist). To burn: the same at 0.7 opacity. Extras, crew and the character card's story tags use the extras flame.
+> - Selected tags: the `+1` / `−1` badge is gone (the bar's colour says the direction). The red outline was core's `button:focus` (1 px, warm): the name keeps the focus across the re-render. It is removed for mouse focus; the keyboard ring stays.
+> - Attention pips turned 180° (crack and build-up are unchanged).
+> - Card back: the improvement's description is shown under its name, in small italics (`improvement.hbs` takes `desc=true` from the theme card). The character card's build-up list keeps it as a tooltip, for lack of room.
+> - Improvement dialog: new `improvementDialog` in the adapter, used by add and edit. It is a DialogV2 (`templates/card-sheet/improvement-dialog.hbs`) with what the system sheet shows for a chosen improvement: the description, the choice (the system's core move list for `THEME_DYN_SELECT`, otherwise free text) and the uses. Save writes `system.choice_item`. A custom (not chosen) improvement still opens the system's full sheet. Look (`.mh-cs-dialog`, in `card-sheet-com.css`): a dark glass window, the title in Rift caps with a white glow, a paper panel with the cards' headings and dashed fields, and dark Rift keys. It beats the External Style's book page. The phase-1 dialogs (Help / Hurt, theme delete) take the same look.
+> - Not checked: a real Mist theme (Lily has none: checked by swapping the card's class in the page), a real burned or to-burn tag (classes swapped the same way), the add-improvement flow end to end, a core-move choice, Firefox. Not changed: the themebook's improvement choice list (the system's `singleChoiceBox`) keeps the system / External Style look.
+
 **Phase 4: Layout, portrait and hero shot** (needs the mockup and the masks)
 - Shorter header bar over the theme cards only.
 - Random −2°…+2° rotation per card (stable per card, not per render), with a client setting to turn it off.

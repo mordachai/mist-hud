@@ -13,7 +13,7 @@
 
 import {
   confirmBox, singleChoiceBox, themeBookSelector, tagOrImprovementChoice,
-  itemEditDialog, itemDialog, autoAwardImpForWeakness, buildUpImprovementChoices,
+  itemEditDialog, improvementDialog, autoAwardImpForWeakness, buildUpImprovementChoices,
   sendImprovementToChat, themeDeleteChoice, logModification,
 } from "./system-adapter.js";
 
@@ -331,7 +331,7 @@ export async function addImprovement(event, target) {
     const created = await owner.addImprovement(theme.id, Number(choice));
     const imp = created && owner.items.get(created.id ?? created[0]?.id);
     if (!imp) return;
-    await itemDialog(imp);
+    await improvementDialog(imp);
     await logModification(owner, "Created", imp);
   });
 }
@@ -343,7 +343,7 @@ export async function editImprovement(event, target) {
   if (!imp) return;
   await once(this, async () => {
     if (!imp.system.chosen) await imp.reloadImprovementFromCompendium();
-    await itemDialog(imp);
+    await improvementDialog(imp);
   });
 }
 

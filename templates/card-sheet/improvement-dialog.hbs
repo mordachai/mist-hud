@@ -1,0 +1,26 @@
+{{!-- The improvement dialog of the card sheet (fixes phase 3): what the
+      system's improvement sheet shows once an improvement is chosen (its
+      description, its choice, its uses), in the module's look. Rendered by
+      system-adapter.js improvementDialog; DialogV2 wraps it in its form.
+      Takes: description, choiceLabel, moves (a core move list, or null for
+      a free text choice), choice, uses ({current, max} or null). --}}
+<div class="mh-cs-imp-dialog-body">
+  <section class="mh-cs-imp-dialog-section">
+    <h4 class="mh-cs-imp-dialog-heading">{{localize "CityOfMist.terms.description"}}</h4>
+    <p class="mh-cs-imp-dialog-desc">{{description}}</p>
+  </section>
+  <section class="mh-cs-imp-dialog-section">
+    <label class="mh-cs-imp-dialog-heading" for="{{uid}}-choice">{{choiceLabel}}</label>
+    {{#if moves}}
+    <select id="{{uid}}-choice" name="choice">
+      <option value="">{{localize "MistHUD.cardSheet.improvementDialog.noChoice"}}</option>
+      {{selectOptions moves selected=choice}}
+    </select>
+    {{else}}
+    <input type="text" id="{{uid}}-choice" name="choice" value="{{choice}}" spellcheck="false">
+    {{/if}}
+  </section>
+  {{#if uses}}
+  <p class="mh-cs-imp-dialog-uses">{{localize "MistHUD.cardSheet.improvementDialog.uses" current=uses.current max=uses.max}}</p>
+  {{/if}}
+</div>

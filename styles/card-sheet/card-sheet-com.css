@@ -99,10 +99,46 @@
   --mh-cs-rule: rgba(165, 75, 40, 0.45);
 }
 
+/* The Mist art is dark (user's new art, 2026-11-19): every Mist font is
+   white (fixes phase 3), the title white with a strong white glow. */
 .mh-card-sheet .mh-cs-type-mist .mh-cs-face {
   background-image: url("../../ui/card-sheet/com/mist_theme_bg.webp");
-  --mh-cs-ink: #1e1f22;
-  --mh-cs-rule: rgba(20, 20, 25, 0.35);
+  --mh-cs-ink: #fff;
+  --mh-cs-band-ink: #fff;
+  --mh-cs-rule: rgba(255, 255, 255, 0.45);
+  --mh-cs-motivation-ink: #fff;
+  --mh-cs-input-bg: rgba(0, 0, 0, 0.25);
+  --mh-cs-input-bg-focus: rgba(0, 0, 0, 0.42);
+  --mh-cs-title-ink: #fff;
+  --mh-cs-title-glow: 0 0 0.6cqw #fff, 0 0 2cqw rgba(255, 255, 255, 0.9), 0 0 4.5cqw rgba(255, 255, 255, 0.65);
+}
+
+.mh-card-sheet .mh-cs-type-mist textarea.mh-cs-title-input {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.mh-card-sheet .mh-cs-type-mist textarea.mh-cs-title-input:is(:hover, :focus) {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* Mist: the icon buttons' hover wash and the pips in white. */
+.mh-card-sheet .mh-cs-type-mist .mh-cs-icon-btn:is(:hover, :focus-visible),
+.mh-card-sheet .mh-cs-type-mist button.mh-cs-burn:hover {
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
+.mh-card-sheet .mh-cs-type-mist .mh-cs-pip {
+  filter: none;
+}
+
+/* The new art (Mythos, Mist, extras: 227 x 579, user, 2026-11-19) has a
+   narrower top band than the Logos art (still the old one): y 10-32 of 227
+   = 4.4-14.1cqw. The band label sits in it and the body (the theme name
+   first) moves up with it. Logos keeps the old positions for now. */
+.mh-card-sheet .mh-cs-card:not(.mh-cs-type-logos) {
+  --mh-cs-band-top: 4.4cqw;
+  --mh-cs-band-h: 9.7cqw;
+  --mh-cs-body-top: 17.6cqw;
 }
 
 /* ── Type icons in the header band (the HUD's icons), at the right ──────── */
@@ -128,24 +164,59 @@
   background-image: url("../../ui/icons/crew_icn.svg");
 }
 
-/* ── Burn icons (the HUD's City of Mist set) ─────────────────────────────── */
-
-.mh-card-sheet .mh-cs-burn {
-  background-image: url("../../ui/icons/burn_com_empty_icn.svg");
+/* ── Burn icons (fixes phase 3: the user's card set, ui/card-sheet/com) ─────
+   At the right end of the tag row, a bit bigger than before, its centre on
+   the first line of the name (the row aligns to the top, so a name that
+   wraps leaves the flame on its first line). Empty: the white flame with
+   a 1px black shadow. Burned: the flame in the card's colour
+   (com_burned_<type>.svg) with a 2px glow; to burn: the same, fainter,
+   until the roll burns it. Extras, crew and the character card use the
+   extras flame. */
+.mh-card-sheet .mh-cs-card {
+  --mh-cs-burned-img: url("../../ui/card-sheet/com/com_burned_extras.svg");
+  --mh-cs-burn-glow: rgba(40, 40, 40, 0.85);
+  --mh-cs-burn-w: 5.4cqw;
+  --mh-cs-burn-h: 7.4cqw;
 }
 
-.mh-card-sheet .mh-cs-burn.toBurn {
-  background-image: url("../../ui/icons/burn_com_active_icn.svg");
+.mh-card-sheet .mh-cs-type-mythos { --mh-cs-burned-img: url("../../ui/card-sheet/com/com_burned_mythos.svg"); --mh-cs-burn-glow: #b06cc8; }
+.mh-card-sheet .mh-cs-type-logos  { --mh-cs-burned-img: url("../../ui/card-sheet/com/com_burned_logos.svg");  --mh-cs-burn-glow: #d4704f; }
+.mh-card-sheet .mh-cs-type-mist   { --mh-cs-burned-img: url("../../ui/card-sheet/com/com_burned_mist.svg");   --mh-cs-burn-glow: #fff; }
+
+.mh-card-sheet .mh-cs-card .mh-cs-tag {
+  align-items: flex-start;
 }
 
-.mh-card-sheet .mh-cs-burn.burned {
-  background-image: url("../../ui/icons/burn_com_full_icn.svg");
+/* Row order: name, trash (edit mode), flame at the end. The negative top
+   margin centres the (taller) flame on the first line of text. */
+.mh-card-sheet .mh-cs-card .mh-cs-tag .mh-cs-tag-name { order: 1; }
+.mh-card-sheet .mh-cs-card .mh-cs-tag .mh-cs-delete   { order: 2; align-self: center; }
+
+.mh-card-sheet .mh-cs-card .mh-cs-burn,
+.mh-card-sheet .mh-cs-card button.mh-cs-burn {
+  order: 3;
+  width: var(--mh-cs-burn-w);
+  height: var(--mh-cs-burn-h);
+  margin: calc((var(--mh-cs-tag-size) * 1.2 - var(--mh-cs-burn-h)) / 2) 0 0 auto;
+  border-radius: 1.2cqw;
+  background: url("../../ui/card-sheet/com/com_burn_empty.svg") center / contain no-repeat;
+  filter: drop-shadow(0 0 1px #000);
+  opacity: 1;
 }
 
-/* The empty flame is light grey (made for the dark HUD): darkened on the cards. */
-.mh-card-sheet .mh-cs-burn.unburned {
-  filter: brightness(0.32);
-  opacity: 0.75;
+.mh-card-sheet .mh-cs-card .mh-cs-burn:is(.burned, .toBurn) {
+  background-image: var(--mh-cs-burned-img);
+  filter: drop-shadow(0 0 2px var(--mh-cs-burn-glow));
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-burn.toBurn {
+  opacity: 0.7;
+}
+
+/* The trash is in the row in edit mode: the flame keeps its place after it. */
+.mh-card-sheet .mh-cs-card .mh-cs-tag .mh-cs-delete + .mh-cs-burn,
+.mh-card-sheet .mh-cs-card .mh-cs-tag .mh-cs-delete ~ .mh-cs-burn {
+  margin-left: 0;
 }
 
 /* The title may use a little of the side margin (the frame is ~5cqw). */
@@ -153,11 +224,27 @@
   margin: 0 -3cqw;
 }
 
-/* The identity / mystery line in Rock Salt (user, 2026-11-18: bigger). */
+/* The identity / mystery line in Rock Salt (user, 2026-11-18: bigger;
+   fixes phase 3: darker, bolder, 2px larger, label included). Rock Salt
+   has one weight: the bold is drawn with a thin stroke of the same ink. */
 .mh-card-sheet .mh-cs-motivation-text {
-  font-size: 4.8cqw;
+  font-size: 5.8cqw;
+  /* Under 1.55 Rock Salt's tall glyph boxes overflow by 1px: a scrollbar. */
   line-height: 1.55;
-  max-height: calc(4.8cqw * 1.55 * 4 + 0.8em);
+  max-height: calc(5.8cqw * 1.55 * 4 + 0.8em);
+  color: var(--mh-cs-motivation-ink, #000);
+  -webkit-text-stroke: 0.18cqw currentColor;
+}
+
+.mh-card-sheet .mh-cs-motivation-label {
+  color: var(--mh-cs-motivation-ink, #000);
+  font-size: 6.4cqw;
+  font-weight: bold;
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-card textarea.mh-cs-motivation-input {
+  color: var(--mh-cs-motivation-ink, #000);
 }
 
 /* Track pips: the City of Mist sheet's point shapes (the External Style
@@ -175,6 +262,12 @@
 .mh-card-sheet .mh-cs-pip.filled {
   background-image: url("../../ui/icons/track-com-full.svg");
   opacity: 1;
+}
+
+/* Attention pips turned 180°: the pointed end faces up (fixes phase 3).
+   Crack and build-up keep the art's own direction. */
+.mh-card-sheet .mh-cs-track-attention .mh-cs-pip {
+  transform: rotate(180deg);
 }
 
 .mh-card-sheet .mh-cs-pips {
@@ -243,27 +336,21 @@
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.55);
 }
 
+/* No +1 / −1 badge (fixes phase 3): the bar's colour says the direction. */
 .mh-card-sheet .mh-cs-tag.mh-cs-selected .mh-cs-select-name::after {
-  padding-right: 1.5cqw;
-  font-family: var(--mh-cs-heading-font);
-  font-weight: 900;
-  font-size: 5.8cqw;
+  content: none;
 }
 
-/* The mark sits where the bar fades out: the card's ink, not white
-   (--mh-cs-ink is set on the face, so it is read here, not on the card). */
-.mh-card-sheet .mh-cs-tag.mh-cs-selected-positive .mh-cs-select-name::after {
-  color: var(--mh-cs-ink, #1f1b16);
+/* No outline on a clicked tag name (fixes phase 3): the name keeps the focus
+   across the re-render a selection makes, and core draws its warm 1px
+   button:focus outline. The keyboard ring (:focus-visible) stays. */
+.mh-card-sheet .mh-cs-card button:focus:not(:focus-visible) {
+  outline: none;
 }
 
-.mh-card-sheet .mh-cs-tag.mh-cs-selected-negative .mh-cs-select-name::after {
-  color: #8d1c16;
-}
-
-/* On the dark bar, the flame shows in its own light colours. */
-.mh-card-sheet .mh-cs-tag.mh-cs-selected .mh-cs-burn.unburned {
-  filter: none;
-  opacity: 0.9;
+.mh-card-sheet .mh-cs-card :is(.mh-cs-tag-name, .mh-cs-imp-name, .mh-cs-burn):is(button):focus-visible {
+  outline: 0.5cqw solid currentColor;
+  outline-offset: 0.3cqw;
 }
 
 /* Serif numerals for the tier / amount on the band (fixes phase 2): PT Serif
@@ -378,3 +465,200 @@
 .mh-card-sheet .mh-cs-deck-pip:nth-child(14) { left: 77.24%; width: 2.67%; }
 .mh-card-sheet .mh-cs-deck-pip:nth-child(15) { left: 80.82%; width: 2.88%; }
 .mh-card-sheet .mh-cs-deck-pip:nth-child(16) { left: 84.59%; width: 8.84%; }
+
+/* ── The card sheet's dialogs (fixes phase 3) ────────────────────────────────
+   The improvement dialog (system-adapter.js improvementDialog) and the
+   other DialogV2 the card sheet opens (Help / Hurt, theme delete) carry
+   .mh-cs-dialog: the sheet's own look instead of the core / system window
+   or the External Style's book page. A dark glass window like the deck's
+   menus and backdrop, the title in the theme cards' Rift capitals with a
+   white glow, the body a paper panel like the cards (charcoal ink, the
+   cards' heavy condensed headings over a rule), dark keys.
+   The doubled :not(#id) root lifts every rule here over the External Style
+   (its book page roots are .app.window-app:where(...):not(#mhx-book) and
+   .application.dialog:not(#mhx-book), both unlayered). */
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) {
+  --mh-cs-dlg-ink: #2a2a2a;
+  --mh-cs-dlg-rule: rgba(40, 40, 40, 0.35);
+  --mh-cs-dlg-text-font: var(--font-family-tags, "Roboto Condensed"), sans-serif;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(14, 11, 9, 0.96);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(3px);
+  color: whitesmoke;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b)::before,
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b)::after {
+  display: none;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) > .window-header {
+  position: relative;
+  padding: 8px 10px 4px 14px;
+  border: none;
+  background: none;
+  box-shadow: none;
+  color: whitesmoke;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) > .window-header .window-title {
+  position: static;
+  inset: auto;
+  padding: 0;
+  font-family: "MH Card Title", "Rift Bold", "Rift", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.03em;
+  text-align: left;
+  text-transform: uppercase;
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.85), 0 0 9px rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) > .window-header :is(.window-icon, .header-control) {
+  color: whitesmoke;
+  opacity: 0.75;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) > .window-header .header-control:is(:hover, :focus-visible) {
+  opacity: 1;
+}
+
+/* The paper panel. */
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) > .window-content {
+  margin: 4px 10px 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #f1ece2, #e2dbce);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.5);
+  color: var(--mh-cs-dlg-ink);
+  font-family: var(--mh-cs-dlg-text-font);
+  font-size: 15px;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: inherit;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .dialog-content :is(p, div:only-child:not([class])) {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+/* Headings: the cards' POWER TAGS heading. */
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) :is(.mh-cs-imp-dialog-heading, .mh-cs-choices > legend) {
+  display: block;
+  width: 100%;
+  margin: 0 0 6px;
+  padding: 0 0 3px;
+  border: none;
+  border-bottom: 2px solid var(--mh-cs-dlg-rule);
+  background: none;
+  font-family: "MH Card Heading", "Fira Sans Extra Condensed", sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--mh-cs-dlg-ink);
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .mh-cs-imp-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .mh-cs-imp-dialog-desc {
+  max-height: 14em;
+  overflow-y: auto;
+  font-style: italic;
+  white-space: pre-line;
+  scrollbar-width: thin;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .mh-cs-imp-dialog-uses {
+  font-family: "MH Card Heading", "Fira Sans Extra Condensed", sans-serif;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .mh-cs-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .dialog-content label {
+  font-size: 15px;
+  color: inherit;
+}
+
+/* Fields: the cards' inline inputs (light field, dashed rule). */
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .dialog-content :is(input[type="text"], input:not([type]), select, textarea) {
+  width: 100%;
+  height: auto;
+  min-height: 30px;
+  padding: 4px 8px;
+  border: none;
+  border-bottom: 2px dashed var(--mh-cs-dlg-rule);
+  border-radius: 4px 4px 0 0;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: none;
+  color: var(--mh-cs-dlg-ink);
+  font-family: var(--mh-cs-dlg-text-font);
+  font-size: 15px;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .dialog-content :is(input, select, textarea):focus {
+  border-bottom-style: solid;
+  background: rgba(255, 255, 255, 0.8);
+  outline: none;
+  box-shadow: none;
+}
+
+/* Keys: dark, Rift capitals; the default one lit. */
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .form-footer {
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .form-footer button {
+  height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: #1f1a17;
+  box-shadow: none;
+  color: whitesmoke;
+  font-family: "MH Card Title", "Rift Bold", "Rift", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .form-footer button:is(:hover, :focus-visible) {
+  border-color: rgba(255, 255, 255, 0.45);
+  background: #2e2723;
+  outline: none;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .form-footer button:is([autofocus], .default) {
+  border-color: rgba(255, 255, 255, 0.4);
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.45);
+}

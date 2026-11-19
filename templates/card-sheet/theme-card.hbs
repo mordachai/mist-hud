@@ -169,7 +169,7 @@
         {{#if card.unspent}}<p class="mh-cs-unspent"><i class="fa-solid fa-up-long" aria-hidden="true"></i> {{card.unspentLabel}}</p>{{/if}}
         <ul class="mh-cs-scroll mh-cs-improvements">
           {{#each card.improvements}}
-          {{> "modules/mist-hud/templates/card-sheet/improvement.hbs" imp=this}}
+          {{> "modules/mist-hud/templates/card-sheet/improvement.hbs" imp=this desc=true}}
           {{else}}
           <li class="mh-cs-none">{{localize "MistHUD.cardSheet.noImprovements"}}</li>
           {{/each}}

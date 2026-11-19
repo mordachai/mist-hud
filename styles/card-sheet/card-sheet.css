@@ -834,6 +834,19 @@
   opacity: 0.5;
 }
 
+/* The description under the name, on its own line (theme cards' back,
+   fixes phase 3). */
+.mh-card-sheet .mh-cs-imp-desc {
+  flex: 1 0 100%;
+  margin: 0.4cqw 0 0;
+  font-size: 4.8cqw;
+  font-style: italic;
+  line-height: 1.3;
+  opacity: 0.85;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
 .mh-card-sheet .mh-cs-none {
   font-family: var(--mh-cs-tag-font);
   font-size: 5.4cqw;

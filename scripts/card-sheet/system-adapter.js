@@ -209,6 +209,58 @@ export async function itemDialog(item) {
   return sys.CityHelpers.itemDialog(item);
 }
 
+/**
+ * The card sheet's improvement dialog (fixes phase 3): the fields the
+ * system's improvement sheet (templates/items/improvement.html) shows for a
+ * chosen improvement (description, choice, uses) in the module's look.
+ * The choice is a core move for THEME_DYN_SELECT improvements (the system's
+ * own list), free text otherwise; Save writes system.choice_item as the
+ * system sheet does. An improvement not chosen from a themebook (a custom
+ * one, with name, uses, flags and description to fill in) still opens the
+ * system's sheet, which has every field.
+ * @returns {Promise<Item|null>}
+ */
+export async function improvementDialog(imp) {
+  const sys = await systemApi();
+  if (!sys) return null;
+  if (!imp.system.chosen) return sys.CityHelpers.itemDialog(imp);
+  const moves = imp.choiceType === "core_move"
+    ? Object.fromEntries(sys.CityHelpers.getMoves()
+        .filter(m => m.system.category == "Core")
+        .map(m => [m.name, m.name]))
+    : null;
+  const max = Number(imp.system.uses?.max) || 0;
+  const content = await foundry.applications.handlebars.renderTemplate(
+    "modules/mist-hud/templates/card-sheet/improvement-dialog.hbs", {
+      uid:         `mh-cs-imp-${imp.id}`,
+      description: imp.description ?? "",
+      choiceLabel: game.i18n.localize("CityOfMist.terms.choice"),
+      moves,
+      choice:      imp.system.choice_item ?? "",
+      uses:        max > 0 ? { current: imp.system.uses?.current ?? 0, max } : null,
+    });
+  const choice = await foundry.applications.api.DialogV2.wait({
+    window:   { title: String(imp.displayedName ?? imp.name), icon: "fa-solid fa-up-long" },
+    classes:  ["mh-cs-dialog", "mh-cs-imp-dialog"],
+    position: { width: 420 },
+    content,
+    buttons: [
+      {
+        action: "save", label: game.i18n.localize("MistHUD.cardSheet.improvementDialog.save"),
+        icon: "fa-solid fa-check", default: true,
+        callback: (_event, button) => ({ choice: String(button.form.elements.choice?.value ?? "").trim() }),
+      },
+      { action: "cancel", label: game.i18n.localize("Cancel"), icon: "fa-solid fa-xmark" },
+    ],
+    rejectClose: false,
+  });
+  // Cancel and close give the action name or null: only Save gives an object.
+  if (choice && typeof choice === "object" && choice.choice !== (imp.system.choice_item ?? "")) {
+    await imp.update({ "system.choice_item": choice.choice });
+  }
+  return imp;
+}
+
 /** The system setting "award an improvement for a second weakness tag" (no question asked). */
 export async function autoAwardImpForWeakness() {
   const sys = await systemApi();
