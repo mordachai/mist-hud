@@ -266,15 +266,8 @@ Hooks.once("init", () => {
     onChange: () => Hooks.callAll("mistHudCardSheetMoves"),
   });
 
-  // Card sheet experiments (user, 2026-11-19): a dotted leader from each
-  // tag's name to its flame, and a tint of its own on each tag line.
-  game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_TAG_LEADERS, {
-    name: K("cardSheetTagLeaders.name"),
-    hint: K("cardSheetTagLeaders.hint"),
-    scope: "client", config: false, type: Boolean, default: true,
-    onChange: () => Hooks.callAll("mistHudCardSheetLook"),
-  });
-
+  // Card sheet experiment (user, 2026-11-19): a band of the card's theme
+  // colour behind each tag line, in alternating shades.
   game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_TAG_TINTS, {
     name: K("cardSheetTagTints.name"),
     hint: K("cardSheetTagTints.hint"),

@@ -119,14 +119,13 @@ function lookOn(key) {
 
 /**
  * The sheet's look switches as data attributes on the window (the CSS keys
- * on them): the tilt, and the tag line experiments (2026-11-19): a dotted
- * leader from a tag's name to its flame, a tint of its own on each tag line.
+ * on them): the tilt, and the tag line tints experiment (2026-11-19): a band
+ * of the card's theme colour behind each tag line, in alternating shades.
  * @param {HTMLElement} el  the sheet's window (or its frame, before the first paint)
  */
 export function applyLookFlags(el) {
   if (!el) return;
   el.dataset.tilt    = tiltOn() ? "on" : "off";
-  el.dataset.leaders = lookOn(SETTINGS.CARD_SHEET_TAG_LEADERS) ? "on" : "off";
   el.dataset.tints   = lookOn(SETTINGS.CARD_SHEET_TAG_TINTS) ? "on" : "off";
 }
 

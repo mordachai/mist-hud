@@ -1,16 +1,41 @@
 {{!-- The card sheet's notes window (scripts/card-sheet/notes.js): the
-      character's Description and, for the GM, the MC Notes, each in the
-      core editor (toggled) for the owner, plain text otherwise.
-      Takes: sections [{ field, label, raw, html, editable }]. --}}
+      character's Description, the clue journal and, for the GM, the MC
+      Notes. The text fields are the core editor (toggled) for the owner,
+      plain text otherwise; journal entries can be deleted by the owner.
+      Takes: description, mcNotes ({ field, label, raw, html, editable };
+      mcNotes null for players), journal { label, entries [{ id, question,
+      answer }], own }. --}}
+{{#*inline "mhCsNoteField"}}
+<section class="mh-cs-notes-section">
+  <h4 class="mh-cs-imp-dialog-heading">{{note.label}}</h4>
+  {{#if note.editable}}
+  <prose-mirror class="mh-cs-notes-editor" name="{{note.field}}" data-field="{{note.field}}" value="{{note.raw}}" toggled>{{{note.html}}}</prose-mirror>
+  {{else}}
+  <div class="mh-cs-notes-text">{{#if note.html}}{{{note.html}}}{{else}}<p class="mh-cs-none">—</p>{{/if}}</div>
+  {{/if}}
+</section>
+{{/inline}}
 <div class="mh-cs-notes-body">
-  {{#each sections}}
-  <section class="mh-cs-notes-section">
-    <h4 class="mh-cs-imp-dialog-heading">{{label}}</h4>
-    {{#if editable}}
-    <prose-mirror class="mh-cs-notes-editor" name="{{field}}" data-field="{{field}}" value="{{raw}}" toggled>{{{html}}}</prose-mirror>
+  {{> mhCsNoteField note=description}}
+
+  <section class="mh-cs-notes-section mh-cs-clue-journal">
+    <h4 class="mh-cs-imp-dialog-heading">{{journal.label}}</h4>
+    {{#if journal.entries.length}}
+    <ul class="mh-cs-journal-list">
+      {{#each journal.entries}}
+      <li class="mh-cs-journal-entry" data-journal-id="{{id}}">
+        <p class="mh-cs-journal-question">{{question}}</p>
+        <p class="mh-cs-journal-answer"><b>{{localize "MistHUD.cardSheet.notes.answer"}}:</b> {{answer}}</p>
+        {{#if ../journal.own}}
+        <button type="button" class="mh-cs-journal-delete" data-action="deleteJournal" data-tooltip="{{localize 'MistHUD.cardSheet.notes.deleteJournal'}}" aria-label="{{localize 'MistHUD.cardSheet.notes.deleteJournal'}}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+        {{/if}}
+      </li>
+      {{/each}}
+    </ul>
     {{else}}
-    <div class="mh-cs-notes-text">{{#if html}}{{{html}}}{{else}}<p class="mh-cs-none">—</p>{{/if}}</div>
+    <p class="mh-cs-none">{{localize "MistHUD.cardSheet.notes.noJournal"}}</p>
     {{/if}}
   </section>
-  {{/each}}
+
+  {{#if mcNotes}}{{> mhCsNoteField note=mcNotes}}{{/if}}
 </div>

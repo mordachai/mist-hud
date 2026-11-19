@@ -15,7 +15,7 @@ import { MistCardSheet, CARD_SHEET_TEMPLATES, refreshCardSheets, refreshCardShee
 import { refreshDeckWindow } from "./card-sheet/tags-deck.js";
 import { syncSelectedStatusTier } from "./card-sheet/system-adapter.js";
 import { bindCanvasRelay } from "./drop-relay.js";
-import { refreshCharacterNotes } from "./card-sheet/notes.js";
+import { refreshCharacterNotes, refreshNotesForItem } from "./card-sheet/notes.js";
 
 // ── Initial load guard ────────────────────────────────────────────────────────
 // Prevents HUDs from opening during the brief "game loading" window.
@@ -231,6 +231,9 @@ for (const hook of ["createItem", "updateItem", "deleteItem"]) {
 Hooks.on("updateActor", actor => refreshDeckWindow(actor));
 // The card sheet's notes window (Description, MC Notes) follows its actor.
 Hooks.on("updateActor", (actor, change) => refreshCharacterNotes(actor, change));
+for (const hook of ["createItem", "updateItem", "deleteItem"]) {
+  Hooks.on(hook, item => refreshNotesForItem(item));
+}
 for (const hook of ["createItem", "updateItem", "deleteItem"]) {
   Hooks.on(hook, item => refreshDeckWindow(item.parent));
 }

@@ -566,6 +566,31 @@ export function systemSheetFlips(actor) {
 }
 
 /**
+ * The actor's clue journal: the questions and answers of used clues, kept
+ * by the system as "journal" items (actor.clueJournal, filled by
+ * actor.addClueJournal, shown in the system sheet's Clues tab).
+ * @param {Actor} actor
+ * @returns {{id: string, question: string, answer: string}[]}
+ */
+export function clueJournal(actor) {
+  return (actor?.clueJournal ?? []).map(j => ({
+    id:       j.id,
+    question: j.system?.question ?? "",
+    answer:   j.system?.answer ?? "",
+  }));
+}
+
+/** Whether an item is a clue journal entry. */
+export function isClueJournalEntry(item) {
+  return item?.type === "journal" || item?.system?.type === "journal";
+}
+
+/** Delete a clue journal entry, as the system sheet does (actor.deleteClue). */
+export async function deleteClueJournalEntry(actor, id) {
+  return actor?.deleteClue?.(id);
+}
+
+/**
  * Open the system's own character sheet for this actor, whatever sheet is
  * set as the actor's default. One instance per actor, reused.
  */

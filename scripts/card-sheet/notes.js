@@ -1,12 +1,15 @@
 // notes.js — the card sheet's notes window (user, 2026-11-19).
 //
-// The character's Description (system.description) and, for the GM, the MC
-// Notes (system.gmnotes): the fields of the system sheet's Bio tab that the
+// The character's Description (system.description), clue journal (the used
+// clues' questions and answers, from the system sheet's Clues tab) and, for
+// the GM, the MC Notes (system.gmnotes): what the system sheet has and the
 // cards have no room for (the biography is on the character card's back).
 // Opened from the notes button at the right of the move bar. Each field is
 // the core ProseMirror editor (toggled, as on the character card); saving
 // it writes the actor. One window per actor; it follows changes made
 // elsewhere (init.js, refreshCharacterNotes) unless an editor is open.
+
+import { clueJournal, isClueJournalEntry, deleteClueJournalEntry, confirmBox } from "./system-adapter.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -26,9 +29,22 @@ export class CharacterNotes extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static DEFAULT_OPTIONS = {
     classes: ["mh-cs-dialog", "mh-cs-notes"],
-    window: { icon: "fa-solid fa-book", resizable: true },
-    position: { width: 520, height: 600 },
+    window: { icon: "fa-solid fa-notebook", resizable: true },
+    position: { width: 520, height: 640 },
+    actions: {
+      deleteJournal: CharacterNotes.#onDeleteJournal,
+    },
   };
+
+  /** Delete a clue journal entry, after the system's yes / no box. */
+  static async #onDeleteJournal(event, target) {
+    const id = target.closest("[data-journal-id]")?.dataset.journalId;
+    if (!id || !this.actor.isOwner) return;
+    const ok = await confirmBox(
+      game.i18n.localize("MistHUD.cardSheet.notes.deleteJournal"),
+      game.i18n.localize("MistHUD.cardSheet.notes.deleteJournalBody"));
+    if (ok) await deleteClueJournalEntry(this.actor, id);
+  }
 
   static PARTS = {
     body: { template: TEMPLATE, scrollable: [".mh-cs-notes-body"] },
@@ -65,9 +81,14 @@ export class CharacterNotes extends HandlebarsApplicationMixin(ApplicationV2) {
         editable: actor.isOwner,
       };
     };
-    context.sections = [await section("system.description", "CityOfMist.terms.description")];
+    context.description = await section("system.description", "CityOfMist.terms.description");
+    context.journal = {
+      label:   game.i18n.localize("MistHUD.cardSheet.notes.clueJournal"),
+      entries: clueJournal(actor),
+      own:     actor.isOwner,
+    };
     // MC Notes: the GM only, as on the system sheet.
-    if (game.user.isGM) context.sections.push(await section("system.gmnotes", "CityOfMist.terms.mc_notes"));
+    context.mcNotes = game.user.isGM ? await section("system.gmnotes", "CityOfMist.terms.mc_notes") : null;
     return context;
   }
 
@@ -85,6 +106,18 @@ export class CharacterNotes extends HandlebarsApplicationMixin(ApplicationV2) {
   get editing() {
     return !!this.element?.querySelector("prose-mirror[open], prose-mirror.active");
   }
+}
+
+/**
+ * A clue journal entry was made, changed or deleted (a clue used, the system
+ * sheet): its actor's open notes window follows.
+ * @param {Item} item
+ */
+export function refreshNotesForItem(item) {
+  if (!isClueJournalEntry(item) || !item.parent) return;
+  const app = foundry.applications.instances.get(windowId(item.parent));
+  if (!app?.rendered || app.editing) return;
+  app.render();
 }
 
 /**

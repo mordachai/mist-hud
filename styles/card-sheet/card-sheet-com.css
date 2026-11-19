@@ -213,9 +213,13 @@
   opacity: 1;
 }
 
+/* The burned flame is the empty one's outline with a white rim around the
+   colour; on the light cards the rim melts into the paper and the flame
+   looked smaller (user, 2026-11-19). The empty flame's 1 px dark edge
+   draws the rim, then the glow. */
 .mh-card-sheet .mh-cs-card .mh-cs-burn:is(.burned, .toBurn) {
   background-image: var(--mh-cs-burned-img);
-  filter: drop-shadow(0 0 2px var(--mh-cs-burn-glow));
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 2px var(--mh-cs-burn-glow));
 }
 
 .mh-card-sheet .mh-cs-card .mh-cs-burn.toBurn {
@@ -672,43 +676,31 @@
   text-shadow: 0 0 6px rgba(255, 255, 255, 0.45);
 }
 
-/* ── Tag line experiments (user, 2026-11-19; Sheet Settings) ────────────────
-   data-leaders="on": a dotted leader runs from a tag's name to its flame
-   (row order: name 1, leader 2, trash 3, flame 4). It sits on the first
-   line's baseline, where the flame is centred.
-   data-tints="on": each tag line gets a light band of its own, in one of
-   four shades (the paper highlighter strips of the reference), white on
-   the dark Mist card. The selection's marker bar (::before) lies over it. */
-.mh-card-sheet[data-leaders="on"] .mh-cs-layer .mh-cs-card .mh-cs-tag .mh-cs-tag-name {
-  flex: 0 1 auto;
-}
-
-.mh-card-sheet[data-leaders="on"] .mh-cs-layer .mh-cs-card .mh-cs-tag:has(> .mh-cs-burn)::after {
-  content: "";
-  order: 2;
-  flex: 1 1 3cqw;
-  min-width: 3cqw;
-  height: calc(var(--mh-cs-tag-size) * 0.98);
-  border-bottom: 0.55cqw dotted currentColor;
-  opacity: 0.45;
-  pointer-events: none;
-}
-
-.mh-card-sheet[data-leaders="on"] .mh-cs-layer .mh-cs-card .mh-cs-tag .mh-cs-delete { order: 3; }
-.mh-card-sheet[data-leaders="on"] .mh-cs-layer .mh-cs-card .mh-cs-tag .mh-cs-burn   { order: 4; margin-left: 0; }
-
+/* ── Tag line tints experiment (user, 2026-11-19; Sheet Settings) ───────────
+   data-tints="on": a band behind each tag line in the card's theme colour
+   (the burned flames' own colours: Mythos violet, Logos rust, Mist slate,
+   grey on extras, crew and the character card), four shades in turn, like
+   strips of highlighter. The selection's marker bar (::before) lies over it.
+   (A dotted leader to the flame was tried and dropped: it breaks on tags
+   that wrap.) */
 .mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card {
-  --mh-cs-tint-1: rgba(214, 178, 118, 0.22);
-  --mh-cs-tint-2: rgba(226, 196, 140, 0.32);
-  --mh-cs-tint-3: rgba(200, 166, 112, 0.16);
-  --mh-cs-tint-4: rgba(232, 208, 160, 0.38);
+  --mh-cs-tint: #6f655a;
+  --mh-cs-tint-a: 18%;
+  --mh-cs-tint-b: 30%;
+  --mh-cs-tint-c: 12%;
+  --mh-cs-tint-d: 24%;
 }
 
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card.mh-cs-type-mythos { --mh-cs-tint: #7d6285; }
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card.mh-cs-type-logos  { --mh-cs-tint: #9f5649; }
+
+/* Mist: the card is dark slate; its bands are a lighter slate blue. */
 .mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card.mh-cs-type-mist {
-  --mh-cs-tint-1: rgba(255, 255, 255, 0.08);
-  --mh-cs-tint-2: rgba(255, 255, 255, 0.14);
-  --mh-cs-tint-3: rgba(255, 255, 255, 0.05);
-  --mh-cs-tint-4: rgba(255, 255, 255, 0.11);
+  --mh-cs-tint: #8fa6c4;
+  --mh-cs-tint-a: 20%;
+  --mh-cs-tint-b: 32%;
+  --mh-cs-tint-c: 14%;
+  --mh-cs-tint-d: 26%;
 }
 
 .mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag {
@@ -716,12 +708,12 @@
   padding-left: calc(var(--mh-cs-depth, 0) * 4cqw + 1.2cqw);
   padding-right: 0.8cqw;
   border-radius: 0.8cqw;
-  background-color: var(--mh-cs-tint-1);
+  background-color: color-mix(in srgb, var(--mh-cs-tint) var(--mh-cs-tint-a), transparent);
 }
 
-.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n+2) { background-color: var(--mh-cs-tint-2); }
-.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n+3) { background-color: var(--mh-cs-tint-3); }
-.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n)   { background-color: var(--mh-cs-tint-4); }
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n+2) { background-color: color-mix(in srgb, var(--mh-cs-tint) var(--mh-cs-tint-b), transparent); }
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n+3) { background-color: color-mix(in srgb, var(--mh-cs-tint) var(--mh-cs-tint-c), transparent); }
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n)   { background-color: color-mix(in srgb, var(--mh-cs-tint) var(--mh-cs-tint-d), transparent); }
 
 /* ── The notes window (notes.js; user, 2026-11-19) ──────────────────────────
    The card sheet's dialog look (.mh-cs-dialog above); the editors are the
@@ -776,4 +768,56 @@
 
 .application.mh-cs-notes .mh-cs-none {
   opacity: 0.5;
+}
+
+/* The clue journal: one entry per used clue, question then answer, the
+   trash at its right (owner). */
+.application.mh-cs-notes .mh-cs-clue-journal {
+  flex: 0 0 auto;
+}
+
+.application.mh-cs-notes .mh-cs-journal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.application.mh-cs-notes .mh-cs-journal-entry {
+  position: relative;
+  padding: 6px 32px 6px 10px;
+  border-left: 3px solid var(--mh-cs-dlg-rule, rgba(40, 40, 40, 0.35));
+  border-radius: 0 4px 4px 0;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.application.mh-cs-notes .mh-cs-journal-entry p {
+  margin: 0;
+  line-height: 1.35;
+}
+
+.application.mh-cs-notes .mh-cs-journal-question {
+  font-weight: bold;
+}
+
+.application.mh-cs-notes .mh-cs-journal-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--mh-cs-dlg-ink, #2a2a2a);
+  font-size: 12px;
+  opacity: 0.45;
+  cursor: pointer;
+}
+
+.application.mh-cs-notes .mh-cs-journal-delete:is(:hover, :focus-visible) {
+  opacity: 1;
 }

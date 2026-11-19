@@ -237,6 +237,13 @@ What the code does today, checked before planning:
 > - Build-up improvements on the character card's back now show their description under the name, as the theme cards do (was a tooltip).
 > - Experiments, both on by default and switchable in Sheet Settings (`cardSheetTagLeaders`, `cardSheetTagTints`, applied at once through `mistHudCardSheetLook`; `data-leaders` / `data-tints` on the window, CSS in `card-sheet-com.css`): a dotted leader from each tag's name to its flame (on the first line, tags with a flame only); a light band behind each tag line in one of four warm shades (white on the Mist card), the marker bar of a selected tag over it.
 > - Not checked: a player client, a real image picked, editing and saving a note, a multi-line tag with the leader, a Mist card with the tints, a long build-up description list.
+>
+> **Second follow-up (user, 2026-11-19): done, a quick check in Foundry as claude-gm (Lily Chow).**
+> - The dotted leader is gone (it only works on tags that don't wrap): setting, CSS and strings removed.
+> - Tag line tints in each theme's colour, stronger: the burned flames' own colours (Mythos violet #7d6285, Logos rust #9f5649, grey on extras, crew and the character card; a lighter slate blue on the dark Mist card), four shades in turn (12–30 %, `color-mix`).
+> - Burned flame "smaller": the burned SVGs have the empty flame's outline (same viewBox and shape), but as a white rim around the colour, and on the light cards the rim melted into the paper. The burned flame now gets the empty one's 1 px dark edge before its glow, so the whole outline shows. The SVGs are unchanged.
+> - Clue journal in the notes window, between Description and MC Notes: each used clue's question and answer (the system's `journal` items, `actor.clueJournal`, read through the adapter), with a trash for the owner (the system's yes / no box, then `actor.deleteClue`). It follows new and deleted entries live. The notes button and window icon are `fa-solid fa-notebook`.
+> - Checked: the tints on Logos / Mythos / extras; a journal entry added (it showed at once), deleted from the window (confirm box), and gone. Not checked: the flame size by eye (the test pane is too small; the user checks), the Mist tints, a player client.
 
 ## Answers (user, 2026-11-19)
 1. **Mockup:** `docs/mockup-3.png`. What it shows:

@@ -37,7 +37,6 @@ export const SETTINGS = {
   CARD_SHEET_TILT:             "cardSheetTilt",
   CARD_SHEET_PORTRAIT_MASK:    "cardSheetPortraitMask",
   CARD_SHEET_TEXT_BUTTONS:     "cardSheetTextButtons",
-  CARD_SHEET_TAG_LEADERS:      "cardSheetTagLeaders",
   CARD_SHEET_TAG_TINTS:        "cardSheetTagTints",
   HUD_FOR_PCS:                 "hudForPCs",
   HUD_FOR_NPCS:                "hudForNPCs",
