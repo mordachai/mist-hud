@@ -529,6 +529,22 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     super._onClose(options);
   }
 
+  /**
+   * Minimise / restore: core animates the window's max-height and max-width,
+   * waits for that (a transitionend or a 1 s timeout) and then sets the
+   * size, clamped by the max-height and max-width it reads at that moment.
+   * The wait could end with the animation still running (an early
+   * transitionend, or a slow frame), and the sheet came back a strip
+   * (200 x 52 to 1024 x 400). So when the wait ends, the window's own
+   * transitions jump to their end before core reads them.
+   */
+  async _awaitTransition(element, timeout) {
+    await super._awaitTransition(element, timeout);
+    for (const animation of element.getAnimations?.() ?? []) {
+      if (animation instanceof CSSTransition && animation.effect?.target === element) animation.finish();
+    }
+  }
+
   /** Header controls: the lock, the HUD and the Sheet Settings ("Open system sheet" is in the ⋮ menu). */
   async _renderFrame(options) {
     const frame = await super._renderFrame(options);
