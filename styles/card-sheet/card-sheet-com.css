@@ -677,30 +677,30 @@
 }
 
 /* ── Tag line tints experiment (user, 2026-11-19; Sheet Settings) ───────────
-   data-tints="on": a band behind each tag line in the card's theme colour
-   (the burned flames' own colours: Mythos violet, Logos rust, Mist slate,
-   grey on extras, crew and the character card), four shades in turn, like
-   strips of highlighter. The selection's marker bar (::before) lies over it.
+   data-tints="on": every other tag line has a band in the card's theme
+   colour (the burned flames' own colours: Mythos violet, Logos rust, grey
+   on extras, crew and the character card; a pale slate blue on the dark
+   Mist card), starting with the first line; the lines between have none
+   (user: "the light version is only no band"). The bands alternate between
+   two strengths, like strips of highlighter. The selection's marker bar
+   (::before) lies over them.
    (A dotted leader to the flame was tried and dropped: it breaks on tags
    that wrap.) */
 .mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card {
   --mh-cs-tint: #6f655a;
-  --mh-cs-tint-a: 18%;
-  --mh-cs-tint-b: 40%;
-  --mh-cs-tint-c: 12%;
-  --mh-cs-tint-d: 32%;
+  --mh-cs-tint-a: 40%;
+  --mh-cs-tint-b: 32%;
 }
 
 .mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card.mh-cs-type-mythos { --mh-cs-tint: #7d6285; }
 .mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card.mh-cs-type-logos  { --mh-cs-tint: #9f5649; }
 
-/* Mist: the card is dark slate; its bands are a lighter slate blue. */
+/* Mist: the card is dark slate; its bands are a pale slate blue, stronger
+   (a light colour over a dark card needs more of it to show). */
 .mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card.mh-cs-type-mist {
-  --mh-cs-tint: #8fa6c4;
-  --mh-cs-tint-a: 20%;
-  --mh-cs-tint-b: 42%;
-  --mh-cs-tint-c: 14%;
-  --mh-cs-tint-d: 34%;
+  --mh-cs-tint: #b4c8e4;
+  --mh-cs-tint-a: 34%;
+  --mh-cs-tint-b: 26%;
 }
 
 .mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag {
@@ -711,9 +711,8 @@
   background-color: color-mix(in srgb, var(--mh-cs-tint) var(--mh-cs-tint-a), transparent);
 }
 
-.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n+2) { background-color: color-mix(in srgb, var(--mh-cs-tint) var(--mh-cs-tint-b), transparent); }
-.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n+3) { background-color: color-mix(in srgb, var(--mh-cs-tint) var(--mh-cs-tint-c), transparent); }
-.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n)   { background-color: color-mix(in srgb, var(--mh-cs-tint) var(--mh-cs-tint-d), transparent); }
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(even) { background-color: transparent; }
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n+3) { background-color: color-mix(in srgb, var(--mh-cs-tint) var(--mh-cs-tint-b), transparent); }
 
 /* ── The notes window (notes.js; user, 2026-11-19) ──────────────────────────
    The card sheet's dialog look (.mh-cs-dialog above); the editors are the
