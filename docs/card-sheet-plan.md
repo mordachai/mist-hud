@@ -1,6 +1,6 @@
 # Card Sheet — design plan
 
-Drafted 2026-11-18, revised the same day with the user's answers. Status: **phase 0 done** (2026-11-18): skeleton sheet, move bar on the system roll path, action map (§ 6.2). **Phase 1 done** (2026-11-18): City of Mist layer 1, the four main themes as read-only flip cards with the user's art and title fitting. **Phase 2 done** (2026-11-18): 244 × 620 cards, flip by the header band, condensed sans theme titles with glow; layer 2 (character card, crew themes, every extra), the active-extra switch and the layer swap. **Phase 3 done** (2026-11-18, b46a524): edit mode (the system's lock), every theme / character card edit through the action map, cards resized to 204 × 520 with the tag text kept at its size. **Phase 4 done** (2026-11-18, 780e1fe, e1b0e03): play mode, tags selected for rolls through the system's selection with the City of Mist marker bars; bigger small fonts. **Phase 5 done** (2026-11-18): the tags-deck (City of Mist), every card edited on the card itself, the detachable deck window, the roll modifier total by the move bar.
+Drafted 2026-11-18, revised the same day with the user's answers. Status: **phase 0 done** (2026-11-18): skeleton sheet, move bar on the system roll path, action map (§ 6.2). **Phase 1 done** (2026-11-18): City of Mist layer 1, the four main themes as read-only flip cards with the user's art and title fitting. **Phase 2 done** (2026-11-18): 244 × 620 cards, flip by the header band, condensed sans theme titles with glow; layer 2 (character card, crew themes, every extra), the active-extra switch and the layer swap. **Phase 3 done** (2026-11-18, b46a524): edit mode (the system's lock), every theme / character card edit through the action map, cards resized to 204 × 520 with the tag text kept at its size. **Phase 4 done** (2026-11-18, 780e1fe, e1b0e03): play mode, tags selected for rolls through the system's selection with the City of Mist marker bars; bigger small fonts. **Phase 5 done** (2026-11-18): the tags-deck (City of Mist), every card edited on the card itself, the detachable deck window, the roll modifier total by the move bar. **City of Mist done** (2026-11-19, user): phases 1–5, the five fix phases of `docs/fixes-and-improvements.md`, the notes window and the Header Bar Position setting. Next: Legend in the Mist (phase 6) and Otherscape (phase 7) once the user's art is ready; read **§ 11** first.
 
 An alternative character sheet for the city-of-mist system (City of Mist, Otherscape, Legend in the Mist).
 It has two layers of flip cards, a **tags-deck** behind them, and a bar of move buttons.
@@ -411,3 +411,61 @@ Each phase ends with a commit and a check in Foundry (localhost:30014, user `cla
 
 1. **Card background images:** City of Mist done: mythos, logos and mist backgrounds; `extras_theme_bg` for extras, crew and the character card (no separate crew or character art). Otherwise, `litm/` and `os/` come with phases 6 and 7, with names by theme type (`mythos`, `logos`, `mist`, `crew`, `extra`, `character`, `deck-ticket`, …).
 2. ~~Back of the character card~~: decided — short description first, then biography.
+
+## 11. Lessons from City of Mist, for Legend in the Mist and Otherscape
+
+Written 2026-11-19, when the user called the City of Mist sheet done. Legend and Otherscape have different themes and cards, but they work the same way. Most of the work is a new per-system CSS file with the measurements of the user's art.
+
+### 11.1 Where the code branches by game
+
+Each place is a map keyed by `getActiveSystem()` (`"city-of-mist"`, `"legend"`, `"otherscape"`; never `game.system.id`). A missing key falls back to a default, so the sheet already opens for the other games, half dressed.
+
+| What | Where | City of Mist today | Legend / Otherscape |
+|---|---|---|---|
+| Per-system CSS file | `CARD_SHEET_CSS_MAP`, `scripts/settings.js` | `card-sheet-com.css` | add `card-sheet-litm.css` / `card-sheet-os.css` (injected at runtime: no world restart) |
+| Character card fields | `CHARACTER_CARD`, `card-sheet-context.js` | Mythos + Logos, Help/Hurt, build-up | the game's own fields; Otherscape essence (§ 6.2: `setEssence`, `setEssenceBurn`); Help/Hurt and build-up probably off |
+| Deck card kinds | `DECK_KINDS`, `tags-deck.js` | status, tag, juice, clue | the default `["status", "tag"]` already fits |
+| Clue journal in the notes window | `notes.js` (always built) | shown | **hide it**: no clues in these games |
+| SHB / Blaze dialog | `rollMove`, `system-adapter.js` | `SHBDialog` | the `BlazeDialog` branch exists, **never tested** |
+| Move bar groups | `move-layout.js` (shared with the HUD) | Core / Special / SHB | already per system |
+| Status boxes | `statusBoxes`, `system-adapter.js` | classic: 16 cells, C(t) = 1, 2, 4, 7, 11, 16 | mist-engine: one box per tier (`StatusMath.statusBoxesME`), see § 11.4 |
+
+New for these games: the **backpack card** (Legend) and the **loadout card** (Otherscape) in layer 2. Give each its own type class (`mh-cs-type-backpack` / `-loadout`), like every card, so its art is one CSS line.
+
+### 11.2 Theme card art: what to measure
+
+- **One aspect ratio per game, for every card type.** The row height comes from `--mh-cs-aspect`; a card of another ratio breaks the layers. In City of Mist the new art (227 × 579) and the old Logos art (473 × 1203) have the same ratio, so they could be mixed.
+- **Measure the bands on the art, in card widths:** 1 px of art = 100 / art width `cqw`. Set `--mh-cs-band-top`, `-band-h`, `-band-inset`, `-body-top`, `-body-bottom`, `-footer-bottom`, `-footer-h`, `-inset` and `-radius` on `.mh-card-sheet`. When one type's art has a different band (the CoM Logos card), override the band vars on that type only (`.mh-cs-card:not(.mh-cs-type-logos)` in CoM).
+- **File names:** `ui/card-sheet/<litm|os>/<type>_theme_bg.webp`, one CSS line per type class. Legend: `origin`, `adventure`, `greatness`, plus fellowship, backpack, extras, character. Otherscape: `mythos`, `self`, `noise`, plus crew, loadout, extras, character. A type without art falls back to the extras art.
+- **A dark card needs the whole ink set**, not only the text colour (the CoM Mist card): `--mh-cs-ink`, `--mh-cs-band-ink`, `--mh-cs-rule`, `--mh-cs-motivation-ink`, `--mh-cs-input-bg` / `-focus`, `--mh-cs-title-ink` and `--mh-cs-title-glow`; a dark title input, a white hover wash on the icon buttons, `filter: none` on the pips, and a lighter, stronger tag tint (`--mh-cs-tint-a` / `-b`).
+- **Titles:** a big face that shrinks to fit (`card-fit.js`, 3 lines), with a glow per type. Pick the faces the External Style already uses for that game: `styles/external/mh-ext-legend.css` ("Manuscript Antiqua" / "CCTreasure" titles, Labrada labels, Caveat hand) and `mh-ext-otherscape.css` (Rift labels, SDGlitch on Mythos titles). Set `--mh-cs-title-font`, `--mh-cs-heading-font` and `--mh-cs-hand-font`. Rock Salt is City of Mist only.
+- **The character card and the portrait name** take the hand font; the name under the portrait takes the main type's title glow.
+
+### 11.3 Per-card pieces that already exist for these games
+
+The HUD and the External Style already have this art. Map it per type in the new CSS file, as `card-sheet-com.css` does:
+
+- **Selected-tag bars** (`--mh-cs-sel-bar`, `--mh-cs-sel-bar-neg`): Legend `ui/select-bar-litm-{normal,toburn,weakness}.webp`; Otherscape `ui/select-bar-{mythosOS,self,noise,neutral2}[-toburn].webp` and `select-bar-weakness.webp`.
+- **Burn flames** (`--mh-cs-burned-img`, `--mh-cs-burn-glow`): Otherscape `ui/icons/burn_{mythosOS,self,noise,neutral}_{empty,toburn,burned}.svg`; Legend the scratch set (`burn_scratch_*2.svg`). City of Mist uses the user's own card set (`ui/card-sheet/com/com_burned_<type>.svg`); the user may draw new ones.
+- **Track pips** (`.mh-cs-pip`): Otherscape `track-os-{empty,full}.svg`; Legend `litm-att-empty.svg`, `litm-crk-empty.svg`, and a mark for its third track, milestones (`addMilestone`).
+- **Type icons in the band** (`.mh-cs-type-icon.<Type>`): `mythos_os_icn`, `self_os_icn`, `noise_os_icn`, `crew_OS_icn`, `loadout_icn`; `origin_litm_icn`, `adventure_litm_icn`, `greatness_litm_icn` (and their `-color` versions), `fellowship_icn`, `backpack_icn`.
+- **Tag line tints** (`--mh-cs-tint` per type): the burned flames' colours, as in CoM.
+
+### 11.4 The tracking card (deck)
+
+- **Measure it in % of the card** and set the `--mh-cs-deck-*` vars (band, box strip, name field, footer, + / − buttons). The CoM numbers are in `card-sheet-com.css`, section tags-deck.
+- **Type marker:** the City of Mist card prints four icons (clue, juice, tag, status). Legend and Otherscape only need **status and tag**, so their art should print two, and the CSS places two `.mh-cs-deck-marker-*` (the `marker-x.svg` cross, or the game's own mark).
+- **The boxes are not the CoM strip.** Both games use the mist-engine status model: **one box per tier, 6 boxes**; the adapter already returns that. The CoM CSS places 16 slanted cells, so the new art needs its own `.mh-cs-deck-pip` positions for 6 boxes.
+- **No clue or juice cards**, so no clue-use button and no clue journal.
+
+### 11.5 Outside the cards
+
+- **The dialogs and the notes window** (`.mh-cs-dialog`: the improvement dialog, the notes) are styled only in `card-sheet-com.css` (the torn book page). Without a per-system version they get the core look. Give them each game's paper or panel.
+- **Shared, already done for every game:** the layout and layers, flip, edit and play modes, the deck's mechanics, the Hero Shot portrait and masks, the tilt, the tag tints switch, the text move buttons, the Header Bar Position (top / bottom), minimise / restore.
+
+### 11.6 How we worked (keep doing it)
+
+- One session per phase. The user decides the look on screenshots, one step at a time; each decision goes into this file with its date.
+- Overrides of shared rules go in the per-system file. mist-hud CSS cannot beat the system's layered `!important`: use another property.
+- Check in Foundry at localhost:30014 (`claude-gm`). This needs a Legend and an Otherscape world, or test PCs in them.
+- In the in-app browser, **keep the pane visible** for anything animated: a hidden pane draws no frames, so `requestAnimationFrame` never fires and minimise hangs (found 2026-11-19).
