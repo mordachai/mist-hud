@@ -631,6 +631,7 @@ export function getDeckItems(actor) {
     storyTags: items.filter(i => i.type === "tag" && i.system?.subtype === "story").map(i => ({
       id: i.id, item: i, name: shown(i),
       burnState: applyBurnState(actor, i.id, "story").burnState,
+      crispy:    !!i.system.crispy,
       temporary: !!i.system.temporary,
       permanent: !!i.system.permanent,
     })),

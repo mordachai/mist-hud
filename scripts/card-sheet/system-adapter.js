@@ -334,22 +334,23 @@ export function statusBoxes(status, tierBoxes) {
 }
 
 /**
- * Click on a status, as the system's SelectedTagsAndStatus._statusSelect
- * (system 4.5.3): a status's default direction is −1 (it hinders), +1 on a
- * right click; the same direction again clears it, the other one switches
- * it. The system counts a selected status as ±tier. The system's checks run
- * first; an open roll or review dialog may take the status instead.
- * @param {Item}    status
- * @param {boolean} invert  right click
- * @returns {number|null} the status's direction now (1, -1, 0), or null if refused
+ * A deck card's + / − (fixes 2026-11-19, phase 2): select a status or a
+ * story tag for the next roll in that direction, as the system's
+ * SelectedTagsAndStatus does (system 4.5.3): the same direction again clears
+ * it, the other one switches it. The system counts a selected status as
+ * ±tier, a tag as ±1. The system's checks run first; an open roll or review
+ * dialog may take the item instead. Burned tags can't be selected.
+ * @param {Item}   doc        a status or a tag
+ * @param {number} direction  1 or -1
+ * @returns {number|null} the item's direction now (1, -1, 0), or null if refused
  */
-export function toggleStatusSelection(status, invert = false) {
+export function setRollDirection(doc, direction) {
   const sts = selectionApi();
-  if (!sts || !status) return null;
-  const direction = invert ? 1 : -1;
-  const target = getSelectionDirection(status) === direction ? 0 : direction;
-  if (target !== 0 && !sts.checkValidityForSelect(status, target)) return null;
-  if (!setSelectionDirection(status, target)) return null;
+  if (!sts || !doc || (direction !== 1 && direction !== -1)) return null;
+  if (doc.type === "tag" && !isTagSelectable(doc)) return null;
+  const target = getSelectionDirection(doc) === direction ? 0 : direction;
+  if (target !== 0 && !sts.checkValidityForSelect(doc, target)) return null;
+  if (!setSelectionDirection(doc, target)) return null;
   playTagSound(target !== 0);
   return target;
 }

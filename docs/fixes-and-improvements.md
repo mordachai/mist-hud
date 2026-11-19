@@ -109,7 +109,7 @@ What the code does today, checked before planning:
 - **Help and Hurt** are the system's juice items (`subtype` `help` / `hurt`, `targetCharacterId`). Moving them from the deck to the character card changes where they show, not their data.
 - **Story tags** on the character card and in the deck are the same items, so "create on one, it shows on the other" works as soon as both can create and delete.
 - **Tracking cards have no back face** today; nothing to remove there.
-- **`ui/portrait-masks/` does not exist yet**: the three mask textures are needed for phase 4.
+- **The masks are in `ui/card-sheet/portrait-masks/`** (the user made the folder; `.webp` files).
 
 ## Phases (one session each, as for the card sheet plan)
 
@@ -136,6 +136,16 @@ What the code does today, checked before planning:
 - Clue button: magnifier + "USE".
 - The deck's toolbar (counts per type, spread, detach) moves to a top bar over the stack; the bottom bar goes (user: "the report" = this toolbar).
 
+> **Phase 2 status: done (2026-11-19), checked in Foundry as claude-gm and Player2 (Lily Chow), play and edit mode, stack / focus / spread and the detached window.**
+> - The new `trackingCard.webp` is **321 × 208** (was 490 × 320), same layout, footer band blank. Re-measured (in `card-sheet-com.css`): band y 8–40, type icons centred x 218.5 / 242.5 / 267.5 / 292, y 23.5; box strip y 55–110 (the 16 cells moved < 1 px, kept); TAG field x 77–302, y 126–166; footer band x 18–309, y 178–198.
+> - Name on the band as plain text (Rift, smaller, fitted by `card-fit.js` to two lines at most); the printed "TRACKING CARD" is hidden by a patch of the band's own colour (#93523b) that fades out at its edges, so no box shows. Tier / amount in PT Serif Bold (system font).
+> - `marker-x.svg` crosses the card's own type icon; the other three are no longer dimmed.
+> - `square-plus` / `square-minus` at the band's right end, play mode, statuses and story tags (+tier / −tier, +1 / −1); live in the stack too. They replace the name buttons (the name is plain text; the right-click selection on the name is gone). New adapter `setRollDirection`.
+> - Footer band: toggle icons at the left (puzzle = partial on clues; hourglass / gem = temporary / permanent on statuses and story tags; leaf = crispy on story tags only, `getDeckItems` now reads `crispy`), always shown, dimmed when off, buttons for the owner (tooltip says on / off), the "on" ones only in the stack and for non-owners. Tools at the right on hover (always on a card brought forward): burn, clue "🔍 USE", trash, "Sure?".
+> - Small round − / + under the box printed 6 (hover; always on a card brought forward).
+> - Deck toolbar on top of the stack; no bottom bar.
+> - Not done here: the phase-1 character card controls (Crew +, Help / Hurt fields, story tag +) keep their minimal look for phase 3. Not checked: Firefox; a real mouse hover (the hover-only tools were checked by forcing them visible).
+
 **Phase 3: Sheet cards (look)**
 - The new card art: Mist fonts white, theme name white with a strong glow, shifted up on Mythos and Mist (not Logos yet); Motivation darker, bolder, +2 px.
 - Burn icons at the right of the tag row, the new `com_burn_empty.svg` / `com_burned_<type>.svg`, 1 px black shadow when empty, 2 px glow when burned, a bit bigger, aligned with the first line of text.
@@ -150,7 +160,7 @@ What the code does today, checked before planning:
 - Back row offset on the X axis from the front row.
 - Overlay darker and fitted to the sheet cards only.
 - "Portrait" button at the left of the header bar: Hide / Portrait 256 × 256 / Hero Shot **340 px wide × 500 px tall** (portrait orientation; user, 2026-11-19; per actor, client UI state), `object-fit: cover` + `object-position: top center`, the character name below in the Mythos title style.
-- Masks: a client setting **None / Misty / Dissolving / Jagged** (user added "None"). The user supplies the files and will swap them while testing, so the code must take whatever is in the folder: fixed names `ui/portrait-masks/misty.png`, `dissolving.png`, `jagged.png` (white = shown, black = hidden, `mask-mode: luminance`), stretched to the 340 × 500 Hero Shot box (`mask-size: 100% 100%`); the user's mask images are 340 × 500 px, no other processing. A missing file must not hide the portrait: check the image loads, fall back to no mask.
+- Masks: a client setting **None / Misty / Dissolving / Jagged** (user added "None"). The user supplies the files and will swap them while testing, so the code must take whatever is in the folder: fixed names in the folder the user made, `ui/card-sheet/portrait-masks/`: `misty.webp`, `dissolving.webp`, `jagged.webp` (as of 2026-11-19; a `jagged.png` is there too) (white = shown, black = hidden, `mask-mode: luminance`), stretched to the 340 × 500 Hero Shot box (`mask-size: 100% 100%`); the user's mask images are 340 × 500 px, no other processing. A missing file must not hide the portrait: check the image loads, fall back to no mask.
 
 **Phase 5: Settings and dialogs**
 - Text move buttons on the card sheet (two rows) through the existing `useTextButtons` setting, or a sheet-only one.

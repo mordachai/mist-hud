@@ -274,6 +274,12 @@
   --mh-cs-deck-pips-y: 26%;  --mh-cs-deck-pips-h: 27%;
   --mh-cs-deck-name-x: 26%;  --mh-cs-deck-name-y: 60%;  --mh-cs-deck-name-w: 68%;  --mh-cs-deck-name-h: 19%;
   --mh-cs-deck-foot-x: 4.5%; --mh-cs-deck-foot-y: 83.5%; --mh-cs-deck-foot-w: 91%; --mh-cs-deck-foot-h: 11%;
+  /* The + / − select squares (top-right corner) and the − / + steps (under
+     the last box), fixes phase 2. */
+  --mh-cs-deck-sel-x: 95%;   --mh-cs-deck-sel-y: 4%;     --mh-cs-deck-sel-size: 4.4cqw;
+  --mh-cs-deck-steps-x: 84%; --mh-cs-deck-steps-y: 53.5%; --mh-cs-deck-steps-w: 10%; --mh-cs-deck-steps-h: 7%;
+  /* What hides the printed title under the card's name (no box: the band's
+     own colour, faded out at its ends). */
   --mh-cs-deck-band-bg: #7a3b26;
   --mh-cs-deck-ink: #2a2a2a;
   --mh-cs-deck-fill: rgba(120, 30, 18, 0.72);
@@ -1553,7 +1559,8 @@
   filter: brightness(1.06);
 }
 
-/* The toolbar under the stack: the count per type, spread, detach. */
+/* The toolbar on top of the stack (fixes phase 2; the stack hangs from it):
+   the count per type, spread, detach. */
 .mh-card-sheet .mh-cs-deck-toolbar {
   flex: 0 0 auto;
   display: flex;
@@ -1588,7 +1595,7 @@
 
 .mh-card-sheet :is(.mh-cs-deck-hit, .mh-cs-deck-name, .mh-cs-deck-tool, .mh-cs-deck-btn,
   .mh-cs-deck-create, .mh-cs-deck-back, .mh-cs-deck-close, .mh-cs-deck-placeholder, .mh-cs-deck-empty,
-  .mh-cs-deck-band-name, .mh-cs-deck-flag, .mh-cs-deck-input) {
+  .mh-cs-deck-band-name, .mh-cs-deck-flag, .mh-cs-deck-input, .mh-cs-deck-sel, .mh-cs-deck-step) {
   flex: 0 0 auto;
   width: auto;
   height: auto;
@@ -1611,7 +1618,7 @@
 
 .mh-card-sheet :is(.mh-cs-deck-hit, .mh-cs-deck-name, .mh-cs-deck-tool, .mh-cs-deck-btn,
   .mh-cs-deck-create, .mh-cs-deck-back, .mh-cs-deck-close, .mh-cs-deck-placeholder, .mh-cs-deck-empty,
-  .mh-cs-deck-band-name, .mh-cs-deck-flag, .mh-cs-deck-pip):focus-visible {
+  .mh-cs-deck-band-name, .mh-cs-deck-flag, .mh-cs-deck-pip, .mh-cs-deck-sel, .mh-cs-deck-step):focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.85);
   outline-offset: 1px;
 }
@@ -1658,8 +1665,11 @@
   color: var(--mh-cs-deck-ink);
 }
 
-/* The name on the red band, over the printed title; the tier / amount and
-   the selection mark at its end. */
+/* The name on the red band, over the printed title, as plain text (fixes
+   phase 2): no box, a compact title shrunk to fit on two lines at most
+   (card-fit.js, --mh-fit), the tier / amount at its end in serif numerals.
+   The printed title is hidden by the band's own colour, faded out at its
+   ends so no box shows. */
 .mh-card-sheet .mh-cs-deck-band {
   position: absolute;
   left: var(--mh-cs-deck-band-x);
@@ -1668,41 +1678,72 @@
   height: var(--mh-cs-deck-band-h);
   display: flex;
   align-items: center;
-  gap: 1.6cqw;
-  padding: 0 2cqw;
-  border-radius: 1cqw;
-  background: var(--mh-cs-deck-band-bg);
+  gap: 1.4cqw;
+  padding: 0 1.2cqw;
   color: #fff;
   font-family: var(--mh-cs-label-font);
-  font-size: 7.4cqw;
-  line-height: 1;
-  letter-spacing: 0.03em;
+  line-height: 0.95;
+  letter-spacing: 0.01em;
   text-transform: uppercase;
 }
 
-.mh-card-sheet .mh-cs-deck-band-name {
+.mh-card-sheet .mh-cs-deck-band::before {
+  content: "";
+  position: absolute;
+  inset: 0 -1.5cqw;
+  z-index: -1;
+  background: var(--mh-cs-deck-band-bg);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 2.4cqw, #000 calc(100% - 2.4cqw), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 2.4cqw, #000 calc(100% - 2.4cqw), transparent);
+  pointer-events: none;
+}
+
+.mh-card-sheet .mh-cs-deck-face {
+  isolation: isolate;
+}
+
+/* The name's box fills the band; the text inside it is what is fitted. */
+.mh-card-sheet .mh-cs-deck-band .mh-cs-deck-band-name {
   flex: 1 1 auto;
+  align-self: stretch;
   min-width: 0;
+  display: flex;
+  align-items: center;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.mh-card-sheet .mh-cs-deck-band-text {
+  display: block;
+  width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  font-size: calc(6.4cqw * var(--mh-fit, 1));
+  /* Room for the font's ascent and descent: an overflowing glyph would
+     count as not fitting. */
+  line-height: 1.15;
+  overflow-wrap: normal;
+  white-space: normal;
+  text-align: left;
+}
+
+/* Too long even at the smallest size: two lines, then an ellipsis. */
+.mh-card-sheet .mh-cs-deck-band-text[data-fit-clamped] {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
 }
 
 .mh-card-sheet .mh-cs-deck-badge {
   flex: 0 0 auto;
-  font-size: 8.6cqw;
-  opacity: 0.95;
+  font-family: var(--mh-cs-deck-num-font, Georgia, "Times New Roman", serif);
+  font-size: 7.4cqw;
+  font-weight: bold;
+  line-height: 1;
 }
 
-.mh-card-sheet .mh-cs-deck-mark {
-  flex: 0 0 auto;
-  padding: 0.4cqw 1.4cqw;
-  border-radius: 1.6cqw;
-  font-size: 6cqw;
-  letter-spacing: 0;
-}
-
-/* The type marker: the card's own icon lit, the three others dimmed. */
+/* The type marker: the card's type is marked on its icon, the other icons
+   stay as printed. Shared fallback: a ring; the per-system file crosses it. */
 .mh-card-sheet .mh-cs-deck-markers {
   position: absolute;
   inset: 0;
@@ -1712,12 +1753,59 @@
 .mh-card-sheet .mh-cs-deck-marker {
   position: absolute;
   border-radius: 50%;
-  background: rgba(60, 22, 12, 0.6);
 }
 
 .mh-card-sheet .mh-cs-deck-marker.on {
-  background: none;
-  box-shadow: 0 0 0 0.6cqw #fff, 0 0 2.4cqw 0.6cqw rgba(255, 220, 150, 0.9);
+  box-shadow: 0 0 0 0.6cqw #fff;
+}
+
+/* The + / − squares in the top-right corner (play mode): select the card
+   for the roll. Over the stack's hit button, so a card can be selected
+   from the stack. */
+.mh-card-sheet .mh-cs-deck-select {
+  position: absolute;
+  z-index: 3;
+  left: var(--mh-cs-deck-sel-x);
+  top: var(--mh-cs-deck-sel-y);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6cqw;
+  pointer-events: none;
+}
+
+.mh-card-sheet .mh-cs-deck-select .mh-cs-deck-sel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--mh-cs-deck-sel-size);
+  height: var(--mh-cs-deck-sel-size);
+  border-radius: 0.8cqw;
+  color: var(--mh-cs-deck-sel-ink, #7a3b26);
+  font-size: calc(var(--mh-cs-deck-sel-size) * 0.92);
+  line-height: 1;
+  opacity: 0.85;
+  pointer-events: auto;
+}
+
+.mh-card-sheet .mh-cs-deck-select .mh-cs-deck-sel:hover,
+.mh-card-sheet .mh-cs-deck-select .mh-cs-deck-sel:focus-visible {
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-deck-select .mh-cs-deck-sel:hover {
+  filter: brightness(1.25);
+}
+
+.mh-card-sheet .mh-cs-deck-select .mh-cs-deck-sel-positive.on {
+  color: #2f9a4a;
+  opacity: 1;
+  filter: drop-shadow(0 0 0.8cqw rgba(63, 174, 90, 0.95));
+}
+
+.mh-card-sheet .mh-cs-deck-select .mh-cs-deck-sel-negative.on {
+  color: #c8402f;
+  opacity: 1;
+  filter: drop-shadow(0 0 0.8cqw rgba(200, 64, 47, 0.95));
 }
 
 /* The 16 boxes: shared fallback is a plain row; the per-system file puts
@@ -1773,9 +1861,8 @@
   background-color: rgba(128, 28, 16, 0.5);
 }
 
-/* The TAG line: the name (keeps the tag text size) and, under it, a row of
-   small fields (temporary / permanent / partial, a clue's source and
-   method) or their values as notes. */
+/* The TAG line: the name (keeps the tag text size) and, under it, a clue's
+   source and method (fields, or their values as notes). */
 .mh-card-sheet .mh-cs-deck-name-line {
   position: absolute;
   left: var(--mh-cs-deck-name-x);
@@ -1806,29 +1893,6 @@
   min-width: 0;
   font-size: 4.4cqw;
   line-height: 1.2;
-}
-
-.mh-card-sheet .mh-cs-deck-flag {
-  flex: 0 0 auto;
-  padding: 0.2cqw 1.2cqw;
-  border-radius: 2cqw;
-  font-family: var(--mh-cs-label-font);
-  font-size: 4.2cqw;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  opacity: 0.45;
-  box-shadow: inset 0 0 0 0.3cqw currentColor;
-}
-
-.mh-card-sheet .mh-cs-deck-flag.on {
-  opacity: 1;
-  background: rgba(40, 30, 25, 0.85);
-  color: #fff;
-  box-shadow: none;
-}
-
-.mh-card-sheet .mh-cs-deck-flag:hover {
-  opacity: 0.85;
 }
 
 /* Fields on the card: written on the line, no box. */
@@ -1877,16 +1941,6 @@
   border-radius: 1cqw;
 }
 
-.mh-card-sheet button.mh-cs-deck-name {
-  display: block;
-  font-size: inherit;
-  text-align: left;
-}
-
-.mh-card-sheet button.mh-cs-deck-name:hover {
-  background: rgba(0, 0, 0, 0.08);
-}
-
 .mh-card-sheet .mh-cs-deck-note {
   flex: 0 0 auto;
   font-family: var(--mh-cs-label-font);
@@ -1902,9 +1956,44 @@
   opacity: 0.6;
 }
 
-/* The controls: a strip over the footer band, on hover or focus (always
-   on the card brought forward). */
-.mh-card-sheet .mh-cs-deck-tools {
+/* The small − / + under the box printed 6 (hover / focus; always on the
+   card brought forward). */
+.mh-card-sheet .mh-cs-deck-steps {
+  position: absolute;
+  left: var(--mh-cs-deck-steps-x);
+  top: var(--mh-cs-deck-steps-y);
+  width: var(--mh-cs-deck-steps-w);
+  height: var(--mh-cs-deck-steps-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2cqw;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.mh-card-sheet .mh-cs-deck-steps .mh-cs-deck-step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.8cqw;
+  height: 3.8cqw;
+  border-radius: 50%;
+  background: rgba(60, 28, 18, 0.82);
+  color: #f6efe4;
+  font-size: 2.4cqw;
+  line-height: 1;
+}
+
+.mh-card-sheet .mh-cs-deck-steps .mh-cs-deck-step:hover,
+.mh-card-sheet .mh-cs-deck-steps .mh-cs-deck-step:focus-visible {
+  background: var(--mh-cs-deck-fill);
+}
+
+/* The footer band: the toggle icons (partial, temporary, permanent, crispy)
+   at the left, always shown; the tools (burn, use, trash) at the right, on
+   hover or focus (always on the card brought forward). */
+.mh-card-sheet .mh-cs-deck-foot {
   position: absolute;
   left: var(--mh-cs-deck-foot-x);
   top: var(--mh-cs-deck-foot-y);
@@ -1913,16 +2002,52 @@
   display: flex;
   align-items: center;
   gap: 1cqw;
-  padding: 0 1.4cqw;
-  border-radius: 1.4cqw;
-  background: rgba(38, 18, 10, 0.88);
-  color: #f3eadf;
+  padding: 0 1.6cqw;
+  color: #f6efe4;
+}
+
+.mh-card-sheet .mh-cs-deck-flags {
+  display: flex;
+  align-items: center;
+  gap: 0.8cqw;
+}
+
+.mh-card-sheet .mh-cs-deck-flag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 6cqw;
+  height: 6cqw;
+  border-radius: 50%;
+  font-size: 3.6cqw;
+  line-height: 1;
+  opacity: 0.5;
+}
+
+.mh-card-sheet button.mh-cs-deck-flag:hover,
+.mh-card-sheet button.mh-cs-deck-flag:focus-visible {
+  opacity: 0.75;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.mh-card-sheet .mh-cs-deck-flag.on {
+  opacity: 1;
+  color: #fff;
+  filter: drop-shadow(0 0 0.8cqw rgba(255, 236, 200, 0.85));
+}
+
+.mh-card-sheet .mh-cs-deck-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.8cqw;
+  margin-left: auto;
   opacity: 0;
   transition: opacity 0.15s ease;
 }
 
-.mh-card-sheet .mh-cs-deck-card:is(:hover, :focus-within) .mh-cs-deck-tools,
-.mh-card-sheet .mh-cs-deck-big .mh-cs-deck-tools {
+.mh-card-sheet .mh-cs-deck-card:is(:hover, :focus-within) :is(.mh-cs-deck-tools, .mh-cs-deck-steps),
+.mh-card-sheet .mh-cs-deck-big :is(.mh-cs-deck-tools, .mh-cs-deck-steps),
+.mh-card-sheet .mh-cs-deck-tools:has(.armed) {
   opacity: 1;
 }
 
@@ -1930,48 +2055,54 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 8cqw;
-  height: 8cqw;
+  width: 6cqw;
+  height: 6cqw;
   border-radius: 50%;
-  font-size: 5cqw;
+  font-size: 3.6cqw;
+  line-height: 1;
   opacity: 0.85;
 }
 
 .mh-card-sheet .mh-cs-deck-tool:hover,
 .mh-card-sheet .mh-cs-deck-tool:focus-visible {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.22);
   opacity: 1;
 }
 
-.mh-card-sheet .mh-cs-deck-tool.mh-cs-delete {
-  margin-left: auto;
+.mh-card-sheet .mh-cs-deck-tool.mh-cs-delete:hover {
+  color: #ffb3a8;
 }
 
-.mh-card-sheet .mh-cs-deck-tool.mh-cs-delete:hover {
-  color: #ff8a7a;
+/* The clue's USE: a magnifier and the word. */
+.mh-card-sheet .mh-cs-deck-tool.mh-cs-deck-tool-text {
+  width: auto;
+  gap: 1cqw;
+  padding: 0 1.8cqw;
+  border-radius: 3cqw;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.mh-card-sheet .mh-cs-deck-tool-label,
+.mh-card-sheet .mh-cs-deck-sure {
+  font-family: var(--mh-cs-label-font);
+  font-size: 3.6cqw;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 /* "Sure?": the first click arms the button, the second one goes through. */
 .mh-card-sheet .mh-cs-deck-tool.armed {
   width: auto;
   gap: 1cqw;
-  padding: 0 2cqw;
-  border-radius: 4cqw;
+  padding: 0 1.8cqw;
+  border-radius: 3cqw;
   background: #b23526;
   color: #fff;
   opacity: 1;
 }
 
-.mh-card-sheet .mh-cs-deck-sure {
-  font-family: var(--mh-cs-label-font);
-  font-size: 4.4cqw;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 /* The band name as a button: selects (a card worked on) or brings the card forward (spread). */
 .mh-card-sheet button.mh-cs-deck-band-name {
-  display: block;
   text-align: left;
   border-radius: 0.8cqw;
 }
@@ -2023,8 +2154,6 @@
   background: rgba(205, 70, 50, 0.3);
 }
 
-.mh-card-sheet .mh-cs-selected-positive .mh-cs-deck-mark { background: #2f8f47; }
-.mh-card-sheet .mh-cs-selected-negative .mh-cs-deck-mark { background: #b23526; }
 
 /* ── Empty deck, detached placeholder ────────────────────────────────────── */
 

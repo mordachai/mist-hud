@@ -2,33 +2,30 @@
       16 boxes, the type marker and the name drawn over it, at positions set
       by the per-system CSS. Everything is done on the card (no dialogs).
       - stack: the cascade behind the layers. The whole card is one button
-        that brings it forward; nothing else is live.
-      - the spread view: the name on the TAG line selects the card (play
-        mode: statuses and story tags) or is a field (edit mode, a new
-        card); the band brings it forward.
+        that brings it forward; only the + / − squares are live over it.
+      - the spread view: the name on the TAG line is a field (edit mode, a
+        new card); the band brings the card forward.
       - work (a card brought forward, the deck window): the name and the
-        small fields are inputs; the band name selects it (play mode).
-      Boxes set the status (or the amount); the controls sit in a strip over
-      the footer band (hover / focus; always on a card brought forward).
+        clue's small fields are inputs.
+      The look (fixes phase 2, 2026-11-19): the name plainly on the band,
+      shrunk to fit (card-fit.js, two lines at most), the tier / amount in
+      serif numerals; the card's type crossed (marker-x.svg) on the type
+      marker; + / − squares in the top-right corner select the card for the
+      roll (play mode); small − / + under the box printed 6; the toggle
+      icons (partial, temporary, permanent, crispy) and the tools (burn,
+      use, trash) on the footer band.
       A status or story tag card is a system draggable (card.drag): it drops
       on any sheet, token or HUD as the system's chat statuses and tags do.
       Takes: card (tags-deck.js deckCard), stack, work, big, index. --}}
 <article class="mh-cs-deck-card mh-cs-deck-kind-{{card.kind}}{{#if card.selection}} mh-cs-selected mh-cs-selected-{{card.selection}}{{/if}}{{#if card.burned}} burned{{/if}}{{#if big}} mh-cs-deck-big{{/if}}{{#if card.isNew}} mh-cs-deck-new{{/if}}{{#if card.drag}} draggable{{/if}}" data-item-id="{{card.id}}" data-kind="{{card.kind}}" style="--i: {{index}}"{{#if card.drag}} draggable="true" data-draggable-type="{{card.drag.type}}" data-name="{{card.drag.name}}" data-options="{{card.drag.options}}" data-source-actor="{{card.drag.source}}"{{/if}}>
   <div class="mh-cs-deck-face">
     <div class="mh-cs-deck-band">
-      {{#if stack}}
-      <span class="mh-cs-deck-band-name">{{card.name}}</span>
-      {{else if work}}
-      {{#if card.selectable}}
-      <button type="button" class="mh-cs-deck-band-name" id="{{@root.uid}}-deck-{{card.id}}-band" data-action="selectDeckCard" aria-pressed="{{#if card.selection}}true{{else}}false{{/if}}" data-tooltip="{{card.selectTooltip}}">{{card.name}}</button>
+      {{#if (or stack work)}}
+      <span class="mh-cs-deck-band-name"{{#if card.selectTooltip}} data-tooltip="{{card.selectTooltip}}"{{/if}}><span class="mh-cs-deck-band-text" data-fit data-fit-lines="2">{{card.name}}</span></span>
       {{else}}
-      <span class="mh-cs-deck-band-name"{{#if card.selectTooltip}} data-tooltip="{{card.selectTooltip}}"{{/if}}>{{card.name}}</span>
-      {{/if}}
-      {{else}}
-      <button type="button" class="mh-cs-deck-band-name" data-action="focusDeckCard" data-tooltip="{{card.focusLabel}}">{{card.name}}</button>
+      <button type="button" class="mh-cs-deck-band-name" data-action="focusDeckCard" data-tooltip="{{card.focusLabel}}"><span class="mh-cs-deck-band-text" data-fit data-fit-lines="2">{{card.name}}</span></button>
       {{/if}}
       {{#if card.badge}}<span class="mh-cs-deck-badge">{{card.badge}}</span>{{/if}}
-      {{#if card.mark}}<span class="mh-cs-deck-mark">{{card.mark}}</span>{{/if}}
     </div>
     <span class="mh-cs-deck-markers" aria-hidden="true">
       {{#each card.markers}}<span class="mh-cs-deck-marker mh-cs-deck-marker-{{key}}{{#if on}} on{{/if}}"></span>{{/each}}
@@ -42,21 +39,23 @@
       {{#each card.boxes}}<span class="mh-cs-deck-pip{{#if this}} filled{{/if}}"></span>{{/each}}
     </span>
     {{/if}}
+    {{#if (and card.steps.length (not stack))}}
+    <div class="mh-cs-deck-steps">
+      {{#each card.steps}}
+      <button type="button" class="mh-cs-deck-step" data-action="{{action}}" data-step="{{step}}" data-tooltip="{{label}}" aria-label="{{label}}"><i class="fa-solid {{icon}}" aria-hidden="true"></i></button>
+      {{/each}}
+    </div>
+    {{/if}}
     <div class="mh-cs-deck-name-line">
       <div class="mh-cs-deck-name-main">
         {{#if (and (or work card.editable) (not stack))}}
         <input type="text" class="mh-cs-deck-name mh-cs-deck-input" id="{{@root.uid}}-deck-{{card.id}}-name" data-deck-field="name" value="{{#unless card.isNew}}{{card.rawName}}{{/unless}}" placeholder="{{card.namePlaceholder}}" spellcheck="false" aria-label="{{card.namePlaceholder}}">
-        {{else if (and card.selectable (not stack))}}
-        <button type="button" class="mh-cs-deck-name" id="{{@root.uid}}-deck-{{card.id}}" data-action="selectDeckCard" aria-pressed="{{#if card.selection}}true{{else}}false{{/if}}" data-tooltip="{{card.selectTooltip}}">{{card.name}}</button>
         {{else}}
         <span class="mh-cs-deck-name"{{#if card.selectTooltip}} data-tooltip="{{card.selectTooltip}}"{{/if}}>{{card.name}}</span>
         {{/if}}
       </div>
       {{#if (and card.hasFields (or work card.editable) (not stack))}}
       <div class="mh-cs-deck-fields">
-        {{#each card.flags}}
-        <button type="button" class="mh-cs-deck-flag{{#if on}} on{{/if}}" data-action="toggleDeckFlag" data-field="{{field}}" aria-pressed="{{#if on}}true{{else}}false{{/if}}">{{label}}</button>
-        {{/each}}
         {{#each card.texts}}
         <input type="text" class="mh-cs-deck-input mh-cs-deck-small" id="{{@root.uid}}-deck-{{../card.id}}-{{field}}" data-deck-field="{{field}}" value="{{value}}" placeholder="{{placeholder}}" aria-label="{{placeholder}}" spellcheck="false">
         {{/each}}
@@ -67,17 +66,40 @@
       </div>
       {{/if}}
     </div>
-    {{#unless stack}}
-    {{#if card.tools.length}}
-    <div class="mh-cs-deck-tools">
-      {{#each card.tools}}
-      <button type="button" class="mh-cs-deck-tool{{#if danger}} mh-cs-delete{{/if}}{{#if armed}} armed{{/if}}" id="{{@root.uid}}-deck-{{../card.id}}-{{action}}{{step}}" data-action="{{action}}"{{#if step}} data-step="{{step}}"{{/if}} data-tooltip="{{label}}" aria-label="{{label}}"><i class="fa-solid {{icon}}" aria-hidden="true"></i>{{#if armed}}<span class="mh-cs-deck-sure">{{sure}}</span>{{/if}}</button>
-      {{/each}}
+    <div class="mh-cs-deck-foot">
+      {{#if (and card.own (not stack))}}
+      {{#if card.flags.length}}
+      <span class="mh-cs-deck-flags">
+        {{#each card.flags}}
+        <button type="button" class="mh-cs-deck-flag{{#if on}} on{{/if}}" data-action="toggleDeckFlag" data-field="{{field}}" aria-pressed="{{#if on}}true{{else}}false{{/if}}" aria-label="{{label}}" data-tooltip="{{tooltip}}"><i class="fa-solid {{icon}}" aria-hidden="true"></i></button>
+        {{/each}}
+      </span>
+      {{/if}}
+      {{else if card.flagsOn}}
+      <span class="mh-cs-deck-flags">
+        {{#each card.flags}}{{#if on}}<span class="mh-cs-deck-flag on" data-tooltip="{{label}}" aria-label="{{label}}"><i class="fa-solid {{icon}}" aria-hidden="true"></i></span>{{/if}}{{/each}}
+      </span>
+      {{/if}}
+      {{#unless stack}}
+      {{#if card.tools.length}}
+      <span class="mh-cs-deck-tools">
+        {{#each card.tools}}
+        <button type="button" class="mh-cs-deck-tool{{#if danger}} mh-cs-delete{{/if}}{{#if text}} mh-cs-deck-tool-text{{/if}}{{#if armed}} armed{{/if}}" id="{{@root.uid}}-deck-{{../card.id}}-{{action}}" data-action="{{action}}" data-tooltip="{{label}}" aria-label="{{label}}"><i class="fa-solid {{icon}}" aria-hidden="true"></i>{{#if armed}}<span class="mh-cs-deck-sure">{{sure}}</span>{{else if text}}<span class="mh-cs-deck-tool-label">{{text}}</span>{{/if}}</button>
+        {{/each}}
+      </span>
+      {{/if}}
+      {{/unless}}
     </div>
-    {{/if}}
-    {{/unless}}
   </div>
   {{#if stack}}
   <button type="button" class="mh-cs-deck-hit" data-action="focusDeckCard" aria-label="{{card.focusLabel}}" data-tooltip="{{card.kindLabel}}: {{card.name}}"></button>
+  {{/if}}
+  {{!-- Over the stack's hit button too: a card can be selected from the stack. --}}
+  {{#if card.select}}
+  <div class="mh-cs-deck-select">
+    {{#each card.select}}
+    <button type="button" class="mh-cs-deck-sel mh-cs-deck-sel-{{#if (gt direction 0)}}positive{{else}}negative{{/if}}{{#if on}} on{{/if}}" data-action="selectDeckCard" data-direction="{{direction}}" aria-pressed="{{#if on}}true{{else}}false{{/if}}" aria-label="{{label}}" data-tooltip="{{tooltip}}"><i class="fa-solid {{icon}}" aria-hidden="true"></i></button>
+    {{/each}}
+  </div>
   {{/if}}
 </article>

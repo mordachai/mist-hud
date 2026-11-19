@@ -391,8 +391,7 @@
 "MistHUD.cardSheet.deck.deleteHint": "Excluir (clique direito: sem confirmação)",
 "MistHUD.cardSheet.deck.useClue": "Usar a pista",
 "MistHUD.cardSheet.deck.cluePlayersOnly": "Só jogadores podem usar pistas.",
-"MistHUD.cardSheet.deck.partial": "parcial",
-"MistHUD.cardSheet.deck.selectStatus": "Clique: selecionar para a rolagem (−) · clique direito: ajudando (+)",
+"MistHUD.cardSheet.deck.partial": "Parcial",
 "MistHUD.cardSheet.deck.bringForward": "Trazer para frente: {name}",
 "MistHUD.cardSheet.deck.backToDeck": "Voltar ao baralho",
 "MistHUD.cardSheet.deck.spread": "Espalhar o baralho",
@@ -407,6 +406,13 @@
 "MistHUD.cardSheet.deck.sureHint": "{action}: clique de novo para confirmar",
 "MistHUD.cardSheet.deck.namePlaceholder": "Nome",
 "MistHUD.cardSheet.deck.boxStatus": "Marcar as caixas até esta",
-"MistHUD.cardSheet.deck.boxAmount": "Definir a quantidade até esta caixa"
+"MistHUD.cardSheet.deck.boxAmount": "Definir a quantidade até esta caixa",
+"MistHUD.cardSheet.deck.crispy": "Crocante",
+"MistHUD.cardSheet.deck.flagOn": "ligado (clique para desligar)",
+"MistHUD.cardSheet.deck.flagOff": "desligado (clique para ligar)",
+"MistHUD.cardSheet.deck.use": "Usar",
+"MistHUD.cardSheet.deck.selectPositive": "Ajuda a rolagem: {value}",
+"MistHUD.cardSheet.deck.selectNegative": "Atrapalha a rolagem: {value}",
+"MistHUD.cardSheet.deck.selectClear": "Clique de novo para limpar"
 
 }

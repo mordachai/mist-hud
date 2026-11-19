@@ -266,24 +266,40 @@
   opacity: 0.9;
 }
 
+/* Serif numerals for the tier / amount on the band (fixes phase 2): PT Serif
+   Bold, shipped by the system. */
+@font-face {
+  font-family: "MH Card Serif";
+  src: url(/systems/city-of-mist/fonts/pt-serif-v12-latin-700.woff2) format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
 /* ── tags-deck: the City of Mist tracking card (plan § 7, phase 5) ─────────
-   trackingCard.webp is 490 x 320. Measured on the art, in % of the card:
-   red band y 15-63 (title "TRACKING CARD" x 18-312, covered by the card's
-   name), the four type icons centred at x 332 / 368.5 / 405 / 441, y 37.5,
-   32 px wide (clue, juice, tag, status); the box strip y 84-171, 16 slanted
-   cells (the tier numbers in cells 1, 2, 4, 7, 11, 16); the TAG field x
-   128-462, y 192-252; the footer band y 268-302. */
+   trackingCard.webp, as replaced by the user (2026-11-19), is 321 x 208 (was
+   490 x 320; the same layout, the footer band now blank). Measured on the
+   art, in % of the card: red band y 8-40 (title "TRACKING CARD" x 18-173,
+   y 13-35, hidden under the card's name), the four type icons centred at
+   x 218.5 / 242.5 / 267.5 / 292, y 23.5, 20 px wide (clue, juice, tag,
+   status); the box strip y 55-110, 16 slanted cells (the tier numbers in
+   cells 1, 2, 4, 7, 11, 16; the cell edges moved less than 1 px); the TAG
+   field x 77-302, y 126-166; the footer band x 18-309, y 178-198. */
 .mh-card-sheet {
-  --mh-cs-deck-aspect: 490 / 320;
-  --mh-cs-deck-hw: 0.6531;
+  --mh-cs-deck-aspect: 321 / 208;
+  --mh-cs-deck-hw: 0.648;
   --mh-cs-deck-step: 0.2;
-  --mh-cs-deck-band-x: 3.7%;  --mh-cs-deck-band-y: 4.7%;  --mh-cs-deck-band-w: 60%;  --mh-cs-deck-band-h: 15%;
-  --mh-cs-deck-pips-y: 26.25%; --mh-cs-deck-pips-h: 27.2%;
-  --mh-cs-deck-name-x: 26.1%; --mh-cs-deck-name-y: 58.6%; --mh-cs-deck-name-w: 68.2%; --mh-cs-deck-name-h: 23.6%;
-  --mh-cs-deck-foot-x: 4.5%;  --mh-cs-deck-foot-y: 83.75%; --mh-cs-deck-foot-w: 91%; --mh-cs-deck-foot-h: 10.6%;
-  /* The band's own red, a little darker at the bottom, as printed. */
-  --mh-cs-deck-band-bg: linear-gradient(#9a5c40, #8a4c33);
+  --mh-cs-deck-band-x: 5%;    --mh-cs-deck-band-y: 4.3%;  --mh-cs-deck-band-w: 59%;   --mh-cs-deck-band-h: 14.5%;
+  --mh-cs-deck-pips-y: 26.4%; --mh-cs-deck-pips-h: 26.5%;
+  --mh-cs-deck-name-x: 25%;   --mh-cs-deck-name-y: 60.6%; --mh-cs-deck-name-w: 69%;   --mh-cs-deck-name-h: 19.2%;
+  --mh-cs-deck-foot-x: 5.6%;  --mh-cs-deck-foot-y: 85.6%; --mh-cs-deck-foot-w: 90.7%; --mh-cs-deck-foot-h: 9.6%;
+  /* + / − squares at the band's right end (x 303-317); − / + under the
+     box printed 6 (cell x 272-300), between the strip and the TAG field. */
+  --mh-cs-deck-sel-x: 94.4%;  --mh-cs-deck-sel-y: 4%;     --mh-cs-deck-sel-size: 4.4cqw;
+  --mh-cs-deck-steps-x: 84%;  --mh-cs-deck-steps-y: 53.4%; --mh-cs-deck-steps-w: 10%; --mh-cs-deck-steps-h: 6.8%;
+  /* The band's own red, measured behind the title (147, 82, 59). */
+  --mh-cs-deck-band-bg: #93523b;
   --mh-cs-deck-ink: #2b2622;
+  --mh-cs-deck-num-font: "MH Card Serif", "PT Serif", Georgia, serif;
   /* A box is checked with a dark red marker; the printed numbers show through. */
   --mh-cs-deck-fill: rgba(128, 28, 16, 0.7);
 }
@@ -293,26 +309,44 @@
   border-radius: 3.2cqw;
 }
 
-/* The name on the band: the same condensed capitals as the printed title. */
+/* The name on the band: the same condensed capitals as the printed title,
+   smaller. The patch hiding the printed title fades out at its ends and at
+   the band's top and bottom, so it shows no edge. */
 .mh-card-sheet .mh-cs-deck-band {
   font-family: "MH Card Title", "Rift Bold", "Rift", sans-serif;
-  font-size: 7.8cqw;
-  letter-spacing: 0.02em;
-  box-shadow: inset 0 0 1.2cqw rgba(60, 20, 10, 0.45);
   text-shadow: 0 0.2cqw 0.4cqw rgba(0, 0, 0, 0.35);
 }
 
-/* The type marker, over the printed icons. */
-.mh-card-sheet .mh-cs-deck-marker {
-  top: calc(11.72% - 5%);
-  width: 6.53%;
-  height: 10%;
+.mh-card-sheet .mh-cs-deck-band::before {
+  inset: 0 0 0 -1.2cqw;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 1.8cqw, #000 calc(100% - 2cqw), transparent),
+    linear-gradient(to bottom, transparent, #000 1cqw, #000 calc(100% - 1cqw), transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent, #000 1.8cqw, #000 calc(100% - 2cqw), transparent),
+    linear-gradient(to bottom, transparent, #000 1cqw, #000 calc(100% - 1cqw), transparent);
+  mask-composite: intersect;
 }
 
-.mh-card-sheet .mh-cs-deck-marker-clue   { left: calc(67.76% - 3.27%); }
-.mh-card-sheet .mh-cs-deck-marker-juice  { left: calc(75.2% - 3.27%); }
-.mh-card-sheet .mh-cs-deck-marker-tag    { left: calc(82.65% - 3.27%); }
-.mh-card-sheet .mh-cs-deck-marker-status { left: calc(90% - 3.27%); }
+/* The type marker: the card's type crossed with a marker (marker-x.svg) over
+   its printed icon; the other three icons are left as printed. */
+.mh-card-sheet .mh-cs-deck-marker {
+  top: calc(11.3% - 5.7%);
+  width: 7.4%;
+  height: 11.4%;
+}
+
+.mh-card-sheet .mh-cs-deck-marker.on {
+  box-shadow: none;
+  background: url("../../ui/card-sheet/com/marker-x.svg") center / contain no-repeat;
+  filter: drop-shadow(0 0 0.25cqw rgba(255, 255, 255, 0.55));
+}
+
+.mh-card-sheet .mh-cs-deck-marker-clue   { left: calc(68.07% - 3.7%); }
+.mh-card-sheet .mh-cs-deck-marker-juice  { left: calc(75.55% - 3.7%); }
+.mh-card-sheet .mh-cs-deck-marker-tag    { left: calc(83.33% - 3.7%); }
+.mh-card-sheet .mh-cs-deck-marker-status { left: calc(90.97% - 3.7%); }
 
 /* The 16 boxes, each on its slanted cell of the strip (centre line y 127). */
 .mh-card-sheet .mh-cs-deck-pips {

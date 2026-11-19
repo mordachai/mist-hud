@@ -391,8 +391,7 @@
 "MistHUD.cardSheet.deck.deleteHint": "Delete (right-click: no confirmation)",
 "MistHUD.cardSheet.deck.useClue": "Use the clue",
 "MistHUD.cardSheet.deck.cluePlayersOnly": "Only players can use clues.",
-"MistHUD.cardSheet.deck.partial": "partial",
-"MistHUD.cardSheet.deck.selectStatus": "Click: select for the roll (−) · right-click: helping (+)",
+"MistHUD.cardSheet.deck.partial": "Partial",
 "MistHUD.cardSheet.deck.bringForward": "Bring forward: {name}",
 "MistHUD.cardSheet.deck.backToDeck": "Back to the deck",
 "MistHUD.cardSheet.deck.spread": "Spread the deck",
@@ -407,6 +406,13 @@
 "MistHUD.cardSheet.deck.sureHint": "{action}: click again to confirm",
 "MistHUD.cardSheet.deck.namePlaceholder": "Name",
 "MistHUD.cardSheet.deck.boxStatus": "Check the boxes up to this one",
-"MistHUD.cardSheet.deck.boxAmount": "Set the amount to this box"
+"MistHUD.cardSheet.deck.boxAmount": "Set the amount to this box",
+"MistHUD.cardSheet.deck.crispy": "Crispy",
+"MistHUD.cardSheet.deck.flagOn": "on (click to turn off)",
+"MistHUD.cardSheet.deck.flagOff": "off (click to turn on)",
+"MistHUD.cardSheet.deck.use": "Use",
+"MistHUD.cardSheet.deck.selectPositive": "Helps the roll: {value}",
+"MistHUD.cardSheet.deck.selectNegative": "Hinders the roll: {value}",
+"MistHUD.cardSheet.deck.selectClear": "Click again to clear it"
 
 }

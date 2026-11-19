@@ -391,10 +391,11 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       deckRendered(this);
       focusDeckView(this);
     }
-    for (const part of LAYER_PARTS) {
+    // Fitted text: the theme titles, and the deck cards' names (fixes phase 2).
+    for (const part of [...LAYER_PARTS, "deck"]) {
       if (options.parts && !options.parts.includes(part)) continue;
       this.#unwatchFit[part]?.();
-      this.#unwatchFit[part] = watchFit(this.element.querySelector(`.mh-cs-${part}`));
+      this.#unwatchFit[part] = watchFit(this.element.querySelector(part === "deck" ? ".mh-cs-deck-part" : `.mh-cs-${part}`));
     }
   }
 

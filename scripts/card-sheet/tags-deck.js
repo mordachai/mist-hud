@@ -19,10 +19,13 @@
 //
 // Everything is done on the card itself (user, 2026-11-18), no system
 // dialogs: the name on the TAG line is a field, a new card starts blank,
-// clicking a box sets the status (or the amount), − / + change one tier
-// with the system's status math, the other fields (clue source / method /
-// partial, temporary / permanent) are small fields under
-// the name, and delete / use / burn ask "sure?" on the button itself.
+// clicking a box sets the status (or the amount), the small − / + under the
+// box printed 6 change one tier with the system's status math, a clue's
+// source / method are small fields under the name, and delete / use / burn
+// ask "sure?" on the button itself. The look (fixes phase 2, 2026-11-19):
+// partial / temporary / permanent / crispy are toggle icons on the footer
+// band, the + / − squares in the top-right corner select the card for the
+// roll, the card's type is crossed on the type marker (marker-x.svg).
 //
 // The system stays the source of truth: reads come from getters.js
 // (getDeckItems), writes go through document methods (createNewStatus,
@@ -36,12 +39,13 @@ import { MODULE_ID, SETTINGS, getActiveSystem } from "../constants.js";
 import { getDeckItems } from "../getters.js";
 import { isEditMode, selectionView } from "./card-sheet-context.js";
 import {
-  logModification, statusBoxes, setStatusBoxes, toggleStatusSelection, toggleTagSelection,
-  isTagSelectable, getSystemSelection, addDragFunctionality,
+  logModification, statusBoxes, setStatusBoxes, setRollDirection,
+  getSystemSelection, addDragFunctionality,
 } from "./system-adapter.js";
 import { bindDropTarget } from "../drop-relay.js";
 import { once } from "./edit-actions.js";
 import { writeUiState, deckState } from "./ui-state.js";
+import { watchFit } from "./card-fit.js";
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
@@ -121,21 +125,24 @@ const ARM_MS = 3000;
 // ── Render context ───────────────────────────────────────────────────────────
 
 /**
- * The controls of a deck card, for its owner: − / + on a status, clue or
- * juice; a trash on every card in both modes (fixes 2026-11-19; not on a
- * collective status, which the system keeps in step with the collective
- * size); burn on a story tag while locked; "use" on a clue (players only,
- * checked on click). Delete, use and burn ask "sure?" on the button
- * (`armed`).
+ * The controls of a deck card, for its owner, in two groups:
+ *   - steps: the small − / + under the box printed 6 (a status, clue or
+ *     juice);
+ *   - tools: on the footer band, at the right: burn on a story tag while
+ *     locked, "use" on a clue (players only, checked on click; a magnifier
+ *     and "USE"), and a trash on every card in both modes (fixes
+ *     2026-11-19; not on a collective status, which the system keeps in
+ *     step with the collective size).
+ * Delete, use and burn ask "sure?" on the button (`armed`).
  */
 function cardTools(kind, row, own, edit, armedKey) {
-  if (!own) return [];
+  if (!own) return { steps: [], tools: [] };
   const tool = (action, icon, label, extra = {}) => ({
     action, icon, label: L(label), ...extra,
     armed: armedKey === `${row.id}:${action}`,
     sure: L("MistHUD.cardSheet.deck.sure"),
   });
-  const step = () => [
+  const steps = kind === "tag" ? [] : [
     tool("stepDeckCard", "fa-minus", kind === "status" ? "MistHUD.cardSheet.deck.subtractTier" : "MistHUD.cardSheet.deck.subtractOne", { step: -1 }),
     tool("stepDeckCard", "fa-plus", kind === "status" ? "MistHUD.cardSheet.deck.addTier" : "MistHUD.cardSheet.deck.addOne", { step: 1 }),
   ];
@@ -143,7 +150,6 @@ function cardTools(kind, row, own, edit, armedKey) {
   const tools = [];
   switch (kind) {
     case "status":
-      tools.push(...step());
       if (!row.specialType) tools.push(del("MistHUD.cardSheet.deck.deleteHint"));
       break;
     case "tag":
@@ -157,18 +163,20 @@ function cardTools(kind, row, own, edit, armedKey) {
       tools.push(del("MistHUD.cardSheet.deck.deleteHint"));
       break;
     case "clue":
-      tools.push(...step());
-      if (row.amount > 0) tools.push(tool("useClue", "fa-magnifying-glass", "MistHUD.cardSheet.deck.useClue", { confirm: true }));
+      if (row.amount > 0) {
+        tools.push(tool("useClue", "fa-magnifying-glass", "MistHUD.cardSheet.deck.useClue", {
+          confirm: true, text: L("MistHUD.cardSheet.deck.use"),
+        }));
+      }
       tools.push(del("MistHUD.cardSheet.deck.delete"));
       break;
     case "juice":
-      tools.push(...step());
       tools.push(del("MistHUD.cardSheet.deck.delete"));
       break;
   }
   // The tooltip of an armed button says what the next click does.
   for (const t of tools) if (t.armed) t.label = L("MistHUD.cardSheet.deck.sureHint", { action: t.label });
-  return tools;
+  return { steps, tools };
 }
 
 /**
@@ -191,8 +199,25 @@ function dragData(actor, kind, row, isNew) {
   };
 }
 
-/** A small on / off field under the name (temporary, permanent, partial). */
-const flag = (field, label, on) => ({ field, label: L(label), on: !!on });
+/**
+ * The on / off fields, as toggle icons on the footer band (fixes phase 2),
+ * only where the system has the field: partial on a clue, temporary /
+ * permanent on a status or a story tag, crispy on a story tag.
+ */
+const FLAG_INFO = {
+  partial:   { icon: "fa-puzzle-piece",   label: "MistHUD.cardSheet.deck.partial" },
+  temporary: { icon: "fa-hourglass-half", label: "CityOfMist.terms.temporary" },
+  permanent: { icon: "fa-gem",            label: "CityOfMist.terms.permanent" },
+  crispy:    { icon: "fa-leaf",           label: "MistHUD.cardSheet.deck.crispy" },
+};
+const flag = (field, on) => {
+  const label = L(FLAG_INFO[field].label);
+  return {
+    field, label, on: !!on,
+    icon:    FLAG_INFO[field].icon,
+    tooltip: `${label}: ${L(on ? "MistHUD.cardSheet.deck.flagOn" : "MistHUD.cardSheet.deck.flagOff")}`,
+  };
+};
 
 /** One deck card. */
 function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
@@ -213,13 +238,12 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
     boxes:     amountBoxes(0),
     boxEdit:   own,
     markers:   MARKER_ORDER.map(key => ({ key, on: key === kind })),
-    tools:     cardTools(kind, row, own, edit, armedKey),
+    ...cardTools(kind, row, own, edit, armedKey),
     flags:     [],
     texts:     [],
     notes:     [],
     selectable: false,
     selection: "",
-    mark:      "",
   };
   switch (kind) {
     case "status": {
@@ -227,9 +251,7 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
       Object.assign(card, sel, {
         badge: String(row.tier),
         boxes: statusBoxes(row.item, TIER_BOXES),
-        flags: [flag("temporary", "CityOfMist.terms.temporary", row.temporary),
-                flag("permanent", "CityOfMist.terms.permanent", row.permanent)],
-        mark:  sel.selection ? `${sel.selection === "positive" ? "+" : "−"}${row.tier}` : "",
+        flags: [flag("temporary", row.temporary), flag("permanent", row.permanent)],
       });
       break;
     }
@@ -239,9 +261,7 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
         burned:    row.burnState === "burned",
         burnState: row.burnState,
         boxEdit:   false,
-        flags: [flag("temporary", "CityOfMist.terms.temporary", row.temporary),
-                flag("permanent", "CityOfMist.terms.permanent", row.permanent)],
-        mark:  sel.selection ? (sel.selection === "positive" ? "+1" : "−1") : "",
+        flags: [flag("temporary", row.temporary), flag("permanent", row.permanent), flag("crispy", row.crispy)],
       });
       break;
     }
@@ -255,7 +275,7 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
       Object.assign(card, {
         badge: String(row.amount),
         boxes: amountBoxes(row.amount),
-        flags: [flag("partial", "MistHUD.cardSheet.deck.partial", row.partial)],
+        flags: [flag("partial", row.partial)],
         texts: [
           { field: "source", value: row.item?.system?.source ?? "", placeholder: L("CityOfMist.terms.clueSource") },
           { field: "method", value: row.item?.system?.method ?? "", placeholder: L("CityOfMist.terms.clueMethod") },
@@ -263,17 +283,24 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
       });
       break;
   }
-  // Shown as text when the fields are not editable.
-  card.notes = [
-    ...card.flags.filter(f => f.on).map(f => f.label),
-    ...card.texts.map(t => t.value).filter(Boolean),
-  ];
-  card.hasFields = card.flags.length > 0 || card.texts.length > 0;
-  // Play mode: a status's or a story tag's name selects it (left: its
-  // default direction, right: reversed), as on the system sheet.
+  // A clue's source and method, as text when they are not editable.
+  card.notes = card.texts.map(t => t.value).filter(Boolean);
+  card.hasFields = card.texts.length > 0;
+  card.flagsOn = card.flags.some(f => f.on);
+  // Play mode: the + / − squares in the top-right corner select a status or
+  // a story tag for the roll (fixes phase 2; they replace the name buttons).
   if (card.selectable) {
-    card.selectTooltip = (card.selectionLabel ? `${card.selectionLabel}<br>` : "")
-      + L(kind === "status" ? "MistHUD.cardSheet.deck.selectStatus" : "MistHUD.cardSheet.selectTag");
+    const value = kind === "status" ? row.tier : 1;
+    card.select = [1, -1].map(direction => {
+      const on = card.selection === (direction > 0 ? "positive" : "negative");
+      const label = L(direction > 0 ? "MistHUD.cardSheet.deck.selectPositive" : "MistHUD.cardSheet.deck.selectNegative",
+        { value: `${direction > 0 ? "+" : "−"}${value}` });
+      return {
+        direction, on, label,
+        icon:    direction > 0 ? "fa-square-plus" : "fa-square-minus",
+        tooltip: on ? `${label}<br>${L("MistHUD.cardSheet.deck.selectClear")}` : label,
+      };
+    });
   } else if (card.noSelect) {
     card.selectTooltip = L("MistHUD.cardSheet.burnedNoSelect");
   }
@@ -460,19 +487,18 @@ function spreadDeck() {
 }
 
 /**
- * Select a status or a story tag for the next roll (play mode), as the
- * system sheet: left click = the default direction (a status −1, the
- * character's story tag +1), right click = reversed, the same click again
- * clears it.
+ * The + / − squares in a card's top-right corner (play mode): select the
+ * status or story tag for the next roll in that direction; the same square
+ * again clears it, the other one switches it (system-adapter
+ * setRollDirection).
  */
 function selectDeckCard(event, target) {
   if (this.editMode) return;
   const item = itemAt(this, target);
-  if (!item) return;
+  const direction = Number(target.dataset.direction);
+  if (!item || (item.type !== "status" && item.type !== "tag")) return;
   event.preventDefault();
-  const invert = event.button === 2;
-  if (item.type === "status") toggleStatusSelection(item, invert);
-  else if (item.type === "tag" && isTagSelectable(item)) toggleTagSelection(item, this.actor, invert);
+  setRollDirection(item, direction);
 }
 
 /**
@@ -552,11 +578,11 @@ async function stepDeckCard(event, target) {
   });
 }
 
-/** The small on / off fields under the name: temporary, permanent (statuses, story tags), partial (clues). */
+/** The toggle icons on the footer band: temporary, permanent (statuses, story tags), crispy (story tags), partial (clues). */
 async function toggleDeckFlag(event, target) {
   const item = itemAt(this, target);
   const field = target.dataset.field;
-  if (!item || !ownedActor(this) || !["temporary", "permanent", "partial"].includes(field)) return;
+  if (!item || !ownedActor(this) || !(field in FLAG_INFO)) return;
   await item.update({ [`system.${field}`]: !item.system[field] });
 }
 
@@ -642,7 +668,7 @@ export const DECK_ACTIONS = {
   focusDeckCard,
   closeDeckView,
   spreadDeck,
-  selectDeckCard: { handler: selectDeckCard, buttons: [0, 2] },
+  selectDeckCard,
   createDeckItem,
   setDeckBoxes,
   stepDeckCard,
@@ -911,6 +937,8 @@ export class TagsDeck extends HandlebarsApplicationMixin(ApplicationV2) {
 
   #actor;
   #keepState = false;
+  /** card-fit.js watcher of the cards' names. */
+  #unwatchFit = null;
 
   /** The window always shows the spread columns. */
   deckView = "spread";
@@ -989,6 +1017,9 @@ export class TagsDeck extends HandlebarsApplicationMixin(ApplicationV2) {
     this.element.dataset.mode = this.editMode ? "edit" : "play";
     deckRendered(this);
     focusDeckView(this);
+    // The cards' names are fitted to their band (card-fit.js).
+    this.#unwatchFit?.();
+    this.#unwatchFit = watchFit(this.element.querySelector(".window-content"));
   }
 
   setPosition(position) {
@@ -1011,6 +1042,8 @@ export class TagsDeck extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Closed by its × (not by attach, or by its sheet closing): the deck goes back to the sheet. */
   _onClose(options) {
     super._onClose(options);
+    this.#unwatchFit?.();
+    this.#unwatchFit = null;
     if (this.#keepState || !this.#actor) return;
     void writeUiState(this.#actor, { deck: { detached: false } }).then(() => refreshDeckParts(this.#actor));
   }
