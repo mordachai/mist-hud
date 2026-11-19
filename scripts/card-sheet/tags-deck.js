@@ -147,7 +147,8 @@ const ARM_MS = 3000;
 function cardTools(kind, row, own, edit, armedKey) {
   if (!own) return { steps: [], tools: [] };
   const tool = (action, icon, label, extra = {}) => ({
-    action, icon, label: L(label), ...extra,
+    // format, not localize: some labels name the card ("Burn {name}").
+    action, icon, label: game.i18n.format(label, { name: row.name ?? row.item?.name ?? "" }), ...extra,
     armed: armedKey === `${row.id}:${action}`,
     sure: L("MistHUD.cardSheet.deck.sure"),
   });
