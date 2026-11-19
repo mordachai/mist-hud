@@ -143,7 +143,7 @@
 "MistHUD.settings.cardSheetPortraitMask.jagged": "Recortada",
 "MistHUD.settings.cardSheetTextButtons.name": "Botões de movimento em texto",
 "MistHUD.settings.cardSheetTextButtons.hint": "Os botões de movimento da ficha de cartas mostram os nomes dos movimentos, em duas linhas, em vez das imagens. O HUD tem a sua própria opção.",
-"MistHUD.settings.cardSheetTagTints.name": "Linhas de tag coloridas (experimento)",
+"MistHUD.settings.cardSheetTagTints.name": "Linhas de tag coloridas",
 "MistHUD.settings.cardSheetTagTints.hint": "Cada linha de tag nas cartas ganha uma faixa da cor do tema (violeta no Mythos, ferrugem no Logos, ardósia no Mist, cinza nos extras e na tripulação), em tons alternados.",
 "MistHUD.settingsForm.save": "Salvar alterações",
 "MistHUD.settingsForm.hud.title": "Configurações do HUD",

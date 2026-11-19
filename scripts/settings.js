@@ -266,7 +266,7 @@ Hooks.once("init", () => {
     onChange: () => Hooks.callAll("mistHudCardSheetMoves"),
   });
 
-  // Card sheet experiment (user, 2026-11-19): a band of the card's theme
+  // Card sheet tag line tints (user, 2026-11-19, approved): a band of the card's theme
   // colour behind each tag line, in alternating shades.
   game.settings.register(MODULE_ID, SETTINGS.CARD_SHEET_TAG_TINTS, {
     name: K("cardSheetTagTints.name"),

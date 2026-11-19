@@ -119,7 +119,7 @@ function lookOn(key) {
 
 /**
  * The sheet's look switches as data attributes on the window (the CSS keys
- * on them): the tilt, and the tag line tints experiment (2026-11-19): a band
+ * on them): the tilt, and the tag line tints (2026-11-19, approved): a band
  * of the card's theme colour behind each tag line, in alternating shades.
  * @param {HTMLElement} el  the sheet's window (or its frame, before the first paint)
  */

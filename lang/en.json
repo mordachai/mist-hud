@@ -143,7 +143,7 @@
 "MistHUD.settings.cardSheetPortraitMask.jagged": "Jagged",
 "MistHUD.settings.cardSheetTextButtons.name": "Text Move Buttons",
 "MistHUD.settings.cardSheetTextButtons.hint": "The card sheet's move buttons show the moves' names, in two rows, instead of their art. The HUD has its own setting.",
-"MistHUD.settings.cardSheetTagTints.name": "Tinted Tag Lines (experiment)",
+"MistHUD.settings.cardSheetTagTints.name": "Tinted Tag Lines",
 "MistHUD.settings.cardSheetTagTints.hint": "Each tag line on the cards gets a band of its theme's colour (Mythos violet, Logos rust, Mist slate, grey on extras and crew), in alternating shades.",
 "MistHUD.settingsForm.save": "Save Changes",
 "MistHUD.settingsForm.hud.title": "HUD Settings",
