@@ -26,6 +26,12 @@
 // partial / temporary / permanent / crispy are toggle icons on the footer
 // band, the + / − squares in the top-right corner select the card for the
 // roll, the card's type is crossed on the type marker (marker-x.svg).
+// Fixes 2026-11-19 (after phase 2): the number follows the name ("NAME-3"
+// for a status, "NAME (2)" for a clue or juice); the toolbar's + opens a
+// blank card forward (a draft, not an item yet) whose type is picked on its
+// type marker, and naming it creates the item; the card last brought
+// forward stays in front of the stack; the deck can be tucked behind the
+// layers (hide / unhide).
 //
 // The system stays the source of truth: reads come from getters.js
 // (getDeckItems), writes go through document methods (createNewStatus,
@@ -69,10 +75,10 @@ const DECK_KINDS = {
 const DEFAULT_KINDS = ["status", "tag"];
 
 const KIND_INFO = {
-  status: { label: "CityOfMist.terms.statuses",  icon: "fa-kit-medical", empty: "MistHUD.cardSheet.deck.noStatuses" },
-  tag:    { label: "CityOfMist.terms.storyTags", icon: "fa-tag",         empty: "MistHUD.cardSheet.noStoryTags" },
-  juice:  { label: "CityOfMist.terms.juice",     icon: "fa-jar",         empty: "MistHUD.cardSheet.deck.noJuice" },
-  clue:   { label: "CityOfMist.terms.clues",     icon: "fa-magnifying-glass", empty: "MistHUD.cardSheet.deck.noClues" },
+  status: { label: "CityOfMist.terms.statuses",  one: "CityOfMist.terms.status", icon: "fa-kit-medical", empty: "MistHUD.cardSheet.deck.noStatuses" },
+  tag:    { label: "CityOfMist.terms.storyTags", one: "CityOfMist.terms.tag",    icon: "fa-tag",         empty: "MistHUD.cardSheet.noStoryTags" },
+  juice:  { label: "CityOfMist.terms.juice",     one: "CityOfMist.terms.juice",  icon: "fa-jar",         empty: "MistHUD.cardSheet.deck.noJuice" },
+  clue:   { label: "CityOfMist.terms.clues",     one: "CityOfMist.terms.clue",   icon: "fa-magnifying-glass", empty: "MistHUD.cardSheet.deck.noClues" },
 };
 
 /** The create buttons of each column (the system sheet's create-* links). */
@@ -85,6 +91,9 @@ const CREATES = {
 
 /** The type marker's icons on the card art, left to right (plan § 7). */
 const MARKER_ORDER = ["clue", "juice", "tag", "status"];
+
+/** The id of the blank card the toolbar's + brings forward (no item yet). */
+export const DRAFT_ID = "draft";
 
 /**
  * The tracking card's boxes: the box (1-based) holding each tier's number
@@ -234,7 +243,8 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
     // The fields (name, the small fields) are inputs in edit mode and on a
     // new card; on a card worked on (brought forward, the deck window) too.
     editable:  own && (edit || isNew),
-    badge:     "",
+    // The number after the name on the band: "-3" (status), " (2)" (clue, juice).
+    suffix:    "",
     boxes:     amountBoxes(0),
     boxEdit:   own,
     markers:   MARKER_ORDER.map(key => ({ key, on: key === kind })),
@@ -249,7 +259,7 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
     case "status": {
       const sel = selectionView(row.item, edit);
       Object.assign(card, sel, {
-        badge: String(row.tier),
+        suffix: `-${row.tier}`,
         boxes: statusBoxes(row.item, TIER_BOXES),
         flags: [flag("temporary", row.temporary), flag("permanent", row.permanent)],
       });
@@ -267,13 +277,13 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
     }
     case "juice":
       Object.assign(card, {
-        badge: String(row.amount),
+        suffix: `\u00a0(${row.amount})`,
         boxes: amountBoxes(row.amount),
       });
       break;
     case "clue":
       Object.assign(card, {
-        badge: String(row.amount),
+        suffix: `\u00a0(${row.amount})`,
         boxes: amountBoxes(row.amount),
         flags: [flag("partial", row.partial)],
         texts: [
@@ -311,6 +321,44 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
   return card;
 }
 
+/**
+ * The blank card the toolbar's + brings forward: not an item yet. Its type
+ * is picked on the type marker (the icons in the top-right corner), its
+ * name typed on the TAG line; Enter (or "Create") makes the item.
+ * @param {string}   kind   the type picked so far
+ * @param {string}   name   what was typed so far
+ * @param {string[]} kinds  the deck's types in this game
+ */
+function draftCard(kind, name, kinds) {
+  return {
+    id:        DRAFT_ID,
+    kind,
+    kindLabel: L(KIND_INFO[kind].label),
+    name:      "",
+    rawName:   name ?? "",
+    isDraft:   true,
+    own:       true,
+    editable:  true,
+    suffix:    "",
+    boxes:     amountBoxes(0),
+    boxEdit:   false,
+    markers:   MARKER_ORDER.map(key => ({
+      key, on: key === kind,
+      pick:  kinds.includes(key),
+      label: L(KIND_INFO[key].one),
+    })),
+    steps: [], tools: [], flags: [], texts: [], notes: [],
+    hasFields: false,
+    flagsOn:   false,
+    selectable: false,
+    selection: "",
+    drag:      null,
+    namePlaceholder: L("MistHUD.cardSheet.deck.namePlaceholder"),
+    pickHint:  L("MistHUD.cardSheet.deck.pickType"),
+    createLabel: L("MistHUD.cardSheet.deck.create"),
+  };
+}
+
 /** Help and Hurt are on the character card, not in the deck. */
 const isHelpHurt = row => row.subtype === "help" || row.subtype === "hurt";
 
@@ -330,8 +378,9 @@ const ROWS = {
  * @param {boolean} [options.inWindow] the detached window (always spread)
  * @param {string}  [options.newId]    a card just created (blank name, focused)
  * @param {string}  [options.armed]    "<itemId>:<action>" of a button asking "sure?"
+ * @param {{kind: string, name: string}} [options.draft]  the blank card forward (focusId DRAFT_ID)
  */
-export function buildDeckContext(actor, { view = "stack", focusId = null, inWindow = false, newId = null, armed = null } = {}) {
+export function buildDeckContext(actor, { view = "stack", focusId = null, inWindow = false, newId = null, armed = null, draft = null } = {}) {
   const own = !!actor?.isOwner;
   const edit = own && isEditMode(actor);
   const items = getDeckItems(actor);
@@ -348,19 +397,31 @@ export function buildDeckContext(actor, { view = "stack", focusId = null, inWind
     };
   });
   const cards = groups.flatMap(g => g.cards);
-  const focus = view === "focus" ? cards.find(c => c.id === focusId) ?? null : null;
+  const state = deckState(actor);
+  const isDraft = own && view === "focus" && focusId === DRAFT_ID && draft && kinds.includes(draft.kind);
+  const focus = isDraft ? draftCard(draft.kind, draft.name, kinds)
+    : view === "focus" ? cards.find(c => c.id === focusId) ?? null : null;
   const shown = inWindow ? "spread" : focus ? "focus" : view === "spread" ? "spread" : "stack";
+  // The stack: the card last brought forward stays in front (the whole one).
+  const top = cards.find(c => c.id === state.top);
+  const stack = top ? [...cards.filter(c => c !== top), top] : cards;
   return {
     view:     shown,
     spread:   shown === "spread",
     inWindow,
-    detached: !inWindow && deckState(actor).detached,
+    detached: !inWindow && state.detached,
+    hidden:   !inWindow && state.hidden,
     own,
     edit,
     groups,
     cards,
+    stack,
     focus,
     counts:   groups.map(g => ({ kind: g.kind, icon: g.icon, label: g.label, count: g.cards.length })),
+    // The toolbar's + menu: a blank card of each type, in the type marker's order.
+    adds:     own ? MARKER_ORDER.filter(k => kinds.includes(k)).map(kind => ({ kind, icon: KIND_INFO[kind].icon, label: L(KIND_INFO[kind].one) })) : [],
+    addLabel: L("MistHUD.cardSheet.deck.newCard"),
+    hideLabel: L(state.hidden ? "MistHUD.cardSheet.deck.unhide" : "MistHUD.cardSheet.deck.hide"),
   };
 }
 
@@ -462,21 +523,105 @@ function confirmed(app, event, target, { rightClickSkips = false } = {}) {
   return false;
 }
 
-/** Click on a card of the stack (or a band in the spread): bring it forward. */
-function focusDeckCard(event, target) {
+/**
+ * Click on a card of the stack (or a band in the spread): bring it forward.
+ * It then stays in front of the stack until another one is brought forward.
+ */
+async function focusDeckCard(event, target) {
   const id = target.closest("[data-item-id]")?.dataset.itemId;
-  if (!id || !this.isMistCardSheet) return;
+  if (!id || id === DRAFT_ID || !this.isMistCardSheet) return;
   this.deckView = "focus";
   this.deckFocus = id;
+  this.deckDraft = null;
+  await writeUiState(this.actor, { deck: { top: id } });
   this.renderDeck();
 }
 
-/** Back to the stack (the forward card goes back, the spread closes). */
+/** Back to the stack (the forward card goes back, the spread closes, a blank card is dropped). */
+export function backToStack(app) {
+  if (app.deckView === "stack" && !app.deckDraft) return;
+  app.deckView = "stack";
+  app.deckFocus = null;
+  app.deckDraft = null;
+  app.renderDeck();
+}
+
 function closeDeckView() {
-  if (this.deckView === "stack") return;
-  this.deckView = "stack";
-  this.deckFocus = null;
+  backToStack(this);
+}
+
+/** The toolbar's hide / unhide: the deck tucked behind the layers, only its unhide button and a strip of the cards showing. */
+async function toggleDeckHidden() {
+  if (!this.isMistCardSheet) return;
+  await writeUiState(this.actor, { deck: { hidden: !deckState(this.actor).hidden } });
   this.renderDeck();
+}
+
+/**
+ * The toolbar's + menu: a blank card of that type, forward (not an item
+ * yet). The type can still be changed on its type marker.
+ */
+function draftDeckCard(event, target) {
+  const kind = target.dataset.kind;
+  if (!this.isMistCardSheet || !KIND_INFO[kind] || !ownedActor(this)) return;
+  target.closest("details")?.removeAttribute("open");
+  this.deckDraft = { kind, name: "" };
+  this.deckView = "focus";
+  this.deckFocus = DRAFT_ID;
+  this.renderDeck();
+}
+
+/** A type marker of the blank card: that type. What was typed is kept. */
+function draftDeckKind(event, target) {
+  const kind = target.dataset.kind;
+  if (!this.deckDraft || !KIND_INFO[kind]) return;
+  const input = draftInput(this);
+  if (input) this.deckDraft.name = input.value;
+  this.deckDraft.kind = kind;
+  this.renderDeck();
+}
+
+/** The blank card's "Create" button. */
+function createDeckDraft() {
+  return createFromDraft(this, draftInput(this)?.value);
+}
+
+const draftInput = app => app.element?.querySelector(`[data-item-id="${DRAFT_ID}"] input[data-deck-field="name"]`) ?? null;
+
+/**
+ * The blank card is named: the item is made with the system's own creation
+ * methods (as createDeckItem), logged "Created", and brought forward (and to
+ * the front of the stack) to be set: its boxes, toggles, a clue's source.
+ */
+async function createFromDraft(app, typed) {
+  const draft = app.deckDraft;
+  const actor = ownedActor(app);
+  if (!draft || !actor) return;
+  const name = String(typed ?? draft.name ?? "").trim();
+  if (!name) {
+    ui.notifications.warn(L("MistHUD.cardSheet.deck.nameFirst"));
+    draftInput(app)?.focus();
+    return;
+  }
+  await once(app, async () => {
+    let created = null;
+    switch (draft.kind) {
+      case "status": created = await actor.createNewStatus(name); break;
+      case "tag":    created = await actor.createStoryTag(name); break;
+      case "clue":   created = await actor.createNewClue({ name }); break;
+      case "juice":  created = await actor.createNewJuice(name); break;
+    }
+    if (!created?.id) return;
+    const after = created.type === "status" ? `tier  ${created.system.tier}`
+      : created.type === "clue" || created.type === "juice" ? `${created.system.amount}` : undefined;
+    await logModification(actor, "Created", created, after);
+    app.deckDraft = null;
+    app.deckView = "focus";
+    app.deckFocus = created.id;
+    await writeUiState(actor, { deck: { top: created.id } });
+    if (created.type === "tag") app.render({ parts: ["layer2", "deck"] });
+    else app.renderDeck();
+  });
 }
 
 /** The toolbar's spread button: lay every card out in front of the sheet, or put them back. */
@@ -668,6 +813,10 @@ export const DECK_ACTIONS = {
   focusDeckCard,
   closeDeckView,
   spreadDeck,
+  toggleDeckHidden,
+  draftDeckCard,
+  draftDeckKind,
+  createDeckDraft,
   selectDeckCard,
   createDeckItem,
   setDeckBoxes,
@@ -689,6 +838,11 @@ export const DECK_ACTIONS = {
  * card is logged as created, or deleted again when left empty.
  */
 async function changeDeckField(app, input) {
+  // The blank card: what was typed is only kept (Enter or "Create" makes it).
+  if (input.closest(`[data-item-id="${DRAFT_ID}"]`)) {
+    if (app.deckDraft && input.dataset.deckField === "name") app.deckDraft.name = input.value ?? "";
+    return;
+  }
   const item = itemAt(app, input);
   const actor = app.actor;
   if (!item || !actor?.isOwner) return;
@@ -758,6 +912,17 @@ export function bindDeckListeners(app, { views = true } = {}) {
   el.addEventListener("keydown", event => {
     const input = event.target.closest?.("input[data-deck-field]");
     if (!input) return;
+    if (input.closest(`[data-item-id="${DRAFT_ID}"]`)) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        void createFromDraft(app, input.value);
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        backToStack(app);
+      }
+      return;
+    }
     if (event.key === "Enter") {
       event.preventDefault();
       input.blur();
@@ -823,9 +988,7 @@ function bindEscape() {
     if (!app) return;
     event.preventDefault();
     event.stopPropagation();
-    app.deckView = "stack";
-    app.deckFocus = null;
-    app.renderDeck();
+    backToStack(app);
   }, { capture: true });
 }
 
@@ -836,9 +999,13 @@ function bindViewListeners(app) {
   el.addEventListener("click", event => {
     if (!event.target.matches?.(".mh-cs-deck-overlay, .mh-cs-deck-overlay > .mh-cs-deck-columns, .mh-cs-deck-column, .mh-cs-deck-list, .mh-cs-deck-focus")) return;
     if (app.deckView === "stack") return;
-    app.deckView = "stack";
-    app.deckFocus = null;
-    app.renderDeck();
+    backToStack(app);
+  });
+  // The toolbar's + menu closes on a click anywhere else.
+  el.addEventListener("pointerdown", event => {
+    for (const menu of el.querySelectorAll("details.mh-cs-deck-add[open]")) {
+      if (!menu.contains(event.target)) menu.removeAttribute("open");
+    }
   });
 }
 
@@ -848,6 +1015,15 @@ function bindViewListeners(app) {
  * into it (its "Back to the deck" button) unless it already is in the sheet.
  */
 export function focusDeckView(app) {
+  if (app.deckDraft) {
+    const input = draftInput(app);
+    if (input) {
+      input.focus({ preventScroll: true });
+      const end = input.value.length;
+      try { input.setSelectionRange(end, end); } catch { /* not a text field */ }
+      return;
+    }
+  }
   if (app.deckNew) {
     const input = app.element.querySelector(`[data-item-id="${app.deckNew}"] input[data-deck-field="name"]`);
     if (input) {

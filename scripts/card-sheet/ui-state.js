@@ -3,7 +3,9 @@
 //   { [actorUuid]: {
 //       flipped: { [cardId]: true },   cards showing their back
 //       front:   1 | 2,                the layer in front
-//       deck:    { detached: bool, position: { left, top, width, height } },
+//       deck:    { detached: bool, position: { left, top, width, height },
+//                  hidden: bool (tucked behind the layers), top: itemId (the
+//                  card last brought forward, in front of the stack) },
 //   } }
 // Shared by MistCardSheet and the detached TagsDeck window.
 
@@ -45,8 +47,13 @@ export async function writeUiState(actor, { flipped, front, deck } = {}) {
   await game.settings.set(MODULE_ID, SETTINGS.CARD_SHEET_STATE, all);
 }
 
-/** The deck's state for this actor: { detached, position }. */
+/** The deck's state for this actor: { detached, position, hidden, top }. */
 export function deckState(actor) {
   const deck = readUiState(actor).deck ?? {};
-  return { detached: deck.detached === true, position: deck.position ?? null };
+  return {
+    detached: deck.detached === true,
+    position: deck.position ?? null,
+    hidden:   deck.hidden === true,
+    top:      typeof deck.top === "string" ? deck.top : null,
+  };
 }

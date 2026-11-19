@@ -356,6 +356,29 @@ export function setRollDirection(doc, direction) {
 }
 
 /**
+ * A selected status changed tier: the system keeps the amount it had when it
+ * was selected (SelectedTagsAndStatus.toActivatedTagFormat, system 4.5.3), so
+ * the totals and the roll would still count the old tier. Its entry in the
+ * system's selection is set to ±(new tier), keeping its direction, and the
+ * system's selection-change hook is fired so everything showing the
+ * selection follows. Client-local, like the selection itself.
+ * @param {Item} status
+ * @returns {boolean} true when the selection changed
+ */
+export function syncSelectedStatusTier(status) {
+  if (status?.type !== "status" || !status.parent) return false;
+  const tokenId = status.parent.token?.id ?? status.parent.tokenId ?? "";
+  const row = getSystemSelection().find(r => r.id === status.id && (r.tokenId || "") === (tokenId || ""));
+  if (!row) return false;
+  const sign = Number(row.amount) < 0 ? -1 : 1;
+  const amount = sign * Math.max(0, Number(status.system?.tier) || 0);
+  if (amount === Number(row.amount)) return false;
+  row.amount = amount;
+  Hooks.callAll("TagOrStatusSelectChange");
+  return true;
+}
+
+/**
  * Draggable tags and statuses (chat cards, scene tags…; the system marks
  * them `.draggable` and adds `.dragging` while they move), as the system
  * sheet's DragAndDrop.addDragFunctionality(html): makes `.draggable`

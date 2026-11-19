@@ -145,6 +145,16 @@ What the code does today, checked before planning:
 > - Small round − / + under the box printed 6 (hover; always on a card brought forward).
 > - Deck toolbar on top of the stack; no bottom bar.
 > - Not done here: the phase-1 character card controls (Crew +, Help / Hurt fields, story tag +) keep their minimal look for phase 3. Not checked: Firefox; a real mouse hover (the hover-only tools were checked by forcing them visible).
+>
+> **Phase 2 follow-up (user, 2026-11-19): done, checked in Foundry as claude-gm (Lily Chow).**
+> - A selected status that changes tier now updates the totals by the move bar (and the roll): the system keeps the amount from when it was selected, so the adapter's `syncSelectedStatusTier` sets its entry to ±(new tier) on `updateItem` and fires `TagOrStatusSelectChange`.
+> - The number follows the name on the band: `NAME-3` (status), `NAME (2)` (clue; juice too). The separate badge is gone.
+> - Toolbar `+`: a menu (clue, juice, tag, status) opens a blank card forward (a draft, not an item yet). Its type can be changed by clicking the type marker's icons; Enter or "Create" makes the item with the system's creation methods and brings it forward; Esc / "Back to the deck" drops it. The column `+` buttons in the spread and the detached window stay.
+> - A card brought forward: darker backdrop (0.92 + blur); its + / − squares float outside the card, at its right (filled green / red when on).
+> - The detached window has the same dark backdrop.
+> - Selected cards: outline only (green / red ring), no colour overlay.
+> - The card last brought forward stays at the front of the stack (`deck.top` in the client UI state).
+> - Toolbar eye: hide / unhide. Hidden, the deck slides 0.8 card widths behind the layers; only the unhide button and a strip of the cards show (`deck.hidden`).
 
 **Phase 3: Sheet cards (look)**
 - The new card art: Mist fonts white, theme name white with a strong glow, shifted up on Mythos and Mist (not Logos yet); Motivation darker, bolder, +2 px.

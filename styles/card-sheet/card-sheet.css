@@ -1531,6 +1531,22 @@
   flex-direction: column;
   gap: 6px;
   pointer-events: none;
+  transition: translate 0.35s ease;
+}
+
+/* Hidden (the toolbar's eye): tucked behind the layers, only a strip of
+   the cards and the unhide button showing. */
+.mh-card-sheet .mh-cs-deck.mh-cs-deck-hidden {
+  translate: calc(-0.8 * var(--mh-cs-card-w)) 0;
+}
+
+.mh-card-sheet .mh-cs-deck-hidden .mh-cs-deck-toolbar {
+  align-self: flex-end;
+  padding: 3px;
+}
+
+.mh-card-sheet .mh-cs-deck-hidden .mh-cs-deck-toolbar > :not(.mh-cs-deck-hide) {
+  display: none;
 }
 
 .mh-card-sheet .mh-cs-deck-stack {
@@ -1573,6 +1589,8 @@
   font-family: var(--mh-cs-label-font);
   font-size: 13px;
   pointer-events: auto;
+  position: relative;
+  z-index: 50;
 }
 
 .mh-card-sheet .mh-cs-deck-count {
@@ -1587,15 +1605,72 @@
   opacity: 0.8;
 }
 
-.mh-card-sheet .mh-cs-deck-count + .mh-cs-deck-btn {
+.mh-card-sheet .mh-cs-deck-push {
   margin-left: auto;
+}
+
+/* The toolbar's + menu: a blank card of each type. */
+.mh-card-sheet .mh-cs-deck-add {
+  position: relative;
+  display: inline-flex;
+}
+
+.mh-card-sheet .mh-cs-deck-add > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.mh-card-sheet .mh-cs-deck-add > summary::-webkit-details-marker {
+  display: none;
+}
+
+.mh-card-sheet .mh-cs-deck-add[open] > summary {
+  background: rgba(255, 255, 255, 0.2);
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-deck-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: -4px;
+  display: flex;
+  flex-direction: column;
+  min-width: 130px;
+  padding: 4px;
+  border-radius: 10px;
+  background: rgba(14, 11, 9, 0.96);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+.mh-card-sheet .mh-cs-deck-menu .mh-cs-deck-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 10px;
+  border-radius: 7px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.mh-card-sheet .mh-cs-deck-menu .mh-cs-deck-menu-item i {
+  width: 14px;
+  font-size: 11px;
+  text-align: center;
+  opacity: 0.8;
+}
+
+.mh-card-sheet .mh-cs-deck-menu .mh-cs-deck-menu-item:hover,
+.mh-card-sheet .mh-cs-deck-menu .mh-cs-deck-menu-item:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
 }
 
 /* ── Deck buttons: no core / system button look ──────────────────────────── */
 
 .mh-card-sheet :is(.mh-cs-deck-hit, .mh-cs-deck-name, .mh-cs-deck-tool, .mh-cs-deck-btn,
   .mh-cs-deck-create, .mh-cs-deck-back, .mh-cs-deck-close, .mh-cs-deck-placeholder, .mh-cs-deck-empty,
-  .mh-cs-deck-band-name, .mh-cs-deck-flag, .mh-cs-deck-input, .mh-cs-deck-sel, .mh-cs-deck-step) {
+  .mh-cs-deck-band-name, .mh-cs-deck-flag, .mh-cs-deck-input, .mh-cs-deck-sel, .mh-cs-deck-step,
+  .mh-cs-deck-menu-item) {
   flex: 0 0 auto;
   width: auto;
   height: auto;
@@ -1618,7 +1693,8 @@
 
 .mh-card-sheet :is(.mh-cs-deck-hit, .mh-cs-deck-name, .mh-cs-deck-tool, .mh-cs-deck-btn,
   .mh-cs-deck-create, .mh-cs-deck-back, .mh-cs-deck-close, .mh-cs-deck-placeholder, .mh-cs-deck-empty,
-  .mh-cs-deck-band-name, .mh-cs-deck-flag, .mh-cs-deck-pip, .mh-cs-deck-sel, .mh-cs-deck-step):focus-visible {
+  .mh-cs-deck-band-name, .mh-cs-deck-flag, .mh-cs-deck-pip, .mh-cs-deck-sel, .mh-cs-deck-step,
+  .mh-cs-deck-marker):focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.85);
   outline-offset: 1px;
 }
@@ -1734,12 +1810,19 @@
   overflow-wrap: anywhere;
 }
 
-.mh-card-sheet .mh-cs-deck-badge {
-  flex: 0 0 auto;
+/* The tier / amount right after the name ("NAME-3", "NAME (2)"), in serif
+   numerals, kept on the name's last line. */
+.mh-card-sheet .mh-cs-deck-num {
   font-family: var(--mh-cs-deck-num-font, Georgia, "Times New Roman", serif);
-  font-size: 7.4cqw;
   font-weight: bold;
-  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* The blank card's band: "Pick the type", pointing at the type marker. */
+.mh-card-sheet .mh-cs-deck-pick-hint .mh-cs-deck-band-text {
+  font-size: 4.6cqw;
+  opacity: 0.9;
 }
 
 /* The type marker: the card's type is marked on its icon, the other icons
@@ -1757,6 +1840,31 @@
 
 .mh-card-sheet .mh-cs-deck-marker.on {
   box-shadow: 0 0 0 0.6cqw #fff;
+}
+
+/* The blank card: its type is picked on the type marker. */
+.mh-card-sheet .mh-cs-deck-markers-pick {
+  z-index: 3;
+}
+
+.mh-card-sheet button.mh-cs-deck-marker {
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+  border: none;
+  background-color: transparent;
+  color: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.mh-card-sheet button.mh-cs-deck-marker:not(.on) {
+  box-shadow: none;
+}
+
+.mh-card-sheet button.mh-cs-deck-marker:not(.on):hover {
+  box-shadow: 0 0 0 0.5cqw rgba(255, 255, 255, 0.85);
 }
 
 /* The + / − squares in the top-right corner (play mode): select the card
@@ -2122,36 +2230,19 @@
   border-radius: 3.5cqw;
 }
 
-/* ── Selected cards: lifted and tinted (green +, red −) ─────────────────── */
+/* ── Selected cards: lifted, with an outline only (green +, red −) ─────── */
 
 /* Lifted in the stack (in a list it would cover the card above). */
 .mh-card-sheet .mh-cs-deck-stack > .mh-cs-deck-card.mh-cs-selected {
   translate: 0 -2.4cqw;
 }
 
-.mh-card-sheet .mh-cs-deck-card.mh-cs-selected .mh-cs-deck-face::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-}
-
 .mh-card-sheet .mh-cs-deck-card.mh-cs-selected-positive .mh-cs-deck-face {
-  box-shadow: 0 0 0 0.8cqw #3fae5a, 0 0.6cqw 3.4cqw rgba(63, 174, 90, 0.85);
-}
-
-.mh-card-sheet .mh-cs-deck-card.mh-cs-selected-positive .mh-cs-deck-face::after {
-  background: rgba(70, 175, 95, 0.3);
+  box-shadow: 0 0 0 0.8cqw #3fae5a, 0 0.6cqw 2.4cqw rgba(0, 0, 0, 0.55);
 }
 
 .mh-card-sheet .mh-cs-deck-card.mh-cs-selected-negative .mh-cs-deck-face {
-  box-shadow: 0 0 0 0.8cqw #c8402f, 0 0.6cqw 3.4cqw rgba(200, 64, 47, 0.85);
-}
-
-.mh-card-sheet .mh-cs-deck-card.mh-cs-selected-negative .mh-cs-deck-face::after {
-  background: rgba(205, 70, 50, 0.3);
+  box-shadow: 0 0 0 0.8cqw #c8402f, 0 0.6cqw 2.4cqw rgba(0, 0, 0, 0.55);
 }
 
 
@@ -2204,6 +2295,61 @@
   border-radius: 14px;
   background: rgba(8, 6, 4, 0.72);
   pointer-events: auto;
+}
+
+/* A card brought forward: a darker backdrop, to set it apart. */
+.mh-card-sheet .mh-cs-deck-overlay-focus {
+  background: rgba(4, 3, 2, 0.92);
+  backdrop-filter: blur(3px);
+}
+
+.mh-card-sheet .mh-cs-deck-focus-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.mh-card-sheet .mh-cs-deck-back.mh-cs-deck-create-draft {
+  background: rgba(47, 120, 64, 0.85);
+}
+
+.mh-card-sheet .mh-cs-deck-back.mh-cs-deck-create-draft:hover {
+  background: rgba(47, 140, 70, 1);
+}
+
+/* Brought forward, the + / − squares float outside the card, at its right. */
+.mh-card-sheet .mh-cs-deck-big .mh-cs-deck-select {
+  --mh-cs-deck-sel-size: 6.4cqw;
+  --mh-cs-deck-sel-ink: rgba(245, 238, 226, 0.8);
+  left: calc(100% + 2.4cqw);
+  top: 0;
+  gap: 1.6cqw;
+}
+
+.mh-card-sheet .mh-cs-deck-big .mh-cs-deck-select .mh-cs-deck-sel {
+  width: calc(var(--mh-cs-deck-sel-size) * 1.5);
+  height: calc(var(--mh-cs-deck-sel-size) * 1.5);
+  border-radius: 1.6cqw;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mh-card-sheet .mh-cs-deck-big .mh-cs-deck-select .mh-cs-deck-sel:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* On: the square filled with its colour, the icon white. */
+.mh-card-sheet .mh-cs-deck-big .mh-cs-deck-select .mh-cs-deck-sel.on {
+  color: #fff;
+  filter: none;
+}
+
+.mh-card-sheet .mh-cs-deck-big .mh-cs-deck-select .mh-cs-deck-sel-positive.on {
+  background: #2f9a4a;
+  box-shadow: 0 0 1.8cqw rgba(63, 174, 90, 0.75);
+}
+
+.mh-card-sheet .mh-cs-deck-big .mh-cs-deck-select .mh-cs-deck-sel-negative.on {
+  background: #c8402f;
+  box-shadow: 0 0 1.8cqw rgba(200, 64, 47, 0.75);
 }
 
 .mh-card-sheet .mh-cs-deck-focus {
@@ -2348,7 +2494,12 @@
 
 .application.mh-card-sheet.mh-cs-deck-window > .window-content {
   margin-top: 6px;
-  padding: 4px 6px 12px;
+  padding: 10px 10px 14px;
+  /* The same dark backdrop as a card brought forward. */
+  border-radius: 14px;
+  background: rgba(4, 3, 2, 0.92);
+  backdrop-filter: blur(3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: thin;

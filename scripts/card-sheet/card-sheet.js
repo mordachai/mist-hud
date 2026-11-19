@@ -126,6 +126,8 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
   deckNewOrigin = "deck";
   /** A deck button asking "sure?": { key, until }. */
   deckArmed = null;
+  /** The blank card forward (the toolbar's +, no item yet): { kind, name }. */
+  deckDraft = null;
 
   renderDeck() {
     return this.render({ parts: ["deck"] });
@@ -371,11 +373,13 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
           focusId: this.deckFocus,
           newId:   this.deckNew,
           armed:   this.deckArmed?.until > Date.now() ? this.deckArmed.key : null,
+          draft:   this.deckDraft,
         });
         // A card brought forward that is gone (deleted, spent): back to the stack.
         if (context.deck.view === "stack") {
           this.deckView = "stack";
           this.deckFocus = null;
+          this.deckDraft = null;
         }
         break;
     }
@@ -457,6 +461,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     this.deckView = "stack";
     this.deckFocus = null;
     this.deckArmed = null;
+    this.deckDraft = null;
     // A new deck card never named goes away, as if its name was left empty.
     const unnamed = this.deckNew && this.actor.items.get(this.deckNew);
     this.deckNew = null;

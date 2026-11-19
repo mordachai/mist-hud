@@ -413,6 +413,12 @@
 "MistHUD.cardSheet.deck.use": "Use",
 "MistHUD.cardSheet.deck.selectPositive": "Helps the roll: {value}",
 "MistHUD.cardSheet.deck.selectNegative": "Hinders the roll: {value}",
-"MistHUD.cardSheet.deck.selectClear": "Click again to clear it"
+"MistHUD.cardSheet.deck.selectClear": "Click again to clear it",
+"MistHUD.cardSheet.deck.newCard": "New card",
+"MistHUD.cardSheet.deck.pickType": "Pick the type",
+"MistHUD.cardSheet.deck.create": "Create",
+"MistHUD.cardSheet.deck.nameFirst": "Give the card a name first.",
+"MistHUD.cardSheet.deck.hide": "Hide the deck",
+"MistHUD.cardSheet.deck.unhide": "Show the deck"
 
 }

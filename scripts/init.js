@@ -13,6 +13,7 @@ import { openNPCInfluenceManager }   from "./npc-influence.js";
 import { TokenStatusNotification, TokenTagNotification } from "./notifications.js";
 import { MistCardSheet, CARD_SHEET_TEMPLATES, refreshCardSheets, refreshCardSheetsOnDBLoad, refreshCardSheetsForOwner, refreshCardSheetTotals } from "./card-sheet/card-sheet.js";
 import { refreshDeckWindow } from "./card-sheet/tags-deck.js";
+import { syncSelectedStatusTier } from "./card-sheet/system-adapter.js";
 import { bindCanvasRelay } from "./drop-relay.js";
 
 // ── Initial load guard ────────────────────────────────────────────────────────
@@ -198,6 +199,12 @@ Hooks.on("updateActor", actor => refreshDeckWindow(actor));
 for (const hook of ["createItem", "updateItem", "deleteItem"]) {
   Hooks.on(hook, item => refreshDeckWindow(item.parent));
 }
+// A selected status changed tier (its card's boxes, − / +, the system
+// sheet…): the selection counts the new tier (fixes 2026-11-19), so the
+// totals by the move bar and the roll follow.
+Hooks.on("updateItem", (item, change) => {
+  if (item.type === "status" && foundry.utils.hasProperty(change, "system.tier")) syncSelectedStatusTier(item);
+});
 // The roll modifier total by the move bar (client setting).
 Hooks.on("mistHudCardSheetTotals", refreshCardSheetTotals);
 

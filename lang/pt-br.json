@@ -413,6 +413,12 @@
 "MistHUD.cardSheet.deck.use": "Usar",
 "MistHUD.cardSheet.deck.selectPositive": "Ajuda a rolagem: {value}",
 "MistHUD.cardSheet.deck.selectNegative": "Atrapalha a rolagem: {value}",
-"MistHUD.cardSheet.deck.selectClear": "Clique de novo para limpar"
+"MistHUD.cardSheet.deck.selectClear": "Clique de novo para limpar",
+"MistHUD.cardSheet.deck.newCard": "Nova carta",
+"MistHUD.cardSheet.deck.pickType": "Escolha o tipo",
+"MistHUD.cardSheet.deck.create": "Criar",
+"MistHUD.cardSheet.deck.nameFirst": "Dê um nome à carta primeiro.",
+"MistHUD.cardSheet.deck.hide": "Esconder o baralho",
+"MistHUD.cardSheet.deck.unhide": "Mostrar o baralho"
 
 }
