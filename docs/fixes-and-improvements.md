@@ -240,10 +240,10 @@ What the code does today, checked before planning:
 >
 > **Second follow-up (user, 2026-11-19): done, a quick check in Foundry as claude-gm (Lily Chow).**
 > - The dotted leader is gone (it only works on tags that don't wrap): setting, CSS and strings removed.
-> - Tag line tints in each theme's colour, stronger: the burned flames' own colours (Mythos violet #7d6285, Logos rust #9f5649, grey on extras, crew and the character card; a lighter slate blue on the dark Mist card), four shades in turn (12–30 %, `color-mix`).
+> - Tag line tints in each theme's colour, stronger: the burned flames' own colours (Mythos violet #7d6285, Logos rust #9f5649, grey on extras, crew and the character card; a lighter slate blue on the dark Mist card), four shades in turn (12 / 18 / 32 / 40 %, `color-mix`; the two darker ones raised after the user's look; Mist 14–42 %).
 > - Burned flame "smaller": the burned SVGs have the empty flame's outline (same viewBox and shape), but as a white rim around the colour, and on the light cards the rim melted into the paper. The burned flame now gets the empty one's 1 px dark edge before its glow, so the whole outline shows. The SVGs are unchanged.
 > - Clue journal in the notes window, between Description and MC Notes: each used clue's question and answer (the system's `journal` items, `actor.clueJournal`, read through the adapter), with a trash for the owner (the system's yes / no box, then `actor.deleteClue`). It follows new and deleted entries live. The notes button and window icon are `fa-solid fa-notebook`.
-> - Checked: the tints on Logos / Mythos / extras; a journal entry added (it showed at once), deleted from the window (confirm box), and gone. Not checked: the flame size by eye (the test pane is too small; the user checks), the Mist tints, a player client.
+> - Checked: the tints on Logos / Mythos / extras; a journal entry added (it showed at once), deleted from the window (confirm box), and gone. The user confirmed the flames are now the same size. Not checked, the Mist tints, a player client.
 
 ## Answers (user, 2026-11-19)
 1. **Mockup:** `docs/mockup-3.png`. What it shows:

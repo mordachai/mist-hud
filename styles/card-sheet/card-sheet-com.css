@@ -686,9 +686,9 @@
 .mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card {
   --mh-cs-tint: #6f655a;
   --mh-cs-tint-a: 18%;
-  --mh-cs-tint-b: 30%;
+  --mh-cs-tint-b: 40%;
   --mh-cs-tint-c: 12%;
-  --mh-cs-tint-d: 24%;
+  --mh-cs-tint-d: 32%;
 }
 
 .mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card.mh-cs-type-mythos { --mh-cs-tint: #7d6285; }
@@ -698,9 +698,9 @@
 .mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card.mh-cs-type-mist {
   --mh-cs-tint: #8fa6c4;
   --mh-cs-tint-a: 20%;
-  --mh-cs-tint-b: 32%;
+  --mh-cs-tint-b: 42%;
   --mh-cs-tint-c: 14%;
-  --mh-cs-tint-d: 26%;
+  --mh-cs-tint-d: 34%;
 }
 
 .mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag {
