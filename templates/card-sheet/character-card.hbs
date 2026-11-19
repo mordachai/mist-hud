@@ -2,7 +2,7 @@
       Front: name, player, the game's character fields (City of Mist: Mythos,
       Logos), the Crew block with Help/Hurt per crewmate, and story tags.
       Back: the short description, the build-up track and its improvements
-      (when the game has one), then the biography.
+      with their descriptions (when the game has one), then the biography.
       Edit mode (card.edit): inputs for the name, the fields and the short
       description, saved on change; the biography in the core ProseMirror
       editor; build-up + / −. Uses the extras card art (per-system CSS).
@@ -129,7 +129,7 @@
           <h5 class="mh-cs-subsection">{{card.buildUp.improvementsLabel}}</h5>
           <ul class="mh-cs-improvements mh-cs-bu-improvements">
             {{#each card.buildUp.improvements}}
-            {{> "modules/mist-hud/templates/card-sheet/improvement.hbs" imp=this}}
+            {{> "modules/mist-hud/templates/card-sheet/improvement.hbs" imp=this desc=true}}
             {{/each}}
           </ul>
           {{/if}}

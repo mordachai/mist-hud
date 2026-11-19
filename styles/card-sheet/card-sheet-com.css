@@ -671,3 +671,109 @@
   border-color: rgba(255, 255, 255, 0.4);
   text-shadow: 0 0 6px rgba(255, 255, 255, 0.45);
 }
+
+/* ── Tag line experiments (user, 2026-11-19; Sheet Settings) ────────────────
+   data-leaders="on": a dotted leader runs from a tag's name to its flame
+   (row order: name 1, leader 2, trash 3, flame 4). It sits on the first
+   line's baseline, where the flame is centred.
+   data-tints="on": each tag line gets a light band of its own, in one of
+   four shades (the paper highlighter strips of the reference), white on
+   the dark Mist card. The selection's marker bar (::before) lies over it. */
+.mh-card-sheet[data-leaders="on"] .mh-cs-layer .mh-cs-card .mh-cs-tag .mh-cs-tag-name {
+  flex: 0 1 auto;
+}
+
+.mh-card-sheet[data-leaders="on"] .mh-cs-layer .mh-cs-card .mh-cs-tag:has(> .mh-cs-burn)::after {
+  content: "";
+  order: 2;
+  flex: 1 1 3cqw;
+  min-width: 3cqw;
+  height: calc(var(--mh-cs-tag-size) * 0.98);
+  border-bottom: 0.55cqw dotted currentColor;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.mh-card-sheet[data-leaders="on"] .mh-cs-layer .mh-cs-card .mh-cs-tag .mh-cs-delete { order: 3; }
+.mh-card-sheet[data-leaders="on"] .mh-cs-layer .mh-cs-card .mh-cs-tag .mh-cs-burn   { order: 4; margin-left: 0; }
+
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card {
+  --mh-cs-tint-1: rgba(214, 178, 118, 0.22);
+  --mh-cs-tint-2: rgba(226, 196, 140, 0.32);
+  --mh-cs-tint-3: rgba(200, 166, 112, 0.16);
+  --mh-cs-tint-4: rgba(232, 208, 160, 0.38);
+}
+
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card.mh-cs-type-mist {
+  --mh-cs-tint-1: rgba(255, 255, 255, 0.08);
+  --mh-cs-tint-2: rgba(255, 255, 255, 0.14);
+  --mh-cs-tint-3: rgba(255, 255, 255, 0.05);
+  --mh-cs-tint-4: rgba(255, 255, 255, 0.11);
+}
+
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag {
+  margin: 0 0 0.6cqw;
+  padding-left: calc(var(--mh-cs-depth, 0) * 4cqw + 1.2cqw);
+  padding-right: 0.8cqw;
+  border-radius: 0.8cqw;
+  background-color: var(--mh-cs-tint-1);
+}
+
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n+2) { background-color: var(--mh-cs-tint-2); }
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n+3) { background-color: var(--mh-cs-tint-3); }
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n)   { background-color: var(--mh-cs-tint-4); }
+
+/* ── The notes window (notes.js; user, 2026-11-19) ──────────────────────────
+   The card sheet's dialog look (.mh-cs-dialog above); the editors are the
+   cards' fields: a light panel with a dashed rule. */
+.application.mh-cs-dialog.mh-cs-notes:not(#mh-cs-dlg):not(#mh-cs-dlg-b) > .window-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.application.mh-cs-notes .mh-cs-notes-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.application.mh-cs-notes .mh-cs-notes-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+.application.mh-cs-notes :is(prose-mirror.mh-cs-notes-editor, .mh-cs-notes-text) {
+  display: block;
+  position: relative;
+  flex: 1 0 auto;
+  min-height: 9em;
+  padding: 4px 8px;
+  border: none;
+  border-bottom: 2px dashed var(--mh-cs-dlg-rule, rgba(40, 40, 40, 0.35));
+  border-radius: 4px 4px 0 0;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--mh-cs-dlg-ink, #2a2a2a);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.application.mh-cs-notes prose-mirror.mh-cs-notes-editor .editor-menu {
+  flex-wrap: wrap;
+  height: auto;
+}
+
+.application.mh-cs-notes .mh-cs-notes-text p,
+.application.mh-cs-notes prose-mirror.mh-cs-notes-editor p {
+  margin: 0 0 0.6em;
+}
+
+.application.mh-cs-notes .mh-cs-none {
+  opacity: 0.5;
+}

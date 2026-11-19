@@ -15,6 +15,7 @@ import { MistCardSheet, CARD_SHEET_TEMPLATES, refreshCardSheets, refreshCardShee
 import { refreshDeckWindow } from "./card-sheet/tags-deck.js";
 import { syncSelectedStatusTier } from "./card-sheet/system-adapter.js";
 import { bindCanvasRelay } from "./drop-relay.js";
+import { refreshCharacterNotes } from "./card-sheet/notes.js";
 
 // ── Initial load guard ────────────────────────────────────────────────────────
 // Prevents HUDs from opening during the brief "game loading" window.
@@ -228,6 +229,8 @@ for (const hook of ["createItem", "updateItem", "deleteItem"]) {
 // The detached tags-deck window is not the actor's sheet: it follows the
 // actor's items (statuses, story tags, juice, clues) and its lock itself.
 Hooks.on("updateActor", actor => refreshDeckWindow(actor));
+// The card sheet's notes window (Description, MC Notes) follows its actor.
+Hooks.on("updateActor", (actor, change) => refreshCharacterNotes(actor, change));
 for (const hook of ["createItem", "updateItem", "deleteItem"]) {
   Hooks.on(hook, item => refreshDeckWindow(item.parent));
 }
@@ -241,7 +244,7 @@ Hooks.on("updateItem", (item, change) => {
 // settings): the move bar re-renders.
 Hooks.on("mistHudCardSheetTotals", refreshCardSheetTotals);
 Hooks.on("mistHudCardSheetMoves",  refreshCardSheetTotals);
-// The card tilt and the Hero Shot mask (client settings).
+// The card tilt, the Hero Shot mask and the tag line experiments (client settings).
 Hooks.on("mistHudCardSheetLook", refreshCardSheetLook);
 
 // The system flips an already selected item (invert-click on a selected tag)

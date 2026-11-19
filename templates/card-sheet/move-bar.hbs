@@ -1,7 +1,8 @@
 <nav class="mh-cs-move-bar{{#if moveBar.text}} mh-cs-move-bar-text{{/if}}">
   {{!-- Portrait: cycles Hide / Portrait / Hero Shot (fixes phase 4); a
-        miniature of the actor's portrait, shaped like the current mode. --}}
-  <button type="button" class="mh-cs-portrait-toggle" data-action="cyclePortrait" data-mode="{{portrait.mode}}" data-tooltip="{{portrait.tooltip}}" aria-label="{{portrait.tooltip}}"><img src="{{portrait.img}}" alt=""></button>
+        miniature of the actor's portrait, shaped like the current mode.
+        Edit mode: picks the portrait image (data-pick). --}}
+  <button type="button" class="mh-cs-portrait-toggle" data-action="cyclePortrait" data-mode="{{portrait.mode}}"{{#if portrait.pick}} data-pick{{/if}} data-tooltip="{{portrait.tooltip}}" aria-label="{{portrait.tooltip}}"><img src="{{portrait.img}}" alt=""></button>
   {{!-- What the selection adds to the next roll (setting: deck cards, tags + cards, or all). --}}
   <div class="mh-cs-totals" aria-live="polite">
     {{#each moveBar.totals}}
@@ -27,4 +28,8 @@
     <i class="fa-solid fa-chevron-down"></i>
   </button>
   {{/if}}
+  {{!-- Description and MC notes (notes.js), at the right of the moves. --}}
+  <button type="button" class="mh-cs-notes-btn" data-action="openNotes" data-tooltip="{{notesLabel}}" aria-label="{{notesLabel}}">
+    <i class="fa-solid fa-book" aria-hidden="true"></i>
+  </button>
 </nav>

@@ -33,8 +33,9 @@ import { PLAY_ACTIONS } from "./play-actions.js";
 import { readUiState, writeUiState, cleanFlips, deckState, portraitMode } from "./ui-state.js";
 import {
   PORTRAIT_COLUMN, REF_CARD_W, nextPortraitMode, portraitContext, applyPortraitMask, clearMaskChecks,
-  tiltOn, applyCardTilts,
+  applyLookFlags, applyCardTilts,
 } from "./portrait.js";
+import { CharacterNotes } from "./notes.js";
 import {
   DECK_TEMPLATES, DECK_ACTIONS, buildDeckContext, bindDeckListeners, deckRendered, focusDeckView,
   openDeckWindow, deckWindowFor, refreshAllDeckWindows,
@@ -112,6 +113,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       nextMoveGroup:   MistCardSheet.#onNextMoveGroup,
       openSystemSheet: MistCardSheet.#onOpenSystemSheet,
       openSheetSettings: () => SheetSettingsForm.open(),
+      openNotes:       MistCardSheet.#onOpenNotes,
       openHud:         MistCardSheet.#onOpenHud,
       flipCard:        MistCardSheet.#onFlipCard,
       showLayer:       MistCardSheet.#onShowLayer,
@@ -252,7 +254,8 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         if (keys.some(k => PORTRAIT_ACTOR_FIELDS.has(k))) parts.push("portrait", "moves");
         return parts;
       }
-      if (keys.every(k => k === "system.locked")) return [...LAYER_PARTS, "deck"];
+      // The lock: the cards, the deck, and the Portrait button (it picks the image in edit mode).
+      if (keys.every(k => k === "system.locked")) return [...LAYER_PARTS, "deck", "moves"];
       return null;
     }
     if (!match || match[1].toLowerCase() === "delete") return null;
@@ -398,7 +401,8 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       case "moves":
         context.moveBar = await prepareMoveBar(this.actor, this.#moveGroup);
         this.#moveGroup = context.moveBar.current;
-        context.portrait = portraitContext(this.actor);
+        context.portrait = portraitContext(this.actor, this.editMode && this.actor.isOwner);
+        context.notesLabel = game.i18n.localize(game.user.isGM ? "MistHUD.cardSheet.notes.buttonGM" : "MistHUD.cardSheet.notes.button");
         break;
       case "portrait":
         context.portrait = portraitContext(this.actor);
@@ -440,7 +444,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     this.element.dataset.front = String(this.frontLayer);
     this.element.dataset.deck = this.deckView;
     this.element.dataset.portrait = this.portraitMode;
-    this.element.dataset.tilt = tiltOn() ? "on" : "off";
+    applyLookFlags(this.element);
     this.#syncLockControl();
     if (!options.parts || options.parts.some(p => LAYER_PARTS.includes(p))) applyCardTilts(this.element);
     if (!options.parts || options.parts.includes("portrait")) void applyPortraitMask(this.element);
@@ -525,7 +529,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     super._onClose(options);
   }
 
-  /** Header button: "Open system sheet", for actions the card sheet does not have yet. */
+  /** Header controls: the lock, the HUD and the Sheet Settings ("Open system sheet" is in the ⋮ menu). */
   async _renderFrame(options) {
     const frame = await super._renderFrame(options);
     // Which layer is in front, before the first paint (no swap animation on open).
@@ -533,7 +537,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     frame.dataset.mode = this.editMode ? "edit" : "play";
     // The portrait column and the tilt, before the first paint (the layout depends on them).
     frame.dataset.portrait = this.portraitMode;
-    frame.dataset.tilt = tiltOn() ? "on" : "off";
+    applyLookFlags(frame);
     const header = frame.querySelector(".window-header");
     const close = header?.querySelector('[data-action="close"]');
     const addControl = (className, action, label) => {
@@ -551,10 +555,6 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if (this.document.isOwner) {
       addControl("fa-lock mh-cs-lock", "toggleLock", game.i18n.localize("MistHUD.cardSheet.unlockSheet"));
     }
-    if (this.document.isOwner || game.user.isGM) {
-      addControl("fa-book-open mh-cs-open-system", "openSystemSheet",
-        game.i18n.localize("MistHUD.cardSheet.openSystemSheet"));
-    }
     // Fixes phase 5: the HUD (closes the sheet; the HUD's header has the
     // matching "open sheet" button) and the Sheet Settings form.
     if (this.document.isOwner) {
@@ -563,6 +563,22 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     addControl("fa-gear mh-cs-sheet-settings", "openSheetSettings",
       game.i18n.localize("MistHUD.settingsForm.sheet.title"));
     return frame;
+  }
+
+  /**
+   * The ⋮ menu: "Open system sheet" (user, 2026-11-19: the card sheet is the
+   * sheet when chosen; the system's stays one click away, out of the header).
+   */
+  _getHeaderControls() {
+    const controls = super._getHeaderControls();
+    if (this.document.isOwner || game.user.isGM) {
+      controls.push({
+        icon:   "fa-solid fa-book-open",
+        label:  "MistHUD.cardSheet.openSystemSheet",
+        action: "openSystemSheet",
+      });
+    }
+    return controls;
   }
 
   // ── Actions ─────────────────────────────────────────────────────────────────
@@ -598,12 +614,20 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     Hooks.callAll("mistHudOpenHud", actor, token);
   }
 
+  /** The move bar's notes button: the Description (and, for the GM, the MC Notes) window. */
+  static #onOpenNotes() {
+    CharacterNotes.open(this.actor);
+  }
+
   /**
    * The header bar's Portrait button: Hide → Portrait → Hero Shot → Hide.
    * The window grows or shrinks at its left by the portrait column's width
    * (at the current card size), so the cards stay where they are.
+   * Edit mode (owner): it picks the portrait image (actor.img) instead, as
+   * the system sheet's profile image does.
    */
   static async #onCyclePortrait() {
+    if (this.editMode && this.actor.isOwner) return this.#pickPortrait();
     const from = this.portraitMode;
     const to = nextPortraitMode(from);
     const cardW = this.element.querySelector(".mh-cs-layer .mh-cs-card")?.offsetWidth || REF_CARD_W;
@@ -614,6 +638,18 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     const { left, width } = this.position;
     this.setPosition({ width: width + delta, left: Math.max(0, left - delta) });
     await this.render({ parts: ["moves", "portrait"] });
+  }
+
+  /** The core image picker for the actor's portrait (the same image as the system sheet's). */
+  #pickPortrait() {
+    const FP = foundry.applications.apps.FilePicker.implementation;
+    const picker = new FP({
+      type:     "image",
+      current:  this.actor.img,
+      callback: path => this.actor.update({ img: path }),
+      position: { top: this.position.top + 40, left: this.position.left + 10 },
+    });
+    return picker.browse();
   }
 
   /**
@@ -752,7 +788,7 @@ export function refreshCardSheetLook() {
   clearMaskChecks();
   for (const app of foundry.applications.instances.values()) {
     if (!(app instanceof MistCardSheet) || !app.rendered) continue;
-    app.element.dataset.tilt = tiltOn() ? "on" : "off";
+    applyLookFlags(app.element);
     void applyPortraitMask(app.element);
   }
 }

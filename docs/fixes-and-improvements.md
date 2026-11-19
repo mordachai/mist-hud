@@ -227,6 +227,16 @@ What the code does today, checked before planning:
 > - **Card sheet header**: a **HUD** button (closes the sheet, then opens the actor's HUD through init.js, hook `mistHudOpenHud`; owners only) and the **Sheet Settings** gear. The move bar keeps 200 px clear at the right for the six header controls (was 150).
 > - Checked: both forms render and save; a second open reuses the window; the HUD's ⋮ menu has "HUD Settings"; the sheet's HUD button closes the sheet and opens the HUD; turning the PC toggle off from the form closes the HUD; the wide layout and the HUD's text buttons apply at once; the sheet's text buttons in two rows at 1366 px (every core move name whole) and the tilt off, both from the form.
 > - Not checked: token selection with the toggles (the test client had no canvas), the NPC toggle and the NPC HUD's ⋮ entry, a GM client, the pt-BR strings in the window, the text buttons on the Special / SHB groups and in a small window, Firefox.
+>
+> **Phase 5 follow-up (user, 2026-11-19): done, a quick check in Foundry as claude-gm (Lily Chow).**
+> - "Open system sheet" left the header: it is in the sheet's ⋮ menu (`_getHeaderControls`). The card sheet is the sheet when chosen.
+> - Portrait image: in edit mode the Portrait button opens the core image picker for `actor.img` (the system sheet's profile image) instead of cycling; a yellow frame and pencil badge say so. Lock the sheet to cycle Hide / Portrait / Hero Shot again. The mask stays in Sheet Settings. The lock now re-renders the move bar too.
+> - Totals in "Tags + cards" mode: "Tags" is now **Themes** (pt-BR "Temas"), where those values come from.
+> - What the card sheet lacked from the system sheet: **Description** (`system.description`) and **MC Notes** (`system.gmnotes`, GM only), from its Bio tab. They are in a notes window (`scripts/card-sheet/notes.js`, `templates/card-sheet/notes.hbs`) opened by a book button at the right of the moves: the core editor (toggled) for the owner, text otherwise, the dialog look of phase 3. It follows changes made elsewhere unless an editor is open. Still missing: the clue journal (the system's journal of used clues) and the tutorial link.
+> - Player, Mythos and Logos: one size, 7.4 cqw (were 6 and 5), in edit mode too.
+> - Build-up improvements on the character card's back now show their description under the name, as the theme cards do (was a tooltip).
+> - Experiments, both on by default and switchable in Sheet Settings (`cardSheetTagLeaders`, `cardSheetTagTints`, applied at once through `mistHudCardSheetLook`; `data-leaders` / `data-tints` on the window, CSS in `card-sheet-com.css`): a dotted leader from each tag's name to its flame (on the first line, tags with a flame only); a light band behind each tag line in one of four warm shades (white on the Mist card), the marker bar of a selected tag over it.
+> - Not checked: a player client, a real image picked, editing and saving a note, a multi-line tag with the leader, a Mist card with the tints, a long build-up description list.
 
 ## Answers (user, 2026-11-19)
 1. **Mockup:** `docs/mockup-3.png`. What it shows:

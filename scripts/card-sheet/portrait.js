@@ -37,16 +37,23 @@ export function nextPortraitMode(mode) {
   return PORTRAIT_MODES[(PORTRAIT_MODES.indexOf(mode) + 1) % PORTRAIT_MODES.length];
 }
 
-/** What the Portrait button and the portrait part show for this actor. */
-export function portraitContext(actor) {
+/**
+ * What the Portrait button and the portrait part show for this actor.
+ * @param {Actor}   actor
+ * @param {boolean} [pick]  edit mode: the button picks the portrait image instead of cycling
+ */
+export function portraitContext(actor, pick = false) {
   const mode = portraitMode(actor);
   const label = m => game.i18n.localize(`MistHUD.cardSheet.${LABELS[m]}`);
   return {
     mode,
+    pick,
     shown:   mode !== "hide",
     img:     actor.img,
     name:    actor.name,
-    tooltip: game.i18n.format("MistHUD.cardSheet.portraitButton", { mode: label(mode), next: label(nextPortraitMode(mode)) }),
+    tooltip: pick
+      ? game.i18n.localize("MistHUD.cardSheet.portraitPick")
+      : game.i18n.format("MistHUD.cardSheet.portraitButton", { mode: label(mode), next: label(nextPortraitMode(mode)) }),
   };
 }
 
@@ -102,6 +109,25 @@ export async function applyPortraitMask(root) {
 export function tiltOn() {
   try { return game.settings.get(MODULE_ID, SETTINGS.CARD_SHEET_TILT) !== false; }
   catch { return true; }
+}
+
+/** A Sheet Settings switch that defaults to on. */
+function lookOn(key) {
+  try { return game.settings.get(MODULE_ID, key) !== false; }
+  catch { return true; }
+}
+
+/**
+ * The sheet's look switches as data attributes on the window (the CSS keys
+ * on them): the tilt, and the tag line experiments (2026-11-19): a dotted
+ * leader from a tag's name to its flame, a tint of its own on each tag line.
+ * @param {HTMLElement} el  the sheet's window (or its frame, before the first paint)
+ */
+export function applyLookFlags(el) {
+  if (!el) return;
+  el.dataset.tilt    = tiltOn() ? "on" : "off";
+  el.dataset.leaders = lookOn(SETTINGS.CARD_SHEET_TAG_LEADERS) ? "on" : "off";
+  el.dataset.tints   = lookOn(SETTINGS.CARD_SHEET_TAG_TINTS) ? "on" : "off";
 }
 
 /** A card's angle in degrees, −2…+2, always the same for the same id (FNV-1a hash). */

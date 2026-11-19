@@ -1,0 +1,16 @@
+{{!-- The card sheet's notes window (scripts/card-sheet/notes.js): the
+      character's Description and, for the GM, the MC Notes, each in the
+      core editor (toggled) for the owner, plain text otherwise.
+      Takes: sections [{ field, label, raw, html, editable }]. --}}
+<div class="mh-cs-notes-body">
+  {{#each sections}}
+  <section class="mh-cs-notes-section">
+    <h4 class="mh-cs-imp-dialog-heading">{{label}}</h4>
+    {{#if editable}}
+    <prose-mirror class="mh-cs-notes-editor" name="{{field}}" data-field="{{field}}" value="{{raw}}" toggled>{{{html}}}</prose-mirror>
+    {{else}}
+    <div class="mh-cs-notes-text">{{#if html}}{{{html}}}{{else}}<p class="mh-cs-none">—</p>{{/if}}</div>
+    {{/if}}
+  </section>
+  {{/each}}
+</div>
