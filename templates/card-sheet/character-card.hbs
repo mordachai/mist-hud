@@ -6,6 +6,11 @@
       Edit mode (card.edit): inputs for the name, the fields and the short
       description, saved on change; the biography in the core ProseMirror
       editor; build-up + / −. Uses the extras card art (per-system CSS).
+      Legend (phase 6, the Hero card): no story tags here (card.showStoryTags
+      false; they are in the deck); the Fellowship relationships table
+      (card.relationships: companion | relationship tag), Promise
+      (card.promise: the build-up track) and the Quintessences (the
+      improvements bought with it) on the front.
       Takes: card (characterCard), layer, back. --}}
 <article class="mh-cs-card mh-cs-character-card mh-cs-type-character{{#if card.flipped}} flipped{{/if}}{{#if card.edit}} mh-cs-editable{{/if}}" data-card-id="{{card.id}}" data-owner-id="{{card.ownerId}}">
   {{> "modules/mist-hud/templates/card-sheet/peek-tab.hbs" layer=layer title=card.title}}
@@ -71,6 +76,87 @@
             {{/each}}
           </ul>
           {{/if}}
+          {{#if card.relationships}}
+          {{!-- Fellowship relationships: one row per companion. Edit mode: the
+                companion is a pick list, the tag a field, a trash at the end.
+                A companion with no tag yet gets an empty row; its "+" (or the
+                heading's, for no companion) makes the tag, named in place. --}}
+          <h4 class="mh-cs-section mh-cs-fellowship-head">
+            <span class="mh-cs-section-label">{{localize "MistHUD.cardSheet.fellowship.title"}}</span>
+            {{#if card.own}}
+            <button type="button" class="mh-cs-icon-btn" data-action="addRelationship" data-tooltip="{{localize 'MistHUD.cardSheet.fellowship.add'}}" aria-label="{{localize 'MistHUD.cardSheet.fellowship.add'}}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+            {{/if}}
+          </h4>
+          <div class="mh-cs-relationships">
+            <div class="mh-cs-rel-head" aria-hidden="true">
+              <span class="mh-cs-rel-col">{{localize "MistHUD.cardSheet.fellowship.companion"}}</span>
+              <span class="mh-cs-rel-col">{{localize "MistHUD.cardSheet.fellowship.tag"}}</span>
+            </div>
+            <ul class="mh-cs-tags mh-cs-rel-rows">
+              {{#each card.relationships.rows}}
+              <li class="mh-cs-tag mh-cs-rel-row mh-cs-relationship-tag {{burnState}}{{#if selection}} mh-cs-selected mh-cs-selected-{{selection}}{{/if}}" data-tag-id="{{id}}" data-item-id="{{id}}">
+                {{#if edit}}
+                <select class="mh-cs-rel-companion mh-cs-rel-select" id="{{@root.uid}}-rel-{{id}}-target" data-edit="relTarget" aria-label="{{localize 'MistHUD.cardSheet.fellowship.companion'}}">
+                  <option value="">—</option>
+                  {{#each companions}}<option value="{{id}}"{{#if selected}} selected{{/if}}>{{name}}</option>{{/each}}
+                </select>
+                {{else}}
+                <span class="mh-cs-rel-companion">{{targetName}}</span>
+                {{/if}}
+                {{#if (or isNew edit)}}
+                <input type="text" class="mh-cs-tag-name mh-cs-rel-input" id="{{@root.uid}}-rel-{{id}}-name" data-deck-field="name" value="{{#unless isNew}}{{name}}{{/unless}}" placeholder="{{localize 'MistHUD.cardSheet.fellowship.tagPlaceholder'}}" spellcheck="false" aria-label="{{localize 'MistHUD.cardSheet.fellowship.tag'}}: {{targetName}}">
+                {{else}}
+                {{> "modules/mist-hud/templates/card-sheet/tag-name.hbs" tag=this}}
+                {{/if}}
+                {{#if edit}}
+                <button type="button" class="mh-cs-icon-btn mh-cs-delete" data-action="deleteTag" data-tooltip="{{localize 'MistHUD.cardSheet.deleteTagHint'}}" aria-label="{{localize 'MistHUD.cardSheet.deleteTag'}}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                {{/if}}
+              </li>
+              {{/each}}
+              {{#each card.relationships.open}}
+              <li class="mh-cs-rel-row mh-cs-rel-open" data-target-id="{{targetId}}">
+                <span class="mh-cs-rel-companion">{{targetName}}</span>
+                {{#if ../card.own}}
+                <button type="button" class="mh-cs-icon-btn mh-cs-rel-add" data-action="addRelationship" data-target-id="{{targetId}}" data-tooltip="{{localize 'MistHUD.cardSheet.fellowship.addFor' name=targetName}}" aria-label="{{localize 'MistHUD.cardSheet.fellowship.addFor' name=targetName}}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+                {{else}}
+                <span class="mh-cs-rel-empty"></span>
+                {{/if}}
+              </li>
+              {{/each}}
+              {{#unless (or card.relationships.rows.length card.relationships.open.length)}}
+              <li class="mh-cs-none">{{localize "MistHUD.cardSheet.fellowship.none"}}</li>
+              {{/unless}}
+            </ul>
+          </div>
+          {{/if}}
+          {{#if card.promise}}
+          {{!-- Promise: the build-up track (5 circles); the Quintessences: the
+                improvements bought with it, on lines. --}}
+          <div class="mh-cs-promise">
+            <span class="mh-cs-promise-label">{{card.promise.label}}</span>
+            {{#if card.edit}}
+            <button type="button" class="mh-cs-icon-btn" data-action="decBuildUp" data-tooltip="{{localize 'MistHUD.cardSheet.removeBuildUp'}}" aria-label="{{localize 'MistHUD.cardSheet.removeBuildUp'}}"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+            {{/if}}
+            <span class="mh-cs-pips mh-cs-promise-pips">{{#each card.promise.pips}}<span class="mh-cs-pip{{#if filled}} filled{{/if}}"></span>{{/each}}</span>
+            {{#if card.edit}}
+            <button type="button" class="mh-cs-icon-btn" data-action="incBuildUp" data-tooltip="{{localize 'MistHUD.cardSheet.addBuildUp'}}" aria-label="{{localize 'MistHUD.cardSheet.addBuildUp'}}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+            {{/if}}
+          </div>
+          {{#if card.promise.unspent}}<p class="mh-cs-unspent">{{card.promise.unspentLabel}}</p>{{/if}}
+          <h4 class="mh-cs-section mh-cs-quint-head">
+            <span class="mh-cs-section-label">{{card.promise.improvementsLabel}}</span>
+            {{#if card.promise.canAdd}}
+            <button type="button" class="mh-cs-icon-btn" data-action="addBUImprovement" data-tooltip="{{localize 'MistHUD.cardSheet.addBuildUpImprovement'}}" aria-label="{{localize 'MistHUD.cardSheet.addBuildUpImprovement'}}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+            {{/if}}
+            <span class="mh-cs-quint-icon" aria-hidden="true"></span>
+          </h4>
+          <ul class="mh-cs-improvements mh-cs-bu-improvements mh-cs-quintessences">
+            {{#each card.promise.improvements}}
+            {{> "modules/mist-hud/templates/card-sheet/improvement.hbs" imp=this desc=false}}
+            {{/each}}
+          </ul>
+          {{/if}}
+          {{#if card.showStoryTags}}
           <h4 class="mh-cs-section mh-cs-story-head">
             <span class="mh-cs-section-label">{{localize "CityOfMist.terms.storyTags"}}</span>
             {{#if card.own}}
@@ -95,6 +181,7 @@
             <li class="mh-cs-none">{{localize "MistHUD.cardSheet.noStoryTags"}}</li>
             {{/each}}
           </ul>
+          {{/if}}
         </div>
       </div>
       <footer class="mh-cs-band mh-cs-band-bottom"></footer>
@@ -137,9 +224,9 @@
         {{/if}}
         <h4 class="mh-cs-section">{{localize "CityOfMist.terms.biography"}}</h4>
         {{#if card.edit}}
-        {{!-- The core editor: shows the enriched text, with its own edit
-              toggle; saving fires "change", handled by the sheet. --}}
-        <prose-mirror class="mh-cs-scroll mh-cs-biography" name="system.biography" data-edit="actor" data-field="system.biography" value="{{card.biographyRaw}}" toggled>{{{card.biography}}}</prose-mirror>
+        {{!-- A plain textarea (the core editor's toolbar took the card):
+              saved on change, one paragraph per line. --}}
+        <textarea class="mh-cs-biography mh-cs-biography-input" id="{{@root.uid}}-character-biography" data-edit="actor" data-field="system.biography" data-multiline aria-label="{{localize 'CityOfMist.terms.biography'}}" placeholder="{{localize 'CityOfMist.terms.biography'}}">{{card.biographyText}}</textarea>
         {{else}}
         <div class="mh-cs-scroll mh-cs-biography">
           {{#if card.biography}}{{{card.biography}}}{{else}}<p class="mh-cs-none">—</p>{{/if}}

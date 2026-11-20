@@ -42,6 +42,23 @@
      the end of § 7.
    ========================================================================== */
 
+/* Fonts by role (user, 2026-11-20, card sheet phase 6): UnifrakturCook for
+   the character name, IM Fell English for the header / band titles,
+   Labrada for theme tags, Caveat for statuses and story tags. The module's
+   own files (Labrada and Caveat come with the system's fonts too). */
+@font-face {
+  font-family: "MH LitM Name";
+  src: url(/modules/mist-hud/ui/fonts/unifrakturcook-700.ttf) format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MH LitM Fell";
+  src: url(/modules/mist-hud/ui/fonts/IMFeENrm28P.ttf) format("truetype");
+  font-display: swap;
+}
+
 .style-custom {
 
   /* ────────────────────────────────────────────────────────────────────────
@@ -274,7 +291,8 @@
     --mhx-bar-toburn:   url(/modules/mist-hud/ui/select-bar-litm-toburn.webp);
     --mhx-bar-weakness: url(/modules/mist-hud/ui/select-bar-litm-weakness.webp);
     --mhx-font-title:   var(--font-family-main2, "Manuscript Antiqua"), "MedievalSharp", serif;
-    --mhx-font-display: var(--font-family-titles, "CCTreasure"), "MedievalSharp", serif;
+    --mhx-font-display: "MH LitM Fell", "IM Fell English", serif;
+    --mhx-font-name:    "MH LitM Name", "UnifrakturCook", serif;
     --mhx-font-label:   var(--font-family-main1, "Labrada"), "IM Fell DW Pica", serif;
     --mhx-font-body:    var(--font-family-main1, "Labrada"), "IM Fell DW Pica", serif;
     --mhx-font-hand:    var(--font-family-cursive, "Caveat"), cursive;
@@ -356,8 +374,8 @@
       left 0 bottom 0.06em / 100% var(--mhx-hl-h) no-repeat;
     margin: 0;
     padding: 0 0.3em;
-    font-family: var(--mhx-font-body);
-    font-style: italic;
+    font-family: var(--mhx-font-hand);
+    font-style: normal;
     font-weight: 700;
     letter-spacing: normal;
     text-transform: lowercase;
@@ -1437,7 +1455,7 @@
 
   .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) input.character-name {
     height: auto;
-    font-family: var(--mhx-font-display);
+    font-family: var(--mhx-font-name);
     font-size: 2.6em;
     font-weight: normal;
     font-style: normal;
@@ -1900,11 +1918,12 @@
     font-size: 1em;
   }
 
-  /* Tag names in the HUD's handwriting (.mh-power-tag: Caveat 600) */
+  /* Theme tag names in Labrada (user, 2026-11-20; was the HUD's Caveat 600).
+     Story tags and statuses are Caveat (the highlighter rule above). */
   .city.sheet :is(.actor-sheet, .threat-sheet, .crew-sheet) span.flex-tag-name {
-    font-family: var(--mhx-font-hand);
-    font-size: 1.45em;
-    font-weight: 600;
+    font-family: var(--mhx-font-body);
+    font-size: 1.05em;
+    font-weight: 500;
     font-style: normal;
     line-height: 1.15;
     letter-spacing: normal;
@@ -2615,11 +2634,11 @@
     min-width: 0;
     max-width: 100%;
     padding: 0 0.3em;
-    font-family: var(--mhx-font-body);
-    font-size: 1.1em;
-    font-style: italic;
+    font-family: var(--mhx-font-hand);
+    font-size: 1.3em;
+    font-style: normal;
     font-weight: 700;
-    line-height: 1.35;
+    line-height: 1.15;
     text-transform: lowercase;
     color: var(--mhx-tag-text);
     border-radius: var(--mhx-hl-radius);
@@ -5815,13 +5834,13 @@
     }
 
     /* Other tags (the tracker can list power tags): the sheet's
-       handwriting (§ 2) */
+       theme tag font, Labrada (§ 2; user, 2026-11-20) */
     & .tag.item-entry span.flex-tag-name:not(.story-tag) {
       padding: 0 0.2em;
-      font-family: var(--mhx-font-hand);
-      font-size: 1.3em;
+      font-family: var(--mhx-font-body);
+      font-size: 1em;
       font-style: normal;
-      font-weight: 600;
+      font-weight: 500;
       line-height: 1.1;
       text-transform: none;
       color: var(--mhx-tag-text);
@@ -6173,6 +6192,21 @@
     & .scene-tag-content > hr:last-child {
       display: none;
     }
+  }
+
+  /* Scene Tags window: story tags and statuses in the serif, a bit bigger
+     (user, 2026-11-20), still on their highlighters. */
+  .app.window-app.story-tag-window :is(span.flex-tag-name.story-tag, span.status-name) {
+    font-family: var(--mhx-font-body);
+    font-weight: 600;
+  }
+
+  .app.window-app.story-tag-window .tag.item-entry span.flex-tag-name.story-tag {
+    font-size: 1.12em;
+  }
+
+  .app.window-app.story-tag-window .status-line span.status-name {
+    font-size: 1.4em;
   }
 
   /* ── Status tracker ─────────────────────────────────────────────────── */

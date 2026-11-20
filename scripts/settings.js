@@ -35,6 +35,7 @@ export function applySystemCSS(system) {
 
 const CARD_SHEET_CSS_MAP = {
   "city-of-mist": "/modules/mist-hud/styles/card-sheet/card-sheet-com.css",
+  "legend":       "/modules/mist-hud/styles/card-sheet/card-sheet-litm.css",
 };
 
 export function applyCardSheetCSS(system) {

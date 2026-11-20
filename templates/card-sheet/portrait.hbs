@@ -1,12 +1,24 @@
 {{!-- PART "portrait": the actor's image at the left of the sheet (fixes
       phase 4). Cycled by the Portrait button at the left of the header bar
       (move-bar.hbs): hidden, Portrait (256 × 256) or Hero Shot (340 × 500,
-      masked by portrait.js), the character name under it. --}}
+      masked by portrait.js), the character name under it.
+      Phase 6: a decoration under the name (per-system CSS, Legend's
+      underline-1.webp on .mh-cs-portrait-deco), then the biography
+      (system.biography) as plain text on a translucent panel; edit mode
+      (owner): the core editor, saved on change like the character card's. --}}
 <section class="mh-cs-portrait-part" data-mode="{{portrait.mode}}">
   {{#if portrait.shown}}
   <figure class="mh-cs-portrait mh-cs-portrait-{{portrait.mode}}">
     <div class="mh-cs-portrait-frame"><img src="{{portrait.img}}" alt="{{portrait.name}}"></div>
     <figcaption class="mh-cs-portrait-name" data-fit data-fit-lines="2">{{portrait.name}}</figcaption>
+    <span class="mh-cs-portrait-deco" aria-hidden="true"></span>
+    {{#if portrait.bio.shown}}
+    {{#if portrait.bio.edit}}
+    <textarea class="mh-cs-portrait-bio mh-cs-portrait-bio-edit" id="{{@root.uid}}-portrait-biography" data-edit="actor" data-field="system.biography" data-multiline aria-label="{{localize 'CityOfMist.terms.biography'}}" placeholder="{{localize 'CityOfMist.terms.biography'}}">{{portrait.bio.text}}</textarea>
+    {{else}}
+    <div class="mh-cs-portrait-bio" data-scroll-key="portrait-bio">{{{portrait.bio.html}}}</div>
+    {{/if}}
+    {{/if}}
   </figure>
   {{/if}}
 </section>

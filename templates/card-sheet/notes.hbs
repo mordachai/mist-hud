@@ -18,6 +18,7 @@
 <div class="mh-cs-notes-body">
   {{> mhCsNoteField note=description cls="mh-cs-notes-description"}}
 
+  {{#if journal}}
   <section class="mh-cs-notes-section mh-cs-clue-journal">
     <h4 class="mh-cs-imp-dialog-heading">{{journal.label}}</h4>
     {{#if journal.entries.length}}
@@ -36,6 +37,7 @@
     <p class="mh-cs-none">{{localize "MistHUD.cardSheet.notes.noJournal"}}</p>
     {{/if}}
   </section>
+  {{/if}}
 
   {{#if mcNotes}}{{> mhCsNoteField note=mcNotes}}{{/if}}
 </div>

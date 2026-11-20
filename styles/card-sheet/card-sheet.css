@@ -478,15 +478,17 @@
    content, the size container: --mh-cs-cw / -ch default to its 100cqw /
    100cqh), and on the window's header bar (which sets them in the window's
    units). */
-.mh-card-sheet :is(.mh-cs-layer, .mh-cs-deck, .mh-cs-deck-overlay, .mh-cs-move-bar, .mh-cs-portrait-part),
+.mh-card-sheet :is(.mh-cs-layer, .mh-cs-deck, .mh-cs-deck-overlay, .mh-cs-move-bar, .mh-cs-portrait-part, .mh-cs-backpack-part),
 .application.mh-card-sheet:not(.mh-cs-deck-window) > .window-header {
   /* The room the header bar takes from the height: the band and its gap. */
   --mh-cs-band-space: calc(var(--mh-cs-band-row) + 8px);
-  --mh-cs-stage-top: var(--mh-cs-band-space);
+  /* --mh-cs-top-k: room over the cards, in card widths, for a card peeking
+     out above them (Legend's backpack); 0 elsewhere. */
+  --mh-cs-stage-top: calc(var(--mh-cs-band-space) + var(--mh-cs-top-k, 0) * var(--mh-cs-card-w));
   --mh-cs-group-k: calc(4 + var(--mh-cs-deck-k) + var(--mh-cs-back-shift) + var(--mh-cs-portrait-k));
   --mh-cs-card-w: min(
     calc((var(--mh-cs-cw, 100cqw) - 2 * var(--mh-cs-edge) - 3 * var(--mh-cs-gap) - var(--mh-cs-portrait-gap)) / var(--mh-cs-group-k)),
-    calc((var(--mh-cs-ch, 100cqh) - var(--mh-cs-band-space)) / (1 / (var(--mh-cs-aspect)) + var(--mh-cs-peek))));
+    calc((var(--mh-cs-ch, 100cqh) - var(--mh-cs-band-space)) / (1 / (var(--mh-cs-aspect)) + var(--mh-cs-peek) + var(--mh-cs-top-k, 0))));
   --mh-cs-peek-h: calc(var(--mh-cs-card-w) * var(--mh-cs-peek));
   --mh-cs-row-w: calc(4 * var(--mh-cs-card-w) + 3 * var(--mh-cs-gap));
   --mh-cs-group-left: calc(6px + (var(--mh-cs-cw, 100cqw)
@@ -500,9 +502,9 @@
    cards keep their size: the stage starts 6 px down (room for the tilted
    corners) and the band reaches into the content's 12 px bottom padding
    (it is the window's header, outside the clipped content). */
-.mh-card-sheet[data-bar="bottom"]:not(.mh-cs-deck-window) :is(.mh-cs-layer, .mh-cs-deck, .mh-cs-deck-overlay, .mh-cs-move-bar, .mh-cs-portrait-part),
+.mh-card-sheet[data-bar="bottom"]:not(.mh-cs-deck-window) :is(.mh-cs-layer, .mh-cs-deck, .mh-cs-deck-overlay, .mh-cs-move-bar, .mh-cs-portrait-part, .mh-cs-backpack-part),
 .application.mh-card-sheet[data-bar="bottom"]:not(.mh-cs-deck-window) > .window-header {
-  --mh-cs-stage-top: 6px;
+  --mh-cs-stage-top: calc(6px + var(--mh-cs-top-k, 0) * var(--mh-cs-card-w));
   --mh-cs-bar-top: calc(var(--mh-cs-stage-top) + var(--mh-cs-card-w) / (var(--mh-cs-aspect)) + var(--mh-cs-peek-h) + 8px);
 }
 
@@ -1111,6 +1113,177 @@
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: thin;
+}
+
+/* ── Mist Engine theme cards (Legend, Otherscape) ─────────────────────────────
+   As on the printed cards (user, 2026-11-20): the paper half holds the title
+   tag (the theme's first power tag, in place of the title), the other power
+   tags and the weakness tags, with no section headings; the colour half,
+   from --mh-cs-paper-end, holds the tracks, the quest and the theme's notes
+   (system.description). The per-system CSS sets --mh-cs-paper-end where its
+   art changes colour (default: half the card) and --mh-cs-me-title-h. */
+.mh-card-sheet .mh-cs-theme-card {
+  --mh-cs-me-paper-end: var(--mh-cs-paper-end, calc(50cqw / (var(--mh-cs-aspect))));
+}
+
+/* The paper ends where the colour starts, whatever the row above it (edit
+   mode) takes: its bottom margin is the rest of the body. */
+.mh-card-sheet .mh-cs-paper {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2cqw;
+  min-height: 0;
+  margin-bottom: calc(100cqw / (var(--mh-cs-aspect)) - var(--mh-cs-body-bottom) - var(--mh-cs-me-paper-end) + 1.5cqw);
+}
+
+.mh-card-sheet .mh-cs-lower {
+  position: absolute;
+  top: calc(var(--mh-cs-me-paper-end) - var(--mh-cs-body-top) + 1.5cqw);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6cqw;
+  min-height: 0;
+}
+
+/* The title tag: a tag row, its name at the title's size (card-fit.js), its
+   burn mark at the right. */
+.mh-card-sheet .mh-cs-card .mh-cs-tag.mh-cs-title-tag {
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 1cqw;
+  padding: 0;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-tag.mh-cs-title-tag .mh-cs-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--mh-cs-me-title-h, 30cqw);
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-tag.mh-cs-title-tag .mh-cs-title .mh-cs-tag-name {
+  display: inline;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  text-transform: inherit;
+  color: inherit;
+  text-shadow: inherit;
+  overflow-wrap: normal;
+  /* Core buttons animate their font: card-fit.js measures right after each
+     size step, so the name must take the size at once. */
+  transition: none;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-tag.mh-cs-title-tag .mh-cs-title .mh-cs-tag-text {
+  padding: 0;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-tag.mh-cs-title-tag .mh-cs-burn {
+  align-self: center;
+  width: calc(var(--mh-cs-burn-w, 5cqw) * 1.4);
+  height: calc(var(--mh-cs-burn-h, 5cqw) * 1.4);
+  margin: 0;
+}
+
+/* The power and weakness tags share one list on the paper; a long one scrolls. */
+.mh-card-sheet .mh-cs-me-tags .mh-cs-weakness-tags {
+  max-height: none;
+  overflow: visible;
+}
+
+/* The mark before each tag: a dot (power), the double chevron (weakness). */
+.mh-card-sheet .mh-cs-card .mh-cs-tag .mh-cs-tag-mark {
+  order: 0;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.4cqw;
+  height: calc(var(--mh-cs-tag-size) * 1.2);
+  font-size: 3.4cqw;
+  color: var(--mh-cs-ink);
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-power-tag .mh-cs-tag-mark::before {
+  content: "";
+  width: 1.3cqw;
+  height: 1.3cqw;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-weakness-tag .mh-cs-tag-mark {
+  color: var(--mh-cs-weak-ink, #8f2a1f);
+}
+
+/* A weakness tag: a faint red highlighter under the row. */
+.mh-card-sheet .mh-cs-me-tags .mh-cs-weakness-tag {
+  background-image: linear-gradient(90deg, var(--mh-cs-weak-mark, rgba(175, 45, 30, 0.16)), var(--mh-cs-weak-mark, rgba(175, 45, 30, 0.16)) 75%, transparent);
+  border-radius: 0.8cqw;
+}
+
+/* + power tag, bonus tag, + weakness: under the list (no headings to hold them). */
+.mh-card-sheet .mh-cs-tag-tools {
+  display: flex;
+  justify-content: center;
+  gap: 1.6cqw;
+  margin-top: 1cqw;
+}
+
+/* The quest on the colour half: a few lines, then it scrolls. */
+.mh-card-sheet .mh-cs-lower .mh-cs-motivation-text {
+  max-height: calc(var(--mh-cs-quest-size, 4.4cqw) * 1.15 * 3 + 0.8em);
+}
+
+/* The theme's notes: the rest of the card, a borderless field (over the
+   inline-input look of the edit fields). */
+.mh-card-sheet .mh-cs-card .mh-cs-lower .mh-cs-theme-notes {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0.6cqw 0.4cqw;
+  border: none;
+  border-radius: 1cqw;
+  background: transparent;
+  box-shadow: none;
+  resize: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-family: var(--mh-cs-notes-font, var(--mh-cs-tag-font));
+  font-size: var(--mh-cs-notes-size, 4.4cqw);
+  line-height: 1.35;
+  text-align: center;
+  white-space: pre-wrap;
+  color: inherit;
+  scrollbar-width: thin;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-lower textarea.mh-cs-theme-notes:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-lower textarea.mh-cs-theme-notes:focus {
+  outline: none;
+  background: rgba(0, 0, 0, 0.14);
+  box-shadow: none;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-lower .mh-cs-theme-notes::placeholder {
+  color: inherit;
+  opacity: 0.5;
+  font-style: italic;
 }
 
 /* ── Back: improvements ──────────────────────────────────────────────────── */
@@ -1788,16 +1961,29 @@
   scrollbar-width: thin;
 }
 
-/* The biography editor (core <prose-mirror>, toggled). */
-.mh-card-sheet .mh-cs-card prose-mirror.mh-cs-biography {
+/* The biography field: a plain textarea (the core editor's toolbar took the
+   card), the rest of the card's back. */
+.mh-card-sheet .mh-cs-card textarea.mh-cs-biography-input {
   display: block;
-  position: relative;
   flex: 1 1 auto;
+  width: 100%;
   min-height: 12cqw;
+  height: auto;
+  margin: 0;
+  padding: 1cqw 1.4cqw;
   overflow-y: auto;
   border: 0.3cqw dashed var(--mh-cs-rule);
   border-radius: 1.2cqw;
   background: var(--mh-cs-input-bg, rgba(255, 255, 255, 0.32));
+  box-shadow: none;
+  color: var(--mh-cs-ink);
+  resize: none;
+  scrollbar-width: thin;
+}
+
+.mh-card-sheet .mh-cs-card textarea.mh-cs-biography-input:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 /* The editor's toolbar wraps on the narrow card, so Save stays in reach. */
@@ -2924,4 +3110,289 @@
 /* Deck cards can be dragged out onto a sheet, a token or a HUD. */
 .mh-card-sheet .mh-cs-deck-card[draggable="true"] {
   -webkit-user-drag: element;
+}
+
+/* ── Phase 6: shared pieces for Legend (and any game that has them) ─────────
+   Three tracks (Legend: Improve, Abandon, Milestone), the Hero card's
+   Fellowship relationships, Promise and Quintessences, the backpack card,
+   and the biography under the portrait (every game). The look is in the
+   per-system file. */
+
+/* Three tracks: one row, tighter; in edit mode (− / + around each) they wrap. */
+.mh-card-sheet .mh-cs-tracks-3 {
+  justify-content: space-between;
+  gap: 1cqw 0.4cqw;
+  letter-spacing: 0.02em;
+}
+
+.mh-card-sheet .mh-cs-editable .mh-cs-tracks-3 {
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.mh-card-sheet .mh-cs-tracks-3 .mh-cs-track {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* Fellowship relationships: two columns, Companion | Relationship Tag. */
+.mh-card-sheet .mh-cs-relationships {
+  flex: 0 0 auto;
+}
+
+.mh-card-sheet .mh-cs-rel-head,
+.mh-card-sheet .mh-cs-rel-row {
+  display: grid;
+  grid-template-columns: 40% 1fr auto;
+  align-items: center;
+  column-gap: 2cqw;
+}
+
+.mh-card-sheet .mh-cs-rel-head {
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.4cqw;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.mh-card-sheet .mh-cs-rel-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mh-card-sheet .mh-cs-rel-row {
+  min-height: 9cqw;
+  border-bottom: 0.3cqw solid var(--mh-cs-rule);
+}
+
+.mh-card-sheet .mh-cs-rel-companion {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--mh-cs-tag-font);
+  font-size: 5.6cqw;
+}
+
+.mh-card-sheet .mh-cs-rel-row > .mh-cs-tag-name {
+  min-width: 0;
+}
+
+.mh-card-sheet .mh-cs-card select.mh-cs-rel-select {
+  width: 100%;
+  height: auto;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  border-bottom: 0.3cqw dashed var(--mh-cs-rule);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font-family: var(--mh-cs-tag-font);
+  font-size: 5.2cqw;
+}
+
+.mh-card-sheet .mh-cs-card input.mh-cs-rel-input {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  padding: 0 0.6cqw;
+  border: none;
+  border-bottom: 0.3cqw solid rgba(0, 0, 0, 0.45);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.35);
+  color: inherit;
+  font: inherit;
+}
+
+.mh-card-sheet .mh-cs-rel-open {
+  opacity: 0.75;
+}
+
+.mh-card-sheet .mh-cs-rel-open .mh-cs-rel-add {
+  grid-column: 3;
+}
+
+/* Promise: the label, then its circles (− / + around them in edit mode). */
+.mh-card-sheet .mh-cs-promise {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6cqw;
+  margin: 2cqw 0 1cqw;
+}
+
+.mh-card-sheet .mh-cs-promise-label {
+  font-family: var(--mh-cs-heading-font);
+  font-size: var(--mh-cs-heading-size);
+  letter-spacing: var(--mh-cs-heading-spacing);
+  text-transform: uppercase;
+}
+
+.mh-card-sheet .mh-cs-promise-pips {
+  gap: 1cqw;
+}
+
+/* The Quintessences heading: the label, its "+", the icon at the right. */
+.mh-card-sheet .mh-cs-quint-head {
+  display: flex;
+  align-items: center;
+  gap: 1.6cqw;
+}
+
+.mh-card-sheet .mh-cs-quint-head .mh-cs-section-label {
+  flex: 1 1 auto;
+}
+
+.mh-card-sheet .mh-cs-quint-icon {
+  flex: 0 0 auto;
+  width: 7cqw;
+  height: 7cqw;
+  background: center / contain no-repeat;
+}
+
+/* ── The backpack card (Legend) ───────────────────────────────────────────────
+   Half a theme card tall, its own art ratio (--mh-cs-backpack-aspect), one
+   card wide (--mh-cs-backpack-k card widths). It sits behind both layers,
+   in the room --mh-cs-top-k makes over them, so its band and its first rows
+   peek out above the back layer's bands (mockup-4, user 2026-11-20;
+   --mh-cs-backpack-x: card widths from the row's start).
+   data-backpack="open" on the window brings it forward. The part's root
+   takes no room, like the deck's. */
+.mh-card-sheet .mh-cs-backpack-part {
+  display: contents;
+}
+
+.mh-card-sheet .mh-cs-backpack-card {
+  --mh-cs-backpack-w: calc(var(--mh-cs-backpack-k, 1) * var(--mh-cs-card-w));
+  position: absolute;
+  z-index: 0;
+  top: calc(var(--mh-cs-stage-top) - var(--mh-cs-top-k, 0) * var(--mh-cs-card-w));
+  left: calc(var(--mh-cs-stage-left) + var(--mh-cs-backpack-x, 3.4) * (var(--mh-cs-card-w) + var(--mh-cs-gap)));
+  width: var(--mh-cs-backpack-w);
+  aspect-ratio: var(--mh-cs-backpack-aspect, 3 / 4);
+  pointer-events: auto;
+  transition: translate 0.4s ease, filter 0.4s ease;
+  filter: brightness(0.9);
+}
+
+/* Open (user, 2026-11-20): it stays where it is, behind the cards, and
+   slides straight up out of the window's top until all of it shows (its
+   bottom at the back layer's top). Over the header bar (the content paints
+   over the window header); the per-system CSS lets the content overflow
+   upwards. */
+.mh-card-sheet[data-backpack="open"] .mh-cs-backpack-card {
+  translate: 0 calc(-1 * (var(--mh-cs-backpack-w) / (var(--mh-cs-backpack-aspect, 3 / 4)) - var(--mh-cs-top-k, 0) * var(--mh-cs-card-w)));
+  filter: none;
+}
+
+/* Always behind the layers (user, 2026-11-20), also hovered or focused: the
+   rule that brings a hovered card on top (z-index 3) is for the layers'
+   cards only. Open, the part over the cards still takes clicks. */
+.mh-card-sheet .mh-cs-backpack-card:is(:hover, :focus-within) {
+  z-index: 0;
+}
+
+/* Tucked away, only its band takes clicks (the rest is behind the front layer). */
+.mh-card-sheet:not([data-backpack="open"]) .mh-cs-backpack-card .mh-cs-body {
+  pointer-events: none;
+}
+
+.mh-card-sheet .mh-cs-backpack-card .mh-cs-band-top {
+  cursor: pointer;
+  border-radius: 1.5cqw;
+}
+
+.mh-card-sheet .mh-cs-backpack-card .mh-cs-band-top:hover {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1));
+}
+
+.mh-card-sheet .mh-cs-backpack-card .mh-cs-band-top:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.6cqw rgba(255, 255, 255, 0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mh-card-sheet .mh-cs-backpack-card { transition: none; }
+}
+
+.mh-card-sheet .mh-cs-backpack-tags {
+  flex: 1 1 auto;
+}
+
+/* Carried or left at home: a small box before the tag (filled = carried). */
+.mh-card-sheet .mh-cs-carry {
+  flex: 0 0 auto;
+  width: 4.6cqw;
+  height: 4.6cqw;
+  min-height: 0;
+  margin: calc((var(--mh-cs-tag-size) * 1.2 - 4.6cqw) / 2) 1.4cqw 0 0;
+  padding: 0;
+  border: 0.5cqw solid currentColor;
+  border-radius: 1cqw;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.mh-card-sheet .mh-cs-loadout-tag.carried .mh-cs-carry {
+  background: currentColor;
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-loadout-tag.left-home .mh-cs-tag-name {
+  opacity: 0.5;
+}
+
+/* ── The biography under the portrait (every game) ──────────────────────────
+   Plain text on a translucent dark panel, under the name (and its
+   decoration); it scrolls, and only it takes clicks in the portrait
+   column. Edit mode (owner): the core editor. */
+.mh-card-sheet .mh-cs-portrait-deco {
+  display: none;
+}
+
+.mh-card-sheet .mh-cs-portrait-bio {
+  display: block;
+  max-height: 34cqh;
+  margin: 3cqw 2cqw 0;
+  padding: 3cqw 4cqw;
+  overflow-y: auto;
+  border-radius: 3cqw;
+  background: rgba(10, 8, 6, 0.55);
+  color: #f2ede4;
+  font-family: var(--mh-cs-tag-font);
+  font-size: max(12px, 5.6cqw);
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  pointer-events: auto;
+  scrollbar-width: thin;
+}
+
+.mh-card-sheet .mh-cs-portrait-bio p {
+  margin: 0 0 0.6em;
+}
+
+.mh-card-sheet .mh-cs-portrait-bio p:last-child {
+  margin-bottom: 0;
+}
+
+/* Edit mode: a plain textarea on the same panel. */
+.mh-card-sheet textarea.mh-cs-portrait-bio-edit {
+  width: calc(100% - 4cqw);
+  min-height: 8em;
+  height: auto;
+  border: none;
+  box-shadow: none;
+  resize: vertical;
+}
+
+.mh-card-sheet textarea.mh-cs-portrait-bio-edit:focus {
+  outline: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: none;
 }

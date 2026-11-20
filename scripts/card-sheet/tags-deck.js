@@ -89,8 +89,14 @@ const CREATES = {
   clue:   [{ subtype: "", icon: "fa-plus", label: "MistHUD.cardSheet.deck.createClue" }],
 };
 
-/** The type marker's icons on the card art, left to right (plan § 7). */
-const MARKER_ORDER = ["clue", "juice", "tag", "status"];
+/** The type marker's icons on the card art, left to right (plan § 7). Legend
+ *  (phase 6): the leaf's colour says the type, the marker is only the blank
+ *  card's type picker. */
+const MARKER_ORDERS = {
+  "city-of-mist": ["clue", "juice", "tag", "status"],
+};
+const DEFAULT_MARKER_ORDER = ["status", "tag"];
+const markerOrder = () => MARKER_ORDERS[getActiveSystem()] ?? DEFAULT_MARKER_ORDER;
 
 /** The id of the blank card the toolbar's + brings forward (no item yet). */
 export const DRAFT_ID = "draft";
@@ -99,8 +105,15 @@ export const DRAFT_ID = "draft";
  * The tracking card's boxes: the box (1-based) holding each tier's number
  * (tier 1–6; tier 5 = OUT, tier 6 = MC). The last one is the box count.
  */
-const TIER_BOXES = [1, 2, 4, 7, 11, 16];
-const BOX_COUNT = TIER_BOXES.at(-1);
+const TIER_BOXES_BY_SYSTEM = {
+  "city-of-mist": [1, 2, 4, 7, 11, 16],
+};
+/** Legend and Otherscape (mist-engine statuses): one box per tier, 6 boxes. */
+const DEFAULT_TIER_BOXES = [1, 2, 3, 4, 5, 6];
+const tierBoxes = () => TIER_BOXES_BY_SYSTEM[getActiveSystem()] ?? DEFAULT_TIER_BOXES;
+/** Games whose status cards mark only the current tier's box (user, 2026-11-20). */
+const SINGLE_BOX_SYSTEMS = new Set(["legend"]);
+const singleBox = () => ({ single: SINGLE_BOX_SYSTEMS.has(getActiveSystem()) });
 
 /**
  * The boxes a clue or juice amount fills: the same mapping as a status
@@ -110,11 +123,12 @@ const BOX_COUNT = TIER_BOXES.at(-1);
  */
 const amountFill = amount => {
   const n = Math.max(0, Math.trunc(Number(amount) || 0));
-  return n ? TIER_BOXES[Math.min(n, TIER_BOXES.length) - 1] : 0;
+  const tiers = tierBoxes();
+  return n ? tiers[Math.min(n, tiers.length) - 1] : 0;
 };
 const amountBoxes = amount => {
   const filled = amountFill(amount);
-  return Array.from({ length: BOX_COUNT }, (_, i) => i < filled);
+  return Array.from({ length: tierBoxes().at(-1) }, (_, i) => i < filled);
 };
 
 /**
@@ -125,7 +139,7 @@ const amountBoxes = amount => {
 function amountForBox(box, current) {
   const amount = Math.max(0, Math.trunc(Number(current) || 0));
   if (amount > 0 && box === amountFill(amount)) return amount - 1;
-  return TIER_BOXES.filter(b => b <= box).length;
+  return tierBoxes().filter(b => b <= box).length;
 }
 
 /** How long a "sure?" button stays armed. */
@@ -248,7 +262,7 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
     suffix:    "",
     boxes:     amountBoxes(0),
     boxEdit:   own,
-    markers:   MARKER_ORDER.map(key => ({ key, on: key === kind })),
+    markers:   markerOrder().map(key => ({ key, on: key === kind })),
     ...cardTools(kind, row, own, edit, armedKey),
     flags:     [],
     texts:     [],
@@ -261,7 +275,7 @@ function deckCard(actor, kind, row, { own, edit, newId, armedKey }) {
       const sel = selectionView(row.item, edit);
       Object.assign(card, sel, {
         suffix: `-${row.tier}`,
-        boxes: statusBoxes(row.item, TIER_BOXES),
+        boxes: statusBoxes(row.item, tierBoxes(), singleBox()),
         flags: [flag("temporary", row.temporary), flag("permanent", row.permanent)],
       });
       break;
@@ -343,7 +357,7 @@ function draftCard(kind, name, kinds) {
     suffix:    "",
     boxes:     amountBoxes(0),
     boxEdit:   false,
-    markers:   MARKER_ORDER.map(key => ({
+    markers:   markerOrder().map(key => ({
       key, on: key === kind,
       pick:  kinds.includes(key),
       label: L(KIND_INFO[key].one),
@@ -420,7 +434,7 @@ export function buildDeckContext(actor, { view = "stack", focusId = null, inWind
     focus,
     counts:   groups.map(g => ({ kind: g.kind, icon: g.icon, label: g.label, count: g.cards.length })),
     // The toolbar's + menu: a blank card of each type, in the type marker's order.
-    adds:     own ? MARKER_ORDER.filter(k => kinds.includes(k)).map(kind => ({ kind, icon: KIND_INFO[kind].icon, label: L(KIND_INFO[kind].one) })) : [],
+    adds:     own ? markerOrder().filter(k => kinds.includes(k)).map(kind => ({ kind, icon: KIND_INFO[kind].icon, label: L(KIND_INFO[kind].one) })) : [],
     addLabel: L("MistHUD.cardSheet.deck.newCard"),
     hideLabel: L(state.hidden ? "MistHUD.cardSheet.deck.unhide" : "MistHUD.cardSheet.deck.hide"),
   };
@@ -718,7 +732,7 @@ async function setDeckBoxes(event, target) {
   await once(this, async () => {
     if (item.type === "status") {
       const before = statusString(item);
-      if (await setStatusBoxes(item, box, TIER_BOXES)) {
+      if (await setStatusBoxes(item, box, tierBoxes(), singleBox())) {
         await logModification(actor, "Edited", item, `${before} edited --> ${statusString(item)})`);
       }
     } else if (item.type === "clue" || item.type === "juice") {

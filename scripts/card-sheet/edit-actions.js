@@ -16,6 +16,7 @@ import {
   itemEditDialog, improvementDialog, autoAwardImpForWeakness, buildUpImprovementChoices,
   sendImprovementToChat, themeDeleteChoice, logModification,
 } from "./system-adapter.js";
+import { htmlToText, textToHtml } from "./card-sheet-context.js";
 
 const L = (key, data) => (data ? game.i18n.format(key, data) : game.i18n.localize(key));
 
@@ -439,7 +440,14 @@ export async function changeActorField(sheet, input) {
   const field = input.dataset.field ?? input.name;
   if (!actor.isOwner || !ACTOR_FIELDS.has(field)) return;
   const value = input.value ?? "";
-  if (value === (foundry.utils.getProperty(actor, field) ?? "")) return;
+  const current = foundry.utils.getProperty(actor, field) ?? "";
+  // The biography is an HTML field written in a plain textarea.
+  if (field === "system.biography") {
+    if (value.replace(/\s+$/, "") === htmlToText(current)) return;
+    await actor.update({ [field]: textToHtml(value) });
+    return;
+  }
+  if (value === current) return;
   if (field === "name" && !value.trim()) {
     input.value = actor.name;
     return;

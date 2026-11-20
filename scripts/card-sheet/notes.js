@@ -9,6 +9,7 @@
 // it writes the actor. One window per actor; it follows changes made
 // elsewhere (init.js, refreshCharacterNotes) unless an editor is open.
 
+import { getActiveSystem } from "../constants.js";
 import { clueJournal, isClueJournalEntry, deleteClueJournalEntry, confirmBox } from "./system-adapter.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -82,7 +83,8 @@ export class CharacterNotes extends HandlebarsApplicationMixin(ApplicationV2) {
       };
     };
     context.description = await section("system.description", "CityOfMist.terms.description");
-    context.journal = {
+    // No clues in Legend and Otherscape: no clue journal (plan § 11.4).
+    context.journal = getActiveSystem() !== "city-of-mist" ? null : {
       label:   game.i18n.localize("MistHUD.cardSheet.notes.clueJournal"),
       entries: clueJournal(actor),
       own:     actor.isOwner,

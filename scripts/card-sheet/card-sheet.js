@@ -21,7 +21,7 @@
 // "portrait"), the sheet cards are tilted a little, and the back layer is
 // offset sideways from the front one (CSS).
 
-import { buildLayer1Context, buildLayer2Context, isEditMode } from "./card-sheet-context.js";
+import { buildLayer1Context, buildLayer2Context, buildBackpackContext, isEditMode } from "./card-sheet-context.js";
 import { watchFit } from "./card-fit.js";
 import { prepareMoveBar, executeMove } from "./move-bar.js";
 import {
@@ -30,9 +30,10 @@ import {
 import { EDIT_ACTIONS, changeThemeField, changeActorField } from "./edit-actions.js";
 import { CHARACTER_ACTIONS, changeHelpHurt } from "./character-actions.js";
 import { PLAY_ACTIONS } from "./play-actions.js";
+import { LEGEND_ACTIONS, changeRelationshipTarget, toggleBackpack } from "./legend-actions.js";
 import { readUiState, writeUiState, cleanFlips, deckState, portraitMode } from "./ui-state.js";
 import {
-  PORTRAIT_COLUMN, REF_CARD_W, nextPortraitMode, portraitContext, applyPortraitMask, clearMaskChecks,
+  PORTRAIT_COLUMN, REF_CARD_W, nextPortraitMode, portraitContext, portraitBiography, applyPortraitMask, clearMaskChecks,
   applyLookFlags, applyCardTilts,
 } from "./portrait.js";
 import { CharacterNotes } from "./notes.js";
@@ -41,6 +42,15 @@ import {
   openDeckWindow, deckWindowFor, refreshAllDeckWindows,
 } from "./tags-deck.js";
 import { SheetSettingsForm } from "../settings-forms.js";
+import { getActiveSystem } from "../constants.js";
+
+/**
+ * Extra window height per game, over the reference size. Legend (user,
+ * 2026-11-20): the cards 20 px taller at the same proportions. The height
+ * sets the card size there: 20 px more card is 20 × 219/579 ≈ 7.6 px more
+ * width, and the peek and backpack room (0.7 card widths) take ~5 px more.
+ */
+const EXTRA_WINDOW_HEIGHT = { legend: 26 };
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -62,14 +72,16 @@ export const CARD_SHEET_TEMPLATES = [
   DECK_TEMPLATES.columns,
   DECK_TEMPLATES.card,
   `${TEMPLATE_DIR}/portrait.hbs`,
+  `${TEMPLATE_DIR}/backpack.hbs`,
 ];
 
 const PORTRAIT_TEMPLATE = `${TEMPLATE_DIR}/portrait.hbs`;
+const BACKPACK_TEMPLATE = `${TEMPLATE_DIR}/backpack.hbs`;
 
 const LAYER_PARTS = ["layer1", "layer2"];
 
 /** What a selection change shows in: both layers, the deck, and the totals by the move bar. */
-const SELECTION_PARTS = ["moves", "layer1", "layer2", "deck"];
+const SELECTION_PARTS = ["moves", "layer1", "layer2", "backpack", "deck"];
 
 /** Everything inside a card that scrolls (and the deck's spread view); its position is kept across re-renders. */
 const SCROLLERS = ".mh-cs-scroll, .mh-cs-weakness-tags, .mh-cs-motivation-text, .mh-cs-title-input, .mh-cs-short-desc, .mh-cs-bu-improvements, [data-scroll-key]";
@@ -81,8 +93,8 @@ const LAYER2_ACTOR_FIELDS = new Set([
   "system.buildup", "system.unspentBU",
 ]);
 
-/** Actor fields the portrait shows. */
-const PORTRAIT_ACTOR_FIELDS = new Set(["name", "img"]);
+/** Actor fields the portrait shows (the biography under the name since phase 6). */
+const PORTRAIT_ACTOR_FIELDS = new Set(["name", "img", "system.biography"]);
 
 /** Theme fields that change only that theme's card (not the layer order or art). */
 const THEME_TEXT_FIELDS = new Set(["name", "system.mystery"]);
@@ -123,6 +135,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       ...CHARACTER_ACTIONS,
       ...PLAY_ACTIONS,
       ...DECK_ACTIONS,
+      ...LEGEND_ACTIONS,
     },
   };
 
@@ -133,6 +146,8 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     portrait: { template: PORTRAIT_TEMPLATE },
     layer1: { template: CARD_SHEET_TEMPLATES[1] },
     layer2: { template: CARD_SHEET_TEMPLATES[2] },
+    // Legend's backpack card (phase 6), tucked behind the front layer; empty elsewhere.
+    backpack: { template: BACKPACK_TEMPLATE },
     deck:   { template: DECK_TEMPLATES.part },
   };
 
@@ -214,6 +229,10 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if (column?.k && options.position?.width === MistCardSheet.DEFAULT_OPTIONS.position.width) {
       options.position.width += Math.round(column.k * REF_CARD_W + column.gap);
     }
+    const extraH = EXTRA_WINDOW_HEIGHT[getActiveSystem()];
+    if (extraH && options.position?.height === MistCardSheet.DEFAULT_OPTIONS.position.height) {
+      options.position.height += extraH;
+    }
     return options;
   }
 
@@ -255,7 +274,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         return parts;
       }
       // The lock: the cards, the deck, and the Portrait button (it picks the image in edit mode).
-      if (keys.every(k => k === "system.locked")) return [...LAYER_PARTS, "deck", "moves"];
+      if (keys.every(k => k === "system.locked")) return [...LAYER_PARTS, "backpack", "deck", "moves", "portrait"];
       return null;
     }
     if (!match || match[1].toLowerCase() === "delete") return null;
@@ -271,6 +290,9 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         const keys = changedKeys(change);
         if (match[1].toLowerCase() !== "update" || !keys.every(k => THEME_TEXT_FIELDS.has(k))) return null;
         parts.add(main.has(item.id) ? "layer1" : "layer2");
+      } else if (item.type === "tag" && item.system?.theme_id && item.system.theme_id === this.actor.loadout?.id) {
+        // A backpack (loadout) tag.
+        parts.add("backpack");
       } else if (item.type === "tag" || item.type === "improvement") {
         const themeId = item.system?.theme_id;
         parts.add(themeId && main.has(themeId) ? "layer1" : "layer2");
@@ -353,6 +375,9 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
       case "helpHurt":
         changeHelpHurt(this, el);
         return;
+      case "relTarget":
+        changeRelationshipTarget(this, el);
+        return;
     }
     super._onChangeForm(formConfig, event);
   }
@@ -406,6 +431,10 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         break;
       case "portrait":
         context.portrait = portraitContext(this.actor);
+        context.portrait.bio = await portraitBiography(this.actor, this.editMode && this.actor.isOwner);
+        break;
+      case "backpack":
+        context.backpack = buildBackpackContext(this.actor);
         break;
       case "layer1":
         Object.assign(context, buildLayer1Context(this.actor, this.cardFlips));
@@ -444,6 +473,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     this.element.dataset.front = String(this.frontLayer);
     this.element.dataset.deck = this.deckView;
     this.element.dataset.portrait = this.portraitMode;
+    this.element.dataset.backpack ??= "closed";
     applyLookFlags(this.element);
     this.#syncLockControl();
     if (!options.parts || options.parts.some(p => LAYER_PARTS.includes(p))) applyCardTilts(this.element);
@@ -471,6 +501,22 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     bindDeckListeners(this);
     // A deck left detached opens its window again with the sheet.
     if (deckState(this.actor).detached) openDeckWindow(this.actor);
+    // The backpack card (Legend): Enter / Space on its band brings it
+    // forward or tucks it back; Esc tucks it back.
+    this.element.addEventListener("keydown", event => {
+      if (event.key === "Escape" && this.element.dataset.backpack === "open"
+        && !event.target.closest?.("input, textarea, select, prose-mirror")) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleBackpack(this, false);
+        return;
+      }
+      if ((event.key !== "Enter" && event.key !== " ") || event.repeat) return;
+      if (!event.target.closest?.('[data-action="toggleBackpack"]')) return;
+      event.preventDefault();
+      event.stopPropagation();
+      toggleBackpack(this);
+    });
     this.element.addEventListener("keydown", event => {
       if (event.key !== "Enter" && event.key !== " ") return;
       const band = event.target.closest?.('[data-action="flipCard"]');
@@ -485,7 +531,9 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     this.element.addEventListener("keydown", event => {
       const input = event.target;
       if (!input?.dataset?.edit || !(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement)) return;
-      if (event.key === "Enter" && !(event.shiftKey && input.dataset.edit === "themeField")) {
+      // A data-multiline field (a theme's notes) keeps Enter as a new line.
+      if (event.key === "Enter" && !("multiline" in input.dataset)
+        && !(event.shiftKey && input.dataset.edit === "themeField")) {
         event.preventDefault();
         input.blur();
       } else if (event.key === "Escape") {

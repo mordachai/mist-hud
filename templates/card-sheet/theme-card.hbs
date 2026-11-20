@@ -35,6 +35,10 @@
 {{/inline}}
 {{#*inline "mh-cs-tag"}}
 <li class="mh-cs-tag mh-cs-{{kind}}-tag {{tag.burnState}}{{#if tag.isTitle}} mh-cs-title-tag{{/if}}{{#if tag.depth}} mh-cs-subtag{{/if}}{{#if tag.selection}} mh-cs-selected mh-cs-selected-{{tag.selection}}{{/if}}" data-tag-id="{{tag.id}}" style="--mh-cs-depth: {{tag.depth}}">
+  {{#if mark}}
+  {{!-- Mist Engine cards: a dot before a power tag, the double chevron before a weakness. --}}
+  <span class="mh-cs-tag-mark" aria-hidden="true">{{#if (eq kind "weakness")}}<i class="fa-solid fa-angles-down"></i>{{/if}}</span>
+  {{/if}}
   {{#if burn}}
   {{#if tag.burnAction}}
   <button type="button" class="mh-cs-burn {{tag.burnState}}" data-action="burnTag" data-tooltip="{{tag.burnLabel}}" aria-label="{{tag.burnLabel}}"></button>
@@ -49,6 +53,48 @@
   {{> "modules/mist-hud/templates/card-sheet/tag-name.hbs" tag=tag}}
   {{/if}}
 </li>
+{{/inline}}
+{{#*inline "mh-cs-title-tag"}}
+{{!-- Legend / Otherscape: the theme's title tag in place of the title, big,
+      selected and burned like any tag (its burn mark at the right). --}}
+<div class="mh-cs-tag mh-cs-power-tag mh-cs-title-tag {{tag.burnState}}{{#if tag.selection}} mh-cs-selected mh-cs-selected-{{tag.selection}}{{/if}}" data-tag-id="{{tag.id}}">
+  <h3 class="mh-cs-title" data-fit data-fit-lines="3">
+    {{#if tag.edit}}
+    <button type="button" class="mh-cs-tag-name mh-cs-edit-name" data-action="editTag" data-tooltip="{{localize 'MistHUD.cardSheet.editTag'}}">{{tag.name}}</button>
+    {{else}}
+    {{> "modules/mist-hud/templates/card-sheet/tag-name.hbs" tag=tag}}
+    {{/if}}
+  </h3>
+  {{#if tag.edit}}
+  <button type="button" class="mh-cs-icon-btn mh-cs-delete" data-action="deleteTag" data-tooltip="{{localize 'MistHUD.cardSheet.deleteTagHint'}}" aria-label="{{localize 'MistHUD.cardSheet.deleteTag'}}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+  {{/if}}
+  {{#if tag.burnAction}}
+  <button type="button" class="mh-cs-burn {{tag.burnState}}" data-action="burnTag" data-tooltip="{{tag.burnLabel}}" aria-label="{{tag.burnLabel}}"></button>
+  {{else}}
+  <span class="mh-cs-burn {{tag.burnState}}" aria-hidden="true"></span>
+  {{/if}}
+</div>
+{{/inline}}
+{{#*inline "mh-cs-theme-title"}}
+{{#if card.edit}}
+<textarea class="mh-cs-title mh-cs-title-input" id="{{@root.uid}}-{{card.id}}-name" data-edit="themeName" rows="3" maxlength="52" spellcheck="false" aria-label="{{localize 'MistHUD.cardSheet.themeName'}}" placeholder="{{localize 'MistHUD.cardSheet.themeName'}}">{{card.title}}</textarea>
+{{else}}
+<h3 class="mh-cs-title" data-fit data-fit-lines="3">{{card.title}}</h3>
+{{/if}}
+{{/inline}}
+{{#*inline "mh-cs-quest"}}
+<div class="mh-cs-motivation{{#if card.motivationEmpty}} empty{{/if}}">
+  {{#if card.typeToggle}}
+  <button type="button" class="mh-cs-motivation-label mh-cs-type-toggle" data-action="toggleThemeType" data-tooltip="{{localize 'MistHUD.cardSheet.toggleThemeType'}}">{{card.motivationLabel}} <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i></button>
+  {{else}}
+  <span class="mh-cs-motivation-label">{{card.motivationLabel}}</span>
+  {{/if}}
+  {{#if card.edit}}
+  <textarea class="mh-cs-motivation-text mh-cs-motivation-input" id="{{@root.uid}}-{{card.id}}-mystery" data-edit="themeField" data-field="mystery" rows="3" aria-label="{{card.motivationLabel}}" placeholder="{{card.motivation}}">{{card.motivationRaw}}</textarea>
+  {{else}}
+  <p class="mh-cs-motivation-text">{{card.motivation}}</p>
+  {{/if}}
+</div>
 {{/inline}}
 {{#if card.empty}}
 <article class="mh-cs-card mh-cs-card-empty" data-card-id="{{card.id}}">
@@ -84,8 +130,8 @@
           {{/if}}
           {{#if card.ownerName}}
           {{#if card.canOpenOwner}}
-          <button type="button" class="mh-cs-owner mh-cs-owner-open" data-action="openOwnerSheet" data-tooltip="{{localize 'MistHUD.cardSheet.openOwnerSheet' name=card.ownerName}}"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> {{card.ownerName}}</button>
-          {{else}}
+          <button type="button" class="mh-cs-owner mh-cs-owner-open" data-action="openOwnerSheet" data-tooltip="{{localize 'MistHUD.cardSheet.openOwnerSheet' name=card.ownerName}}"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>{{#unless card.ownerSame}} {{card.ownerName}}{{/unless}}</button>
+          {{else unless card.ownerSame}}
           <span class="mh-cs-owner">{{card.ownerName}}</span>
           {{/if}}
           {{/if}}
@@ -102,27 +148,70 @@
           {{/if}}
         </div>
         {{/if}}
-        {{#if card.edit}}
-        <textarea class="mh-cs-title mh-cs-title-input" id="{{@root.uid}}-{{card.id}}-name" data-edit="themeName" rows="3" maxlength="52" spellcheck="false" aria-label="{{localize 'MistHUD.cardSheet.themeName'}}" placeholder="{{localize 'MistHUD.cardSheet.themeName'}}">{{card.title}}</textarea>
+        {{#if card.mistEngine}}
+        {{!-- Legend / Otherscape (the printed theme cards): the title tag, the
+              other power tags and the weakness tags on the paper half (no
+              section headings); the tracks, the quest and the theme's notes
+              on the colour half. --}}
+        <div class="mh-cs-paper">
+          {{#if card.titleTag}}
+          {{> mh-cs-title-tag tag=card.titleTag}}
+          {{else}}
+          {{> mh-cs-theme-title card=card}}
+          {{/if}}
+          <div class="mh-cs-scroll mh-cs-me-tags">
+            <ul class="mh-cs-tags mh-cs-power-tags">
+              {{#each card.powerTags}}
+              {{> mh-cs-tag tag=this kind="power" burn=true mark=true}}
+              {{/each}}
+            </ul>
+            <ul class="mh-cs-tags mh-cs-weakness-tags">
+              {{#each card.weaknessTags}}
+              {{> mh-cs-tag tag=this kind="weakness" burn=false mark=true}}
+              {{/each}}
+            </ul>
+            {{#if (or card.canAddPower card.edit)}}
+            <div class="mh-cs-tag-tools">
+              {{#if card.canAddPower}}
+              <button type="button" class="mh-cs-icon-btn" data-action="addTag" data-subtype="power" data-tooltip="{{localize 'MistHUD.cardSheet.addPowerTag'}}" aria-label="{{localize 'MistHUD.cardSheet.addPowerTag'}}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+              {{/if}}
+              {{#if card.edit}}
+              <button type="button" class="mh-cs-icon-btn" data-action="addBonusTag" data-tooltip="{{localize 'MistHUD.cardSheet.addBonusTag'}}" aria-label="{{localize 'MistHUD.cardSheet.addBonusTag'}}"><i class="fa-solid fa-star" aria-hidden="true"></i></button>
+              <button type="button" class="mh-cs-icon-btn mh-cs-add-weakness" data-action="addTag" data-subtype="weakness" data-tooltip="{{localize 'MistHUD.cardSheet.addWeaknessTag'}}" aria-label="{{localize 'MistHUD.cardSheet.addWeaknessTag'}}"><i class="fa-solid fa-angles-down" aria-hidden="true"></i></button>
+              {{/if}}
+            </div>
+            {{/if}}
+          </div>
+        </div>
+        <div class="mh-cs-lower">
+          <div class="mh-cs-tracks{{#if card.milestone}} mh-cs-tracks-3{{/if}}">
+            {{> mh-cs-pips kind="attention" label=card.attentionLabel pips=card.attention card=card}}
+            {{> mh-cs-pips kind="crack" label=card.crackLabel pips=card.crack card=card reset=card.canResetFade}}
+            {{#if card.milestone}}
+            {{> mh-cs-pips kind="milestone" label=card.milestone.label pips=card.milestone.pips card=card}}
+            {{/if}}
+          </div>
+          {{> mh-cs-quest card=card}}
+          {{#if card.hasDescription}}
+          {{!-- The theme's notes (system.description): its owner writes in it,
+                locked or not, like the notes window. --}}
+          {{#if card.own}}
+          <textarea class="mh-cs-theme-notes" id="{{@root.uid}}-{{card.id}}-description" data-edit="themeField" data-field="description" data-multiline aria-label="{{localize 'MistHUD.cardSheet.themeNotes'}}" placeholder="{{localize 'MistHUD.cardSheet.themeNotesHint'}}">{{card.description}}</textarea>
+          {{else}}
+          <p class="mh-cs-theme-notes">{{card.description}}</p>
+          {{/if}}
+          {{/if}}
+        </div>
         {{else}}
-        <h3 class="mh-cs-title" data-fit data-fit-lines="3">{{card.title}}</h3>
-        {{/if}}
-        <div class="mh-cs-tracks">
+        {{> mh-cs-theme-title card=card}}
+        <div class="mh-cs-tracks{{#if card.milestone}} mh-cs-tracks-3{{/if}}">
           {{> mh-cs-pips kind="attention" label=card.attentionLabel pips=card.attention card=card}}
           {{> mh-cs-pips kind="crack" label=card.crackLabel pips=card.crack card=card reset=card.canResetFade}}
-        </div>
-        <div class="mh-cs-motivation{{#if card.motivationEmpty}} empty{{/if}}">
-          {{#if card.typeToggle}}
-          <button type="button" class="mh-cs-motivation-label mh-cs-type-toggle" data-action="toggleThemeType" data-tooltip="{{localize 'MistHUD.cardSheet.toggleThemeType'}}">{{card.motivationLabel}} <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i></button>
-          {{else}}
-          <span class="mh-cs-motivation-label">{{card.motivationLabel}}</span>
-          {{/if}}
-          {{#if card.edit}}
-          <textarea class="mh-cs-motivation-text mh-cs-motivation-input" id="{{@root.uid}}-{{card.id}}-mystery" data-edit="themeField" data-field="mystery" rows="3" aria-label="{{card.motivationLabel}}" placeholder="{{card.motivation}}">{{card.motivationRaw}}</textarea>
-          {{else}}
-          <p class="mh-cs-motivation-text">{{card.motivation}}</p>
+          {{#if card.milestone}}
+          {{> mh-cs-pips kind="milestone" label=card.milestone.label pips=card.milestone.pips card=card}}
           {{/if}}
         </div>
+        {{> mh-cs-quest card=card}}
         <div class="mh-cs-scroll">
           <h4 class="mh-cs-section">
             <span class="mh-cs-section-label">{{localize "CityOfMist.terms.powerTags"}}</span>
@@ -153,6 +242,7 @@
             {{/each}}
           </ul>
         </div>
+        {{/if}}
       </div>
       <footer class="mh-cs-band mh-cs-band-bottom"></footer>
     </section>

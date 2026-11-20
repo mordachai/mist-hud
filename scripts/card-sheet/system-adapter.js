@@ -334,14 +334,32 @@ export async function statusDrop(actor, name, options) {
  *    box unchecks it, but a status keeps at least one box (delete removes it);
  *  - mist-engine: only the boxes holding a tier number count; that tier's
  *    box is toggled (StatusMath.binaryToggle), unless it was the last one.
+ *  - single (Legend, user 2026-11-20): only the current tier is marked;
+ *    a click sets the status to that box's tier (no lower boxes), a click
+ *    on the current tier lowers it by one (not below 1).
  * @param {Item}     status
  * @param {number}   box        1-based
  * @param {number[]} tierBoxes  the box holding each tier's number
+ * @param {{single?: boolean}} [options]
  * @returns {Promise<boolean>} true when the status changed
  */
-export async function setStatusBoxes(status, box, tierBoxes) {
+export async function setStatusBoxes(status, box, tierBoxes, { single = false } = {}) {
   const mistEngine = api.CitySettings?.isOtherscapeStatuses?.() ?? false;
   const math = globalThis.StatusMath;
+  if (single) {
+    const tier = tierBoxes.indexOf(box) + 1;
+    if (tier < 1) return false;
+    const current = Number(status.system.tier) || 0;
+    const target = Math.max(1, tier === current ? tier - 1 : tier);
+    if (mistEngine) {
+      if (target === current && !Number(status.system.pips)) return false;
+      await status.update({ "system.tier": target, "system.pips": 0 });
+    } else {
+      if (target === current) return false;
+      await status.setBoxesChecked(tierBoxes[target - 1]);
+    }
+    return true;
+  }
   if (mistEngine && math?.binaryToggle) {
     const index = tierBoxes.indexOf(box);
     if (index < 0) return false;
@@ -364,14 +382,21 @@ export async function setStatusBoxes(status, box, tierBoxes) {
  *  - mist-engine (the statusAdditionSystem setting): one box per tier, each
  *    on or off (StatusMath.statusBoxesME), shown in the box of that tier's
  *    number.
+ *  - single (Legend): only the box of the current tier.
  * @param {Item}     status
  * @param {number[]} tierBoxes  the box (1-based) holding each tier's number, e.g. [1, 2, 4, 7, 11, 16]
+ * @param {{single?: boolean}} [options]
  * @returns {boolean[]} one entry per box (tierBoxes.at(-1) boxes)
  */
-export function statusBoxes(status, tierBoxes) {
+export function statusBoxes(status, tierBoxes, { single = false } = {}) {
   const total = tierBoxes.at(-1) ?? 0;
   const boxes = new Array(total).fill(false);
   if (!status) return boxes;
+  if (single) {
+    const tier = Number(status.system?.tier) || 0;
+    if (tier >= 1 && tierBoxes[tier - 1]) boxes[tierBoxes[tier - 1] - 1] = true;
+    return boxes;
+  }
   const mistEngine = api.CitySettings?.isOtherscapeStatuses?.() ?? false;
   const math = globalThis.StatusMath;
   if (mistEngine && math?.statusBoxesME) {
@@ -602,6 +627,9 @@ export async function openSystemSheet(actor) {
     sheet = new sys.CityCharacterSheet(actor);
     systemSheets.set(actor, sheet);
   }
+  // Already open: bring it forward. A first render has no element yet
+  // (bringToTop would throw); it opens on top anyway.
+  const open = !!sheet.rendered;
   sheet.render(true);
-  sheet.bringToTop?.();
+  if (open) sheet.bringToTop?.();
 }

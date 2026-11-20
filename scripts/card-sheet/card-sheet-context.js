@@ -13,6 +13,7 @@ import { getActiveSystem } from "../constants.js";
 import {
   getThemesAndTags, getMysteryFromTheme, getThemeImprovements,
   getCrewThemes, getAllExtraThemes, getBuildUpImprovements,
+  getRelationshipTags, applyBurnState,
 } from "../getters.js";
 import { gameTerms, isTagSelectable } from "./system-adapter.js";
 import { getSelectionDirection } from "../hud-state.js";
@@ -21,6 +22,65 @@ import { getSelectionDirection } from "../hud-state.js";
 const MAIN_SLOTS = 4;
 
 const pips = track => (track ?? []).map(v => ({ filled: !!v }));
+
+/**
+ * A theme's third track (Legend: Milestone), when the game has one: its
+ * pips and its name, or null.
+ */
+function milestoneTrack(theme) {
+  let label = "";
+  try { label = theme?.getThemePropertyTerm?.("milestone") ?? ""; } catch { label = ""; }
+  if (!label) return null;
+  return { label, pips: pips(theme.system?.milestone) };
+}
+
+/**
+ * Legend and Otherscape (the Mist Engine games): the theme's first power tag
+ * is its title tag (getters.js isTitle), shown in place of the title, and the
+ * card is laid out as on the printed theme cards: title tag, tags and
+ * weakness on the paper; tracks, quest and the theme's notes on the colour.
+ */
+const MIST_ENGINE = new Set(["legend", "otherscape"]);
+
+/**
+ * The tags of a theme card: the title tag (Mist Engine games) apart from the
+ * other power tags, the theme's notes (system.description, an HTML field)
+ * as plain text for the textarea under the quest.
+ */
+function mistEngineView(theme, powerTags) {
+  if (!MIST_ENGINE.has(getActiveSystem())) return { mistEngine: false, powerTags };
+  const titleTag = powerTags.find(t => t.isTitle) ?? null;
+  return {
+    mistEngine:  true,
+    titleTag,
+    powerTags:   titleTag ? powerTags.filter(t => t !== titleTag) : powerTags,
+    hasDescription: !!theme && "description" in (theme.system ?? {}),
+    description: htmlToText(theme?.system?.description ?? ""),
+  };
+}
+
+/** An HTML field as plain text (paragraphs and line breaks as new lines). */
+export function htmlToText(html) {
+  const value = String(html ?? "");
+  if (!/[<&]/.test(value)) return value;
+  // DOMParser: an inert document (no image loads, no handlers run).
+  const doc = new DOMParser().parseFromString(
+    value.replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>\s*/gi, "\n"), "text/html");
+  return (doc.body?.textContent ?? "").replace(/\n+$/, "");
+}
+
+/** Plain text (a textarea) back to an HTML field: one paragraph per line. */
+export function textToHtml(text) {
+  const value = String(text ?? "").replace(/\s+$/, "");
+  if (!value) return "";
+  return value.split("\n").map(line => `<p>${foundry.utils.escapeHTML(line)}</p>`).join("");
+}
+
+/**
+ * The card type (the type class that picks the art in the per-system CSS) of
+ * a crew theme, per game: the Legend crew theme is the Fellowship.
+ */
+const CREW_TYPE = { legend: "fellowship" };
 
 /** Edit mode: the system's unlocked state. */
 export const isEditMode = actor => !actor?.system?.locked;
@@ -141,6 +201,12 @@ function themeCard(actor, t, flips) {
   const motivation = theme?.system?.mystery ?? "";
   const unspent = t.unspent_upgrades || 0;
   const perms = permissions(actor, actor);
+  // A themebook without a type (custom ones): the type the system gives the
+  // theme (CityItem.getThemeType), as its own sheet does.
+  let category = t.category;
+  if (!category || /^(default|unknown)$/i.test(category)) {
+    try { category = theme?.getThemeType?.() || category; } catch { /* keep it */ }
+  }
   return {
     id:              t.id,
     empty:           false,
@@ -149,8 +215,8 @@ function themeCard(actor, t, flips) {
     topRow:          perms.edit,
     flipped:         !!flips[t.id],
     // Picks the background art in the per-system CSS (mythos, logos, mist…)
-    type:            String(t.category ?? "default").toLowerCase(),
-    category:        t.category,
+    type:            String(category ?? "default").toLowerCase(),
+    category,
     themebook:       t.themebookLabel,
     title:           t.themeName,
     motivationLabel: info.prefix,
@@ -161,7 +227,8 @@ function themeCard(actor, t, flips) {
     crackLabel:      info.crackLabel,
     attention:       pips(info.attention),
     crack:           pips(info.crack),
-    powerTags:       (t.powerTags ?? []).map(tag => tagView(tag, actor, perms)),
+    milestone:       milestoneTrack(theme),
+    ...mistEngineView(theme, (t.powerTags ?? []).map(tag => tagView(tag, actor, perms))),
     weaknessTags:    (t.weaknessTags ?? []).map(tag => tagView(tag, actor, perms)),
     improvements:    getThemeImprovements(actor, t.id).map(imp => improvementView(imp, perms)),
     unspent,
@@ -189,12 +256,17 @@ function linkedThemeCard(t, flips, actor) {
     ...themeControls(actor, theme, perms, unspent, t.crack),
     flipped:         !!flips[t.id],
     // Crew and extra themes use the extras art, whatever their themebook type.
-    type:            isExtra ? "extra" : "crew",
+    type:            isExtra ? "extra" : CREW_TYPE[getActiveSystem()] ?? "crew",
     category:        t.category,
     themebook:       t.themebookLabel,
     title:           t.name,
     ownerId:         t.actorId,
     ownerName:       owner && owner.id !== actor.id ? owner.name : "",
+    // The Legend Fellowship (its actor is named like the theme), or a crew
+    // named like its theme: the name once, as the title; the open-sheet
+    // button keeps only its icon (the name in its tooltip).
+    ownerSame:       !!owner && ((!isExtra && getActiveSystem() === "legend")
+      || owner.name.trim().toLowerCase() === String(t.name ?? "").trim().toLowerCase()),
     // The crew's / danger's own sheet (CityCharacterSheet.openOwnerSheet).
     canOpenOwner,
     // The row under the band: the extra's state, the owner's sheet, the edit controls.
@@ -207,7 +279,8 @@ function linkedThemeCard(t, flips, actor) {
     crackLabel:      t.crackLabel,
     attention:       pips(t.attention),
     crack:           pips(t.crack),
-    powerTags:       (t.powerTags ?? []).map(tag => tagView(tag, owner, perms)),
+    milestone:       milestoneTrack(theme),
+    ...mistEngineView(theme, (t.powerTags ?? []).map(tag => tagView(tag, owner, perms))),
     weaknessTags:    (t.weaknessTags ?? []).map(tag => tagView(tag, owner, perms)),
     improvements:    owner ? getThemeImprovements(owner, t.id).map(imp => improvementView(imp, perms)) : [],
     unspent,
@@ -220,8 +293,13 @@ function linkedThemeCard(t, flips, actor) {
 
 /**
  * What the character card shows, per game. City of Mist: Mythos and Logos,
- * and Help/Hurt per crewmate. Legend and Otherscape get theirs in phases 6–7
- * (the card then shows the name, player and story tags only).
+ * Help/Hurt per crewmate, story tags; the build-up track on the back.
+ * Legend (phase 6): the Hero card of docs/character_card-hero_card.png:
+ * name, player, the Fellowship relationships (companion | relationship
+ * tag), Promise (the system's build-up track) and the Quintessences (the
+ * improvements bought with it), all on the front; story tags only in the
+ * deck. Otherscape gets its own in phase 7 (until then: name, player and
+ * story tags).
  */
 const CHARACTER_CARD = {
   "city-of-mist": {
@@ -232,6 +310,14 @@ const CHARACTER_CARD = {
     helpHurt: true,
     // The build-up track and the improvements bought with it (system.buildup, unspentBU).
     buildUp: true,
+  },
+  legend: {
+    label: "MistHUD.cardSheet.heroCard",
+    fields: [],
+    storyTags: false,
+    relationships: true,
+    // The build-up track on the front, as Promise and Quintessences.
+    promise: true,
   },
 };
 
@@ -279,6 +365,38 @@ function buildUpView(actor, perms) {
   };
 }
 
+/**
+ * The Fellowship relationships (Legend), one row per companion: the
+ * relationship tags (subtype "relationship"; the companion is the module
+ * flag RELATIONSHIP_TARGET, as in the HUD), then the other player
+ * characters with no tag yet (an empty row; "+" makes their tag).
+ */
+function relationshipsView(actor, perms, newTag) {
+  const { tags, openSlots } = getRelationshipTags(actor);
+  const rows = tags.map(t => ({
+    id:         t.id,
+    name:       t.tagName,
+    burnState:  t.burnState,
+    targetId:   t.targetId ?? "",
+    targetName: t.targetName || "?",
+    isNew:      !!newTag && t.id === newTag,
+    edit:       perms.edit,
+    ...selectionView(actor.items.get(t.id), perms.edit),
+  }));
+  const open = openSlots.map(a => ({ targetId: a.id, targetName: a.name }));
+  // The companions a row may name (edit mode): the other player characters,
+  // plus anyone a tag already names.
+  const companions = game.actors
+    .filter(a => a.type === "character" && a.id !== actor.id
+      && (a.hasPlayerOwner || rows.some(r => r.targetId === a.id)))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(a => ({ id: a.id, name: a.name }));
+  for (const row of rows) {
+    row.companions = companions.map(c => ({ ...c, selected: c.id === row.targetId }));
+  }
+  return { rows, open };
+}
+
 async function characterCard(actor, flips, storyTags, newStoryTag) {
   const config = CHARACTER_CARD[getActiveSystem()] ?? {};
   const sys = actor.system ?? {};
@@ -295,7 +413,7 @@ async function characterCard(actor, flips, storyTags, newStoryTag) {
     type:        "character",
     flipped:     !!flips.character,
     category:    "Character",
-    themebook:   game.i18n.localize("MistHUD.cardSheet.characterCard"),
+    themebook:   game.i18n.localize(config.label ?? "MistHUD.cardSheet.characterCard"),
     title:       actor.name,
     player:      playerNames(actor),
     fields:      (config.fields ?? []).map(f => ({
@@ -305,6 +423,8 @@ async function characterCard(actor, flips, storyTags, newStoryTag) {
     })),
     helpHurt:    !!config.helpHurt,
     crewmates:   config.helpHurt ? crewmates(actor) : [],
+    showStoryTags: config.storyTags !== false,
+    relationships: config.relationships ? relationshipsView(actor, perms, newStoryTag) : null,
     // Story tags: "+" for the owner (both modes; the new tag's name is a
     // field here), edit and delete in edit mode, as on the theme cards.
     storyTags:   storyTags.map(t => ({
@@ -319,8 +439,59 @@ async function characterCard(actor, flips, storyTags, newStoryTag) {
     })),
     shortDescription: sys.short_description ?? "",
     biography,
-    biographyRaw: sys.biography ?? "",
+    biographyText: htmlToText(sys.biography ?? ""),
     buildUp:     config.buildUp ? buildUpView(actor, perms) : null,
+    promise:     config.promise ? {
+      ...buildUpView(actor, perms),
+      // The Hero card names them Quintessences (the system: Moments of Fulfillment).
+      improvementsLabel: game.i18n.localize("MistHUD.cardSheet.quintessences"),
+    } : null,
+  };
+}
+
+// ── Backpack (Legend) ────────────────────────────────────────────────────────
+
+/** The games with a backpack card: the system's loadout theme (actor.loadout). */
+const BACKPACK = { legend: { label: "Legend.terms.loadoutTheme.name" } };
+
+/**
+ * The backpack card (Legend, phase 6): the loadout theme's tags, each with
+ * its weakness tags under it. A loadout tag is carried (activated) or left
+ * at home. Null in games without one.
+ * @param {Actor} actor
+ */
+export function buildBackpackContext(actor) {
+  const config = BACKPACK[getActiveSystem()];
+  if (!config || !actor) return null;
+  const theme = actor.loadout ?? null;
+  const perms = permissions(actor, actor);
+  const view = (tag, depth) => {
+    const base = applyBurnState(actor, tag.id, tag.system?.subtype ?? "loadout");
+    return {
+      ...tagView({ ...base, depth }, actor, perms),
+      weakness: tag.system?.subtype === "weakness",
+      carried:  !!tag.system?.activated_loadout,
+    };
+  };
+  const all = theme?.tags?.() ?? [];
+  const sorted = list => [...list].sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
+  // The carried tags first (user, 2026-11-20): the first rows peek out
+  // above the cards while the backpack is tucked away.
+  const tags = sorted(all.filter(t => !t.system?.parentId)).map(tag => ({
+    ...view(tag, 0),
+    weaknesses: sorted(all.filter(t => t.system?.parentId === tag.id)).map(w => view(w, 1)),
+  })).sort((a, b) => Number(b.carried) - Number(a.carried));
+  let label = game.i18n.localize(config.label);
+  if (label === config.label) label = game.i18n.localize("MistHUD.cardSheet.backpack");
+  return {
+    id:       "backpack",
+    themeId:  theme?.id ?? "",
+    ownerId:  actor.id,
+    ...perms,
+    exists:   !!theme,
+    type:     "backpack",
+    label,
+    tags,
   };
 }
 
@@ -336,6 +507,8 @@ async function characterCard(actor, flips, storyTags, newStoryTag) {
  *   so the sheet can re-render when they change.
  */
 export async function buildLayer2Context(actor, flips = {}, { newStoryTag = null } = {}) {
+  // newStoryTag: a story tag, or (Legend) a relationship tag, just made on
+  // the character card (its name is a field).
   const { storyTags } = getThemesAndTags(actor);
   const linked = [...getCrewThemes(actor), ...getAllExtraThemes(actor)];
   const cards = [

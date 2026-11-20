@@ -14,6 +14,7 @@
 
 import { MODULE_ID, SETTINGS } from "../constants.js";
 import { PORTRAIT_MODES, portraitMode } from "./ui-state.js";
+import { htmlToText } from "./card-sheet-context.js";
 
 /** The reference card's width (px), at which the portrait has its nominal size. */
 export const REF_CARD_W = 204;
@@ -55,6 +56,19 @@ export function portraitContext(actor, pick = false) {
       ? game.i18n.localize("MistHUD.cardSheet.portraitPick")
       : game.i18n.format("MistHUD.cardSheet.portraitButton", { mode: label(mode), next: label(nextPortraitMode(mode)) }),
   };
+}
+
+/**
+ * The biography under the name (phase 6, Legend and City of Mist): the
+ * actor's system.biography, enriched; in edit mode (owner) the core editor.
+ * @param {Actor}   actor
+ * @param {boolean} edit  edit mode and this user owns the actor
+ */
+export async function portraitBiography(actor, edit = false) {
+  const raw = actor?.system?.biography ?? "";
+  const TextEditor = foundry.applications.ux.TextEditor.implementation;
+  const html = raw ? await TextEditor.enrichHTML(raw, { secrets: actor.isOwner, relativeTo: actor }) : "";
+  return { text: edit ? htmlToText(raw) : "", html, edit, shown: edit || !!html.trim() };
 }
 
 // ── Hero Shot mask ───────────────────────────────────────────────────────────

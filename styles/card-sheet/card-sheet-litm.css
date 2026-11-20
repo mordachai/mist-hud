@@ -1,0 +1,1451 @@
+/* card-sheet-litm.css — Legend in the Mist art, fonts and colours for the card
+   sheet (phase 6, 2026-11-20). Injected at runtime by settings.js
+   (applyCardSheetCSS) when Legend is the active game; not in module.json.
+   Every rule is rooted under .mh-card-sheet (or .mh-cs-dialog).
+   The model is card-sheet-com.css; only what differs from the shared
+   card-sheet.css is here. */
+
+/* ── Fonts (user, 2026-11-20) ─────────────────────────────────────────────────
+   UnifrakturCook: the character name. IM Fell English: the header bands and
+   titles. Labrada: the theme tags. Caveat: statuses, story tags and the
+   handwritten fields. Labrada and Caveat are the module's (ui/fonts), the
+   same files the HUD loads. */
+@font-face {
+  font-family: "MH LitM Name";
+  src: url("../../ui/fonts/unifrakturcook-700.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MH LitM Fell";
+  src: url("../../ui/fonts/IMFeENrm28P.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MH LitM Labrada";
+  src: url("../../ui/fonts/Labrada-Var.ttf") format("truetype");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MH LitM Caveat";
+  src: url("../../ui/fonts/Caveat-Var.ttf") format("truetype");
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+/* Texturina: the quest (user, 2026-11-20). */
+@font-face {
+  font-family: "MH LitM Texturina";
+  src: url("../../ui/fonts/texturina-regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MH LitM Texturina";
+  src: url("../../ui/fonts/texturina-italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MH LitM Texturina";
+  src: url("../../ui/fonts/texturina-700.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Card geometry ────────────────────────────────────────────────────────────
+   The theme art is 219 x 579 (every type, the neutral one too): header band
+   y 3-30 inside a ~2 px frame, the side frame x 0-8, no footer band; on the
+   Origin, Adventure and Greatness art the paper ends at y ~280 and the
+   type's colour fills the lower half. 1 px of art = 100 / 219 cqw. */
+.mh-card-sheet {
+  --mh-cs-aspect: 219 / 579;
+  --mh-cs-radius: 1.6cqw;
+  --mh-cs-band-top: 1.4cqw;
+  --mh-cs-band-h: 12.3cqw;
+  --mh-cs-band-inset: 6cqw;
+  --mh-cs-footer-bottom: 2cqw;
+  --mh-cs-footer-h: 8cqw;
+  --mh-cs-body-top: 16.4cqw;
+  --mh-cs-body-bottom: 5cqw;
+  --mh-cs-inset: 7cqw;
+  /* Where the paper ends on the main theme art (y 280). */
+  --mh-cs-paper-end: 140cqw;
+  /* The tracks row: pips, then the name under them. */
+  --mh-cs-tracks-h: 14cqw;
+  --mh-cs-title-font: "MH LitM Fell", "IM Fell English", serif;
+  --mh-cs-title-size: 20cqw;
+  --mh-cs-title-lh: 0.98;
+  --mh-cs-title-h: 42cqw;
+  --mh-cs-title-weight: normal;
+  --mh-cs-title-spacing: 0;
+  --mh-cs-title-case: none;
+  --mh-cs-title-ink: #2c2219;
+  /* Edit mode: the title field at about half the title's size. */
+  --mh-cs-title-input-scale: 0.55;
+  --mh-cs-title-glow: 0 0.2cqw 0 rgba(255, 250, 235, 0.8);
+  --mh-cs-label-font: "MH LitM Fell", "IM Fell English", serif;
+  --mh-cs-heading-font: "MH LitM Fell", "IM Fell English", serif;
+  --mh-cs-heading-size: 6.2cqw;
+  --mh-cs-heading-weight: normal;
+  --mh-cs-heading-spacing: 0.06em;
+  --mh-cs-hand-font: "MH LitM Caveat", "Caveat", cursive;
+  --mh-cs-tag-font: "MH LitM Labrada", "Labrada", serif;
+  --mh-cs-name-font: "MH LitM Name", "UnifrakturCook", serif;
+  --mh-cs-quest-font: "MH LitM Texturina", "Texturina", serif;
+  --mh-cs-band-ink: #fffaf0;
+  /* The backpack card (294 x 381): one card wide, about half a theme card
+     tall, over the third and fourth cards (mockup-4). */
+  --mh-cs-backpack-aspect: 294 / 381;
+  --mh-cs-backpack-k: 1.02;
+  --mh-cs-backpack-x: 2.74;
+}
+
+/* Room over the cards for the backpack's band and first rows (not in the
+   detached deck window, which has no backpack). */
+.mh-card-sheet:not(.mh-cs-deck-window) {
+  --mh-cs-top-k: 0.5;
+}
+
+/* ── Wider cards, same height (user, 2026-11-20: 20 px more each) ────────────
+   The cards are 196 x 464 at the default window instead of 176 x 464: the
+   art stretches sideways. --mh-cs-card-w is the unit of the whole stage, so
+   everything else measured in card widths (the peek, the backpack room, the
+   portrait column, the leaves, the backpack) is scaled by --mh-cs-wide-f
+   (176 / 196) to keep its size. Inside a card, what is placed on the art
+   from top to bottom (bands, where the paper ends) is scaled the same way,
+   as 1cqw is now wider than one art pixel is tall. */
+.mh-card-sheet {
+  --mh-cs-wide-f: calc(176 / 196);
+}
+
+.mh-card-sheet:not(.mh-cs-deck-window) {
+  --mh-cs-aspect: calc(219 / 579 / var(--mh-cs-wide-f));
+  --mh-cs-peek: calc(0.2 * var(--mh-cs-wide-f));
+  --mh-cs-top-k: calc(0.5 * var(--mh-cs-wide-f));
+  --mh-cs-deck-k: calc(0.96 * var(--mh-cs-wide-f));
+  --mh-cs-deck-hw: calc(0.54 * var(--mh-cs-wide-f));
+  --mh-cs-backpack-k: calc(1.02 * var(--mh-cs-wide-f));
+}
+
+.mh-card-sheet:not(.mh-cs-deck-window)[data-portrait="portrait"] {
+  --mh-cs-portrait-k: calc(256 / 204 * var(--mh-cs-wide-f));
+}
+
+.mh-card-sheet:not(.mh-cs-deck-window)[data-portrait="hero"] {
+  --mh-cs-portrait-k: calc(340 / 204 * var(--mh-cs-wide-f));
+}
+
+/* The deck column keeps the leaves' width. */
+.mh-card-sheet:not(.mh-cs-deck-window) .mh-cs-deck {
+  left: calc(var(--mh-cs-stage-left) + var(--mh-cs-row-w) - (var(--mh-cs-wide-f) - var(--mh-cs-deck-k)) * var(--mh-cs-card-w));
+  width: calc(var(--mh-cs-wide-f) * var(--mh-cs-card-w));
+}
+
+/* Hidden (the toolbar's eye), a third of the leaves still shows past the
+   last card (user, 2026-11-20): the deck sticks out --mh-cs-deck-k card
+   widths, so it slides back that less 0.36 of its width. */
+.mh-card-sheet:not(.mh-cs-deck-window) .mh-cs-deck.mh-cs-deck-hidden {
+  translate: calc(-1 * (var(--mh-cs-deck-k) - 0.36 * var(--mh-cs-wide-f)) * var(--mh-cs-card-w)) 0;
+}
+
+/* Spread out (the sheet's spread view and the detached window), the leaves
+   20 % smaller, so more of them show at once (user, 2026-11-20). */
+.mh-card-sheet .mh-cs-deck-list {
+  align-items: center;
+}
+
+.mh-card-sheet .mh-cs-deck-list > .mh-cs-deck-card {
+  width: 80%;
+}
+
+.mh-card-sheet:not(.mh-cs-deck-window) .mh-cs-layer .mh-cs-card {
+  --mh-cs-band-top: calc(1.4cqw * var(--mh-cs-wide-f));
+  --mh-cs-band-h: calc(12.3cqw * var(--mh-cs-wide-f));
+  --mh-cs-body-top: calc(16.4cqw * var(--mh-cs-wide-f));
+  --mh-cs-paper-end: calc(140cqw * var(--mh-cs-wide-f));
+  --mh-cs-title-size: calc(20cqw * var(--mh-cs-wide-f));
+  --mh-cs-title-h: calc(42cqw * var(--mh-cs-wide-f));
+}
+
+.mh-card-sheet:not(.mh-cs-deck-window) .mh-cs-layer .mh-cs-theme-card {
+  --mh-cs-me-title-h: calc(32cqw * var(--mh-cs-wide-f));
+}
+
+/* ── Backgrounds by card type ─────────────────────────────────────────────── */
+
+.mh-card-sheet .mh-cs-theme-card .mh-cs-face,
+.mh-card-sheet .mh-cs-character-card .mh-cs-face {
+  background-color: transparent;
+  background-image: url("../../ui/card-sheet/litm/neutral_theme_bg.webp");
+  --mh-cs-ink: #2c2219;
+  --mh-cs-rule: rgba(95, 60, 40, 0.35);
+}
+
+.mh-card-sheet .mh-cs-type-origin .mh-cs-face    { background-image: url("../../ui/card-sheet/litm/origin_theme_bg.webp"); }
+.mh-card-sheet .mh-cs-type-adventure .mh-cs-face { background-image: url("../../ui/card-sheet/litm/adventure_theme_bg.webp"); }
+.mh-card-sheet .mh-cs-type-greatness .mh-cs-face { background-image: url("../../ui/card-sheet/litm/greatness_theme_bg.webp"); }
+
+/* The Hero card, the Fellowship and the extras: the neutral art (user,
+   2026-11-20). One line each, so their own art later is a one-line change. */
+.mh-card-sheet .mh-cs-type-character .mh-cs-face  { background-image: url("../../ui/card-sheet/litm/neutral_theme_bg.webp"); }
+.mh-card-sheet .mh-cs-type-fellowship .mh-cs-face { background-image: url("../../ui/card-sheet/litm/neutral_theme_bg.webp"); }
+.mh-card-sheet .mh-cs-type-crew .mh-cs-face       { background-image: url("../../ui/card-sheet/litm/neutral_theme_bg.webp"); }
+.mh-card-sheet .mh-cs-type-extra .mh-cs-face      { background-image: url("../../ui/card-sheet/litm/neutral_theme_bg.webp"); }
+
+.mh-card-sheet .mh-cs-backpack-card .mh-cs-face {
+  background: transparent url("../../ui/card-sheet/litm/backpack_theme_bg.webp") center / 100% 100% no-repeat;
+  --mh-cs-ink: #2c2219;
+  --mh-cs-rule: rgba(95, 60, 40, 0.35);
+}
+
+/* The header band: small capitals in IM Fell, white, centred (the type icon
+   at the right). */
+.mh-card-sheet .mh-cs-themebook {
+  font-family: var(--mh-cs-label-font);
+  font-size: 6.4cqw;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-shadow: 0 0.3cqw 0.8cqw rgba(0, 0, 0, 0.55);
+}
+
+.mh-card-sheet .mh-cs-band-top .mh-cs-type-icon {
+  order: 2;
+  width: 8cqw;
+  height: 8cqw;
+  filter: drop-shadow(0 0 0.5cqw rgba(0, 0, 0, 0.5));
+}
+
+.mh-card-sheet .mh-cs-type-icon.Origin     { background-image: url("../../ui/icons/origin_litm_icn.svg"); }
+.mh-card-sheet .mh-cs-type-icon.Adventure  { background-image: url("../../ui/icons/adventure_litm_icn.svg"); }
+.mh-card-sheet .mh-cs-type-icon.Greatness  { background-image: url("../../ui/icons/greatness_litm_icn.svg"); }
+.mh-card-sheet .mh-cs-type-icon:is(.Crew, .Fellowship) { background-image: url("../../ui/icons/fellowship_icn.svg"); }
+.mh-card-sheet .mh-cs-type-icon.Backpack   { background-image: url("../../ui/icons/backpack_icn.svg"); }
+
+/* The theme title: IM Fell, as typed (no capitals), dark ink on the paper. */
+.mh-card-sheet .mh-cs-title {
+  margin: 0 -2cqw;
+}
+
+/* ── The main themes: the paper half and the colour half ─────────────────────
+   As on the printed cards: the title tag, the power tags and the weakness
+   tags on the paper (dark ink); the tracks, the quest and the theme's notes
+   on the type's colour, in off-white (card-sheet.css, Mist Engine cards). */
+.mh-card-sheet .mh-cs-theme-card {
+  --mh-cs-me-title-h: 32cqw;
+  --mh-cs-quest-size: max(14px, 7.2cqw);
+  /* The notes under the quest: bigger (user, 2026-11-20), 14 px at least. */
+  --mh-cs-notes-size: max(14px, 7cqw);
+}
+
+/* The tracks lower on the colour half (user, 2026-11-20: 20 px at least).
+   The names in normal case, a little smaller than 14 px (user, 2026-11-20:
+   the size floor in the last block), so the three columns stand apart. */
+.mh-card-sheet .mh-cs-lower .mh-cs-tracks {
+  margin: max(20px, 11.4cqw) -1cqw 0;
+  gap: 3cqw;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.mh-card-sheet .mh-cs-lower .mh-cs-tracks > * {
+  flex: 1 1 auto;
+}
+
+.mh-card-sheet .mh-cs-lower .mh-cs-track-label {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* "QUEST" between two rules, as on the printed cards. */
+.mh-card-sheet .mh-cs-lower .mh-cs-motivation-label {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+}
+
+.mh-card-sheet .mh-cs-lower .mh-cs-motivation-label::before,
+.mh-card-sheet .mh-cs-lower .mh-cs-motivation-label::after {
+  content: "";
+  flex: 1 1 auto;
+  border-top: max(1px, 0.3cqw) solid currentColor;
+  opacity: 0.7;
+}
+
+/* ── Theme tags centred, as on the printed cards (user, 2026-11-20) ──────────
+   No dot before a power tag; the weakness's double chevron, bigger, just
+   before its name. The burn mark and the trash sit at the right edge, out of
+   the flow, and the same room on both sides keeps the name centred. */
+.mh-card-sheet .mh-cs-me-tags .mh-cs-tag {
+  position: relative;
+  justify-content: center;
+  gap: 0.8cqw;
+  padding-inline: calc(var(--mh-cs-burn-w) + 0.4cqw);
+}
+
+.mh-card-sheet .mh-cs-me-tags .mh-cs-tag:has(.mh-cs-delete) {
+  padding-inline: calc(var(--mh-cs-burn-w) + 7cqw);
+}
+
+.mh-card-sheet .mh-cs-me-tags .mh-cs-tag .mh-cs-tag-name {
+  flex: 0 1 auto;
+  text-align: center;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-me-tags .mh-cs-power-tag .mh-cs-tag-mark {
+  display: none;
+}
+
+/* The chevron in the name's colour (user, 2026-11-20), black when selected
+   like the name. */
+.mh-card-sheet .mh-cs-card .mh-cs-me-tags .mh-cs-weakness-tag .mh-cs-tag-mark {
+  width: auto;
+  font-size: max(14px, 6.4cqw);
+  color: var(--mh-cs-ink);
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-me-tags .mh-cs-weakness-tag.mh-cs-selected .mh-cs-tag-mark {
+  color: #000;
+}
+
+.mh-card-sheet .mh-cs-me-tags .mh-cs-tag .mh-cs-burn {
+  position: absolute;
+  top: calc(0.7cqw + (var(--mh-cs-tag-size) * 1.2 - var(--mh-cs-burn-h)) / 2);
+  right: 0;
+  margin: 0;
+}
+
+.mh-card-sheet .mh-cs-me-tags .mh-cs-tag .mh-cs-delete {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  translate: 0 -50%;
+}
+
+.mh-card-sheet .mh-cs-me-tags .mh-cs-tag .mh-cs-burn ~ .mh-cs-delete {
+  right: calc(var(--mh-cs-burn-w) + 1.4cqw);
+}
+
+/* The weakness highlighter, even on both sides of the centred name. */
+.mh-card-sheet .mh-cs-me-tags .mh-cs-weakness-tag {
+  background-image: linear-gradient(90deg, transparent, var(--mh-cs-weak-mark, rgba(175, 45, 30, 0.16)) 15%, var(--mh-cs-weak-mark, rgba(175, 45, 30, 0.16)) 85%, transparent);
+}
+
+.mh-card-sheet .mh-cs-card:is(.mh-cs-type-origin, .mh-cs-type-adventure, .mh-cs-type-greatness) {
+  /* White, with a darker shadow, so it reads over the mist too (user,
+     2026-11-20). */
+  --mh-cs-low-ink: #fff;
+  --mh-cs-low-rule: rgba(255, 255, 255, 0.7);
+}
+
+.mh-card-sheet .mh-cs-card:is(.mh-cs-type-origin, .mh-cs-type-adventure, .mh-cs-type-greatness) .mh-cs-front .mh-cs-lower {
+  --mh-cs-ink: var(--mh-cs-low-ink);
+  --mh-cs-rule: var(--mh-cs-low-rule);
+  color: var(--mh-cs-low-ink);
+  text-shadow: 0 0 0.5cqw rgba(0, 0, 0, 0.85), 0 0.3cqw 1.2cqw rgba(0, 0, 0, 0.6);
+}
+
+.mh-card-sheet .mh-cs-card:is(.mh-cs-type-origin, .mh-cs-type-adventure, .mh-cs-type-greatness) .mh-cs-front .mh-cs-lower .mh-cs-motivation-label {
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-card:is(.mh-cs-type-origin, .mh-cs-type-adventure, .mh-cs-type-greatness) .mh-cs-front .mh-cs-lower textarea.mh-cs-theme-notes::placeholder {
+  color: rgba(255, 255, 255, 0.82);
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-card:is(.mh-cs-type-origin, .mh-cs-type-adventure, .mh-cs-type-greatness) .mh-cs-front .mh-cs-lower textarea.mh-cs-theme-notes:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mh-card-sheet .mh-cs-card:is(.mh-cs-type-origin, .mh-cs-type-adventure, .mh-cs-type-greatness) .mh-cs-front .mh-cs-lower textarea.mh-cs-theme-notes:focus {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+/* The title tag: IM Fell, as typed. */
+.mh-card-sheet .mh-cs-card .mh-cs-tag.mh-cs-title-tag .mh-cs-title {
+  margin: 0;
+}
+
+/* The quest: Texturina (user, 2026-11-20). */
+.mh-card-sheet .mh-cs-motivation-text {
+  font-family: var(--mh-cs-quest-font);
+  font-size: var(--mh-cs-quest-size);
+  line-height: 1.15;
+  max-height: calc(var(--mh-cs-quest-size) * 1.15 * 4 + 0.8em);
+}
+
+.mh-card-sheet .mh-cs-motivation-label {
+  font-size: 5.4cqw;
+  letter-spacing: 0.1em;
+  opacity: 0.85;
+}
+
+/* ── Tracks: Improve, Abandon, Milestone ─────────────────────────────────────
+   All three are circles, filled when checked (user, 2026-11-20): white on
+   the colour half of Origin / Adventure / Greatness, the ink's colour on the
+   neutral art (Fellowship, extras). */
+.mh-card-sheet .mh-cs-tracks {
+  font-family: var(--mh-cs-label-font);
+  font-size: 4.6cqw;
+  letter-spacing: 0.04em;
+}
+
+.mh-card-sheet .mh-cs-pip {
+  width: 5.6cqw;
+  height: 5.6cqw;
+  border: none;
+  border-radius: 0;
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 0 0.3cqw rgba(40, 25, 10, 0.9));
+}
+
+.mh-card-sheet .mh-cs-tracks .mh-cs-pip,
+.mh-card-sheet .mh-cs-promise .mh-cs-pip {
+  border: 0.45cqw solid currentColor;
+  border-radius: 50%;
+  background: transparent;
+  filter: none;
+}
+
+.mh-card-sheet .mh-cs-promise .mh-cs-pip.filled {
+  background: url("../../ui/card-sheet/com/marker-x.svg") center / 80% 80% no-repeat;
+}
+
+/* A bit bigger than the other pips; filled with the line's colour. */
+.mh-card-sheet .mh-cs-tracks .mh-cs-pip {
+  width: 6.8cqw;
+  height: 6.8cqw;
+}
+
+.mh-card-sheet .mh-cs-tracks .mh-cs-pip.filled {
+  background: currentColor;
+}
+
+.mh-card-sheet .mh-cs-card:is(.mh-cs-type-origin, .mh-cs-type-adventure, .mh-cs-type-greatness) .mh-cs-tracks .mh-cs-pip {
+  color: #fff;
+  filter: drop-shadow(0 0 0.3cqw rgba(40, 25, 10, 0.9));
+}
+
+/* ── Burn: the HUD's scratch marks (ui/icons/burn_scratch_*2.svg) ─────────── */
+/* 10cqw (user, 2026-11-20). */
+.mh-card-sheet .mh-cs-card {
+  --mh-cs-burn-w: 10cqw;
+  --mh-cs-burn-h: 10cqw;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-tag {
+  align-items: flex-start;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-tag .mh-cs-tag-name { order: 1; }
+.mh-card-sheet .mh-cs-card .mh-cs-tag .mh-cs-delete   { order: 2; align-self: center; }
+
+.mh-card-sheet .mh-cs-card .mh-cs-burn,
+.mh-card-sheet .mh-cs-card button.mh-cs-burn {
+  order: 3;
+  width: var(--mh-cs-burn-w);
+  height: var(--mh-cs-burn-h);
+  margin: calc((var(--mh-cs-tag-size) * 1.2 - var(--mh-cs-burn-h)) / 2) 0 0 auto;
+  border-radius: 1cqw;
+  background: url("../../ui/icons/burn_scratch_empty2.svg") center / contain no-repeat;
+  opacity: 0.75;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-burn.toBurn {
+  background-image: url("../../ui/icons/burn_scratch_toburn2.svg");
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-burn.burned {
+  background-image: url("../../ui/icons/burn_scratch_burned2.svg");
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-card .mh-cs-tag .mh-cs-delete ~ .mh-cs-burn {
+  margin-left: 0;
+}
+
+/* ── Tags: Labrada for the theme tags, Caveat for story / relationship tags ─ */
+.mh-card-sheet .mh-cs-card {
+  --mh-cs-tag-size: 8.6cqw;
+}
+
+.mh-card-sheet .mh-cs-weakness-tag .mh-cs-tag-name {
+  font-style: italic;
+}
+
+.mh-card-sheet .mh-cs-relationship-tag .mh-cs-tag-name,
+.mh-card-sheet .mh-cs-story-tag .mh-cs-tag-name {
+  font-family: var(--mh-cs-hand-font);
+  font-size: 7.6cqw;
+}
+
+/* Selected tags: the HUD's Legend brush bars (select-bar-litm-*.webp) behind
+   the row, the name in white over them. */
+.mh-card-sheet .mh-cs-card {
+  --mh-cs-sel-bar: url("../../ui/select-bar-litm-normal.webp");
+  --mh-cs-sel-bar-neg: url("../../ui/select-bar-litm-weakness.webp");
+}
+
+.mh-card-sheet .mh-cs-tag {
+  position: relative;
+  isolation: isolate;
+}
+
+.mh-card-sheet .mh-cs-tag::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--mh-cs-sel-bar) left center / 100% 100% no-repeat;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+.mh-card-sheet .mh-cs-weakness-tag::before,
+.mh-card-sheet .mh-cs-tag.mh-cs-selected-negative::before {
+  background-image: var(--mh-cs-sel-bar-neg);
+}
+
+.mh-card-sheet .mh-cs-weakness-tag.mh-cs-selected-positive::before {
+  background-image: var(--mh-cs-sel-bar);
+}
+
+.mh-card-sheet .mh-cs-tag:has(> .mh-cs-select-name:hover)::before {
+  opacity: 0.35;
+}
+
+.mh-card-sheet .mh-cs-tag.mh-cs-selected::before {
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-tag .mh-cs-tag-text,
+.mh-card-sheet .mh-cs-card .mh-cs-select-name:hover .mh-cs-tag-text,
+.mh-card-sheet .mh-cs-tag.mh-cs-selected .mh-cs-tag-text {
+  background: none;
+  box-shadow: none;
+}
+
+/* Black over the brush bar (white read badly, user 2026-11-20). */
+.mh-card-sheet .mh-cs-tag.mh-cs-selected .mh-cs-tag-text {
+  color: #000;
+  text-shadow: 0 0 0.6cqw rgba(255, 250, 235, 0.6);
+}
+
+.mh-card-sheet .mh-cs-tag.mh-cs-selected .mh-cs-select-name::after {
+  content: none;
+}
+
+.mh-card-sheet .mh-cs-card button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Tag line tints (Sheet Settings): the type's colour. */
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card {
+  --mh-cs-tint: #8a6a55;
+  --mh-cs-tint-a: 30%;
+  --mh-cs-tint-b: 22%;
+}
+
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card:is(.mh-cs-type-origin, .mh-cs-type-adventure, .mh-cs-type-greatness) {
+  --mh-cs-tint: #fff8e8;
+  --mh-cs-tint-a: 18%;
+  --mh-cs-tint-b: 12%;
+}
+
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag {
+  margin: 0 0 0.6cqw;
+  padding-left: calc(var(--mh-cs-depth, 0) * 4cqw + 1.2cqw);
+  padding-right: 0.8cqw;
+  border-radius: 0.8cqw;
+  background-color: color-mix(in srgb, var(--mh-cs-tint) var(--mh-cs-tint-a), transparent);
+}
+
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(even) { background-color: transparent; }
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-tags > .mh-cs-tag:nth-child(4n+3) { background-color: color-mix(in srgb, var(--mh-cs-tint) var(--mh-cs-tint-b), transparent); }
+
+/* The theme tags keep their centred room on both sides with the tints on,
+   so a long name wraps before the burn mark (user, 2026-11-20). */
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-me-tags .mh-cs-tag:not(.mh-cs-title-tag) {
+  padding-inline: calc(var(--mh-cs-burn-w) + 0.4cqw);
+}
+
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card .mh-cs-me-tags .mh-cs-tag:not(.mh-cs-title-tag):has(.mh-cs-delete) {
+  padding-inline: calc(var(--mh-cs-burn-w) + 7cqw);
+}
+
+/* The theme's name a little lower under the band (user, 2026-11-20). */
+.mh-card-sheet .mh-cs-layer .mh-cs-card .mh-cs-paper > :is(.mh-cs-title-tag, .mh-cs-title-input) {
+  margin-top: 4cqw;
+}
+
+/* No striped rows on the neutral art (the Fellowship, extras: user,
+   2026-11-20). */
+.mh-card-sheet[data-tints="on"] .mh-cs-layer .mh-cs-card:is(.mh-cs-type-fellowship, .mh-cs-type-crew, .mh-cs-type-extra) .mh-cs-tags > .mh-cs-tag:nth-child(n) {
+  background-color: transparent;
+}
+
+/* ── The Hero card (docs/character_card-hero_card.png) ───────────────────────
+   "HERO CARD" on the band; the name in UnifrakturCook; strips in a pale
+   brown wash for Player, Fellowship Relationship and Quintessences; the
+   relationships as a two-column table with a rule between the columns;
+   Promise with five circles; the Quintessences on ruled lines; a "Legend
+   in the Mist" footer (text: no logo art yet). */
+.mh-card-sheet .mh-cs-character-card {
+  --mh-cs-strip: rgba(140, 95, 65, 0.16);
+}
+
+.mh-card-sheet .mh-cs-character-card .mh-cs-body {
+  bottom: 13cqw;
+  gap: 1.4cqw;
+}
+
+.mh-card-sheet .mh-cs-character-name,
+.mh-card-sheet .mh-cs-card input.mh-cs-character-name {
+  height: 30cqw;
+  font-family: var(--mh-cs-name-font);
+  font-size: calc(17cqw * var(--mh-fit, 1));
+  font-weight: 700;
+  line-height: 0.95;
+  text-transform: none;
+  color: #3a2618;
+  text-shadow: 0 0.2cqw 0 rgba(255, 250, 235, 0.8);
+}
+
+.mh-card-sheet .mh-cs-card input.mh-cs-character-name {
+  font-size: 12cqw;
+}
+
+.mh-card-sheet .mh-cs-character-card .mh-cs-field {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.6cqw;
+  padding: 0;
+  border: none;
+}
+
+.mh-card-sheet .mh-cs-character-card .mh-cs-field dt,
+.mh-card-sheet .mh-cs-character-card .mh-cs-section {
+  margin: 0;
+  padding: 0.8cqw 0;
+  border: none;
+  background: var(--mh-cs-strip);
+  font-family: var(--mh-cs-heading-font);
+  font-size: 5.6cqw;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 1;
+}
+
+.mh-card-sheet .mh-cs-character-card .mh-cs-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4cqw;
+  margin-top: 1.4cqw;
+}
+
+.mh-card-sheet .mh-cs-character-card .mh-cs-section .mh-cs-section-label {
+  flex: 0 1 auto;
+}
+
+.mh-card-sheet .mh-cs-character-card .mh-cs-field dd {
+  padding: 0 0 0.6cqw;
+  border-bottom: 0.3cqw solid var(--mh-cs-rule);
+  font-family: var(--mh-cs-hand-font);
+  font-size: 7.6cqw;
+  text-align: center;
+}
+
+.mh-card-sheet .mh-cs-character-card .mh-cs-rel-head {
+  padding: 0.6cqw 0;
+  border-bottom: 0.3cqw solid var(--mh-cs-rule);
+  font-size: 4.2cqw;
+  text-align: center;
+}
+
+.mh-card-sheet .mh-cs-character-card .mh-cs-rel-row {
+  font-family: var(--mh-cs-hand-font);
+}
+
+.mh-card-sheet .mh-cs-character-card .mh-cs-rel-companion {
+  padding-right: 1.4cqw;
+  border-right: 0.3cqw solid var(--mh-cs-rule);
+  font-family: var(--mh-cs-hand-font);
+  font-size: 7cqw;
+}
+
+.mh-card-sheet .mh-cs-promise-label {
+  font-size: 5.8cqw;
+}
+
+.mh-card-sheet .mh-cs-promise .mh-cs-pip {
+  width: 6.4cqw;
+  height: 6.4cqw;
+  color: #5a4030;
+}
+
+.mh-card-sheet .mh-cs-quint-icon {
+  /* No quintessence art yet: the marker X. */
+  background-image: url("../../ui/card-sheet/com/marker-x.svg");
+  opacity: 0.8;
+}
+
+.mh-card-sheet .mh-cs-quintessences {
+  min-height: calc(4 * 8.4cqw);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent calc(8.4cqw - 0.3cqw), var(--mh-cs-rule) calc(8.4cqw - 0.3cqw), var(--mh-cs-rule) 8.4cqw);
+}
+
+.mh-card-sheet .mh-cs-quintessences .mh-cs-improvement {
+  min-height: 8.4cqw;
+  font-family: var(--mh-cs-hand-font);
+  font-size: 7cqw;
+  line-height: 8.4cqw;
+}
+
+.mh-card-sheet .mh-cs-character-card .mh-cs-front .mh-cs-band-bottom {
+  justify-content: center;
+}
+
+.mh-card-sheet .mh-cs-character-card .mh-cs-front .mh-cs-band-bottom::after {
+  content: "Legend in the Mist";
+  padding: 0.6cqw 4cqw;
+  border-top: 0.3cqw solid var(--mh-cs-rule);
+  color: #6a4a35;
+  font-family: var(--mh-cs-heading-font);
+  font-size: 5.6cqw;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── The backpack card (294 x 381): band y 2-41, frame x 0-15, a thin band
+   at the bottom (y 366-380). 1 px of art = 100 / 294 cqw. ───────────────
+   50 px wider than its art, same height (user, 2026-11-20): the art
+   stretches sideways, centred where it was. --mh-cs-bp-h is the height
+   (registered, so it is worked out on the card, in the stage's units);
+   --mh-cs-bp-u is 1cqw of the card at its art width: what is placed from
+   top to bottom, the burn mark and the tag size use it, so they keep
+   their size. */
+@property --mh-cs-bp-h {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --mh-cs-bp-u {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+.mh-card-sheet .mh-cs-backpack-card {
+  --mh-cs-bp-h: calc(var(--mh-cs-backpack-k, 1) * var(--mh-cs-card-w) / (294 / 381));
+  --mh-cs-bp-u: calc(var(--mh-cs-backpack-k, 1) * var(--mh-cs-card-w) / 100);
+  --mh-cs-backpack-w: calc(var(--mh-cs-backpack-k, 1) * var(--mh-cs-card-w) + 50px);
+  margin-left: -25px;
+  height: var(--mh-cs-bp-h);
+  aspect-ratio: auto;
+  --mh-cs-band-top: calc(0.8 * var(--mh-cs-bp-u));
+  --mh-cs-band-h: calc(13.2 * var(--mh-cs-bp-u));
+  --mh-cs-band-inset: 6cqw;
+  --mh-cs-body-top: calc(16 * var(--mh-cs-bp-u));
+  --mh-cs-body-bottom: calc(6 * var(--mh-cs-bp-u));
+  --mh-cs-inset: 7cqw;
+  --mh-cs-tag-size: calc(7.4 * var(--mh-cs-bp-u));
+  --mh-cs-burn-w: calc(10 * var(--mh-cs-bp-u));
+  --mh-cs-burn-h: calc(10 * var(--mh-cs-bp-u));
+}
+
+/* Tucked away, the rows that peek out above the cards take clicks too
+   (select, burn, carry: user, 2026-11-20); the rest, behind the cards, is
+   covered by a blank sheet (::after) so a gap between two cards never
+   reaches a hidden row. --mh-cs-bp-peek: how much of the card shows. */
+@property --mh-cs-bp-peek {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+.mh-card-sheet .mh-cs-backpack-card {
+  --mh-cs-bp-peek: calc(var(--mh-cs-top-k, 0) * var(--mh-cs-card-w));
+}
+
+.mh-card-sheet:not([data-backpack="open"]) .mh-cs-backpack-card .mh-cs-body {
+  pointer-events: auto;
+}
+
+.mh-card-sheet:not([data-backpack="open"]) .mh-cs-backpack-card::after {
+  content: "";
+  position: absolute;
+  inset: var(--mh-cs-bp-peek) 0 0 0;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+/* Open: it rises by its height (the art's, not its width's). */
+.mh-card-sheet[data-backpack="open"] .mh-cs-backpack-card {
+  translate: 0 calc(-1 * (var(--mh-cs-bp-h) - var(--mh-cs-top-k, 0) * var(--mh-cs-card-w)));
+}
+
+/* The open backpack rises out of the window's top: the content is clipped
+   at the sides and bottom only (not while minimised, when core shrinks it). */
+.application.mh-card-sheet:not(.mh-cs-deck-window):not(.minimized) > .window-content {
+  overflow: visible;
+  clip-path: inset(-100vh 0 0 0);
+}
+
+/* Behind the header bar too (user, 2026-11-20). The bar is the window's
+   header, under the whole content, so the backpack can't go under it: the
+   strip that crosses the bar is cut out of it instead (clip-path, which
+   also lets the clicks through to the bar's controls). The hole is where
+   the bar is, in the card's own box: y 0 to --mh-cs-band-row of the window,
+   less the card's top (closed: --mh-cs-band-space; open: that less its
+   rise). It moves with the slide, same timing. Not with the bar at the
+   bottom. */
+.mh-card-sheet:not([data-bar="bottom"]) .mh-cs-backpack-card {
+  --mh-cs-bp-hole-y: calc(-1 * var(--mh-cs-band-space));
+  clip-path: polygon(evenodd,
+    -20% -20%, 120% -20%, 120% 120%, -20% 120%, -20% -20%,
+    -20% var(--mh-cs-bp-hole-y), 120% var(--mh-cs-bp-hole-y),
+    120% calc(var(--mh-cs-bp-hole-y) + var(--mh-cs-band-row)), -20% calc(var(--mh-cs-bp-hole-y) + var(--mh-cs-band-row)),
+    -20% var(--mh-cs-bp-hole-y));
+  transition: translate 0.4s ease, filter 0.4s ease, clip-path 0.4s ease;
+}
+
+.mh-card-sheet:not([data-bar="bottom"])[data-backpack="open"] .mh-cs-backpack-card {
+  --mh-cs-bp-hole-y: calc(100% - var(--mh-cs-top-k, 0) * var(--mh-cs-card-w) - var(--mh-cs-band-space));
+}
+
+.mh-card-sheet .mh-cs-backpack-card .mh-cs-face {
+  box-shadow: none;
+  filter: drop-shadow(0 0.8cqw 2cqw rgba(0, 0, 0, 0.55));
+}
+
+.mh-card-sheet .mh-cs-backpack-card .mh-cs-top-row {
+  justify-content: flex-end;
+}
+
+/* A little tilted, as in mockup-4 (user, 2026-11-20), with the other cards'
+   tilt. The inside turns, not the card: the card still slides straight up
+   and the header bar's hole above stays level. */
+.mh-card-sheet[data-tilt="on"] .mh-cs-backpack-card .mh-cs-card-inner {
+  rotate: 2.5deg;
+}
+
+/* Carried or left at home: a diamond, with a dot in it when carried
+   (user, 2026-11-20). */
+.mh-card-sheet .mh-cs-backpack-card .mh-cs-carry {
+  width: 3.8cqw;
+  height: 3.8cqw;
+  margin: calc((var(--mh-cs-tag-size) * 1.2 - 3.8cqw) / 2) 2cqw 0 0.6cqw;
+  border-width: max(1px, 0.45cqw);
+  border-radius: 0;
+  rotate: 45deg;
+  opacity: 0.85;
+}
+
+.mh-card-sheet .mh-cs-backpack-card .mh-cs-loadout-tag.carried .mh-cs-carry {
+  background: radial-gradient(circle, currentColor 0 34%, transparent 40%);
+  opacity: 1;
+}
+
+/* ── The portrait: the name in UnifrakturCook, the underline under it ────── */
+.mh-card-sheet .mh-cs-portrait-name {
+  font-family: var(--mh-cs-name-font);
+  font-weight: 700;
+  text-transform: none;
+  line-height: 1;
+  /* As tall as its lines (two at most), so the underline sits right under
+     a one-line name (user, 2026-11-20). card-fit.js still sees the cap. */
+  height: auto;
+  max-height: calc(24cqw * 2 + 2cqw);
+  --mh-cs-portrait-name-ink: #fbf3e2;
+  --mh-cs-portrait-name-glow: 0 0 0.05em rgba(255, 240, 210, 0.6), 0 0.04em 0.16em rgba(0, 0, 0, 0.95);
+}
+
+.mh-card-sheet .mh-cs-portrait-deco {
+  display: block;
+  width: 78%;
+  aspect-ratio: 3241 / 244;
+  margin: 0 auto;
+  background: url("../../ui/card-sheet/litm/underline-1.webp") center / contain no-repeat;
+  filter: drop-shadow(0 0.4cqw 0.8cqw rgba(0, 0, 0, 0.8));
+}
+
+.mh-card-sheet .mh-cs-portrait-bio {
+  font-family: var(--mh-cs-tag-font);
+}
+
+/* ── tags-deck: the leaves (user, 2026-11-20) ────────────────────────────────
+   Statuses on the green leaf, story tags on the yellow one (500 x 270,
+   leaf_green / leaf_yellow.webp). Measured on the art, in % of the card:
+   the light name patch x 136-410, y 39-128; the six boxes y 141-211 at
+   x 90-126, 140-178, 194-239, 251-294, 308-348, 367-403. The leaf's colour
+   says the type: no type marker (the blank card picks its type on two small
+   leaves at the stem). The tier numbers are drawn on the boxes, a checked
+   box is crossed with the marker X (docs/litm-status.png). */
+.mh-card-sheet {
+  --mh-cs-deck-aspect: 500 / 270;
+  --mh-cs-deck-hw: 0.54;
+  --mh-cs-deck-step: 0.42;
+  --mh-cs-deck-band-x: 27%;   --mh-cs-deck-band-y: 15%;   --mh-cs-deck-band-w: 55%;  --mh-cs-deck-band-h: 31%;
+  --mh-cs-deck-pips-y: 52.2%; --mh-cs-deck-pips-h: 25.9%;
+  --mh-cs-deck-name-x: 27%;   --mh-cs-deck-name-y: 17%;   --mh-cs-deck-name-w: 55%;  --mh-cs-deck-name-h: 27%;
+  --mh-cs-deck-foot-x: 22%;   --mh-cs-deck-foot-y: 80.5%; --mh-cs-deck-foot-w: 56%;  --mh-cs-deck-foot-h: 11%;
+  --mh-cs-deck-sel-x: 89%;    --mh-cs-deck-sel-y: 6%;     --mh-cs-deck-sel-size: 4.6cqw;
+  --mh-cs-deck-steps-x: 80%; --mh-cs-deck-steps-y: 48%; --mh-cs-deck-steps-w: 9%;  --mh-cs-deck-steps-h: 26%;
+  --mh-cs-deck-ink: #1d2414;
+  --mh-cs-deck-fill: transparent;
+  --mh-cs-deck-sel-ink: #f4efdc;
+}
+
+.mh-card-sheet .mh-cs-deck-face {
+  border-radius: 0;
+  background-color: transparent;
+  background-image: url("../../ui/card-sheet/litm/leaf_yellow.webp");
+  box-shadow: none;
+  filter: drop-shadow(0 0.6cqw 1.4cqw rgba(0, 0, 0, 0.6));
+}
+
+.mh-card-sheet .mh-cs-deck-kind-status .mh-cs-deck-face {
+  background-image: url("../../ui/card-sheet/litm/leaf_green.webp");
+}
+
+/* The name on the patch, handwritten. */
+.mh-card-sheet .mh-cs-deck-band {
+  justify-content: center;
+  color: var(--mh-cs-deck-ink);
+  font-family: var(--mh-cs-hand-font);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  text-shadow: 0 0 0.6cqw rgba(255, 255, 240, 0.5);
+}
+
+.mh-card-sheet .mh-cs-deck-band::before {
+  display: none;
+}
+
+.mh-card-sheet .mh-cs-deck-band-text {
+  font-size: calc(10cqw * var(--mh-fit, 1));
+  text-align: center;
+}
+
+.mh-card-sheet .mh-cs-deck-num {
+  font-family: "MH LitM Fell", "IM Fell English", serif;
+  font-weight: normal;
+}
+
+/* A name field (edit mode, a new card) takes the patch; the band hides. */
+.mh-card-sheet .mh-cs-deck-card:has(.mh-cs-deck-name-line input.mh-cs-deck-name) .mh-cs-deck-band {
+  visibility: hidden;
+}
+
+.mh-card-sheet .mh-cs-deck-card:not(:has(.mh-cs-deck-name-line input.mh-cs-deck-name)) .mh-cs-deck-name-main {
+  display: none;
+}
+
+.mh-card-sheet .mh-cs-deck-name-line {
+  font-family: var(--mh-cs-hand-font);
+  font-size: 8cqw;
+}
+
+/* The type marker: none (the leaf's colour), except the blank card's picker. */
+.mh-card-sheet .mh-cs-deck-markers:not(.mh-cs-deck-markers-pick) {
+  display: none;
+}
+
+.mh-card-sheet .mh-cs-deck-markers-pick .mh-cs-deck-marker {
+  left: 2%;
+  width: 12%;
+  height: 13%;
+  border-radius: 0;
+  background: center / contain no-repeat;
+  opacity: 0.6;
+}
+
+.mh-card-sheet .mh-cs-deck-markers-pick .mh-cs-deck-marker-status { top: 26%; background-image: url("../../ui/card-sheet/litm/leaf_green.webp"); }
+.mh-card-sheet .mh-cs-deck-markers-pick .mh-cs-deck-marker-tag    { top: 41%; background-image: url("../../ui/card-sheet/litm/leaf_yellow.webp"); }
+
+.mh-card-sheet .mh-cs-deck-markers-pick .mh-cs-deck-marker.on {
+  opacity: 1;
+  box-shadow: none;
+  filter: drop-shadow(0 0 0.6cqw #fff);
+}
+
+/* The toggle icons (temporary, permanent, crispy) along the stem, from the
+   leaf's tip upwards (user, 2026-11-20); the tools keep the footer's place.
+   The footer box goes (display: contents), so both are placed on the leaf. */
+.mh-card-sheet .mh-cs-deck-foot {
+  display: contents;
+}
+
+/* The tools are placed one by one on the leaf (user, 2026-11-20): the trash
+   under the gap between boxes 4 and 5, a story tag's burn in the free space
+   at the right, near the tip (statuses have their − / + there). */
+.mh-card-sheet .mh-cs-deck-tools {
+  display: contents;
+}
+
+.mh-card-sheet .mh-cs-deck-tool {
+  position: absolute;
+  left: 60.2%;
+  top: 87%;
+  translate: -50% -50%;
+  color: #f6efe4;
+  text-shadow: 0 0 0.6cqw rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.mh-card-sheet .mh-cs-deck-tool[data-action="burnDeckTag"] { left: 87%; top: 50%; }
+.mh-card-sheet .mh-cs-deck-tool[data-action="useClue"]     { left: 74%; top: 87%; }
+
+.mh-card-sheet .mh-cs-deck-card:is(:hover, :focus-within) .mh-cs-deck-tool,
+.mh-card-sheet .mh-cs-deck-big .mh-cs-deck-tool,
+.mh-card-sheet .mh-cs-deck-tool.armed {
+  opacity: 0.9;
+}
+
+.mh-card-sheet .mh-cs-deck-card .mh-cs-deck-tool:is(:hover, :focus-visible) {
+  opacity: 1;
+}
+
+/* The − / + in a column, the + on top (user, 2026-11-20). */
+.mh-card-sheet .mh-cs-deck-steps {
+  flex-direction: column-reverse;
+  gap: 1cqw;
+}
+
+.mh-card-sheet .mh-cs-deck-flags {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.mh-card-sheet .mh-cs-deck-flag {
+  position: absolute;
+  translate: -50% -50%;
+  color: #f6efe4;
+  text-shadow: 0 0 0.6cqw rgba(0, 0, 0, 0.8);
+  pointer-events: auto;
+}
+
+.mh-card-sheet .mh-cs-deck-flag:nth-child(1) { left: 9%;  top: 52%; }
+.mh-card-sheet .mh-cs-deck-flag:nth-child(2) { left: 15%; top: 36%; }
+.mh-card-sheet .mh-cs-deck-flag:nth-child(3) { left: 21%; top: 22%; }
+
+/* The six boxes, each on its painted box; the tier number on it; a checked
+   box crossed with the marker X. */
+.mh-card-sheet .mh-cs-deck-pips {
+  display: block;
+  left: 0;
+  right: 0;
+  counter-reset: mh-cs-box;
+}
+
+.mh-card-sheet .mh-cs-deck-pip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  counter-increment: mh-cs-box;
+}
+
+.mh-card-sheet .mh-cs-deck-pip:nth-child(1) { left: 18%;   width: 7.2%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(2) { left: 28%;   width: 7.6%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(3) { left: 38.8%; width: 9%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(4) { left: 50.2%; width: 8.6%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(5) { left: 61.6%; width: 8%; }
+.mh-card-sheet .mh-cs-deck-pip:nth-child(6) { left: 73.4%; width: 7.2%; }
+
+.mh-card-sheet .mh-cs-deck-pip::before {
+  content: counter(mh-cs-box);
+  position: absolute;
+  top: 6%;
+  left: 0;
+  right: 0;
+  color: rgba(40, 46, 26, 0.7);
+  font-family: "MH LitM Fell", "IM Fell English", serif;
+  font-size: 6cqw;
+  line-height: 1;
+  text-align: center;
+}
+
+.mh-card-sheet .mh-cs-deck-pip.filled::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 38%;
+  bottom: 8%;
+  background: url("../../ui/card-sheet/com/marker-x.svg") center / contain no-repeat;
+}
+
+.mh-card-sheet .mh-cs-deck-pip.filled,
+.mh-card-sheet button.mh-cs-deck-pip.filled {
+  background-color: transparent;
+  mix-blend-mode: normal;
+}
+
+.mh-card-sheet button.mh-cs-deck-pip:hover,
+.mh-card-sheet button.mh-cs-deck-pip.filled:hover {
+  background-color: rgba(255, 255, 230, 0.25);
+  mix-blend-mode: normal;
+}
+
+/* ── The card sheet's dialogs and the notes window: a parchment page ───────
+   The improvement dialog, Help / Hurt, theme delete and the notes window
+   (.mh-cs-dialog). A brown leather frame like the neutral card's band,
+   the title in IM Fell, the body on the paper of the cards, Labrada text.
+   The doubled :not(#id) root lifts every rule here over the External
+   Style, as in card-sheet-com.css. */
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) {
+  --mh-cs-dlg-ink: #2c2219;
+  --mh-cs-dlg-rule: rgba(95, 60, 40, 0.35);
+  --mh-cs-dlg-text-font: "MH LitM Labrada", "Labrada", serif;
+  border: 1px solid rgba(60, 30, 20, 0.6);
+  border-radius: 6px;
+  background: linear-gradient(180deg, #a26f5b, #8a5a47);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
+  color: #fffaf0;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b)::before,
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b)::after {
+  display: none;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) > .window-header {
+  position: relative;
+  padding: 7px 10px 5px 14px;
+  border: none;
+  background: none;
+  box-shadow: none;
+  color: #fffaf0;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) > .window-header .window-title {
+  position: static;
+  inset: auto;
+  padding: 0;
+  font-family: "MH LitM Fell", "IM Fell English", serif;
+  font-size: 19px;
+  font-weight: normal;
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  color: #fffaf0;
+  -webkit-text-fill-color: #fffaf0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) > .window-header :is(.window-icon, .header-control) {
+  color: #fffaf0;
+  opacity: 0.8;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) > .window-header .header-control:is(:hover, :focus-visible) {
+  opacity: 1;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) > .window-content {
+  margin: 2px 6px 6px;
+  padding: 12px 14px;
+  border-radius: 3px;
+  background: #ece2d2 url("../../ui/card-sheet/litm/neutral_theme_bg.webp") center 80% / 100% auto;
+  box-shadow: inset 0 0 0 1px rgba(60, 30, 20, 0.25), 0 2px 8px rgba(0, 0, 0, 0.45);
+  color: var(--mh-cs-dlg-ink);
+  font-family: var(--mh-cs-dlg-text-font);
+  font-size: 15px;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: inherit;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .dialog-content :is(p, div:only-child:not([class])) {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) :is(.mh-cs-imp-dialog-heading, .mh-cs-choices > legend) {
+  display: block;
+  width: 100%;
+  margin: 0 0 6px;
+  padding: 3px 0;
+  border: none;
+  background: rgba(140, 95, 65, 0.16);
+  font-family: "MH LitM Fell", "IM Fell English", serif;
+  font-size: 15px;
+  font-weight: normal;
+  line-height: 1.1;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--mh-cs-dlg-ink);
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .mh-cs-imp-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .mh-cs-imp-dialog-desc {
+  max-height: 14em;
+  overflow-y: auto;
+  font-style: italic;
+  white-space: pre-line;
+  scrollbar-width: thin;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .mh-cs-imp-dialog-uses {
+  font-family: "MH LitM Fell", "IM Fell English", serif;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .mh-cs-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .dialog-content label {
+  font-size: 15px;
+  color: inherit;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .dialog-content :is(input[type="text"], input:not([type]), input[type="number"], select, textarea) {
+  width: 100%;
+  height: auto;
+  min-height: 30px;
+  padding: 4px 8px;
+  border: none;
+  border-bottom: 2px solid var(--mh-cs-dlg-rule);
+  border-radius: 0;
+  background: rgba(255, 252, 244, 0.6);
+  box-shadow: none;
+  color: var(--mh-cs-dlg-ink);
+  font-family: var(--mh-cs-dlg-text-font);
+  font-size: 15px;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .dialog-content :is(input, select, textarea):focus {
+  background: rgba(255, 252, 244, 0.9);
+  outline: none;
+  box-shadow: none;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .form-footer {
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .form-footer button {
+  height: 32px;
+  border: 1px solid rgba(60, 30, 20, 0.5);
+  border-radius: 4px;
+  background: #8a5a47;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  color: #fffaf0;
+  font-family: "MH LitM Fell", "IM Fell English", serif;
+  font-size: 15px;
+  font-weight: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .form-footer button:is(:hover, :focus-visible) {
+  background: #9b6a56;
+  outline: none;
+}
+
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .form-footer button:is([autofocus], .default) {
+  border-color: rgba(255, 245, 225, 0.6);
+  text-shadow: 0 0 6px rgba(255, 240, 210, 0.5);
+}
+
+/* The notes window: the editors on the paper. */
+.application.mh-cs-dialog.mh-cs-notes:not(#mh-cs-dlg):not(#mh-cs-dlg-b) > .window-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.application.mh-cs-notes .mh-cs-notes-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.application.mh-cs-notes .mh-cs-notes-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+.application.mh-cs-notes :is(prose-mirror.mh-cs-notes-editor, .mh-cs-notes-text) {
+  display: block;
+  position: relative;
+  flex: 1 0 auto;
+  min-height: 9em;
+  padding: 4px 8px;
+  border: none;
+  border-bottom: 2px solid var(--mh-cs-dlg-rule, rgba(95, 60, 40, 0.35));
+  background: rgba(255, 252, 244, 0.55);
+  color: var(--mh-cs-dlg-ink, #2c2219);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.application.mh-cs-notes .mh-cs-notes-description,
+.application.mh-cs-notes .mh-cs-notes-description :is(prose-mirror.mh-cs-notes-editor, .mh-cs-notes-text) {
+  flex: 0 0 auto;
+}
+
+.application.mh-cs-notes .mh-cs-notes-description :is(prose-mirror.mh-cs-notes-editor, .mh-cs-notes-text) {
+  min-height: 6.4em;
+}
+
+.application.mh-cs-notes prose-mirror.mh-cs-notes-editor .editor-menu {
+  flex-wrap: wrap;
+  height: auto;
+}
+
+.application.mh-cs-notes .mh-cs-notes-text p,
+.application.mh-cs-notes prose-mirror.mh-cs-notes-editor p {
+  margin: 0 0 0.6em;
+}
+
+.application.mh-cs-notes .mh-cs-none {
+  opacity: 0.5;
+}
+
+/* ── No text under 14 px (user, 2026-11-20) ───────────────────────────────────
+   Every text of the sheet keeps its card-relative size, but never less than
+   14 px (the size at the reference window is in the comment). The root
+   (1,2,0) lifts these over every rule above and in card-sheet.css. Icons and
+   the core window controls keep their size. */
+/* Tags a bit bigger (user, 2026-11-20): 16 px at least. */
+.application.mh-card-sheet:not(#mh-cs-min) .mh-cs-card {
+  --mh-cs-tag-size: max(16px, 7.6cqw);
+}
+
+.application.mh-card-sheet:not(#mh-cs-min) .mh-cs-card.mh-cs-backpack-card {
+  --mh-cs-tag-size: max(16px, calc(7.4 * var(--mh-cs-bp-u)));
+}
+
+/* Labels and headings (4.2–5.8cqw: 7–10 px). */
+.application.mh-card-sheet:not(#mh-cs-min) :is(
+  .mh-cs-themebook, .mh-cs-motivation-label,
+  .mh-cs-section, .mh-cs-section-label, .mh-cs-subsection, .mh-cs-unspent, .mh-cs-none,
+  .mh-cs-field dt, .mh-cs-promise-label, .mh-cs-owner) {
+  font-size: max(14px, 5.6cqw);
+}
+
+/* Under 14 px where the user allowed it (2026-11-20): the track names, so
+   they stand apart, and the Hero card's headings, so none wraps or
+   overlaps. */
+.application.mh-card-sheet:not(#mh-cs-min) :is(.mh-cs-track-label, .mh-cs-tracks) {
+  font-size: max(12px, 5.6cqw);
+}
+
+.application.mh-card-sheet:not(#mh-cs-min) .mh-cs-character-card :is(.mh-cs-section, .mh-cs-section-label, .mh-cs-field dt, .mh-cs-promise-label) {
+  font-size: max(12px, 5.6cqw);
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+}
+
+/* The relationships: the companion column wider, so "COMPANION" fits; a
+   long name or "RELATION TAG" goes on two lines instead of being cut. */
+.application.mh-card-sheet:not(#mh-cs-min) .mh-cs-character-card :is(.mh-cs-rel-head, .mh-cs-rel-row) {
+  grid-template-columns: 46% 1fr auto;
+}
+
+.application.mh-card-sheet:not(#mh-cs-min) .mh-cs-character-card :is(.mh-cs-rel-head, .mh-cs-rel-col) {
+  font-size: max(11px, 5cqw);
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.application.mh-card-sheet:not(#mh-cs-min) .mh-cs-character-card span.mh-cs-rel-companion {
+  overflow: visible;
+  white-space: normal;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.application.mh-card-sheet:not(#mh-cs-min) .mh-cs-character-card .mh-cs-front .mh-cs-band-bottom,
+.application.mh-card-sheet:not(#mh-cs-min) .mh-cs-character-card .mh-cs-front .mh-cs-band-bottom::after {
+  font-size: max(12px, 5.6cqw);
+  white-space: nowrap;
+}
+
+/* Improvements (6–6.2cqw: 10–11 px). */
+.application.mh-card-sheet:not(#mh-cs-min) :is(.mh-cs-imp-name, .mh-cs-imp-choice, .mh-cs-imp-desc) {
+  font-size: max(14px, 6.2cqw);
+}
+
+/* Text fields and tags (5–7.6cqw: 9–13 px). */
+.application.mh-card-sheet:not(#mh-cs-min) :is(
+  .mh-cs-short-desc, .mh-cs-field dd, .mh-cs-rel-companion, .mh-cs-rel-input,
+  .mh-cs-rel-row, .mh-cs-quintessences .mh-cs-improvement) {
+  font-size: max(14px, 7cqw);
+}
+
+.application.mh-card-sheet:not(#mh-cs-min) .mh-cs-card .mh-cs-tag:not(.mh-cs-title-tag) :is(.mh-cs-tag-name, .mh-cs-tag-text) {
+  font-size: max(14px, var(--mh-cs-tag-size));
+}
+
+.application.mh-card-sheet:not(#mh-cs-min) .mh-cs-card :is(.mh-cs-relationship-tag, .mh-cs-story-tag) .mh-cs-tag-name {
+  font-size: max(14px, 7.6cqw);
+}
+
+/* The biography under the portrait. */
+.application.mh-card-sheet:not(#mh-cs-min) .mh-cs-portrait-bio {
+  font-size: max(14px, 5.6cqw);
+}
+
+/* The header bar's roll totals and the deck's toolbar (11–13 px). */
+.application.mh-card-sheet:not(#mh-cs-min) :is(.mh-cs-total-label, .mh-cs-deck-count, .mh-cs-deck-menu-item) {
+  font-size: 14px;
+}
+
+/* The improvement dialog's uses line (13 px). */
+.application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .mh-cs-imp-dialog-uses {
+  font-size: 14px;
+}

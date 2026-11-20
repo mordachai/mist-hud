@@ -21,6 +21,14 @@ const GROUPS = [
   { key: "shb",     from: ["shb"],              label: "CityOfMist.terms.shb" },
 ];
 
+/**
+ * Legend and Otherscape have fewer moves (user, 2026-11-20, phase 6): every
+ * move in one group, in the same order (core, special, Sacrifice / Blaze),
+ * with no chevron.
+ */
+const SINGLE_GROUP = new Set(["legend", "otherscape"]);
+const ALL_GROUP = { key: "all", from: GROUPS.flatMap(g => g.from), label: "MistHUD.hud.moves" };
+
 function _button(move) {
   const abbr = getMoveAbbreviation(move);
   // Text buttons are round: long abbreviations (MONOLOGUE) get smaller text.
@@ -35,7 +43,7 @@ function _button(move) {
  */
 export async function prepareMoveBar(actor, groupIndex = 0) {
   const pages = organizeMoves(await getMoves(), m => actor.canUseMove?.(m) ?? true);
-  const groups = GROUPS
+  const groups = (SINGLE_GROUP.has(getActiveSystem()) ? [ALL_GROUP] : GROUPS)
     .map(g => ({ ...g, moves: g.from.flatMap(k => pages.find(p => p.key === k)?.moves ?? []) }))
     .filter(g => g.moves.length);
   const n = groups.length;

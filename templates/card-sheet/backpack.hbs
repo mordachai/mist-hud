@@ -1,0 +1,72 @@
+{{!-- PART "backpack": the Legend backpack card (phase 6), the system's
+      loadout theme. About half a theme card tall, tucked behind the front
+      layer with its header band peeking out above it (like the back
+      layer); clicking the band brings it forward, clicking it again (or
+      Esc) tucks it back. One row per loadout tag: the carried toggle
+      (play and edit), the name (play mode: select it for the roll), the burn
+      flame; its weakness tags under it. Edit mode: + (new tag), a weakness +
+      and trash per tag, the name opens the system's edit dialog.
+      Empty for games without a backpack.
+      Takes: backpack (buildBackpackContext) or null. --}}
+<section class="mh-cs-backpack-part">
+  {{#if backpack}}
+  <article class="mh-cs-card mh-cs-backpack-card mh-cs-type-backpack{{#if backpack.edit}} mh-cs-editable{{/if}}" data-card-id="backpack" data-theme-id="{{backpack.themeId}}" data-owner-id="{{backpack.ownerId}}">
+    <div class="mh-cs-card-inner">
+      <section class="mh-cs-face mh-cs-front">
+        <header class="mh-cs-band mh-cs-band-top" data-action="toggleBackpack" role="button" tabindex="0" aria-expanded="false" data-tooltip="{{localize 'MistHUD.cardSheet.backpackToggle'}}">
+          <span class="mh-cs-themebook">{{backpack.label}}</span>
+          <span class="mh-cs-type-icon Backpack" aria-hidden="true"></span>
+        </header>
+        <div class="mh-cs-body">
+          {{#if backpack.exists}}
+          {{#if backpack.edit}}
+          <div class="mh-cs-top-row">
+            <span class="mh-cs-edit-tools">
+              <button type="button" class="mh-cs-icon-btn" data-action="addLoadoutTag" data-tooltip="{{localize 'MistHUD.cardSheet.addLoadoutTag'}}" aria-label="{{localize 'MistHUD.cardSheet.addLoadoutTag'}}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+            </span>
+          </div>
+          {{/if}}
+          <ul class="mh-cs-scroll mh-cs-tags mh-cs-backpack-tags">
+            {{#each backpack.tags}}
+            <li class="mh-cs-tag mh-cs-loadout-tag {{burnState}}{{#if carried}} carried{{else}} left-home{{/if}}{{#if selection}} mh-cs-selected mh-cs-selected-{{selection}}{{/if}}" data-tag-id="{{id}}">
+              {{#if ../backpack.own}}
+              <button type="button" class="mh-cs-carry" data-action="toggleLoadoutTag" aria-pressed="{{#if carried}}true{{else}}false{{/if}}" data-tooltip="{{#if carried}}{{localize 'MistHUD.cardSheet.loadoutCarried'}}{{else}}{{localize 'MistHUD.cardSheet.loadoutLeft'}}{{/if}}" aria-label="{{localize 'MistHUD.cardSheet.loadoutToggle' name=name}}"></button>
+              {{else}}
+              <span class="mh-cs-carry" aria-hidden="true"></span>
+              {{/if}}
+              {{#if edit}}
+              <button type="button" class="mh-cs-tag-name mh-cs-edit-name" data-action="editTag" data-tooltip="{{localize 'MistHUD.cardSheet.editTag'}}">{{name}}</button>
+              <button type="button" class="mh-cs-icon-btn mh-cs-add-weakness" data-action="addLoadoutWeakness" data-tooltip="{{localize 'MistHUD.cardSheet.addWeaknessTag'}}" aria-label="{{localize 'MistHUD.cardSheet.addWeaknessTag'}}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+              <button type="button" class="mh-cs-icon-btn mh-cs-delete" data-action="deleteTag" data-tooltip="{{localize 'MistHUD.cardSheet.deleteTagHint'}}" aria-label="{{localize 'MistHUD.cardSheet.deleteTag'}}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+              {{else}}
+              {{> "modules/mist-hud/templates/card-sheet/tag-name.hbs" tag=this}}
+              {{/if}}
+              {{#if burnAction}}
+              <button type="button" class="mh-cs-burn {{burnState}}" data-action="burnTag" data-tooltip="{{burnLabel}}" aria-label="{{burnLabel}}"></button>
+              {{else}}
+              <span class="mh-cs-burn {{burnState}}" aria-hidden="true"></span>
+              {{/if}}
+            </li>
+            {{#each weaknesses}}
+            <li class="mh-cs-tag mh-cs-weakness-tag mh-cs-subtag {{burnState}}{{#if selection}} mh-cs-selected mh-cs-selected-{{selection}}{{/if}}" data-tag-id="{{id}}" style="--mh-cs-depth: 1">
+              {{#if edit}}
+              <button type="button" class="mh-cs-tag-name mh-cs-edit-name" data-action="editTag" data-tooltip="{{localize 'MistHUD.cardSheet.editTag'}}">{{name}}</button>
+              <button type="button" class="mh-cs-icon-btn mh-cs-delete" data-action="deleteTag" data-tooltip="{{localize 'MistHUD.cardSheet.deleteTagHint'}}" aria-label="{{localize 'MistHUD.cardSheet.deleteTag'}}"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+              {{else}}
+              {{> "modules/mist-hud/templates/card-sheet/tag-name.hbs" tag=this}}
+              {{/if}}
+            </li>
+            {{/each}}
+            {{else}}
+            <li class="mh-cs-none">{{localize "MistHUD.cardSheet.noLoadoutTags"}}</li>
+            {{/each}}
+          </ul>
+          {{else if backpack.own}}
+          <button type="button" class="mh-cs-add-theme" data-action="createBackpack"><i class="fa-solid fa-plus" aria-hidden="true"></i> {{localize "MistHUD.cardSheet.createBackpack"}}</button>
+          {{/if}}
+        </div>
+      </section>
+    </div>
+  </article>
+  {{/if}}
+</section>
