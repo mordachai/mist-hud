@@ -487,6 +487,40 @@
 .mh-card-sheet .mh-cs-deck-pip:nth-child(15) { left: 80.82%; width: 2.88%; }
 .mh-card-sheet .mh-cs-deck-pip:nth-child(16) { left: 84.59%; width: 8.84%; }
 
+/* A checked box is struck with a hand-drawn marker slash (slash.svg) instead
+   of a filled cell, turned to lean with the strip's slanted cells; the
+   printed numbers show through. */
+.mh-card-sheet .mh-cs-deck-pip.filled,
+.mh-card-sheet button.mh-cs-deck-pip.filled {
+  background-color: transparent;
+}
+
+.mh-card-sheet .mh-cs-deck-pip.filled::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 108%;
+  aspect-ratio: 13 / 109;
+  background: url("../../ui/card-sheet/com/slash.svg") center / 100% 100% no-repeat;
+  transform: translate(-50%, -50%) rotate(4deg);
+  pointer-events: none;
+}
+
+/* The boxes with a printed number (1, 2, 4, 7, 11, 16) are crossed with the
+   marker X instead, on the top half of the box so the number stays clear;
+   un-skewed so the X keeps its shape. */
+.mh-card-sheet .mh-cs-deck-pip.filled:is(:nth-child(1), :nth-child(2), :nth-child(4),
+    :nth-child(7), :nth-child(11), :nth-child(16))::after {
+  left: 8%;
+  right: 8%;
+  top: 2%;
+  height: 50%;
+  aspect-ratio: auto;
+  background: url("../../ui/card-sheet/com/marker-x.svg") center / contain no-repeat;
+  transform: skewX(5.7deg);
+}
+
 /* ── The card sheet's dialogs (fixes phase 3) ────────────────────────────────
    The improvement dialog (system-adapter.js improvementDialog) and the
    other DialogV2 the card sheet opens (Help / Hurt, theme delete) carry
