@@ -809,27 +809,8 @@
   clip-path: inset(-100vh 0 0 0);
 }
 
-/* Behind the header bar too (user, 2026-11-20). The bar is the window's
-   header, under the whole content, so the backpack can't go under it: the
-   strip that crosses the bar is cut out of it instead (clip-path, which
-   also lets the clicks through to the bar's controls). The hole is where
-   the bar is, in the card's own box: y 0 to --mh-cs-band-row of the window,
-   less the card's top (closed: --mh-cs-band-space; open: that less its
-   rise). It moves with the slide, same timing. Not with the bar at the
-   bottom. */
-.mh-card-sheet:not([data-bar="bottom"]) .mh-cs-backpack-card {
-  --mh-cs-bp-hole-y: calc(-1 * var(--mh-cs-band-space));
-  clip-path: polygon(evenodd,
-    -20% -20%, 120% -20%, 120% 120%, -20% 120%, -20% -20%,
-    -20% var(--mh-cs-bp-hole-y), 120% var(--mh-cs-bp-hole-y),
-    120% calc(var(--mh-cs-bp-hole-y) + var(--mh-cs-band-row)), -20% calc(var(--mh-cs-bp-hole-y) + var(--mh-cs-band-row)),
-    -20% var(--mh-cs-bp-hole-y));
-  transition: translate 0.4s ease, filter 0.4s ease, clip-path 0.4s ease;
-}
-
-.mh-card-sheet:not([data-bar="bottom"])[data-backpack="open"] .mh-cs-backpack-card {
-  --mh-cs-bp-hole-y: calc(100% - var(--mh-cs-top-k, 0) * var(--mh-cs-card-w) - var(--mh-cs-band-space));
-}
+/* The header bar no longer crosses the backpack: at the top, it is the
+   parchment at its left (see "The header bar" at the end of this file). */
 
 .mh-card-sheet .mh-cs-backpack-card .mh-cs-face {
   box-shadow: none;
@@ -1448,4 +1429,232 @@
 /* The improvement dialog's uses line (13 px). */
 .application.mh-cs-dialog:not(#mh-cs-dlg):not(#mh-cs-dlg-b) .mh-cs-imp-dialog-uses {
   font-size: 14px;
+}
+
+/* ── The header bar, at the top (user, 2026-11-20) ────────────────────────────
+   No band over the cards: the bar is a sheet of parchment (header_bg) in
+   the room the backpack peeks into, from the theme cards' left edge to the
+   backpack, as tall as that room. The cards keep their size (the window
+   opens 58 px shorter, card-sheet.js) and start 6 px down, as with the bar
+   at the bottom. Moves and the feather (Notes) are in the move bar, laid
+   over the parchment; the header controls are a 3 × 2 grid at its right,
+   in leather brown. Minimised, the window is the plain band again. */
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) :is(.mh-cs-layer, .mh-cs-deck, .mh-cs-deck-overlay, .mh-cs-move-bar, .mh-cs-portrait-part, .mh-cs-backpack-part),
+.application.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window):not(.minimized) > .window-header {
+  --mh-cs-band-space: 6px;
+  --mh-cs-hdr-h: calc(var(--mh-cs-top-k, 0) * var(--mh-cs-card-w) + 1px);
+  /* To the backpack's left edge (it is 50 px wider than its art, centred), less a gap. */
+  --mh-cs-hdr-w: calc(var(--mh-cs-backpack-x) * (var(--mh-cs-card-w) + var(--mh-cs-gap)) - 25px - 12px);
+  --mh-cs-leather: #5c3a1e;
+  --mh-cs-leather-ink: #3d2512;
+}
+
+.application.mh-card-sheet.mh-card-sheet:not(.mh-cs-deck-window):not([data-bar="bottom"]):not(.minimized) > .window-header {
+  width: var(--mh-cs-hdr-w);
+  height: var(--mh-cs-hdr-h);
+  padding: 0 10px;
+  display: grid;
+  grid-template-columns: repeat(3, 24px);
+  grid-auto-rows: 24px;
+  justify-content: end;
+  align-content: center;
+  gap: 2px 4px;
+  border-radius: 0;
+  background: url("../../ui/card-sheet/litm/header_bg.webp") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 0.25rem 0.35rem rgba(0, 0, 0, 0.5));
+  color: var(--mh-cs-leather);
+}
+
+.application.mh-card-sheet.mh-card-sheet:not(.mh-cs-deck-window):not([data-bar="bottom"]):not(.minimized) > .window-header .window-title {
+  position: absolute;
+}
+
+.application.mh-card-sheet.mh-card-sheet:not(.mh-cs-deck-window):not([data-bar="bottom"]):not(.minimized) > .window-header .header-control {
+  color: var(--mh-cs-leather);
+  font-size: 14px;
+  opacity: 0.85;
+  text-shadow: none;
+}
+
+.application.mh-card-sheet.mh-card-sheet:not(.mh-cs-deck-window):not([data-bar="bottom"]):not(.minimized) > .window-header .header-control:is(:hover, :focus-visible) {
+  color: var(--mh-cs-leather-ink);
+  opacity: 1;
+}
+
+/* Unlocked: the lock in a burnt orange, and a brown rim inside the parchment. */
+.application.mh-card-sheet.mh-card-sheet:not(.mh-cs-deck-window):not([data-bar="bottom"]):not(.minimized) > .window-header .mh-cs-lock.active {
+  color: #b0501a;
+  opacity: 1;
+}
+
+.application.mh-card-sheet.mh-card-sheet[data-mode="edit"]:not(.mh-cs-deck-window):not([data-bar="bottom"]):not(.minimized) > .window-header {
+  box-shadow: inset 0 0 0 2px rgba(176, 80, 26, 0.55);
+}
+
+/* The move bar over the parchment: the moves in two rows (column by
+   column, so a set splits evenly), the feather at the right, clear of the
+   controls' grid. */
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-move-bar {
+  width: var(--mh-cs-hdr-w);
+  height: var(--mh-cs-hdr-h);
+  padding: 4px 92px 4px 12px;
+  gap: 4px;
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-move-bar:not(.mh-cs-move-bar-text) .mh-cs-move-group:not(.hidden) {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-rows: repeat(2, 36px);
+  grid-auto-flow: column;
+  grid-auto-columns: 36px;
+  align-content: center;
+  gap: 4px;
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-move-bar:not(.mh-cs-move-bar-text) .mh-cs-move {
+  width: 36px;
+  height: 36px;
+}
+
+/* Buttons without art (circles and text): Texturina, leather on parchment. */
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-move:not(.mh-cs-move-img) {
+  border-color: var(--mh-cs-leather);
+  background: rgba(92, 58, 30, 0.08);
+  color: var(--mh-cs-leather-ink);
+  font-family: var(--mh-cs-quest-font);
+  font-weight: 700;
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-move:not(.mh-cs-move-img):is(:hover, :focus-visible) {
+  background: rgba(92, 58, 30, 0.2);
+}
+
+/* Text move buttons: Legend's names are long (Sacrifice (Scarring)), so
+   three rows in the parchment's height, in normal case, and plain text on
+   the parchment, no capsule (user, 2026-11-20): hovered, a brown wash
+   under it and the ink darker. */
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-move-bar-text .mh-cs-move-group:not(.hidden) {
+  grid-template-rows: repeat(3, 22px);
+  gap: 3px 4px;
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-move.mh-cs-move-text {
+  padding: 0 6px;
+  border: none;
+  border-radius: 3px;
+  background: none;
+  font-size: 14px;
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* A line tall enough for Texturina's descenders (the name is clipped to its box). */
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-move.mh-cs-move-text span {
+  line-height: 20px;
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-move.mh-cs-move-text:is(:hover, :focus-visible) {
+  background: rgba(92, 58, 30, 0.16);
+  color: #1f1209;
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-move.mh-cs-move-img:is(:hover, :focus-visible) {
+  box-shadow: 0 0 4px var(--mh-cs-leather);
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-move-toggle {
+  background: rgba(92, 58, 30, 0.15);
+  color: var(--mh-cs-leather);
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-move-toggle:hover {
+  background: rgba(92, 58, 30, 0.3);
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-portrait-toggle {
+  margin-right: 2px;
+  border-color: var(--mh-cs-leather);
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-portrait-toggle:is(:hover, :focus-visible) {
+  box-shadow: 0 0 6px rgba(92, 58, 30, 0.7);
+}
+
+/* The roll totals in ink, small, one under the other (Themes over Cards,
+   user, 2026-11-20), so the moves have the room. The ids in :not() beat
+   the 14 px floor for the totals' labels further up. */
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-totals {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  margin-right: 0;
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-total {
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+  padding: 1px 4px;
+  border-radius: 6px;
+  line-height: 1.1;
+  background: rgba(92, 58, 30, 0.12);
+  color: var(--mh-cs-leather-ink);
+  font-family: var(--mh-cs-quest-font);
+}
+
+.application.mh-card-sheet:not(#mh-cs-min):not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-total-label {
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-total-value {
+  font-size: 13px;
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-total-positive .mh-cs-total-value { color: #2f6b2a; }
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-total-negative .mh-cs-total-value { color: #9b2a18; }
+
+/* Notes: the feather, with "Notes" in Texturina under it. */
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-notes-btn {
+  width: auto;
+  height: auto;
+  margin: 0 0 0 auto;
+  padding: 0 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--mh-cs-leather-ink);
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-notes-btn i {
+  display: block;
+  width: 38px;
+  height: 38px;
+  background: url("../../ui/card-sheet/litm/feather.webp") center / contain no-repeat;
+  transition: transform 0.15s ease;
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-notes-btn i::before {
+  content: none;
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-notes-btn .mh-cs-notes-caption {
+  display: block;
+  font-family: var(--mh-cs-quest-font);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-notes-btn:is(:hover, :focus-visible) {
+  background: none;
+}
+
+.mh-card-sheet:not([data-bar="bottom"]):not(.mh-cs-deck-window) .mh-cs-notes-btn:is(:hover, :focus-visible) i {
+  transform: rotate(-8deg) scale(1.08);
 }

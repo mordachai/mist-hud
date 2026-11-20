@@ -385,6 +385,7 @@
 "MistHUD.cardSheet.portraitHero": "Hero Shot",
 "MistHUD.cardSheet.portraitPick": "Change the portrait image (edit mode). Lock the sheet to show / hide the portrait.",
 "MistHUD.cardSheet.notes.button": "Description and clue journal",
+"MistHUD.cardSheet.notes.short": "Notes",
 "MistHUD.cardSheet.notes.clueJournal": "Clue Journal",
 "MistHUD.cardSheet.notes.noJournal": "No clues in the journal yet. A used clue's question and answer go here.",
 "MistHUD.cardSheet.notes.answer": "Answer",

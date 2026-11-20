@@ -34,7 +34,7 @@ import { LEGEND_ACTIONS, changeRelationshipTarget, toggleBackpack } from "./lege
 import { readUiState, writeUiState, cleanFlips, deckState, portraitMode } from "./ui-state.js";
 import {
   PORTRAIT_COLUMN, REF_CARD_W, nextPortraitMode, portraitContext, portraitBiography, applyPortraitMask, clearMaskChecks,
-  applyLookFlags, applyCardTilts,
+  applyLookFlags, applyCardTilts, barPosition,
 } from "./portrait.js";
 import { CharacterNotes } from "./notes.js";
 import {
@@ -51,6 +51,14 @@ import { getActiveSystem } from "../constants.js";
  * width, and the peek and backpack room (0.7 card widths) take ~5 px more.
  */
 const EXTRA_WINDOW_HEIGHT = { legend: 26 };
+
+/**
+ * Legend with the header bar at the top (user, 2026-11-20): the bar is the
+ * parchment in the backpack's room over the cards, so the band's row and
+ * gap (56 + 8) less the 6 px the stage starts down are not needed; the
+ * window opens that much shorter and the cards keep their size.
+ */
+const LEGEND_TOP_BAR_SAVED = 58;
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -229,7 +237,8 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     if (column?.k && options.position?.width === MistCardSheet.DEFAULT_OPTIONS.position.width) {
       options.position.width += Math.round(column.k * REF_CARD_W + column.gap);
     }
-    const extraH = EXTRA_WINDOW_HEIGHT[getActiveSystem()];
+    let extraH = EXTRA_WINDOW_HEIGHT[getActiveSystem()] ?? 0;
+    if (getActiveSystem() === "legend" && barPosition() === "top") extraH -= LEGEND_TOP_BAR_SAVED;
     if (extraH && options.position?.height === MistCardSheet.DEFAULT_OPTIONS.position.height) {
       options.position.height += extraH;
     }
@@ -428,6 +437,7 @@ export class MistCardSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         this.#moveGroup = context.moveBar.current;
         context.portrait = portraitContext(this.actor, this.editMode && this.actor.isOwner);
         context.notesLabel = game.i18n.localize(game.user.isGM ? "MistHUD.cardSheet.notes.buttonGM" : "MistHUD.cardSheet.notes.button");
+        context.notesShort = game.i18n.localize("MistHUD.cardSheet.notes.short");
         break;
       case "portrait":
         context.portrait = portraitContext(this.actor);

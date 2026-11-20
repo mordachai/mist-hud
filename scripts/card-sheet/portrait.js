@@ -146,7 +146,7 @@ export function applyLookFlags(el) {
 }
 
 /** Where the sheet's header bar sits: "top" (default) or "bottom" (client setting). */
-function barPosition() {
+export function barPosition() {
   try { return game.settings.get(MODULE_ID, SETTINGS.CARD_SHEET_BAR_POSITION) === "bottom" ? "bottom" : "top"; }
   catch { return "top"; }
 }

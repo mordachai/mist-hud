@@ -376,6 +376,11 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
+/* The caption under the icon: only Legend's header shows it. */
+.mh-card-sheet .mh-cs-notes-caption {
+  display: none;
+}
+
 /* ── Card geometry ───────────────────────────────────────────────────────────
    Card-relative sizes are in cqw of the card (each card is an inline-size
    container), so the cards scale with the window and never grow. The

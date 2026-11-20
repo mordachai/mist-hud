@@ -385,6 +385,7 @@
 "MistHUD.cardSheet.portraitHero": "Hero Shot",
 "MistHUD.cardSheet.portraitPick": "Trocar a imagem do retrato (modo de edição). Trave a ficha para mostrar / esconder o retrato.",
 "MistHUD.cardSheet.notes.button": "Descrição e diário de pistas",
+"MistHUD.cardSheet.notes.short": "Notas",
 "MistHUD.cardSheet.notes.clueJournal": "Diário de pistas",
 "MistHUD.cardSheet.notes.noJournal": "Ainda não há pistas no diário. A pergunta e a resposta de uma pista usada vêm para cá.",
 "MistHUD.cardSheet.notes.answer": "Resposta",
